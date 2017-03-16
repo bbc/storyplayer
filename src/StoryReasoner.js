@@ -44,12 +44,27 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _evaluateConditions(candidates: Array<{condition: any} | any>): any {
-        for (let i = 0; i < candidates.length; ++i) {
-            if (JsonLogic.apply(candidates[i].condition)) {
-                return candidates[i];
-            }
+        const evaluatedCandidates = candidates
+            .map(
+                (candidate, i) => ({i, result: JsonLogic.apply(candidate.condition)})
+            )
+            .filter(candidate => candidate.result > 0);
+        if (evaluatedCandidates.length > 0) {
+            const bestCandidate = evaluatedCandidates.sort((a, b) => {
+                if (a.result === b.result) {
+                    return a.i - b.i;
+                } else if (a.result === true) {
+                    return -1;
+                } else if (b.result === true) {
+                    return 1;
+                } else {
+                    return b.result - a.result;
+                }
+            })[0].i;
+            return candidates[bestCandidate];
+        } else {
+            return null;
         }
-        return null;
     }
 
 }

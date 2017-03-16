@@ -193,4 +193,140 @@ describe('StoryReasoner', () => {
         storyReasoner.next();
     });
 
+    it('handles fuzzy logic appropriately', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": {'-': [1.0, 0.5]},
+                },
+                {
+                    "id": "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    "condition": {'-': [1.0, 0.1]},
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My bad narrative object",
+                },
+                {
+                    id: "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    name: "My narrative object",
+                },
+            ],
+        });
+
+        storyReasoner.on('narrativeElementChanged', narrativeElement => {
+            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.name).toEqual("My narrative object");
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
+    it('never selects false links', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": false,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My bad narrative object",
+                },
+            ],
+        });
+
+        storyReasoner.on('error', () => {
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
+    it('gives boolean true priority above any fuzzy logic', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": {'+': [1.0, 0.5]},
+                },
+                {
+                    "id": "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My bad narrative object",
+                },
+                {
+                    id: "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    name: "My narrative object",
+                },
+            ],
+        });
+
+        storyReasoner.on('narrativeElementChanged', narrativeElement => {
+            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
+    it('gives higher priority to items which come first', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": {'+': [1.0, 0.5]},
+                },
+                {
+                    "id": "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    "condition": {'+': [1.0, 0.5]},
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My narrative object",
+                },
+                {
+                    id: "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+                    name: "My bad narrative object",
+                },
+            ],
+        });
+
+        storyReasoner.on('narrativeElementChanged', narrativeElement => {
+            expect(narrativeElement.id).toEqual('3d4b829e-390e-45cb-a314-eeed0d66064f');
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
 });
