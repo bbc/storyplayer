@@ -87,7 +87,7 @@ describe('StoryReasoner', () => {
         storyReasoner.start();
     });
 
-    it('use JSONLogic to evaluate the beginning rules', (done) => {
+    it('uses JSONLogic to evaluate the beginning rules', (done) => {
         const storyReasoner = new StoryReasoner({
             id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
             version: "0:0",
@@ -122,6 +122,75 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.start();
+    });
+
+    it('emits an error on the next event if there are no suitable links', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My start narrative object",
+                    links: [],
+                },
+            ],
+        });
+        storyReasoner.start();
+
+        storyReasoner.on('error', () => {
+            done();
+        });
+
+        storyReasoner.next();
+    });
+
+    it('emits the next item when prodded', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My start narrative object",
+                    links: [
+                        {
+                            link_type: 'PRESENTATION_OBJECT',
+                            target: '7772a753-7ea8-4375-921f-6b086535e1c8',
+                            condition: true,
+                        },
+                    ],
+                },
+                {
+                    id: "7772a753-7ea8-4375-921f-6b086535e1c8",
+                    name: "My second narrative object",
+                },
+            ],
+        });
+        storyReasoner.start();
+
+        storyReasoner.on('narrativeElementChanged', narrativeElement => {
+            expect(narrativeElement.id).toEqual('7772a753-7ea8-4375-921f-6b086535e1c8');
+            done();
+        });
+
+        storyReasoner.next();
     });
 
 });

@@ -145,7 +145,7 @@
 
     /* Stylistic Issues */
     "array-bracket-spacing": [1, "never"],
-    "brace-style": [1, "stroustrup", { "allowSingleLine": true }],
+    "brace-style": [1, "1tbs", { "allowSingleLine": false }],
     "camelcase": [0, { "properties": "always" }],
     "comma-spacing": [1, { "before": false, "after": true }],
     "comma-style": [1, "last"],

@@ -9,6 +9,7 @@ export default class StoryReasoner extends EventEmitter {
 
     _story: Story;
     _narrativeElements: {[id: string]: NarrativeElement};
+    _currentNarrativeElement: NarrativeElement;
 
     constructor(story: Story) {
         super();
@@ -20,13 +21,35 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     start() {
-        for (let i = 0; i < this._story.beginnings.length; ++i) {
-            if (JsonLogic.apply(this._story.beginnings[i].condition)) {
-                this.emit('narrativeElementChanged', this._narrativeElements[this._story.beginnings[i].id]);
-                return;
+        const startElement = this._evaluateConditions(this._story.beginnings);
+        if (startElement) {
+            this._setCurrentNarrativeElement(startElement.id);
+        } else {
+            this.emit('error', new Error('Unable to choose a valid beginning'));
+        }
+    }
+
+    next() {
+        const nextElement = this._evaluateConditions(this._currentNarrativeElement.links);
+        if (nextElement) {
+            this._setCurrentNarrativeElement(nextElement.target);
+        } else {
+            this.emit('error', new Error('There are no possible links'));
+        }
+    }
+
+    _setCurrentNarrativeElement(narrativeElementId: string) {
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+        this.emit('narrativeElementChanged', this._currentNarrativeElement);
+    }
+
+    _evaluateConditions(candidates: Array<{condition: any} | any>): any {
+        for (let i = 0; i < candidates.length; ++i) {
+            if (JsonLogic.apply(candidates[i].condition)) {
+                return candidates[i];
             }
         }
-        this.emit('error', new Error('Unable to choose a valid beginning'));
+        return null;
     }
 
 }
