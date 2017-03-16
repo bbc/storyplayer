@@ -1,0 +1,28 @@
+export type Tags = {[key: string]: Array<string>};
+
+export type NarrativeElement = {
+    id: string,
+    version: string,
+    name: string,
+    description: string,
+    tags: Tags,
+    presentation: {
+        type: string,
+        target: string
+    },
+    links: Array<{
+        link_type: string,
+        condition: any,
+        target?: string,
+
+    }>
+};
+
+export type Story = {
+    id: string,
+    version: string,
+    name: string,
+    tags: Tags,
+    beginnings: Array<{id: string, condition: any}>,
+    narrative_objects: Array<NarrativeElement>,
+};
