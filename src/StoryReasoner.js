@@ -1,6 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
+import JsonLogic from 'json-logic-js';
 
 import type { Story, NarrativeElement } from './romper';
 
@@ -18,9 +19,14 @@ export default class StoryReasoner extends EventEmitter {
         });
     }
 
-    start(): void {
-        const beginningObjectId = this._story.beginnings[0].id;
-        this.emit('narrativeElementChanged', this._narrativeElements[beginningObjectId]);
+    start() {
+        for (let i = 0; i < this._story.beginnings.length; ++i) {
+            if (JsonLogic.apply(this._story.beginnings[i].condition)) {
+                this.emit('narrativeElementChanged', this._narrativeElements[this._story.beginnings[i].id]);
+                return;
+            }
+        }
+        this.emit('error', new Error('Unable to choose a valid beginning'));
     }
 
 }

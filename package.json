@@ -6,6 +6,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "build": "browserify -o dist/romper.js -t babelify -e src/romper.js",
+    "pretest": "flow-typed install",
     "test": "karma start spec/support/karma.conf.js --single-run && eslint src/ spec/ && flow check",
     "test-watch": "concurrently \"karma start spec/support/karma.conf.js --auto-watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check || exit 1'\"",
     "watch": "watchify -o dist/romper.js -t babelify -e src/romper.js --debug"
@@ -31,6 +32,7 @@
     "eslint": "^3.17.1",
     "eslint-plugin-flowtype": "^2.30.3",
     "flow-bin": "^0.41.0",
+    "flow-typed": "^2.0.0",
     "jasmine-core": "*",
     "karma": "^1.5.0",
     "karma-browserify": "^5.1.1",
@@ -39,5 +41,8 @@
     "karma-phantomjs-launcher": "^1.0.4",
     "nodemon": "^1.11.0",
     "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "json-logic-js": "^1.0.11"
   }
 }
