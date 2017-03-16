@@ -1,0 +1,41 @@
+{
+  "name": "romper",
+  "version": "0.0.1",
+  "description": "Object Based Media player",
+  "main": "dist/romper.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "browserify -o dist/romper.js -t babelify -e src/romper.js",
+    "test": "karma start spec/support/karma.conf.js --single-run && eslint src/ spec/ && flow check",
+    "test-watch": "nodemon -L --watch app --watch spec --exec npm test",
+    "watch": "watchify -o dist/romper.js -t babelify -e src/romper.js --debug"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bbc/romper.git"
+  },
+  "author": "BBC R&D",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/bbc/romper/issues"
+  },
+  "homepage": "https://github.com/bbc/romper#readme",
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-es2015": "^6.24.0",
+    "babelify": "^7.3.0",
+    "browserify": ">=10 <15",
+    "eslint": "^3.17.1",
+    "eslint-plugin-flowtype": "^2.30.3",
+    "flow-bin": "^0.41.0",
+    "jasmine-core": "*",
+    "karma": "^1.5.0",
+    "karma-browserify": "^5.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-junit-reporter": "^1.2.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "watchify": "^3.9.0"
+  }
+}
