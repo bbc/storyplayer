@@ -10,11 +10,15 @@ export default class StoryReasoner extends EventEmitter {
     _story: Story;
     _narrativeElements: {[id: string]: NarrativeElement};
     _currentNarrativeElement: NarrativeElement;
+    _storyStarted: boolean;
+    _storyEnded: boolean;
 
     constructor(story: Story) {
         super();
         this._story = story;
         this._narrativeElements = {};
+        this._storyStarted = false;
+        this._storyEnded = false;
         this._story.narrative_objects.forEach(narrativeElement => {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
@@ -23,6 +27,7 @@ export default class StoryReasoner extends EventEmitter {
     start() {
         const startElement = this._evaluateConditions(this._story.beginnings);
         if (startElement) {
+            this._storyStarted = true;
             this._setCurrentNarrativeElement(startElement.id);
         } else {
             this.emit('error', new Error('Unable to choose a valid beginning'));
@@ -30,9 +35,20 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     next() {
+        if (!this._storyStarted) {
+            throw new Error('InvalidState: this story has not yet started');
+        }
+        if (this._storyEnded) {
+            throw new Error('InvalidState: this story has ended');
+        }
         const nextElement = this._evaluateConditions(this._currentNarrativeElement.links);
         if (nextElement) {
-            this._setCurrentNarrativeElement(nextElement.target);
+            if (nextElement.link_type === 'END_STORY') {
+                this.emit('storyEnd');
+                this._storyEnded = true;
+            } else {
+                this._setCurrentNarrativeElement(nextElement.target);
+            }
         } else {
             this.emit('error', new Error('There are no possible links'));
         }

@@ -329,4 +329,82 @@ describe('StoryReasoner', () => {
         storyReasoner.start();
     });
 
+    it('sends an endStory event when the story ends', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My narrative object",
+                    links: [
+                        {
+                            link_type: 'END_STORY',
+                            condition: true,
+                        },
+                    ],
+                },
+            ],
+        });
+        storyReasoner.start();
+
+        storyReasoner.on('storyEnd', () => {
+            done();
+        });
+
+        storyReasoner.next();
+    });
+
+    it('does not allow you to trigger next when a story has ended', () => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My narrative object",
+                    links: [
+                        {
+                            link_type: 'END_STORY',
+                            condition: true,
+                        },
+                    ],
+                },
+            ],
+        });
+        storyReasoner.start();
+        storyReasoner.next();
+
+        expect(() => storyReasoner.next()).toThrow();
+    });
+
+    it('does not allow you to trigger next before a story has started', () => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [],
+            narrative_objects: [],
+        });
+
+        expect(() => storyReasoner.next()).toThrow();
+    });
+
 });
