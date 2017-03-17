@@ -9,11 +9,13 @@ import type StoryReasonerFactory from './StoryReasonerFactory';
 export default class StoryReasoner extends EventEmitter {
 
     _story: Story;
+    _subStoryReasoner: ?StoryReasoner;
     _narrativeElements: {[id: string]: NarrativeElement};
     _currentNarrativeElement: NarrativeElement;
     _storyStarted: boolean;
     _storyEnded: boolean;
     _reasonerFactory: StoryReasonerFactory;
+    _resolving: boolean;
 
     constructor(story: Story, reasonerFactory: StoryReasonerFactory) {
         super();
@@ -25,6 +27,7 @@ export default class StoryReasoner extends EventEmitter {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
         this._reasonerFactory = reasonerFactory;
+        this._resolving = false;
     }
 
     start() {
@@ -41,6 +44,27 @@ export default class StoryReasoner extends EventEmitter {
         if (this._storyEnded) {
             throw new Error('InvalidState: this story has ended');
         }
+        if (this._resolving) {
+            throw new Error('InvalidState: currently resolving a sub-story');
+        }
+        if (this._subStoryReasoner) {
+            this._subStoryReasoner.next();
+        } else {
+            this._chooseNextNode();
+        }
+    }
+
+    _chooseBeginning() {
+        const startElement = this._evaluateConditions(this._story.beginnings);
+        if (startElement) {
+            this._storyStarted = true;
+            this._setCurrentNarrativeElement(startElement.id);
+        } else {
+            this.emit('error', new Error('Unable to choose a valid beginning'));
+        }
+    }
+
+    _chooseNextNode() {
         const nextElement = this._evaluateConditions(this._currentNarrativeElement.links);
         if (nextElement) {
             this._followLink(nextElement);
@@ -62,23 +86,41 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
-    _chooseBeginning() {
-        const startElement = this._evaluateConditions(this._story.beginnings);
-        if (startElement) {
-            this._storyStarted = true;
-            this._setCurrentNarrativeElement(startElement.id);
+    _setCurrentNarrativeElement(narrativeElementId: string) {
+        if (!(narrativeElementId in this._narrativeElements)) {
+            this.emit('error', new Error('Link is to an narrative object not in the graph'));
         } else {
-            this.emit('error', new Error('Unable to choose a valid beginning'));
+            this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+            if (this._currentNarrativeElement.presentation.type === 'STORY_OBJECT') {
+                this._resolving = true;
+                this._reasonerFactory(this._currentNarrativeElement.presentation.target)
+                    .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
+                    .catch(err => {
+                        this.emit('error', err);
+                    });
+            } else {
+                this.emit('narrativeElementChanged', this._currentNarrativeElement);
+            }
         }
     }
 
-    _setCurrentNarrativeElement(narrativeElementId: string) {
-        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
-        if (this._currentNarrativeElement.presentation.type === 'STORY_OBJECT') {
-            this._reasonerFactory(this._currentNarrativeElement.presentation.target);
-        } else {
-            this.emit('narrativeElementChanged', this._currentNarrativeElement);
-        }
+    _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
+        const errorCallback = err => this.emit('error', err);
+        const elementChangedCallback = element => this.emit('narrativeElementChanged', element);
+        const storyEndCallback = () => {
+            this._subStoryReasoner = null;
+            this._chooseNextNode();
+            subStoryReasoner.removeListener('error', errorCallback);
+            subStoryReasoner.removeListener('narrativeElementChanged', elementChangedCallback);
+            subStoryReasoner.removeListener('storyEnd', storyEndCallback);
+        };
+
+        subStoryReasoner.on('error', errorCallback);
+        subStoryReasoner.on('narrativeElementChanged', elementChangedCallback);
+        subStoryReasoner.on('storyEnd', storyEndCallback);
+        this._subStoryReasoner = subStoryReasoner;
+        this._resolving = false;
+        subStoryReasoner.start();
     }
 
     _evaluateConditions(candidates: Array<{condition: any} | any>): any {

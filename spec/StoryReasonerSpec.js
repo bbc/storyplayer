@@ -1,5 +1,6 @@
 // @flow
 
+import "babel-polyfill";
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -12,8 +13,9 @@ describe('StoryReasoner', () => {
 
     const PRESENTATION_OBJECT_ID = '8d7e96f2-fbc0-467c-a285-88a8908bc954';
     let story;
-    let storyFetcher;
     let storyReasoner;
+    let subStoryReasoner;
+    let subStoryReasonerFactory;
 
     beforeEach(() => {
         story = {
@@ -24,11 +26,14 @@ describe('StoryReasoner', () => {
             beginnings: [],
             narrative_objects: [],
         };
-        storyFetcher = sinon.stub();
+        subStoryReasoner = new StoryReasoner({ narrative_objects: [] });
+        sinon.stub(subStoryReasoner, 'start');
+        sinon.stub(subStoryReasoner, 'next');
+        subStoryReasonerFactory = sinon.stub().returns(Promise.resolve(subStoryReasoner));
     });
 
     function buildStoryReasoner() {
-        storyReasoner = new StoryReasoner(story, storyFetcher);
+        storyReasoner = new StoryReasoner(story, subStoryReasonerFactory);
     }
 
     it('emits the first narrative element on story start', (done) => {
@@ -260,12 +265,127 @@ describe('StoryReasoner', () => {
         storyReasoner.next();
     });
 
-    it('will fetch a sub-story if the presentation of a narrative node is another story', () => {
-        addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [], true);
+    it('generates an error if the link target is not in the graph', (done) => {
+        addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [
+            {
+                link_type: 'NARRATIVE_OBJECT',
+                condition: true,
+                target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
+            },
+        ]);
         buildStoryReasoner();
         storyReasoner.start();
 
-        expect(storyFetcher).to.have.been.calledWith(PRESENTATION_OBJECT_ID);
+        storyReasoner.on('error', () => {
+            done();
+        });
+
+        storyReasoner.next();
+    });
+
+    describe('sub-stories', () => {
+
+        beforeEach(() => {
+            addNarrativeObject('85478a77-bfe6-43c7-84ef-29d85a9b0221', 'Post-story', null, []);
+            addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [
+                {
+                    link_type: 'NARRATIVE_OBJECT',
+                    condition: true,
+                    target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
+                },
+            ], true);
+            buildStoryReasoner();
+        });
+
+        it('will fetch a sub-story if the presentation of a narrative node is another story', () => {
+            storyReasoner.start();
+
+            expect(subStoryReasonerFactory).to.have.been.calledWith(PRESENTATION_OBJECT_ID);
+        });
+
+        it('will throw an error if it can not fetch a substory', (done) => {
+            subStoryReasonerFactory.returns(Promise.reject());
+
+            storyReasoner.on('error', () => {
+                done();
+            });
+
+            storyReasoner.start();
+        });
+
+        it('will call start() on the substory reasoner', (done) => {
+            subStoryReasoner.start.callsFake(() => {
+                subStoryReasoner.emit('narrativeElementChanged', {});
+            });
+
+            storyReasoner.on('narrativeElementChanged', () => {
+                expect(subStoryReasoner.start).to.have.been.calledWith();
+                done();
+            });
+
+            storyReasoner.start();
+        });
+
+        it('will call pass changing narrative elements from that substory reasoner up', (done) => {
+            const expectedId = '19b71c5a-1eca-45d9-8e39-4500b32a97bb';
+            subStoryReasoner.start.callsFake(() => {
+                subStoryReasoner.emit('narrativeElementChanged', {
+                    id: expectedId,
+                });
+            });
+
+            storyReasoner.on('narrativeElementChanged', elem => {
+                expect(elem.id).to.equal(expectedId);
+                done();
+            });
+
+            storyReasoner.start();
+        });
+
+        it('will not allow next to be triggered before the substory has finished loading', () => {
+            storyReasoner.start();
+
+            expect(() => storyReasoner.next()).to.throw(Error);
+        });
+
+        it('will pass next() calls on to the sub-story', (done) => {
+            const expectedId = '19b71c5a-1eca-45d9-8e39-4500b32a97bb';
+            subStoryReasoner.start.callsFake(() => {
+                subStoryReasoner.emit('narrativeElementChanged', {
+                    id: 'incorrect-id',
+                });
+            });
+            subStoryReasoner.next.callsFake(() => {
+                subStoryReasoner.emit('narrativeElementChanged', {
+                    id: expectedId,
+                });
+            });
+
+            storyReasoner.once('narrativeElementChanged', () => {
+                storyReasoner.once('narrativeElementChanged', elem => {
+                    expect(elem.id).to.equal(expectedId);
+                    done();
+                });
+
+                storyReasoner.next();
+            });
+
+            storyReasoner.start();
+        });
+
+        it('will continue traversing the parent graph when the substory ends', (done) => {
+            subStoryReasoner.start.callsFake(() => {
+                subStoryReasoner.emit('storyEnd');
+            });
+
+            storyReasoner.on('narrativeElementChanged', elem => {
+                expect(elem.id).to.equal('85478a77-bfe6-43c7-84ef-29d85a9b0221');
+                done();
+            });
+
+            storyReasoner.start();
+        });
+
     });
 
     function addNarrativeObject(id, name, condition, links, referencesSubStory) {
