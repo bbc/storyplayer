@@ -47,6 +47,8 @@ export default class StoryReasoner extends EventEmitter {
                 this._setCurrentNarrativeElement(nextElement.target);
             } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
                 this._chooseBeginning();
+            } else {
+                this.emit('error', new Error(`Unable to follow a link of type ${nextElement.link_type}`));
             }
         } else {
             this.emit('error', new Error('There are no possible links'));
