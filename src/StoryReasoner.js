@@ -4,6 +4,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 
 import type { Story, NarrativeElement } from './romper';
+import type StoryReasonerFactory from './StoryReasonerFactory';
 
 export default class StoryReasoner extends EventEmitter {
 
@@ -12,8 +13,9 @@ export default class StoryReasoner extends EventEmitter {
     _currentNarrativeElement: NarrativeElement;
     _storyStarted: boolean;
     _storyEnded: boolean;
+    _reasonerFactory: StoryReasonerFactory;
 
-    constructor(story: Story) {
+    constructor(story: Story, reasonerFactory: StoryReasonerFactory) {
         super();
         this._story = story;
         this._narrativeElements = {};
@@ -22,6 +24,7 @@ export default class StoryReasoner extends EventEmitter {
         this._story.narrative_objects.forEach(narrativeElement => {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
+        this._reasonerFactory = reasonerFactory;
     }
 
     start() {
@@ -40,18 +43,22 @@ export default class StoryReasoner extends EventEmitter {
         }
         const nextElement = this._evaluateConditions(this._currentNarrativeElement.links);
         if (nextElement) {
-            if (nextElement.link_type === 'END_STORY') {
-                this.emit('storyEnd');
-                this._storyEnded = true;
-            } else if (nextElement.link_type === 'NARRATIVE_OBJECT') {
-                this._setCurrentNarrativeElement(nextElement.target);
-            } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
-                this._chooseBeginning();
-            } else {
-                this.emit('error', new Error(`Unable to follow a link of type ${nextElement.link_type}`));
-            }
+            this._followLink(nextElement);
         } else {
             this.emit('error', new Error('There are no possible links'));
+        }
+    }
+
+    _followLink(nextElement: NarrativeElement) {
+        if (nextElement.link_type === 'END_STORY') {
+            this.emit('storyEnd');
+            this._storyEnded = true;
+        } else if (nextElement.link_type === 'NARRATIVE_OBJECT') {
+            this._setCurrentNarrativeElement(nextElement.target);
+        } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
+            this._chooseBeginning();
+        } else {
+            this.emit('error', new Error(`Unable to follow a link of type ${nextElement.link_type}`));
         }
     }
 
@@ -67,7 +74,11 @@ export default class StoryReasoner extends EventEmitter {
 
     _setCurrentNarrativeElement(narrativeElementId: string) {
         this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
-        this.emit('narrativeElementChanged', this._currentNarrativeElement);
+        if (this._currentNarrativeElement.presentation.type === 'STORY_OBJECT') {
+            this._reasonerFactory(this._currentNarrativeElement.presentation.target);
+        } else {
+            this.emit('narrativeElementChanged', this._currentNarrativeElement);
+        }
     }
 
     _evaluateConditions(candidates: Array<{condition: any} | any>): any {
