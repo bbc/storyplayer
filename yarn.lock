@@ -13,13 +13,6 @@ abbrev@1:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/abbrev/-/abbrev-1.1.0.tgz#d0554c2256636e2f56e7c2e5ad183f859428d81f"
 
-accepts@1.3.3:
-  version "1.3.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/accepts/-/accepts-1.3.3.tgz#c3ca7434938648c3e0d9c1e328dd68b622c284ca"
-  dependencies:
-    mime-types "~2.1.11"
-    negotiator "0.6.1"
-
 acorn-jsx@^3.0.0:
   version "3.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/acorn-jsx/-/acorn-jsx-3.0.1.tgz#afdf9488fb1ecefc8348f6fb22f464e32a58b36b"
@@ -30,13 +23,20 @@ acorn@4.0.4, acorn@^4.0.3:
   version "4.0.4"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/acorn/-/acorn-4.0.4.tgz#17a8d6a7a6c4ef538b814ec9abac2779293bf30a"
 
+acorn@^1.0.3:
+  version "1.2.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/acorn/-/acorn-1.2.2.tgz#c8ce27de0acc76d896d2b1fad3df588d9e82f014"
+
 acorn@^3.0.4:
   version "3.3.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/acorn/-/acorn-3.3.0.tgz#45e37fb39e8da3f25baee3ff5369e2bb5f22017a"
 
-after@0.8.2:
-  version "0.8.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/after/-/after-0.8.2.tgz#fedb394f9f0e02aa9768e702bda23b505fae7e1f"
+agent-base@2:
+  version "2.0.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/agent-base/-/agent-base-2.0.1.tgz#bd8f9e86a8eb221fffa07bd14befd55df142815e"
+  dependencies:
+    extend "~3.0.0"
+    semver "~5.0.1"
 
 ajv-keywords@^1.0.0:
   version "1.5.1"
@@ -48,6 +48,10 @@ ajv@^4.7.0:
   dependencies:
     co "^4.6.0"
     json-stable-stringify "^1.0.1"
+
+amdefine@>=0.0.4:
+  version "1.0.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
 ansi-escapes@^1.1.0:
   version "1.4.0"
@@ -68,6 +72,10 @@ ansi-styles@^1.1.0:
 ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
+
+ansi_up@^1.3.0:
+  version "1.3.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ansi_up/-/ansi_up-1.3.0.tgz#c9c946bfc0b9bb5eaa060684bf2abaafe68bbd44"
 
 anymatch@^1.3.0:
   version "1.3.0"
@@ -115,10 +123,6 @@ array-reduce@~0.0.0:
   version "0.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/array-reduce/-/array-reduce-0.0.0.tgz#173899d3ffd1c7d9383e4479525dbe278cab5f2b"
 
-array-slice@^0.2.3:
-  version "0.2.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/array-slice/-/array-slice-0.2.3.tgz#dd3cfb80ed7973a75117cdac69b0b99ec86186f5"
-
 array-union@^1.0.1:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/array-union/-/array-union-1.0.2.tgz#9a34410e4f4e3da23dea375be5be70f24778ec39"
@@ -132,10 +136,6 @@ array-uniq@^1.0.1:
 array-unique@^0.2.1:
   version "0.2.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/array-unique/-/array-unique-0.2.1.tgz#a1d97ccafcbc2625cc70fadceb36a50c58b01a53"
-
-arraybuffer.slice@0.0.6:
-  version "0.0.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/arraybuffer.slice/-/arraybuffer.slice-0.0.6.tgz#f33b2159f0532a3f3107a272c0ccfbd1ad2979ca"
 
 arrify@^1.0.0:
   version "1.0.1"
@@ -166,6 +166,10 @@ assert@^1.4.0:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/assert/-/assert-1.4.1.tgz#99912d591836b5a6f5b345c0f07eefc08fc65d91"
   dependencies:
     util "0.10.3"
+
+assertion-error@^1.0.1:
+  version "1.0.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/assertion-error/-/assertion-error-1.0.2.tgz#13ca515d86206da0bac66e834dd397d87581094c"
 
 astw@^2.0.0:
   version "2.2.0"
@@ -623,25 +627,13 @@ babylon@^6.11.0, babylon@^6.13.0, babylon@^6.15.0:
   version "6.16.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/babylon/-/babylon-6.16.1.tgz#30c5a22f481978a9e7f8cdfdf496b11d94b404d3"
 
-backo2@1.0.2:
-  version "1.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
-
 balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
 
-base64-arraybuffer@0.1.5:
-  version "0.1.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/base64-arraybuffer/-/base64-arraybuffer-0.1.5.tgz#73926771923b5a19747ad666aa5cd4bf9c6e9ce8"
-
 base64-js@^1.0.2:
   version "1.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/base64-js/-/base64-js-1.2.0.tgz#a39992d723584811982be5e290bb6a53d86700f1"
-
-base64id@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/base64id/-/base64id-1.0.0.tgz#47688cb99bb6804f0e06d3e763b1c32e57d8e6b6"
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.1"
@@ -649,19 +641,9 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-better-assert@~1.0.0:
-  version "1.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/better-assert/-/better-assert-1.0.2.tgz#40866b9e1b9e0b55b481894311e68faffaebc522"
-  dependencies:
-    callsite "1.0.0"
-
 binary-extensions@^1.0.0:
   version "1.8.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/binary-extensions/-/binary-extensions-1.8.0.tgz#48ec8d16df4377eae5fa5884682480af4d95c774"
-
-blob@0.0.4:
-  version "0.0.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/blob/-/blob-0.0.4.tgz#bcf13052ca54463f30f9fc7e95b9a47630a94921"
 
 block-stream@*:
   version "0.0.9"
@@ -669,28 +651,13 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.1.1, bluebird@^3.3.0:
+bluebird@^3.1.1:
   version "3.5.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
 
 bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.4.0:
   version "4.11.6"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/bn.js/-/bn.js-4.11.6.tgz#53344adb14617a13f6e8dd2ce28905d1c0ba3215"
-
-body-parser@^1.16.1:
-  version "1.17.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/body-parser/-/body-parser-1.17.1.tgz#75b3bc98ddd6e7e0d8ffe750dfaca5c66993fa47"
-  dependencies:
-    bytes "2.4.0"
-    content-type "~1.0.2"
-    debug "2.6.1"
-    depd "~1.1.0"
-    http-errors "~1.6.1"
-    iconv-lite "0.4.15"
-    on-finished "~2.3.0"
-    qs "6.4.0"
-    raw-body "~2.2.0"
-    type-is "~1.6.14"
 
 boom@2.x.x:
   version "2.10.1"
@@ -705,12 +672,6 @@ brace-expansion@^1.0.0:
     balanced-match "^0.4.1"
     concat-map "0.0.1"
 
-braces@^0.1.2:
-  version "0.1.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/braces/-/braces-0.1.5.tgz#c085711085291d8b75fdd74eab0f8597280711e6"
-  dependencies:
-    expand-range "^0.1.0"
-
 braces@^1.8.2:
   version "1.8.5"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/braces/-/braces-1.8.5.tgz#ba77962e12dff969d6b76711e914b737857bf6a7"
@@ -723,6 +684,12 @@ brorand@^1.0.1:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
 
+brout@^1.1.0:
+  version "1.2.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/brout/-/brout-1.2.0.tgz#0771dabf796d312f0a7c1f1281e00f7660cf702f"
+  dependencies:
+    through2 "^2.0.0"
+
 browser-pack@^6.0.1:
   version "6.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/browser-pack/-/browser-pack-6.0.2.tgz#f86cd6cef4f5300c8e63e07a4d512f65fbff4531"
@@ -733,11 +700,19 @@ browser-pack@^6.0.1:
     through2 "^2.0.0"
     umd "^3.0.0"
 
+browser-reload@^1.1.0:
+  version "1.1.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/browser-reload/-/browser-reload-1.1.0.tgz#513c1eb5ce913fe36a0ba18e13909cb07b425a92"
+
 browser-resolve@^1.11.0, browser-resolve@^1.7.0:
   version "1.11.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/browser-resolve/-/browser-resolve-1.11.2.tgz#8ff09b0a2c421718a1051c260b32e48f442938ce"
   dependencies:
     resolve "1.1.7"
+
+browser-stdout@1.3.0:
+  version "1.3.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/browser-stdout/-/browser-stdout-1.3.0.tgz#f351d32969d32fa5d7a5567154263d928ae3bd1f"
 
 browserify-aes@^1.0.0, browserify-aes@^1.0.4:
   version "1.0.6"
@@ -790,7 +765,7 @@ browserify-zlib@~0.1.2:
   dependencies:
     pako "~0.2.0"
 
-"browserify@>=10 <15", browserify@^14.0.0:
+"browserify@>=10 <15", browserify@^14.0.0, browserify@^14.1.0:
   version "14.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/browserify/-/browserify-14.1.0.tgz#0508cc1e7bf4c152312c2fa523e676c0b0b92311"
   dependencies:
@@ -865,10 +840,6 @@ builtin-status-codes@^3.0.0:
   version "3.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
 
-bytes@2.4.0:
-  version "2.4.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/bytes/-/bytes-2.4.0.tgz#7d97196f9d5baf7f6935e25985549edd2a6c2339"
-
 cached-path-relative@^1.0.0:
   version "1.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cached-path-relative/-/cached-path-relative-1.0.1.tgz#d09c4b52800aa4c078e2dd81a869aac90d2e54e7"
@@ -878,10 +849,6 @@ caller-path@^0.1.0:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/caller-path/-/caller-path-0.1.0.tgz#94085ef63581ecd3daa92444a8fe94e82577751f"
   dependencies:
     callsites "^0.2.0"
-
-callsite@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/callsite/-/callsite-1.0.0.tgz#280398e5d664bd74038b6f0905153e6e8af1bc20"
 
 callsites@^0.2.0:
   version "0.2.0"
@@ -894,6 +861,14 @@ camelcase@^3.0.0:
 caseless@~0.11.0:
   version "0.11.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/caseless/-/caseless-0.11.0.tgz#715b96ea9841593cc33067923f5ec60ebda4f7d7"
+
+chai@^3.5.0:
+  version "3.5.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/chai/-/chai-3.5.0.tgz#4d02637b067fe958bdbfdd3a40ec56fef7373247"
+  dependencies:
+    assertion-error "^1.0.1"
+    deep-eql "^0.1.3"
+    type-detect "^1.0.0"
 
 chalk@0.5.1:
   version "0.5.1"
@@ -919,7 +894,7 @@ charenc@~0.0.1:
   version "0.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/charenc/-/charenc-0.0.2.tgz#c0a1d2f3a7092e03774bfa83f14c0fc5790a8667"
 
-chokidar@^1.0.0, chokidar@^1.4.1, chokidar@^1.4.3:
+chokidar@^1.0.0, chokidar@^1.4.3:
   version "1.6.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/chokidar/-/chokidar-1.6.1.tgz#2f4447ab5e96e50fb3d789fd90d4c72e0e4c70c2"
   dependencies:
@@ -970,15 +945,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-colors@^1.1.0, colors@^1.1.2:
+colors@^1.1.2:
   version "1.1.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/colors/-/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
-
-combine-lists@^1.0.0:
-  version "1.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/combine-lists/-/combine-lists-1.0.1.tgz#458c07e09e0d900fc28b70a3fec2dacd1d2cb7f6"
-  dependencies:
-    lodash "^4.5.0"
 
 combine-source-map@~0.7.1:
   version "0.7.2"
@@ -999,41 +968,17 @@ commander@2.6.0:
   version "2.6.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/commander/-/commander-2.6.0.tgz#9df7e52fb2a0cb0fb89058ee80c3104225f37e1d"
 
-commander@^2.9.0:
+commander@2.9.0, commander@^2.9.0:
   version "2.9.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/commander/-/commander-2.9.0.tgz#9c99094176e12240cb22d6c5146098400fe0f7d4"
   dependencies:
     graceful-readlink ">= 1.0.0"
 
-component-bind@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/component-bind/-/component-bind-1.0.0.tgz#00c608ab7dcd93897c0009651b1d3a8e1e73bbd1"
-
-component-emitter@1.1.2:
-  version "1.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/component-emitter/-/component-emitter-1.1.2.tgz#296594f2753daa63996d2af08d15a95116c9aec3"
-
-component-emitter@1.2.1:
-  version "1.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/component-emitter/-/component-emitter-1.2.1.tgz#137918d6d78283f7df7a6b7c5a63e140e69425e6"
-
-component-inherit@0.0.3:
-  version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/component-inherit/-/component-inherit-0.0.3.tgz#645fc4adf58b72b649d5cae65135619db26ff143"
-
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
 
-concat-stream@1.5.0:
-  version "1.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/concat-stream/-/concat-stream-1.5.0.tgz#53f7d43c51c5e43f81c8fdd03321c631be68d611"
-  dependencies:
-    inherits "~2.0.1"
-    readable-stream "~2.0.0"
-    typedarray "~0.0.5"
-
-concat-stream@^1.4.6, concat-stream@~1.5.0, concat-stream@~1.5.1:
+concat-stream@^1.4.6, concat-stream@^1.4.7, concat-stream@~1.5.0, concat-stream@~1.5.1:
   version "1.5.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/concat-stream/-/concat-stream-1.5.2.tgz#708978624d856af41a5a741defdd261da752c266"
   dependencies:
@@ -1067,15 +1012,6 @@ configstore@^1.0.0:
     write-file-atomic "^1.1.2"
     xdg-basedir "^2.0.0"
 
-connect@^3.6.0:
-  version "3.6.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/connect/-/connect-3.6.0.tgz#f09a4f7dcd17324b663b725c815bdb1c4158a46e"
-  dependencies:
-    debug "2.6.1"
-    finalhandler "1.0.0"
-    parseurl "~1.3.1"
-    utils-merge "1.0.0"
-
 console-browserify@^1.1.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/console-browserify/-/console-browserify-1.1.0.tgz#f0241c45730a9fc6323b206dbf38edc741d0bb10"
@@ -1086,13 +1022,19 @@ console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
 
+consolify@^2.1.0:
+  version "2.2.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/consolify/-/consolify-2.2.0.tgz#6221db1074a08d840ff30a5c0cbbf3c609a74f8c"
+  dependencies:
+    ansi_up "^1.3.0"
+    brout "^1.1.0"
+    browser-reload "^1.1.0"
+    source-mapper "^2.0.0"
+    through2 "^2.0.0"
+
 constants-browserify@~1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
-
-content-type@~1.0.2:
-  version "1.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/content-type/-/content-type-1.0.2.tgz#b7d113aee7a8dd27bd21133c4dc2529df1721eed"
 
 convert-source-map@^1.1.0, convert-source-map@^1.1.3:
   version "1.4.0"
@@ -1102,17 +1044,26 @@ convert-source-map@~1.1.0:
   version "1.1.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/convert-source-map/-/convert-source-map-1.1.3.tgz#4829c877e9fe49b3161f3bf3673888e204699860"
 
-cookie@0.3.1:
-  version "0.3.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
-
-core-js@^2.2.0, core-js@^2.4.0:
+core-js@^2.4.0:
   version "2.4.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/core-js/-/core-js-2.4.1.tgz#4de911e667b0eae9124e34254b53aea6fc618d3e"
 
 core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
+
+coverify@^1.4.1:
+  version "1.4.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/coverify/-/coverify-1.4.1.tgz#b3e4b07ec1ce209c0eac99a58aabdf67d8b62726"
+  dependencies:
+    convert-source-map "^1.1.0"
+    falafel "^1.0.1"
+    minimist "^1.1.1"
+    slash "^1.0.0"
+    source-map "~0.4.2"
+    split2 "^0.2.1"
+    stream-combiner2 "^1.0.2"
+    through2 "~0.6.5"
 
 create-ecdh@^4.0.0:
   version "4.0.0"
@@ -1136,6 +1087,20 @@ create-hmac@^1.1.0, create-hmac@^1.1.2:
   dependencies:
     create-hash "^1.1.0"
     inherits "^2.0.1"
+
+cross-spawn-async@^2.2.2:
+  version "2.2.5"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cross-spawn-async/-/cross-spawn-async-2.2.5.tgz#845ff0c0834a3ded9d160daca6d390906bb288cc"
+  dependencies:
+    lru-cache "^4.0.0"
+    which "^1.2.8"
+
+cross-spawn@^2.1.4:
+  version "2.2.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cross-spawn/-/cross-spawn-2.2.3.tgz#fac56202dfd3d0dd861778f2da203bf434bb821c"
+  dependencies:
+    cross-spawn-async "^2.2.2"
+    spawn-sync "^1.0.15"
 
 crypt@~0.0.1:
   version "0.0.2"
@@ -1161,10 +1126,6 @@ crypto-browserify@^3.0.0:
     pbkdf2 "^3.0.3"
     public-encrypt "^4.0.0"
     randombytes "^2.0.0"
-
-custom-event@~1.0.0:
-  version "1.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/custom-event/-/custom-event-1.0.1.tgz#5d02a46850adf1b4a317946a3928fccb5bfd0425"
 
 d@1:
   version "1.0.0"
@@ -1192,9 +1153,11 @@ date-now@^0.1.4:
   version "0.1.4"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
 
-debug@0.7.4:
-  version "0.7.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-0.7.4.tgz#06e1ea8082c2cb14e39806e22e2f6f757f92af39"
+debug@2, debug@^2.1.1, debug@^2.2.0:
+  version "2.6.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-2.6.3.tgz#0f7eb8c30965ec08c72accfa0130c8b79984141d"
+  dependencies:
+    ms "0.7.2"
 
 debug@2.2.0, debug@~2.2.0:
   version "2.2.0"
@@ -1202,27 +1165,15 @@ debug@2.2.0, debug@~2.2.0:
   dependencies:
     ms "0.7.1"
 
-debug@2.3.3:
-  version "2.3.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-2.3.3.tgz#40c453e67e6e13c901ddec317af8986cda9eff8c"
-  dependencies:
-    ms "0.7.2"
-
-debug@2.6.1:
-  version "2.6.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
-  dependencies:
-    ms "0.7.2"
-
-debug@^2.1.1, debug@^2.2.0:
-  version "2.6.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-2.6.3.tgz#0f7eb8c30965ec08c72accfa0130c8b79984141d"
-  dependencies:
-    ms "0.7.2"
-
 decamelize@^1.1.1:
   version "1.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
+
+deep-eql@^0.1.3:
+  version "0.1.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/deep-eql/-/deep-eql-0.1.3.tgz#ef558acab8de25206cd713906d74e56930eb69f2"
+  dependencies:
+    type-detect "0.1.1"
 
 deep-extend@~0.4.0:
   version "0.4.1"
@@ -1256,10 +1207,6 @@ delegates@^1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
 
-depd@1.1.0, depd@~1.1.0:
-  version "1.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/depd/-/depd-1.1.0.tgz#e1bd82c6aab6ced965b97b88b17ed3e528ca18c3"
-
 deps-sort@^2.0.0:
   version "2.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/deps-sort/-/deps-sort-2.0.0.tgz#091724902e84658260eb910748cccd1af6e21fb5"
@@ -1289,9 +1236,9 @@ detective@^4.0.0:
     acorn "^4.0.3"
     defined "^1.0.0"
 
-di@^0.0.1:
-  version "0.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/di/-/di-0.0.1.tgz#806649326ceaa7caa3306d75d985ea2748ba913c"
+diff@1.4.0:
+  version "1.4.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/diff/-/diff-1.4.0.tgz#7f28d2eb9ee7b15a97efd89ce63dcfdaa3ccbabf"
 
 diffie-hellman@^5.0.0:
   version "5.0.2"
@@ -1307,15 +1254,6 @@ doctrine@^1.2.2:
   dependencies:
     esutils "^2.0.2"
     isarray "^1.0.0"
-
-dom-serialize@^2.2.0:
-  version "2.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/dom-serialize/-/dom-serialize-2.2.1.tgz#562ae8999f44be5ea3076f5419dcd59eb43ac95b"
-  dependencies:
-    custom-event "~1.0.0"
-    ent "~2.2.0"
-    extend "^3.0.0"
-    void-elements "^2.0.0"
 
 domain-browser@~1.1.0:
   version "1.1.7"
@@ -1346,10 +1284,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
 
-ee-first@1.1.1:
-  version "1.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
-
 elliptic@^6.0.0:
   version "6.4.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/elliptic/-/elliptic-6.4.0.tgz#cac9af8762c85836187003c8dfe193e5e2eae5df"
@@ -1362,58 +1296,11 @@ elliptic@^6.0.0:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-encodeurl@~1.0.1:
-  version "1.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/encodeurl/-/encodeurl-1.0.1.tgz#79e3d58655346909fe6f0f45a5de68103b294d20"
-
 end-of-stream@1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/end-of-stream/-/end-of-stream-1.0.0.tgz#d4596e702734a93e40e9af864319eabd99ff2f0e"
   dependencies:
     once "~1.3.0"
-
-engine.io-client@1.8.3:
-  version "1.8.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/engine.io-client/-/engine.io-client-1.8.3.tgz#1798ed93451246453d4c6f635d7a201fe940d5ab"
-  dependencies:
-    component-emitter "1.2.1"
-    component-inherit "0.0.3"
-    debug "2.3.3"
-    engine.io-parser "1.3.2"
-    has-cors "1.1.0"
-    indexof "0.0.1"
-    parsejson "0.0.3"
-    parseqs "0.0.5"
-    parseuri "0.0.5"
-    ws "1.1.2"
-    xmlhttprequest-ssl "1.5.3"
-    yeast "0.1.2"
-
-engine.io-parser@1.3.2:
-  version "1.3.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/engine.io-parser/-/engine.io-parser-1.3.2.tgz#937b079f0007d0893ec56d46cb220b8cb435220a"
-  dependencies:
-    after "0.8.2"
-    arraybuffer.slice "0.0.6"
-    base64-arraybuffer "0.1.5"
-    blob "0.0.4"
-    has-binary "0.1.7"
-    wtf-8 "1.0.0"
-
-engine.io@1.8.3:
-  version "1.8.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/engine.io/-/engine.io-1.8.3.tgz#8de7f97895d20d39b85f88eeee777b2bd42b13d4"
-  dependencies:
-    accepts "1.3.3"
-    base64id "1.0.0"
-    cookie "0.3.1"
-    debug "2.3.3"
-    engine.io-parser "1.3.2"
-    ws "1.1.2"
-
-ent@~2.2.0:
-  version "2.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ent/-/ent-2.2.0.tgz#e964219325a21d05f44466a2f686ed6ce5f5dd1d"
 
 error-ex@^1.2.0:
   version "1.3.1"
@@ -1427,6 +1314,10 @@ es5-ext@^0.10.14, es5-ext@^0.10.9, es5-ext@~0.10.11, es5-ext@~0.10.14, es5-ext@~
   dependencies:
     es6-iterator "2"
     es6-symbol "~3.1"
+
+es5-shim@^4.4.1:
+  version "4.5.9"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/es5-shim/-/es5-shim-4.5.9.tgz#2a1e2b9e583ff5fed0c20a3ee2cbf3f75230a5c0"
 
 es6-iterator@2, es6-iterator@^2.0.1, es6-iterator@~2.0.1:
   version "2.0.1"
@@ -1450,10 +1341,6 @@ es6-map@^0.1.3:
 es6-promise@^3.0.2:
   version "3.3.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/es6-promise/-/es6-promise-3.3.1.tgz#a08cdde84ccdbf34d027a1451bc91d4bcd28a613"
-
-es6-promise@~4.0.3:
-  version "4.0.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/es6-promise/-/es6-promise-4.0.5.tgz#7882f30adde5b240ccfa7f7d78c548330951ae42"
 
 es6-set@~0.1.3:
   version "0.1.5"
@@ -1481,11 +1368,7 @@ es6-weak-map@^2.0.1:
     es6-iterator "^2.0.1"
     es6-symbol "^3.1.1"
 
-escape-html@~1.0.3:
-  version "1.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
-
-escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
+escape-string-regexp@1.0.5, escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
@@ -1592,10 +1475,6 @@ event-stream@~3.3.0:
     stream-combiner "~0.0.4"
     through "~2.3.1"
 
-eventemitter3@1.x.x:
-  version "1.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/eventemitter3/-/eventemitter3-1.2.0.tgz#1c86991d816ad1e504750e73874224ecf3bec508"
-
 events@~1.1.0:
   version "1.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
@@ -1610,26 +1489,11 @@ exit-hook@^1.0.0:
   version "1.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/exit-hook/-/exit-hook-1.1.1.tgz#f05ca233b48c05d54fff07765df8507e95c02ff8"
 
-expand-braces@^0.1.1:
-  version "0.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/expand-braces/-/expand-braces-0.1.2.tgz#488b1d1d2451cb3d3a6b192cfc030f44c5855fea"
-  dependencies:
-    array-slice "^0.2.3"
-    array-unique "^0.2.1"
-    braces "^0.1.2"
-
 expand-brackets@^0.1.4:
   version "0.1.5"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/expand-brackets/-/expand-brackets-0.1.5.tgz#df07284e342a807cd733ac5af72411e581d1177b"
   dependencies:
     is-posix-bracket "^0.1.0"
-
-expand-range@^0.1.0:
-  version "0.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/expand-range/-/expand-range-0.1.1.tgz#4cb8eda0993ca56fa4f41fc42f3cbb4ccadff044"
-  dependencies:
-    is-number "^0.1.1"
-    repeat-string "^0.2.2"
 
 expand-range@^1.8.1:
   version "1.8.2"
@@ -1637,7 +1501,7 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
-extend@^3.0.0, extend@~3.0.0:
+extend@3, extend@~3.0.0:
   version "3.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/extend/-/extend-3.0.0.tgz#5a474353b9f3353ddd8176dfd37b91c83a46f1d4"
 
@@ -1647,28 +1511,22 @@ extglob@^0.3.1:
   dependencies:
     is-extglob "^1.0.0"
 
-extract-zip@~1.5.0:
-  version "1.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/extract-zip/-/extract-zip-1.5.0.tgz#92ccf6d81ef70a9fa4c1747114ccef6d8688a6c4"
-  dependencies:
-    concat-stream "1.5.0"
-    debug "0.7.4"
-    mkdirp "0.5.0"
-    yauzl "2.4.1"
-
 extsprintf@1.0.2:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
 
+falafel@^1.0.1:
+  version "1.2.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/falafel/-/falafel-1.2.0.tgz#c18d24ef5091174a497f318cd24b026a25cddab4"
+  dependencies:
+    acorn "^1.0.3"
+    foreach "^2.0.5"
+    isarray "0.0.1"
+    object-keys "^1.0.6"
+
 fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
-
-fd-slicer@~1.0.1:
-  version "1.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/fd-slicer/-/fd-slicer-1.0.1.tgz#8b5bcbd9ec327c5041bf9ab023fd6750f1177e65"
-  dependencies:
-    pend "~1.2.0"
 
 figures@^1.3.5:
   version "1.7.0"
@@ -1697,18 +1555,6 @@ fill-range@^2.1.0:
     randomatic "^1.1.3"
     repeat-element "^1.1.2"
     repeat-string "^1.5.2"
-
-finalhandler@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/finalhandler/-/finalhandler-1.0.0.tgz#b5691c2c0912092f18ac23e9416bde5cd7dc6755"
-  dependencies:
-    debug "2.6.1"
-    encodeurl "~1.0.1"
-    escape-html "~1.0.3"
-    on-finished "~2.3.0"
-    parseurl "~1.3.1"
-    statuses "~1.3.1"
-    unpipe "~1.0.0"
 
 find-up@^1.0.0:
   version "1.1.2"
@@ -1759,6 +1605,10 @@ for-own@^0.1.4:
   dependencies:
     for-in "^1.0.1"
 
+foreach@^2.0.5:
+  version "2.0.5"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/foreach/-/foreach-2.0.5.tgz#0bee005018aeb260d0a3af3ae658dd0136ec1b99"
+
 forever-agent@~0.6.1:
   version "0.6.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
@@ -1774,14 +1624,6 @@ form-data@~2.1.1:
 from@~0:
   version "0.1.7"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/from/-/from-0.1.7.tgz#83c60afc58b9c56997007ed1a768b3ab303a44fe"
-
-fs-extra@~1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/fs-extra/-/fs-extra-1.0.0.tgz#cd3ce5f7e7cb6145883fcae3191e9877f8587950"
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^2.1.0"
-    klaw "^1.0.0"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -1867,7 +1709,18 @@ glob-parent@^2.0.0:
   dependencies:
     is-glob "^2.0.0"
 
-glob@^7.0.0, glob@^7.0.3, glob@^7.0.5, glob@^7.0.6, glob@^7.1.0, glob@^7.1.1:
+glob@7.0.5:
+  version "7.0.5"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/glob/-/glob-7.0.5.tgz#b4202a69099bbb4d292a7c1b95b6682b67ebdc95"
+  dependencies:
+    fs.realpath "^1.0.0"
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "^3.0.2"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
+
+glob@^7.0.0, glob@^7.0.3, glob@^7.0.5, glob@^7.0.6, glob@^7.1.0:
   version "7.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/glob/-/glob-7.1.1.tgz#805211df04faaf1c63a3600306cdf5ade50b2ec8"
   dependencies:
@@ -1908,13 +1761,17 @@ got@^3.2.0:
     read-all-stream "^3.0.0"
     timed-out "^2.0.0"
 
-graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
+graceful-fs@^4.1.11, graceful-fs@^4.1.2:
   version "4.1.11"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
 "graceful-readlink@>= 1.0.0":
   version "1.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
+
+growl@1.9.2:
+  version "1.9.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/growl/-/growl-1.9.2.tgz#0ea7743715db8d8de2c5ede1775e1b45ac85c02f"
 
 har-validator@~2.0.6:
   version "2.0.6"
@@ -1937,16 +1794,6 @@ has-ansi@^2.0.0:
   dependencies:
     ansi-regex "^2.0.0"
 
-has-binary@0.1.7:
-  version "0.1.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/has-binary/-/has-binary-0.1.7.tgz#68e61eb16210c9545a0a5cce06a873912fe1e68c"
-  dependencies:
-    isarray "0.0.1"
-
-has-cors@1.1.0:
-  version "1.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/has-cors/-/has-cors-1.1.0.tgz#5e474793f7ea9843d1bb99c23eef49ff126fff39"
-
 has-flag@^1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/has-flag/-/has-flag-1.0.0.tgz#9d9e793165ce017a00f00418c43f942a7b1d11fa"
@@ -1966,17 +1813,6 @@ hash.js@^1.0.0, hash.js@^1.0.3:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/hash.js/-/hash.js-1.0.3.tgz#1332ff00156c0a0ffdd8236013d07b77a0451573"
   dependencies:
     inherits "^2.0.1"
-
-hasha@~2.2.0:
-  version "2.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/hasha/-/hasha-2.2.0.tgz#78d7cbfc1e6d66303fe79837365984517b2f6ee1"
-  dependencies:
-    is-stream "^1.0.1"
-    pinkie-promise "^2.0.0"
-
-hat@^0.0.3:
-  version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/hat/-/hat-0.0.3.tgz#bb014a9e64b3788aed8005917413d4ff3d502d8a"
 
 hawk@~3.1.3:
   version "3.1.3"
@@ -2014,22 +1850,6 @@ htmlescape@^1.1.0:
   version "1.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/htmlescape/-/htmlescape-1.1.1.tgz#3a03edc2214bca3b66424a3e7959349509cb0351"
 
-http-errors@~1.6.1:
-  version "1.6.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/http-errors/-/http-errors-1.6.1.tgz#5f8b8ed98aca545656bf572997387f904a722257"
-  dependencies:
-    depd "1.1.0"
-    inherits "2.0.3"
-    setprototypeof "1.0.3"
-    statuses ">= 1.3.1 < 2"
-
-http-proxy@^1.13.0:
-  version "1.16.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/http-proxy/-/http-proxy-1.16.2.tgz#06dff292952bf64dbe8471fa9df73066d4f37742"
-  dependencies:
-    eventemitter3 "1.x.x"
-    requires-port "1.x.x"
-
 http-signature@~1.1.0:
   version "1.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
@@ -2042,9 +1862,13 @@ https-browserify@~0.0.0:
   version "0.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/https-browserify/-/https-browserify-0.0.1.tgz#3f91365cabe60b77ed0ebba24b454e3e09d95a82"
 
-iconv-lite@0.4.15:
-  version "0.4.15"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/iconv-lite/-/iconv-lite-0.4.15.tgz#fe265a218ac6a57cfe854927e9d04c19825eddeb"
+https-proxy-agent@^1.0.0:
+  version "1.0.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/https-proxy-agent/-/https-proxy-agent-1.0.0.tgz#35f7da6c48ce4ddbfa264891ac593ee5ff8671e6"
+  dependencies:
+    agent-base "2"
+    debug "2"
+    extend "3"
 
 ieee754@^1.1.4:
   version "1.1.8"
@@ -2077,7 +1901,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@~2.0.0, inherits@~2.0.1:
+inherits@2, inherits@^2.0.1, inherits@~2.0.0, inherits@~2.0.1:
   version "2.0.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
@@ -2213,10 +2037,6 @@ is-npm@^1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-npm/-/is-npm-1.0.0.tgz#f2fb63a65e4905b406c86072765a1a4dc793b9f4"
 
-is-number@^0.1.1:
-  version "0.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-number/-/is-number-0.1.1.tgz#69a7af116963d47206ec9bd9b48a14216f1e3806"
-
 is-number@^2.0.2, is-number@^2.1.0:
   version "2.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-number/-/is-number-2.1.0.tgz#01fcbbb393463a548f2f466cce16dece49db908f"
@@ -2261,7 +2081,7 @@ is-resolvable@^1.0.0:
   dependencies:
     tryit "^1.0.1"
 
-is-stream@^1.0.0, is-stream@^1.0.1:
+is-stream@^1.0.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
 
@@ -2281,10 +2101,6 @@ isarray@1.0.0, isarray@^1.0.0, isarray@~1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
-isbinaryfile@^3.0.0:
-  version "3.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/isbinaryfile/-/isbinaryfile-3.0.2.tgz#4a3e974ec0cba9004d3fc6cde7209ea69368a621"
-
 isexe@^1.1.1:
   version "1.1.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/isexe/-/isexe-1.1.2.tgz#36f3e22e60750920f5e7241a476a8c6a42275ad0"
@@ -2299,19 +2115,11 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-jasmine-core@*:
-  version "2.5.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jasmine-core/-/jasmine-core-2.5.2.tgz#6f61bd79061e27f43e6f9355e44b3c6cab6ff297"
-
 jodid25519@^1.0.0:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jodid25519/-/jodid25519-1.0.2.tgz#06d4912255093419477d425633606e0e90782967"
   dependencies:
     jsbn "~0.1.0"
-
-js-string-escape@^1.0.0:
-  version "1.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/js-string-escape/-/js-string-escape-1.0.1.tgz#e2625badbc0d67c7533e9edc1068c587ae4137ef"
 
 js-tokens@^3.0.0:
   version "3.0.1"
@@ -2368,12 +2176,6 @@ json5@^0.5.0:
   version "0.5.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/json5/-/json5-0.5.1.tgz#1eade7acc012034ad84e2396767ead9fa5495821"
 
-jsonfile@^2.1.0:
-  version "2.4.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsonfile/-/jsonfile-2.4.0.tgz#3736a2b428b87bbda0cc83b53fa3d633a35c2ae8"
-  optionalDependencies:
-    graceful-fs "^4.1.6"
-
 jsonify@~0.0.0:
   version "0.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsonify/-/jsonify-0.0.0.tgz#2c74b6ee41d93ca51b7b5aaee8f503631d252a73"
@@ -2395,82 +2197,11 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.3.6"
 
-karma-browserify@^5.1.1:
-  version "5.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/karma-browserify/-/karma-browserify-5.1.1.tgz#f642d70d776d9ab3b73526c5732abcfea2400319"
-  dependencies:
-    convert-source-map "^1.1.3"
-    hat "^0.0.3"
-    js-string-escape "^1.0.0"
-    lodash "^3.10.1"
-    minimatch "^3.0.0"
-    os-shim "^0.1.3"
-
-karma-jasmine@^1.1.0:
-  version "1.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/karma-jasmine/-/karma-jasmine-1.1.0.tgz#22e4c06bf9a182e5294d1f705e3733811b810acf"
-
-karma-junit-reporter@^1.2.0:
-  version "1.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/karma-junit-reporter/-/karma-junit-reporter-1.2.0.tgz#4f9c40cedfb1a395f8aef876abf96189917c6396"
-  dependencies:
-    path-is-absolute "^1.0.0"
-    xmlbuilder "8.2.2"
-
-karma-phantomjs-launcher@^1.0.4:
-  version "1.0.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/karma-phantomjs-launcher/-/karma-phantomjs-launcher-1.0.4.tgz#d23ca34801bda9863ad318e3bb4bd4062b13acd2"
-  dependencies:
-    lodash "^4.0.1"
-    phantomjs-prebuilt "^2.1.7"
-
-karma@^1.5.0:
-  version "1.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/karma/-/karma-1.5.0.tgz#9c4c14f0400bef2c04c8e8e6bff59371025cc009"
-  dependencies:
-    bluebird "^3.3.0"
-    body-parser "^1.16.1"
-    chokidar "^1.4.1"
-    colors "^1.1.0"
-    combine-lists "^1.0.0"
-    connect "^3.6.0"
-    core-js "^2.2.0"
-    di "^0.0.1"
-    dom-serialize "^2.2.0"
-    expand-braces "^0.1.1"
-    glob "^7.1.1"
-    graceful-fs "^4.1.2"
-    http-proxy "^1.13.0"
-    isbinaryfile "^3.0.0"
-    lodash "^3.8.0"
-    log4js "^0.6.31"
-    mime "^1.3.4"
-    minimatch "^3.0.0"
-    optimist "^0.6.1"
-    qjobs "^1.1.4"
-    range-parser "^1.2.0"
-    rimraf "^2.6.0"
-    safe-buffer "^5.0.1"
-    socket.io "1.7.3"
-    source-map "^0.5.3"
-    tmp "0.0.31"
-    useragent "^2.1.12"
-
-kew@~0.7.0:
-  version "0.7.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/kew/-/kew-0.7.0.tgz#79d93d2d33363d6fdd2970b335d9141ad591d79b"
-
 kind-of@^3.0.2:
   version "3.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/kind-of/-/kind-of-3.1.0.tgz#475d698a5e49ff5e53d14e3e732429dc8bf4cf47"
   dependencies:
     is-buffer "^1.0.2"
-
-klaw@^1.0.0:
-  version "1.3.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/klaw/-/klaw-1.3.1.tgz#4088433b46b3b1ba259d78785d8e96f73ba02439"
-  optionalDependencies:
-    graceful-fs "^4.1.9"
 
 labeled-stream-splicer@^2.0.0:
   version "2.0.0"
@@ -2505,6 +2236,10 @@ lexical-scope@^1.2.0:
   dependencies:
     astw "^2.0.0"
 
+listen@^1.0.0:
+  version "1.0.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/listen/-/listen-1.0.1.tgz#feede3d5a874c53c2284d3c3597a5fc5afc74e43"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -2525,6 +2260,10 @@ lodash._baseassign@^3.0.0:
 lodash._basecopy@^3.0.0:
   version "3.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash._basecopy/-/lodash._basecopy-3.0.1.tgz#8da0e6a876cf344c0ad8a54882111dd3c5c7ca36"
+
+lodash._basecreate@^3.0.0:
+  version "3.0.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash._basecreate/-/lodash._basecreate-3.0.3.tgz#1bc661614daa7fc311b7d03bf16806a0213cf821"
 
 lodash._bindcallback@^3.0.0:
   version "3.0.1"
@@ -2557,6 +2296,14 @@ lodash.assign@^3.0.0:
 lodash.assign@^4.0.3, lodash.assign@^4.0.6:
   version "4.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash.assign/-/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
+
+lodash.create@3.1.1:
+  version "3.1.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash.create/-/lodash.create-3.1.1.tgz#d7f2849f0dbda7e04682bb8cd72ab022461debe7"
+  dependencies:
+    lodash._baseassign "^3.0.0"
+    lodash._basecreate "^3.0.0"
+    lodash._isiterateecall "^3.0.0"
 
 lodash.defaults@^3.1.2:
   version "3.1.2"
@@ -2593,20 +2340,9 @@ lodash.restparam@^3.0.0:
   version "3.6.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash.restparam/-/lodash.restparam-3.6.1.tgz#936a4e309ef330a7645ed4145986c85ae5b20805"
 
-lodash@^3.10.1, lodash@^3.8.0:
-  version "3.10.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
-
-lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.2, lodash@^4.15.0, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.5.1:
+lodash@^4.0.0, lodash@^4.11.2, lodash@^4.15.0, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.1:
   version "4.17.4"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
-
-log4js@^0.6.31:
-  version "0.6.38"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/log4js/-/log4js-0.6.38.tgz#2c494116695d6fb25480943d3fc872e662a522fd"
-  dependencies:
-    readable-stream "~1.0.2"
-    semver "~4.3.3"
 
 loose-envify@^1.0.0:
   version "1.3.1"
@@ -2618,9 +2354,12 @@ lowercase-keys@^1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lowercase-keys/-/lowercase-keys-1.0.0.tgz#4e3366b39e7f5457e35f1324bdf6f88d0bfc7306"
 
-lru-cache@2.2.x:
-  version "2.2.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lru-cache/-/lru-cache-2.2.4.tgz#6c658619becf14031d0d0b594b16042ce4dc063d"
+lru-cache@^4.0.0:
+  version "4.0.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lru-cache/-/lru-cache-4.0.2.tgz#1d17679c069cda5d040991a09dbc2c0db377e55e"
+  dependencies:
+    pseudomap "^1.0.1"
+    yallist "^2.0.0"
 
 map-stream@~0.1.0:
   version "0.1.0"
@@ -2633,10 +2372,6 @@ md5@^2.1.0:
     charenc "~0.0.1"
     crypt "~0.0.1"
     is-buffer "~1.1.1"
-
-media-typer@0.3.0:
-  version "0.3.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
 
 micromatch@^2.1.5:
   version "2.3.11"
@@ -2667,15 +2402,26 @@ mime-db@~1.26.0:
   version "1.26.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mime-db/-/mime-db-1.26.0.tgz#eaffcd0e4fc6935cf8134da246e2e6c35305adff"
 
-mime-types@^2.1.12, mime-types@~2.1.11, mime-types@~2.1.13, mime-types@~2.1.7:
+mime-types@^2.1.12, mime-types@~2.1.7:
   version "2.1.14"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mime-types/-/mime-types-2.1.14.tgz#f7ef7d97583fcaf3b7d282b6f8b5679dab1e94ee"
   dependencies:
     mime-db "~1.26.0"
 
-mime@^1.2.11, mime@^1.3.4:
+mime@^1.2.11:
   version "1.3.4"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mime/-/mime-1.3.4.tgz#115f9e3b6b3daf2959983cb38f149a2d40eb5d53"
+
+min-wd@^2.9.0:
+  version "2.9.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/min-wd/-/min-wd-2.9.3.tgz#35d6bc7d32f66e60192babdfd6c1674e992f13bd"
+  dependencies:
+    brout "^1.1.0"
+    listen "^1.0.0"
+    resolve "^1.1.6"
+    saucelabs "^1.0.1"
+    source-mapper "^2.0.0"
+    through2 "^2.0.0"
 
 minimalistic-assert@^1.0.0:
   version "1.0.0"
@@ -2691,25 +2437,66 @@ minimatch@^3.0.0, minimatch@^3.0.2:
   dependencies:
     brace-expansion "^1.0.0"
 
-minimist@0.0.8, minimist@~0.0.1:
+minimist@0.0.8:
   version "0.0.8"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
 
-minimist@^1.1.0, minimist@^1.2.0:
+minimist@^1.1.0, minimist@^1.1.1, minimist@^1.2.0:
   version "1.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
-mkdirp@0.5.0:
-  version "0.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mkdirp/-/mkdirp-0.5.0.tgz#1d73076a6df986cd9344e15e71fcc05a4c9abf12"
-  dependencies:
-    minimist "0.0.8"
-
-"mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
+mkdirp@0.5.1, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
   version "0.5.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   dependencies:
     minimist "0.0.8"
+
+mocaccino@^2.0.0:
+  version "2.0.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mocaccino/-/mocaccino-2.0.0.tgz#38e66a751596cdf55a35a94110b5b9fb3eba1b18"
+  dependencies:
+    brout "^1.1.0"
+    listen "^1.0.0"
+    mocha "^3.2.0"
+    resolve "^1.1.6"
+    supports-color "^3.1.2"
+    through2 "^2.0.0"
+
+mocha@^3.2.0:
+  version "3.2.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mocha/-/mocha-3.2.0.tgz#7dc4f45e5088075171a68896814e6ae9eb7a85e3"
+  dependencies:
+    browser-stdout "1.3.0"
+    commander "2.9.0"
+    debug "2.2.0"
+    diff "1.4.0"
+    escape-string-regexp "1.0.5"
+    glob "7.0.5"
+    growl "1.9.2"
+    json3 "3.3.2"
+    lodash.create "3.1.1"
+    mkdirp "0.5.1"
+    supports-color "3.1.2"
+
+mochify@^3.1.0:
+  version "3.1.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mochify/-/mochify-3.1.0.tgz#5dac1cd88f0efa5b18bb8ead1ad49a60185e7767"
+  dependencies:
+    brout "^1.1.0"
+    browserify "^14.1.0"
+    consolify "^2.1.0"
+    coverify "^1.4.1"
+    glob "^7.0.5"
+    min-wd "^2.9.0"
+    mocaccino "^2.0.0"
+    mocha "^3.2.0"
+    phantomic "^1.4.0"
+    resolve "^1.1.6"
+    source-mapper "^2.0.0"
+    subarg "^1.0.0"
+    through2 "^2.0.0"
+    watchify "^3.7.0"
+    which "^1.2.1"
 
 module-deps@^4.0.8:
   version "4.1.1"
@@ -2750,10 +2537,6 @@ nan@^2.3.0:
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
-
-negotiator@0.6.1:
-  version "0.6.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
 nested-error-stacks@^1.0.0:
   version "1.0.2"
@@ -2832,10 +2615,6 @@ oauth-sign@~0.8.1:
   version "0.8.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
 
-object-assign@4.1.0:
-  version "4.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/object-assign/-/object-assign-4.1.0.tgz#7a3b3d0e98063d43f4c03f2e8ae6cd51a86883a0"
-
 object-assign@^3.0.0:
   version "3.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/object-assign/-/object-assign-3.0.0.tgz#9bedd5ca0897949bca47e7ff408062d549f587f2"
@@ -2844,9 +2623,9 @@ object-assign@^4.0.0, object-assign@^4.0.1, object-assign@^4.1.0:
   version "4.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
-object-component@0.0.3:
-  version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/object-component/-/object-component-0.0.3.tgz#f0c69aa50efc95b866c186f400a33769cb2f1291"
+object-keys@^1.0.6:
+  version "1.0.11"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/object-keys/-/object-keys-1.0.11.tgz#c54601778ad560f1142ce0e01bcca8b56d13426d"
 
 object.omit@^2.0.0:
   version "2.0.1"
@@ -2854,12 +2633,6 @@ object.omit@^2.0.0:
   dependencies:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
-
-on-finished@~2.3.0:
-  version "2.3.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/on-finished/-/on-finished-2.3.0.tgz#20f1336481b083cd75337992a16971aa2d906947"
-  dependencies:
-    ee-first "1.1.1"
 
 once@^1.3.0:
   version "1.4.0"
@@ -2877,13 +2650,6 @@ onetime@^1.0.0:
   version "1.1.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/onetime/-/onetime-1.1.0.tgz#a1f7838f8314c516f05ecefcbc4ccfe04b4ed789"
 
-optimist@^0.6.1:
-  version "0.6.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
-  dependencies:
-    minimist "~0.0.1"
-    wordwrap "~0.0.2"
-
 optionator@^0.8.2:
   version "0.8.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/optionator/-/optionator-0.8.2.tgz#364c5e409d3f4d6301d6c0b4c05bba50180aeb64"
@@ -2894,10 +2660,6 @@ optionator@^0.8.2:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
     wordwrap "~1.0.0"
-
-options@>=0.0.5:
-  version "0.0.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/options/-/options-0.0.6.tgz#ec22d312806bb53e731773e7cdaefcf1c643128f"
 
 os-browserify@~0.1.1:
   version "0.1.2"
@@ -2913,11 +2675,11 @@ os-locale@^1.4.0:
   dependencies:
     lcid "^1.0.0"
 
-os-shim@^0.1.3:
+os-shim@^0.1.2:
   version "0.1.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/os-shim/-/os-shim-0.1.3.tgz#6b62c3791cf7909ea35ed46e17658bb417cb3917"
 
-os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.1:
+os-tmpdir@^1.0.0, os-tmpdir@^1.0.1:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
 
@@ -2976,28 +2738,6 @@ parse-json@^2.2.0:
   dependencies:
     error-ex "^1.2.0"
 
-parsejson@0.0.3:
-  version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/parsejson/-/parsejson-0.0.3.tgz#ab7e3759f209ece99437973f7d0f1f64ae0e64ab"
-  dependencies:
-    better-assert "~1.0.0"
-
-parseqs@0.0.5:
-  version "0.0.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/parseqs/-/parseqs-0.0.5.tgz#d5208a3738e46766e291ba2ea173684921a8b89d"
-  dependencies:
-    better-assert "~1.0.0"
-
-parseuri@0.0.5:
-  version "0.0.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/parseuri/-/parseuri-0.0.5.tgz#80204a50d4dbb779bfdc6ebe2778d90e4bce320a"
-  dependencies:
-    better-assert "~1.0.0"
-
-parseurl@~1.3.1:
-  version "1.3.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/parseurl/-/parseurl-1.3.1.tgz#c8ab8c9223ba34888aa64a297b28853bec18da56"
-
 path-browserify@~0.0.0:
   version "0.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/path-browserify/-/path-browserify-0.0.0.tgz#a0b870729aae214005b7d5032ec2cbbb0fb4451a"
@@ -3044,23 +2784,13 @@ pbkdf2@^3.0.3:
   dependencies:
     create-hmac "^1.1.2"
 
-pend@~1.2.0:
-  version "1.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"
-
-phantomjs-prebuilt@^2.1.7:
-  version "2.1.14"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/phantomjs-prebuilt/-/phantomjs-prebuilt-2.1.14.tgz#d53d311fcfb7d1d08ddb24014558f1188c516da0"
+phantomic@^1.4.0:
+  version "1.4.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/phantomic/-/phantomic-1.4.0.tgz#b0a9b64f72a5aabe8cdbe7c8387b3cff2ab1f4a0"
   dependencies:
-    es6-promise "~4.0.3"
-    extract-zip "~1.5.0"
-    fs-extra "~1.0.0"
-    hasha "~2.2.0"
-    kew "~0.7.0"
-    progress "~1.1.8"
-    request "~2.79.0"
-    request-progress "~2.0.1"
-    which "~1.2.10"
+    cross-spawn "^2.1.4"
+    es5-shim "^4.4.1"
+    source-mapper "^2.0.0"
 
 pify@^2.0.0:
   version "2.3.0"
@@ -3104,7 +2834,7 @@ process@~0.11.0:
   version "0.11.9"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/process/-/process-0.11.9.tgz#7bd5ad21aa6253e7da8682264f1e11d11c0318c1"
 
-progress@^1.1.8, progress@~1.1.8:
+progress@^1.1.8:
   version "1.1.8"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
 
@@ -3113,6 +2843,10 @@ ps-tree@^1.0.1:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ps-tree/-/ps-tree-1.1.0.tgz#b421b24140d6203f1ed3c76996b4427b08e8c014"
   dependencies:
     event-stream "~3.3.0"
+
+pseudomap@^1.0.1:
+  version "1.0.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/pseudomap/-/pseudomap-1.0.2.tgz#f052a28da70e618917ef0a8ac34c1ae5a68286b3"
 
 public-encrypt@^4.0.0:
   version "4.0.0"
@@ -3131,14 +2865,6 @@ punycode@1.3.2:
 punycode@^1.3.2, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
-
-qjobs@^1.1.4:
-  version "1.1.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/qjobs/-/qjobs-1.1.5.tgz#659de9f2cf8dcc27a1481276f205377272382e73"
-
-qs@6.4.0:
-  version "6.4.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
 
 qs@~6.3.0:
   version "6.3.2"
@@ -3162,18 +2888,6 @@ randomatic@^1.1.3:
 randombytes@^2.0.0, randombytes@^2.0.1:
   version "2.0.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/randombytes/-/randombytes-2.0.3.tgz#674c99760901c3c4112771a31e521dc349cc09ec"
-
-range-parser@^1.2.0:
-  version "1.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
-
-raw-body@~2.2.0:
-  version "2.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/raw-body/-/raw-body-2.2.0.tgz#994976cf6a5096a41162840492f0bdc5d6e7fb96"
-  dependencies:
-    bytes "2.4.0"
-    iconv-lite "0.4.15"
-    unpipe "1.0.0"
 
 rc@^1.0.1, rc@~1.1.6:
   version "1.1.7"
@@ -3212,6 +2926,15 @@ read-pkg@^1.0.0:
     normalize-package-data "^2.3.2"
     path-type "^1.0.0"
 
+"readable-stream@>=1.0.33-1 <1.1.0-0":
+  version "1.0.34"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
+  dependencies:
+    core-util-is "~1.0.0"
+    inherits "~2.0.1"
+    isarray "0.0.1"
+    string_decoder "~0.10.x"
+
 readable-stream@^2.0.0, "readable-stream@^2.0.0 || ^1.1.13", readable-stream@^2.0.2, readable-stream@^2.1.0, readable-stream@^2.1.5:
   version "2.2.6"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/readable-stream/-/readable-stream-2.2.6.tgz#8b43aed76e71483938d12a8d46c6cf1a00b1f816"
@@ -3223,15 +2946,6 @@ readable-stream@^2.0.0, "readable-stream@^2.0.0 || ^1.1.13", readable-stream@^2.
     process-nextick-args "~1.0.6"
     string_decoder "~0.10.x"
     util-deprecate "~1.0.1"
-
-readable-stream@~1.0.2:
-  version "1.0.34"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
-  dependencies:
-    core-util-is "~1.0.0"
-    inherits "~2.0.1"
-    isarray "0.0.1"
-    string_decoder "~0.10.x"
 
 readable-stream@~2.0.0:
   version "2.0.6"
@@ -3330,10 +3044,6 @@ repeat-element@^1.1.2:
   version "1.1.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/repeat-element/-/repeat-element-1.1.2.tgz#ef089a178d1483baae4d93eb98b4f9e4e11d990a"
 
-repeat-string@^0.2.2:
-  version "0.2.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/repeat-string/-/repeat-string-0.2.2.tgz#c7a8d3236068362059a7e4651fc6884e8b1fb4ae"
-
 repeat-string@^1.5.2:
   version "1.6.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
@@ -3350,13 +3060,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request-progress@~2.0.1:
-  version "2.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/request-progress/-/request-progress-2.0.1.tgz#5d36bb57961c673aa5b788dbc8141fdf23b44e08"
-  dependencies:
-    throttleit "^1.0.0"
-
-request@^2.69.0, request@^2.79.0, request@~2.79.0:
+request@^2.69.0, request@^2.79.0:
   version "2.79.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/request/-/request-2.79.0.tgz#4dfe5bf6be8b8cdc37fcf93e04b65577722710de"
   dependencies:
@@ -3396,10 +3100,6 @@ require-uncached@^1.0.2:
     caller-path "^0.1.0"
     resolve-from "^1.0.0"
 
-requires-port@1.x.x:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
-
 resolve-from@^1.0.0:
   version "1.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/resolve-from/-/resolve-from-1.0.1.tgz#26cbfe935d1aeeeabb29bc3fe5aeb01e93d44226"
@@ -3421,7 +3121,7 @@ restore-cursor@^1.0.1:
     exit-hook "^1.0.0"
     onetime "^1.0.0"
 
-rimraf@2, rimraf@^2.2.8, rimraf@^2.6.0:
+rimraf@2, rimraf@^2.2.8:
   version "2.6.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/rimraf/-/rimraf-2.6.1.tgz#c2338ec643df7a1b7fe5c54fa86f57428a55f33d"
   dependencies:
@@ -3455,9 +3155,11 @@ rx@2.3.24:
   version "2.3.24"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/rx/-/rx-2.3.24.tgz#14f950a4217d7e35daa71bbcbe58eff68ea4b2b7"
 
-safe-buffer@^5.0.1:
-  version "5.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
+saucelabs@^1.0.1:
+  version "1.4.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/saucelabs/-/saucelabs-1.4.0.tgz#b934a9af9da2874b3f40aae1fcde50a4466f5f38"
+  dependencies:
+    https-proxy-agent "^1.0.0"
 
 semver-diff@^2.0.0:
   version "2.1.0"
@@ -3469,9 +3171,9 @@ semver-diff@^2.0.0:
   version "5.3.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/semver/-/semver-5.3.0.tgz#9b2ce5d3de02d17c6012ad326aa6b4d0cf54f94f"
 
-semver@~4.3.3:
-  version "4.3.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/semver/-/semver-4.3.6.tgz#300bc6e0e86374f7ba61068b5b1ecd57fc6532da"
+semver@~5.0.1:
+  version "5.0.3"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
@@ -3480,10 +3182,6 @@ set-blocking@^2.0.0, set-blocking@~2.0.0:
 set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
-
-setprototypeof@1.0.3:
-  version "1.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/setprototypeof/-/setprototypeof-1.0.3.tgz#66567e37043eeb4f04d91bd658c0cbefb55b8e04"
 
 sha.js@^2.3.6, sha.js@~2.4.4:
   version "2.4.8"
@@ -3537,63 +3235,40 @@ sntp@1.x.x:
   dependencies:
     hoek "2.x.x"
 
-socket.io-adapter@0.5.0:
-  version "0.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/socket.io-adapter/-/socket.io-adapter-0.5.0.tgz#cb6d4bb8bec81e1078b99677f9ced0046066bb8b"
-  dependencies:
-    debug "2.3.3"
-    socket.io-parser "2.3.1"
-
-socket.io-client@1.7.3:
-  version "1.7.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/socket.io-client/-/socket.io-client-1.7.3.tgz#b30e86aa10d5ef3546601c09cde4765e381da377"
-  dependencies:
-    backo2 "1.0.2"
-    component-bind "1.0.0"
-    component-emitter "1.2.1"
-    debug "2.3.3"
-    engine.io-client "1.8.3"
-    has-binary "0.1.7"
-    indexof "0.0.1"
-    object-component "0.0.3"
-    parseuri "0.0.5"
-    socket.io-parser "2.3.1"
-    to-array "0.1.4"
-
-socket.io-parser@2.3.1:
-  version "2.3.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/socket.io-parser/-/socket.io-parser-2.3.1.tgz#dd532025103ce429697326befd64005fcfe5b4a0"
-  dependencies:
-    component-emitter "1.1.2"
-    debug "2.2.0"
-    isarray "0.0.1"
-    json3 "3.3.2"
-
-socket.io@1.7.3:
-  version "1.7.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/socket.io/-/socket.io-1.7.3.tgz#b8af9caba00949e568e369f1327ea9be9ea2461b"
-  dependencies:
-    debug "2.3.3"
-    engine.io "1.8.3"
-    has-binary "0.1.7"
-    object-assign "4.1.0"
-    socket.io-adapter "0.5.0"
-    socket.io-client "1.7.3"
-    socket.io-parser "2.3.1"
-
 source-map-support@^0.4.2:
   version "0.4.13"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/source-map-support/-/source-map-support-0.4.13.tgz#9782e6f7deb424d5f173327a1879eb46453bdcd4"
   dependencies:
     source-map "^0.5.6"
 
-source-map@^0.5.0, source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.3:
+source-map@^0.5.0, source-map@^0.5.6, source-map@~0.5.3:
   version "0.5.6"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/source-map/-/source-map-0.5.6.tgz#75ce38f52bf0733c5a7f0c118d81334a2bb5f412"
+
+source-map@~0.4.2:
+  version "0.4.4"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/source-map/-/source-map-0.4.4.tgz#eba4f5da9c0dc999de68032d8b4f76173652036b"
+  dependencies:
+    amdefine ">=0.0.4"
+
+source-mapper@^2.0.0:
+  version "2.0.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/source-mapper/-/source-mapper-2.0.0.tgz#67ca48c79475812d87462aa7aaa7b2f5ed0d34ea"
+  dependencies:
+    convert-source-map "^1.1.3"
+    source-map "~0.5.3"
+    through2 "^2.0.0"
 
 spawn-command@^0.0.2-1:
   version "0.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/spawn-command/-/spawn-command-0.0.2.tgz#9544e1a43ca045f8531aac1a48cb29bdae62338e"
+
+spawn-sync@^1.0.15:
+  version "1.0.15"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/spawn-sync/-/spawn-sync-1.0.15.tgz#b00799557eb7fb0c8376c29d44e8a1ea67e57476"
+  dependencies:
+    concat-stream "^1.4.7"
+    os-shim "^0.1.2"
 
 spdx-correct@~1.0.0:
   version "1.0.2"
@@ -3608,6 +3283,12 @@ spdx-expression-parse@~1.0.0:
 spdx-license-ids@^1.0.2:
   version "1.2.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
+
+split2@^0.2.1:
+  version "0.2.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/split2/-/split2-0.2.1.tgz#02ddac9adc03ec0bb78c1282ec079ca6e85ae900"
+  dependencies:
+    through2 "~0.6.1"
 
 split@0.3:
   version "0.3.3"
@@ -3634,10 +3315,6 @@ sshpk@^1.7.0:
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
 
-"statuses@>= 1.3.1 < 2", statuses@~1.3.1:
-  version "1.3.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/statuses/-/statuses-1.3.1.tgz#faf51b9eb74aaef3b3acf4ad5f61abf24cb7b93e"
-
 stream-browserify@^2.0.0:
   version "2.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/stream-browserify/-/stream-browserify-2.0.1.tgz#66266ee5f9bdb9940a4e4514cafb43bb71e5c9db"
@@ -3645,7 +3322,7 @@ stream-browserify@^2.0.0:
     inherits "~2.0.1"
     readable-stream "^2.0.2"
 
-stream-combiner2@^1.1.1:
+stream-combiner2@^1.0.2, stream-combiner2@^1.1.1:
   version "1.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/stream-combiner2/-/stream-combiner2-1.1.1.tgz#fb4d8a1420ea362764e21ad4780397bebcb41cbe"
   dependencies:
@@ -3740,6 +3417,12 @@ subarg@^1.0.0:
   dependencies:
     minimist "^1.1.0"
 
+supports-color@3.1.2:
+  version "3.1.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-color/-/supports-color-3.1.2.tgz#72a262894d9d408b956ca05ff37b2ed8a6e2a2d5"
+  dependencies:
+    has-flag "^1.0.0"
+
 supports-color@^0.2.0:
   version "0.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-color/-/supports-color-0.2.0.tgz#d92de2694eb3f67323973d7ae3d8b55b4c22190a"
@@ -3748,7 +3431,7 @@ supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
 
-supports-color@^3.2.3:
+supports-color@^3.1.2, supports-color@^3.2.3:
   version "3.2.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-color/-/supports-color-3.2.3.tgz#65ac0504b3954171d8a64946b2ae3cbb8a5f54f6"
   dependencies:
@@ -3809,16 +3492,19 @@ text-table@~0.2.0:
   version "0.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
 
-throttleit@^1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/throttleit/-/throttleit-1.0.0.tgz#9e785836daf46743145a5984b6268d828528ac6c"
-
 through2@^2.0.0:
   version "2.0.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/through2/-/through2-2.0.3.tgz#0004569b37c7c74ba39c43f3ced78d1ad94140be"
   dependencies:
     readable-stream "^2.1.5"
     xtend "~4.0.1"
+
+through2@~0.6.1, through2@~0.6.5:
+  version "0.6.5"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/through2/-/through2-0.6.5.tgz#41ab9c67b29d57209071410e1d7a7a968cd3ad48"
+  dependencies:
+    readable-stream ">=1.0.33-1 <1.1.0-0"
+    xtend ">=4.0.0 <4.1.0-0"
 
 through@2, "through@>=2.2.7 <3", through@^2.3.6, through@^2.3.8, through@~2.3, through@~2.3.1:
   version "2.3.8"
@@ -3833,16 +3519,6 @@ timers-browserify@^1.0.1:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/timers-browserify/-/timers-browserify-1.4.2.tgz#c9c58b575be8407375cb5e2462dacee74359f41d"
   dependencies:
     process "~0.11.0"
-
-tmp@0.0.31, tmp@0.0.x:
-  version "0.0.31"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/tmp/-/tmp-0.0.31.tgz#8f38ab9438e17315e5dbd8b3657e8bfb277ae4a7"
-  dependencies:
-    os-tmpdir "~1.0.1"
-
-to-array@0.1.4:
-  version "0.1.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/to-array/-/to-array-0.1.4.tgz#17e6c11f73dd4f3d74cda7a4ff3238e9ad9bf890"
 
 to-arraybuffer@^1.0.0:
   version "1.0.1"
@@ -3898,12 +3574,13 @@ type-check@~0.3.2:
   dependencies:
     prelude-ls "~1.1.2"
 
-type-is@~1.6.14:
-  version "1.6.14"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/type-is/-/type-is-1.6.14.tgz#e219639c17ded1ca0789092dd54a03826b817cb2"
-  dependencies:
-    media-typer "0.3.0"
-    mime-types "~2.1.13"
+type-detect@0.1.1:
+  version "0.1.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/type-detect/-/type-detect-0.1.1.tgz#0ba5ec2a885640e470ea4e8505971900dac58822"
+
+type-detect@^1.0.0:
+  version "1.0.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
 
 typedarray@~0.0.5:
   version "0.0.6"
@@ -3913,10 +3590,6 @@ uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
 
-ultron@1.0.x:
-  version "1.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ultron/-/ultron-1.0.2.tgz#ace116ab557cd197386a4e88f4685378c8b2e4fa"
-
 umd@^3.0.0:
   version "3.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/umd/-/umd-3.0.1.tgz#8ae556e11011f63c2596708a8837259f01b3d60e"
@@ -3924,10 +3597,6 @@ umd@^3.0.0:
 undefsafe@0.0.3:
   version "0.0.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/undefsafe/-/undefsafe-0.0.3.tgz#ecca3a03e56b9af17385baac812ac83b994a962f"
-
-unpipe@1.0.0, unpipe@~1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
 
 update-notifier@0.5.0:
   version "0.5.0"
@@ -3954,13 +3623,6 @@ user-home@^2.0.0:
   dependencies:
     os-homedir "^1.0.0"
 
-useragent@^2.1.12:
-  version "2.1.12"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/useragent/-/useragent-2.1.12.tgz#aa7da6cdc48bdc37ba86790871a7321d64edbaa2"
-  dependencies:
-    lru-cache "2.2.x"
-    tmp "0.0.x"
-
 util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
@@ -3970,10 +3632,6 @@ util@0.10.3, util@~0.10.1:
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/util/-/util-0.10.3.tgz#7afb1afe50805246489e3db7fe0ed379336ac0f9"
   dependencies:
     inherits "2.0.1"
-
-utils-merge@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
 
 uuid@^2.0.1:
   version "2.0.3"
@@ -4002,11 +3660,7 @@ vm-browserify@~0.0.1:
   dependencies:
     indexof "0.0.1"
 
-void-elements@^2.0.0:
-  version "2.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
-
-watchify@^3.9.0:
+watchify@^3.7.0, watchify@^3.9.0:
   version "3.9.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/watchify/-/watchify-3.9.0.tgz#f075fd2e8a86acde84cedba6e5c2a0bedd523d9e"
   dependencies:
@@ -4022,7 +3676,7 @@ which-module@^1.0.0:
   version "1.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/which-module/-/which-module-1.0.0.tgz#bba63ca861948994ff307736089e3b96026c2a4f"
 
-which@^1.2.11, which@~1.2.10:
+which@^1.2.1, which@^1.2.11, which@^1.2.8:
   version "1.2.12"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/which/-/which-1.2.12.tgz#de67b5e450269f194909ef23ece4ebe416fa1192"
   dependencies:
@@ -4037,10 +3691,6 @@ wide-align@^1.1.0:
 window-size@^0.2.0:
   version "0.2.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/window-size/-/window-size-0.2.0.tgz#b4315bb4214a3d7058ebeee892e13fa24d98b075"
-
-wordwrap@~0.0.2:
-  version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
 wordwrap@~1.0.0:
   version "1.0.0"
@@ -4071,42 +3721,27 @@ write@^0.2.1:
   dependencies:
     mkdirp "^0.5.1"
 
-ws@1.1.2:
-  version "1.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ws/-/ws-1.1.2.tgz#8a244fa052401e08c9886cf44a85189e1fd4067f"
-  dependencies:
-    options ">=0.0.5"
-    ultron "1.0.x"
-
-wtf-8@1.0.0:
-  version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/wtf-8/-/wtf-8-1.0.0.tgz#392d8ba2d0f1c34d1ee2d630f15d0efb68e1048a"
-
 xdg-basedir@^2.0.0:
   version "2.0.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/xdg-basedir/-/xdg-basedir-2.0.0.tgz#edbc903cc385fc04523d966a335504b5504d1bd2"
   dependencies:
     os-homedir "^1.0.0"
 
-xmlbuilder@8.2.2:
-  version "8.2.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/xmlbuilder/-/xmlbuilder-8.2.2.tgz#69248673410b4ba42e1a6136551d2922335aa773"
-
-xmlhttprequest-ssl@1.5.3:
-  version "1.5.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/xmlhttprequest-ssl/-/xmlhttprequest-ssl-1.5.3.tgz#185a888c04eca46c3e4070d99f7b49de3528992d"
-
 xregexp@^3.0.0:
   version "3.1.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/xregexp/-/xregexp-3.1.1.tgz#8ee18d75ef5c7cb3f9967f8d29414a6ca5b1a184"
 
-xtend@^4.0.0, xtend@~4.0.1:
+"xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@~4.0.1:
   version "4.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
 y18n@^3.2.1:
   version "3.2.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/y18n/-/y18n-3.2.1.tgz#6d15fba884c08679c0d77e88e7759e811e07fa41"
+
+yallist@^2.0.0:
+  version "2.1.2"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/yallist/-/yallist-2.1.2.tgz#1c11f9218f076089a47dd512f93c6699a6a81d52"
 
 yargs-parser@^2.4.1:
   version "2.4.1"
@@ -4133,13 +3768,3 @@ yargs@^4.2.0:
     window-size "^0.2.0"
     y18n "^3.2.1"
     yargs-parser "^2.4.1"
-
-yauzl@2.4.1:
-  version "2.4.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/yauzl/-/yauzl-2.4.1.tgz#9528f442dab1b2284e58b4379bb194e22e0c4005"
-  dependencies:
-    fd-slicer "~1.0.1"
-
-yeast@0.1.2:
-  version "0.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"

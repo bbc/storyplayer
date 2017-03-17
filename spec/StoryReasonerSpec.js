@@ -1,5 +1,7 @@
 // @flow
 
+import { expect } from 'chai';
+
 import StoryReasoner from '../src/StoryReasoner';
 
 describe('StoryReasoner', () => {
@@ -25,8 +27,8 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
-            expect(narrativeElement.name).toEqual("My narrative object");
+            expect(narrativeElement.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.name).to.equal("My narrative object");
             done();
         });
 
@@ -62,8 +64,8 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
-            expect(narrativeElement.name).toEqual("My narrative object");
+            expect(narrativeElement.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.name).to.equal("My narrative object");
             done();
         });
 
@@ -116,8 +118,8 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
-            expect(narrativeElement.name).toEqual("My narrative object");
+            expect(narrativeElement.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.name).to.equal("My narrative object");
             done();
         });
 
@@ -186,7 +188,7 @@ describe('StoryReasoner', () => {
         storyReasoner.start();
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('7772a753-7ea8-4375-921f-6b086535e1c8');
+            expect(narrativeElement.id).to.equal('7772a753-7ea8-4375-921f-6b086535e1c8');
             done();
         });
 
@@ -222,8 +224,8 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
-            expect(narrativeElement.name).toEqual("My narrative object");
+            expect(narrativeElement.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.name).to.equal("My narrative object");
             done();
         });
 
@@ -286,7 +288,7 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            expect(narrativeElement.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
             done();
         });
 
@@ -322,7 +324,7 @@ describe('StoryReasoner', () => {
         });
 
         storyReasoner.on('narrativeElementChanged', narrativeElement => {
-            expect(narrativeElement.id).toEqual('3d4b829e-390e-45cb-a314-eeed0d66064f');
+            expect(narrativeElement.id).to.equal('3d4b829e-390e-45cb-a314-eeed0d66064f');
             done();
         });
 
@@ -391,7 +393,7 @@ describe('StoryReasoner', () => {
         storyReasoner.start();
         storyReasoner.next();
 
-        expect(() => storyReasoner.next()).toThrow();
+        expect(() => storyReasoner.next()).to.throw(Error);
     });
 
     it('does not allow you to trigger next before a story has started', () => {
@@ -404,7 +406,7 @@ describe('StoryReasoner', () => {
             narrative_objects: [],
         });
 
-        expect(() => storyReasoner.next()).toThrow();
+        expect(() => storyReasoner.next()).to.throw(Error);
     });
 
 });
