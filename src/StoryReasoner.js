@@ -150,24 +150,26 @@ export default class StoryReasoner extends EventEmitter {
                 )
                 .filter(candidate => candidate.result > 0);
             if (evaluatedCandidates.length > 0) {
-                const bestCandidate = evaluatedCandidates.sort((a, b) => {
-                    if (a.result === b.result) {
-                        return a.i - b.i;
-                    } else if (a.result === true) {
-                        return -1;
-                    } else if (b.result === true) {
-                        return 1;
-                    } else {
-                        return b.result - a.result;
-                    }
-                })[0].i;
-                return candidates[bestCandidate];
+                const bestCandidate = evaluatedCandidates.sort(sortCandidates)[0];
+                return candidates[bestCandidate.i];
             } else {
                 return null;
             }
         });
     }
 
+}
+
+function sortCandidates(a, b) {
+    if (a.result === b.result) {
+        return a.i - b.i;
+    } else if (a.result === true) {
+        return -1;
+    } else if (b.result === true) {
+        return 1;
+    } else {
+        return b.result - a.result;
+    }
 }
 
 function convertDotNotationToNestedObjects(resolvedVars) {
