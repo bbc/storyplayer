@@ -173,7 +173,7 @@ describe('StoryReasoner', () => {
                     name: "My start narrative object",
                     links: [
                         {
-                            link_type: 'PRESENTATION_OBJECT',
+                            link_type: 'NARRATIVE_OBJECT',
                             target: '7772a753-7ea8-4375-921f-6b086535e1c8',
                             condition: true,
                         },
@@ -407,6 +407,60 @@ describe('StoryReasoner', () => {
         });
 
         expect(() => storyReasoner.next()).to.throw(Error);
+    });
+
+    it('does not allow you to trigger start a story twice', () => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [],
+        });
+
+        storyReasoner.start();
+        expect(() => storyReasoner.start()).to.throw(Error);
+    });
+
+    it('will allow you to go back to the beginning of the story', (done) => {
+        const storyReasoner = new StoryReasoner({
+            id: "23fb988d-510f-48c2-bae5-9b9e7d927bf4",
+            version: "0:0",
+            name: "A sample story",
+            tags: {},
+            beginnings: [
+                {
+                    "id": "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    "condition": true,
+                },
+            ],
+            narrative_objects: [
+                {
+                    id: "3d4b829e-390e-45cb-a314-eeed0d66064f",
+                    name: "My start narrative object",
+                    links: [
+                        {
+                            link_type: 'CHOOSE_BEGINNING',
+                            condition: true,
+                        },
+                    ],
+                },
+            ],
+        });
+        storyReasoner.start();
+
+        storyReasoner.on('narrativeElementChanged', narrativeElement => {
+            expect(narrativeElement.id).to.equal('3d4b829e-390e-45cb-a314-eeed0d66064f');
+            done();
+        });
+
+        storyReasoner.next();
     });
 
 });

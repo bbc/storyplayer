@@ -25,13 +25,10 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     start() {
-        const startElement = this._evaluateConditions(this._story.beginnings);
-        if (startElement) {
-            this._storyStarted = true;
-            this._setCurrentNarrativeElement(startElement.id);
-        } else {
-            this.emit('error', new Error('Unable to choose a valid beginning'));
+        if (this._storyStarted) {
+            throw new Error('InvalidState: this story has already been');
         }
+        this._chooseBeginning();
     }
 
     next() {
@@ -46,11 +43,23 @@ export default class StoryReasoner extends EventEmitter {
             if (nextElement.link_type === 'END_STORY') {
                 this.emit('storyEnd');
                 this._storyEnded = true;
-            } else {
+            } else if (nextElement.link_type === 'NARRATIVE_OBJECT') {
                 this._setCurrentNarrativeElement(nextElement.target);
+            } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
+                this._chooseBeginning();
             }
         } else {
             this.emit('error', new Error('There are no possible links'));
+        }
+    }
+
+    _chooseBeginning() {
+        const startElement = this._evaluateConditions(this._story.beginnings);
+        if (startElement) {
+            this._storyStarted = true;
+            this._setCurrentNarrativeElement(startElement.id);
+        } else {
+            this.emit('error', new Error('Unable to choose a valid beginning'));
         }
     }
 
