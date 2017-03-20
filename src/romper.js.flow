@@ -32,3 +32,5 @@ export type Story = {
     beginnings: Array<Beginning>,
     narrative_objects: Array<NarrativeElement>,
 };
+
+export type DataResolver = (name: string) => Promise<any>;

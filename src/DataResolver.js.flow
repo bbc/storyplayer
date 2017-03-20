@@ -1,1 +1,0 @@
-export type DataResolver = (name: string) => Promise<any>;

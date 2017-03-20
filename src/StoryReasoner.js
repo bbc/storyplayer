@@ -3,9 +3,8 @@
 import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 
-import type { Story, NarrativeElement, Link } from './romper';
+import type { Story, NarrativeElement, Link, DataResolver } from './romper';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
-import type { DataResolver } from './DataResolver';
 
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
