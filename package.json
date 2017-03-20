@@ -7,9 +7,9 @@
     "prepublish": "npm run build",
     "build": "browserify -o dist/romper.js -t babelify -e src/romper.js",
     "pretest": "flow-typed install",
-    "test": "concurrently \"node_modules/.bin/mochify --transform babelify --recursive spec\" \"eslint src/ spec/\" \"flow check\"",
-    "test-watch": "concurrently \"node_modules/.bin/mochify --transform babelify --watch --recursive spec\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check || exit 1'\"",
-    "watch": "watchify -o dist/romper.js -t babelify -e src/romper.js --debug"
+    "test": "concurrently \"node_modules/.bin/mochify --transform babelify --recursive spec\" \"eslint src/ spec/\" \"flow check --all\"",
+    "prewatch": "flow-typed install",
+    "watch": "concurrently \"watchify -o dist/romper.js -t babelify -e src/romper.js --debug\" \"node_modules/.bin/mochify --transform babelify --watch --recursive spec\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\""
   },
   "repository": {
     "type": "git",

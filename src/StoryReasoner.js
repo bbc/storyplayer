@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 
-import type { Story, NarrativeElement } from './romper';
+import type { Story, NarrativeElement, Link } from './romper';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type { DataResolver } from './DataResolver';
 
@@ -85,11 +85,11 @@ export default class StoryReasoner extends EventEmitter {
             });
     }
 
-    _followLink(nextElement: NarrativeElement) {
+    _followLink(nextElement: Link) {
         if (nextElement.link_type === 'END_STORY') {
             this._storyEnded = true;
             this.emit('storyEnd');
-        } else if (nextElement.link_type === 'NARRATIVE_OBJECT') {
+        } else if (nextElement.link_type === 'NARRATIVE_OBJECT' && nextElement.target) {
             this._setCurrentNarrativeElement(nextElement.target);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this._chooseBeginning();
@@ -135,7 +135,7 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.start();
     }
 
-    _evaluateConditions(candidates: Array<{condition: any} | any>): Promise<any> {
+    _evaluateConditions<T>(candidates: Array<{condition: any} & T>): Promise<?T> {
         const interestingVars = Array.from(
             new Set(...candidates.map(candidate => JsonLogic.uses_data(candidate.condition))).values()
         );

@@ -1,5 +1,16 @@
 export type Tags = {[key: string]: Array<string>};
 
+export type Beginning = {
+    id: string,
+    condition: any
+};
+
+export type Link = {
+    link_type: string,
+    condition: any,
+    target?: string,
+};
+
 export type NarrativeElement = {
     id: string,
     version: string,
@@ -10,11 +21,7 @@ export type NarrativeElement = {
         type: string,
         target: string
     },
-    links: Array<{
-        link_type: string,
-        condition: any,
-        target?: string,
-    }>
+    links: Array<Link>
 };
 
 export type Story = {
@@ -22,6 +29,6 @@ export type Story = {
     version: string,
     name: string,
     tags: Tags,
-    beginnings: Array<{id: string, condition: any}>,
+    beginnings: Array<Beginning>,
     narrative_objects: Array<NarrativeElement>,
 };

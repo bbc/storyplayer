@@ -27,7 +27,18 @@ describe('StoryReasoner', () => {
             beginnings: [],
             narrative_objects: [],
         };
-        subStoryReasoner = new StoryReasoner({ narrative_objects: [] }, () => Promise.reject(), () => Promise.reject());
+        subStoryReasoner = new StoryReasoner(
+            {
+                id: "3a7bf33e-38f9-4a27-9eac-c2e2008b36a9",
+                version: "0:0",
+                name: "A sub-story",
+                tags: {},
+                beginnings: [],
+                narrative_objects: [],
+            },
+            () => Promise.reject(),
+            () => Promise.reject()
+        );
         sinon.stub(subStoryReasoner, 'start');
         sinon.stub(subStoryReasoner, 'next');
         subStoryReasonerFactory = sinon.stub().returns(Promise.resolve(subStoryReasoner));
@@ -444,7 +455,7 @@ describe('StoryReasoner', () => {
             type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
             target: PRESENTATION_OBJECT_ID,
         };
-        story.narrative_objects.push({ id, name, links, presentation });
+        story.narrative_objects.push({ id, name, links, presentation, description: '', tags: {}, version: '' });
     }
 
 });
