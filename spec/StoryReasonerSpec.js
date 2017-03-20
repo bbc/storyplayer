@@ -42,7 +42,7 @@ describe('StoryReasoner', () => {
         sinon.stub(subStoryReasoner, 'start');
         sinon.stub(subStoryReasoner, 'next');
         subStoryReasonerFactory = sinon.stub().returns(Promise.resolve(subStoryReasoner));
-        dataResolver = sinon.stub();
+        dataResolver = sinon.stub().returns(Promise.resolve());
     });
 
     function buildStoryReasoner() {
@@ -437,7 +437,51 @@ describe('StoryReasoner', () => {
         addNarrativeObject("c46cd043-9edc-4c46-8b7c-f70afc6d6c23", "My narrative object", {"var": "test.test"}, []);
         buildStoryReasoner();
 
-        dataResolver.returns(true);
+        dataResolver.returns(Promise.resolve(true));
+
+        storyReasoner.on('narrativeElementChanged', elem => {
+            expect(elem.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
+    it('should support resolving strings', (done) => {
+        addNarrativeObject(
+            "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+            "My narrative object",
+            {'==': [{"var": "test.test"}, 'test']},
+            []
+        );
+        buildStoryReasoner();
+
+        dataResolver.returns(Promise.resolve('test'));
+
+        storyReasoner.on('narrativeElementChanged', elem => {
+            expect(elem.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
+            done();
+        });
+
+        storyReasoner.start();
+    });
+
+    it('should not break the whole chain if one resolution promise rejects', (done) => {
+        addNarrativeObject(
+            "e2e5d2e2-ab2e-4120-a816-ab9e44f0ffef",
+            "My narrative object",
+            {'==': [{"var": "test.test"}, 'test']},
+            []
+        );
+        addNarrativeObject(
+            "c46cd043-9edc-4c46-8b7c-f70afc6d6c23",
+            "My second narrative object",
+            true,
+            []
+        );
+        buildStoryReasoner();
+
+        dataResolver.returns(Promise.reject());
 
         storyReasoner.on('narrativeElementChanged', elem => {
             expect(elem.id).to.equal('c46cd043-9edc-4c46-8b7c-f70afc6d6c23');
