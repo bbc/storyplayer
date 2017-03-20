@@ -17,7 +17,9 @@ export default function(data: Object): DataResolver {
      * @return {Promise.<any>} A promise which resolves to the requested variable, or null if the variable does not exist
      */
     return function(name: string): Promise<any> {
-        return Promise.resolve(null);
+        return Promise.resolve(
+            name.split('.').reduce((obj, key) => (obj !== null && key in obj) ? obj[key] : null, data)
+        );
     };
 
 }
