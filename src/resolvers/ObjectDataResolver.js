@@ -1,6 +1,6 @@
 // @flow
 
-import type { DataResolver } from '../DataResolver';
+import type { DataResolver } from '../romper';
 
 /**
  * Returns an instance of DataResolver which resolves over the data object passed in

@@ -1,3 +1,16 @@
+import type BaseRenderer from "./renderers/BaseRenderer";
+
+export type Renderers = {[type: string]: Class<BaseRenderer>};
+
+export type Settings = {
+    storyId: string,
+    target: HTMLElement,
+    renderers?: Renderers,
+    dataResolver: DataResolver,
+    storyFetcher: StoryFetcher,
+    presentationFetcher: PresentationFetcher,
+};
+
 export type Tags = {[key: string]: Array<string>};
 
 export type Beginning = {
@@ -34,3 +47,29 @@ export type Story = {
 };
 
 export type DataResolver = (name: string) => Promise<any>;
+
+export type StoryFetcher = (id: string) => Promise<Story>;
+
+export type SimpleAVRepresentation = {
+    id: string,
+    version: string,
+    name: string,
+    tags: Tags,
+    representation_type: "SIMPLE_AV",
+    asset_collection: string,
+};
+
+export type Representation = SimpleAVRepresentation;
+
+export type Presentation = {
+    id: string,
+    version: string,
+    name: string,
+    tags: Tags,
+    representations: Array<{
+        representation: Representation,
+        condition: any
+    }>
+};
+
+export type PresentationFetcher = (id: string) => Promise<Presentation>;
