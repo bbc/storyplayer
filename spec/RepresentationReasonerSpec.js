@@ -28,10 +28,7 @@ describe('RepresentationReasoner', () => {
             }],
             tags: {},
         }).then(presentation => {
-            expect(presentation).to.not.be.null;
-            if (presentation) {
-                expect(presentation.id).to.equal('2a64404d-8988-4cf3-a3e9-f7742ba4afe9');
-            }
+            expect(presentation.id).to.equal('2a64404d-8988-4cf3-a3e9-f7742ba4afe9');
         });
     });
 
