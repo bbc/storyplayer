@@ -27,6 +27,7 @@ export default function Controller(
                 if (currentRenderer) {
                     currentRenderer.destroy();
                 }
+                alert(narrativeElement.description);
                 fetchPresentation(narrativeElement.presentation.target)
                     .then(presentation => representationReasoner(presentation))
                     .then(representation => {

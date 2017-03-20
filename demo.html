@@ -1112,7 +1112,25 @@
 
         },
         "presentation_objects": [
-
+            {
+                "id": "2c8e17d9-ad69-4190-accb-bd0fe5403446",
+                "version": "0:0",
+                "name": "Put Toast In The Toaster",
+                "tags": {},
+                "representations": [
+                    {
+                        "representation": {
+                            "id": "974fae33-e688-4c07-a111-2cb0f9e54a9c",
+                            "version": "0:0",
+                            "name": "Toast Going Into Toaster",
+                            "tags": {},
+                            "representation_type": "SIMPLE_AV",
+                            "asset_collection": "ce61dd92-b9d2-4d86-9e60-a8d4d25e69ae"
+                        },
+                        "condition": true
+                    }
+                ]
+            }
         ],
         "state": {
 
@@ -1132,7 +1150,7 @@
             presentationFetcher: id => Promise.resolve(
                 config.presentation_objects
                     .filter(presentationObject => presentationObject.id === id)[0]
-            ).then(presentationObject => presentationObject ? presentationObject : Promise.reject()),
+            ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such object')),
         });
     })();
 </script>
