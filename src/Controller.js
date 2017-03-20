@@ -30,7 +30,9 @@ export default function Controller(
                 fetchPresentation(narrativeElement.presentation.target)
                     .then(presentation => representationReasoner(presentation))
                     .then(representation => {
-                        if (representation.representation_type in renderers) {
+                        if (!representation) {
+                            console.error('No valid representations');
+                        } else if (representation.representation_type in renderers) {
                             const Renderer = renderers[representation.representation_type];
                             currentRenderer = new Renderer(representation, target);
                             currentRenderer.start();

@@ -1,9 +1,6 @@
 import BaseRenderer from './BaseRenderer';
-import type { SimpleAVRepresentation } from "../romper";
 
 export default class SimpleAVRenderer extends BaseRenderer {
-
-    _representation: SimpleAVRepresentation;
 
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p>`;

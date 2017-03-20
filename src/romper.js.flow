@@ -50,16 +50,14 @@ export type DataResolver = (name: string) => Promise<any>;
 
 export type StoryFetcher = (id: string) => Promise<Story>;
 
-export type SimpleAVRepresentation = {
+export type Representation = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
-    representation_type: "SIMPLE_AV",
-    asset_collection: string,
+    representation_type: string,
+    asset_collection?: string,
 };
-
-export type Representation = SimpleAVRepresentation;
 
 export type Presentation = {
     id: string,
