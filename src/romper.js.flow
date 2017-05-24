@@ -5,7 +5,6 @@ import type BaseRenderer from "./renderers/BaseRenderer";
 export type Renderers = {[type: string]: Class<BaseRenderer>};
 
 export type Settings = {
-    storyId: string,
     target: HTMLElement,
     renderers?: Renderers,
     dataResolver: DataResolver,
@@ -45,7 +44,7 @@ export type Story = {
     name: string,
     tags: Tags,
     beginnings: Array<Beginning>,
-    narrative_objects: Array<NarrativeElement>,
+    narrative_elements: Array<NarrativeElement>,
 };
 
 export type DataResolver = (name: string) => Promise<any>;

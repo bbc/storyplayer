@@ -19,7 +19,7 @@
                     "condition": true
                 }
             ],
-            "narrative_objects": [
+            "narrative_elements": [
                 {
                     "id": "cf025884-41ff-4658-b74d-487258acc034",
                     "version": "0:0",
@@ -1142,8 +1142,7 @@
     (function() {
         const config = JSON.parse(document.getElementById('romper-story').textContent);
 
-        window.Romper.init({
-            storyId: '',
+        let romper = window.Romper.init({
             target: document.getElementById('romper-target'),
             dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
             storyFetcher: () => Promise.resolve(config.story),
@@ -1152,6 +1151,8 @@
                     .filter(presentationObject => presentationObject.id === id)[0]
             ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such object')),
         });
+
+        romper.start('');
     })();
 </script>
 </body>

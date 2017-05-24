@@ -27,8 +27,7 @@ module.exports = {
 
         const storyReasonerFactory = StoryReasonerFactory(mergedSettings.storyFetcher, mergedSettings.dataResolver);
         const representationReasoner = RepresentationReasonerFactory(mergedSettings.dataResolver);
-        Controller(
-            mergedSettings.storyId,
+        return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
             mergedSettings.presentationFetcher,

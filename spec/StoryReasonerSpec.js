@@ -25,7 +25,7 @@ describe('StoryReasoner', () => {
             name: "A sample story",
             tags: {},
             beginnings: [],
-            narrative_objects: [],
+            narrative_elements: [],
         };
         subStoryReasoner = new StoryReasoner(
             {
@@ -34,7 +34,7 @@ describe('StoryReasoner', () => {
                 name: "A sub-story",
                 tags: {},
                 beginnings: [],
-                narrative_objects: [],
+                narrative_elements: [],
             },
             () => Promise.reject(),
             () => Promise.reject()
@@ -499,7 +499,7 @@ describe('StoryReasoner', () => {
             type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
             target: PRESENTATION_OBJECT_ID,
         };
-        story.narrative_objects.push({ id, name, links, presentation, description: '', tags: {}, version: '' });
+        story.narrative_elements.push({ id, name, links, presentation, description: '', tags: {}, version: '' });
     }
 
 });

@@ -61,7 +61,7 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = false;
 
         this._narrativeElements = {};
-        this._story.narrative_objects.forEach(narrativeElement => {
+        this._story.narrative_elements.forEach(narrativeElement => {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
     }

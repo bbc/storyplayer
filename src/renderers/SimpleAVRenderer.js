@@ -5,6 +5,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p>`;
         const button = document.createElement('button');
+        button.innerHTML = 'Next';
         button.addEventListener('click', () => {
             this.emit('complete');
         });
