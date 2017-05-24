@@ -1,3 +1,5 @@
+// @flow
+
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import SimpleAVRenderer from './renderers/SimpleAVRenderer';
 import type { Settings } from "./romper";
@@ -13,7 +15,7 @@ const DEFAULT_SETTINGS = {
     renderers: RENDERERS,
 };
 
-window.Romper = {
+module.exports = {
     RENDERERS,
 
     RESOLVERS: {
@@ -35,5 +37,3 @@ window.Romper = {
         );
     },
 };
-
-export default window.Romper;

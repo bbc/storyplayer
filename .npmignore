@@ -1,0 +1,6 @@
+/.eslintrc
+/.flowconfig
+/dist/.gitignore
+/flow-typed
+/spec
+/yarn.lock

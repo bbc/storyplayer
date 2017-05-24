@@ -1,3 +1,5 @@
+// @flow
+
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type { NarrativeElement, PresentationFetcher, Renderers } from "./romper";
 import type { RepresentationReasoner } from "./RepresentationReasoner";

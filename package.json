@@ -5,11 +5,11 @@
   "main": "dist/romper.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "browserify -o dist/romper.js -t babelify -e src/romper.js",
+    "build": "concurrently \"babel src --out-dir dist\" \"browserify -o dist/romper.browser.js -t babelify -e src/romper.browser.js\"",
     "pretest": "flow-typed install",
     "test": "concurrently \"node_modules/.bin/mochify --transform babelify --recursive spec\" \"eslint src/ spec/\" \"flow check --all\"",
     "prewatch": "flow-typed install",
-    "watch": "concurrently \"watchify -o dist/romper.js -t babelify -e src/romper.js --debug\" \"node_modules/.bin/mochify --transform babelify --watch --recursive spec\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\""
+    "watch": "concurrently \"watchify -o dist/romper.browser.js -t babelify -e src/romper.browser.js --debug\" \"node_modules/.bin/mochify --transform babelify --watch --recursive spec\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\""
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/bbc/romper#readme",
   "devDependencies": {
+    "babel-cli": "^6.24.1",
     "babel-eslint": "^7.1.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-polyfill": "^6.23.0",
@@ -42,5 +43,8 @@
   },
   "dependencies": {
     "json-logic-js": "^1.0.11"
+  },
+  "publishConfig": {
+    "registry": "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm"
   }
 }
