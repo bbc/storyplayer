@@ -1,6 +1,9 @@
+/.babelrc
 /.eslintrc
 /.flowconfig
-/dist/.gitignore
+*.iml
+/demo.html
 /flow-typed
 /spec
+/src
 /yarn.lock
