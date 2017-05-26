@@ -141,7 +141,7 @@ export default class StoryReasoner extends EventEmitter {
         if (nextElement.link_type === 'END_STORY') {
             this._storyEnded = true;
             this.emit('storyEnd');
-        } else if (nextElement.link_type === 'NARRATIVE_OBJECT' && nextElement.target) {
+        } else if (nextElement.link_type === 'NARRATIVE_ELEMENT' && nextElement.target) {
             this._setCurrentNarrativeElement(nextElement.target);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this._chooseBeginning();
