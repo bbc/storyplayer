@@ -1,3 +1,5 @@
+// @flow
+
 import JsonLogic from 'json-logic-js';
 import type { DataResolver } from "./romper";
 
