@@ -125,7 +125,7 @@ describe('StoryReasoner', () => {
     it('emits the next item when prodded', (done) => {
         addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [
             {
-                link_type: 'NARRATIVE_OBJECT',
+                link_type: 'NARRATIVE_ELEMENT',
                 target: '7772a753-7ea8-4375-921f-6b086535e1c8',
                 condition: true,
             },
@@ -298,7 +298,7 @@ describe('StoryReasoner', () => {
     it('generates an error if the link target is not in the graph', (done) => {
         addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [
             {
-                link_type: 'NARRATIVE_OBJECT',
+                link_type: 'NARRATIVE_ELEMENT',
                 condition: true,
                 target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
             },
@@ -321,7 +321,7 @@ describe('StoryReasoner', () => {
             addNarrativeObject('85478a77-bfe6-43c7-84ef-29d85a9b0221', 'Post-story', null, []);
             addNarrativeObject("3d4b829e-390e-45cb-a314-eeed0d66064f", "My start narrative object", true, [
                 {
-                    link_type: 'NARRATIVE_OBJECT',
+                    link_type: 'NARRATIVE_ELEMENT',
                     condition: true,
                     target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
                 },
