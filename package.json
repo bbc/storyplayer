@@ -1,5 +1,5 @@
 {
-  "name": "romper",
+  "name": "@bbc/romper",
   "version": "0.1.1",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
@@ -43,8 +43,5 @@
   },
   "dependencies": {
     "json-logic-js": "^1.0.11"
-  },
-  "publishConfig": {
-    "registry": "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm"
   }
 }
