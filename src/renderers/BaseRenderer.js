@@ -4,7 +4,6 @@ import EventEmitter from 'events';
 import type { Representation } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
-
     _representation: Representation;
     _target: HTMLElement;
 
@@ -44,5 +43,4 @@ export default class BaseRenderer extends EventEmitter {
      */
     destroy() {
     }
-
 }

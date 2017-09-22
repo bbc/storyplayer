@@ -1,7 +1,6 @@
 import BaseRenderer from './BaseRenderer';
 
 export default class SimpleAVRenderer extends BaseRenderer {
-
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p>`;
         const button = document.createElement('button');
@@ -17,5 +16,4 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._target.removeChild(this._target.lastChild);
         }
     }
-
 }

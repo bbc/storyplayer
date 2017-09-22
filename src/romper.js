@@ -2,10 +2,10 @@
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import SimpleAVRenderer from './renderers/SimpleAVRenderer';
-import type { Settings } from "./romper";
-import Controller from "./Controller";
-import StoryReasonerFactory from "./StoryReasonerFactory";
-import RepresentationReasonerFactory from "./RepresentationReasoner";
+import type { Settings } from './romper';
+import Controller from './Controller';
+import StoryReasonerFactory from './StoryReasonerFactory';
+import RepresentationReasonerFactory from './RepresentationReasoner';
 
 const RENDERERS = {
     SIMPLE_AV: SimpleAVRenderer,
@@ -32,7 +32,7 @@ module.exports = {
             storyReasonerFactory,
             mergedSettings.presentationFetcher,
             representationReasoner,
-            mergedSettings.renderers
+            mergedSettings.renderers,
         );
     },
 };

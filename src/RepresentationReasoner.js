@@ -12,19 +12,17 @@ export type RepresentationReasoner = (presentation: Presentation) => Promise<Rep
  * @return {RepresentationReasoner} an instance of the reasoner
  */
 export default function RepresentationReasonerFactory(dataResolver: DataResolver): RepresentationReasoner {
-
     /**
      * Given a representation, this will give you the appropriate presentation to use
      *
      * @param {Presentation} presentation the presentation object to reason about
      * @return {Promise.<Representation>} a promise which will resolve to the representation to use
      */
-    return function(presentation: Presentation): Promise<Representation> {
+    return function (presentation: Presentation): Promise<Representation> {
         return evaluateConditions(presentation.representations, dataResolver)
             .then(representationContainer =>
-                representationContainer ?
-                representationContainer.representation :
-                Promise.reject('no suitable representations found')
-            );
+                (representationContainer ?
+                    representationContainer.representation :
+                    Promise.reject('no suitable representations found')));
     };
 }
