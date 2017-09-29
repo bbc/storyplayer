@@ -17,5 +17,6 @@ module.exports = {
         'no-confusing-arrow': [1, { allowParens: true }],
         'no-prototype-builtins': [0],
         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+        'no-underscore-dangle': 0
     },
 };

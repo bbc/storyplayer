@@ -4,31 +4,6 @@ import JsonLogic from 'json-logic-js';
 import type { DataResolver } from './romper';
 
 /**
- * Takes a list of links that has a JSONLogic "condition", evaluates them and returns
- * the object with the best JSONLogic result
- *
- * @param {Array} candidates array to evaluate
- * @param {DataResolver} dataResolver the resolver to use to resolve variables
- * @return {Promise} the best result
- * @private
- */
-export default function evaluateConditions<T>(candidates: Array<{condition: any} & T>, dataResolver: DataResolver): Promise<?T> {
-    const interestingVars = Array.from(new Set(...candidates.map(candidate => JsonLogic.uses_data(candidate.condition))).values());
-    return Promise.all(interestingVars.map(interestingVar => dataResolver(interestingVar)
-        .catch(() => null)
-        .then(value => ({ key: interestingVar, value })))).then(convertDotNotationToNestedObjects).then((resolvedVars) => {
-        const evaluatedCandidates = candidates
-            .map((candidate, i) => ({ i, result: JsonLogic.apply(candidate.condition, resolvedVars) }))
-            .filter(candidate => candidate.result > 0);
-        if (evaluatedCandidates.length > 0) {
-            const bestCandidate = evaluatedCandidates.sort(sortCandidates)[0];
-            return candidates[bestCandidate.i];
-        }
-        return null;
-    });
-}
-
-/**
  * Evaluate a pair of JSONLogic results for sorting such that true is like Infinity and false like -Infinity.
  *
  * @param {Object} a the first item to sort
@@ -70,4 +45,29 @@ function convertDotNotationToNestedObjects(resolvedVars) {
         });
     });
     return vars;
+}
+
+/**
+ * Takes a list of links that has a JSONLogic "condition", evaluates them and returns
+ * the object with the best JSONLogic result
+ *
+ * @param {Array} candidates array to evaluate
+ * @param {DataResolver} dataResolver the resolver to use to resolve variables
+ * @return {Promise} the best result
+ * @private
+ */
+export default function evaluateConditions<T>(candidates: Array<{condition: any} & T>, dataResolver: DataResolver): Promise<?T> {
+    const interestingVars = Array.from(new Set(...candidates.map(candidate => JsonLogic.uses_data(candidate.condition))).values());
+    return Promise.all(interestingVars.map(interestingVar => dataResolver(interestingVar)
+        .catch(() => null)
+        .then(value => ({ key: interestingVar, value })))).then(convertDotNotationToNestedObjects).then((resolvedVars) => {
+        const evaluatedCandidates = candidates
+            .map((candidate, i) => ({ i, result: JsonLogic.apply(candidate.condition, resolvedVars) }))
+            .filter(candidate => candidate.result > 0);
+        if (evaluatedCandidates.length > 0) {
+            const bestCandidate = evaluatedCandidates.sort(sortCandidates)[0];
+            return candidates[bestCandidate.i];
+        }
+        return null;
+    });
 }
