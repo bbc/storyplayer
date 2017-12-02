@@ -155,7 +155,7 @@ export default class StoryReasoner extends EventEmitter {
             this.emit('error', new Error('Link is to an narrative object not in the graph'));
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
-            if (this._currentNarrativeElement.presentation.type === 'STORY_OBJECT') {
+            if (this._currentNarrativeElement.presentation.type === 'STORY_ELEMENT') {
                 this._resolving = true;
                 this._reasonerFactory(this._currentNarrativeElement.presentation.target)
                     .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))

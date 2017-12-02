@@ -8,7 +8,8 @@ import StoryReasonerFactory from "./StoryReasonerFactory";
 import RepresentationReasonerFactory from "./RepresentationReasoner";
 
 const RENDERERS = {
-    SIMPLE_AV: SimpleAVRenderer,
+    "urn:x-object-based-media:representation-types:simple-av/v1.0": SimpleAVRenderer,
+    "urn:x-object-based-media:representation-types:switchable/v1.0": SimpleAVRenderer
 };
 
 const DEFAULT_SETTINGS = {
