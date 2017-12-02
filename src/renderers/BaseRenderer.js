@@ -2,10 +2,12 @@
 
 import EventEmitter from 'events';
 import type { Representation } from '../romper';
+import type { AssetCollectionFetcher } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
 
     _representation: Representation;
+    _fetchAssetCollection: AssetCollectionFetcher;
     _target: HTMLElement;
 
     /**
@@ -15,9 +17,10 @@ export default class BaseRenderer extends EventEmitter {
      * @param {Representation} representation the representation node to be rendered
      * @param {HTMLElement} target the DOM node this representation is targeted at
      */
-    constructor(representation: Representation, target: HTMLElement) {
+    constructor(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, target: HTMLElement) {
         super();
         this._representation = representation;
+        this._fetchAssetCollection = assetCollectionFetcher;
         this._target = target;
     }
 

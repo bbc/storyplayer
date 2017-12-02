@@ -2,6 +2,7 @@
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import SimpleAVRenderer from './renderers/SimpleAVRenderer';
+import SwitchableRenderer from './renderers/SwitchableRenderer';
 import type { Settings } from "./romper";
 import Controller from "./Controller";
 import StoryReasonerFactory from "./StoryReasonerFactory";
@@ -9,7 +10,7 @@ import RepresentationReasonerFactory from "./RepresentationReasoner";
 
 const RENDERERS = {
     "urn:x-object-based-media:representation-types:simple-av/v1.0": SimpleAVRenderer,
-    "urn:x-object-based-media:representation-types:switchable/v1.0": SimpleAVRenderer
+    "urn:x-object-based-media:representation-types:switchable/v1.0": SwitchableRenderer,
 };
 
 const DEFAULT_SETTINGS = {
@@ -32,6 +33,7 @@ module.exports = {
             mergedSettings.target,
             storyReasonerFactory,
             mergedSettings.presentationFetcher,
+            mergedSettings.assetCollectionFetcher,
             representationReasoner,
             mergedSettings.renderers
         );

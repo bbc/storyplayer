@@ -2,7 +2,7 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, Renderers } from "./romper";
+import type { NarrativeElement, PresentationFetcher, Renderers, AssetCollectionFetcher } from "./romper";
 import type { RepresentationReasoner } from "./RepresentationReasoner";
 import type BaseRenderer from "./renderers/BaseRenderer";
 
@@ -11,6 +11,7 @@ export default class Controller {
         target: HTMLElement,
         storyReasonerFactory: StoryReasonerFactory,
         fetchPresentation: PresentationFetcher,
+        fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         renderers: Renderers
     ) {
@@ -21,6 +22,7 @@ export default class Controller {
         this._storyReasonerFactory = storyReasonerFactory;
         this._fetchPresentation = fetchPresentation;
         this._representationReasoner = representationReasoner;
+        this._fetchAssetCollection = fetchAssetCollection;
         this._renderers = renderers;
     }
 
@@ -57,7 +59,7 @@ export default class Controller {
 
                             if (representation.representation_type in this._renderers) {
                                 const Renderer = this._renderers[representation.representation_type];
-                                const currentRenderer = new Renderer(representation, this._target);
+                                const currentRenderer = new Renderer(representation, this._fetchAssetCollection, this._target);
                                 currentRenderer.start();
                                 currentRenderer.on('complete', () => {
                                     reasoner.next();
@@ -99,6 +101,7 @@ export default class Controller {
     _target: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
     _fetchPresentation: PresentationFetcher;
+    _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _renderers: Renderers;
     _handleError: ?Function;
