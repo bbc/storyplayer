@@ -16,8 +16,10 @@ export default class SwitchableRenderer extends BaseRenderer {
         if(this._representation.asset_collection.choices){
             for(this._i = 0; this._i < this._representation.asset_collection.choices.length; this._i++){
                 const choiceLabel = this._representation.asset_collection.choices[this._i].label;
+                const choiceRepresentationDetail =
+                    this._representation.asset_collection.choices[this._i].representation.name;
                 const switchitem = document.createElement('li');
-                switchitem.textContent = choiceLabel;
+                switchitem.textContent = choiceLabel + ': ' + choiceRepresentationDetail;
                 switchlist.appendChild(switchitem);
                 // each item .id points to a representation...
             }
