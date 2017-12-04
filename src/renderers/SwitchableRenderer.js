@@ -29,6 +29,9 @@ export default class SwitchableRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.icon)
                 .then(icon => {
                     iconData.textContent += `${icon.name}`;
+                    if(icon.assets.audio_src){
+                        iconData.textContent += ` from ${icon.assets.image_src}`;
+                    }
                 });
         } else {
             iconData.textContent += 'none';

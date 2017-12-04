@@ -17,6 +17,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then(fg => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
+                    if(fg.assets.av_src){
+                        foregroundItem.textContent += ` from ${fg.assets.av_src}`;
+                    }
                 });
         } else {
             foregroundItem.textContent = 'foreground: none';
@@ -26,6 +29,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.background)
                 .then(bg => {
                     backgroundItem.textContent = `background: ${bg.name}`;
+                    if(bg.assets.audio_src){
+                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
+                    }
                 });
         } else {
             backgroundItem.textContent = 'background: none';
@@ -35,6 +41,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.icon)
                 .then(icon => {
                     iconItem.textContent = `icon: ${icon.name}`;
+                    if(icon.assets.audio_src){
+                        iconItem.textContent += ` from ${icon.assets.image_src}`;
+                    }
                 });
         } else {
             iconItem.textContent = 'icon: none';
