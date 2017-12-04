@@ -15,6 +15,7 @@ export default class BaseRenderer extends EventEmitter {
      * is called, as this could be constructed in advance as part of pre-loading.
      *
      * @param {Representation} representation the representation node to be rendered
+     * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {HTMLElement} target the DOM node this representation is targeted at
      */
     constructor(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, target: HTMLElement) {

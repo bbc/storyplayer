@@ -59,7 +59,9 @@ export default class Controller {
 
                             if (representation.representation_type in this._renderers) {
                                 const Renderer = this._renderers[representation.representation_type];
-                                const currentRenderer = new Renderer(representation, this._fetchAssetCollection, this._target);
+                                const currentRenderer = new Renderer(
+                                    representation, this._fetchAssetCollection, this._target
+                                );
                                 currentRenderer.start();
                                 currentRenderer.on('complete', () => {
                                     reasoner.next();
