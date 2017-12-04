@@ -7,7 +7,6 @@ chai.use(sinonChai);
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 
 describe('RepresentationReasoner', () => {
-
     it('returns the representation which is true', () => {
         const resolver = sinon.stub();
         const reasoner = RepresentationReasonerFactory(resolver);
@@ -27,9 +26,8 @@ describe('RepresentationReasoner', () => {
                 },
             }],
             tags: {},
-        }).then(presentation => {
+        }).then((presentation) => {
             expect(presentation.id).to.equal('2a64404d-8988-4cf3-a3e9-f7742ba4afe9');
         });
     });
-
 });

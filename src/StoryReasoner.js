@@ -11,7 +11,6 @@ import type { StoryReasonerFactory } from './StoryReasonerFactory';
  * structure of a story.
  */
 export default class StoryReasoner extends EventEmitter {
-
     _story: Story;
     _dataResolver: DataResolver;
     _reasonerFactory: StoryReasonerFactory;
@@ -61,7 +60,7 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = false;
 
         this._narrativeElements = {};
-        this._story.narrative_elements.forEach(narrativeElement => {
+        this._story.narrative_elements.forEach((narrativeElement) => {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
     }
@@ -114,7 +113,7 @@ export default class StoryReasoner extends EventEmitter {
     _chooseBeginning() {
         this._resolving = true;
         evaluateConditions(this._story.beginnings, this._dataResolver)
-            .then(startElement => {
+            .then((startElement) => {
                 this._resolving = false;
                 if (startElement) {
                     this._setCurrentNarrativeElement(startElement.id);
@@ -127,7 +126,7 @@ export default class StoryReasoner extends EventEmitter {
     _chooseNextNode() {
         this._resolving = true;
         evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
-            .then(nextElement => {
+            .then((nextElement) => {
                 this._resolving = false;
                 if (nextElement) {
                     this._followLink(nextElement);
@@ -159,7 +158,7 @@ export default class StoryReasoner extends EventEmitter {
                 this._resolving = true;
                 this._reasonerFactory(this._currentNarrativeElement.presentation.target)
                     .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
-                    .catch(err => {
+                    .catch((err) => {
                         this.emit('error', err);
                     });
             } else {
@@ -186,5 +185,4 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = false;
         subStoryReasoner.start();
     }
-
 }

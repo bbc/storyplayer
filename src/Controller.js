@@ -2,9 +2,9 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, Renderers } from "./romper";
-import type { RepresentationReasoner } from "./RepresentationReasoner";
-import type BaseRenderer from "./renderers/BaseRenderer";
+import type { NarrativeElement, PresentationFetcher, Renderers } from './romper';
+import type { RepresentationReasoner } from './RepresentationReasoner';
+import type BaseRenderer from './renderers/BaseRenderer';
 
 export default class Controller {
     constructor(
@@ -12,7 +12,7 @@ export default class Controller {
         storyReasonerFactory: StoryReasonerFactory,
         fetchPresentation: PresentationFetcher,
         representationReasoner: RepresentationReasoner,
-        renderers: Renderers
+        renderers: Renderers,
     ) {
         this._storyId = null;
         this._reasoner = null;
@@ -28,7 +28,7 @@ export default class Controller {
         this._storyId = storyId;
 
         this._storyReasonerFactory(this._storyId)
-            .then(reasoner => {
+            .then((reasoner) => {
                 if (this._storyId !== storyId) {
                     return;
                 }
@@ -50,7 +50,7 @@ export default class Controller {
                     console.log(narrativeElement); // eslint-disable-line no-console
                     this._fetchPresentation(narrativeElement.presentation.target)
                         .then(presentation => this._representationReasoner(presentation))
-                        .then(representation => {
+                        .then((representation) => {
                             if (this._reasoner !== reasoner) {
                                 return;
                             }

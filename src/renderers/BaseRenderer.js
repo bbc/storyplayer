@@ -1,10 +1,9 @@
 // @flow
-
+/* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
 import type { Representation } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
-
     _representation: Representation;
     _target: HTMLElement;
 
@@ -44,5 +43,4 @@ export default class BaseRenderer extends EventEmitter {
      */
     destroy() {
     }
-
 }

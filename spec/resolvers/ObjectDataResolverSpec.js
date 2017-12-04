@@ -3,9 +3,8 @@ import ObjectDataResolverFactory from '../../src/resolvers/ObjectDataResolver';
 import { expect } from 'chai';
 
 describe('ObjectDataResolver', () => {
-
     it('resolves data from an object that is passed in', () => {
-        const dataResolver = ObjectDataResolverFactory({'test': 'foobar'});
+        const dataResolver = ObjectDataResolverFactory({ test: 'foobar' });
         return dataResolver('test')
             .then((result) => {
                 expect(result).to.equal('foobar');
@@ -13,7 +12,7 @@ describe('ObjectDataResolver', () => {
     });
 
     it('resolves nested data from an object that is passed in', () => {
-        const dataResolver = ObjectDataResolverFactory({'nested': {'test': 'foobar'}});
+        const dataResolver = ObjectDataResolverFactory({ nested: { test: 'foobar' } });
         return dataResolver('nested.test')
             .then((result) => {
                 expect(result).to.equal('foobar');
@@ -35,5 +34,4 @@ describe('ObjectDataResolver', () => {
                 expect(result).to.equal(null);
             });
     });
-
 });
