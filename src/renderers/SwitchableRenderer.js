@@ -15,10 +15,11 @@ export default class SwitchableRenderer extends BaseRenderer {
 
         if(this._representation.asset_collection.choices){
             for(this._i = 0; this._i < this._representation.asset_collection.choices.length; this._i++){
+                const choiceLabel = this._representation.asset_collection.choices[this._i].label;
                 this._fetchAssetCollection(this._representation.asset_collection.choices[this._i].id)
                     .then(fg => {
                         const switchitem = document.createElement('li');
-                        switchitem.textContent = fg.name;
+                        switchitem.textContent = `${choiceLabel}: ${fg.name}`;
                         switchlist.appendChild(switchitem);
                     });
             }
