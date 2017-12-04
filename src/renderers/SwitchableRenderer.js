@@ -14,14 +14,12 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._target.appendChild(iconData);
 
         if(this._representation.asset_collection.choices){
-            // console.log(this._representation.asset_collection.choices);
             for(this._i = 0; this._i < this._representation.asset_collection.choices.length; this._i++){
                 this._fetchAssetCollection(this._representation.asset_collection.choices[this._i].id)
                     .then(fg => {
                         const switchitem = document.createElement('li');
                         switchitem.textContent = fg.name;
                         switchlist.appendChild(switchitem);
-                        // switchlist.innerHTML += `<li>${fg.name}</li>`; 
                     });
             }
         }
@@ -32,12 +30,11 @@ export default class SwitchableRenderer extends BaseRenderer {
                     iconData.textContent += `${icon.name}`;
                 });
         } else {
-            console.log("no icon");
+            iconData.textContent += 'none';
         }
 
         const button = document.createElement('button');
         button.innerHTML = 'Next';
-        console.log('adding click listener');
         button.addEventListener('click', () => {
             this.emit('complete');
         });
