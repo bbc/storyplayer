@@ -2,14 +2,16 @@ import BaseRenderer from './BaseRenderer';
 
 export default class SwitchableRenderer extends BaseRenderer {
 
-    _switchOptions;
     _i;
 
     start() {
 
-        this._target.innerHTML = `<p>${this._representation.name}</p><ul>`;
+        this._target.innerHTML = `<p>${this._representation.name}</p><p>Options:</p><ul>`;
         const switchlist = document.createElement('ul');
         this._target.appendChild(switchlist);
+        const iconData = document.createElement('p');
+        iconData.textContent = 'icon: ';
+        this._target.appendChild(iconData);
 
         if(this._representation.asset_collection.choices){
             // console.log(this._representation.asset_collection.choices);
@@ -22,6 +24,15 @@ export default class SwitchableRenderer extends BaseRenderer {
                         // switchlist.innerHTML += `<li>${fg.name}</li>`; 
                     });
             }
+        }
+
+        if(this._representation.asset_collection.icon){
+            this._fetchAssetCollection(this._representation.asset_collection.icon)
+                .then(icon => {
+                    iconData.textContent += `${icon.name}`;
+                });
+        } else {
+            console.log("no icon");
         }
 
         const button = document.createElement('button');

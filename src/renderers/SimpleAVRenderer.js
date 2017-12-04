@@ -4,25 +4,40 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p>`;
-        const assetname = document.createElement('p');
-        this._target.appendChild(assetname);
+        const assetList = document.createElement('ul');
+        const foregroundItem = document.createElement('li');
+        const backgroundItem = document.createElement('li');
+        const iconItem = document.createElement('li');
+        assetList.appendChild(foregroundItem);
+        assetList.appendChild(backgroundItem);
+        assetList.appendChild(iconItem);
+        this._target.appendChild(assetList);
 
         if(this._representation.asset_collection.foreground){
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then(fg => {
-                    assetname.textContent = `foreground: ${fg.name}`;
+                    foregroundItem.textContent = `foreground: ${fg.name}`;
                 });
         } else {
-            console.log("no foreground");
+            foregroundItem.textContent = 'foreground: none';
         }
 
         if(this._representation.asset_collection.background){
             this._fetchAssetCollection(this._representation.asset_collection.background)
                 .then(bg => {
-                    assetname.innerHTML += `<br/>background: ${bg.name}`;
+                    backgroundItem.textContent = `background: ${bg.name}`;
                 });
         } else {
-            console.log("no background");
+            backgroundItem.textContent = 'background: none';
+        }
+
+        if(this._representation.asset_collection.icon){
+            this._fetchAssetCollection(this._representation.asset_collection.icon)
+                .then(icon => {
+                    iconItem.textContent = `icon: ${icon.name}`;
+                });
+        } else {
+            iconItem.textContent = 'icon: none';
         }
 
         const button = document.createElement('button');
