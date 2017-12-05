@@ -2,7 +2,7 @@
 
 import type BaseRenderer from "./renderers/BaseRenderer";
 
-export type Renderers = {[type: string]: Class<BaseRenderer>};
+export type Renderers = { [type: string]: Class<BaseRenderer> };
 
 export type Settings = {
     target: HTMLElement,
@@ -12,9 +12,9 @@ export type Settings = {
     presentationFetcher: PresentationFetcher,
 };
 
-export type Tags = {[key: string]: Array<string>};
+export type Tags = { [key: string]: Array<string> };
 
-export type SourceLocation = {[key: string]: string};
+export type SourceLocation = { [key: string]: string };
 
 export type Beginning = {
     id: string,
@@ -59,7 +59,26 @@ export type Representation = {
     name: string,
     tags: Tags,
     representation_type: string,
-    asset_collection?: string,
+    asset_collection: {
+        foreground?: string,
+        background?: string,
+        icon?: string,
+    },
+    choices?: Array<{
+        label: string,
+        representation?: {
+            id: string,
+            version: string,
+            name: string,
+            tags: Tags,
+            representation_type: string,
+            asset_collection: {
+                foreground?: string,
+                background?: string,
+                icon?: string,
+            },
+        }
+    }>,
 };
 
 export type AssetCollection = {
@@ -67,7 +86,11 @@ export type AssetCollection = {
     version: string,
     name: string,
     tags: Tags,
-    assets: Array<SourceLocation>,
+    assets: {
+        audio_src?: string,
+        image_src?: string,
+        av_src?: string,
+    },
 };
 
 export type Presentation = {

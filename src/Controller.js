@@ -2,7 +2,7 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, Renderers } from './romper';
+import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 

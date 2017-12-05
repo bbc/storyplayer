@@ -1,3 +1,5 @@
+// @flow
+
 import BaseRenderer from './BaseRenderer';
 
 export default class SimpleAVRenderer extends BaseRenderer {
@@ -40,7 +42,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.icon)
                 .then((icon) => {
                     iconItem.textContent = `icon: ${icon.name}`;
-                    if (icon.assets.audio_src) {
+                    if (icon.assets.image_src) {
                         iconItem.textContent += ` from ${icon.assets.image_src}`;
                     }
                 });
