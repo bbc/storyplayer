@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Romper Frog Demo</title>
 </head>
+
 <body>
-<div id="romper-target"></div>
-<script type="application/json" id="romper-story">
+    <div id="romper-target"></div>
+    <script type="application/json" id="romper-story">
     {
         "asset_collections": [
             {
@@ -70,7 +72,7 @@
                 "description": "",
                 "version": "0:0",
                 "tags": {},
-                "type": "urn:x-object-based-media:asset-collection-types:simpleav/v1.0",
+                "type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
                 "assets": {
                     "av_src": "urn:x-ipstudio:entity:package:f2f6979f-df5d-4ffb-83da-310a141695ff"
                 }
@@ -81,7 +83,7 @@
                 "description": "",
                 "version": "0:0",
                 "tags": {},
-                "type": "urn:x-object-based-media:asset-collection-types:simpleav/v1.0",
+                "type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
                 "assets": {
                     "av_src": "urn:x-ipstudio:entity:package:cf194b5a-eb6a-4a33-a2b3-2d9dc914a039"
                 }
@@ -92,7 +94,7 @@
                 "description": "",
                 "version": "0:0",
                 "tags": {},
-                "type": "urn:x-object-based-media:asset-collection-types:simpleav/v1.0",
+                "type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
                 "assets": {
                     "av_src": "urn:x-ipstudio:entity:package:9635b63d-8be8-457e-9105-b227b0f4b392"
                 }
@@ -541,11 +543,9 @@
                             "name": "Make Step 1 Switchable Presentation Element",
                             "tags": {},
                             "representation_type": "urn:x-object-based-media:representation-types:switchable/v1.0",
-                            "asset_collection": {
-                                "icon": "8d8b9741-7c7a-4f59-94b8-b53c7d1039a2"
-                            },
                             "choices": [
                                 {
+                                    "label": "overhead",
                                     "representation": {
                                         "id": "8037d1c0-8ea3-4833-9aa8-dd910f3e89f3",
                                         "version": "0:0",
@@ -557,12 +557,15 @@
                                             "background": "d22484f9-da14-484b-8051-71be36b2227f"
                                         },
                                         "behaviours": [
-                                            { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
                                         ]
-                                    },
-                                    "label": "overhead"
+                                    }
                                 },
                                 {
+                                    "label": "presenter",
                                     "representation": {
                                         "id": "aa7ff82e-5cf2-40bd-b9fb-48d0ed829458",
                                         "version": "0:0",
@@ -574,12 +577,15 @@
                                             "background": "d22484f9-da14-484b-8051-71be36b2227f"
                                         },
                                         "behaviours": [
-                                            { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
                                         ]
-                                    },
-                                    "label": "presenter"
+                                    }
                                 },
                                 {
+                                    "label": "close-up",
                                     "representation": {
                                         "id": "3d22492b-ec4c-4cc0-80d1-b7f880aff0d5",
                                         "version": "0:0",
@@ -591,12 +597,15 @@
                                             "background": "d22484f9-da14-484b-8051-71be36b2227f"
                                         },
                                         "behaviours": [
-                                            { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
                                         ]
-                                    },
-                                    "label": "close-up"
+                                    }
                                 },
                                 {
+                                    "label": "graphic",
                                     "representation": {
                                         "id": "91a9bef3-acfd-4aab-ac5b-ac06d0ee4e85",
                                         "version": "0:0",
@@ -606,10 +615,12 @@
                                         "asset_collection": {
                                             "foreground": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
                                         }
-                                    },
-                                    "label": "graphic"
+                                    }
                                 }
-                            ]                        
+                            ],
+                            "asset_collection": {
+                                "icon": "8d8b9741-7c7a-4f59-94b8-b53c7d1039a2"
+                            }
                         },
                         "condition": {
                             "==": [
@@ -637,72 +648,81 @@
                                 "icon": "8d8b9741-7c7a-4f59-94b8-b53c7d1039a2"
                             },
                             "choices": [
-                            {
-                                "representation": {
-                                    "id": "8037d1c0-8ea3-4833-9aa8-dd910f3e89f3",
-                                    "version": "0:0",
-                                    "name": "Make Step 2 Camera 1 Representation Element",
-                                    "tags": {},
-                                    "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
-                                    "asset_collection": {
-                                        "foreground": "f1482c67-1c5b-407b-90c3-c2f7288e253c",
-                                        "background": "d22484f9-da14-484b-8051-71be36b2227f"
-                                    },
-                                    "behaviours": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
-                                    ]
-                                },
-                                "label": "overhead"
-                            },
-                            {
-                                "representation": {
-                                    "id": "aa7ff82e-5cf2-40bd-b9fb-48d0ed829458",
-                                    "version": "0:0",
-                                    "name": "Make Step 2 Camera 2 Representation Element",
-                                    "tags": {},
-                                    "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
-                                    "asset_collection": {
-                                        "foreground": "fa20bde6-a388-4ec8-a457-ceaecdddcb4d",
-                                        "background": "d22484f9-da14-484b-8051-71be36b2227f"
-                                    },
-                                    "behaviours": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
-                                    ]
-                                },
-                                "label": "presenter"
-                            },
-                            {
-                                "representation": {
-                                    "id": "3d22492b-ec4c-4cc0-80d1-b7f880aff0d5",
-                                    "version": "0:0",
-                                    "name": "Make Step 2 Camera 3 Representation Element",
-                                    "tags": {},
-                                    "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
-                                    "asset_collection": {
-                                        "foreground": "852bd2f3-3b76-40af-bca6-b266a4c0d22e",
-                                        "background": "d22484f9-da14-484b-8051-71be36b2227f"
-                                    },
-                                    "behaviours": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:pause-at-end", "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a" }
-                                    ]
-                                },
-                                "label": "close-up"
-                            },
-                            {
-                                "representation": {
-                                    "id": "91a9bef3-acfd-4aab-ac5b-ac06d0ee4e85",
-                                    "version": "0:0",
-                                    "name": "Make Step 2 Image Representation Element",
-                                    "tags": {},
-                                    "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
-                                    "asset_collection": {
-                                        "foreground": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                {
+                                    "label": "overhead",
+                                    "representation": {
+                                        "id": "8037d1c0-8ea3-4833-9aa8-dd910f3e89f3",
+                                        "version": "0:0",
+                                        "name": "Make Step 1 Camera 1 Representation Element",
+                                        "tags": {},
+                                        "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                                        "asset_collection": {
+                                            "foreground": "f1482c67-1c5b-407b-90c3-c2f7288e253c",
+                                            "background": "d22484f9-da14-484b-8051-71be36b2227f"
+                                        },
+                                        "behaviours": [
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
+                                        ]
                                     }
                                 },
-                                "label": "graphic"
-                            }
-                        ]                        
-                   },
+                                {
+                                    "label": "presenter",
+                                    "representation": {
+                                        "id": "aa7ff82e-5cf2-40bd-b9fb-48d0ed829458",
+                                        "version": "0:0",
+                                        "name": "Make Step 1 Camera 2 Representation Element",
+                                        "tags": {},
+                                        "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                                        "asset_collection": {
+                                            "foreground": "fa20bde6-a388-4ec8-a457-ceaecdddcb4d",
+                                            "background": "d22484f9-da14-484b-8051-71be36b2227f"
+                                        },
+                                        "behaviours": [
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "label": "close-up",
+                                    "representation": {
+                                        "id": "3d22492b-ec4c-4cc0-80d1-b7f880aff0d5",
+                                        "version": "0:0",
+                                        "name": "Make Step 1 Camera 3 Representation Element",
+                                        "tags": {},
+                                        "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                                        "asset_collection": {
+                                            "foreground": "852bd2f3-3b76-40af-bca6-b266a4c0d22e",
+                                            "background": "d22484f9-da14-484b-8051-71be36b2227f"
+                                        },
+                                        "behaviours": [
+                                            {
+                                                "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
+                                                "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "label": "graphic",
+                                    "representation": {
+                                        "id": "91a9bef3-acfd-4aab-ac5b-ac06d0ee4e85",
+                                        "version": "0:0",
+                                        "name": "Make Step 1 Image Representation Element",
+                                        "tags": {},
+                                        "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+                                        "asset_collection": {
+                                            "foreground": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
                         "condition": {
                             "==": [
                                 1,
@@ -739,33 +759,33 @@
                 ]
             }
         ]
-    }
-</script>
-<script src="dist/romper.browser.js"></script>
-<script>
-    (function() {
-        const config = JSON.parse(document.getElementById('romper-story').textContent);
+    }</script>
+    <script src="dist/romper.browser.js"></script>
+    <script>
+        (function () {
+            const config = JSON.parse(document.getElementById('romper-story').textContent);
 
-         let romper = window.Romper.init({
-            target: document.getElementById('romper-target'),
-            dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
-            // storyFetcher: () => Promise.resolve(story), //config.story[0]),
-            storyFetcher: id => Promise.resolve(
-                config.story
-                    .filter(storyObject => storyObject.id === id)[0]
-            ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
-            presentationFetcher: id => Promise.resolve(
-                config.presentations
-                    .filter(presentationObject => presentationObject.id === id)[0]
-            ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object ' + id)),
-            assetCollectionFetcher: id => Promise.resolve(
-                config.asset_collections
-                    .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
-            ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection')),
-        });
+            let romper = window.Romper.init({
+                target: document.getElementById('romper-target'),
+                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
+                // storyFetcher: () => Promise.resolve(story), //config.story[0]),
+                storyFetcher: id => Promise.resolve(
+                    config.story
+                        .filter(storyObject => storyObject.id === id)[0]
+                ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
+                presentationFetcher: id => Promise.resolve(
+                    config.presentations
+                        .filter(presentationObject => presentationObject.id === id)[0]
+                ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object ' + id)),
+                assetCollectionFetcher: id => Promise.resolve(
+                    config.asset_collections
+                        .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
+                ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection')),
+            });
 
-        romper.start('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
-    })();
-</script>
+            romper.start('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
+        })();
+    </script>
 </body>
+
 </html>
