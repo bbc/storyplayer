@@ -4,10 +4,10 @@ import 'babel-polyfill';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import StoryReasoner from '../src/StoryReasoner';
 
 chai.use(sinonChai);
 
-import StoryReasoner from '../src/StoryReasoner';
 
 describe('StoryReasoner', () => {
     const PRESENTATION_OBJECT_ID = '8d7e96f2-fbc0-467c-a285-88a8908bc954';
@@ -16,6 +16,19 @@ describe('StoryReasoner', () => {
     let subStoryReasoner;
     let subStoryReasonerFactory;
     let dataResolver;
+
+    function addNarrativeObject(id, name, condition, links, referencesSubStory) {
+        if (condition !== null) {
+            story.beginnings.push({ id, condition });
+        }
+        const presentation = {
+            type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
+            target: PRESENTATION_OBJECT_ID,
+        };
+        story.narrative_elements.push({
+            id, name, links, presentation, description: '', tags: {}, version: '',
+        });
+    }
 
     beforeEach(() => {
         story = {
@@ -487,17 +500,4 @@ describe('StoryReasoner', () => {
 
         storyReasoner.start();
     });
-
-    function addNarrativeObject(id, name, condition, links, referencesSubStory) {
-        if (condition !== null) {
-            story.beginnings.push({ id, condition });
-        }
-        const presentation = {
-            type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
-            target: PRESENTATION_OBJECT_ID,
-        };
-        story.narrative_elements.push({
-            id, name, links, presentation, description: '', tags: {}, version: '',
-        });
-    }
 });
