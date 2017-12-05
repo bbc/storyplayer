@@ -1,7 +1,46 @@
 // @flow
 import BaseRenderer from './BaseRenderer';
+import type { Representation, AssetCollection, AssetCollectionFetcher } from '../romper';
+import SimpleAVRenderer from './SimpleAVRenderer';
+import ImageRenderer from './ImageRenderer';
 
 export default class SwitchableRenderer extends BaseRenderer {
+
+    _choiceRenderers: Array<?BaseRenderer>;
+
+    constructor(
+        representation: Representation,
+        assetCollectionFetcher: AssetCollectionFetcher,
+        target: HTMLElement,
+    ) {
+        super(representation, assetCollectionFetcher, target);
+        this._choiceRenderers = [];
+
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice) => {
+                let SubRenderer = this.getRenderer(choice.representation.representation_type);
+                // create Renderer
+                this._choiceRenderers.push(
+                    new SubRenderer(
+                        choice.representation,
+                        assetCollectionFetcher,
+                        document.createElement('div')
+                    )
+                );
+            }
+            );
+        }
+    }
+
+
+    getRenderer(representationType: string) {
+        const RENDERERS = {
+            'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
+            'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
+            'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
+        };
+        return RENDERERS[representationType];
+    }
 
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p><p>Options:</p><ul>`;
@@ -13,8 +52,6 @@ export default class SwitchableRenderer extends BaseRenderer {
 
         if (this._representation.choices) {
             this._representation.choices.forEach((choice) => {
-                // for (this._i = 0; this._i < this._representation.choices.length; this._i++) { // eslint-disable-line no-plusplus
-                // const choice = this._representation.choices[this._i];
                 const choiceLabel = choice.label;
                 let choiceRepresentationDetail = '';
                 if (choice.representation) {
@@ -23,7 +60,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                 const switchitem = document.createElement('li');
                 switchitem.textContent = `${choiceLabel}: ${choiceRepresentationDetail}`;
                 switchlist.appendChild(switchitem);
-                // each item .id points to a representation...
             });
         }
 

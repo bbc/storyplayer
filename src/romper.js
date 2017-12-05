@@ -2,6 +2,7 @@
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import SimpleAVRenderer from './renderers/SimpleAVRenderer';
+import ImageRenderer from './renderers/ImageRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import type { Settings } from './romper';
 import Controller from './Controller';
@@ -9,6 +10,7 @@ import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-lin
 import RepresentationReasonerFactory from './RepresentationReasoner';
 
 const RENDERERS = {
+    'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
     'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
     'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
 };

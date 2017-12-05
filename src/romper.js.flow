@@ -66,18 +66,7 @@ export type Representation = {
     },
     choices?: Array<{
         label: string,
-        representation?: {
-            id: string,
-            version: string,
-            name: string,
-            tags: Tags,
-            representation_type: string,
-            asset_collection: {
-                foreground?: string,
-                background?: string,
-                icon?: string,
-            },
-        }
+        representation: Representation,
     }>,
 };
 
