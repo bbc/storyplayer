@@ -1,7 +1,7 @@
 // @flow
 
 import type { DataResolver, StoryFetcher } from './romper';
-import StoryReasoner from "./StoryReasoner";
+import StoryReasoner from './StoryReasoner';
 
 export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;
 
@@ -12,8 +12,7 @@ export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;
  * @param {Function} dataResolver an instance of the data resolver using for resolving world state
  * @return {Factory} an instance of the Factory which can be used to fetch an individual story
  */
-export default function(fetcher: StoryFetcher, dataResolver: DataResolver): StoryReasonerFactory {
-
+export default function (fetcher: StoryFetcher, dataResolver: DataResolver): StoryReasonerFactory {
     /**
      * Given a story ID, this will give you an instance of a StoryReasoner which can reason over that ID
      *

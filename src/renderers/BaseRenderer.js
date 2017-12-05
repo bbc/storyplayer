@@ -1,11 +1,9 @@
 // @flow
-
+/* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
-import type { Representation } from '../romper';
-import type { AssetCollectionFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
-
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _target: HTMLElement;
@@ -18,7 +16,11 @@ export default class BaseRenderer extends EventEmitter {
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {HTMLElement} target the DOM node this representation is targeted at
      */
-    constructor(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, target: HTMLElement) {
+    constructor(
+        representation: Representation,
+        assetCollectionFetcher: AssetCollectionFetcher,
+        target: HTMLElement,
+    ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
@@ -38,15 +40,12 @@ export default class BaseRenderer extends EventEmitter {
      * @fires BaseRenderer#complete
      * @return {void}
      */
-    start() {
-    }
+    start() {}
 
     /**
      * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
      *
      * @return {void}
      */
-    destroy() {
-    }
-
+    destroy() {}
 }

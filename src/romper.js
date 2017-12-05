@@ -3,14 +3,14 @@
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import SimpleAVRenderer from './renderers/SimpleAVRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
-import type { Settings } from "./romper";
-import Controller from "./Controller";
-import StoryReasonerFactory from "./StoryReasonerFactory";
-import RepresentationReasonerFactory from "./RepresentationReasoner";
+import type { Settings } from './romper';
+import Controller from './Controller';
+import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
+import RepresentationReasonerFactory from './RepresentationReasoner';
 
 const RENDERERS = {
-    "urn:x-object-based-media:representation-types:simple-av/v1.0": SimpleAVRenderer,
-    "urn:x-object-based-media:representation-types:switchable/v1.0": SwitchableRenderer,
+    'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
+    'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
 };
 
 const DEFAULT_SETTINGS = {
@@ -27,7 +27,10 @@ module.exports = {
     init: (settings: Settings) => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
-        const storyReasonerFactory = StoryReasonerFactory(mergedSettings.storyFetcher, mergedSettings.dataResolver);
+        const storyReasonerFactory = StoryReasonerFactory(
+            mergedSettings.storyFetcher,
+            mergedSettings.dataResolver,
+        );
         const representationReasoner = RepresentationReasonerFactory(mergedSettings.dataResolver);
         return new Controller(
             mergedSettings.target,
@@ -35,7 +38,7 @@ module.exports = {
             mergedSettings.presentationFetcher,
             mergedSettings.assetCollectionFetcher,
             representationReasoner,
-            mergedSettings.renderers
+            mergedSettings.renderers,
         );
     },
 };

@@ -2,9 +2,9 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, Renderers, AssetCollectionFetcher } from "./romper";
-import type { RepresentationReasoner } from "./RepresentationReasoner";
-import type BaseRenderer from "./renderers/BaseRenderer";
+import type { NarrativeElement, PresentationFetcher, Renderers } from './romper';
+import type { RepresentationReasoner } from './RepresentationReasoner';
+import type BaseRenderer from './renderers/BaseRenderer';
 
 export default class Controller {
     constructor(
@@ -13,7 +13,7 @@ export default class Controller {
         fetchPresentation: PresentationFetcher,
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
-        renderers: Renderers
+        renderers: Renderers,
     ) {
         this._storyId = null;
         this._reasoner = null;
@@ -29,54 +29,55 @@ export default class Controller {
     start(storyId: string) {
         this._storyId = storyId;
 
-        this._storyReasonerFactory(this._storyId)
-            .then(reasoner => {
-                if (this._storyId !== storyId) {
-                    return;
+        this._storyReasonerFactory(this._storyId).then((reasoner) => {
+            if (this._storyId !== storyId) {
+                return;
+            }
+
+            this._handleStoryEnd = () => {
+                alert('Story ended!'); // eslint-disable-line no-alert
+            };
+            reasoner.on('storyEnd', this._handleStoryEnd);
+
+            this._handleError = (err) => {
+                alert(`Error: ${err}`); // eslint-disable-line no-alert
+            };
+            reasoner.on('error', this._handleError);
+
+            this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                if (this._currentRenderer) {
+                    this._currentRenderer.destroy();
                 }
+                console.log(narrativeElement); // eslint-disable-line no-console
+                this._fetchPresentation(narrativeElement.presentation.target)
+                    .then(presentation => this._representationReasoner(presentation))
+                    .then((representation) => {
+                        if (this._reasoner !== reasoner) {
+                            return;
+                        }
 
-                this._handleStoryEnd = () => {
-                    alert('Story ended!'); // eslint-disable-line no-alert
-                };
-                reasoner.on('storyEnd', this._handleStoryEnd);
+                        if (representation.representation_type in this._renderers) {
+                            const Renderer = this._renderers[representation.representation_type];
+                            const currentRenderer = new Renderer(
+                                representation,
+                                this._fetchAssetCollection,
+                                this._target,
+                            );
+                            currentRenderer.start();
+                            currentRenderer.on('complete', () => {
+                                reasoner.next();
+                            });
+                            this._currentRenderer = currentRenderer;
+                        } else {
+                            console.error(`Do not know how to render ${representation.representation_type}`);
+                        }
+                    });
+            };
+            reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
-                this._handleError = (err) => {
-                    alert(`Error: ${err}`); // eslint-disable-line no-alert
-                };
-                reasoner.on('error', this._handleError);
-
-                this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                    if (this._currentRenderer) {
-                        this._currentRenderer.destroy();
-                    }
-                    console.log(narrativeElement); // eslint-disable-line no-console
-                    this._fetchPresentation(narrativeElement.presentation.target)
-                        .then(presentation => this._representationReasoner(presentation))
-                        .then(representation => {
-                            if (this._reasoner !== reasoner) {
-                                return;
-                            }
-
-                            if (representation.representation_type in this._renderers) {
-                                const Renderer = this._renderers[representation.representation_type];
-                                const currentRenderer = new Renderer(
-                                    representation, this._fetchAssetCollection, this._target
-                                );
-                                currentRenderer.start();
-                                currentRenderer.on('complete', () => {
-                                    reasoner.next();
-                                });
-                                this._currentRenderer = currentRenderer;
-                            } else {
-                                console.error(`Do not know how to render ${representation.representation_type}`);
-                            }
-                        });
-                };
-                reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
-
-                this._reasoner = reasoner;
-                this._reasoner.start();
-            });
+            this._reasoner = reasoner;
+            this._reasoner.start();
+        });
     }
 
     reset() {

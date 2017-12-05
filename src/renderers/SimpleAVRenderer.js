@@ -1,7 +1,6 @@
 import BaseRenderer from './BaseRenderer';
 
 export default class SimpleAVRenderer extends BaseRenderer {
-
     start() {
         this._target.innerHTML = `<p>${this._representation.name}</p>`;
         const assetList = document.createElement('ul');
@@ -13,11 +12,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetList.appendChild(iconItem);
         this._target.appendChild(assetList);
 
-        if(this._representation.asset_collection.foreground){
+        if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
-                .then(fg => {
+                .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
-                    if(fg.assets.av_src){
+                    if (fg.assets.av_src) {
                         foregroundItem.textContent += ` from ${fg.assets.av_src}`;
                     }
                 });
@@ -25,11 +24,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
             foregroundItem.textContent = 'foreground: none';
         }
 
-        if(this._representation.asset_collection.background){
+        if (this._representation.asset_collection.background) {
             this._fetchAssetCollection(this._representation.asset_collection.background)
-                .then(bg => {
+                .then((bg) => {
                     backgroundItem.textContent = `background: ${bg.name}`;
-                    if(bg.assets.audio_src){
+                    if (bg.assets.audio_src) {
                         backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
                     }
                 });
@@ -37,11 +36,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
             backgroundItem.textContent = 'background: none';
         }
 
-        if(this._representation.asset_collection.icon){
+        if (this._representation.asset_collection.icon) {
             this._fetchAssetCollection(this._representation.asset_collection.icon)
-                .then(icon => {
+                .then((icon) => {
                     iconItem.textContent = `icon: ${icon.name}`;
-                    if(icon.assets.audio_src){
+                    if (icon.assets.audio_src) {
                         iconItem.textContent += ` from ${icon.assets.image_src}`;
                     }
                 });
@@ -62,5 +61,4 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._target.removeChild(this._target.lastChild);
         }
     }
-
 }
