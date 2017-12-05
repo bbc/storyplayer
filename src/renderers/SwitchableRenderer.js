@@ -1,12 +1,12 @@
 // @flow
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollection, AssetCollectionFetcher } from '../romper';
-import SimpleAVRenderer from './SimpleAVRenderer';
-import ImageRenderer from './ImageRenderer';
+import RendererFactory from './RendererFactory';
 
 export default class SwitchableRenderer extends BaseRenderer {
 
     _choiceRenderers: Array<?BaseRenderer>;
+    _choiceDiv: HTMLDivElement;
 
     constructor(
         representation: Representation,
@@ -14,36 +14,38 @@ export default class SwitchableRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, target);
-        this._choiceRenderers = [];
 
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice) => {
-                let SubRenderer = this.getRenderer(choice.representation.representation_type);
-                // create Renderer
-                this._choiceRenderers.push(
-                    new SubRenderer(
-                        choice.representation,
-                        assetCollectionFetcher,
-                        document.createElement('div')
-                    )
-                );
-            }
-            );
-        }
+        this._choiceDiv = document.createElement('div');
+        this._choiceDiv.id = 'subrenderer';
+        this._choiceRenderers = this.getChoiceRenderers();
     }
 
-
-    getRenderer(representationType: string) {
-        const RENDERERS = {
-            'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
-            'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
-            'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
-        };
-        return RENDERERS[representationType];
+    getChoiceRenderers() {
+        if (this._representation.choices) {
+            return this._representation.choices.map((choice) => {
+                // create Renderer
+                return RendererFactory(
+                    choice.representation,
+                    this._fetchAssetCollection,
+                    this._choiceDiv
+                )
+            });
+        }
+        return [];
     }
 
     start() {
-        this._target.innerHTML = `<p>${this._representation.name}</p><p>Options:</p><ul>`;
+        this._target.appendChild(this._choiceDiv);
+        // start subrenderer for first choice
+        this._choiceRenderers[0].start();
+
+        const para = document.createElement('p');
+        para.textContent = this._representation.name;
+        const optPara = document.createElement('p');
+        optPara.textContent = 'Options';
+        this._target.appendChild(para);
+        this._target.appendChild(optPara);
+
         const switchlist = document.createElement('ul');
         this._target.appendChild(switchlist);
         const iconData = document.createElement('p');

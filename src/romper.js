@@ -9,19 +9,10 @@ import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
 import RepresentationReasonerFactory from './RepresentationReasoner';
 
-const RENDERERS = {
-    'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
-    'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
-    'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
-};
-
 const DEFAULT_SETTINGS = {
-    renderers: RENDERERS,
 };
 
 module.exports = {
-    RENDERERS,
-
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
     },

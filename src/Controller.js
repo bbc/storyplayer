@@ -5,6 +5,7 @@ import type StoryReasoner from './StoryReasoner';
 import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
+import RendererFactory from './renderers/RendererFactory';
 
 export default class Controller {
     constructor(
@@ -56,13 +57,9 @@ export default class Controller {
                             return;
                         }
 
-                        if (representation.representation_type in this._renderers) {
-                            const Renderer = this._renderers[representation.representation_type];
-                            const currentRenderer = new Renderer(
-                                representation,
-                                this._fetchAssetCollection,
-                                this._target,
-                            );
+                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._target);
+
+                        if (currentRenderer) {
                             currentRenderer.start();
                             currentRenderer.on('complete', () => {
                                 reasoner.next();
