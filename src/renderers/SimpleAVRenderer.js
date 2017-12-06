@@ -1,23 +1,38 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
+import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class SimpleAVRenderer extends BaseRenderer {
     start() {
         this.renderVideoElement();
         this.renderDataModelInfo();
+
         // cheat for now - only display button if not in target with subrenderer id:
         if (this._target.id !== 'subrenderer') this.renderNextButton();
     }
 
     renderVideoElement() {
         const videoElement = document.createElement('video');
+        if (!this.hls) {
+            this._hls = new Hls();
+        }
+
         videoElement.style.width = '300px';
         // set its source
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     if (fg.assets.av_src) {
+                        this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
+                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
+                            // give mediaUrl to HlsJs
+                            this._hls.loadSource(mediaUrl);
+                            this._hls.attachMedia(videoElement);
+                            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                videoElement.play();
+                            });
+                        }).catch((err) => { console.error(err, 'Notfound'); });
                         // videoElement.src = fg.assets.av_src;
                         // videoElement.play();
                     }
@@ -54,15 +69,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
 
         if (this._representation.asset_collection.foreground) {
-            //debugger; // eslint-disable-line no-debugger
-
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
                     if (fg.assets.av_src) {
-                        this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
-                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
                         foregroundItem.textContent += ` from ${fg.assets.av_src}`;
                     }
                 });
