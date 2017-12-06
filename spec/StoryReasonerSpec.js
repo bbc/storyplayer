@@ -21,7 +21,7 @@ describe('StoryReasoner', () => {
             story.beginnings.push({ id, condition });
         }
         const presentation = {
-            type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
+            type: referencesSubStory ? 'STORY_ELEMENT' : 'PRESENTATION_OBJECT',
             target: PRESENTATION_OBJECT_ID,
         };
         story.narrative_elements.push({
