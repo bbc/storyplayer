@@ -5,7 +5,7 @@ import BaseRenderer from './BaseRenderer';
 export default class SimpleAVRenderer extends BaseRenderer {
     start() {
         this.renderVideoElement();
-        // this.renderDataModelInfo();
+        this.renderDataModelInfo();
         // cheat for now - only display button if not in target with subrenderer id:
         if (this._target.id !== 'subrenderer') this.renderNextButton();
     }
@@ -18,8 +18,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     if (fg.assets.av_src) {
-                        videoElement.src = fg.assets.av_src;
-                        videoElement.play();
+                        // videoElement.src = fg.assets.av_src;
+                        // videoElement.play();
                     }
                 });
         } else {
@@ -54,13 +54,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
 
         if (this._representation.asset_collection.foreground) {
+            //debugger; // eslint-disable-line no-debugger
+
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
                     if (fg.assets.av_src) {
-                        this._fetchMedia(fg.assets.av_src).then(mediaUrl => {
-                            console.log('FETCHED FROM MS MEDIA!',mediaUrl );
-                        }).catch(err => {console.error(err,'Notfound')});
+                        this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
+                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
+                        }).catch((err) => { console.error(err, 'Notfound'); });
                         foregroundItem.textContent += ` from ${fg.assets.av_src}`;
                     }
                 });

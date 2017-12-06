@@ -1,12 +1,12 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
 import ImageRenderer from './ImageRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 
-export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, target: HTMLElement): ?BaseRenderer {
+export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, mediaFetcher: MediaFetcher, target: HTMLElement): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
         'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
@@ -20,6 +20,7 @@ export default function RendererFactory(representation: Representation, assetCol
         currentRenderer = new Renderer(
             representation,
             assetCollectionFetcher,
+            mediaFetcher,
             target,
         );
     } else {

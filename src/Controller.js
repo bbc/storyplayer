@@ -2,11 +2,10 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Renderers } from './romper';
+import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
-import type { MediaFetcher } from './romper';
 
 export default class Controller {
     constructor(
@@ -59,8 +58,7 @@ export default class Controller {
                         if (this._reasoner !== reasoner) {
                             return;
                         }
-
-                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._target);
+                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._fetchMedia, this._target);
 
                         if (currentRenderer) {
                             currentRenderer.start();
