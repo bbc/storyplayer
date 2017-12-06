@@ -1,11 +1,12 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
-import type { Representation, AssetCollectionFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
+    _fetchMedia: MediaFetcher;
     _target: HTMLElement;
 
     /**
@@ -14,16 +15,19 @@ export default class BaseRenderer extends EventEmitter {
      *
      * @param {Representation} representation the representation node to be rendered
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
+     * @param {MediaFetcher} MediaFetcher a fetcher for media
      * @param {HTMLElement} target the DOM node this representation is targeted at
      */
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
+        mediaFetcher: MediaFetcher,
         target: HTMLElement,
     ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
+        this._fetchMedia = mediaFetcher;
         this._target = target;
     }
 

@@ -58,6 +58,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
                     if (fg.assets.av_src) {
+                        this._fetchMedia(fg.assets.av_src).then(mediaUrl => {
+                            console.log('FETCHED FROM MS MEDIA!',mediaUrl );
+                        }).catch(err => {console.error(err,'Notfound')});
                         foregroundItem.textContent += ` from ${fg.assets.av_src}`;
                     }
                 });

@@ -10,6 +10,7 @@ export type Settings = {
     dataResolver: DataResolver,
     storyFetcher: StoryFetcher,
     presentationFetcher: PresentationFetcher,
+    mediaFetcher: MediaFetcher,
 };
 
 export type Tags = { [key: string]: Array<string> };
@@ -96,3 +97,5 @@ export type Presentation = {
 export type PresentationFetcher = (id: string) => Promise<Presentation>;
 
 export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+
+export type MediaFetcher = (uri:string) => Promise<string>;

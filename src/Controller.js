@@ -6,6 +6,7 @@ import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Ren
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
+import type { MediaFetcher } from './romper';
 
 export default class Controller {
     constructor(
@@ -14,6 +15,7 @@ export default class Controller {
         fetchPresentation: PresentationFetcher,
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
+        fetchMedia: MediaFetcher,
         renderers: Renderers,
     ) {
         this._storyId = null;
@@ -24,6 +26,7 @@ export default class Controller {
         this._fetchPresentation = fetchPresentation;
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
+        this._fetchMedia = fetchMedia;
         this._renderers = renderers;
     }
 
@@ -103,6 +106,7 @@ export default class Controller {
     _fetchPresentation: PresentationFetcher;
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
+    _fetchMedia: MediaFetcher;
     _renderers: Renderers;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;

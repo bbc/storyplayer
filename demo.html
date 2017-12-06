@@ -764,7 +764,6 @@
     <script>
         (function () {
             const config = JSON.parse(document.getElementById('romper-story').textContent);
-
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
