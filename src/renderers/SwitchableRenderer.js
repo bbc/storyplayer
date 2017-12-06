@@ -1,32 +1,35 @@
 // @flow
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
     _choiceDiv: HTMLDivElement;
+    _fetchMedia: MediaFetcher;
     _currentRenderer: number;
 
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
+        fetchMedia: MediaFetcher,
         target: HTMLElement,
     ) {
-        super(representation, assetCollectionFetcher, target);
+        super(representation, assetCollectionFetcher, fetchMedia, target);
 
         this._choiceDiv = document.createElement('div');
         this._choiceDiv.id = 'subrenderer';
         this._choiceRenderers = this.getChoiceRenderers();
         this._currentRenderer = 0;
     }
-
     getChoiceRenderers() {
+
         if (this._representation.choices) {
             return this._representation.choices.map(choice =>
                 RendererFactory(
                     choice.representation,
                     this._fetchAssetCollection,
+                    this._fetchMedia,
                     this._choiceDiv,
                 ));
         }
