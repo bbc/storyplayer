@@ -1,6 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
+import BehaviourFactory from '../behaviours/BehaviourFactory';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
@@ -29,6 +30,7 @@ export default class BaseRenderer extends EventEmitter {
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
         this._target = target;
+        this._behavioursRunning = { complete: 0 }; // Count of number of behaviours running against each event type
     }
 
     /**
@@ -44,7 +46,28 @@ export default class BaseRenderer extends EventEmitter {
      * @fires BaseRenderer#complete
      * @return {void}
      */
+
     start() {}
+
+    complete() {
+        const behaviours = this._representation.behaviours;
+        if (behaviours) {
+            behaviours.complete.forEach((behaviour) => {
+                const newBehaviour = BehaviourFactory(behaviour, this.completeBehaviourDone.bind(this));
+                if (newBehaviour) {
+                    newBehaviour.start();
+                    this._behavioursRunning.complete++;
+                }
+            });
+        }
+    }
+
+    completeBehaviourDone() {
+        this._behavioursRunning.complete--;
+        if (this._behavioursRunning.complete === 0) {
+            this.emit('complete');
+        }
+    }
 
     /**
      * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
