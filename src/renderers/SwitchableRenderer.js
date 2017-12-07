@@ -22,8 +22,8 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers = this.getChoiceRenderers();
         this._currentRenderer = 0;
     }
-    getChoiceRenderers() {
 
+    getChoiceRenderers() {
         if (this._representation.choices) {
             return this._representation.choices.map(choice =>
                 RendererFactory(
@@ -37,18 +37,23 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     renderSwitchButtons() {
+        const buttonPanel = document.createElement('div');
+        buttonPanel.className = 'switchbuttons';
         let i = 0;
         if (this._representation.choices) {
             this._representation.choices.forEach((choice) => {
                 const index = i;
-                const switchButton = document.createElement('button');
-                switchButton.innerHTML = choice.label;
+                const switchButton = document.createElement('img');
+                switchButton.setAttribute('role', 'button');
                 switchButton.addEventListener('click', () => {
                     this.switch(index);
                 });
-                this._target.appendChild(switchButton);
+                // switchButton.innerHTML = choice.label;
+                this.setIcon(switchButton, choice.representation);
+                buttonPanel.appendChild(switchButton);
                 i += 1;
             });
+            this._target.appendChild(buttonPanel);
         }
     }
 
@@ -75,6 +80,20 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
         this.renderDataModelInfo();
         this.renderNextButton();
+    }
+
+    setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
+        if (choiceRepresentation.asset_collection.icon) {
+            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon)
+                .then((icon) => {
+                    if (icon.assets.image_src) {
+                        this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
+                            console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
+                            element.src = mediaUrl;
+                        }).catch((err) => { console.error(err, 'Notfound'); });
+                    }
+                });
+        }
     }
 
     renderNextButton() {
