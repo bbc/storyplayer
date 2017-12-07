@@ -1,23 +1,17 @@
 // @flow
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
-import SimpleAVRenderer from './renderers/SimpleAVRenderer';
 import type { Settings } from './romper';
 import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
 import RepresentationReasonerFactory from './RepresentationReasoner';
-
-const RENDERERS = {
-    SIMPLE_AV: SimpleAVRenderer,
-};
+import MediaFetcher from './fetchers/MediaFetcher';
 
 const DEFAULT_SETTINGS = {
-    renderers: RENDERERS,
+    mediaFetcher: new MediaFetcher({}),
 };
 
 module.exports = {
-    RENDERERS,
-
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
     },
@@ -29,12 +23,15 @@ module.exports = {
             mergedSettings.storyFetcher,
             mergedSettings.dataResolver,
         );
+
         const representationReasoner = RepresentationReasonerFactory(mergedSettings.dataResolver);
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
             mergedSettings.presentationFetcher,
+            mergedSettings.assetCollectionFetcher,
             representationReasoner,
+            mergedSettings.mediaFetcher,
             mergedSettings.renderers,
         );
     },

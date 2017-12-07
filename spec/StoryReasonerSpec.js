@@ -8,7 +8,6 @@ import StoryReasoner from '../src/StoryReasoner';
 
 chai.use(sinonChai);
 
-
 describe('StoryReasoner', () => {
     const PRESENTATION_OBJECT_ID = '8d7e96f2-fbc0-467c-a285-88a8908bc954';
     let story;
@@ -22,11 +21,17 @@ describe('StoryReasoner', () => {
             story.beginnings.push({ id, condition });
         }
         const presentation = {
-            type: referencesSubStory ? 'STORY_OBJECT' : 'PRESENTATION_OBJECT',
+            type: referencesSubStory ? 'STORY_ELEMENT' : 'PRESENTATION_OBJECT',
             target: PRESENTATION_OBJECT_ID,
         };
         story.narrative_elements.push({
-            id, name, links, presentation, description: '', tags: {}, version: '',
+            id,
+            name,
+            links,
+            presentation,
+            description: '',
+            tags: {},
+            version: '',
         });
     }
 
@@ -80,7 +85,12 @@ describe('StoryReasoner', () => {
         const expectedId = 'c46cd043-9edc-4c46-8b7c-f70afc6d6c23';
         const expectedName = 'My narrative object';
 
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My bad narrative object', false, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My bad narrative object',
+            false,
+            [],
+        );
         addNarrativeObject(expectedId, expectedName, true, []);
         buildStoryReasoner();
 
@@ -107,7 +117,12 @@ describe('StoryReasoner', () => {
         const expectedId = 'c46cd043-9edc-4c46-8b7c-f70afc6d6c23';
         const expectedName = 'My narrative object';
 
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My bad narrative object', { '==': [0, 1] }, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My bad narrative object',
+            { '==': [0, 1] },
+            [],
+        );
         addNarrativeObject(expectedId, expectedName, { '==': [1, 1] }, []);
         buildStoryReasoner();
 
@@ -121,7 +136,12 @@ describe('StoryReasoner', () => {
     });
 
     it('emits an error on the next event if there are no suitable links', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My start narrative object',
+            true,
+            [],
+        );
         buildStoryReasoner();
         storyReasoner.start();
 
@@ -135,14 +155,24 @@ describe('StoryReasoner', () => {
     });
 
     it('emits the next item when prodded', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, [
-            {
-                link_type: 'NARRATIVE_ELEMENT',
-                target: '7772a753-7ea8-4375-921f-6b086535e1c8',
-                condition: true,
-            },
-        ]);
-        addNarrativeObject('7772a753-7ea8-4375-921f-6b086535e1c8', 'My second narrative object', null, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My start narrative object',
+            true,
+            [
+                {
+                    link_type: 'NARRATIVE_ELEMENT',
+                    target: '7772a753-7ea8-4375-921f-6b086535e1c8',
+                    condition: true,
+                },
+            ],
+        );
+        addNarrativeObject(
+            '7772a753-7ea8-4375-921f-6b086535e1c8',
+            'My second narrative object',
+            null,
+            [],
+        );
 
         buildStoryReasoner();
         storyReasoner.start();
@@ -160,7 +190,12 @@ describe('StoryReasoner', () => {
     it('handles fuzzy logic appropriately', (done) => {
         const expectedId = 'c46cd043-9edc-4c46-8b7c-f70afc6d6c23';
         const expectedName = 'My narrative object';
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My bad narrative object', { '-': [1.0, 0.5] }, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My bad narrative object',
+            { '-': [1.0, 0.5] },
+            [],
+        );
         addNarrativeObject(expectedId, expectedName, { '-': [1.0, 0.1] }, []);
         buildStoryReasoner();
 
@@ -174,7 +209,12 @@ describe('StoryReasoner', () => {
     });
 
     it('never selects false links', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My bad narrative object', false, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My bad narrative object',
+            false,
+            [],
+        );
         buildStoryReasoner();
 
         storyReasoner.on('error', () => {
@@ -187,7 +227,12 @@ describe('StoryReasoner', () => {
     it('gives boolean true priority above any fuzzy logic', (done) => {
         const expectedId = 'c46cd043-9edc-4c46-8b7c-f70afc6d6c23';
         const expectedName = 'My narrative object';
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My bad narrative object', { '+': [1.0, 0.5] }, []);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My bad narrative object',
+            { '+': [1.0, 0.5] },
+            [],
+        );
         addNarrativeObject(expectedId, expectedName, true, []);
         buildStoryReasoner();
 
@@ -203,7 +248,12 @@ describe('StoryReasoner', () => {
         const expectedId = '3d4b829e-390e-45cb-a314-eeed0d66064f';
         const expectedName = 'My narrative object';
         addNarrativeObject(expectedId, expectedName, { '+': [1.0, 0.5] }, []);
-        addNarrativeObject('c46cd043-9edc-4c46-8b7c-f70afc6d6c23', 'My bad narrative object', { '+': [1.0, 0.5] }, []);
+        addNarrativeObject(
+            'c46cd043-9edc-4c46-8b7c-f70afc6d6c23',
+            'My bad narrative object',
+            { '+': [1.0, 0.5] },
+            [],
+        );
         buildStoryReasoner();
 
         storyReasoner.on('narrativeElementChanged', (narrativeElement) => {
@@ -269,12 +319,17 @@ describe('StoryReasoner', () => {
     });
 
     it('will allow you to go back to the beginning of the story', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, [
-            {
-                link_type: 'CHOOSE_BEGINNING',
-                condition: true,
-            },
-        ]);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My start narrative object',
+            true,
+            [
+                {
+                    link_type: 'CHOOSE_BEGINNING',
+                    condition: true,
+                },
+            ],
+        );
         buildStoryReasoner();
         storyReasoner.start();
 
@@ -289,12 +344,17 @@ describe('StoryReasoner', () => {
     });
 
     it('generates an error if the link type is unrecognised', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, [
-            {
-                link_type: 'WOBBLE',
-                condition: true,
-            },
-        ]);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My start narrative object',
+            true,
+            [
+                {
+                    link_type: 'WOBBLE',
+                    condition: true,
+                },
+            ],
+        );
         buildStoryReasoner();
         storyReasoner.start();
 
@@ -308,13 +368,18 @@ describe('StoryReasoner', () => {
     });
 
     it('generates an error if the link target is not in the graph', (done) => {
-        addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, [
-            {
-                link_type: 'NARRATIVE_ELEMENT',
-                condition: true,
-                target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
-            },
-        ]);
+        addNarrativeObject(
+            '3d4b829e-390e-45cb-a314-eeed0d66064f',
+            'My start narrative object',
+            true,
+            [
+                {
+                    link_type: 'NARRATIVE_ELEMENT',
+                    condition: true,
+                    target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
+                },
+            ],
+        );
         buildStoryReasoner();
         storyReasoner.start();
 
@@ -330,13 +395,19 @@ describe('StoryReasoner', () => {
     describe('sub-stories', () => {
         beforeEach(() => {
             addNarrativeObject('85478a77-bfe6-43c7-84ef-29d85a9b0221', 'Post-story', null, []);
-            addNarrativeObject('3d4b829e-390e-45cb-a314-eeed0d66064f', 'My start narrative object', true, [
-                {
-                    link_type: 'NARRATIVE_ELEMENT',
-                    condition: true,
-                    target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
-                },
-            ], true);
+            addNarrativeObject(
+                '3d4b829e-390e-45cb-a314-eeed0d66064f',
+                'My start narrative object',
+                true,
+                [
+                    {
+                        link_type: 'NARRATIVE_ELEMENT',
+                        condition: true,
+                        target: '85478a77-bfe6-43c7-84ef-29d85a9b0221',
+                    },
+                ],
+                true,
+            );
             buildStoryReasoner();
         });
 
@@ -434,7 +505,12 @@ describe('StoryReasoner', () => {
     });
 
     it('should resolve data using the data resolver', () => {
-        addNarrativeObject('c46cd043-9edc-4c46-8b7c-f70afc6d6c23', 'My narrative object', { var: 'test.test' }, []);
+        addNarrativeObject(
+            'c46cd043-9edc-4c46-8b7c-f70afc6d6c23',
+            'My narrative object',
+            { var: 'test.test' },
+            [],
+        );
         addNarrativeObject('2311429b-cab9-4628-9cd4-5cc037bbfc50', 'My narrative object', true, []);
         buildStoryReasoner();
 
@@ -444,7 +520,12 @@ describe('StoryReasoner', () => {
     });
 
     it('should use the response of the data resolver', (done) => {
-        addNarrativeObject('c46cd043-9edc-4c46-8b7c-f70afc6d6c23', 'My narrative object', { var: 'test.test' }, []);
+        addNarrativeObject(
+            'c46cd043-9edc-4c46-8b7c-f70afc6d6c23',
+            'My narrative object',
+            { var: 'test.test' },
+            [],
+        );
         buildStoryReasoner();
 
         dataResolver.returns(Promise.resolve(true));
