@@ -73,7 +73,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (firstChoice) {
             firstChoice.start();
         }
-
+        this.renderDataModelInfo();
         this.renderNextButton();
     }
 
