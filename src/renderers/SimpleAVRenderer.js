@@ -45,15 +45,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
                             console.log('FETCHED FROM MS MEDIA!', mediaUrl);
-                            // give mediaUrl to HlsJs
-                            this._hls.loadSource(mediaUrl);
-                            this._hls.attachMedia(videoElement);
-                            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                                videoElement.play();
-                            });
+                            this.populateVideoElement(videoElement, mediaUrl);
                         }).catch((err) => { console.error(err, 'Notfound'); });
-                        // videoElement.src = fg.assets.av_src;
-                        // videoElement.play();
                     }
                 });
         } else {
@@ -67,6 +60,23 @@ export default class SimpleAVRenderer extends BaseRenderer {
         videoElement.addEventListener('ended', () => {
             this.emit('complete');
         });
+    }
+
+    populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
+        // if mediaUrl is hls
+        if (mediaUrl.indexOf('.m3u8') != -1) {
+            this._hls.loadSource(mediaUrl);
+            this._hls.attachMedia(videoElement);
+            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                videoElement.play();
+            });
+        }
+        else {
+            videoElement.src = mediaUrl;
+            videoElement.addEventListener('loadeddata', () => {
+                videoElement.play();
+            });
+        }
     }
 
     renderNextButton() {
