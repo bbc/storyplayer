@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
-import BehaviourFactory from '../behaviours/BehaviourFactory';
+import BehaviourRunner from '../behaviours/BehaviourRunner';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 export default class BaseRenderer extends EventEmitter {
@@ -30,9 +30,8 @@ export default class BaseRenderer extends EventEmitter {
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
         this._target = target;
-        this._behavioursRunning = { complete: 0 }; // Count of number of behaviours running against each event type
+        this._behaviourRunner = this._representation.behaviours ? new BehaviourRunner(this._representation.behaviours, this) : null;
     }
-
     /**
      * An event which fires when this renderer has completed it's part of the experience
      * (e.g., video finished, or the user has clicked 'skip', etc)
@@ -47,28 +46,20 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
 
+    preStart() {
+        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
+            this.emit('completeStartBehaviours');
+        }
+    }
+
     start() {}
 
     complete() {
-        const behaviours = this._representation.behaviours;
-        if (behaviours) {
-            behaviours.complete.forEach((behaviour) => {
-                const newBehaviour = BehaviourFactory(behaviour, this.completeBehaviourDone.bind(this));
-                if (newBehaviour) {
-                    newBehaviour.start();
-                    this._behavioursRunning.complete++;
-                }
-            });
+        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('complete', 'complete')) {
+            this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
         }
     }
-
-    completeBehaviourDone() {
-        this._behavioursRunning.complete--;
-        if (this._behavioursRunning.complete === 0) {
-            this.emit('complete');
-        }
-    }
-
+    
     /**
      * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
      *
