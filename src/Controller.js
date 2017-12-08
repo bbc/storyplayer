@@ -68,7 +68,7 @@ export default class Controller {
                                 reasoner.next();
                             });
                             this._currentRenderer = currentRenderer;
-                            currentRenderer.preStart();
+                            currentRenderer.willStart();
                         } else {
                             console.error(`Do not know how to render ${representation.representation_type}`);
                         }

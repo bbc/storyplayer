@@ -1,6 +1,7 @@
+// @flow
 import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
 
-export default function BehaviourFactory(behaviour, behaviourComplete) {
+export default function BehaviourFactory(behaviour: Object, behaviourComplete: (event: string, completionEvent: string) => void) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,
     };

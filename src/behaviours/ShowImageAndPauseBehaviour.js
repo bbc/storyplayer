@@ -8,7 +8,6 @@ export default class ShowImageAndPauseBehaviour extends BaseBehaviour {
 
     handleTimeout() {
         console.log('Pausing finished');
-        this.done = true;
         this.behaviourComplete();
     }
 }

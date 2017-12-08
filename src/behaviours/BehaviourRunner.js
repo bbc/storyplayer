@@ -1,7 +1,15 @@
+// @flow
+
 import BehaviourFactory from '../behaviours/BehaviourFactory';
+import BaseRenderer from '../renderers/BaseRenderer';
 
 export default class BehaviourRunner {
-    constructor(behaviours, baseRenderer) {
+    behaviours: Object;
+    behavioursRunning: Object;
+    baseRenderer: BaseRenderer;
+    events: Array<string>;
+
+    constructor(behaviours: Object, baseRenderer: BaseRenderer) {
         this.behaviours = behaviours;
         this.behavioursRunning = {};
         this.baseRenderer = baseRenderer;
@@ -13,7 +21,7 @@ export default class BehaviourRunner {
 
     // Run behaviours for a specific event type.
     // Returns true if there's a behaviour, false if none found
-    runBehaviours(event, completionEvent) {
+    runBehaviours(event: string, completionEvent: string) {
         if (this.behaviours[event] === undefined || this.behaviours[event] === [])
             return false;
         this.behaviours[event].forEach((behaviourDefinition) => {
@@ -28,10 +36,15 @@ export default class BehaviourRunner {
 
     // Called on behaviour of a specific event type ending
     // Checks for number of behaviours of that type running - if it's zero, send the completion event
-    handleBehaviourComplete(event, completionEvent) {
-        if (this.behavioursRunning[event] === undefined) return;
-        if (this.behavioursRunning[event] > 0)
+    handleBehaviourComplete(event: string, completionEvent: string) {
+        if (this.behavioursRunning[event] === undefined) {
+            return;
+        }
+
+        if (this.behavioursRunning[event] > 0) {
             this.behavioursRunning[event] -= 1;
+        }
+
         if (this.behavioursRunning[event] === 0) {
             this.baseRenderer.emit(completionEvent);
         }

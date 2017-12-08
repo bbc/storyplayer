@@ -1,6 +1,8 @@
+// @flow
 export default class BaseBehaviour {
-    constructor(behaviourComplete) {
-        this.done = false;
+    behaviourComplete: (event: string, completionEvent: string) => void;
+
+    constructor(behaviourComplete: (event: string, completionEvent: string) => void) {
         this.behaviourComplete = behaviourComplete;
     }
 }

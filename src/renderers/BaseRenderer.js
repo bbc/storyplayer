@@ -9,6 +9,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
+    _behaviourRunner: ?BehaviourRunner;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -30,7 +31,9 @@ export default class BaseRenderer extends EventEmitter {
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
         this._target = target;
-        this._behaviourRunner = this._representation.behaviours ? new BehaviourRunner(this._representation.behaviours, this) : null;
+        this._behaviourRunner = this._representation.behaviours
+            ? new BehaviourRunner(this._representation.behaviours, this)
+            : null;
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience
@@ -46,7 +49,7 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
 
-    preStart() {
+    willStart() {
         if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
             this.emit('completeStartBehaviours');
         }
@@ -59,7 +62,6 @@ export default class BaseRenderer extends EventEmitter {
             this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
         }
     }
-    
     /**
      * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
      *
