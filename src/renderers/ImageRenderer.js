@@ -13,7 +13,6 @@ export default class ImageRenderer extends BaseRenderer {
     renderImageElement() {
         const imageElement = document.createElement('img');
         if (this._representation.asset_collection.foreground) {
-            //debugger; // eslint-disable-line no-debugger
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     if (fg.assets.image_src) {
@@ -25,8 +24,6 @@ export default class ImageRenderer extends BaseRenderer {
                 });
         }
 
-        imageElement.style.width = '300px';
-        imageElement.style.height = '150px';
         this._target.appendChild(imageElement);
     }
 
@@ -50,7 +47,6 @@ export default class ImageRenderer extends BaseRenderer {
 
 
         if (this._representation.asset_collection.foreground) {
-            //debugger; // eslint-disable-line no-debugger
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;

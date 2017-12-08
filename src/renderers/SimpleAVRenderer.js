@@ -37,7 +37,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     renderVideoElement() {
         const videoElement = document.createElement('video');
 
-        videoElement.style.width = '500px';
         // set its source
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
@@ -64,14 +63,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         // if mediaUrl is hls
-        if (mediaUrl.indexOf('.m3u8') != -1) {
+        if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 videoElement.play();
             });
-        }
-        else {
+        } else {
             videoElement.src = mediaUrl;
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.play();
