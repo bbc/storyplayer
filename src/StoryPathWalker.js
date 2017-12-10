@@ -90,7 +90,7 @@ export default class StoryPathWalker extends EventEmitter {
     parseStory(storyid: string) {
         this._depth = 1;
         this._storyFetcher(storyid).then((story) => {
-            console.log('SPW parsing story ', story.name);
+            // console.log('SPW parsing story ', story.name);
             const storyStartId = this.getBeginning(story);
             const storyStart = StoryPathWalker.getNarrEl(storyStartId, story);
             this.walkFetch(story, storyStart, this._path);
@@ -98,21 +98,23 @@ export default class StoryPathWalker extends EventEmitter {
     }
 
     walkComplete() {
-        // this.getStoryPath();
         this.emit('walkComplete', this.getStoryPath());
     }
 
-    getStoryPath(): { [key: number]: string } {
+    getStoryPath(): Promise<{ [key: number]: string }> {
         const map = {};
         let index = 1;
+        var promises = [];
         this._path.forEach((presentationId) => {
-            const position = index;
-            this._presentationFetcher(presentationId).then((pres) => {
-                map[position] = pres.id;
-            });
-            index += 1;
+            promises.push(
+                this._presentationFetcher(presentationId)
+                    .then((pres) => {
+                        map[index] = pres.id;
+                        index += 1;
+                    })
+            );
         });
-        // console.log('SPW parsed story', map);
-        return map;
+
+        return Promise.all(promises).then(() => map);
     }
 }
