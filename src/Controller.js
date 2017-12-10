@@ -2,10 +2,11 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
+import StoryPathWalker from './StoryPathWalker';
 
 export default class Controller {
     constructor(
@@ -16,6 +17,7 @@ export default class Controller {
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
         renderers: Renderers,
+        fetchStory: StoryFetcher,
     ) {
         this._storyId = null;
         this._reasoner = null;
@@ -27,12 +29,16 @@ export default class Controller {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._renderers = renderers;
+        this._fetchStory = fetchStory;
     }
 
     start(storyId: string) {
         this._storyId = storyId;
 
-        this._storyReasonerFactory(this._storyId).then((reasoner) => {
+        const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
+        spw.parseStory(this._storyId);
+
+        this._storyReasonerFactory(storyId).then((reasoner) => {
             if (this._storyId !== storyId) {
                 return;
             }
@@ -108,6 +114,7 @@ export default class Controller {
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
+    _fetchStory: StoryFetcher;
     _renderers: Renderers;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
