@@ -38,9 +38,10 @@ export default class Controller {
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
         spw.on('nonLinear', () => alert('non-linear story'));
         const handleWalkEnd = (path) => {
-            // alert('Walk complete');
-            console.log(path);
-            // console.log(spw.getStoryPath());
+            console.log('Controller swp walk complete', spw._path);
+            path.then((map) =>
+                console.log('controller got presids from spw:', map)
+            );
         };
         spw.on('walkComplete', handleWalkEnd);
 
