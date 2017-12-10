@@ -32,14 +32,14 @@ export default class StoryPathWalker extends EventEmitter {
 
     getBeginning(story: Story): string {
         if (story.beginnings.length > 1) {
-            this.emit('error', new Error('Story non-linear: multiple possible beginnings'));
+            this.emit('nonLinear', new Error('Story non-linear: multiple possible beginnings'));
         }
         return story.beginnings[0].id;
     }
 
     getLink(ne: NarrativeElement): Link {
         if (ne.links.length > 1) {
-            this.emit('error', new Error('Story non-linear: multiple possible links'));
+            this.emit('nonLinear', new Error('Story non-linear: multiple possible links'));
         }
         return ne.links[0];
     }
@@ -60,7 +60,7 @@ export default class StoryPathWalker extends EventEmitter {
                 // return false if substory non-linear
                 if (!linear) return false;
                 // console.log('depth', this._depth);
-                if (this._depth === 0) this.getStoryPath();
+                if (this._depth === 0) this.walkComplete();
                 return true;
             });
         } else {
@@ -68,7 +68,7 @@ export default class StoryPathWalker extends EventEmitter {
             neList.push(startEl.presentation.target);
         }
         if (startEl.links.length > 1) {
-            this.emit('error', new Error('Story non-linear: multiple possible links'));
+            this.emit('nonLinear', new Error('Story non-linear: multiple possible links'));
             return false;
         }
         const link = this.getLink(startEl);
@@ -97,6 +97,11 @@ export default class StoryPathWalker extends EventEmitter {
         });
     }
 
+    walkComplete() {
+        // this.getStoryPath();
+        this.emit('walkComplete', this.getStoryPath());
+    }
+
     getStoryPath(): { [key: number]: string } {
         const map = {};
         let index = 1;
@@ -107,7 +112,7 @@ export default class StoryPathWalker extends EventEmitter {
             });
             index += 1;
         });
-        console.log('SPW parsed story', map);
+        // console.log('SPW parsed story', map);
         return map;
     }
 }
