@@ -98,4 +98,4 @@ export type PresentationFetcher = (id: string) => Promise<Presentation>;
 
 export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
 
-export type MediaFetcher = (uri:string) => Promise<string>;
+export type MediaFetcher = (uri: string) => Promise<string>;
