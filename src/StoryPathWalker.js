@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
+import type{ Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
 
 /**
  * The StoryPathWalker is a class which walks through the narrative
@@ -101,7 +101,7 @@ export default class StoryPathWalker extends EventEmitter {
         this.emit('walkComplete', this.getStoryPath());
     }
 
-    getStoryPath(): Promise<{ [key: number]: string }> {
+    getStoryPath(): Promise<{ [key: number]: Presentation }> {
         const map = {};
         let index = 1;
         var promises = [];
@@ -109,7 +109,7 @@ export default class StoryPathWalker extends EventEmitter {
             promises.push(
                 this._presentationFetcher(presentationId)
                     .then((pres) => {
-                        map[index] = pres.id;
+                        map[index] = pres;
                         index += 1;
                     })
             );

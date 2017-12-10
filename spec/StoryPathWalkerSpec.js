@@ -7,9 +7,8 @@ import chai, { expect } from 'chai';
 // import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import StoryPathWalker from '../src/StoryPathWalker';
-
+import type { Presentation } from '../src/romper';
 const storyjson = require('./teststory.json');
-
 
 chai.use(sinonChai);
 
@@ -49,7 +48,8 @@ describe('StoryPathWalker', () => {
         const spw = new StoryPathWalker(storyFetcher, presentationFetcher);
         const handleWalkEnd = (path) => {
             path.then((map) => {
-                expect(map['3']).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
+                expect(map['3'].id).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
+                expect(map['3'].representations[0].representation.id).to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
                 done();
             });
         };
