@@ -1,10 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link, DataResolver } from './romper';
-import evaluateConditions from './logic';
-import StoryReasoner from './StoryReasoner';
-import StoryReasonerFactory from './StoryReasonerFactory';
+import type { StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
 
 /**
  * The StoryPathWalker is a class which walks through the narrative
@@ -17,7 +14,10 @@ export default class StoryPathWalker extends EventEmitter {
     _presentationFetcher: PresentationFetcher;
     _depth: number;
 
-    constructor(storyFetcher: StoryFetcher, presentationFetcher: PresentationFetcher) {
+    constructor(
+        storyFetcher: StoryFetcher,
+        presentationFetcher: PresentationFetcher,
+    ) {
         super();
         this._storyFetcher = storyFetcher;
         this._presentationFetcher = presentationFetcher;
@@ -25,11 +25,12 @@ export default class StoryPathWalker extends EventEmitter {
         this._depth = 0;
     }
 
-    getNe(id: string, story: Story): NarrativeElement {
-        return story.narrative_elements.filter(neObject => neObject.id === id)[0];
+    static getNarrEl(id: string, story: Story): NarrativeElement {
+        const narrativeEl = story.narrative_elements.filter(neObject => neObject.id === id)[0];
+        return narrativeEl;
     }
 
-    getBeginning(story: Story) {
+    getBeginning(story: Story): string {
         if (story.beginnings.length > 1) {
             this.emit('error', new Error('Story non-linear: multiple possible beginnings'));
         }
@@ -48,22 +49,22 @@ export default class StoryPathWalker extends EventEmitter {
             const subStoryId = startEl.presentation.target;
             this._depth += 1;
             // console.log('SPW fetch sub story ', subStoryId, 'at depth', this._depth);
-            const subStory = this._storyFetcher(subStoryId).then(subStory => {
+            this._storyFetcher(subStoryId).then((subStory) => {
                 // console.log('SPW fetched ', subStory.name);
                 const subStoryStartId = this.getBeginning(subStory);
                 // return false if multiple starts possible
                 if (!subStoryStartId) return false;
-                const subStoryStart = this.getNe(subStoryStartId, subStory);
+                const subStoryStart = StoryPathWalker.getNarrEl(subStoryStartId, subStory);
                 // recurse
                 const linear = this.walkFetch(subStory, subStoryStart, neList);
                 // return false if substory non-linear
                 if (!linear) return false;
-                console.log('depth', this._depth);
-                if (this._depth === 0) this.getStoryPath(); //console.log('SWE subfetch path = ', neList);
+                // console.log('depth', this._depth);
+                if (this._depth === 0) this.getStoryPath();
+                return true;
             });
-        }
-        else {
-            console.log('SWE fetch pushing ', startEl.presentation.target);
+        } else {
+            // console.log('SWE fetch pushing ', startEl.presentation.target);
             neList.push(startEl.presentation.target);
         }
         if (startEl.links.length > 1) {
@@ -75,7 +76,7 @@ export default class StoryPathWalker extends EventEmitter {
             if (!link.target) {
                 this.emit('error', new Error('Cannot walk path - no link target'));
             } else {
-                const nextNe = this.getNe(link.target, story);
+                const nextNe = StoryPathWalker.getNarrEl(link.target, story);
                 return this.walkFetch(story, nextNe, neList);
             }
         } else if (link.link_type === 'END_STORY') {
@@ -91,24 +92,22 @@ export default class StoryPathWalker extends EventEmitter {
         this._storyFetcher(storyid).then((story) => {
             console.log('SPW parsing story ', story.name);
             const storyStartId = this.getBeginning(story);
-            const storyStart = this.getNe(storyStartId, story);
-            console.log('SPW starting at ', storyStart.name);
-            const linear = this.walkFetch(story, storyStart, this._path);
+            const storyStart = StoryPathWalker.getNarrEl(storyStartId, story);
+            this.walkFetch(story, storyStart, this._path);
         });
     }
 
     getStoryPath(): { [key: number]: string } {
-        let map = {};
+        const map = {};
         let index = 1;
-        this._path.forEach(presentationId => {
+        this._path.forEach((presentationId) => {
             const position = index;
             this._presentationFetcher(presentationId).then((pres) => {
-                map[position] = pres.name;
+                map[position] = pres.id;
             });
             index += 1;
         });
         console.log('SPW parsed story', map);
         return map;
     }
-
 }
