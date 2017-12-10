@@ -33,6 +33,7 @@ module.exports = {
             representationReasoner,
             mergedSettings.mediaFetcher,
             mergedSettings.renderers,
+            mergedSettings.storyFetcher,
         );
     },
 };
