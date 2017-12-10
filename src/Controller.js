@@ -36,7 +36,15 @@ export default class Controller {
         this._storyId = storyId;
 
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
-        spw.parseStory(this._storyId);
+        spw.on('nonLinear', () => alert('non-linear story'));
+        const handleWalkEnd = (path) => {
+            // alert('Walk complete');
+            console.log(path);
+            // console.log(spw.getStoryPath());
+        };
+        spw.on('walkComplete', handleWalkEnd);
+
+        spw.parseStory(storyId);
 
         this._storyReasonerFactory(storyId).then((reasoner) => {
             if (this._storyId !== storyId) {
