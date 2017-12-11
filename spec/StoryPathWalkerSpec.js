@@ -35,7 +35,7 @@ describe('StoryPathWalker', () => {
             expect(spw._linear).to.be.equal(true);
             expect(linear).to.be.equal(true);
             expect(spw._path.length).to.equal(7);
-            expect(spw._path[1]).to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
+            expect(spw._path[1].presentation.target).to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
