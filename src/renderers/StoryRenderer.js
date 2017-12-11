@@ -57,12 +57,11 @@ export default class StoryRenderer extends EventEmitter {
                 this._iconAssetList.push(null);
             }
         });
-        console.log('icons', this._iconElementMap);
+        // console.log('icons', this._iconElementMap);
     }
 
     // handle click on icon - emit message including representation id
     iconClickHandler(repId: string) {
-        // console.log('selected representation', repId);
         this.emit('pathShift', repId);
     }
 
@@ -86,11 +85,29 @@ export default class StoryRenderer extends EventEmitter {
                             this._iconElementList.push(newIcon);
                             this._iconElementMap[repId] = newIcon;
                             newIcon.addEventListener('click', () => this.iconClickHandler(repId));
+                            if (repId === this._currentRepresentation) {
+                                newIcon.className = 'activeIcon';
+                            } else {
+                                newIcon.className = 'inactiveIcon';
+                            }
                         }
                     }));
             }
             i += 1;
         });
         return Promise.all(promises).then();
+    }
+
+    handleNarrativeElementChanged(repid: string) {
+        console.log('changed ne to ', repid);
+        this._currentRepresentation = repid;
+        Object.keys(this._iconElementMap).forEach((mapKey) => {
+            if (this._iconElementMap[mapKey]) {
+                this._iconElementMap[mapKey].className = 'inactiveIcon';
+            }
+        });
+        if (this._iconElementMap[repid]) {
+            this._iconElementMap[repid].className = 'activeIcon';
+        }
     }
 }
