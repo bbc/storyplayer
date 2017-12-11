@@ -2,11 +2,12 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, Presentation, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
+import StoryRenderer from './renderers/StoryRenderer';
 
 export default class Controller {
     constructor(
@@ -36,17 +37,38 @@ export default class Controller {
         this._storyId = storyId;
 
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
-        spw.on('nonLinear', () => alert('non-linear story'));
+        // spw.on('nonLinear', () => alert('non-linear story'));
         const handleWalkEnd = (linear) => {
-            console.log('Controller swp walk complete', spw._path);
+            // what do we do if we find a linear story
+            const handleLinearStory = (presentationPath: Array<Presentation>) => {
+                // resolve a presentation list into a promise of representation list
+                const getRepresentationList = (path: Array<Presentation>) => {
+                    const replist = [];
+                    const promises = [];
+                    path.forEach((presentationId) => {
+                        promises.push(this._representationReasoner(presentationId)
+                            .then((repres) => {
+                                replist.push(repres);
+                            }));
+                    });
+                    return Promise.all(promises).then(() => replist);
+                };
+
+                getRepresentationList(presentationPath).then((list) => {
+                    const storyRenderer = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._target);
+                    storyRenderer.on('pathShift', (repid) => {
+                        console.log('controller switch to', repid);
+                    });
+                    storyRenderer.start();
+                });
+            };
+
             if (linear) {
                 spw.getStoryPath()
-                    .then(map =>
-                        console.log('controller got presids from spw:', map));
+                    .then(map => handleLinearStory(map));
             }
         };
         spw.on('walkComplete', handleWalkEnd);
-
         spw.parseStory(storyId);
 
         this._storyReasonerFactory(storyId).then((reasoner) => {
