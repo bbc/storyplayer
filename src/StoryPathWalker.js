@@ -10,7 +10,7 @@ import type{ Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeEl
 export default class StoryPathWalker extends EventEmitter {
     _storyFetcher: StoryFetcher;
     // _dataResolver: DataResolver;
-    _path: Array<string>;
+    _path: Array<NarrativeElement>;
     _presentationFetcher: PresentationFetcher;
     _depth: number;
     _linear: boolean;
@@ -52,7 +52,7 @@ export default class StoryPathWalker extends EventEmitter {
         return ne.links[0];
     }
 
-    walkFetch(story: Story, startEl: NarrativeElement, neList: Array<string>) {
+    walkFetch(story: Story, startEl: NarrativeElement, neList: Array<NarrativeElement>) {
         if (this._abort) { this._path = []; return; }
         if (startEl.presentation.type === 'STORY_ELEMENT') {
             const subStoryId = startEl.presentation.target;
@@ -73,7 +73,7 @@ export default class StoryPathWalker extends EventEmitter {
             });
         } else {
             // console.log('SWE fetch pushing ', startEl.presentation.target);
-            neList.push(startEl.presentation.target);
+            neList.push(startEl);
         }
         if (startEl.links.length > 1) {
             this.emit('nonLinear', new Error('Story non-linear: multiple possible links'));
@@ -113,7 +113,8 @@ export default class StoryPathWalker extends EventEmitter {
     getStoryPath(): Promise<Array<Presentation>> {
         const map = [];
         const promises = [];
-        this._path.forEach((presentationId) => {
+        this._path.forEach((ne) => {
+            const presentationId = ne.presentation.target;
             promises.push(this._presentationFetcher(presentationId)
                 .then((pres) => {
                     map.push(pres);
@@ -121,5 +122,25 @@ export default class StoryPathWalker extends EventEmitter {
         });
 
         return Promise.all(promises).then(() => map);
+    }
+
+    getNeForRep(repid: string): Promise<?NarrativeElement> {
+        // get pres
+        let matchingNe = null;
+        const promises = [];
+        this._path.forEach((ne) => {
+            const presentationId = ne.presentation.target;
+            promises.push(this._presentationFetcher(presentationId)
+                .then((pres) => {
+                    pres.representations.forEach((rep) => {
+                        if (rep.representation.id === repid) {
+                            console.log('Representation', repid, 'is in NE', ne.name);
+                            matchingNe = ne;
+                        }
+                    });
+                }));
+        });
+
+        return Promise.all(promises).then(() => matchingNe);
     }
 }
