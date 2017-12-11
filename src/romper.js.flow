@@ -43,7 +43,7 @@ export type Story = {
     id: string,
     version: string,
     name: string,
-    tags: Tags,
+    tags?: Tags,
     beginnings: Array<Beginning>,
     narrative_elements: Array<NarrativeElement>,
 };
