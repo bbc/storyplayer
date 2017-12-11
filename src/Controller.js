@@ -31,6 +31,7 @@ export default class Controller {
         this._fetchMedia = fetchMedia;
         this._renderers = renderers;
         this._fetchStory = fetchStory;
+        this.createStoryAndElementDivs();
     }
 
     start(storyId: string) {
@@ -55,11 +56,11 @@ export default class Controller {
                 };
 
                 getRepresentationList(presentationPath).then((list) => {
-                    const storyRenderer = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._target);
-                    storyRenderer.on('pathShift', (repid) => {
+                    this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget);
+                    this._renderStory.on('pathShift', (repid) => {
                         console.log('controller switch to', repid);
                     });
-                    storyRenderer.start();
+                    this._renderStory.start();
                 });
             };
 
@@ -97,7 +98,7 @@ export default class Controller {
                         if (this._reasoner !== reasoner) {
                             return;
                         }
-                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._fetchMedia, this._target);
+                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._fetchMedia, this._neTarget);
 
                         if (currentRenderer) {
                             currentRenderer.start();
@@ -108,6 +109,11 @@ export default class Controller {
                         } else {
                             console.error(`Do not know how to render ${representation.representation_type}`);
                         }
+
+                        if (this._renderStory) {
+                            console.log('story renderer needs to know ne change');
+                            this._renderStory.handleNarrativeElementChanged(representation.id);
+                        }
                     });
             };
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
@@ -115,6 +121,15 @@ export default class Controller {
             this._reasoner = reasoner;
             this._reasoner.start();
         });
+    }
+
+    createStoryAndElementDivs() {
+        this._neTarget = document.createElement('div');
+        this._neTarget.id = 'render_element';
+        this._target.appendChild(this._neTarget);
+        this._storyTarget = document.createElement('div');
+        this._storyTarget.id = 'story_element';
+        this._target.appendChild(this._storyTarget);
     }
 
     reset() {
@@ -149,4 +164,7 @@ export default class Controller {
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
+    _renderStory: StoryRenderer;
+    _neTarget: HTMLDivElement;
+    _storyTarget: HTMLDivElement;
 }
