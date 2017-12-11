@@ -89,7 +89,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
                             console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
-                            element.src = mediaUrl;
+                            element.setAttribute('src', mediaUrl);
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
                 });

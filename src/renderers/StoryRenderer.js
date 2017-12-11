@@ -81,7 +81,7 @@ export default class StoryRenderer extends EventEmitter {
                     .then((iconAsset) => {
                         if (iconAsset.assets.image_src) {
                             const newIcon = document.createElement('img');
-                            newIcon.src = iconAsset.assets.image_src;
+                            newIcon.setAttribute('src', iconAsset.assets.image_src);
                             this._iconElementList.push(newIcon);
                             this._iconElementMap[repId] = newIcon;
                             newIcon.addEventListener('click', () => this.iconClickHandler(repId));
