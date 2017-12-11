@@ -13,11 +13,11 @@ chai.use(sinonChai);
 
 const storyFetcher = id =>
     Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0])
-        .then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id));
+        .then(storyObject => storyObject);
 
 const presentationFetcher = id =>
     Promise.resolve(storyjson.presentations.filter(presentationObject => presentationObject.id === id)[0])
-        .then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object ' + id));
+        .then(presentationObject => presentationObject);
 
 describe('StoryPathWalker', () => {
     it('can create a new instance of StoryPathWalker', (done) => {
