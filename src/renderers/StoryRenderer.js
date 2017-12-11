@@ -1,6 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
+import StoryPathWalker from '../StoryPathWalker';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 export default class StoryRenderer extends EventEmitter {
@@ -12,18 +13,21 @@ export default class StoryRenderer extends EventEmitter {
     _iconElementList: Array<HTMLImageElement>;
     _iconElementMap: { [key: string]: ?HTMLElement }
     _currentRepresentation: string;
+    _spw: StoryPathWalker;
 
     constructor(
         representationList: Array<Representation>,
         fetchAssetCollection: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
+        spw: StoryPathWalker,
     ) {
         super();
         this._representationList = representationList;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._target = target;
+        this._spw = spw;
         this._iconAssetList = [];
         this._iconElementList = [];
         this._iconElementMap = {};
@@ -62,7 +66,10 @@ export default class StoryRenderer extends EventEmitter {
 
     // handle click on icon - emit message including representation id
     iconClickHandler(repId: string) {
-        this.emit('pathShift', repId);
+        // use spw to work out repid
+        this._spw.getNeForRep(repId).then((ne) => {
+            if (ne) this.emit('pathShift', ne.id);
+        });
     }
 
     // go thtough the list of icon assets and build some icons, appending them

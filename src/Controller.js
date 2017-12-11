@@ -56,9 +56,9 @@ export default class Controller {
                 };
 
                 getRepresentationList(presentationPath).then((list) => {
-                    this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget);
-                    this._renderStory.on('pathShift', (repid) => {
-                        console.log('controller switch to', repid);
+                    this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget, spw);
+                    this._renderStory.on('pathShift', (neid) => {
+                        console.log('controller switch to', neid);
                     });
                     this._renderStory.start();
                 });
