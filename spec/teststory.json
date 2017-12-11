@@ -504,19 +504,6 @@
                         "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
                         "asset_collection": {
                             "foreground": "cd825485-4de6-4b88-99c0-33e609dcf66e"
-                        },
-                        "behaviours": {
-                            "start": [],
-                            "complete": [
-                                {
-                                    "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause",
-                                    "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                },
-                                {
-                                    "type": "urn:x-object-based-media:asset-mixin:show-3d-model",
-                                    "mesh": "adeb8f74-0sfa-45ce-bf92-8328bc66457b"
-                                }
-                            ]
                         }
                     },
                     "condition": {
@@ -635,13 +622,7 @@
                                         "foreground": "f1482c67-1c5b-407b-90c3-c2f7288e253c",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "FB95A7AB-FB65-4C73-9FD3-1910F8CE754F"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
@@ -656,13 +637,7 @@
                                         "foreground": "fa20bde6-a388-4ec8-a457-ceaecdddcb4d",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "265ECCF4-B4B0-4E55-9B9A-FAE9849330B1"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
@@ -677,13 +652,7 @@
                                         "foreground": "852bd2f3-3b76-40af-bca6-b266a4c0d22e",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "A914B88E-46D3-4D55-BE5F-7DE0000487BC"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
@@ -743,13 +712,7 @@
                                         "foreground": "BD4289A0-A26E-430E-82BA-87493E4CF6C1",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "FB95A7AB-FB65-4C73-9FD3-1910F8CE754F"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
@@ -764,13 +727,7 @@
                                         "foreground": "D7EFDC54-136B-4C50-9D55-C0BB5526F00C",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "265ECCF4-B4B0-4E55-9B9A-FAE9849330B1"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
@@ -785,13 +742,7 @@
                                         "foreground": "17A8C096-89B3-4033-8678-6DC4C1C3B80E",
                                         "background": "d22484f9-da14-484b-8051-71be36b2227f",
                                         "icon": "A914B88E-46D3-4D55-BE5F-7DE0000487BC"
-                                    },
-                                    "behaviours": [
-                                        {
-                                            "type": "urn:x-object-based-media:asset-mixin:pause-at-end",
-                                            "image": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                        }
-                                    ]
+                                    }
                                 }
                             },
                             {
