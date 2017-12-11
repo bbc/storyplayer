@@ -61,11 +61,14 @@ export default class Controller {
                         const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._fetchMedia, this._target);
 
                         if (currentRenderer) {
-                            currentRenderer.start();
+                            currentRenderer.on('completeStartBehaviours', () => {
+                                currentRenderer.start();
+                            });
                             currentRenderer.on('complete', () => {
                                 reasoner.next();
                             });
                             this._currentRenderer = currentRenderer;
+                            currentRenderer.willStart();
                         } else {
                             console.error(`Do not know how to render ${representation.representation_type}`);
                         }

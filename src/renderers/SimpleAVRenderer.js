@@ -27,6 +27,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
+        super.start();
         this.renderVideoElement();
         this.renderDataModelInfo();
 
@@ -57,7 +58,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // automatically move on at video end
         videoElement.addEventListener('ended', () => {
-            this.emit('complete');
+            super.complete();            
         });
     }
 
