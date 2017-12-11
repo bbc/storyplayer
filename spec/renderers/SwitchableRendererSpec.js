@@ -43,12 +43,6 @@ const defaultSwitchableRepresentation = {
                     background: 'd22484f9-da14-484b-8051-71be36b2227f',
                     icon: 'FB95A7AB-FB65-4C73-9FD3-1910F8CE754F',
                 },
-                behaviours: [
-                    {
-                        type: 'urn:x-object-based-media:asset-mixin:pause-at-end',
-                        image: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
-                    },
-                ],
             },
         },
         {
@@ -64,12 +58,6 @@ const defaultSwitchableRepresentation = {
                     background: 'd22484f9-da14-484b-8051-71be36b2227f',
                     icon: '265ECCF4-B4B0-4E55-9B9A-FAE9849330B1',
                 },
-                behaviours: [
-                    {
-                        type: 'urn:x-object-based-media:asset-mixin:pause-at-end',
-                        image: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
-                    },
-                ],
             },
         },
         {
@@ -85,12 +73,6 @@ const defaultSwitchableRepresentation = {
                     background: 'd22484f9-da14-484b-8051-71be36b2227f',
                     icon: 'A914B88E-46D3-4D55-BE5F-7DE0000487BC',
                 },
-                behaviours: [
-                    {
-                        type: 'urn:x-object-based-media:asset-mixin:pause-at-end',
-                        image: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
-                    },
-                ],
             },
         },
         {
