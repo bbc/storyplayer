@@ -106,4 +106,8 @@ export type PresentationFetcher = (id: string) => Promise<Presentation>;
 
 export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
 
+<<<<<<< HEAD
 export type MediaFetcher = (uri: string) => Promise<string>;
+=======
+export type MediaFetcher = (uri: string) => Promise<string>;
+>>>>>>> c33ddaaf22e5fa18a1b191dab58df3cea6f73ff4
