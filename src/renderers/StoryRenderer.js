@@ -6,7 +6,6 @@ import type { PathItem } from '../StoryPathWalker';
 
 export default class StoryRenderer extends EventEmitter {
     _pathItemList: Array<PathItem>;
-    _iconAssetList: Array<?string>;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
@@ -25,14 +24,13 @@ export default class StoryRenderer extends EventEmitter {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._target = target;
-        this._iconAssetList = [];
         this._iconElementList = [];
         this._iconElementMap = {};
     }
 
     start() {
         // console.log('starting story renderer');
-        this.collectAssets();
+        // this.collectAssets();
         this.buildAssets().then(() => {
             // console.log(this._iconElementList);
             const iconlist = document.createElement('ul');
@@ -47,21 +45,6 @@ export default class StoryRenderer extends EventEmitter {
         this._currentRepresentation = this._pathItemList[0].representation.id;
     }
 
-    // go through the representation list and build a list of asset collection ids for icon assets
-    // contain null if no icon, or asset_collection id
-    collectAssets() {
-        console.log(this._pathItemList);
-        this._pathItemList.forEach((repitem) => {
-            if (repitem.representation && repitem.representation.asset_collection.icon) {
-                const iconAsset = repitem.representation.asset_collection.icon;
-                this._iconAssetList.push(iconAsset);
-            } else {
-                this._iconAssetList.push(null);
-            }
-        });
-        // console.log('icons', this._iconElementMap);
-    }
-
     // handle click on icon - emit message including narrative element id
     iconClickHandler(repId: string) {
         const pitem = this._pathItemList.filter(pathitem => pathitem.representation.id === repId)[0];
@@ -69,26 +52,27 @@ export default class StoryRenderer extends EventEmitter {
         this.emit('pathShift', pitem.narrative_element.id);
     }
 
-    // go thtough the list of icon assets and build some icons, appending them
+    // go thtough the list of path items and build some icons, appending them
     // to the target div with some click handling
     buildAssets(): Promise<> {
         const promises = [];
-        let i = 0;
-        this._iconAssetList.forEach((iconAssetId) => {
-            const index = i;
-            const repId = this._pathItemList[index].representation.id;
-            if (!iconAssetId) {
-                promises.push(() => { this._iconElementMap[repId] = null; });
+        this._pathItemList.forEach((pathItem) => {
+            const rep = pathItem.representation;
+            if (!rep) {
+                console.error('Story renderer has no representation for path item');
+            } else if (!rep.asset_collection.icon) {
+                promises.push(() => { this._iconElementMap[rep.id] = null; });
             } else {
+                const iconAssetId = rep.asset_collection.icon;
                 promises.push(this._fetchAssetCollection(iconAssetId)
                     .then((iconAsset) => {
                         if (iconAsset.assets.image_src) {
                             const newIcon = document.createElement('img');
                             newIcon.setAttribute('src', iconAsset.assets.image_src);
                             this._iconElementList.push(newIcon);
-                            this._iconElementMap[repId] = newIcon;
-                            newIcon.addEventListener('click', () => this.iconClickHandler(repId));
-                            if (repId === this._currentRepresentation) {
+                            this._iconElementMap[rep.id] = newIcon;
+                            newIcon.addEventListener('click', () => this.iconClickHandler(rep.id));
+                            if (rep.id === this._currentRepresentation) {
                                 newIcon.className = 'activeIcon';
                             } else {
                                 newIcon.className = 'inactiveIcon';
@@ -96,13 +80,13 @@ export default class StoryRenderer extends EventEmitter {
                         }
                     }));
             }
-            i += 1;
         });
         return Promise.all(promises).then();
     }
 
     handleNarrativeElementChanged(repid: string) {
-        console.log('changed ne to ', repid);
+        // probably also want to check that the representations in our path map
+        // are still those that the reasoner is selecting
         this._currentRepresentation = repid;
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {

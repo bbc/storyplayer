@@ -59,7 +59,7 @@ export default class Controller {
                 // console.log("Cllr spw pathitmes", spw._othermap);
                 this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget);
                 this._renderStory.on('pathShift', (neid) => {
-                    console.log('controller switch to', neid);
+                    console.log('controller received request to switch to ne', neid);
                 });
                 this._renderStory.start();
             });
@@ -115,7 +115,6 @@ export default class Controller {
                         }
 
                         if (this._renderStory) {
-                            console.log('story renderer needs to know ne change');
                             this._renderStory.handleNarrativeElementChanged(representation.id);
                         }
                     });
