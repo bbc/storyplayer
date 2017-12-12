@@ -1,7 +1,13 @@
 // @flow
 
 import EventEmitter from 'events';
-import type{ Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
+import type{ Representation, Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
+
+export type PathItem = {
+    narrative_element: NarrativeElement,
+    presentation: Presentation,
+    representation?: Representation,
+};
 
 /**
  * The StoryPathWalker is a class which walks through the narrative
@@ -15,6 +21,7 @@ export default class StoryPathWalker extends EventEmitter {
     _depth: number;
     _linear: boolean;
     _abort: boolean;
+    _pathmap: Array<PathItem>;
 
     constructor(
         storyFetcher: StoryFetcher,
@@ -26,6 +33,7 @@ export default class StoryPathWalker extends EventEmitter {
         this._path = [];
         this._depth = 0;
         this._linear = true;
+        this._pathmap = [];
     }
 
     static getNarrEl(id: string, story: Story): NarrativeElement {
@@ -107,40 +115,24 @@ export default class StoryPathWalker extends EventEmitter {
     }
 
     walkComplete() {
-        this.emit('walkComplete', this._linear);
+        this.getStoryPath().then(() => this.emit('walkComplete', this._pathmap));
+        // this.emit('walkComplete', this._linear);
     }
 
-    getStoryPath(): Promise<Array<Presentation>> {
-        const map = [];
+    getStoryPath(): Promise<Array<PathItem>> {
         const promises = [];
         this._path.forEach((ne) => {
             const presentationId = ne.presentation.target;
             promises.push(this._presentationFetcher(presentationId)
                 .then((pres) => {
-                    map.push(pres);
+                    const pathmapitem: PathItem = {
+                        narrative_element: ne,
+                        presentation: pres,
+                    };
+                    this._pathmap.push(pathmapitem);
                 }));
         });
 
-        return Promise.all(promises).then(() => map);
-    }
-
-    getNeForRep(repid: string): Promise<?NarrativeElement> {
-        // get pres
-        let matchingNe = null;
-        const promises = [];
-        this._path.forEach((ne) => {
-            const presentationId = ne.presentation.target;
-            promises.push(this._presentationFetcher(presentationId)
-                .then((pres) => {
-                    pres.representations.forEach((rep) => {
-                        if (rep.representation.id === repid) {
-                            console.log('Representation', repid, 'is in NE', ne.name);
-                            matchingNe = ne;
-                        }
-                    });
-                }));
-        });
-
-        return Promise.all(promises).then(() => matchingNe);
+        return Promise.all(promises).then(() => this._pathmap);
     }
 }

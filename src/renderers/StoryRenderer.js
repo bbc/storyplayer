@@ -1,11 +1,11 @@
 // @flow
 
 import EventEmitter from 'events';
-import StoryPathWalker from '../StoryPathWalker';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { PathItem } from '../StoryPathWalker';
 
 export default class StoryRenderer extends EventEmitter {
-    _representationList: Array<Representation>;
+    _pathItemList: Array<PathItem>;
     _iconAssetList: Array<?string>;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
@@ -13,21 +13,18 @@ export default class StoryRenderer extends EventEmitter {
     _iconElementList: Array<HTMLImageElement>;
     _iconElementMap: { [key: string]: ?HTMLElement }
     _currentRepresentation: string;
-    _spw: StoryPathWalker;
 
     constructor(
-        representationList: Array<Representation>,
+        pathItemList: Array<PathItem>,
         fetchAssetCollection: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
-        spw: StoryPathWalker,
     ) {
         super();
-        this._representationList = representationList;
+        this._pathItemList = pathItemList;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._target = target;
-        this._spw = spw;
         this._iconAssetList = [];
         this._iconElementList = [];
         this._iconElementMap = {};
@@ -47,15 +44,16 @@ export default class StoryRenderer extends EventEmitter {
             });
             this._target.appendChild(iconlist);
         });
-        this._currentRepresentation = this._representationList[0].id;
+        this._currentRepresentation = this._pathItemList[0].representation.id;
     }
 
     // go through the representation list and build a list of asset collection ids for icon assets
     // contain null if no icon, or asset_collection id
     collectAssets() {
-        this._representationList.forEach((repitem) => {
-            if (repitem.asset_collection.icon) {
-                const iconAsset = repitem.asset_collection.icon;
+        console.log(this._pathItemList);
+        this._pathItemList.forEach((repitem) => {
+            if (repitem.representation && repitem.representation.asset_collection.icon) {
+                const iconAsset = repitem.representation.asset_collection.icon;
                 this._iconAssetList.push(iconAsset);
             } else {
                 this._iconAssetList.push(null);
@@ -64,12 +62,11 @@ export default class StoryRenderer extends EventEmitter {
         // console.log('icons', this._iconElementMap);
     }
 
-    // handle click on icon - emit message including representation id
+    // handle click on icon - emit message including narrative element id
     iconClickHandler(repId: string) {
-        // use spw to work out repid
-        this._spw.getNeForRep(repId).then((ne) => {
-            if (ne) this.emit('pathShift', ne.id);
-        });
+        const pitem = this._pathItemList.filter(pathitem => pathitem.representation.id === repId)[0];
+        // console.log('chandle pathshift ne', pitem.narrative_element.id);
+        this.emit('pathShift', pitem.narrative_element.id);
     }
 
     // go thtough the list of icon assets and build some icons, appending them
@@ -79,9 +76,8 @@ export default class StoryRenderer extends EventEmitter {
         let i = 0;
         this._iconAssetList.forEach((iconAssetId) => {
             const index = i;
-            const repId = this._representationList[index].id;
+            const repId = this._pathItemList[index].representation.id;
             if (!iconAssetId) {
-                // nowt
                 promises.push(() => { this._iconElementMap[repId] = null; });
             } else {
                 promises.push(this._fetchAssetCollection(iconAssetId)

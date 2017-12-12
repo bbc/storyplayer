@@ -33,7 +33,7 @@ describe('StoryPathWalker', () => {
         const spw = new StoryPathWalker(storyFetcher, presentationFetcher);
         const handleWalkEnd = (linear) => {
             expect(spw._linear).to.be.equal(true);
-            expect(linear).to.be.equal(true);
+            expect(linear.length > 0).to.be.equal(true);
             expect(spw._path.length).to.equal(7);
             expect(spw._path[1].presentation.target).to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
             done();
@@ -48,8 +48,8 @@ describe('StoryPathWalker', () => {
             if (linear) {
                 spw.getStoryPath()
                     .then((map) => {
-                        expect(map[2].id).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
-                        expect(map[2].representations[0].representation.id).to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
+                        expect(map[2].presentation.id).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
+                        expect(map[2].presentation.representations[0].representation.id).to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
                         done();
                     });
             }
@@ -81,7 +81,7 @@ describe('StoryPathWalker', () => {
         spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
     });
 
-    it('returns false on multi-beginning story', (done) => {
+    it('returns empty list on multi-beginning story', (done) => {
         const intro = storyjson.story[1];
         intro.beginnings.push({
             target: '619f999a-5535-4b05-9f20-9b523033078b',
@@ -91,14 +91,14 @@ describe('StoryPathWalker', () => {
         const handleWalkEnd = (linear) => {
             expect(spw._path.length).to.be.equal(0);
             expect(spw._linear).to.be.equal(false);
-            expect(linear).to.be.equal(false);
+            expect(linear.length).to.be.equal(0);
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
         spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
     });
 
-    it('returns false on story with link branch', (done) => {
+    it('returns empty list on story with link branch', (done) => {
         const introsubs = storyjson.story[1].narrative_elements[0];
         introsubs.links.push({
             target: 'ed5304f6-b500-478d-b71d-c6632db95cf1',
@@ -109,7 +109,7 @@ describe('StoryPathWalker', () => {
         const handleWalkEnd = (linear) => {
             expect(spw._linear).to.be.equal(false);
             expect(spw._path.length).to.be.equal(0);
-            expect(linear).to.be.equal(false);
+            expect(linear.length).to.be.equal(0);
             done();
         };
         spw.on('walkComplete', handleWalkEnd);

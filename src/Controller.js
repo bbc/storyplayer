@@ -2,11 +2,12 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, Presentation, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
+import type { PathItem } from './StoryPathWalker';
 import StoryRenderer from './renderers/StoryRenderer';
 
 export default class Controller {
@@ -39,36 +40,36 @@ export default class Controller {
 
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
         // spw.on('nonLinear', () => alert('non-linear story'));
-        const handleWalkEnd = (linear) => {
-            // what do we do if we find a linear story
-            const handleLinearStory = (presentationPath: Array<Presentation>) => {
-                // resolve a presentation list into a promise of representation list
-                const getRepresentationList = (path: Array<Presentation>) => {
-                    const replist = [];
-                    const promises = [];
-                    path.forEach((presentationId) => {
-                        promises.push(this._representationReasoner(presentationId)
-                            .then((repres) => {
-                                replist.push(repres);
-                            }));
-                    });
-                    return Promise.all(promises).then(() => replist);
-                };
-
-                getRepresentationList(presentationPath).then((list) => {
-                    this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget, spw);
-                    this._renderStory.on('pathShift', (neid) => {
-                        console.log('controller switch to', neid);
-                    });
-                    this._renderStory.start();
+        const handleWalkEnd = (presentationPath: Array<PathItem>) => {
+            // resolve a presentation list into a promise of representation list
+            const getRepresentationList = (path: Array<PathItem>) => {
+                const replist = [];
+                const promises = [];
+                path.forEach((pathItem) => {
+                    promises.push(this._representationReasoner(pathItem.presentation)
+                        .then((repres) => {
+                            pathItem.representation = repres;
+                            replist.push(pathItem);
+                        }));
                 });
+                return Promise.all(promises).then(() => replist);
             };
 
-            if (linear) {
+            getRepresentationList(presentationPath).then((list) => {
+                // console.log("Cllr spw pathitmes", spw._othermap);
+                this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget);
+                this._renderStory.on('pathShift', (neid) => {
+                    console.log('controller switch to', neid);
+                });
+                this._renderStory.start();
+            });
+
+            if (presentationPath.length > 0) {
                 spw.getStoryPath()
-                    .then(map => handleLinearStory(map));
+                    .then(map => getRepresentationList(map));
             }
         };
+
         spw.on('walkComplete', handleWalkEnd);
         spw.parseStory(storyId);
 
