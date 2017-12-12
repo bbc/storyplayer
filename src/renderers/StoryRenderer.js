@@ -101,11 +101,22 @@ export default class StoryRenderer extends EventEmitter {
         if (this._iconElementMap[repid]) {
             this._iconElementMap[repid].className = 'activeIcon';
         }
-        const currentPathItem = this._pathItemList.filter(pi => pi.representation.id === repid)[0];
+        this.showHideTarget();
+    }
+
+    // show or hide the target of this renderer according to whether we are in a substory
+    showHideTarget() {
+        const currentPathItem = this._pathItemList.filter(pi =>
+            pi.representation.id === this._currentRepresentation)[0];
+
+        this._target.classList.remove('active');
+        this._target.classList.remove('inactive');
         if (currentPathItem.stories.indexOf(this._deepestCommonSubstory) === -1) {
             console.log('not in icon substory');
+            this._target.classList.add('inactive');
         } else {
             console.log('in icon substory');
+            this._target.classList.add('active');
         }
     }
 
@@ -121,10 +132,16 @@ export default class StoryRenderer extends EventEmitter {
                 }
             });
         });
-        // const activeElements = [['a', 'b', 'c'], ['a', 'b', 'c', 'd'], ['a', 'b', 'c']];
-        console.log('active stories', activeElements);
-        const commonPath = activeElements[0];
-        activeElements.forEach((ae) => {
+        const commonPath = StoryRenderer.findShortestCommonList(activeElements);
+        console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
+        return commonPath[commonPath.length - 1];
+    }
+
+    static findShortestCommonList(list: Array<Array<string>>): Array<string> {
+        // const list = [['a', 'b', 'c'], ['a', 'b', 'c', 'd'], ['a', 'b', 'c']];
+        console.log('active stories', list);
+        const commonPath = list[0];
+        list.forEach((ae) => {
             // trim common to same length
             while (commonPath.length > ae.length) commonPath.pop();
             // trim uncommon stories from end
@@ -132,7 +149,6 @@ export default class StoryRenderer extends EventEmitter {
                 if (commonPath[i] !== ae[i]) commonPath.pop();
             }
         });
-        console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
-        return commonPath[commonPath.length - 1];
+        return commonPath;
     }
 }
