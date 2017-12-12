@@ -12,6 +12,7 @@ export default class StoryRenderer extends EventEmitter {
     _iconElementList: Array<HTMLImageElement>;
     _iconElementMap: { [key: string]: ?HTMLElement }
     _currentRepresentation: string;
+    _deepestCommonSubstory: string;
 
     constructor(
         pathItemList: Array<StoryPathItem>,
@@ -33,6 +34,7 @@ export default class StoryRenderer extends EventEmitter {
         // this.collectAssets();
         this.buildAssets().then(() => {
             // console.log(this._iconElementList);
+            this._deepestCommonSubstory = this.findSubStories();
             const iconlist = document.createElement('ul');
             iconlist.id = 'chapterIcons';
             this._iconElementList.forEach((iconImageElement) => {
@@ -99,5 +101,38 @@ export default class StoryRenderer extends EventEmitter {
         if (this._iconElementMap[repid]) {
             this._iconElementMap[repid].className = 'activeIcon';
         }
+        const currentPathItem = this._pathItemList.filter(pi => pi.representation.id === repid)[0];
+        if (currentPathItem.stories.indexOf(this._deepestCommonSubstory) === -1) {
+            console.log('not in icon substory');
+        } else {
+            console.log('in icon substory');
+        }
+    }
+
+    findSubStories(): string {
+        const activeElements = [];
+        const depth = [];
+        Object.keys(this._iconElementMap).forEach((repid) => {
+            console.log(repid);
+            this._pathItemList.forEach((pathItem) => {
+                if (pathItem.representation && pathItem.representation.id === repid) {
+                    activeElements.push(pathItem.stories);
+                    depth.push(pathItem.stories.length);
+                }
+            });
+        });
+        // const activeElements = [['a', 'b', 'c'], ['a', 'b', 'c', 'd'], ['a', 'b', 'c']];
+        console.log('active stories', activeElements);
+        const commonPath = activeElements[0];
+        activeElements.forEach((ae) => {
+            // trim common to same length
+            while (commonPath.length > ae.length) commonPath.pop();
+            // trim uncommon stories from end
+            for (let i = commonPath.length - 1; i > 0; i -= 1) {
+                if (commonPath[i] !== ae[i]) commonPath.pop();
+            }
+        });
+        console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
+        return commonPath[commonPath.length - 1];
     }
 }
