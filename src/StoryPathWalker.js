@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type{ Representation, Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
+import type { Representation, Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
 
 export type StoryPathItem = {
     stories: Array<string>,
@@ -64,7 +64,12 @@ export default class StoryPathWalker extends EventEmitter {
         return ne.links[0];
     }
 
-    walkFetch(story: Story, startEl: NarrativeElement, neList: Array<PathGather>, storyList: Array<string>) {
+    walkFetch(
+        story: Story,
+        startEl: NarrativeElement,
+        neList: Array<PathGather>,
+        storyList: Array<string>,
+    ) {
         if (this._abort) { this._path = []; return; }
         if (startEl.presentation.type === 'STORY_ELEMENT') {
             const subStoryId = startEl.presentation.target;
