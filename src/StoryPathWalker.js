@@ -3,11 +3,15 @@
 import EventEmitter from 'events';
 import type{ Representation, Presentation, StoryFetcher, PresentationFetcher, Story, NarrativeElement, Link } from './romper';
 
-export type PathItem = {
+export type StoryPathItem = {
+    stories: Array<string>,
     narrative_element: NarrativeElement,
     presentation: Presentation,
     representation?: Representation,
 };
+
+// the things we create as we walk the story
+type PathGather = { stories: Array<string>, ne: NarrativeElement };
 
 /**
  * The StoryPathWalker is a class which walks through the narrative
@@ -16,12 +20,12 @@ export type PathItem = {
 export default class StoryPathWalker extends EventEmitter {
     _storyFetcher: StoryFetcher;
     // _dataResolver: DataResolver;
-    _path: Array<NarrativeElement>;
+    _path: Array<PathGather>;
     _presentationFetcher: PresentationFetcher;
     _depth: number;
     _linear: boolean;
     _abort: boolean;
-    _pathmap: Array<PathItem>;
+    _pathmap: Array<StoryPathItem>;
 
     constructor(
         storyFetcher: StoryFetcher,
@@ -60,7 +64,7 @@ export default class StoryPathWalker extends EventEmitter {
         return ne.links[0];
     }
 
-    walkFetch(story: Story, startEl: NarrativeElement, neList: Array<NarrativeElement>) {
+    walkFetch(story: Story, startEl: NarrativeElement, neList: Array<PathGather>, storyList: Array<string>) {
         if (this._abort) { this._path = []; return; }
         if (startEl.presentation.type === 'STORY_ELEMENT') {
             const subStoryId = startEl.presentation.target;
@@ -74,14 +78,20 @@ export default class StoryPathWalker extends EventEmitter {
                     return;
                 }
                 // return false if multiple starts possible
+                storyList.push(subStoryId);
                 const subStoryStart = StoryPathWalker.getNarrEl(subStoryStartId, subStory);
                 // recurse
-                this.walkFetch(subStory, subStoryStart, neList);
+                this.walkFetch(subStory, subStoryStart, neList, storyList);
+                storyList.pop();
                 if (this._depth === 0) this.walkComplete();
             });
         } else {
-            // console.log('SWE fetch pushing ', startEl.presentation.target);
-            neList.push(startEl);
+            // console.log('SWE fetch pushing ', startEl.presentation.target, storyList);
+            const pathItem = {
+                stories: storyList.slice(0),
+                ne: startEl,
+            };
+            neList.push(pathItem);
         }
         if (startEl.links.length > 1) {
             this.emit('nonLinear', new Error('Story non-linear: multiple possible links'));
@@ -94,7 +104,7 @@ export default class StoryPathWalker extends EventEmitter {
                 this.emit('error', new Error('Cannot walk path - no link target'));
             } else {
                 const nextNe = StoryPathWalker.getNarrEl(link.target, story);
-                this.walkFetch(story, nextNe, neList);
+                this.walkFetch(story, nextNe, neList, storyList);
             }
         } else if (link.link_type === 'END_STORY') {
             this._depth -= 1;
@@ -109,7 +119,7 @@ export default class StoryPathWalker extends EventEmitter {
             const storyStartId = this.getBeginning(story);
             if (storyStartId) {
                 const storyStart = StoryPathWalker.getNarrEl(storyStartId, story);
-                this.walkFetch(story, storyStart, this._path);
+                this.walkFetch(story, storyStart, this._path, [storyStartId]);
             }
         });
     }
@@ -119,14 +129,15 @@ export default class StoryPathWalker extends EventEmitter {
         // this.emit('walkComplete', this._linear);
     }
 
-    getStoryPath(): Promise<Array<PathItem>> {
+    getStoryPath(): Promise<Array<StoryPathItem>> {
         const promises = [];
-        this._path.forEach((ne) => {
-            const presentationId = ne.presentation.target;
+        this._path.forEach((pathGather) => {
+            const presentationId = pathGather.ne.presentation.target;
             promises.push(this._presentationFetcher(presentationId)
                 .then((pres) => {
-                    const pathmapitem: PathItem = {
-                        narrative_element: ne,
+                    const pathmapitem: StoryPathItem = {
+                        stories: pathGather.stories,
+                        narrative_element: pathGather.ne,
                         presentation: pres,
                     };
                     this._pathmap.push(pathmapitem);

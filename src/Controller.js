@@ -7,7 +7,7 @@ import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
-import type { PathItem } from './StoryPathWalker';
+import type { StoryPathItem } from './StoryPathWalker';
 import StoryRenderer from './renderers/StoryRenderer';
 
 export default class Controller {
@@ -40,9 +40,9 @@ export default class Controller {
 
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
         // spw.on('nonLinear', () => alert('non-linear story'));
-        const handleWalkEnd = (presentationPath: Array<PathItem>) => {
+        const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
             // resolve a presentation list into a promise of representation list
-            const getRepresentationList = (path: Array<PathItem>) => {
+            const getRepresentationList = (path: Array<StoryPathItem>) => {
                 const replist = [];
                 const promises = [];
                 path.forEach((pathItem) => {

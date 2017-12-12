@@ -2,10 +2,10 @@
 
 import EventEmitter from 'events';
 import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
-import type { PathItem } from '../StoryPathWalker';
+import type { StoryPathItem } from '../StoryPathWalker';
 
 export default class StoryRenderer extends EventEmitter {
-    _pathItemList: Array<PathItem>;
+    _pathItemList: Array<StoryPathItem>;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
@@ -14,7 +14,7 @@ export default class StoryRenderer extends EventEmitter {
     _currentRepresentation: string;
 
     constructor(
-        pathItemList: Array<PathItem>,
+        pathItemList: Array<StoryPathItem>,
         fetchAssetCollection: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
@@ -42,14 +42,17 @@ export default class StoryRenderer extends EventEmitter {
             });
             this._target.appendChild(iconlist);
         });
-        this._currentRepresentation = this._pathItemList[0].representation.id;
+        if (this._pathItemList[0].representation) {
+            this._currentRepresentation = this._pathItemList[0].representation.id;
+        }
     }
 
     // handle click on icon - emit message including narrative element id
     iconClickHandler(repId: string) {
-        const pitem = this._pathItemList.filter(pathitem => pathitem.representation.id === repId)[0];
+        const pitems = this._pathItemList.filter(pathitem =>
+            pathitem.representation && (pathitem.representation.id === repId));
         // console.log('chandle pathshift ne', pitem.narrative_element.id);
-        this.emit('pathShift', pitem.narrative_element.id);
+        if (pitems.length === 1) this.emit('pathShift', pitems[0].narrative_element.id);
     }
 
     // go thtough the list of path items and build some icons, appending them
