@@ -57,7 +57,12 @@ export default class Controller {
 
             getRepresentationList(presentationPath).then((list) => {
                 // console.log("Cllr spw pathitmes", spw._othermap);
-                this._renderStory = new StoryRenderer(list, this._fetchAssetCollection, this._fetchMedia, this._storyTarget);
+                this._renderStory = new StoryRenderer(
+                    list,
+                    this._fetchAssetCollection,
+                    this._fetchMedia,
+                    this._storyTarget,
+                );
                 this._renderStory.on('pathShift', (neid) => {
                     console.log('controller received request to switch to ne', neid);
                 });
@@ -99,7 +104,12 @@ export default class Controller {
                         if (this._reasoner !== reasoner) {
                             return;
                         }
-                        const currentRenderer = RendererFactory(representation, this._fetchAssetCollection, this._fetchMedia, this._neTarget);
+                        const currentRenderer = RendererFactory(
+                            representation,
+                            this._fetchAssetCollection,
+                            this._fetchMedia,
+                            this._neTarget,
+                        );
 
                         if (currentRenderer) {
                             currentRenderer.on('completeStartBehaviours', () => {
@@ -144,7 +154,10 @@ export default class Controller {
             this._reasoner.removeListener('error', this._handleError);
         }
         if (this._reasoner && this._handleNarrativeElementChanged) {
-            this._reasoner.removeListener('narrativeElementChanged', this._handleNarrativeElementChanged);
+            this._reasoner.removeListener(
+                'narrativeElementChanged',
+                this._handleNarrativeElementChanged,
+            );
         }
         this._reasoner = null;
 

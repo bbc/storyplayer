@@ -16,7 +16,8 @@ const storyFetcher = id =>
         .then(storyObject => storyObject);
 
 const presentationFetcher = id =>
-    Promise.resolve(storyjson.presentations.filter(presentationObject => presentationObject.id === id)[0])
+    Promise.resolve(storyjson.presentations
+        .filter(presentationObject => presentationObject.id === id)[0])
         .then(presentationObject => presentationObject);
 
 describe('StoryPathWalker', () => {
@@ -35,7 +36,8 @@ describe('StoryPathWalker', () => {
             expect(spw._linear).to.be.equal(true);
             expect(linear.length > 0).to.be.equal(true);
             expect(spw._path.length).to.equal(7);
-            expect(spw._path[1].ne.presentation.target).to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
+            expect(spw._path[1].ne.presentation.target)
+                .to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
@@ -48,8 +50,10 @@ describe('StoryPathWalker', () => {
             if (linear) {
                 spw.getStoryPath()
                     .then((map) => {
-                        expect(map[2].presentation.id).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
-                        expect(map[2].presentation.representations[0].representation.id).to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
+                        expect(map[2].presentation.id)
+                            .to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
+                        expect(map[2].presentation.representations[0].representation.id)
+                            .to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
                         done();
                     });
             }
