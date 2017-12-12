@@ -1,7 +1,7 @@
 // @flow
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
-import type StoryReasoner from './StoryReasoner';
+import StoryReasoner from './StoryReasoner';
 import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
@@ -38,6 +38,39 @@ export default class Controller {
     start(storyId: string) {
         this._storyId = storyId;
 
+        // is the narrative element with id neid one of the narrative elements
+        // that reasoner is currently reasoning over?
+        const isInReasoner = (neid: string, reasoner: StoryReasoner) => {
+            const rids = Object.keys(reasoner._narrativeElements);
+            return (rids.indexOf(neid) !== -1);
+        };
+
+        // dive into the substory reasoners until we find one that has neid
+        // as one of its narrative elements
+        // if not found, returns null
+        const getSubReasoner = (neid: string, reasoner: ?StoryReasoner) => {
+            if (!reasoner) return null;
+            if (isInReasoner(neid, reasoner)) {
+                return reasoner;
+            } else if (reasoner._subStoryReasoner) {
+                return getSubReasoner(neid, reasoner._subStoryReasoner);
+            }
+            return null;
+        };
+
+        // jump to a narrative element
+        // only works if in current substory
+        const jumpToNarrativeElement = (neid: string) => {
+            if (!this._reasoner) console.error('no reasoner');
+            console.log('finding reasoner for', neid);
+            const currentReasoner = getSubReasoner(neid, this._reasoner);
+            if (currentReasoner) {
+                currentReasoner._setCurrentNarrativeElement(neid);
+            } else {
+                console.error('cannot navigate to', neid);
+            }
+        };
+
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
         // spw.on('nonLinear', () => alert('non-linear story'));
         const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
@@ -65,6 +98,7 @@ export default class Controller {
                 );
                 this._renderStory.on('pathShift', (neid) => {
                     console.log('controller received request to switch to ne', neid);
+                    jumpToNarrativeElement(neid);
                 });
                 this._renderStory.start();
             });
@@ -121,7 +155,10 @@ export default class Controller {
                             this._currentRenderer = currentRenderer;
                             currentRenderer.willStart();
                         } else {
-                            console.error(`Do not know how to render ${representation.representation_type}`);
+                            console.error(
+                                'Do not know how to render',
+                                representation.representation_type,
+                            );
                         }
 
                         if (this._renderStory) {
