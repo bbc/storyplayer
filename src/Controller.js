@@ -40,7 +40,7 @@ export default class Controller {
 
         // is the narrative element with id neid one of the narrative elements
         // that reasoner is currently reasoning over?
-        const isInReasoner = (neid: string, reasoner: StoryReasoner) => {
+        const isInReasoner = (neid: string, reasoner: StoryReasoner): boolean => {
             const rids = Object.keys(reasoner._narrativeElements);
             return (rids.indexOf(neid) !== -1);
         };
@@ -48,7 +48,7 @@ export default class Controller {
         // dive into the substory reasoners until we find one that has neid
         // as one of its narrative elements
         // if not found, returns null
-        const getSubReasoner = (neid: string, reasoner: ?StoryReasoner) => {
+        const getSubReasoner = (neid: string, reasoner: ?StoryReasoner): ?StoryReasoner => {
             if (!reasoner) return null;
             if (isInReasoner(neid, reasoner)) {
                 return reasoner;
@@ -58,11 +58,13 @@ export default class Controller {
             return null;
         };
 
-        // jump to a narrative element
-        // only works if in current substory
+        /**
+         * go to an arbitrary node in the current story
+         * @param neid: id of narrative element to jump to
+         */
         const jumpToNarrativeElement = (neid: string) => {
             if (!this._reasoner) console.error('no reasoner');
-            console.log('finding reasoner for', neid);
+            // console.log('finding reasoner for', neid);
             const currentReasoner = getSubReasoner(neid, this._reasoner);
             if (currentReasoner) {
                 currentReasoner._setCurrentNarrativeElement(neid);
@@ -71,10 +73,38 @@ export default class Controller {
             }
         };
 
+        /**
+         * go to previous node in the current story
+         * @param currentNeId id of narrative element to go back from
+         */
+        const goBack = () => {
+            let currentReasoner = this._reasoner;
+
+            if (!currentReasoner) {
+                console.error('cannot go back - no reasoner');
+                return;
+            }
+
+            while (currentReasoner._subStoryReasoner) {
+                currentReasoner = currentReasoner._subStoryReasoner;
+            }
+
+            const previous = currentReasoner._findPreviousNode();
+            if (previous) {
+                jumpToNarrativeElement(previous);
+            } else {
+                console.error('cannot resolve previous node to go to');
+            }
+        };
+
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
-        // spw.on('nonLinear', () => alert('non-linear story'));
+
+        // handle our StoryPathWalker reaching the end of its travels:
+        // resolve the list of presentations into representations
+        // then (if story is linear) create and start a StoryRenderer
         const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
             // resolve a presentation list into a promise of representation list
+            // returns a promise for such a list
             const getRepresentationList = (path: Array<StoryPathItem>) => {
                 const replist = [];
                 const promises = [];
@@ -88,8 +118,8 @@ export default class Controller {
                 return Promise.all(promises).then(() => replist);
             };
 
+            // resolve the promise by creating the StoryRenderer
             getRepresentationList(presentationPath).then((list) => {
-                // console.log("Cllr spw pathitmes", spw._othermap);
                 this._renderStory = new StoryRenderer(
                     list,
                     this._fetchAssetCollection,
@@ -103,7 +133,9 @@ export default class Controller {
                 this._renderStory.start();
             });
 
+            // the walk has finished - is it linear
             if (presentationPath.length > 0) {
+                // yes - do all the above to build the StoryRenderer
                 spw.getStoryPath()
                     .then(map => getRepresentationList(map));
             }
@@ -152,6 +184,15 @@ export default class Controller {
                             currentRenderer.on('complete', () => {
                                 reasoner.next();
                             });
+
+                            // this is used by a custom behaviour...
+                            // can't really go about adapting controller
+                            // when we have new behaviours
+                            // (although most behaviours shouldn't interfere with
+                            // story logic)
+                            currentRenderer.on('goBack', () => {
+                                goBack();
+                            });
                             this._currentRenderer = currentRenderer;
                             currentRenderer.willStart();
                         } else {
@@ -161,6 +202,7 @@ export default class Controller {
                             );
                         }
 
+                        // tell story renderer that we've changed
                         if (this._renderStory) {
                             this._renderStory.handleNarrativeElementChanged(representation.id);
                         }

@@ -27,7 +27,7 @@ export default class BehaviourRunner {
         this.behaviours[event].forEach((behaviourDefinition) => {
             const behaviour = BehaviourFactory(behaviourDefinition, this.handleBehaviourComplete.bind(this, event, completionEvent));
             if (behaviour) {
-                behaviour.start();
+                behaviour.start(this.baseRenderer);
                 this.behavioursRunning[event] += 1;
             }
         });
