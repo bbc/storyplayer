@@ -50,22 +50,25 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     willStart() {
-        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
             this.emit('completeStartBehaviours');
         }
     }
 
-    start() {}
+    start() { }
 
     complete() {
-        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('complete', 'complete')) {
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours('complete', 'complete')) {
             this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
         }
     }
     /**
-     * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
+     * Destroy is called as this representation is unloaded from being visible.
+     * You should leave the DOM as you left it.
      *
      * @return {void}
      */
-    destroy() {}
+    destroy() { }
 }

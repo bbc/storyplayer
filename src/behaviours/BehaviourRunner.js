@@ -27,7 +27,10 @@ export default class BehaviourRunner {
             return false;
         }
         this.behaviours[event].forEach((behaviourDefinition) => {
-            const behaviour = BehaviourFactory(behaviourDefinition, this.handleBehaviourComplete.bind(this, event, completionEvent));
+            const behaviour = BehaviourFactory(
+                behaviourDefinition,
+                this.handleBehaviourComplete.bind(this, event, completionEvent),
+            );
             if (behaviour) {
                 this.behavioursRunning[event] += 1;
                 behaviourQueue.push(behaviour);
@@ -40,9 +43,9 @@ export default class BehaviourRunner {
     }
 
     // Called on behaviour of a specific event type ending
-    // Checks for number of behaviours of that type running - if it's zero, send the completion event
+    // Checks for number of behaviours of that type running
+    //   - if it's zero, send the completion event
     handleBehaviourComplete(event: string, completionEvent: string) {
-        console.log(event, completionEvent, this.behavioursRunning[event]);
         if (this.behavioursRunning[event] === undefined) {
             return;
         }
