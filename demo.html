@@ -9,11 +9,11 @@
             width: 50px;
         }
 
-        #story_element.inactive {
+        .inactive {
             visibility: hidden;
         }
 
-        #story_element.active {
+        .active {
             visibility: visible;
         }
 
@@ -694,11 +694,6 @@
                                 "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
                                 "asset_collection": {
                                     "foreground": "cd825485-4de6-4b88-99c0-33e609dcf66e"
-                                },
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
                                 }
                             },
                             "condition": {
@@ -728,10 +723,6 @@
                                     "background": "d22484f9-da14-484b-8051-71be36b2227f"
                                 },
                                 "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
                                 }
                             },
                             "condition": {
@@ -762,8 +753,6 @@
                                 },
                                 "behaviours": {
                                     "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
                                         { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
                                         ]
                                 }
@@ -796,6 +785,7 @@
                                 },
                                 "behaviours": {
                                     "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause" },
                                         { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
                                         { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
                                     ]
@@ -904,6 +894,12 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
+                                },
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
+                                    ]
                                 }
                             },
                             "condition": {
@@ -1009,7 +1005,13 @@
                                             }
                                         }
                                     }
-                                ]
+                                ],
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
+                                    ]
+                                }
                             },
                             "condition": {
                                 "==": [
@@ -1097,6 +1099,12 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "3f0f5f04-c3e1-456b-91ce-37a0a62fc681"
+                                },
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
+                                    ]
                                 }
                             },
                             "condition": {
@@ -1185,6 +1193,12 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "ae9b9c9f-9a94-4449-b3de-1b2dbb2df447"
+                                },
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
+                                    ]
                                 }
                             },
                             "condition": {
