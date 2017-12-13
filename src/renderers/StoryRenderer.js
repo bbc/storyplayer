@@ -4,6 +4,8 @@ import EventEmitter from 'events';
 import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { StoryPathItem } from '../StoryPathWalker';
 
+// Render story data (i.e., not refreshed every NE)
+// currently focused on chapter icons
 export default class StoryRenderer extends EventEmitter {
     _pathItemList: Array<StoryPathItem>;
     _fetchAssetCollection: AssetCollectionFetcher;
@@ -104,22 +106,35 @@ export default class StoryRenderer extends EventEmitter {
         this.showHideTarget();
     }
 
+    getRepresentationIndex(repid: string): number {
+        let index = -1;
+        let i = 0;
+        this._pathItemList.forEach((storyPathItem) => {
+            if (storyPathItem.representation && storyPathItem.representation.id === repid) {
+                index = i;
+            }
+            i += 1;
+        });
+        return index;
+    }
+
     // show or hide the target of this renderer according to whether we are in a substory
     showHideTarget() {
-        const currentPathItem = this._pathItemList.filter(pi =>
-            pi.representation.id === this._currentRepresentation)[0];
+        const currentRepIndex = this.getRepresentationIndex(this._currentRepresentation);
+        const currentPathItem = this._pathItemList[currentRepIndex];
 
         this._target.classList.remove('active');
         this._target.classList.remove('inactive');
         if (currentPathItem.stories.indexOf(this._deepestCommonSubstory) === -1) {
-            console.log('not in icon substory');
+            // console.log('not in icon substory');
             this._target.classList.add('inactive');
         } else {
-            console.log('in icon substory');
+            // console.log('in icon substory');
             this._target.classList.add('active');
         }
     }
 
+    // find the deepest substory that includes all the representations with icons
     findSubStories(): string {
         const activeElements = [];
         const depth = [];
@@ -133,13 +148,13 @@ export default class StoryRenderer extends EventEmitter {
             });
         });
         const commonPath = StoryRenderer.findShortestCommonList(activeElements);
-        console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
+        // console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
         return commonPath[commonPath.length - 1];
     }
 
     static findShortestCommonList(list: Array<Array<string>>): Array<string> {
         // const list = [['a', 'b', 'c'], ['a', 'b', 'c', 'd'], ['a', 'b', 'c']];
-        console.log('active stories', list);
+        // console.log('active stories', list);
         const commonPath = list[0];
         list.forEach((ae) => {
             // trim common to same length
