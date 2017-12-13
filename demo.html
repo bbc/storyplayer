@@ -721,6 +721,11 @@
                                 "asset_collection": {
                                     "foreground": "6364E048-5F87-4226-BEC5-21776E0DF65F",
                                     "background": "d22484f9-da14-484b-8051-71be36b2227f"
+                                },
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" }
+                                    ]
                                 }
                             },
                             "condition": {
@@ -748,6 +753,12 @@
                                 "asset_collection": {
                                     "foreground": "8b06cc58-1ccb-42e1-aeec-4302e817c671",
                                     "background": "d22484f9-da14-484b-8051-71be36b2227f"
+                                },
+                                "behaviours": {
+                                    "start": [
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause" },
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" }
+                                        ]
                                 }
                             },
                             "condition": {
@@ -1215,7 +1226,7 @@
                 ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
                 mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => {
                     if (resolvedUri === '') {
-                        return 'http://localhost/~andybr/obm/nothingtosee.mp4';
+                        return 'http://localhost/~andybr/obm/nothingtosee.mp4#t=[2]';
                     } else if (resolvedUri.indexOf('localhost') === -1) {
                         return 'http://localhost/~andybr/obm/nothingtosee.mp4';
                     }
