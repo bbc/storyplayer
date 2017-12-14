@@ -71,4 +71,26 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() { }
+
+    renderNextButton() {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.addEventListener('click', () => this.handleNextButtonClick());
+        this._target.appendChild(nextButton);
+    }
+
+    handleNextButtonClick() {
+        this.emit('nextButtonClicked');
+    }
+
+    renderBackButton() {
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back';
+        backButton.addEventListener('click', () => this.handleBackButtonClick());
+        this._target.appendChild(backButton);
+    }
+
+    handleBackButtonClick() {
+        this.emit('backButtonClicked');
+    }
 }

@@ -78,8 +78,8 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (firstChoice) {
             firstChoice.start();
         }
-        this.renderDataModelInfo();
-        this.renderNextButton();
+        // this.renderDataModelInfo();
+        // this.renderNextButton();
     }
 
     setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
@@ -94,18 +94,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                     }
                 });
         }
-    }
-
-    renderNextButton() {
-        // render next button
-        const buttonDiv = document.createElement('div');
-        const button = document.createElement('button');
-        button.innerHTML = 'Next';
-        button.addEventListener('click', () => {
-            this.emit('complete');
-        });
-        buttonDiv.appendChild(button);
-        this._target.appendChild(buttonDiv);
     }
 
     renderDataModelInfo() {

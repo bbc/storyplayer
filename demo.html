@@ -17,6 +17,28 @@
             visibility: visible;
         }
 
+        #behaviour-backbutton,
+        #behaviour-nextbutton {
+            position: absolute;
+            top: 250px;
+            height: 30px;
+            width: 50px;
+            background: rgba(200, 200, 230, 0.5);
+            border: 1px solid lightgray;
+            border-radius: 0px;
+            color: white;
+            margin: 5px;
+            z-index: 5;
+        }
+
+        #behaviour-backbutton {
+            left: 10px;
+        }
+
+        #behaviour-nextbutton {
+            left: 445px
+        }
+
         #romper-target img,
         video {
             max-height: 281px;
@@ -36,17 +58,19 @@
 
         div#render_element {
             background-color: rgb(230, 247, 252);
-            padding: 10px;
+            padding-left: 0px;
+            padding-top: 0px;
+            /* padding: 10px; */
         }
 
         div#subrenderer {
             background-color: rgb(214, 245, 214);
-            padding: 10px;
+            padding: 0px;
         }
 
         div#story_element {
             background-color: rgb(253, 245, 231);
-            padding: 10px;
+            padding: 0px;
         }
     </style>
 </head>
@@ -750,11 +774,6 @@
                                 "asset_collection": {
                                     "foreground": "8b06cc58-1ccb-42e1-aeec-4302e817c671",
                                     "background": "d22484f9-da14-484b-8051-71be36b2227f"
-                                },
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                        ]
                                 }
                             },
                             "condition": {
@@ -785,9 +804,7 @@
                                 },
                                 "behaviours": {
                                     "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
+                                        { "type": "urn:x-object-based-media:asset-mixin:show-image-and-pause" }
                                     ]
                                 }
                             },
@@ -894,12 +911,6 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "adeb8f74-00d1-45ce-bf92-8328bc66457a"
-                                },
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
                                 }
                             },
                             "condition": {
@@ -1005,13 +1016,7 @@
                                             }
                                         }
                                     }
-                                ],
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
-                                }
+                                ]
                             },
                             "condition": {
                                 "==": [
@@ -1099,12 +1104,6 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "3f0f5f04-c3e1-456b-91ce-37a0a62fc681"
-                                },
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
                                 }
                             },
                             "condition": {
@@ -1193,12 +1192,6 @@
                                 ],
                                 "asset_collection": {
                                     "icon": "ae9b9c9f-9a94-4449-b3de-1b2dbb2df447"
-                                },
-                                "behaviours": {
-                                    "start": [
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-back-button" },
-                                        { "type": "urn:x-object-based-media:asset-mixin:show-next-button" }
-                                    ]
                                 }
                             },
                             "condition": {

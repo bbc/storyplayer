@@ -178,10 +178,15 @@ export default class Controller {
                         );
 
                         if (currentRenderer) {
+                            currentRenderer.renderBackButton();
+                            currentRenderer.renderNextButton();
                             currentRenderer.on('completeStartBehaviours', () => {
                                 currentRenderer.start();
                             });
                             currentRenderer.on('complete', () => {
+                                reasoner.next();
+                            });
+                            currentRenderer.on('nextButtonClicked', () => {
                                 reasoner.next();
                             });
 
@@ -190,7 +195,7 @@ export default class Controller {
                             // when we have new behaviours
                             // (although most behaviours shouldn't interfere with
                             // story logic)
-                            currentRenderer.on('goBack', () => {
+                            currentRenderer.on('backButtonClicked', () => {
                                 goBack();
                             });
                             this._currentRenderer = currentRenderer;

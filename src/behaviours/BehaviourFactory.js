@@ -1,7 +1,5 @@
 // @flow
 import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
-import ShowBackButtonBehaviour from './ShowBackButtonBehaviour';
-import ShowNextButtonBehaviour from './ShowNextButtonBehaviour';
 
 export default function BehaviourFactory(
     behaviour: Object,
@@ -9,8 +7,6 @@ export default function BehaviourFactory(
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,
-        'urn:x-object-based-media:asset-mixin:show-back-button': ShowBackButtonBehaviour,
-        'urn:x-object-based-media:asset-mixin:show-next-button': ShowNextButtonBehaviour,
     };
 
     let currentBehaviour;
