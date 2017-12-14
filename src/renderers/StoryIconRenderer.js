@@ -6,7 +6,7 @@ import type { StoryPathItem } from '../StoryPathWalker';
 
 // Render story data (i.e., not refreshed every NE)
 // currently focused on chapter icons
-export default class StoryRenderer extends EventEmitter {
+export default class StoryIconRenderer extends EventEmitter {
     _pathItemList: Array<StoryPathItem>;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
@@ -147,7 +147,7 @@ export default class StoryRenderer extends EventEmitter {
                 }
             });
         });
-        const commonPath = StoryRenderer.findShortestCommonList(activeElements);
+        const commonPath = StoryIconRenderer.findShortestCommonList(activeElements);
         // console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
         return commonPath[commonPath.length - 1];
     }

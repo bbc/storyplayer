@@ -8,7 +8,7 @@ import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
-import StoryRenderer from './renderers/StoryRenderer';
+import StoryIconRenderer from './renderers/StoryIconRenderer';
 
 export default class Controller {
     constructor(
@@ -101,7 +101,7 @@ export default class Controller {
 
         // handle our StoryPathWalker reaching the end of its travels:
         // resolve the list of presentations into representations
-        // then (if story is linear) create and start a StoryRenderer
+        // then (if story is linear) create and start a StoryIconRenderer
         const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
             // resolve a presentation list into a promise of representation list
             // returns a promise for such a list
@@ -118,9 +118,9 @@ export default class Controller {
                 return Promise.all(promises).then(() => replist);
             };
 
-            // resolve the promise by creating the StoryRenderer
+            // resolve the promise by creating the StoryIconRenderer
             getRepresentationList(presentationPath).then((list) => {
-                this._renderStory = new StoryRenderer(
+                this._renderStory = new StoryIconRenderer(
                     list,
                     this._fetchAssetCollection,
                     this._fetchMedia,
@@ -135,7 +135,7 @@ export default class Controller {
 
             // the walk has finished - is it linear
             if (presentationPath.length > 0) {
-                // yes - do all the above to build the StoryRenderer
+                // yes - do all the above to build the StoryIconRenderer
                 spw.getStoryPath()
                     .then(map => getRepresentationList(map));
             }
@@ -264,7 +264,7 @@ export default class Controller {
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
-    _renderStory: StoryRenderer;
+    _renderStory: StoryIconRenderer;
     _neTarget: HTMLDivElement;
     _storyTarget: HTMLDivElement;
 }
