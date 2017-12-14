@@ -126,7 +126,7 @@ export default class Controller {
                     this._fetchMedia,
                     this._storyTarget,
                 );
-                this._renderStory.on('pathShift', (neid) => {
+                this._renderStory.on('jumpToNarrativeElement', (neid) => {
                     console.log('controller received request to switch to ne', neid);
                     jumpToNarrativeElement(neid);
                 });

@@ -56,7 +56,7 @@ export default class StoryRenderer extends EventEmitter {
         const pitems = this._pathItemList.filter(pathitem =>
             pathitem.representation && (pathitem.representation.id === repId));
         // console.log('chandle pathshift ne', pitem.narrative_element.id);
-        if (pitems.length === 1) this.emit('pathShift', pitems[0].narrative_element.id);
+        if (pitems.length === 1) this.emit('jumpToNarrativeElement', pitems[0].narrative_element.id);
     }
 
     // go thtough the list of path items and build some icons, appending them
