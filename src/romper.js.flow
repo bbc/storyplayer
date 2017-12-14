@@ -1,16 +1,5 @@
 // @flow
 
-export type Renderers = { [type: string]: Class<BaseRenderer> };
-
-export type Settings = {
-    target: HTMLElement,
-    renderers?: Renderers,
-    dataResolver: DataResolver,
-    storyFetcher: StoryFetcher,
-    presentationFetcher: PresentationFetcher,
-    mediaFetcher: MediaFetcher,
-};
-
 export type Tags = { [key: string]: Array<string> };
 
 export type SourceLocation = { [key: string]: string };
@@ -43,7 +32,7 @@ export type Story = {
     id: string,
     version: string,
     name: string,
-    tags: Tags,
+    tags?: Tags,
     beginnings: Array<Beginning>,
     narrative_elements: Array<NarrativeElement>,
 };
@@ -107,3 +96,21 @@ export type PresentationFetcher = (id: string) => Promise<Presentation>;
 export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
 
 export type MediaFetcher = (uri: string) => Promise<string>;
+
+export type BaseRenderer = {
+    representation: Representation,
+    assetCollectionFetcher: AssetCollectionFetcher,
+    mediaFetcher: MediaFetcher,
+    target: HTMLElement,
+};
+
+export type Renderers = { [type: string]: Class<BaseRenderer> };
+
+export type Settings = {
+    target: HTMLElement,
+    renderers?: Renderers,
+    dataResolver: DataResolver,
+    storyFetcher: StoryFetcher,
+    presentationFetcher: PresentationFetcher,
+    mediaFetcher: MediaFetcher,
+};

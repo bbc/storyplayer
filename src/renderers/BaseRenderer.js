@@ -50,22 +50,47 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     willStart() {
-        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
             this.emit('completeStartBehaviours');
         }
     }
 
-    start() {}
+    start() { }
 
     complete() {
-        if (!this._behaviourRunner || !this._behaviourRunner.runBehaviours('complete', 'complete')) {
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours('complete', 'complete')) {
             this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
         }
     }
     /**
-     * Destroy is called as this representation is unloaded from being visible. You should leave the DOM as you left it.
+     * Destroy is called as this representation is unloaded from being visible.
+     * You should leave the DOM as you left it.
      *
      * @return {void}
      */
-    destroy() {}
+    destroy() { }
+
+    renderNextButton() {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.addEventListener('click', () => this.handleNextButtonClick());
+        this._target.appendChild(nextButton);
+    }
+
+    handleNextButtonClick() {
+        this.emit('nextButtonClicked');
+    }
+
+    renderBackButton() {
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back';
+        backButton.addEventListener('click', () => this.handleBackButtonClick());
+        this._target.appendChild(backButton);
+    }
+
+    handleBackButtonClick() {
+        this.emit('backButtonClicked');
+    }
 }

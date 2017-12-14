@@ -14,7 +14,7 @@ export default class StoryReasoner extends EventEmitter {
     _story: Story;
     _dataResolver: DataResolver;
     _reasonerFactory: StoryReasonerFactory;
-    _narrativeElements: {[id: string]: NarrativeElement};
+    _narrativeElements: { [id: string]: NarrativeElement };
     _currentNarrativeElement: NarrativeElement;
     _storyStarted: boolean;
     _storyEnded: boolean;
@@ -184,5 +184,24 @@ export default class StoryReasoner extends EventEmitter {
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         subStoryReasoner.start();
+    }
+
+    _findPreviousNode(): ?string {
+        const currentId = this._currentNarrativeElement.id;
+        let incomingLinkCount = 0;
+        let previousNodeId = null;
+        this._story.narrative_elements.forEach((ne) => {
+            ne.links.forEach((link) => {
+                if (link.target === currentId) {
+                    previousNodeId = ne.id;
+                    incomingLinkCount += 1;
+                }
+            });
+        });
+        if (incomingLinkCount > 1) {
+            console.log('too many incoming links to define a previous');
+            return null;
+        }
+        return previousNodeId;
     }
 }

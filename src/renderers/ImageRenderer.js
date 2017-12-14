@@ -6,8 +6,6 @@ export default class ImageRenderer extends BaseRenderer {
     start() {
         this.renderImageElement();
         this.renderDataModelInfo();
-        // cheat for now - only display button if not in target with subrenderer id:
-        if (this._target.id !== 'subrenderer') this.renderNextButton();
     }
 
     renderImageElement() {
@@ -25,18 +23,6 @@ export default class ImageRenderer extends BaseRenderer {
         }
 
         this._target.appendChild(imageElement);
-    }
-
-    renderNextButton() {
-        // render next button
-        const buttonDiv = document.createElement('div');
-        const button = document.createElement('button');
-        button.innerHTML = 'Next';
-        button.addEventListener('click', () => {
-            this.emit('complete');
-        });
-        buttonDiv.appendChild(button);
-        this._target.appendChild(buttonDiv);
     }
 
     renderDataModelInfo() {

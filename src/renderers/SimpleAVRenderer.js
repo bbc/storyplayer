@@ -1,6 +1,8 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
+import MediaFetcher from '../fetchers/MediaFetcher';
+import type { Representation, AssetCollectionFetcher } from '../romper';
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class SimpleAVRenderer extends BaseRenderer {
@@ -30,9 +32,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.start();
         this.renderVideoElement();
         this.renderDataModelInfo();
-
-        // cheat for now - only display button if not in target with subrenderer id:
-        if (this._target.id !== 'subrenderer') this.renderNextButton();
     }
 
     renderVideoElement() {
@@ -58,7 +57,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // automatically move on at video end
         videoElement.addEventListener('ended', () => {
-            super.complete();            
+            super.complete();
         });
     }
 
@@ -71,23 +70,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 videoElement.play();
             });
         } else {
-            videoElement.src = mediaUrl;
+            videoElement.setAttribute('src', mediaUrl);
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.play();
             });
         }
-    }
-
-    renderNextButton() {
-        // render next button
-        const buttonDiv = document.createElement('div');
-        const button = document.createElement('button');
-        button.innerHTML = 'Next';
-        button.addEventListener('click', () => {
-            this.emit('complete');
-        });
-        buttonDiv.appendChild(button);
-        this._target.appendChild(buttonDiv);
     }
 
     renderDataModelInfo() {
