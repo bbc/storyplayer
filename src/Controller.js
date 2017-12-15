@@ -59,24 +59,9 @@ export default class Controller {
         };
 
         /**
-         * go to an arbitrary node in the current story
-         * @param neid: id of narrative element to jump to
-         */
-        const jumpToNarrativeElement = (neid: string) => {
-            if (!this._reasoner) console.error('no reasoner');
-            // console.log('finding reasoner for', neid);
-            const currentReasoner = getSubReasoner(neid, this._reasoner);
-            if (currentReasoner) {
-                currentReasoner._setCurrentNarrativeElement(neid);
-            } else {
-                console.error('cannot navigate to', neid);
-            }
-        };
-
-        /**
-         * go to previous node in the current story
-         * @param currentNeId id of narrative element to go back from
-         */
+          * go to previous node in the current story
+          * @param currentNeId id of narrative element to go back from
+          */
         const goBack = () => {
             let currentReasoner = this._reasoner;
 
@@ -95,6 +80,130 @@ export default class Controller {
             } else {
                 console.error('cannot resolve previous node to go to');
             }
+        };
+
+        const _handleStoryEnd = () => {
+            alert('Story ended!'); // eslint-disable-line no-alert
+        };
+        const _handleError = (err) => {
+            alert(`Error: ${err}`); // eslint-disable-line no-alert
+        };
+
+        const _handleNEChange = (reasoner, narrativeElement) => {
+            if (this._currentRenderer) {
+                this._currentRenderer.destroy();
+            }
+            console.log(narrativeElement); // eslint-disable-line no-console
+            this._fetchPresentation(narrativeElement.presentation.target)
+                .then(presentation => this._representationReasoner(presentation))
+                .then((representation) => {
+                    if (this._reasoner !== reasoner) {
+                        return;
+                    }
+                    const currentRenderer = RendererFactory(
+                        representation,
+                        this._fetchAssetCollection,
+                        this._fetchMedia,
+                        this._neTarget,
+                    );
+
+                    if (currentRenderer) {
+                        currentRenderer.renderBackButton();
+                        currentRenderer.renderNextButton();
+                        currentRenderer.on('completeStartBehaviours', () => {
+                            currentRenderer.start();
+                        });
+                        currentRenderer.on('complete', () => {
+                            reasoner.next();
+                        });
+                        currentRenderer.on('nextButtonClicked', () => {
+                            reasoner.next();
+                        });
+                        currentRenderer.on('backButtonClicked', () => {
+                            goBack();
+                        });
+                        this._currentRenderer = currentRenderer;
+                        currentRenderer.willStart();
+                    } else {
+                        console.error(
+                            'Do not know how to render',
+                            representation.representation_type,
+                        );
+                    }
+
+                    // tell story renderer that we've changed
+                    if (this._renderStory) {
+                        this._renderStory.handleNarrativeElementChanged(representation.id);
+                    }
+                });
+        };
+
+        const walkNewReasoner = (storyid, targetNeId) => {
+            this._storyReasonerFactory(storyId).then((dummyReasoner) => {
+                if (this._storyId !== storyId) {
+                    return;
+                }
+
+                const _dummyHandleStoryEnd = () => {
+                    console.log('reached story end without meeting target node');
+                };
+                dummyReasoner.on('storyEnd', _dummyHandleStoryEnd);
+
+                this._handleError = (err) => {
+                    alert(`Error: ${err}`); // eslint-disable-line no-alert
+                };
+                dummyReasoner.on('error', this._handleError);
+
+                const dummyHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                    // console.log('dummy reasoner at', narrativeElement.name);
+                    if (narrativeElement.id === targetNeId) {
+                        // console.log('TARGET HIT!');
+                        this.reset();
+                        this._storyId = storyid;
+                        dummyReasoner.on('storyEnd', _handleStoryEnd);
+                        dummyReasoner.removeListener(
+                            'narrativeElementChanged',
+                            dummyHandleNarrativeElementChanged,
+                        );
+
+                        this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
+                            _handleNEChange(dummyReasoner, ne);
+                        };
+
+                        dummyReasoner.on(
+                            'narrativeElementChanged',
+                            this._handleNarrativeElementChanged,
+                        );
+                        this._reasoner = dummyReasoner;
+                        // this._handleNarrativeElementChanged(narrativeElement);
+                        _handleNEChange(dummyReasoner, narrativeElement);
+                        // setSubReasoners(dummyReasoner, this._reasoner);
+                    } else {
+                        dummyReasoner.next();
+                    }
+                };
+                dummyReasoner.on('narrativeElementChanged', dummyHandleNarrativeElementChanged);
+                // console.log('starting dummy reasoner');
+                dummyReasoner.start();
+            });
+        };
+
+        /**
+         * go to an arbitrary node in the current story
+         * @param neid: id of narrative element to jump to
+         */
+        const jumpToNarrativeElement = (neid: string) => {
+            walkNewReasoner(this._storyId, neid);
+            /*
+            if (!this._reasoner) console.error('no reasoner');
+            // console.log('finding reasoner for', neid);
+            const currentReasoner = getSubReasoner(neid, this._reasoner);
+            if (currentReasoner) {
+                currentReasoner._setCurrentNarrativeElement(neid);
+            } else {
+                console.error('cannot navigate to', neid);
+            }
+            */
         };
 
         const spw = new StoryPathWalker(this._fetchStory, this._fetchPresentation);
@@ -131,7 +240,7 @@ export default class Controller {
                         this._storyTarget,
                     );
                     this._renderStory.on('jumpToNarrativeElement', (neid) => {
-                        console.log('controller received request to switch to ne', neid);
+                        // console.log('controller received request to switch to ne', neid);
                         jumpToNarrativeElement(neid);
                     });
                     this._renderStory.start();
@@ -147,70 +256,20 @@ export default class Controller {
                 return;
             }
 
-            this._handleStoryEnd = () => {
-                alert('Story ended!'); // eslint-disable-line no-alert
-            };
-            reasoner.on('storyEnd', this._handleStoryEnd);
-
-            this._handleError = (err) => {
-                alert(`Error: ${err}`); // eslint-disable-line no-alert
-            };
-            reasoner.on('error', this._handleError);
+            reasoner.on('storyEnd', _handleStoryEnd);
+            reasoner.on('error', _handleError);
 
             this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                if (this._currentRenderer) {
-                    this._currentRenderer.destroy();
-                }
-                console.log(narrativeElement); // eslint-disable-line no-console
-                this._fetchPresentation(narrativeElement.presentation.target)
-                    .then(presentation => this._representationReasoner(presentation))
-                    .then((representation) => {
-                        if (this._reasoner !== reasoner) {
-                            return;
-                        }
-                        const currentRenderer = RendererFactory(
-                            representation,
-                            this._fetchAssetCollection,
-                            this._fetchMedia,
-                            this._neTarget,
-                        );
-
-                        if (currentRenderer) {
-                            currentRenderer.renderBackButton();
-                            currentRenderer.renderNextButton();
-                            currentRenderer.on('completeStartBehaviours', () => {
-                                currentRenderer.start();
-                            });
-                            currentRenderer.on('complete', () => {
-                                reasoner.next();
-                            });
-                            currentRenderer.on('nextButtonClicked', () => {
-                                reasoner.next();
-                            });
-                            currentRenderer.on('backButtonClicked', () => {
-                                goBack();
-                            });
-                            this._currentRenderer = currentRenderer;
-                            currentRenderer.willStart();
-                        } else {
-                            console.error(
-                                'Do not know how to render',
-                                representation.representation_type,
-                            );
-                        }
-
-                        // tell story renderer that we've changed
-                        if (this._renderStory) {
-                            this._renderStory.handleNarrativeElementChanged(representation.id);
-                        }
-                    });
+                _handleNEChange(reasoner, narrativeElement);
             };
+
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
             this._reasoner = reasoner;
             this._reasoner.start();
         });
     }
+
 
     createStoryAndElementDivs() {
         this._neTarget = document.createElement('div');
