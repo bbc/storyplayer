@@ -187,12 +187,6 @@ export default class Controller {
                             currentRenderer.on('nextButtonClicked', () => {
                                 reasoner.next();
                             });
-
-                            // this is used by a custom behaviour...
-                            // can't really go about adapting controller
-                            // when we have new behaviours
-                            // (although most behaviours shouldn't interfere with
-                            // story logic)
                             currentRenderer.on('backButtonClicked', () => {
                                 goBack();
                             });
