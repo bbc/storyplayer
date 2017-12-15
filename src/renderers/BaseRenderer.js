@@ -70,7 +70,11 @@ export default class BaseRenderer extends EventEmitter {
      *
      * @return {void}
      */
-    destroy() { }
+    destroy() {
+        if (this._behaviourRunner) {
+            this._behaviourRunner.destroyBehaviours();
+        }
+    }
 
     renderNextButton() {
         const nextButton = document.createElement('button');

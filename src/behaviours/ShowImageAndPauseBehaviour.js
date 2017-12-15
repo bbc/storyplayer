@@ -1,14 +1,25 @@
 import BaseBehaviour from './BaseBehaviour';
 
 export default class ShowImageAndPauseBehaviour extends BaseBehaviour {
+    constructor(behaviourDefinition, onComplete) {
+        super(behaviourDefinition, onComplete);
+        this.timerHandle = null;
+    }
+    
     start() {
-        console.log('Pausing for 3 seconds...');
-        setTimeout(this.handleTimeout.bind(this), 3000);
+        const pause = parseFloat(this.behaviourDefinition.pause);
+        this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
     }
 
     handleTimeout() {
-        console.log('Pausing finished');
-        this.behaviourComplete();
+        this.timerHandle = null;
+        this.onComplete();
+    }
+
+    destroy() {
+        if (this.timerHandle) {
+            clearTimeout(this.timerHandle);
+        }
     }
 }
 

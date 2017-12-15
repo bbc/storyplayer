@@ -4,57 +4,63 @@ import BehaviourFactory from '../behaviours/BehaviourFactory';
 import BaseRenderer from '../renderers/BaseRenderer';
 
 export default class BehaviourRunner {
-    behaviours: Object;
-    behavioursRunning: Object;
+    behaviourDefinitions: Object;
+    eventCounters: Object;
     baseRenderer: BaseRenderer;
-    events: Array<string>;
+    eventNames: Array<string>;
+    behaviours: Array<Object>;
 
-    constructor(behaviours: Object, baseRenderer: BaseRenderer) {
-        this.behaviours = behaviours;
-        this.behavioursRunning = {};
+    constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {
+        this.behaviourDefinitions = behaviourDefinitions;
+        this.eventCounters = {};
+        this.behaviours = [];
         this.baseRenderer = baseRenderer;
-        this.events = Object.keys(behaviours);
-        for (let i = 0; i < this.events.length; i += 1) {
-            this.behavioursRunning[this.events[i]] = 0;
+        this.eventNames = Object.keys(behaviourDefinitions);
+
+        for (let i = 0; i < this.eventNames.length; i += 1) {
+            this.eventCounters[this.eventNames[i]] = 0;
         }
     }
 
-    // Run behaviours for a specific event type.
-    // Returns true if there's a behaviour, false if none found
+    // Run behaviours for a specific event type. Returns true if there's a behaviour, false if none found
     runBehaviours(event: string, completionEvent: string) {
-        const behaviourQueue = [];
-        if (this.behaviours[event] === undefined || this.behaviours[event] === []) {
+        if (this.behaviourDefinitions[event] === undefined || this.behaviourDefinitions[event] === []) {
             return false;
         }
-        this.behaviours[event].forEach((behaviourDefinition) => {
+
+        // Create all behaviours before starting any behaviours for correct handleOnComplete reference counting
+        this.behaviourDefinitions[event].forEach((behaviourDefinition) => {
             const behaviour = BehaviourFactory(
                 behaviourDefinition,
-                this.handleBehaviourComplete.bind(this, event, completionEvent),
+                this.handleCompletion.bind(this, event, completionEvent),
             );
             if (behaviour) {
-                this.behavioursRunning[event] += 1;
-                behaviourQueue.push(behaviour);
+                this.behaviours.push(behaviour);
+                this.eventCounters[event] += 1;
             }
         });
-        behaviourQueue.forEach((behav) => {
-            behav.start(this.baseRenderer);
-        });
+
+        this.behaviours.forEach((behaviour) => { behaviour.start(this.baseRenderer); });
         return true;
+    }
+
+    destroyBehaviours() {
+        this.behaviours.forEach((behaviour) => { behaviour.destroy(); });
     }
 
     // Called on behaviour of a specific event type ending
     // Checks for number of behaviours of that type running
     //   - if it's zero, send the completion event
-    handleBehaviourComplete(event: string, completionEvent: string) {
-        if (this.behavioursRunning[event] === undefined) {
+    handleCompletion(event: string, completionEvent: string) {
+        if (this.eventCounters[event] === undefined) {
             return;
         }
 
-        if (this.behavioursRunning[event] > 0) {
-            this.behavioursRunning[event] -= 1;
+        if (this.eventCounters[event] > 0) {
+            this.eventCounters[event] -= 1;
         }
 
-        if (this.behavioursRunning[event] === 0) {
+        if (this.eventCounters[event] === 0) {
             this.baseRenderer.emit(completionEvent);
         }
     }
