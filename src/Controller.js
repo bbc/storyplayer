@@ -103,11 +103,10 @@ export default class Controller {
         // resolve the list of presentations into representations
         // then (if story is linear) create and start a StoryIconRenderer
         const handleWalkEnd = (storyItemPath: Array<StoryPathItem>) => {
-            // resolve a presentation list into a representation list
-            // returns a promise for such a list
+            // resolve each presentation in the list into a representation
+            // mutates the storyPathItem list to include these
             const getRepresentationList =
-                (path: Array<StoryPathItem>): Promise<Array<StoryPathItem>> => {
-                    const replist = [];
+                (path: Array<StoryPathItem>): Promise<> => {
                     const promises = [];
                     path.forEach((pathItem) => {
                         promises.push(this._representationReasoner(pathItem.presentation));
@@ -116,19 +115,17 @@ export default class Controller {
                     return Promise.all(promises).then((representations) => {
                         representations.forEach((repres, i) => {
                             path[i].representation = repres;
-                            replist.push(path[i]);
                         });
-                        return Promise.resolve(replist);
                     });
                 };
 
             // the walk has finished - is it linear
             if (storyItemPath.length > 0) {
-                // get a promise for the representations
-                // resolve the promise by creating the StoryIconRenderer
-                getRepresentationList(storyItemPath).then((list) => {
+                // get a promise for the representations being resolved
+                // then create the StoryIconRenderer
+                getRepresentationList(storyItemPath).then(() => {
                     this._renderStory = new StoryIconRenderer(
-                        list,
+                        storyItemPath,
                         this._fetchAssetCollection,
                         this._fetchMedia,
                         this._storyTarget,
