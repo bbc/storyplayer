@@ -5,8 +5,8 @@
   "main": "dist/romper.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "concurrently \"babel src --out-dir dist\" \"browserify -o dist/romper.browser.js -t babelify -e src/romper.browser.js\"",
-    "pretest": "flow-typed install",
+    "build": "concurrently \"babel src --source-maps inline --out-dir dist\" \"browserify -dt babelify -e src/romper.browser.js -o dist/romper.browser.js\"",
+      "pretest": "flow-typed install",
     "test": "concurrently \"node_modules/.bin/mochify --transform babelify --recursive spec\" \"eslint src/ spec/\" \"flow check --all\"",
     "prewatch": "flow-typed install",
     "watch": "concurrently \"watchify -o dist/romper.browser.js -t babelify -e src/romper.browser.js --debug\" \"node_modules/.bin/mochify --transform babelify --watch --recursive spec\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\""
