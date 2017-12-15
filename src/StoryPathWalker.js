@@ -26,6 +26,8 @@ export default class StoryPathWalker extends EventEmitter {
     _linear: boolean;
     _abort: boolean;
     _pathmap: Array<StoryPathItem>;
+    _storylist: Array<Story>;
+    _storyId: string;
 
     constructor(
         storyFetcher: StoryFetcher,
@@ -64,21 +66,77 @@ export default class StoryPathWalker extends EventEmitter {
         return ne.links[0];
     }
 
+    fetchAllStories(
+        story: Story,
+        startEl: NarrativeElement,
+        storyList: Array<Story>,
+    ) {
+        if (startEl.presentation.type === 'STORY_ELEMENT') {
+            const subStoryId = startEl.presentation.target;
+            this._depth += 1;
+            this._storyFetcher(subStoryId).then((subStory) => {
+                // console.log('SPW fetched ', subStory.name);
+                const subStoryStartId = this.getBeginning(subStory);
+                if (!subStoryStartId) {
+                    this.storyFetchComplete();
+                    return;
+                }
+                storyList.push(subStory);
+                const subStoryStart = StoryPathWalker.getNarrEl(subStoryStartId, subStory);
+                // recurse
+                this.fetchAllStories(subStory, subStoryStart, storyList);
+                if (this._depth === 0) this.storyFetchComplete();
+            });
+        }
+
+        if (startEl.links.length > 1) {
+            // this.emit('nonLinear', new Error('Story non-linear: multiple possible links'));
+            return;
+        }
+        const link = this.getLink(startEl);
+        if (!link) return;
+        if (link.link_type === 'NARRATIVE_ELEMENT') {
+            if (!link.target) {
+                this.emit('error', new Error('Cannot walk path - no link target'));
+            } else {
+                const nextNe = StoryPathWalker.getNarrEl(link.target, story);
+                this.fetchAllStories(story, nextNe, storyList);
+            }
+        } else if (link.link_type === 'END_STORY') {
+            this._depth -= 1;
+        }
+    }
+
+    getStory(id: string): ?Story {
+        let matchingStory = null;
+        this._storylist.forEach((story) => {
+            if (story.id === id) {
+                matchingStory = story;
+            }
+        });
+        return matchingStory;
+    }
+
     walkFetch(
         story: Story,
         startEl: NarrativeElement,
         neList: Array<PathGather>,
         storyList: Array<string>,
     ) {
+        // console.log('entering walk', this._depth);
         if (this._abort) { this._path = []; return; }
         if (startEl.presentation.type === 'STORY_ELEMENT') {
             const subStoryId = startEl.presentation.target;
-            this._depth += 1;
-            // console.log('SPW fetch sub story ', subStoryId, 'at depth', this._depth);
-            this._storyFetcher(subStoryId).then((subStory) => {
-                // console.log('SPW fetched ', subStory.name);
+
+            const subStory = this.getStory(subStoryId);
+
+            if (subStory) {
+                // console.log(subStory.name);
+
+                // console.log('SPW fetch sub story ', subStoryId, 'at depth', this._depth);
                 const subStoryStartId = this.getBeginning(subStory);
                 if (!subStoryStartId) {
+                    console.log('no start id');
                     this.walkComplete();
                     return;
                 }
@@ -86,12 +144,16 @@ export default class StoryPathWalker extends EventEmitter {
                 storyList.push(subStoryId);
                 const subStoryStart = StoryPathWalker.getNarrEl(subStoryStartId, subStory);
                 // recurse
+                this._depth += 1;
                 this.walkFetch(subStory, subStoryStart, neList, storyList);
                 storyList.pop();
-                if (this._depth === 0) this.walkComplete();
-            });
+            }
+            // if (this._depth === 0) {
+            //     console.log('depth', this._depth);
+            //     this.walkComplete();
+            // }
         } else {
-            // console.log('SWE fetch pushing ', startEl.presentation.target, storyList);
+            // console.log('SWE fetch pushing ', startEl.name, storyList);
             const pathItem = {
                 stories: storyList.slice(0),
                 ne: startEl,
@@ -113,21 +175,40 @@ export default class StoryPathWalker extends EventEmitter {
             }
         } else if (link.link_type === 'END_STORY') {
             this._depth -= 1;
+            if (this._depth === 0) {
+                this.walkComplete();
+            }
         }
     }
 
     parseStory(storyid: string) {
         this._depth = 1;
         this._abort = false;
+        this._storyId = storyid;
         this._storyFetcher(storyid).then((story) => {
             // console.log('SPW parsing story ', story.name);
             const storyStartId = this.getBeginning(story);
+            this._storylist = [story];
             if (storyStartId) {
                 const storyStart = StoryPathWalker.getNarrEl(storyStartId, story);
-                this.walkFetch(story, storyStart, this._path, [storyStartId]);
+                this.fetchAllStories(story, storyStart, this._storylist);
             }
         });
     }
+
+    // once we've completed our recursive fetch of the stories,
+    // recursively walk through again to build the map
+    storyFetchComplete() {
+        // console.log('sf complete', this._storylist);
+        const startStory = this._storylist[0];
+        const storyStartId = this.getBeginning(startStory);
+        if (storyStartId) {
+            this._depth = 1;
+            const storyStart = StoryPathWalker.getNarrEl(storyStartId, startStory);
+            this.walkFetch(startStory, storyStart, this._path, [storyStartId]);
+        }
+    }
+
 
     walkComplete() {
         this.getStoryPath().then(() => this.emit('walkComplete', this._pathmap));
