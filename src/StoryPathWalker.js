@@ -138,17 +138,20 @@ export default class StoryPathWalker extends EventEmitter {
         const promises = [];
         this._path.forEach((pathGather) => {
             const presentationId = pathGather.ne.presentation.target;
-            promises.push(this._presentationFetcher(presentationId)
-                .then((pres) => {
-                    const pathmapitem: StoryPathItem = {
-                        stories: pathGather.stories,
-                        narrative_element: pathGather.ne,
-                        presentation: pres,
-                    };
-                    this._pathmap.push(pathmapitem);
-                }));
+            promises.push(this._presentationFetcher(presentationId));
         });
 
-        return Promise.all(promises).then(() => this._pathmap);
+        return Promise.all(promises).then((presentations) => {
+            presentations.forEach((pres, i) => {
+                const pathGather = this._path[i];
+                const pathmapitem: StoryPathItem = {
+                    stories: pathGather.stories,
+                    narrative_element: pathGather.ne,
+                    presentation: pres,
+                };
+                this._pathmap.push(pathmapitem);
+            });
+            return Promise.resolve(this._pathmap);
+        });
     }
 }

@@ -1236,14 +1236,15 @@
     <script>
         (function () {
             const config = JSON.parse(document.getElementById('romper-story').textContent);
+            const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 500));
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
-                // storyFetcher: () => Promise.resolve(story), //config.story[0]),
-                storyFetcher: id => Promise.resolve(
-                    config.story
-                        .filter(storyObject => storyObject.id === id)[0]
-                ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
+                storyFetcher: id => Promise.resolve(wait().then(() => config.story.filter(storyObject => storyObject.id === id)[0])),
+                // storyFetcher: id => Promise.resolve(
+                // config.story
+                //         .filter(storyObject => storyObject.id === id)[0]
+                // ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
                 mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => {
                     if (resolvedUri === '') {
                         return 'http://localhost/~andybr/obm/nothingtosee.mp4#t=[2]';

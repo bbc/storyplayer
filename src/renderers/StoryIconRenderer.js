@@ -11,10 +11,10 @@ export default class StoryIconRenderer extends EventEmitter {
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
-    _iconElementList: Array<HTMLImageElement>;
-    _iconElementMap: { [key: string]: ?HTMLElement }
-    _currentRepresentation: string;
-    _deepestCommonSubstory: string;
+    _iconElementMap: { [key: string]: ?HTMLElement } // map of representationIds to icon <img>s
+    _currentRepresentationId: string; // the id of the current representation
+    _deepestCommonSubstory: string; // the story id of the deepest story with all icons
+    _iconListElement: HTMLElement; // the <ul> containing the icons
 
     constructor(
         pathItemList: Array<StoryPathItem>,
@@ -27,36 +27,34 @@ export default class StoryIconRenderer extends EventEmitter {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._target = target;
-        this._iconElementList = [];
         this._iconElementMap = {};
     }
 
     start() {
-        // console.log('starting story renderer');
-        // this.collectAssets();
-        this.buildAssets().then(() => {
-            // console.log(this._iconElementList);
+        if (this._pathItemList[0].representation) {
+            this._currentRepresentationId = this._pathItemList[0].representation.id;
+        }
+        this.buildAssets().then((iconImgElements) => {
             this._deepestCommonSubstory = this.findSubStories();
-            const iconlist = document.createElement('ul');
-            iconlist.id = 'chapterIcons';
-            this._iconElementList.forEach((iconImageElement) => {
+            this._iconListElement = document.createElement('ul');
+            this._iconListElement.id = 'chapterIcons';
+            iconImgElements.forEach((iconImageElement) => {
                 const iconListItem = document.createElement('li');
                 iconListItem.appendChild(iconImageElement);
-                iconlist.appendChild(iconListItem);
+                this._iconListElement.appendChild(iconListItem);
             });
-            this._target.appendChild(iconlist);
+            this._target.appendChild(this._iconListElement);
+            this.showHideTarget();
         });
-        if (this._pathItemList[0].representation) {
-            this._currentRepresentation = this._pathItemList[0].representation.id;
-        }
     }
 
     // handle click on icon - emit message including narrative element id
-    iconClickHandler(repId: string) {
-        const pitems = this._pathItemList.filter(pathitem =>
-            pathitem.representation && (pathitem.representation.id === repId));
-        // console.log('chandle pathshift ne', pitem.narrative_element.id);
-        if (pitems.length === 1) this.emit('jumpToNarrativeElement', pitems[0].narrative_element.id);
+    iconClickHandler(representationId: string) {
+        const storyPathItems = this._pathItemList.filter(pathitem =>
+            pathitem.representation && (pathitem.representation.id === representationId));
+        if (storyPathItems.length === 1) {
+            this.emit('jumpToNarrativeElement', storyPathItems[0].narrative_element.id);
+        }
     }
 
     // go thtough the list of path items and build some icons, appending them
@@ -68,68 +66,86 @@ export default class StoryIconRenderer extends EventEmitter {
             if (!rep) {
                 console.error('Story renderer has no representation for path item');
             } else if (!rep.asset_collection.icon) {
-                promises.push(() => { this._iconElementMap[rep.id] = null; });
+                promises.push(Promise.resolve(null));
             } else {
                 const iconAssetId = rep.asset_collection.icon;
-                promises.push(this._fetchAssetCollection(iconAssetId)
-                    .then((iconAsset) => {
-                        if (iconAsset.assets.image_src) {
-                            const newIcon = document.createElement('img');
-                            newIcon.setAttribute('src', iconAsset.assets.image_src);
-                            this._iconElementList.push(newIcon);
-                            this._iconElementMap[rep.id] = newIcon;
-                            newIcon.addEventListener('click', () => this.iconClickHandler(rep.id));
-                            if (rep.id === this._currentRepresentation) {
-                                newIcon.className = 'activeIcon';
-                            } else {
-                                newIcon.className = 'inactiveIcon';
-                            }
-                        }
-                    }));
+                promises.push(this._fetchAssetCollection(iconAssetId));
             }
         });
-        return Promise.all(promises).then();
+
+        const iconElementList = []; // list of icon <IMG> elements
+        // populate this list and...
+        // build map to work out which representations have which icons
+        return Promise.all(promises).then((iconAssets) => {
+            iconAssets.forEach((iconAsset, i) => {
+                if (this._pathItemList[i].representation) {
+                    const representationId = this._pathItemList[i].representation.id;
+                    if (iconAsset === null) {
+                        this._iconElementMap[representationId] = null;
+                    } else if (iconAsset.assets.image_src) {
+                        const newIcon = this.buildIconImgElement(
+                            representationId,
+                            iconAsset.assets.image_src,
+                        );
+                        iconElementList.push(newIcon);
+                        this._iconElementMap[representationId] = newIcon;
+                    }
+                }
+            });
+            return Promise.resolve(iconElementList);
+        });
     }
 
-    handleNarrativeElementChanged(repid: string) {
+    // build icon with click handler
+    buildIconImgElement(representationId: string, sourceUrl: string): HTMLImageElement {
+        const newIcon = document.createElement('img');
+        newIcon.setAttribute('src', sourceUrl);
+        newIcon.addEventListener('click', () => this.iconClickHandler(representationId));
+        if (representationId === this._currentRepresentationId) {
+            newIcon.className = 'activeIcon';
+        } else {
+            newIcon.className = 'inactiveIcon';
+        }
+        return newIcon;
+    }
+
+    handleNarrativeElementChanged(representationId: string) {
         // probably also want to check that the representations in our path map
         // are still those that the reasoner is selecting
-        this._currentRepresentation = repid;
+        this._currentRepresentationId = representationId;
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {
                 this._iconElementMap[mapKey].className = 'inactiveIcon';
             }
         });
-        if (this._iconElementMap[repid]) {
-            this._iconElementMap[repid].className = 'activeIcon';
+        if (this._iconElementMap[representationId]) {
+            this._iconElementMap[representationId].className = 'activeIcon';
         }
         this.showHideTarget();
     }
 
-    getRepresentationIndex(repid: string): number {
+    getRepresentationIndex(representationId: string): number {
         let index = -1;
-        let i = 0;
-        this._pathItemList.forEach((storyPathItem) => {
-            if (storyPathItem.representation && storyPathItem.representation.id === repid) {
+        this._pathItemList.forEach((storyPathItem, i) => {
+            if (storyPathItem.representation
+                && storyPathItem.representation.id === representationId) {
                 index = i;
             }
-            i += 1;
         });
         return index;
     }
 
     // show or hide the target of this renderer according to whether we are in a substory
     showHideTarget() {
-        const currentRepIndex = this.getRepresentationIndex(this._currentRepresentation);
+        const currentRepIndex = this.getRepresentationIndex(this._currentRepresentationId);
         const currentPathItem = this._pathItemList[currentRepIndex];
+        // console.log('in', currentPathItem, '- icon story is:', this._deepestCommonSubstory);
 
         this._target.classList.remove('active');
         this._target.classList.remove('inactive');
         if (currentPathItem.stories.indexOf(this._deepestCommonSubstory) === -1) {
-            // console.log('not in icon substory');
             this._target.classList.add('inactive');
         } else {
-            // console.log('in icon substory');
             this._target.classList.add('active');
         }
     }
@@ -137,24 +153,17 @@ export default class StoryIconRenderer extends EventEmitter {
     // find the deepest substory that includes all the representations with icons
     findSubStories(): string {
         const activeElements = [];
-        const depth = [];
-        Object.keys(this._iconElementMap).forEach((repid) => {
-            console.log(repid);
-            this._pathItemList.forEach((pathItem) => {
-                if (pathItem.representation && pathItem.representation.id === repid) {
-                    activeElements.push(pathItem.stories);
-                    depth.push(pathItem.stories.length);
-                }
-            });
+        Object.keys(this._iconElementMap).forEach((representationId, index) => {
+            if (this._iconElementMap[representationId] !== null) { // there is an icon
+                const pathItem = this._pathItemList[index]; // get the corresponding path icon
+                activeElements.push(pathItem.stories.slice(0)); // add the stories
+            }
         });
         const commonPath = StoryIconRenderer.findShortestCommonList(activeElements);
-        // console.log('deepest story encompassing all icons is', commonPath[commonPath.length - 1]);
         return commonPath[commonPath.length - 1];
     }
 
     static findShortestCommonList(list: Array<Array<string>>): Array<string> {
-        // const list = [['a', 'b', 'c'], ['a', 'b', 'c', 'd'], ['a', 'b', 'c']];
-        // console.log('active stories', list);
         const commonPath = list[0];
         list.forEach((ae) => {
             // trim common to same length

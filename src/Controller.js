@@ -102,42 +102,40 @@ export default class Controller {
         // handle our StoryPathWalker reaching the end of its travels:
         // resolve the list of presentations into representations
         // then (if story is linear) create and start a StoryIconRenderer
-        const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
-            // resolve a presentation list into a promise of representation list
-            // returns a promise for such a list
-            const getRepresentationList = (path: Array<StoryPathItem>) => {
-                const replist = [];
-                const promises = [];
-                path.forEach((pathItem) => {
-                    promises.push(this._representationReasoner(pathItem.presentation)
-                        .then((repres) => {
-                            pathItem.representation = repres;
-                            replist.push(pathItem);
-                        }));
-                });
-                return Promise.all(promises).then(() => replist);
-            };
+        const handleWalkEnd = (storyItemPath: Array<StoryPathItem>) => {
+            // resolve each presentation in the list into a representation
+            // mutates the storyPathItem list to include these
+            const getRepresentationList =
+                (path: Array<StoryPathItem>): Promise<> => {
+                    const promises = [];
+                    path.forEach((pathItem) => {
+                        promises.push(this._representationReasoner(pathItem.presentation));
+                    });
 
-            // resolve the promise by creating the StoryIconRenderer
-            getRepresentationList(presentationPath).then((list) => {
-                this._renderStory = new StoryIconRenderer(
-                    list,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._storyTarget,
-                );
-                this._renderStory.on('jumpToNarrativeElement', (neid) => {
-                    console.log('controller received request to switch to ne', neid);
-                    jumpToNarrativeElement(neid);
-                });
-                this._renderStory.start();
-            });
+                    return Promise.all(promises).then((representations) => {
+                        representations.forEach((repres, i) => {
+                            path[i].representation = repres;
+                        });
+                    });
+                };
 
             // the walk has finished - is it linear
-            if (presentationPath.length > 0) {
-                // yes - do all the above to build the StoryIconRenderer
-                spw.getStoryPath()
-                    .then(map => getRepresentationList(map));
+            if (storyItemPath.length > 0) {
+                // get a promise for the representations being resolved
+                // then create the StoryIconRenderer
+                getRepresentationList(storyItemPath).then(() => {
+                    this._renderStory = new StoryIconRenderer(
+                        storyItemPath,
+                        this._fetchAssetCollection,
+                        this._fetchMedia,
+                        this._storyTarget,
+                    );
+                    this._renderStory.on('jumpToNarrativeElement', (neid) => {
+                        console.log('controller received request to switch to ne', neid);
+                        jumpToNarrativeElement(neid);
+                    });
+                    this._renderStory.start();
+                });
             }
         };
 
@@ -189,12 +187,6 @@ export default class Controller {
                             currentRenderer.on('nextButtonClicked', () => {
                                 reasoner.next();
                             });
-
-                            // this is used by a custom behaviour...
-                            // can't really go about adapting controller
-                            // when we have new behaviours
-                            // (although most behaviours shouldn't interfere with
-                            // story logic)
                             currentRenderer.on('backButtonClicked', () => {
                                 goBack();
                             });
