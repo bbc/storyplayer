@@ -102,8 +102,8 @@ export default class Controller {
         // handle our StoryPathWalker reaching the end of its travels:
         // resolve the list of presentations into representations
         // then (if story is linear) create and start a StoryIconRenderer
-        const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
-            // resolve a presentation list into a promise of representation list
+        const handleWalkEnd = (storyItemPath: Array<StoryPathItem>) => {
+            // resolve a presentation list into a representation list
             // returns a promise for such a list
             const getRepresentationList =
                 (path: Array<StoryPathItem>): Promise<Array<StoryPathItem>> => {
@@ -122,26 +122,23 @@ export default class Controller {
                     });
                 };
 
-            // resolve the promise by creating the StoryIconRenderer
-            getRepresentationList(presentationPath).then((list) => {
-                this._renderStory = new StoryIconRenderer(
-                    list,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._storyTarget,
-                );
-                this._renderStory.on('jumpToNarrativeElement', (neid) => {
-                    console.log('controller received request to switch to ne', neid);
-                    jumpToNarrativeElement(neid);
-                });
-                this._renderStory.start();
-            });
-
             // the walk has finished - is it linear
-            if (presentationPath.length > 0) {
-                // yes - do all the above to build the StoryIconRenderer
-                spw.getStoryPath()
-                    .then(map => getRepresentationList(map));
+            if (storyItemPath.length > 0) {
+                // get a promise for the representations
+                // resolve the promise by creating the StoryIconRenderer
+                getRepresentationList(storyItemPath).then((list) => {
+                    this._renderStory = new StoryIconRenderer(
+                        list,
+                        this._fetchAssetCollection,
+                        this._fetchMedia,
+                        this._storyTarget,
+                    );
+                    this._renderStory.on('jumpToNarrativeElement', (neid) => {
+                        console.log('controller received request to switch to ne', neid);
+                        jumpToNarrativeElement(neid);
+                    });
+                    this._renderStory.start();
+                });
             }
         };
 
