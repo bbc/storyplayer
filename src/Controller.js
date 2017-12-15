@@ -105,21 +105,22 @@ export default class Controller {
         const handleWalkEnd = (presentationPath: Array<StoryPathItem>) => {
             // resolve a presentation list into a promise of representation list
             // returns a promise for such a list
-            const getRepresentationList = (path: Array<StoryPathItem>) => {
-                const replist = [];
-                const promises = [];
-                path.forEach((pathItem) => {
-                    promises.push(this._representationReasoner(pathItem.presentation));
-                });
-
-                return Promise.all(promises).then((representations) => {
-                    representations.forEach((repres, i) => {
-                        path[i].representation = repres;
-                        replist.push(path[i]);
+            const getRepresentationList =
+                (path: Array<StoryPathItem>): Promise<Array<StoryPathItem>> => {
+                    const replist = [];
+                    const promises = [];
+                    path.forEach((pathItem) => {
+                        promises.push(this._representationReasoner(pathItem.presentation));
                     });
-                    return Promise.resolve(replist);
-                });
-            };
+
+                    return Promise.all(promises).then((representations) => {
+                        representations.forEach((repres, i) => {
+                            path[i].representation = repres;
+                            replist.push(path[i]);
+                        });
+                        return Promise.resolve(replist);
+                    });
+                };
 
             // resolve the promise by creating the StoryIconRenderer
             getRepresentationList(presentationPath).then((list) => {

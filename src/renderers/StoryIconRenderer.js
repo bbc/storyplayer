@@ -31,6 +31,9 @@ export default class StoryIconRenderer extends EventEmitter {
     }
 
     start() {
+        if (this._pathItemList[0].representation) {
+            this._currentRepresentation = this._pathItemList[0].representation.id;
+        }
         this.buildAssets().then((iconImgElements) => {
             this._deepestCommonSubstory = this.findSubStories();
             this._iconListElement = document.createElement('ul');
@@ -41,10 +44,8 @@ export default class StoryIconRenderer extends EventEmitter {
                 this._iconListElement.appendChild(iconListItem);
             });
             this._target.appendChild(this._iconListElement);
+            this.showHideTarget();
         });
-        if (this._pathItemList[0].representation) {
-            this._currentRepresentation = this._pathItemList[0].representation.id;
-        }
     }
 
     // handle click on icon - emit message including narrative element id
