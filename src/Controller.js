@@ -33,6 +33,8 @@ export default class Controller {
         this._renderers = renderers;
         this._fetchStory = fetchStory;
         this.createStoryAndElementDivs();
+        this._linearStoryPath = null;
+        this._currentNarrativeElement = null;
     }
 
     start(storyId: string) {
@@ -40,41 +42,44 @@ export default class Controller {
 
         // is the narrative element with id neid one of the narrative elements
         // that reasoner is currently reasoning over?
-        const isInReasoner = (neid: string, reasoner: StoryReasoner): boolean => {
-            const rids = Object.keys(reasoner._narrativeElements);
-            return (rids.indexOf(neid) !== -1);
-        };
+        // const isInReasoner = (neid: string, reasoner: StoryReasoner): boolean => {
+        //     const rids = Object.keys(reasoner._narrativeElements);
+        //     return (rids.indexOf(neid) !== -1);
+        // };
 
-        // dive into the substory reasoners until we find one that has neid
-        // as one of its narrative elements
-        // if not found, returns null
-        const getSubReasoner = (neid: string, reasoner: ?StoryReasoner): ?StoryReasoner => {
-            if (!reasoner) return null;
-            if (isInReasoner(neid, reasoner)) {
-                return reasoner;
-            } else if (reasoner._subStoryReasoner) {
-                return getSubReasoner(neid, reasoner._subStoryReasoner);
+        // // dive into the substory reasoners until we find one that has neid
+        // // as one of its narrative elements
+        // // if not found, returns null
+        // const getSubReasoner = (neid: string, reasoner: ?StoryReasoner): ?StoryReasoner => {
+        //     if (!reasoner) return null;
+        //     if (isInReasoner(neid, reasoner)) {
+        //         return reasoner;
+        //     } else if (reasoner._subStoryReasoner) {
+        //         return getSubReasoner(neid, reasoner._subStoryReasoner);
+        //     }
+        //     return null;
+        // };
+
+        const getPrevious = () => {
+            // console.log('getPrev', this._linearStoryPath);
+            let matchingId = null;
+            if (this._linearStoryPath) {
+                // find current
+                this._linearStoryPath.forEach((storyPathItem, i) => {
+                    if (storyPathItem.narrative_element.id === this._currentNarrativeElement.id && i >= 1) {
+                        matchingId = this._linearStoryPath[i - 1].narrative_element.id;
+                    }
+                });
+                // find previous
             }
-            return null;
+            return matchingId;
         };
-
         /**
           * go to previous node in the current story
           * @param currentNeId id of narrative element to go back from
           */
         const goBack = () => {
-            let currentReasoner = this._reasoner;
-
-            if (!currentReasoner) {
-                console.error('cannot go back - no reasoner');
-                return;
-            }
-
-            while (currentReasoner._subStoryReasoner) {
-                currentReasoner = currentReasoner._subStoryReasoner;
-            }
-
-            const previous = currentReasoner._findPreviousNode();
+            const previous = getPrevious();
             if (previous) {
                 jumpToNarrativeElement(previous);
             } else {
@@ -93,6 +98,7 @@ export default class Controller {
             if (this._currentRenderer) {
                 this._currentRenderer.destroy();
             }
+            this._currentNarrativeElement = narrativeElement;
             console.log(narrativeElement); // eslint-disable-line no-console
             this._fetchPresentation(narrativeElement.presentation.target)
                 .then(presentation => this._representationReasoner(presentation))
@@ -233,6 +239,7 @@ export default class Controller {
                 // get a promise for the representations being resolved
                 // then create the StoryIconRenderer
                 getRepresentationList(storyItemPath).then(() => {
+                    this._linearStoryPath = storyItemPath;
                     this._renderStory = new StoryIconRenderer(
                         storyItemPath,
                         this._fetchAssetCollection,
@@ -318,4 +325,6 @@ export default class Controller {
     _renderStory: StoryIconRenderer;
     _neTarget: HTMLDivElement;
     _storyTarget: HTMLDivElement;
+    _linearStoryPath: Array<StoryPathItem>;
+    _currentNarrativeElement: NarrativeElement;
 }
