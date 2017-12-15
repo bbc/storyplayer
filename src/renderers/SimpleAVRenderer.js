@@ -127,5 +127,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         while (this._target.lastChild) {
             this._target.removeChild(this._target.lastChild);
         }
+        super.destroy();
     }
 }
