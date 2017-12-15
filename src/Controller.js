@@ -109,13 +109,16 @@ export default class Controller {
                 const replist = [];
                 const promises = [];
                 path.forEach((pathItem) => {
-                    promises.push(this._representationReasoner(pathItem.presentation)
-                        .then((repres) => {
-                            pathItem.representation = repres;
-                            replist.push(pathItem);
-                        }));
+                    promises.push(this._representationReasoner(pathItem.presentation));
                 });
-                return Promise.all(promises).then(() => replist);
+
+                return Promise.all(promises).then((representations) => {
+                    representations.forEach((repres, i) => {
+                        path[i].representation = repres;
+                        replist.push(path[i]);
+                    });
+                    return Promise.resolve(replist);
+                });
             };
 
             // resolve the promise by creating the StoryIconRenderer
