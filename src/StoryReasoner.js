@@ -72,6 +72,7 @@ export default class StoryReasoner extends EventEmitter {
      * @throws when the story has already started
      * @fires StoryReasoner#error
      * @fires StoryReasoner#narrativeElementChanged
+     * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
     start() {
@@ -88,6 +89,7 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#error
      * @fires StoryReasoner#narrativeElementChanged
      * @fires StoryReasoner#storyEnd
+     * @fires StoryReasoner#choiceOfLinks
      * @throws when the story has not yet started, or has already ended
      * @throws if the reasoner is currently reasoning something (e.g,. next() has been called but a new narrative
      *         element has not yet been thought about)
@@ -112,6 +114,9 @@ export default class StoryReasoner extends EventEmitter {
 
     _chooseBeginning() {
         this._resolving = true;
+        if (this._story.beginnings.length > 1) {
+            this.emit('choiceOfBeginnings');
+        }
         evaluateConditions(this._story.beginnings, this._dataResolver)
             .then((startElement) => {
                 this._resolving = false;
@@ -125,6 +130,9 @@ export default class StoryReasoner extends EventEmitter {
 
     _chooseNextNode() {
         this._resolving = true;
+        if (this._currentNarrativeElement.links.length > 1) {
+            this.emit('choiceOfLinks');
+        }
         evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
             .then((nextElement) => {
                 this._resolving = false;
@@ -169,6 +177,9 @@ export default class StoryReasoner extends EventEmitter {
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
         const errorCallback = err => this.emit('error', err);
+        const branchBeginningCallback = () => this.emit('choiceOfBeginnings');
+        const branchLinkCallback = () => this.emit('choiceOfLinks');
+
         const elementChangedCallback = element => this.emit('narrativeElementChanged', element);
         const storyEndCallback = () => {
             this._subStoryReasoner = null;
@@ -178,6 +189,8 @@ export default class StoryReasoner extends EventEmitter {
             subStoryReasoner.removeListener('storyEnd', storyEndCallback);
         };
 
+        subStoryReasoner.on('choiceOfBeginnings', branchBeginningCallback);
+        subStoryReasoner.on('choiceOfLinks', branchLinkCallback);
         subStoryReasoner.on('error', errorCallback);
         subStoryReasoner.on('narrativeElementChanged', elementChangedCallback);
         subStoryReasoner.on('storyEnd', storyEndCallback);
@@ -198,7 +211,10 @@ export default class StoryReasoner extends EventEmitter {
                 }
             });
         });
-        if (incomingLinkCount > 1) {
+        if (incomingLinkCount === 0) {
+            console.log('cannot go back - at start of story');
+            // need to start traversing the tree...
+        } else if (incomingLinkCount > 1) {
             console.log('too many incoming links to define a previous');
             return null;
         }
