@@ -60,7 +60,11 @@ export default class Controller {
             return null;
         };
 
-        const getPrevious = () => {
+        // get the id of the previous node
+        // if it's a linear path, will use the linearStoryPath to identify
+        // if not will ask reasoner to try within ths substory
+        // otherwise, returns null.
+        const getPrevious = (): ?string => {
             // console.log('getPrev', this._linearStoryPath);
             let matchingId = null;
             if (this._linearStoryPath) {
@@ -71,9 +75,22 @@ export default class Controller {
                         matchingId = this._linearStoryPath[i - 1].narrative_element.id;
                     }
                 });
-                // find previous
+            } else {
+                const subReasoner = getSubReasoner(this._currentNarrativeElement.id, this._reasoner);
+                if (subReasoner) matchingId = subReasoner.findPreviousNode();
             }
             return matchingId;
+        };
+
+        // is there a next node in the path.  Takes current reasoner and
+        // recurses into subStoryReasoners
+        const hasNextNode = (reasoner): boolean => {
+            // can't have two end story links
+            if (reasoner._currentNarrativeElement.links.length > 1) return true;
+            if (reasoner._currentNarrativeElement.links[0].link_type === 'NARRATIVE_ELEMENT') return true;
+            const subReasoner = reasoner._subStoryReasoner;
+            if (subReasoner) return hasNextNode(subReasoner);
+            return false;
         };
 
         /**
@@ -89,6 +106,7 @@ export default class Controller {
             }
         };
 
+        // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
             alert('Story ended!'); // eslint-disable-line no-alert
         };
@@ -116,8 +134,10 @@ export default class Controller {
                     );
 
                     if (currentRenderer) {
-                        currentRenderer.renderBackButton();
-                        currentRenderer.renderNextButton();
+                        // render buttons if appropriate
+                        if (getPrevious()) currentRenderer.renderBackButton();
+                        if (hasNextNode(reasoner)) currentRenderer.renderNextButton();
+
                         currentRenderer.on('completeStartBehaviours', () => {
                             currentRenderer.start();
                         });
@@ -260,7 +280,6 @@ export default class Controller {
             this._reasoner.start();
         });
     }
-
 
     createStoryAndElementDivs() {
         this._neTarget = document.createElement('div');

@@ -31,9 +31,7 @@ export default class StoryIconRenderer extends EventEmitter {
     }
 
     start() {
-        if (this._pathItemList[0].representation) {
-            this._currentRepresentationId = this._pathItemList[0].representation.id;
-        }
+        this._currentRepresentationId = this._pathItemList[0].representation.id;
         this.buildAssets().then((iconImgElements) => {
             this._deepestCommonSubstory = this.findSubStories();
             this._iconListElement = document.createElement('ul');
@@ -62,13 +60,10 @@ export default class StoryIconRenderer extends EventEmitter {
     buildAssets(): Promise<> {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
-            const rep = pathItem.representation;
-            if (!rep) {
-                console.error('Story renderer has no representation for path item');
-            } else if (!rep.asset_collection.icon) {
+            if (!pathItem.representation.asset_collection.icon) {
                 promises.push(Promise.resolve(null));
             } else {
-                const iconAssetId = rep.asset_collection.icon;
+                const iconAssetId = pathItem.representation.asset_collection.icon;
                 promises.push(this._fetchAssetCollection(iconAssetId));
             }
         });
@@ -78,18 +73,16 @@ export default class StoryIconRenderer extends EventEmitter {
         // build map to work out which representations have which icons
         return Promise.all(promises).then((iconAssets) => {
             iconAssets.forEach((iconAsset, i) => {
-                if (this._pathItemList[i].representation) {
-                    const representationId = this._pathItemList[i].representation.id;
-                    if (iconAsset === null) {
-                        this._iconElementMap[representationId] = null;
-                    } else if (iconAsset.assets.image_src) {
-                        const newIcon = this.buildIconImgElement(
-                            representationId,
-                            iconAsset.assets.image_src,
-                        );
-                        iconElementList.push(newIcon);
-                        this._iconElementMap[representationId] = newIcon;
-                    }
+                const representationId = this._pathItemList[i].representation.id;
+                if (iconAsset === null) {
+                    this._iconElementMap[representationId] = null;
+                } else if (iconAsset.assets.image_src) {
+                    const newIcon = this.buildIconImgElement(
+                        representationId,
+                        iconAsset.assets.image_src,
+                    );
+                    iconElementList.push(newIcon);
+                    this._iconElementMap[representationId] = newIcon;
                 }
             });
             return Promise.resolve(iconElementList);

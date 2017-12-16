@@ -199,7 +199,7 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.start();
     }
 
-    _findPreviousNode(): ?string {
+    findPreviousNode(): ?string {
         const currentId = this._currentNarrativeElement.id;
         let incomingLinkCount = 0;
         let previousNodeId = null;
@@ -216,7 +216,6 @@ export default class StoryReasoner extends EventEmitter {
             // need to start traversing the tree...
         } else if (incomingLinkCount > 1) {
             console.log('too many incoming links to define a previous');
-            return null;
         }
         return previousNodeId;
     }
