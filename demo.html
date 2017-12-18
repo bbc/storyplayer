@@ -7,6 +7,20 @@
     <style>
         .switchbuttons img {
             width: 50px;
+            background: rgba(200, 200, 230, 0.5);
+            border: 1px solid lightgray;
+        }
+
+        .switchbuttons li {
+            list-style: none;
+        }
+
+        .switchbuttons ul {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            margin-left: 0px;
+            padding-left: 5px;
         }
 
         .inactive {
@@ -46,15 +60,22 @@
         }
 
         img.inactiveIcon {
-            width: 50px;
+            width: 30px;
         }
 
         img.activeIcon {
-            width: 80px;
+            width: 60px;
         }
 
         #chapterIcons li {
-            display: inline;
+            list-style: none;
+            /* display: inline; */
+        }
+
+        #chapterIcons {
+            /* position: absolute;
+            top: 0px;
+            left: 430px; */
         }
 
         div#render_element {

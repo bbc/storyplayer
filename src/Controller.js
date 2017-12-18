@@ -35,8 +35,8 @@ export default class Controller {
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
-        // this._currentNarrativeElement = null;
-        this._lastSwitchableLabel = ''; // probably want to instantiate a full history class?
+        this._lastSwitchableLabel = ''; // the label of the last selected switchable choice
+        // probably want to instantiate a full history class?
     }
 
     start(storyId: string) {

@@ -37,14 +37,16 @@ export default class SwitchableRenderer extends BaseRenderer {
         return [];
     }
 
-    // display the buttons as IMG elements in a div
+    // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
         const buttonPanel = document.createElement('div');
+        const buttonList = document.createElement('ul');
         buttonPanel.className = 'switchbuttons';
         let i = 0;
         if (this._representation.choices) {
             this._representation.choices.forEach((choice) => {
                 const index = i;
+                const switchListItem = document.createElement('li');
                 const switchButton = document.createElement('img');
                 switchButton.setAttribute('role', 'button');
                 switchButton.setAttribute('alt', choice.label);
@@ -53,9 +55,11 @@ export default class SwitchableRenderer extends BaseRenderer {
                 });
                 // switchButton.innerHTML = choice.label;
                 this._setIcon(switchButton, choice.representation);
-                buttonPanel.appendChild(switchButton);
+                switchListItem.appendChild(switchButton);
+                buttonList.appendChild(switchListItem);
                 i += 1;
             });
+            buttonPanel.appendChild(buttonList);
             this._target.appendChild(buttonPanel);
         }
     }
