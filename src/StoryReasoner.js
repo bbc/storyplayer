@@ -29,7 +29,8 @@ export default class StoryReasoner extends EventEmitter {
      */
 
     /**
-     * This event is fired when a narrative element has changed. The body is the new narrative element.
+     * This event is fired when a narrative element has changed.
+     * The body is the new narrative element.
      *
      * @event StoryReasoner#narrativeElementChanged
      * @type {NarrativeElement}
@@ -43,11 +44,13 @@ export default class StoryReasoner extends EventEmitter {
      */
 
     /**
-     * Builds an instance of the reasoner for a particular story, including recursing into sub-stories where they exist.
+     * Builds an instance of the reasoner for a particular story,
+     * including recursing into sub-stories where they exist.
      *
      * @param {Story} story The JSON data structure of a Story, expanded to include the full set of
      *                      narrative elements expressed within
-     * @param {DataResolver} dataResolver used for resolving variables which are referenced in JSONLogic expressions
+     * @param {DataResolver} dataResolver used for resolving variables
+     *                      which are referenced in JSONLogic expressions
      * @param {StoryReasonerFactory} reasonerFactory used for building reasons for sub-stories
      */
     constructor(story: Story, dataResolver: DataResolver, reasonerFactory: StoryReasonerFactory) {
@@ -66,8 +69,8 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     /**
-     * Start this particular story. This initially causes a narrativeElementChanged event to fire to indicate which
-     * narrative element is the first in this story.
+     * Start this particular story. This initially causes a narrativeElementChanged
+     * event to fire to indicate which narrative element is the first in this story.
      *
      * @throws when the story has already started
      * @fires StoryReasoner#error
@@ -91,7 +94,8 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#storyEnd
      * @fires StoryReasoner#choiceOfLinks
      * @throws when the story has not yet started, or has already ended
-     * @throws if the reasoner is currently reasoning something (e.g,. next() has been called but a new narrative
+     * @throws if the reasoner is currently reasoning something
+     *         (e.g,. next() has been called but a new narrative
      *         element has not yet been thought about)
      * @return {void}
      */
@@ -153,7 +157,10 @@ export default class StoryReasoner extends EventEmitter {
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this._chooseBeginning();
         } else {
-            this.emit('error', new Error(`Unable to follow a link of type ${nextElement.link_type}`));
+            this.emit(
+                'error',
+                new Error(`Unable to follow a link of type ${nextElement.link_type}`),
+            );
         }
     }
 
@@ -199,7 +206,53 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.start();
     }
 
-    findPreviousNode(): ?string {
+    // is the narrative element with id neid one of the narrative elements
+    // that reasoner is currently reasoning over ?
+    _isInReasoner(narrativeElementId: string): boolean {
+        const rids = Object.keys(this._narrativeElements);
+        return (rids.indexOf(narrativeElementId) !== -1);
+    }
+
+    // dive into the substory reasoners until we find one that has neid
+    // as one of its narrative elements
+    // if not found, returns null
+    _getSubReasonerWithNarrativeElement(
+        narrativeElementId: string,
+        reasoner: StoryReasoner,
+    ): ?StoryReasoner {
+        if (this._isInReasoner(narrativeElementId)) {
+            return reasoner;
+        } else if (reasoner._subStoryReasoner) {
+            return this._getSubReasonerWithNarrativeElement(
+                narrativeElementId,
+                reasoner._subStoryReasoner,
+            );
+        }
+        return null;
+    }
+
+    /**
+     * Recurse into sub-story reasoners to find one containing a narrative element
+     * with the given id
+     *
+     * @param {string} The id of the narrative element we're searching for
+     * @return {?StoryReasoner} The reasoner that is directly handling the narrative
+     * element, or null if one can't be found.
+     */
+    getSubReasonerContainingNarrativeElement(narrativeElementId: string): ?StoryReasoner {
+        return this._getSubReasonerWithNarrativeElement(narrativeElementId, this);
+    }
+
+    /**
+     * Find the id of the Narrative Element that comes before the one currently being
+     * reasoned over.  Only looks within this story (i.e., does not go up the tree and
+     * into other stories).
+     *
+     * @return {?string} The id of the narrative element that comes before it, or null
+     * if we're at the start of this (sub) story or if there are multiple nodes leading
+     * to this one.
+     */
+    findPreviousNodeId(): ?string {
         const currentId = this._currentNarrativeElement.id;
         let incomingLinkCount = 0;
         let previousNodeId = null;
@@ -212,10 +265,10 @@ export default class StoryReasoner extends EventEmitter {
             });
         });
         if (incomingLinkCount === 0) {
-            console.log('cannot go back - at start of story');
+            // console.log('cannot go back - at start of story');
             // need to start traversing the tree...
         } else if (incomingLinkCount > 1) {
-            console.log('too many incoming links to define a previous');
+            // console.log('too many incoming links to define a previous');
         }
         return previousNodeId;
     }
