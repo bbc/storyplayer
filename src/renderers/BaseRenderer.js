@@ -78,6 +78,7 @@ export default class BaseRenderer extends EventEmitter {
 
     renderNextButton() {
         const nextButton = document.createElement('button');
+        nextButton.id = 'nextNEbutton';
         nextButton.textContent = 'Next';
         nextButton.addEventListener('click', () => this.handleNextButtonClick());
         this._target.appendChild(nextButton);
@@ -89,6 +90,7 @@ export default class BaseRenderer extends EventEmitter {
 
     renderBackButton() {
         const backButton = document.createElement('button');
+        backButton.id = 'backNEbutton';
         backButton.textContent = 'Back';
         backButton.addEventListener('click', () => this.handleBackButtonClick());
         this._target.appendChild(backButton);
