@@ -55,10 +55,10 @@ describe('StoryPathWalker', () => {
     it('can parse straight story to presentation objects', (done) => {
         const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
         const handleWalkEnd = () => {
-            spw.getStoryItemList(representationReasoner).then((map) => {
-                expect(map[2].presentation.id)
+            spw.getStoryItemList(representationReasoner).then((storyItemArray) => {
+                expect(storyItemArray[2].presentation.id)
                     .to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
-                expect(map[2].presentation.representations[0].representation.id)
+                expect(storyItemArray[2].presentation.representations[0].representation.id)
                     .to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
                 done();
             });
