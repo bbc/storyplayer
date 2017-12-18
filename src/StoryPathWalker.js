@@ -48,6 +48,17 @@ export default class StoryPathWalker extends EventEmitter {
     _pathmap: Array<PartialStoryPathItem>;
     _storyItemMap: Array<StoryPathItem>;
 
+    /**
+     * Create an instance of a StoryPathWalker
+     *
+     * @param {Function} storyFetcher a function which fetches the JSON body of a story
+     * @param {Function} presentationFetcher a function which fetches the
+     *           JSON body of a presentation
+     * @param {Function} storyReasonerFactory a Factory for making StoryReasoners
+     *
+     * @return {StoryPathWalker} an instance of the StoryPathWalker which can be used to
+     * walk a story graph and find a linear path through it, if there is one.
+     */
     constructor(
         storyFetcher: StoryFetcher,
         presentationFetcher: PresentationFetcher,
@@ -98,8 +109,15 @@ export default class StoryPathWalker extends EventEmitter {
         this._getPresentations(path).then(() => this.emit('walkComplete'));
     }
 
-    // resolve each presentation in the list into a representation
-    // mutates the storyPathItem list to include these
+    /**
+     * Resolve each presentation in the list into a representation
+     * @param {RepresentationReasoner} a reasoner for determining which Representation to use
+     * for a Presentation
+     *
+     * @returns {Promise<Array<StoryPathItem>>} A promise to return an array of StoryPathItems,
+     * which will be empty if the story is non-linear, or if this is called before the
+     * walkComplete event has been emitted.
+     */
     getStoryItemList(representationReasoner: RepresentationReasoner): Promise<Array<StoryPathItem>> {
         const promises = [];
         this._pathmap.forEach((pathItem) => {
@@ -116,9 +134,10 @@ export default class StoryPathWalker extends EventEmitter {
     }
 
     /**
-    * Walk the story graph to see if it's linear
-    * @param {*id of the story to fetch and parse} storyId
-    */
+     * Walk the story graph to see if it's linear
+     * @fires StoryPathWalker#walkComplete
+     * @param {string} id of the story to fetch and parse
+     */
     parseStory(storyId: string) {
         this._linear = true;
         const path = [];
