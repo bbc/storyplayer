@@ -9,6 +9,7 @@ import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
+import SwitchableRenderer from './renderers/SwitchableRenderer';
 
 export default class Controller {
     constructor(
@@ -34,7 +35,8 @@ export default class Controller {
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
-        // this._currentNarrativeElement = null;
+        this._lastSwitchableLabel = ''; // the label of the last selected switchable choice
+        // probably want to instantiate a full history class?
     }
 
     start(storyId: string) {
@@ -149,6 +151,9 @@ export default class Controller {
                     currentRenderer.on('backButtonClicked', () => {
                         this._goBackOneStepInStory();
                     });
+                    currentRenderer.on('switchedRepresentation', (label) => {
+                        this._lastSwitchableLabel = label;
+                    });
                     this._currentRenderer = currentRenderer;
                     currentRenderer.willStart();
                 } else {
@@ -156,6 +161,14 @@ export default class Controller {
                         'Do not know how to render',
                         representation.representation_type,
                     );
+                }
+
+                // try to remain consistent across NEs with Switchable Representations
+                if (currentRenderer instanceof SwitchableRenderer) {
+                    if (this._lastSwitchableLabel) {
+                        console.log('Switchable again: stay on ', this._lastSwitchableLabel);
+                        currentRenderer.switchToRepresentationWithLabel(this._lastSwitchableLabel);
+                    }
                 }
 
                 // tell story renderer that we've changed
@@ -342,4 +355,5 @@ export default class Controller {
     _storyTarget: HTMLDivElement;
     _linearStoryPath: Array<StoryPathItem>;
     _currentNarrativeElement: NarrativeElement;
+    _lastSwitchableLabel: string;
 }

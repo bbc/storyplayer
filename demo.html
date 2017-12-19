@@ -7,18 +7,33 @@
     <style>
         .switchbuttons img {
             width: 50px;
+            background: rgba(200, 200, 230, 0.5);
+            border: 1px solid lightgray;
+        }
+
+        .switchbuttons li {
+            list-style: none;
+        }
+
+        .switchbuttons ul {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            margin-left: 0px;
+            padding-left: 5px;
         }
 
         .inactive {
-            visibility: hidden;
+            opacity: 0.3;
+            /* visibility: hidden; */
         }
 
         .active {
             visibility: visible;
         }
 
-        #behaviour-backbutton,
-        #behaviour-nextbutton {
+        #backNEbutton,
+        #nextNEbutton {
             position: absolute;
             top: 250px;
             height: 30px;
@@ -31,11 +46,11 @@
             z-index: 5;
         }
 
-        #behaviour-backbutton {
+        #backNEbutton {
             left: 10px;
         }
 
-        #behaviour-nextbutton {
+        #nextNEbutton {
             left: 445px
         }
 
@@ -45,15 +60,22 @@
         }
 
         img.inactiveIcon {
-            width: 50px;
+            width: 30px;
         }
 
         img.activeIcon {
-            width: 80px;
+            width: 60px;
         }
 
         #chapterIcons li {
-            display: inline;
+            list-style: none;
+            /* display: inline; */
+        }
+
+        #chapterIcons {
+            /* position: absolute;
+            top: 0px;
+            left: 430px; */
         }
 
         div#render_element {
@@ -99,7 +121,7 @@
                     "tags": {},
                     "type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/icons/presenter.svg"
+                        "image_src": "./dist/democontent/presenter.svg"
                     }
                 },
                 {
@@ -110,7 +132,7 @@
                     "tags": {},
                     "type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/icons/overhead.svg"
+                        "image_src": "./dist/democontent/overhead.svg"
                     }
                 },
                 {
@@ -121,7 +143,7 @@
                     "tags": {},
                     "type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/icons/hands.svg"
+                        "image_src": "./dist/democontent/hands.svg"
                     }
                 },
                 {
@@ -286,7 +308,7 @@
                     "tags": {},
                     "type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/frog/colour_flog1.svg"
+                        "image_src": "./dist/democontent/colour_flog1.svg"
                     }
                 },
                 {
@@ -297,7 +319,7 @@
                     "tags": {},
                     "type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/frog/colour_flog2.svg"
+                        "image_src": "./dist/democontent/colour_flog2.svg"
                     }
                 },
                 {
@@ -326,7 +348,7 @@
                     "id": "3f0f5f04-c3e1-456b-91ce-37a0a62fc681",
                     "description": "",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/frog/colour_flog3.svg"
+                        "image_src": "./dist/democontent/colour_flog3.svg"
                     },
                     "version": "0.0",
                     "name": "Make Step 3 Image",
@@ -337,7 +359,7 @@
                     "id": "ae9b9c9f-9a94-4449-b3de-1b2dbb2df447",
                     "description": "",
                     "assets": {
-                        "image_src": "http://localhost/~andybr/obm/makeTests/frog/colour_flog4.svg"
+                        "image_src": "./dist/democontent/colour_flog4.svg"
                     },
                     "version": "0.0",
                     "name": "Make Step 4 Image",
@@ -1236,7 +1258,7 @@
     <script>
         (function () {
             const config = JSON.parse(document.getElementById('romper-story').textContent);
-            const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 500));
+            const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 100));
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
@@ -1247,11 +1269,12 @@
                 // ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
                 mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => {
                     if (resolvedUri === '') {
-                        return 'http://localhost/~andybr/obm/nothingtosee.mp4#t=[2]';
+                        return './dist/democontent/bbctestcard.mp4';
+                    } else if (resolvedUri.indexOf('dist/democontent') !== -1) {
+                        return resolvedUri;
                     } else if (resolvedUri.indexOf('localhost') === -1) {
-                        return 'http://localhost/~andybr/obm/nothingtosee.mp4';
-                    }
-                    else {
+                        return './dist/democontent/bbctestcard.mp4';
+                    } else {
                         return resolvedUri;
                     }
                     // resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri');
