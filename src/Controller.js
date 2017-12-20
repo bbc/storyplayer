@@ -122,11 +122,9 @@ export default class Controller {
     _handleBackground(representation: Representation) {
         if (representation.asset_collection.background) {
             const newBackgroundAssetCollection = representation.asset_collection.background;
-            if (this._rendererState.lastBackgroundAssetCollectionId) {
-                if (this._rendererState
-                    .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
-                    console.log('maintain background');
-                }
+            if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
+                .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
+                console.log('maintain background');
             } else {
                 console.log('new background');
                 if (this._backgroundRenderer) {
