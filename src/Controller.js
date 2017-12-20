@@ -218,7 +218,8 @@ export default class Controller {
                     if (currentRenderer) {
                         const choiceIndex = currentRenderer._currentRendererIndex;
                         if (currentRenderer && currentRenderer._representation.choices) {
-                            const chosenRepresentation = currentRenderer._representation.choices[choiceIndex].representation;
+                            const chosenRepresentation = currentRenderer._representation
+                                .choices[choiceIndex].representation;
                             this._handleBackground(chosenRepresentation);
                         }
                     }

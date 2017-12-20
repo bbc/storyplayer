@@ -73,6 +73,7 @@ export type AssetCollection = {
     version: string,
     name: string,
     tags: Tags,
+    type: string,
     assets: {
         audio_src?: string,
         image_src?: string,
