@@ -22,7 +22,7 @@ export default function BackgroundRendererFactory(assetCollectionType: string, r
             target,
         );
     } else {
-        console.error(`Do not know how to render background ${assetCollectionType.type}`);
+        console.error(`Do not know how to render background ${assetCollectionType}`);
     }
     console.log('Factory made', currentRenderer);
     return currentRenderer;

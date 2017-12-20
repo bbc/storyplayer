@@ -1,20 +1,6 @@
 // @flow
 
 import BackgroundRenderer from './BackgroundRenderer';
-/*
-    "asset_collections": [
-        {
-            "id": "d22484f9-da14-484b-8051-71be36b2227f",
-            "name": "Looping Background Music",
-            "description": "This background music loops throughout the experience and is played under each step of the make",
-            "version": "0:0",
-            "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-types:looping-audio/v1.0",
-            "assets": {
-                "audio_src": "urn:x-ipstudio:entity:package:af4dfbe4-5efc-46a8-ab6e-a50b891ec119"
-            }
-        },
-*/
 
 export default class BsackgroundAudioRenderer extends BackgroundRenderer {
     start() {
@@ -24,7 +10,6 @@ export default class BsackgroundAudioRenderer extends BackgroundRenderer {
 
     _renderBackground() {
         const audioElement = document.createElement('audio');
-        // audioElement.loop;
         this._getBackgroundAssetCollection()
             .then((bg) => {
                 if (bg && bg.assets.audio_src) {

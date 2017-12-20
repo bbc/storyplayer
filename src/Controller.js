@@ -179,8 +179,6 @@ export default class Controller {
                     this._neTarget,
                 );
 
-                this._handleBackground(representation);
-
                 if (currentRenderer) {
                     // render buttons if appropriate
                     if (this._getIdOfPreviousNode()) currentRenderer.renderBackButton();
@@ -198,8 +196,9 @@ export default class Controller {
                     currentRenderer.on('backButtonClicked', () => {
                         this._goBackOneStepInStory();
                     });
-                    currentRenderer.on('switchedRepresentation', (label) => {
-                        this._rendererState.lastSwitchableLabel = label;
+                    currentRenderer.on('switchedRepresentation', (choice) => {
+                        this._rendererState.lastSwitchableLabel = choice.label;
+                        this._handleBackground(choice.representation);
                     });
                     this._currentRenderer = currentRenderer;
                     currentRenderer.willStart();
@@ -216,6 +215,16 @@ export default class Controller {
                         currentRenderer.switchToRepresentationWithLabel(this
                             ._rendererState.lastSwitchableLabel);
                     }
+                    if (currentRenderer) {
+                        const choiceIndex = currentRenderer._currentRendererIndex;
+                        if (currentRenderer && currentRenderer._representation.choices) {
+                            const chosenRepresentation = currentRenderer._representation.choices[choiceIndex].representation;
+                            this._handleBackground(chosenRepresentation);
+                        }
+                    }
+                } else {
+                    // handle backgrounds
+                    this._handleBackground(representation);
                 }
 
                 // tell story renderer that we've changed
