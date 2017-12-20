@@ -2,7 +2,7 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, Renderers } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import type BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
@@ -10,6 +10,7 @@ import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
+import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 
 export default class Controller {
     constructor(
@@ -25,6 +26,7 @@ export default class Controller {
         this._storyId = null;
         this._reasoner = null;
         this._currentRenderer = null;
+        this._backgroundRenderer = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._fetchPresentation = fetchPresentation;
@@ -35,7 +37,10 @@ export default class Controller {
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
-        this._lastSwitchableLabel = ''; // the label of the last selected switchable choice
+        this._rendererState = {
+            lastSwitchableLabel: '', // the label of the last selected switchable choice
+            lastBackgroundAssetCollectionId: '', // the id of the background asset collection
+        };
         // probably want to instantiate a full history class?
     }
 
@@ -114,6 +119,44 @@ export default class Controller {
         }
     }
 
+    _handleBackground(representation: Representation) {
+        if (representation.asset_collection.background) {
+            const newBackgroundAssetCollection = representation.asset_collection.background;
+            if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
+                .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
+                console.log('maintain background');
+            } else {
+                console.log('new background');
+                if (this._backgroundRenderer) {
+                    this._backgroundRenderer.destroy();
+                }
+                this._fetchAssetCollection(newBackgroundAssetCollection)
+                    .then((bgAssetCollection) => {
+                        // need to use a factory based on the background asset_collection type...
+                        const backgroundRenderer = BackgroundRendererFactory(
+                            bgAssetCollection.type,
+                            representation,
+                            this._fetchAssetCollection,
+                            this._fetchMedia,
+                            this._backgroundTarget,
+                        );
+                        if (backgroundRenderer) {
+                            this._backgroundRenderer = backgroundRenderer;
+                            backgroundRenderer.start();
+                        }
+                    });
+                this._rendererState
+                    .lastBackgroundAssetCollectionId = newBackgroundAssetCollection;
+            }
+        } else {
+            this._rendererState.lastBackgroundAssetCollectionId = '';
+            console.log('no background');
+            if (this._backgroundRenderer) {
+                this._backgroundRenderer.destroy();
+            }
+        }
+    }
+
     // respond to a change in the Narrative Element
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
         if (this._currentRenderer) {
@@ -151,8 +194,9 @@ export default class Controller {
                     currentRenderer.on('backButtonClicked', () => {
                         this._goBackOneStepInStory();
                     });
-                    currentRenderer.on('switchedRepresentation', (label) => {
-                        this._lastSwitchableLabel = label;
+                    currentRenderer.on('switchedRepresentation', (choice) => {
+                        this._rendererState.lastSwitchableLabel = choice.label;
+                        this._handleBackground(choice.representation);
                     });
                     this._currentRenderer = currentRenderer;
                     currentRenderer.willStart();
@@ -165,10 +209,21 @@ export default class Controller {
 
                 // try to remain consistent across NEs with Switchable Representations
                 if (currentRenderer instanceof SwitchableRenderer) {
-                    if (this._lastSwitchableLabel) {
-                        console.log('Switchable again: stay on ', this._lastSwitchableLabel);
-                        currentRenderer.switchToRepresentationWithLabel(this._lastSwitchableLabel);
+                    if (this._rendererState.lastSwitchableLabel) {
+                        currentRenderer.switchToRepresentationWithLabel(this
+                            ._rendererState.lastSwitchableLabel);
                     }
+                    if (currentRenderer) {
+                        const choiceIndex = currentRenderer._currentRendererIndex;
+                        if (currentRenderer && currentRenderer._representation.choices) {
+                            const chosenRepresentation = currentRenderer._representation
+                                .choices[choiceIndex].representation;
+                            this._handleBackground(chosenRepresentation);
+                        }
+                    }
+                } else {
+                    // handle backgrounds
+                    this._handleBackground(representation);
                 }
 
                 // tell story renderer that we've changed
@@ -313,6 +368,9 @@ export default class Controller {
         this._storyTarget = document.createElement('div');
         this._storyTarget.id = 'story_element';
         this._target.appendChild(this._storyTarget);
+        this._backgroundTarget = document.createElement('div');
+        this._backgroundTarget.id = 'background_element';
+        this._target.appendChild(this._backgroundTarget);
     }
 
     reset() {
@@ -339,7 +397,9 @@ export default class Controller {
     _storyId: ?string;
     _reasoner: ?StoryReasoner;
     _currentRenderer: ?BaseRenderer;
+    _backgroundRenderer: ?BaseRenderer;
     _target: HTMLElement;
+    _backgroundTarget: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
     _fetchPresentation: PresentationFetcher;
     _fetchAssetCollection: AssetCollectionFetcher;
@@ -355,5 +415,8 @@ export default class Controller {
     _storyTarget: HTMLDivElement;
     _linearStoryPath: Array<StoryPathItem>;
     _currentNarrativeElement: NarrativeElement;
-    _lastSwitchableLabel: string;
+    _rendererState: {
+        lastSwitchableLabel: string,
+        lastBackgroundAssetCollectionId: string,
+    };
 }

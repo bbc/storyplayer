@@ -72,7 +72,7 @@ export default class SwitchableRenderer extends BaseRenderer {
      */
     switchToRepresentationAtIndex(choiceIndex: number) {
         if (this._representation.choices && this._representation.choices[choiceIndex]) {
-            this.emit('switchedRepresentation', this._representation.choices[choiceIndex].label);
+            this.emit('switchedRepresentation', this._representation.choices[choiceIndex]);
         }
         if (choiceIndex >= 0 && choiceIndex < this._choiceRenderers.length) {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
