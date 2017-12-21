@@ -119,22 +119,6 @@ export default class Controller {
         }
     }
 
-    // get the current representation of a renderer
-    // resolves the selected representation in a switchable
-    static _getRepresentation(renderer: BaseRenderer): ?Representation {
-        let representation;
-        if (renderer instanceof SwitchableRenderer) {
-            const choiceIndex = renderer._currentRendererIndex;
-            if (renderer && renderer._representation.choices) {
-                representation = renderer._representation
-                    .choices[choiceIndex].representation;
-            }
-        } else {
-            representation = renderer._representation;
-        }
-        return representation;
-    }
-
     // given a new representation, handle the background rendering
     _handleBackground(representation: Representation) {
         if (representation && representation.asset_collection.background) {
@@ -255,7 +239,7 @@ export default class Controller {
                     this._swapRenderers(newRenderer);
 
                     // handle backgrounds
-                    const representationWithBackground = Controller._getRepresentation(newRenderer);
+                    const representationWithBackground = newRenderer.getRepresentation();
                     if (representationWithBackground) {
                         this._handleBackground(representationWithBackground);
                     }
