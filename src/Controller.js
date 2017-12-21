@@ -2,7 +2,7 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
@@ -20,7 +20,7 @@ export default class Controller {
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
-        renderers: Renderers,
+        // renderers: Renderers,
         fetchStory: StoryFetcher,
     ) {
         this._storyId = null;
@@ -33,7 +33,7 @@ export default class Controller {
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
-        this._renderers = renderers;
+        // this._renderers = renderers;
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
@@ -136,7 +136,7 @@ export default class Controller {
     }
 
     // given a new representation, handle the background rendering
-    _handleBackground(representation: ?Representation) {
+    _handleBackground(representation: Representation) {
         if (representation && representation.asset_collection.background) {
             const newBackgroundAssetCollection = representation.asset_collection.background;
             if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
@@ -255,7 +255,10 @@ export default class Controller {
                     this._swapRenderers(newRenderer);
 
                     // handle backgrounds
-                    this._handleBackground(Controller._getRepresentation(newRenderer));
+                    const representationWithBackground = Controller._getRepresentation(newRenderer);
+                    if (representationWithBackground) {
+                        this._handleBackground(representationWithBackground);
+                    }
                 }
 
                 // tell story renderer that we've changed
@@ -438,7 +441,7 @@ export default class Controller {
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
     _fetchStory: StoryFetcher;
-    _renderers: Renderers;
+    // _renderers: Renderers;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;

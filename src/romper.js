@@ -32,7 +32,6 @@ module.exports = {
             mergedSettings.assetCollectionFetcher,
             representationReasoner,
             mergedSettings.mediaFetcher,
-            mergedSettings.renderers,
             mergedSettings.storyFetcher,
         );
     },
