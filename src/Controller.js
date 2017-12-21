@@ -45,7 +45,6 @@ export default class Controller {
     start(storyId: string) {
         this._storyId = storyId;
 
-
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
             alert('Story ended!'); // eslint-disable-line no-alert
@@ -213,7 +212,7 @@ export default class Controller {
 
         // render buttons if appropriate
         if (this._getIdOfPreviousNode()) newRenderer.renderBackButton();
-        if (this._reasoner && this._isFollowedByAnotherNode(this._reasoner)) {
+        if (this._reasoner && this._reasoner.hasNextNode()) {
             newRenderer.renderNextButton();
         }
 
@@ -339,23 +338,6 @@ export default class Controller {
                 this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }
         }
-    }
-
-    // is there a next node in the path.  Takes current reasoner and
-    // recurses into subStoryReasoners
-    _isFollowedByAnotherNode(reasoner: StoryReasoner): boolean {
-        // can't have two end story links, so if multiple links, must continue
-        if (reasoner._currentNarrativeElement.links.length > 1) {
-            return true;
-        }
-        // if only link is to an NE, must continue
-        if (reasoner._currentNarrativeElement.links[0].link_type === 'NARRATIVE_ELEMENT') {
-            return true;
-        }
-        // if not, check with reasoner whether we go into another story
-        const subReasoner = reasoner._subStoryReasoner;
-        if (subReasoner) return this._isFollowedByAnotherNode(subReasoner);
-        return false;
     }
 
     // get the id of the previous node

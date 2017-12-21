@@ -116,7 +116,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     // in which case return main Switchable Representation
     getRepresentation() {
         if (this._representation.choices && this._representation
-            .choices.length <= this._currentRendererIndex) {
+            .choices.length >= this._currentRendererIndex) {
             return this._representation
                 .choices[this._currentRendererIndex].representation;
         }
