@@ -6,10 +6,7 @@ import type { Representation, AssetCollectionFetcher } from '../romper';
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class SimpleAVRenderer extends BaseRenderer {
-    _choiceRenderers: Array<?BaseRenderer>;
-    _choiceDiv: HTMLDivElement;
     _fetchMedia: MediaFetcher;
-    _currentRenderer: number;
     _hls: Object;
 
     constructor(
@@ -19,13 +16,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-
-        this._choiceDiv = document.createElement('div');
-        this._choiceDiv.id = 'subrenderer';
         if (Hls.isSupported()) {
             this._hls = new Hls();
         }
-        this._currentRenderer = 0;
     }
 
     start() {
@@ -43,7 +36,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 .then((fg) => {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
-                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
                             this.populateVideoElement(videoElement, mediaUrl);
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
