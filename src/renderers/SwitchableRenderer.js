@@ -112,10 +112,15 @@ export default class SwitchableRenderer extends BaseRenderer {
         // this._renderDataModelInfo();
     }
 
+    // return the currently chosen representation, unless we can't
+    // in which case return main Switchable Representation
     getRepresentation() {
-        // return this._choiceRenderers[this._currentRendererIndex].getRepresentation();
-        return this._representation
-            .choices[this._currentRendererIndex].representation;
+        if (this._representation.choices && this._representation
+            .choices.length <= this._currentRendererIndex) {
+            return this._representation
+                .choices[this._currentRendererIndex].representation;
+        }
+        return this._representation;
     }
 
     // fetch the icon asset for the given representation and set
