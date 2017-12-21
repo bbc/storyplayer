@@ -112,6 +112,12 @@ export default class SwitchableRenderer extends BaseRenderer {
         // this._renderDataModelInfo();
     }
 
+    getRepresentation() {
+        // return this._choiceRenderers[this._currentRendererIndex].getRepresentation();
+        return this._representation
+            .choices[this._currentRendererIndex].representation;
+    }
+
     // fetch the icon asset for the given representation and set
     // the source of the IMG element
     _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {

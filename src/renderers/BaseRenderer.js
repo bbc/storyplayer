@@ -58,6 +58,14 @@ export default class BaseRenderer extends EventEmitter {
 
     start() { }
 
+    /**
+     * get the representation that this renderer is currently rendering
+     * @returns {Representation}
+     */
+    getRepresentation(): Representation {
+        return this._representation;
+    }
+
     complete() {
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours('complete', 'complete')) {
