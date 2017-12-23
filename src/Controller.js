@@ -126,8 +126,10 @@ export default class Controller {
     //     continue with the current one (do nothing) if background is same asset_collection
     //  or start a new background renderer
     _handleBackgroundRendering(representation: Representation) {
-        if (representation && representation.asset_collection.background) {
-            const newBackgroundAssetCollection = representation.asset_collection.background;
+        if (representation
+            && representation.asset_collection.background
+            && representation.asset_collection.background.length > 0) {
+            const newBackgroundAssetCollection = representation.asset_collection.background[0];
             if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
                 .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
                 // console.log('maintain background');

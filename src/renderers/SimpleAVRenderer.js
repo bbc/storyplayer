@@ -63,6 +63,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             });
         } else {
             videoElement.setAttribute('src', mediaUrl);
+            videoElement.setAttribute('muted', 'true');
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.play();
             });
@@ -90,8 +91,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 });
         }
 
-        if (this._representation.asset_collection.background) {
-            this._fetchAssetCollection(this._representation.asset_collection.background)
+        if (this._representation.asset_collection.background
+            && this._representation.asset_collection.background.length > 0) {
+            this._fetchAssetCollection(this._representation.asset_collection.background[0])
                 .then((bg) => {
                     backgroundItem.textContent = `background: ${bg.name}`;
                     if (bg.assets.audio_src) {

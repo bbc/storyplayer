@@ -2,7 +2,7 @@
 
 import BackgroundRenderer from './BackgroundRenderer';
 
-export default class BsackgroundAudioRenderer extends BackgroundRenderer {
+export default class BackgroundAudioRenderer extends BackgroundRenderer {
     start() {
         this._renderBackground();
         // this._renderDataModelInfo();
@@ -10,7 +10,7 @@ export default class BsackgroundAudioRenderer extends BackgroundRenderer {
 
     _renderBackground() {
         const audioElement = document.createElement('audio');
-        this._getBackgroundAssetCollection()
+        this._getBackgroundAssetCollections()
             .then((bg) => {
                 if (bg && bg.assets.audio_src) {
                     this._fetchMedia(bg.assets.audio_src).then((mediaUrl) => {
@@ -34,8 +34,9 @@ export default class BsackgroundAudioRenderer extends BackgroundRenderer {
         this._target.appendChild(assetList);
 
 
-        if (this._representation.asset_collection.background) {
-            this._fetchAssetCollection(this._representation.asset_collection.background)
+        if (this._representation.asset_collection.background
+            && this._representation.asset_collection.background.length > 0) {
+            this._fetchAssetCollection(this._representation.asset_collection.background[0])
                 .then((bg) => {
                     backgroundItem.textContent = `background: ${bg.name}`;
                     if (bg.assets.audio_src) {

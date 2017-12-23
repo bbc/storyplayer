@@ -49,8 +49,11 @@ export type Representation = {
     representation_type: string,
     asset_collection: {
         foreground?: string,
-        background?: string,
-        icon?: string,
+        background?: Array<string>,
+        icon?: {
+            default: string,
+            highlight?: string,
+        },
     },
     choices?: Array<{
         label: string,

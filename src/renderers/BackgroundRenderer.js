@@ -11,12 +11,13 @@ export default class BackgroundRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-        this._getBackgroundAssetCollection();
+        this._getBackgroundAssetCollections();
     }
 
-    _getBackgroundAssetCollection(): Promise<?AssetCollection> {
-        if (this._representation.asset_collection.background) {
-            const assetCollectionId = this._representation.asset_collection.background;
+    _getBackgroundAssetCollections(): Promise<?AssetCollection> {
+        if (this._representation.asset_collection.background
+            && this._representation.asset_collection.background.length > 0) {
+            const assetCollectionId = this._representation.asset_collection.background[0];
             return this._fetchAssetCollection(assetCollectionId);
         }
         return Promise.resolve(null);
