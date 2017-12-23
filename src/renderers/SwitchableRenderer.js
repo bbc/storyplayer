@@ -127,7 +127,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     // the source of the IMG element
     _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
         if (choiceRepresentation.asset_collection.icon) {
-            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon)
+            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon.default)
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
@@ -170,7 +170,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon).then((icon) => {
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
                 iconData.textContent += `${icon.name}`;
                 if (icon.assets.image_src) {
                     iconData.textContent += ` from ${icon.assets.image_src}`;

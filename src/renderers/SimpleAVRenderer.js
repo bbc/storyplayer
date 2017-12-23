@@ -105,7 +105,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon)
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
                 .then((icon) => {
                     iconItem.textContent = `icon: ${icon.name}`;
                     if (icon.assets.image_src) {

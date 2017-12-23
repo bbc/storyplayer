@@ -65,7 +65,7 @@ export default class StoryIconRenderer extends EventEmitter {
         }
     }
 
-    // go thtough the list of path items and build some icons, appending them
+    // go through the list of path items and build some icons, appending them
     // to the target div with some click handling
     _buildAssets(): Promise<> {
         const promises = [];
@@ -73,7 +73,7 @@ export default class StoryIconRenderer extends EventEmitter {
             if (!pathItem.representation.asset_collection.icon) {
                 promises.push(Promise.resolve(null));
             } else {
-                const iconAssetId = pathItem.representation.asset_collection.icon;
+                const iconAssetId = pathItem.representation.asset_collection.icon.default;
                 promises.push(this._fetchAssetCollection(iconAssetId));
             }
         });
