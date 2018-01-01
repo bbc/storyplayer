@@ -1,17 +1,19 @@
 // @flow
 
 import type BackgroundRenderer from './BackgroundRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher, AssetCollection } from '../romper';
 import BackgroundAudioRenderer from './BackgroundAudioRenderer';
 
 export default function BackgroundRendererFactory(
     assetCollectionType: string,
     representation: Representation,
     assetCollectionFetcher: AssetCollectionFetcher,
+    assetCollection: AssetCollection,
     mediaFetcher: MediaFetcher, target: HTMLElement,
 ): ?BackgroundRenderer {
     const RENDERERS = {
-        'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0': BackgroundAudioRenderer,
+        'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0':
+            BackgroundAudioRenderer,
     };
 
     let currentRenderer;
@@ -21,6 +23,7 @@ export default function BackgroundRendererFactory(
         currentRenderer = new Renderer(
             representation,
             assetCollectionFetcher,
+            assetCollection,
             mediaFetcher,
             target,
         );

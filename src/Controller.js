@@ -25,7 +25,7 @@ export default class Controller {
         this._storyId = null;
         this._reasoner = null;
         this._currentRenderer = null;
-        this._backgroundRenderer = null;
+        this._backgroundRenderers = {};
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._fetchPresentation = fetchPresentation;
@@ -37,7 +37,6 @@ export default class Controller {
         this._linearStoryPath = [];
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
-            lastBackgroundAssetCollectionId: '', // the id of the background asset collection
         };
         // probably want to instantiate a full history class?
     }
@@ -126,42 +125,46 @@ export default class Controller {
     //     continue with the current one (do nothing) if background is same asset_collection
     //  or start a new background renderer
     _handleBackgroundRendering(representation: Representation) {
+        let newBackgrounds = [];
         if (representation
-            && representation.asset_collection.background
-            && representation.asset_collection.background.length > 0) {
-            const newBackgroundAssetCollection = representation.asset_collection.background[0];
-            if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
-                .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
-                // console.log('maintain background');
+            && representation.asset_collection.background) {
+            newBackgrounds = representation.asset_collection.background;
+        }
+
+        // remove dead backgrounds
+        Object.keys(this._backgroundRenderers).forEach((rendererACId) => {
+            if (newBackgrounds.indexOf(rendererACId) === -1) {
+                // console.log('destroying background', rendererACId);
+                this._backgroundRenderers[rendererACId].destroy();
+                delete this._backgroundRenderers[rendererACId];
+            }
+        });
+
+        newBackgrounds.forEach((backgroundAssetCollectionId) => {
+            // maintain ones in both, add new ones, remove old ones
+            if (Object.prototype.hasOwnProperty
+                .call(this._backgroundRenderers, backgroundAssetCollectionId)) {
+                // console.log('maintain background', backgroundAssetCollectionId);
             } else {
-                // console.log('new background');
-                if (this._backgroundRenderer) {
-                    this._backgroundRenderer.destroy();
-                }
-                this._fetchAssetCollection(newBackgroundAssetCollection)
+                // console.log('new background', backgroundAssetCollectionId);
+                this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
                             bgAssetCollection.type,
                             representation,
                             this._fetchAssetCollection,
+                            bgAssetCollection,
                             this._fetchMedia,
                             this._backgroundTarget,
                         );
                         if (backgroundRenderer) {
-                            this._backgroundRenderer = backgroundRenderer;
                             backgroundRenderer.start();
+                            this._backgroundRenderers[backgroundAssetCollectionId]
+                                = backgroundRenderer;
                         }
                     });
-                this._rendererState
-                    .lastBackgroundAssetCollectionId = newBackgroundAssetCollection;
             }
-        } else {
-            this._rendererState.lastBackgroundAssetCollectionId = '';
-            // console.log('no background');
-            if (this._backgroundRenderer) {
-                this._backgroundRenderer.destroy();
-            }
-        }
+        });
     }
 
     // create a new renderer for the given representation, and attach
@@ -403,7 +406,7 @@ export default class Controller {
     _storyId: ?string;
     _reasoner: ?StoryReasoner;
     _currentRenderer: ?BaseRenderer;
-    _backgroundRenderer: ?BaseRenderer;
+    _backgroundRenderers: { [key: string]: BaseRenderer }; // map of assetCollectionIds to renderers
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
@@ -422,6 +425,5 @@ export default class Controller {
     _currentNarrativeElement: NarrativeElement;
     _rendererState: {
         lastSwitchableLabel: string,
-        lastBackgroundAssetCollectionId: string,
     };
 }
