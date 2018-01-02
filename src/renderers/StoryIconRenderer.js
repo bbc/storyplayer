@@ -20,7 +20,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconListElement: HTMLElement; // the <ul> containing the icons
-    _iconUrlMap: { [key: string]: ?{} };
+    _iconUrlMap: { [key: string]: ?{ default: ?string, highlight: ?string } }; // urls of default and highlight icons
 
     /**
      * Create a new instance of a StoryIconRenderer
