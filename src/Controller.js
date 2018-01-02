@@ -11,6 +11,7 @@ import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
+import BackgroundRenderer from './renderers/BackgroundRenderer';
 
 export default class Controller {
     constructor(
@@ -142,8 +143,7 @@ export default class Controller {
 
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
-            if (Object.prototype.hasOwnProperty
-                .call(this._backgroundRenderers, backgroundAssetCollectionId)) {
+            if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
                 // console.log('maintain background', backgroundAssetCollectionId);
             } else {
                 // console.log('new background', backgroundAssetCollectionId);
@@ -151,8 +151,6 @@ export default class Controller {
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
                             bgAssetCollection.type,
-                            representation,
-                            this._fetchAssetCollection,
                             bgAssetCollection,
                             this._fetchMedia,
                             this._backgroundTarget,
@@ -406,7 +404,7 @@ export default class Controller {
     _storyId: ?string;
     _reasoner: ?StoryReasoner;
     _currentRenderer: ?BaseRenderer;
-    _backgroundRenderers: { [key: string]: BaseRenderer }; // map of assetCollectionIds to renderers
+    _backgroundRenderers: { [key: string]: BackgroundRenderer };
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
