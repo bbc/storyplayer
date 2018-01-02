@@ -2,29 +2,29 @@
 
 import BackgroundRenderer from './BackgroundRenderer';
 
-export default class BsackgroundAudioRenderer extends BackgroundRenderer {
+export default class BackgroundAudioRenderer extends BackgroundRenderer {
+    _audioElement: HTMLAudioElement;
+
     start() {
         this._renderBackground();
         // this._renderDataModelInfo();
     }
 
     _renderBackground() {
-        const audioElement = document.createElement('audio');
-        this._getBackgroundAssetCollection()
-            .then((bg) => {
-                if (bg && bg.assets.audio_src) {
-                    this._fetchMedia(bg.assets.audio_src).then((mediaUrl) => {
-                        audioElement.src = mediaUrl;
-                    }).catch((err) => { console.error(err, 'Notfound'); });
-                }
-                if (bg && bg.type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-                    audioElement.setAttribute('loop', 'true');
-                }
-            });
-        audioElement.addEventListener('loadeddata', () => {
-            audioElement.play();
+        this._audioElement = document.createElement('audio');
+        if (this._assetCollection && this._assetCollection.assets.audio_src) {
+            this._fetchMedia(this._assetCollection.assets.audio_src).then((mediaUrl) => {
+                this._audioElement.src = mediaUrl;
+            }).catch((err) => { console.error(err, 'Notfound'); });
+        }
+        if (this._assetCollection && this._assetCollection
+            .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
+            this._audioElement.setAttribute('loop', 'true');
+        }
+        this._audioElement.addEventListener('loadeddata', () => {
+            this._audioElement.play();
         });
-        this._target.appendChild(audioElement);
+        this._target.appendChild(this._audioElement);
     }
 
     _renderDataModelInfo() {
@@ -33,22 +33,16 @@ export default class BsackgroundAudioRenderer extends BackgroundRenderer {
         assetList.appendChild(backgroundItem);
         this._target.appendChild(assetList);
 
-
-        if (this._representation.asset_collection.background) {
-            this._fetchAssetCollection(this._representation.asset_collection.background)
-                .then((bg) => {
-                    backgroundItem.textContent = `background: ${bg.name}`;
-                    if (bg.assets.audio_src) {
-                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
-                    }
-                });
+        if (this._assetCollection) {
+            backgroundItem.textContent = `background: ${this._assetCollection.name}`;
+            if (this._assetCollection.assets.audio_src) {
+                backgroundItem.textContent += ` from ${this._assetCollection.assets.audio_src}`;
+            }
         }
     }
 
     destroy() {
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
-        }
+        this._target.removeChild(this._audioElement);
         super.destroy();
     }
 }

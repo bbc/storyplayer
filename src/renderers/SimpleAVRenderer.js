@@ -6,10 +6,7 @@ import type { Representation, AssetCollectionFetcher } from '../romper';
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class SimpleAVRenderer extends BaseRenderer {
-    _choiceRenderers: Array<?BaseRenderer>;
-    _choiceDiv: HTMLDivElement;
     _fetchMedia: MediaFetcher;
-    _currentRenderer: number;
     _hls: Object;
 
     constructor(
@@ -19,13 +16,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-
-        this._choiceDiv = document.createElement('div');
-        this._choiceDiv.id = 'subrenderer';
         if (Hls.isSupported()) {
             this._hls = new Hls();
         }
-        this._currentRenderer = 0;
     }
 
     start() {
@@ -43,7 +36,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 .then((fg) => {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
-                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
                             this.populateVideoElement(videoElement, mediaUrl);
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
@@ -71,6 +63,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             });
         } else {
             videoElement.setAttribute('src', mediaUrl);
+            videoElement.setAttribute('muted', 'true');
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.play();
             });
@@ -98,8 +91,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 });
         }
 
-        if (this._representation.asset_collection.background) {
-            this._fetchAssetCollection(this._representation.asset_collection.background)
+        if (this._representation.asset_collection.background
+            && this._representation.asset_collection.background.length > 0) {
+            this._fetchAssetCollection(this._representation.asset_collection.background[0])
                 .then((bg) => {
                     backgroundItem.textContent = `background: ${bg.name}`;
                     if (bg.assets.audio_src) {
@@ -111,7 +105,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon)
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
                 .then((icon) => {
                     iconItem.textContent = `icon: ${icon.name}`;
                     if (icon.assets.image_src) {

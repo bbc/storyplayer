@@ -206,6 +206,31 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.start();
     }
 
+    /**
+     * Does the current narrative element have any ongoing links, or is it the end of the story?
+     * Recurses into substories.
+     */
+    hasNextNode(): boolean {
+        return this._isFollowedByAnotherNode(this);
+    }
+
+    // is there a next node in the path.  Takes a reasoner and
+    // recurses into its subStoryReasoners
+    _isFollowedByAnotherNode(reasoner: StoryReasoner): boolean {
+        // can't have two end story links, so if multiple links, must continue
+        if (reasoner._currentNarrativeElement.links.length > 1) {
+            return true;
+        }
+        // if only link is to an NE, must continue
+        if (reasoner._currentNarrativeElement.links[0].link_type === 'NARRATIVE_ELEMENT') {
+            return true;
+        }
+        // if not, check with reasoner whether we go into another story
+        const subReasoner = reasoner._subStoryReasoner;
+        if (subReasoner) return this._isFollowedByAnotherNode(subReasoner);
+        return false;
+    }
+
     // is the narrative element with id neid one of the narrative elements
     // that reasoner is currently reasoning over ?
     _isInReasoner(narrativeElementId: string): boolean {

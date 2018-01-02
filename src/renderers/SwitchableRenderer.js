@@ -112,11 +112,22 @@ export default class SwitchableRenderer extends BaseRenderer {
         // this._renderDataModelInfo();
     }
 
+    // return the currently chosen representation, unless we can't
+    // in which case return main Switchable Representation
+    getRepresentation() {
+        if (this._representation.choices && this._representation
+            .choices.length >= this._currentRendererIndex) {
+            return this._representation
+                .choices[this._currentRendererIndex].representation;
+        }
+        return this._representation;
+    }
+
     // fetch the icon asset for the given representation and set
     // the source of the IMG element
     _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
         if (choiceRepresentation.asset_collection.icon) {
-            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon)
+            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon.default)
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
@@ -159,7 +170,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon).then((icon) => {
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
                 iconData.textContent += `${icon.name}`;
                 if (icon.assets.image_src) {
                     iconData.textContent += ` from ${icon.assets.image_src}`;

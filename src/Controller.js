@@ -2,15 +2,16 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, Renderers } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
-import type BaseRenderer from './renderers/BaseRenderer';
+import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
+import BackgroundRenderer from './renderers/BackgroundRenderer';
 
 export default class Controller {
     constructor(
@@ -20,33 +21,29 @@ export default class Controller {
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
-        renderers: Renderers,
         fetchStory: StoryFetcher,
     ) {
         this._storyId = null;
         this._reasoner = null;
         this._currentRenderer = null;
-        this._backgroundRenderer = null;
+        this._backgroundRenderers = {};
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._fetchPresentation = fetchPresentation;
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
-        this._renderers = renderers;
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
-            lastBackgroundAssetCollectionId: '', // the id of the background asset collection
         };
         // probably want to instantiate a full history class?
     }
 
     start(storyId: string) {
         this._storyId = storyId;
-
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -56,36 +53,8 @@ export default class Controller {
             alert(`Error: ${err}`); // eslint-disable-line no-alert
         };
 
-        // StoryPathWalker stuff:
-        // create an spw to see if the story is linear or not
-        const spw = new StoryPathWalker(
-            this._fetchStory,
-            this._fetchPresentation,
-            this._storyReasonerFactory,
-        );
-
-        // handle our StoryPathWalker reaching the end of its travels:
-        // get spw to resolve the list of presentations into representations
-        // then (if story is linear) create and start a StoryIconRenderer
-        const _handleWalkEnd = () => {
-            spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
-                this._linearStoryPath = storyItemPath;
-                this._renderStory = new StoryIconRenderer(
-                    storyItemPath,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._storyTarget,
-                );
-                this._renderStory.on('jumpToNarrativeElement', (neid) => {
-                    // console.log('controller received request to switch to ne', neid);
-                    this._jumpToNarrativeElement(neid);
-                });
-                this._renderStory.start();
-            });
-        };
-
-        spw.on('walkComplete', _handleWalkEnd);
-        spw.parseStory(storyId);
+        // see if we have a linear story
+        this._testForLinearityAndBuildStoryRenderer(storyId);
 
         this._storyReasonerFactory(storyId).then((reasoner) => {
             if (this._storyId !== storyId) {
@@ -106,9 +75,41 @@ export default class Controller {
         });
     }
 
+    // see if we have a linear story
+    // and if we do, create a StoryIconRenderer
+    _testForLinearityAndBuildStoryRenderer(storyId: string) {
+        // create an spw to see if the story is linear or not
+        const spw = new StoryPathWalker(
+            this._fetchStory,
+            this._fetchPresentation,
+            this._storyReasonerFactory,
+        );
+
+        // handle our StoryPathWalker reaching the end of its travels:
+        // get spw to resolve the list of presentations into representations
+        // then (if story is linear) create and start a StoryIconRenderer
+        const _handleWalkEnd = () => {
+            spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
+                this._linearStoryPath = storyItemPath;
+                this._renderStory = new StoryIconRenderer(
+                    storyItemPath,
+                    this._fetchAssetCollection,
+                    this._fetchMedia,
+                    this._storyTarget,
+                );
+                this._renderStory.on('jumpToNarrativeElement', (neid) => {
+                    this._jumpToNarrativeElement(neid);
+                });
+                this._renderStory.start();
+            });
+        };
+
+        spw.on('walkComplete', _handleWalkEnd);
+        spw.parseStory(storyId);
+    }
+
     //
-    // go to previous node in the current story
-    // @param currentNeId id of narrative element to go back from
+    // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
         const previous = this._getIdOfPreviousNode();
@@ -119,49 +120,117 @@ export default class Controller {
         }
     }
 
-    _handleBackground(representation: Representation) {
-        if (representation.asset_collection.background) {
-            const newBackgroundAssetCollection = representation.asset_collection.background;
-            if (this._rendererState.lastBackgroundAssetCollectionId && this._rendererState
-                .lastBackgroundAssetCollectionId === newBackgroundAssetCollection) {
-                console.log('maintain background');
+    // given a new representation, handle the background rendering
+    // either:
+    //     stop if there is no background
+    //     continue with the current one (do nothing) if background is same asset_collection
+    //  or start a new background renderer
+    _handleBackgroundRendering(representation: Representation) {
+        let newBackgrounds = [];
+        if (representation
+            && representation.asset_collection.background) {
+            newBackgrounds = representation.asset_collection.background;
+        }
+
+        // remove dead backgrounds
+        Object.keys(this._backgroundRenderers).forEach((rendererACId) => {
+            if (newBackgrounds.indexOf(rendererACId) === -1) {
+                // console.log('destroying background', rendererACId);
+                this._backgroundRenderers[rendererACId].destroy();
+                delete this._backgroundRenderers[rendererACId];
+            }
+        });
+
+        newBackgrounds.forEach((backgroundAssetCollectionId) => {
+            // maintain ones in both, add new ones, remove old ones
+            if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
+                // console.log('maintain background', backgroundAssetCollectionId);
             } else {
-                console.log('new background');
-                if (this._backgroundRenderer) {
-                    this._backgroundRenderer.destroy();
-                }
-                this._fetchAssetCollection(newBackgroundAssetCollection)
+                // console.log('new background', backgroundAssetCollectionId);
+                this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
-                        // need to use a factory based on the background asset_collection type...
                         const backgroundRenderer = BackgroundRendererFactory(
                             bgAssetCollection.type,
-                            representation,
-                            this._fetchAssetCollection,
+                            bgAssetCollection,
                             this._fetchMedia,
                             this._backgroundTarget,
                         );
                         if (backgroundRenderer) {
-                            this._backgroundRenderer = backgroundRenderer;
                             backgroundRenderer.start();
+                            this._backgroundRenderers[backgroundAssetCollectionId]
+                                = backgroundRenderer;
                         }
                     });
-                this._rendererState
-                    .lastBackgroundAssetCollectionId = newBackgroundAssetCollection;
             }
+        });
+    }
+
+    // create a new renderer for the given representation, and attach
+    // the standard listeners to it
+    _createNewRenderer(representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
+        const newRenderer = RendererFactory(
+            representation,
+            this._fetchAssetCollection,
+            this._fetchMedia,
+            this._neTarget,
+        );
+
+        if (newRenderer) {
+            newRenderer.on('completeStartBehaviours', () => {
+                newRenderer.start();
+            });
+            newRenderer.on('complete', () => {
+                reasoner.next();
+            });
+            newRenderer.on('nextButtonClicked', () => {
+                reasoner.next();
+            });
+            newRenderer.on('backButtonClicked', () => {
+                this._goBackOneStepInStory();
+            });
+            newRenderer.on('switchedRepresentation', (choice) => {
+                this._rendererState.lastSwitchableLabel = choice.label;
+                this._handleBackgroundRendering(choice.representation);
+            });
         } else {
-            this._rendererState.lastBackgroundAssetCollectionId = '';
-            console.log('no background');
-            if (this._backgroundRenderer) {
-                this._backgroundRenderer.destroy();
+            console.error(
+                'Do not know how to render',
+                representation.representation_type,
+            );
+        }
+        return newRenderer;
+    }
+
+    // swap the renderers over
+    // it's from here we might want to be clever with retaining elements if
+    // Renderers are of the same type
+    _swapRenderers(newRenderer: BaseRenderer) {
+        // if both same type, just update current
+        //   else
+        // destroy old renderer
+        if (this._currentRenderer) {
+            this._currentRenderer.destroy();
+        }
+        this._currentRenderer = newRenderer;
+
+        // render buttons if appropriate
+        if (this._getIdOfPreviousNode()) newRenderer.renderBackButton();
+        if (this._reasoner && this._reasoner.hasNextNode()) {
+            newRenderer.renderNextButton();
+        }
+
+        newRenderer.willStart();
+
+        if (newRenderer instanceof SwitchableRenderer) {
+            if (this._rendererState.lastSwitchableLabel) {
+                newRenderer.switchToRepresentationWithLabel(this
+                    ._rendererState.lastSwitchableLabel);
             }
         }
     }
 
-    // respond to a change in the Narrative Element
+    // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
-        if (this._currentRenderer) {
-            this._currentRenderer.destroy();
-        }
         this._currentNarrativeElement = narrativeElement;
         console.log(narrativeElement); // eslint-disable-line no-console
         this._fetchPresentation(narrativeElement.presentation.target)
@@ -170,60 +239,15 @@ export default class Controller {
                 if (this._reasoner !== reasoner) {
                     return;
                 }
-                const currentRenderer = RendererFactory(
-                    representation,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._neTarget,
-                );
 
-                if (currentRenderer) {
-                    // render buttons if appropriate
-                    if (this._getIdOfPreviousNode()) currentRenderer.renderBackButton();
-                    if (this._isFollowedByAnotherNode(reasoner)) currentRenderer.renderNextButton();
+                // create the new Renderer
+                const newRenderer = this._createNewRenderer(representation, reasoner);
 
-                    currentRenderer.on('completeStartBehaviours', () => {
-                        currentRenderer.start();
-                    });
-                    currentRenderer.on('complete', () => {
-                        reasoner.next();
-                    });
-                    currentRenderer.on('nextButtonClicked', () => {
-                        reasoner.next();
-                    });
-                    currentRenderer.on('backButtonClicked', () => {
-                        this._goBackOneStepInStory();
-                    });
-                    currentRenderer.on('switchedRepresentation', (choice) => {
-                        this._rendererState.lastSwitchableLabel = choice.label;
-                        this._handleBackground(choice.representation);
-                    });
-                    this._currentRenderer = currentRenderer;
-                    currentRenderer.willStart();
-                } else {
-                    console.error(
-                        'Do not know how to render',
-                        representation.representation_type,
-                    );
-                }
-
-                // try to remain consistent across NEs with Switchable Representations
-                if (currentRenderer instanceof SwitchableRenderer) {
-                    if (this._rendererState.lastSwitchableLabel) {
-                        currentRenderer.switchToRepresentationWithLabel(this
-                            ._rendererState.lastSwitchableLabel);
-                    }
-                    if (currentRenderer) {
-                        const choiceIndex = currentRenderer._currentRendererIndex;
-                        if (currentRenderer && currentRenderer._representation.choices) {
-                            const chosenRepresentation = currentRenderer._representation
-                                .choices[choiceIndex].representation;
-                            this._handleBackground(chosenRepresentation);
-                        }
-                    }
-                } else {
+                if (newRenderer) {
+                    // swap renderers
+                    this._swapRenderers(newRenderer);
                     // handle backgrounds
-                    this._handleBackground(representation);
+                    this._handleBackgroundRendering(newRenderer.getRepresentation());
                 }
 
                 // tell story renderer that we've changed
@@ -319,23 +343,6 @@ export default class Controller {
         }
     }
 
-    // is there a next node in the path.  Takes current reasoner and
-    // recurses into subStoryReasoners
-    _isFollowedByAnotherNode(reasoner: StoryReasoner): boolean {
-        // can't have two end story links, so if multiple links, must continue
-        if (reasoner._currentNarrativeElement.links.length > 1) {
-            return true;
-        }
-        // if only link is to an NE, must continue
-        if (reasoner._currentNarrativeElement.links[0].link_type === 'NARRATIVE_ELEMENT') {
-            return true;
-        }
-        // if not, check with reasoner whether we go into another story
-        const subReasoner = reasoner._subStoryReasoner;
-        if (subReasoner) return this._isFollowedByAnotherNode(subReasoner);
-        return false;
-    }
-
     // get the id of the previous node
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory
@@ -397,7 +404,7 @@ export default class Controller {
     _storyId: ?string;
     _reasoner: ?StoryReasoner;
     _currentRenderer: ?BaseRenderer;
-    _backgroundRenderer: ?BaseRenderer;
+    _backgroundRenderers: { [key: string]: BackgroundRenderer };
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
@@ -406,7 +413,6 @@ export default class Controller {
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
     _fetchStory: StoryFetcher;
-    _renderers: Renderers;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
@@ -417,6 +423,5 @@ export default class Controller {
     _currentNarrativeElement: NarrativeElement;
     _rendererState: {
         lastSwitchableLabel: string,
-        lastBackgroundAssetCollectionId: string,
     };
 }

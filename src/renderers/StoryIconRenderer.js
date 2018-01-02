@@ -1,8 +1,13 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AssetCollection, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { StoryPathItem } from '../StoryPathWalker';
+
+export type AssetCollectionPair = {
+    default: ?AssetCollection,
+    highlight: ?AssetCollection,
+};
 
 // Render story data (i.e., not refreshed every NE)
 // currently focused on chapter icons
@@ -15,6 +20,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconListElement: HTMLElement; // the <ul> containing the icons
+    _iconUrlMap: { [key: string]: ?{} };
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -38,11 +44,13 @@ export default class StoryIconRenderer extends EventEmitter {
         this._fetchMedia = fetchMedia;
         this._target = target;
         this._iconElementMap = {};
+        this._iconUrlMap = {};
     }
 
     start() {
         this._currentRepresentationId = this._pathItemList[0].representation.id;
-        this._buildAssets().then((iconImgElements) => {
+        this._getIconAssets().then((iconAssets) => {
+            const iconImgElements = this._buildAssets(iconAssets);
             this._deepestCommonSubstory = this._findSubStories();
             this._iconListElement = document.createElement('ul');
             this._iconListElement.id = 'chapterIcons';
@@ -65,38 +73,69 @@ export default class StoryIconRenderer extends EventEmitter {
         }
     }
 
-    // go thtough the list of path items and build some icons, appending them
+    // go through the list of path items and build some icons, appending them
     // to the target div with some click handling
-    _buildAssets(): Promise<> {
+    _getIconAssets(): Promise<Array<AssetCollectionPair>> {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
             if (!pathItem.representation.asset_collection.icon) {
                 promises.push(Promise.resolve(null));
+                promises.push(Promise.resolve(null));
             } else {
-                const iconAssetId = pathItem.representation.asset_collection.icon;
-                promises.push(this._fetchAssetCollection(iconAssetId));
+                const defaultAssetCollectionId = pathItem.representation.asset_collection.icon.default;
+                promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
+                if (pathItem.representation.asset_collection.icon.highlight) {
+                    promises.push(this._fetchAssetCollection(pathItem.representation.asset_collection.icon.highlight));
+                } else {
+                    promises.push(Promise.resolve(null));
+                }
             }
         });
 
-        const iconElementList = []; // list of icon <IMG> elements
+        const iconUrlList = []; // list of icon asset collections in AssetCollectionPair objects
         // populate this list and...
-        // build map to work out which representations have which icons
         return Promise.all(promises).then((iconAssets) => {
-            iconAssets.forEach((iconAsset, i) => {
-                const representationId = this._pathItemList[i].representation.id;
-                if (iconAsset === null) {
-                    this._iconElementMap[representationId] = null;
-                } else if (iconAsset.assets.image_src) {
-                    const newIcon = this._buildIconImgElement(
-                        representationId,
-                        iconAsset.assets.image_src,
-                    );
-                    iconElementList.push(newIcon);
-                    this._iconElementMap[representationId] = newIcon;
-                }
-            });
-            return Promise.resolve(iconElementList);
+            for (let i = 0; i < iconAssets.length; i += 2) {
+                const urls = {
+                    default: iconAssets[i],
+                    highlight: iconAssets[i + 1],
+                };
+                iconUrlList.push(urls);
+            }
+            return Promise.resolve(iconUrlList);
         });
+    }
+
+    // go through the list of assets and build some icons
+    // collect a map of these to representationIds
+    // and build a map of urls of default and highlight icons for each representationId
+    _buildAssets(assets: Array<AssetCollectionPair>): Array<HTMLImageElement> {
+        const iconElementList = []; // list of icon <IMG> elements
+        assets.forEach((iconAssets, i) => {
+            const representationId = this._pathItemList[i].representation.id;
+            let defaultUrl = null;
+            let highlightUrl = null;
+            if (iconAssets.default === null) {
+                this._iconElementMap[representationId] = null;
+            } else if (iconAssets.default && iconAssets.default.assets.image_src) {
+                defaultUrl = iconAssets.default.assets.image_src;
+                const newIcon = this._buildIconImgElement(
+                    representationId,
+                    defaultUrl,
+                );
+                iconElementList.push(newIcon);
+                this._iconElementMap[representationId] = newIcon;
+            }
+            if (iconAssets.highlight && iconAssets.highlight.assets.image_src) {
+                highlightUrl = iconAssets.highlight.assets.image_src;
+            }
+            // store urls
+            this._iconUrlMap[representationId] = {
+                default: defaultUrl,
+                highlight: highlightUrl,
+            };
+        });
+        return iconElementList;
     }
 
     // build icon with click handler
@@ -125,10 +164,16 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {
                 this._iconElementMap[mapKey].className = 'inactiveIcon';
+                if (this._iconUrlMap[mapKey].default) {
+                    this._iconElementMap[mapKey].setAttribute('src', this._iconUrlMap[mapKey].default);
+                }
             }
         });
         if (this._iconElementMap[representationId]) {
             this._iconElementMap[representationId].className = 'activeIcon';
+            if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].highlight) {
+                this._iconElementMap[representationId].setAttribute('src', this._iconUrlMap[representationId].highlight);
+            }
         }
         this._showHideTarget();
     }
