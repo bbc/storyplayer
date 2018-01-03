@@ -52,7 +52,7 @@ export type Representation = {
         background?: Array<string>,
         icon?: {
             default: string,
-            highlight?: string,
+            active?: string,
         },
     },
     choices?: Array<{
