@@ -6,7 +6,7 @@ import type { StoryPathItem } from '../StoryPathWalker';
 
 export type AssetCollectionPair = {
     default: ?AssetCollection,
-    highlight: ?AssetCollection,
+    active: ?AssetCollection,
 };
 
 // Render story data (i.e., not refreshed every NE)
@@ -20,7 +20,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconListElement: HTMLElement; // the <ul> containing the icons
-    _iconUrlMap: { [key: string]: ?{ default: ?string, highlight: ?string } }; // urls of default and highlight icons
+    _iconUrlMap: { [key: string]: ?{ default: ?string, active: ?string } }; // urls of default and active icons
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -84,8 +84,8 @@ export default class StoryIconRenderer extends EventEmitter {
             } else {
                 const defaultAssetCollectionId = pathItem.representation.asset_collection.icon.default;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
-                if (pathItem.representation.asset_collection.icon.highlight) {
-                    promises.push(this._fetchAssetCollection(pathItem.representation.asset_collection.icon.highlight));
+                if (pathItem.representation.asset_collection.icon.active) {
+                    promises.push(this._fetchAssetCollection(pathItem.representation.asset_collection.icon.active));
                 } else {
                     promises.push(Promise.resolve(null));
                 }
@@ -98,7 +98,7 @@ export default class StoryIconRenderer extends EventEmitter {
             for (let i = 0; i < iconAssets.length; i += 2) {
                 const urls = {
                     default: iconAssets[i],
-                    highlight: iconAssets[i + 1],
+                    active: iconAssets[i + 1],
                 };
                 iconUrlList.push(urls);
             }
@@ -108,13 +108,13 @@ export default class StoryIconRenderer extends EventEmitter {
 
     // go through the list of assets and build some icons
     // collect a map of these to representationIds
-    // and build a map of urls of default and highlight icons for each representationId
+    // and build a map of urls of default and active icons for each representationId
     _buildAssets(assets: Array<AssetCollectionPair>): Array<HTMLImageElement> {
         const iconElementList = []; // list of icon <IMG> elements
         assets.forEach((iconAssets, i) => {
             const representationId = this._pathItemList[i].representation.id;
             let defaultUrl = null;
-            let highlightUrl = null;
+            let activeUrl = null;
             if (iconAssets.default === null) {
                 this._iconElementMap[representationId] = null;
             } else if (iconAssets.default && iconAssets.default.assets.image_src) {
@@ -126,13 +126,13 @@ export default class StoryIconRenderer extends EventEmitter {
                 iconElementList.push(newIcon);
                 this._iconElementMap[representationId] = newIcon;
             }
-            if (iconAssets.highlight && iconAssets.highlight.assets.image_src) {
-                highlightUrl = iconAssets.highlight.assets.image_src;
+            if (iconAssets.active && iconAssets.active.assets.image_src) {
+                activeUrl = iconAssets.active.assets.image_src;
             }
             // store urls
             this._iconUrlMap[representationId] = {
                 default: defaultUrl,
-                highlight: highlightUrl,
+                active: activeUrl,
             };
         });
         return iconElementList;
@@ -171,8 +171,8 @@ export default class StoryIconRenderer extends EventEmitter {
         });
         if (this._iconElementMap[representationId]) {
             this._iconElementMap[representationId].className = 'activeIcon';
-            if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].highlight) {
-                this._iconElementMap[representationId].setAttribute('src', this._iconUrlMap[representationId].highlight);
+            if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].active) {
+                this._iconElementMap[representationId].setAttribute('src', this._iconUrlMap[representationId].active);
             }
         }
         this._showHideTarget();
