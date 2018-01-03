@@ -8,6 +8,7 @@ import Hls from '../../node_modules/hls.js/dist/hls';
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _hls: Object;
+    _videoElement: HTMLVideoElement;
 
     constructor(
         representation: Representation,
@@ -28,7 +29,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
-        const videoElement = document.createElement('video');
+        this._videoElement = document.createElement('video');
 
         // set its source
         if (this._representation.asset_collection.foreground) {
@@ -36,7 +37,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 .then((fg) => {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
-                            this.populateVideoElement(videoElement, mediaUrl);
+                            this.populateVideoElement(this._videoElement, mediaUrl);
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
                 });
@@ -45,10 +46,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
 
         // render it
-        this._target.appendChild(videoElement);
+        this._target.appendChild(this._videoElement);
 
         // automatically move on at video end
-        videoElement.addEventListener('ended', () => {
+        this._videoElement.addEventListener('ended', () => {
             super.complete();
         });
     }
@@ -115,6 +116,20 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             iconItem.textContent = 'icon: none';
         }
+    }
+
+    getCurrentTime(): number {
+        return this._videoElement.currentTime;
+    }
+
+    setCurrentTime(time: number) {
+        this._videoElement.currentTime = time;
+    }
+
+    setStartTime(time: number) {
+        this._videoElement.addEventListener('loadeddata', () => {
+            this.setCurrentTime(time);
+        });
     }
 
     destroy() {

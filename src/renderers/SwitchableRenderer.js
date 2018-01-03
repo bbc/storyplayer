@@ -2,12 +2,14 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
+import SimpleAVRenderer from './SimpleAVRenderer';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
     _choiceDiv: HTMLDivElement;
     _fetchMedia: MediaFetcher;
     _currentRendererIndex: number;
+    _previousRendererPlayheadTime: number;
 
     constructor(
         representation: Representation,
@@ -21,6 +23,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceDiv.id = 'subrenderer';
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
+        this._previousRendererPlayheadTime = 0;
     }
 
     // create a renderer for each choice
@@ -76,11 +79,20 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
         if (choiceIndex >= 0 && choiceIndex < this._choiceRenderers.length) {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
-            if (currentChoice) currentChoice.destroy();
-
+            if (currentChoice) {
+                if (currentChoice instanceof SimpleAVRenderer) {
+                    // store playhead time
+                    this._previousRendererPlayheadTime = currentChoice.getCurrentTime();
+                }
+                currentChoice.destroy();
+            }
             this._currentRendererIndex = choiceIndex;
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) newChoice.start();
+            if (newChoice && newChoice instanceof SimpleAVRenderer) {
+                // sync playhead time
+                newChoice.setStartTime(this._previousRendererPlayheadTime);
+            }
         }
     }
 
@@ -170,12 +182,13 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
-                iconData.textContent += `${icon.name}`;
-                if (icon.assets.image_src) {
-                    iconData.textContent += ` from ${icon.assets.image_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
+                .then((icon) => {
+                    iconData.textContent += `${icon.name}`;
+                    if (icon.assets.image_src) {
+                        iconData.textContent += ` from ${icon.assets.image_src}`;
+                    }
+                });
         } else {
             iconData.textContent += 'none';
         }
