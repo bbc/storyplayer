@@ -35,18 +35,21 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._videoElement = document.createElement('video');
 
         // set CSS classname
-        videoElement.className = 'romper-video-element';
+        this._videoElement.className = 'romper-video-element';
 
         // set its source
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
-                .then((fg) => {
-                    if (fg.assets.av_src) {
-                        this._fetchMedia(fg.assets.av_src).then((mediaUrl) => {
+            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
+                if (fg.assets.av_src) {
+                    this._fetchMedia(fg.assets.av_src)
+                        .then((mediaUrl) => {
                             this.populateVideoElement(this._videoElement, mediaUrl);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
-                    }
-                });
+                        })
+                        .catch((err) => {
+                            console.error(err, 'Notfound');
+                        });
+                }
+            });
         } else {
             // console.error('No foreground source for AVRenderer');
         }
@@ -63,7 +66,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         // if mediaUrl is hls
         videoElement.muted = true;
-        
+
         if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
@@ -79,46 +82,46 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderControlBar() {
-        const video = document.getElementsByClassName('romper-video-element')[0];   // this is probably very bad
+        const video = document.getElementsByClassName('romper-video-element')[0]; // this is probably very bad
         // buttons
         const playPause = document.createElement('button');
         playPause.className = 'play-pause';
-        playPause.addEventListener('click', function() {
-            if (video.paused == true) {
-              // Play the video
-              video.play();
+        playPause.addEventListener('click', () => {
+            if (video.paused === true) {
+                // Play the video
+                video.play();
             } else {
-              // Pause the video
-              video.pause();
+                // Pause the video
+                video.pause();
             }
-          });
+        });
 
         const mute = document.createElement('button');
         mute.className = 'mute';
-        mute.addEventListener("click", function() {
-            if (video.muted == false) {
-              // Mute the video
-              video.muted = true;
+        mute.addEventListener('click', () => {
+            if (!video.muted) {
+                // Mute the video
+                video.muted = true;
             } else {
-              // Unmute the video
-              video.muted = false;
+                // Unmute the video
+                video.muted = false;
             }
         });
 
         const fullscreen = document.createElement('button');
         fullscreen.className = 'fullscreen';
         // Event listener for the full-screen button
-        fullscreen.addEventListener("click", function() {
+        fullscreen.addEventListener('click', () => {
             if (video.requestFullscreen) {
-            video.requestFullscreen();
+                video.requestFullscreen();
             } else if (video.mozRequestFullScreen) {
-            video.mozRequestFullScreen(); // Firefox
+                video.mozRequestFullScreen(); // Firefox
             } else if (video.webkitRequestFullscreen) {
-            video.webkitRequestFullscreen(); // Chrome and Safari
+                video.webkitRequestFullscreen(); // Chrome and Safari
             }
         });
 
-        //ranges
+        // ranges
         const volume = document.createElement('input');
         volume.type = 'range';
         volume.className = 'volume-range';
@@ -126,43 +129,48 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const scrubBar = document.createElement('input');
         scrubBar.type = 'range';
         scrubBar.className = 'scrub-bar';
-        scrubBar.setAttribute('value', 0);
+        scrubBar.setAttribute('value', '0');
         // Event listener for the seek bar
-        scrubBar.addEventListener("change", function() {
+        scrubBar.addEventListener('change', () => {
             // Calculate the new time
-            var time = video.duration * (scrubBar.value / 100);
-        
+            const time = video.duration * (scrubBar.value / 100);
+
             // Update the video time
             video.currentTime = time;
         });
 
         // Update the seek bar as the video plays
-        video.addEventListener("timeupdate", function() {
+        video.addEventListener('timeupdate', () => {
             // Calculate the slider value
-            var value = (100 / video.duration) * video.currentTime;
-        
+            const value = 100 / video.duration * video.currentTime;
+
             // Update the slider value
             scrubBar.value = value;
         });
 
         // Pause the video when the slider handle is being dragged
-        scrubBar.addEventListener("mousedown", function() {
+        scrubBar.addEventListener('mousedown', () => {
             video.pause();
         });
-        
+
         // Play the video when the slider handle is dropped
-        scrubBar.addEventListener("mouseup", function() {
+        scrubBar.addEventListener('mouseup', () => {
             video.play();
         });
 
+        // container to hold all controls
         const controls = document.createElement('div');
         controls.className = 'video-controls';
 
-        controls.appendChild(playPause);
+        const inlineControls = document.createElement('div');
+        inlineControls.className = 'video-controls__inline';
+
         controls.appendChild(scrubBar);
-        controls.appendChild(volume);
-        controls.appendChild(mute);
-        controls.appendChild(fullscreen);
+        inlineControls.appendChild(playPause);
+        inlineControls.appendChild(mute);
+        inlineControls.appendChild(volume);
+        inlineControls.appendChild(fullscreen);
+        controls.appendChild(inlineControls);
         this._target.appendChild(controls);
     }
 
@@ -176,38 +184,36 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetList.appendChild(iconItem);
         this._target.appendChild(assetList);
 
-
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
-                .then((fg) => {
-                    foregroundItem.textContent = `foreground: ${fg.name}`;
-                    if (fg.assets.av_src) {
-                        foregroundItem.textContent += ` from ${fg.assets.av_src}`;
-                    }
-                });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
+                foregroundItem.textContent = `foreground: ${fg.name}`;
+                if (fg.assets.av_src) {
+                    foregroundItem.textContent += ` from ${fg.assets.av_src}`;
+                }
+            });
         }
 
-        if (this._representation.asset_collection.background
-            && this._representation.asset_collection.background.length > 0) {
-            this._fetchAssetCollection(this._representation.asset_collection.background[0])
-                .then((bg) => {
-                    backgroundItem.textContent = `background: ${bg.name}`;
-                    if (bg.assets.audio_src) {
-                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
-                    }
-                });
+        if (
+            this._representation.asset_collection.background &&
+            this._representation.asset_collection.background.length > 0
+        ) {
+            this._fetchAssetCollection(this._representation.asset_collection.background[0]).then((bg) => {
+                backgroundItem.textContent = `background: ${bg.name}`;
+                if (bg.assets.audio_src) {
+                    backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
+                }
+            });
         } else {
             backgroundItem.textContent = 'background: none';
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
-                .then((icon) => {
-                    iconItem.textContent = `icon: ${icon.name}`;
-                    if (icon.assets.image_src) {
-                        iconItem.textContent += ` from ${icon.assets.image_src}`;
-                    }
-                });
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
+                iconItem.textContent = `icon: ${icon.name}`;
+                if (icon.assets.image_src) {
+                    iconItem.textContent += ` from ${icon.assets.image_src}`;
+                }
+            });
         } else {
             iconItem.textContent = 'icon: none';
         }
