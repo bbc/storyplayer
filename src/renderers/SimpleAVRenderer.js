@@ -28,7 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.start();
         this.renderVideoElement();
         this.renderControlBar();
-        // this.renderDataModelInfo();
+        this.renderDataModelInfo();
     }
 
     renderVideoElement() {
@@ -162,19 +162,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const controls = document.createElement('div');
         controls.className = 'video-controls';
 
-        const inlineControls = document.createElement('div');
-        inlineControls.className = 'video-controls__inline';
-
-        controls.appendChild(scrubBar);
-        inlineControls.appendChild(playPause);
-        inlineControls.appendChild(mute);
-        inlineControls.appendChild(volume);
-        inlineControls.appendChild(fullscreen);
-        controls.appendChild(inlineControls);
+        controls.appendChild(playPause);
+        controls.appendChild(volume);
+        controls.appendChild(mute);
+        controls.appendChild(fullscreen);
+        this._target.appendChild(scrubBar);
         this._target.appendChild(controls);
     }
 
     renderDataModelInfo() {
+        const parentElement = this._target.parentElement; // eslint-disable-line
         const assetList = document.createElement('ul');
         const foregroundItem = document.createElement('li');
         const backgroundItem = document.createElement('li');
@@ -182,7 +179,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetList.appendChild(foregroundItem);
         assetList.appendChild(backgroundItem);
         assetList.appendChild(iconItem);
-        this._target.appendChild(assetList);
+        if (parentElement) parentElement.appendChild(assetList);
 
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
