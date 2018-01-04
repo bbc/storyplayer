@@ -1,8 +1,10 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import MediaFetcher from '../fetchers/MediaFetcher';
-import type { Representation, AssetCollectionFetcher } from '../romper';
+import mediaFetcher from '../fetchers/MediaFetcher';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+
+// @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class SimpleAVRenderer extends BaseRenderer {
@@ -25,11 +27,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
     start() {
         super.start();
         this.renderVideoElement();
-        this.renderDataModelInfo();
+        this.renderControlBar();
+        // this.renderDataModelInfo();
     }
 
     renderVideoElement() {
         this._videoElement = document.createElement('video');
+
+        // set CSS classname
+        videoElement.className = 'romper-video-element';
 
         // set its source
         if (this._representation.asset_collection.foreground) {
@@ -56,6 +62,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         // if mediaUrl is hls
+        videoElement.muted = true;
+        
         if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
@@ -64,11 +72,98 @@ export default class SimpleAVRenderer extends BaseRenderer {
             });
         } else {
             videoElement.setAttribute('src', mediaUrl);
-            videoElement.setAttribute('muted', 'true');
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.play();
             });
         }
+    }
+
+    renderControlBar() {
+        const video = document.getElementsByClassName('romper-video-element')[0];   // this is probably very bad
+        // buttons
+        const playPause = document.createElement('button');
+        playPause.className = 'play-pause';
+        playPause.addEventListener('click', function() {
+            if (video.paused == true) {
+              // Play the video
+              video.play();
+            } else {
+              // Pause the video
+              video.pause();
+            }
+          });
+
+        const mute = document.createElement('button');
+        mute.className = 'mute';
+        mute.addEventListener("click", function() {
+            if (video.muted == false) {
+              // Mute the video
+              video.muted = true;
+            } else {
+              // Unmute the video
+              video.muted = false;
+            }
+        });
+
+        const fullscreen = document.createElement('button');
+        fullscreen.className = 'fullscreen';
+        // Event listener for the full-screen button
+        fullscreen.addEventListener("click", function() {
+            if (video.requestFullscreen) {
+            video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) {
+            video.mozRequestFullScreen(); // Firefox
+            } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen(); // Chrome and Safari
+            }
+        });
+
+        //ranges
+        const volume = document.createElement('input');
+        volume.type = 'range';
+        volume.className = 'volume-range';
+
+        const scrubBar = document.createElement('input');
+        scrubBar.type = 'range';
+        scrubBar.className = 'scrub-bar';
+        scrubBar.setAttribute('value', 0);
+        // Event listener for the seek bar
+        scrubBar.addEventListener("change", function() {
+            // Calculate the new time
+            var time = video.duration * (scrubBar.value / 100);
+        
+            // Update the video time
+            video.currentTime = time;
+        });
+
+        // Update the seek bar as the video plays
+        video.addEventListener("timeupdate", function() {
+            // Calculate the slider value
+            var value = (100 / video.duration) * video.currentTime;
+        
+            // Update the slider value
+            scrubBar.value = value;
+        });
+
+        // Pause the video when the slider handle is being dragged
+        scrubBar.addEventListener("mousedown", function() {
+            video.pause();
+        });
+        
+        // Play the video when the slider handle is dropped
+        scrubBar.addEventListener("mouseup", function() {
+            video.play();
+        });
+
+        const controls = document.createElement('div');
+        controls.className = 'video-controls';
+
+        controls.appendChild(playPause);
+        controls.appendChild(scrubBar);
+        controls.appendChild(volume);
+        controls.appendChild(mute);
+        controls.appendChild(fullscreen);
+        this._target.appendChild(controls);
     }
 
     renderDataModelInfo() {

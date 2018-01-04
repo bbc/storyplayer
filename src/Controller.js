@@ -370,7 +370,7 @@ export default class Controller {
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
         this._neTarget = document.createElement('div');
-        this._neTarget.id = 'render_element';
+        this._neTarget.id = 'render-element';
         this._target.appendChild(this._neTarget);
         this._storyTarget = document.createElement('div');
         this._storyTarget.id = 'story_element';
