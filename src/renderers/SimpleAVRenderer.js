@@ -65,7 +65,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         // if mediaUrl is hls
-        videoElement.muted = true;
+        videoElement.muted = true; // TODO: remove this line and change the class on line 101 to 'mute-button--unmuted'
 
         if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
@@ -85,26 +85,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const video = document.getElementsByClassName('romper-video-element')[0]; // this is probably very bad
         // buttons
         const playPause = document.createElement('button');
-        playPause.className = 'play-pause';
+        playPause.className = 'play-pause--playing';
         playPause.addEventListener('click', () => {
             if (video.paused === true) {
                 // Play the video
                 video.play();
+                playPause.className = 'play-pause--playing';
             } else {
                 // Pause the video
                 video.pause();
+                playPause.className = 'play-pause--paused';
             }
         });
 
         const mute = document.createElement('button');
-        mute.className = 'mute';
+        mute.className = 'mute-button--muted';
         mute.addEventListener('click', () => {
             if (!video.muted) {
                 // Mute the video
                 video.muted = true;
+                mute.className = 'mute-button--muted';
             } else {
                 // Unmute the video
                 video.muted = false;
+                mute.className = 'mute-button--unmuted';
             }
         });
 
