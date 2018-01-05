@@ -81,20 +81,29 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    // Add player controls to the DOM and listen for events
     renderControlBar() {
-        const video = document.getElementsByClassName('romper-video-element')[0]; // this is probably very bad
+        // target element by its class name rather than ID as there will be multiple videos on the page...
+        // TODO: find a way of grabbing the actual element rather than just the element at index 0.
+        const video = document.getElementsByClassName('romper-video-element')[0];
+
         // buttons
         const playPause = document.createElement('button');
         playPause.className = 'play-pause--playing';
+        const playVideo = () => {
+            video.play();
+            playPause.className = 'play-pause--playing';
+        };
+        const pauseVideo = () => {
+            video.pause();
+            playPause.className = 'play-pause--paused';
+        };
+
         playPause.addEventListener('click', () => {
             if (video.paused === true) {
-                // Play the video
-                video.play();
-                playPause.className = 'play-pause--playing';
+                playVideo();
             } else {
-                // Pause the video
-                video.pause();
-                playPause.className = 'play-pause--paused';
+                pauseVideo();
             }
         });
 
@@ -133,8 +142,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const scrubBar = document.createElement('input');
         scrubBar.type = 'range';
         scrubBar.className = 'scrub-bar';
-        scrubBar.setAttribute('value', '0');
-        // Event listener for the seek bar
+
+        // update scrub bar position as video plays
         scrubBar.addEventListener('change', () => {
             // Calculate the new time
             const time = video.duration * (scrubBar.value / 100);
@@ -142,6 +151,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // Update the video time
             video.currentTime = time;
         });
+
+        // allow clicking the scrub bar to seek to a video position
+        function seek(e: MouseEvent) {
+            const percent = e.offsetX / this.offsetWidth;
+            video.currentTime = percent * video.duration;
+        }
+
+        scrubBar.addEventListener('click', seek);
 
         // Update the seek bar as the video plays
         video.addEventListener('timeupdate', () => {
@@ -154,12 +171,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // Pause the video when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
-            video.pause();
+            pauseVideo();
         });
 
         // Play the video when the slider handle is dropped
         scrubBar.addEventListener('mouseup', () => {
-            video.play();
+            playVideo();
         });
 
         // container to hold all controls
