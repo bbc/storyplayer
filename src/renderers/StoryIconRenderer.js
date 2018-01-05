@@ -84,7 +84,7 @@ export default class StoryIconRenderer extends EventEmitter {
             } else {
                 const defaultAssetCollectionId = pathItem.representation.asset_collection.icon.default;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
-                if (pathItem.representation.asset_collection.icon.highlight) {
+                if (pathItem.representation.asset_collection.icon && pathItem.representation.asset_collection.icon.highlight) {
                     promises.push(this._fetchAssetCollection(pathItem.representation.asset_collection.icon.highlight));
                 } else {
                     promises.push(Promise.resolve(null));
@@ -164,7 +164,7 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {
                 this._iconElementMap[mapKey].className = 'inactiveIcon';
-                if (this._iconUrlMap[mapKey].default) {
+                if (this._iconUrlMap[mapKey] && this._iconUrlMap[mapKey].default) {
                     this._iconElementMap[mapKey].setAttribute('src', this._iconUrlMap[mapKey].default);
                 }
             }
