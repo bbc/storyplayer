@@ -6,7 +6,7 @@ import type { StoryPathItem } from '../StoryPathWalker';
 
 export type AssetCollectionPair = {
     default: ?AssetCollection,
-    highlight: ?AssetCollection,
+    active: ?AssetCollection,
 };
 
 // Render story data (i.e., not refreshed every NE)
@@ -20,7 +20,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconListElement: HTMLElement; // the <ul> containing the icons
-    _iconUrlMap: { [key: string]: ?{ default: ?string, highlight: ?string } }; // urls of default and highlight icons
+    _iconUrlMap: { [key: string]: { default: ?string, active: ?string } }; // urls of default and active icons
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -49,12 +49,13 @@ export default class StoryIconRenderer extends EventEmitter {
 
     start() {
         this._currentRepresentationId = this._pathItemList[0].representation.id;
-        this._getIconAssets().then((iconAssets) => {
-            const iconImgElements = this._buildAssets(iconAssets);
+        this._getIconAssets().then((iconAssets) => { // fetch AssetCollections
+            this._buildUrlMap(iconAssets); // get urls for each icon
+            const iconImgElements = this._buildAssets(); // build icons
             this._deepestCommonSubstory = this._findSubStories();
             this._iconListElement = document.createElement('ul');
             this._iconListElement.id = 'chapterIcons';
-            iconImgElements.forEach((iconImageElement) => {
+            iconImgElements.forEach((iconImageElement) => { // add icons to DOM
                 const iconListItem = document.createElement('li');
                 iconListItem.appendChild(iconImageElement);
                 this._iconListElement.appendChild(iconListItem);
@@ -73,67 +74,78 @@ export default class StoryIconRenderer extends EventEmitter {
         }
     }
 
-    // go through the list of path items and build some icons, appending them
-    // to the target div with some click handling
+    // go through the list of path items and collect the AssetCollection for the
+    // default and active icons of each
     _getIconAssets(): Promise<Array<AssetCollectionPair>> {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
-            if (!pathItem.representation.asset_collection.icon) {
-                promises.push(Promise.resolve(null));
-                promises.push(Promise.resolve(null));
-            } else {
-                const defaultAssetCollectionId = pathItem.representation.asset_collection.icon.default;
+            if (pathItem.representation.asset_collection.icon) {
+                const icon = pathItem.representation.asset_collection.icon;
+                const defaultAssetCollectionId = icon.default;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
-                if (pathItem.representation.asset_collection.icon && pathItem.representation.asset_collection.icon.highlight) {
-                    promises.push(this._fetchAssetCollection(pathItem.representation.asset_collection.icon.highlight));
+                if (icon.active) {
+                    promises.push(this._fetchAssetCollection(icon.active));
                 } else {
                     promises.push(Promise.resolve(null));
                 }
+            } else {
+                promises.push(Promise.resolve(null));
+                promises.push(Promise.resolve(null));
             }
         });
 
-        const iconUrlList = []; // list of icon asset collections in AssetCollectionPair objects
-        // populate this list and...
+        const iconAssetList = []; // list of icon asset collections in AssetCollectionPair objects
         return Promise.all(promises).then((iconAssets) => {
             for (let i = 0; i < iconAssets.length; i += 2) {
                 const urls = {
                     default: iconAssets[i],
-                    highlight: iconAssets[i + 1],
+                    active: iconAssets[i + 1],
                 };
-                iconUrlList.push(urls);
+                iconAssetList.push(urls);
             }
-            return Promise.resolve(iconUrlList);
+            return Promise.resolve(iconAssetList);
         });
     }
 
-    // go through the list of assets and build some icons
-    // collect a map of these to representationIds
-    // and build a map of urls of default and highlight icons for each representationId
-    _buildAssets(assets: Array<AssetCollectionPair>): Array<HTMLImageElement> {
-        const iconElementList = []; // list of icon <IMG> elements
+    // go through the list of AssetCollections for icons and
+    // and build a map of urls of default and active icons for each representationId
+    _buildUrlMap(assets: Array<AssetCollectionPair>) {
         assets.forEach((iconAssets, i) => {
             const representationId = this._pathItemList[i].representation.id;
             let defaultUrl = null;
-            let highlightUrl = null;
-            if (iconAssets.default === null) {
-                this._iconElementMap[representationId] = null;
-            } else if (iconAssets.default && iconAssets.default.assets.image_src) {
+            let activeUrl = null;
+            if (iconAssets.default && iconAssets.default.assets.image_src) {
                 defaultUrl = iconAssets.default.assets.image_src;
-                const newIcon = this._buildIconImgElement(
-                    representationId,
-                    defaultUrl,
-                );
-                iconElementList.push(newIcon);
-                this._iconElementMap[representationId] = newIcon;
             }
-            if (iconAssets.highlight && iconAssets.highlight.assets.image_src) {
-                highlightUrl = iconAssets.highlight.assets.image_src;
+            if (iconAssets.active && iconAssets.active.assets.image_src) {
+                activeUrl = iconAssets.active.assets.image_src;
             }
             // store urls
             this._iconUrlMap[representationId] = {
                 default: defaultUrl,
-                highlight: highlightUrl,
+                active: activeUrl,
             };
+        });
+    }
+
+    // go through the list of pathItems and build some icons
+    // collect a map of these to representationIds
+    _buildAssets(): Array<HTMLImageElement> {
+        const iconElementList = []; // list of icon <IMG> elements
+        this._pathItemList.forEach((pathItem) => {
+            const representationId = pathItem.representation.id;
+            const iconUrl = this._iconUrlMap[representationId];
+            if (iconUrl.default) {
+                const url = iconUrl.default;
+                const newIcon = this._buildIconImgElement(
+                    representationId,
+                    url,
+                );
+                iconElementList.push(newIcon);
+                this._iconElementMap[representationId] = newIcon;
+            } else {
+                this._iconElementMap[representationId] = null;
+            }
         });
         return iconElementList;
     }
@@ -163,16 +175,18 @@ export default class StoryIconRenderer extends EventEmitter {
         this._currentRepresentationId = representationId;
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {
-                this._iconElementMap[mapKey].className = 'inactiveIcon';
+                const iconElement = this._iconElementMap[mapKey];
+                iconElement.className = 'inactiveIcon';
                 if (this._iconUrlMap[mapKey] && this._iconUrlMap[mapKey].default) {
-                    this._iconElementMap[mapKey].setAttribute('src', this._iconUrlMap[mapKey].default);
+                    iconElement.setAttribute('src', this._iconUrlMap[mapKey].default);
                 }
             }
         });
         if (this._iconElementMap[representationId]) {
             this._iconElementMap[representationId].className = 'activeIcon';
-            if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].highlight) {
-                this._iconElementMap[representationId].setAttribute('src', this._iconUrlMap[representationId].highlight);
+            if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].active) {
+                this._iconElementMap[representationId]
+                    .setAttribute('src', this._iconUrlMap[representationId].active);
             }
         }
         this._showHideTarget();
