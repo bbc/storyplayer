@@ -1,7 +1,6 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import mediaFetcher from '../fetchers/MediaFetcher';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 // @flowignore
@@ -65,8 +64,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         // if mediaUrl is hls
-        videoElement.muted = true; // TODO: remove this line and change the class on line 101 to 'mute-button--unmuted'
-
         if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
@@ -84,8 +81,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     // Add player controls to the DOM and listen for events
     renderControlBar() {
         // target element by its class name rather than ID as there will be multiple videos on the page...
-        // TODO: find a way of grabbing the actual element rather than just the element at index 0.
-        const video = document.getElementsByClassName('romper-video-element')[0];
+        const video = this._videoElement;
 
         // buttons
         const playPause = document.createElement('button');
@@ -108,7 +104,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         });
 
         const mute = document.createElement('button');
-        mute.className = 'mute-button--muted';
+        mute.className = 'mute-button--unmuted';
         mute.addEventListener('click', () => {
             if (!video.muted) {
                 // Mute the video
@@ -126,10 +122,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // Event listener for the full-screen button
         fullscreen.addEventListener('click', () => {
             if (video.requestFullscreen) {
+                // @flowignore
                 video.requestFullscreen();
             } else if (video.mozRequestFullScreen) {
+                // @flowignore
                 video.mozRequestFullScreen(); // Firefox
             } else if (video.webkitRequestFullscreen) {
+                // @flowignore
                 video.webkitRequestFullscreen(); // Chrome and Safari
             }
         });
@@ -146,7 +145,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // update scrub bar position as video plays
         scrubBar.addEventListener('change', () => {
             // Calculate the new time
-            const time = video.duration * (scrubBar.value / 100);
+            const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
 
             // Update the video time
             video.currentTime = time;
@@ -163,10 +162,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // Update the seek bar as the video plays
         video.addEventListener('timeupdate', () => {
             // Calculate the slider value
-            const value = 100 / video.duration * video.currentTime;
+            const value = (100 / video.duration) * video.currentTime;
 
             // Update the slider value
-            scrubBar.value = value;
+            scrubBar.value = value.toString();
         });
 
         // Pause the video when the slider handle is being dragged
@@ -192,7 +191,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderDataModelInfo() {
-        const parentElement = this._target.parentElement; // eslint-disable-line
         const assetList = document.createElement('ul');
         const foregroundItem = document.createElement('li');
         const backgroundItem = document.createElement('li');
@@ -200,7 +198,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetList.appendChild(foregroundItem);
         assetList.appendChild(backgroundItem);
         assetList.appendChild(iconItem);
-        if (parentElement) parentElement.appendChild(assetList);
+        this._target.appendChild(assetList);
 
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
