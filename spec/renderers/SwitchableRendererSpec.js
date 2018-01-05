@@ -40,8 +40,10 @@ const defaultSwitchableRepresentation = {
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
                 asset_collection: {
                     foreground: 'f1482c67-1c5b-407b-90c3-c2f7288e253c',
-                    background: 'd22484f9-da14-484b-8051-71be36b2227f',
-                    icon: 'FB95A7AB-FB65-4C73-9FD3-1910F8CE754F',
+                    background: ['d22484f9-da14-484b-8051-71be36b2227f'],
+                    icon: {
+                        default: 'FB95A7AB-FB65-4C73-9FD3-1910F8CE754F',
+                    },
                 },
             },
         },
@@ -55,8 +57,8 @@ const defaultSwitchableRepresentation = {
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
                 asset_collection: {
                     foreground: 'fa20bde6-a388-4ec8-a457-ceaecdddcb4d',
-                    background: 'd22484f9-da14-484b-8051-71be36b2227f',
-                    icon: '265ECCF4-B4B0-4E55-9B9A-FAE9849330B1',
+                    background: ['d22484f9-da14-484b-8051-71be36b2227f'],
+                    icon: { default: '265ECCF4-B4B0-4E55-9B9A-FAE9849330B1' },
                 },
             },
         },
@@ -70,8 +72,8 @@ const defaultSwitchableRepresentation = {
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
                 asset_collection: {
                     foreground: '852bd2f3-3b76-40af-bca6-b266a4c0d22e',
-                    background: 'd22484f9-da14-484b-8051-71be36b2227f',
-                    icon: 'A914B88E-46D3-4D55-BE5F-7DE0000487BC',
+                    background: ['d22484f9-da14-484b-8051-71be36b2227f'],
+                    icon: { default: 'A914B88E-46D3-4D55-BE5F-7DE0000487BC' },
                 },
             },
         },
@@ -85,20 +87,18 @@ const defaultSwitchableRepresentation = {
                 representation_type: 'urn:x-object-based-media:representation-types:image/v1.0',
                 asset_collection: {
                     foreground: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
-                    icon: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
+                    icon: { default: 'adeb8f74-00d1-45ce-bf92-8328bc66457a' },
                 },
             },
         },
     ],
     asset_collection: {
-        icon: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
+        icon: { default: 'adeb8f74-00d1-45ce-bf92-8328bc66457a' },
     },
 };
 
 const assetCollectionFetcher = id =>
-    Promise.resolve(storyjson.asset_collections
-        .filter(assetCollectionObject => assetCollectionObject.id === id)[0])
-        .then(assetCollectionObject => assetCollectionObject);
+    Promise.resolve(storyjson.asset_collections.filter(assetCollectionObject => assetCollectionObject.id === id)[0]).then(assetCollectionObject => assetCollectionObject);
 
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
