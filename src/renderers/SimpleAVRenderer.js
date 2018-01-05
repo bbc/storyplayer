@@ -28,7 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.start();
         this.renderVideoElement();
         this.renderControlBar();
-        this.renderDataModelInfo();
+        // this.renderDataModelInfo();
     }
 
     renderVideoElement() {
