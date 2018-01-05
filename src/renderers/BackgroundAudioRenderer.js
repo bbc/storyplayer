@@ -1,6 +1,8 @@
 // @flow
 
 import BackgroundRenderer from './BackgroundRenderer';
+import MediaFetcher from '../fetchers/MediaFetcher';
+import type { AssetCollection } from '../romper';
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
@@ -19,11 +21,11 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     start() {
-        this._renderBackground();
+        this._renderBackgroundAudio();
         // this._renderDataModelInfo();
     }
 
-    _renderBackground() {
+    _renderBackgroundAudio() {
         this._audioElement = document.createElement('audio');
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src).then((mediaUrl) => {
