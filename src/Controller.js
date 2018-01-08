@@ -45,6 +45,8 @@ export default class Controller {
     start(storyId: string) {
         this._storyId = storyId;
 
+        this._upcomingRenderers = [];
+
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
             alert('Story ended!'); // eslint-disable-line no-alert
@@ -240,8 +242,11 @@ export default class Controller {
                     return;
                 }
 
-                // create the new Renderer
-                const newRenderer = this._createNewRenderer(representation, reasoner);
+                // get a Renderer for this new NE
+                const newRenderer = this._getRenderer(narrativeElement, representation, reasoner);
+
+                // look ahead and create new renderers for the next step
+                this._rendererLookahead(narrativeElement);
 
                 if (newRenderer) {
                     // swap renderers
@@ -255,6 +260,52 @@ export default class Controller {
                     this._renderStory.handleNarrativeElementChanged(representation.id);
                 }
             });
+    }
+
+    // get a renderer for the given NE, and its Representation
+    // see if we've created one in advance, otherwise create a fresh one
+    _getRenderer(narrativeElement: NarrativeElement, representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
+        let newRenderer;
+        // have we already got a renderer?
+        if (this._upcomingRenderers.length === 1) {
+            const newRenderersList = this._upcomingRenderers.shift();
+            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
+                newRenderer = newRenderersList[narrativeElement.id];
+            }
+        }
+        // create the new Renderer if we need to
+        if (!newRenderer) {
+            newRenderer = this._createNewRenderer(representation, reasoner);
+        }
+        return newRenderer;
+    }
+
+    // create reasoners for the NEs that follow narrativeElement
+    _rendererLookahead(narrativeElement: NarrativeElement) {
+        // console.log('at', narrativeElement);
+        const upcomingIds = Controller._getIdsOfNextNodes(narrativeElement);
+        const upcomingRenderers = {};
+        upcomingIds.forEach((neid) => {
+            if (this._reasoner) {
+                // get the actual NarrativeElement object
+                const reasoner = this._reasoner;
+                const subReasoner = reasoner.getSubReasonerContainingNarrativeElement(neid);
+                let neObj;
+                if (subReasoner) {
+                    neObj = subReasoner._narrativeElements[neid];
+                }
+                if (neObj) {
+                    this._fetchPresentation(neObj.presentation.target)
+                        .then(presentation => this._representationReasoner(presentation))
+                        .then((representation) => {
+                            // create the new Renderer
+                            const newRenderer = this._createNewRenderer(representation, reasoner);
+                            upcomingRenderers[neid] = newRenderer;
+                        });
+                }
+            }
+        });
+        this._upcomingRenderers.push(upcomingRenderers);
     }
 
     // create a reasoner to do a shadow walk of the story graph
@@ -366,6 +417,20 @@ export default class Controller {
         return matchingId;
     }
 
+    // get an array of ids of the NarrativeElements that follow narrativeElement
+    static _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
+        const upcomingIds: Array<string> = [];
+        const nextNodes = narrativeElement.links;
+        nextNodes.forEach((link) => {
+            if (link.link_type === 'NARRATIVE_ELEMENT' && link.target) {
+                upcomingIds.push(link.target);
+            } else if (link.link_type === 'END_STORY') {
+                console.log('end of substory - cannot map next');
+            }
+        });
+        return upcomingIds;
+    }
+
     // create new divs within the target to hold the storyIconRenderer and
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
@@ -424,4 +489,5 @@ export default class Controller {
     _rendererState: {
         lastSwitchableLabel: string,
     };
+    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
 }
