@@ -74,9 +74,6 @@ export default class SwitchableRenderer extends BaseRenderer {
      * @param {number} choiceIndex index of choices array to show
      */
     switchToRepresentationAtIndex(choiceIndex: number) {
-        if (this._representation.choices && this._representation.choices[choiceIndex]) {
-            this.emit('switchedRepresentation', this._representation.choices[choiceIndex]);
-        }
         if (choiceIndex >= 0 && choiceIndex < this._choiceRenderers.length) {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
             if (currentChoice) {
@@ -88,7 +85,12 @@ export default class SwitchableRenderer extends BaseRenderer {
             }
             this._currentRendererIndex = choiceIndex;
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
-            if (newChoice) newChoice.start();
+            if (newChoice) {
+                newChoice.start();
+                if (this._representation.choices && this._representation.choices[choiceIndex]) {
+                    this.emit('switchedRepresentation', this._representation.choices[choiceIndex]);
+                }
+            }
             if (newChoice && newChoice instanceof SimpleAVRenderer) {
                 // sync playhead time
                 newChoice.setStartTime(this._previousRendererPlayheadTime);
@@ -97,19 +99,22 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     /**
-     * Switch to the renderer for a given choice.  Has no effect if
+     * set selection renderer for a given choice.  Has no effect if
      * label not associated with any choice
      *
      * @param {string} choiceLabel label of choice to show
+     *
+     * returns selected index, but does not make the switch
      */
-    switchToRepresentationWithLabel(choiceLabel: string) {
+    setChoiceToRepresentationWithLabel(choiceLabel: string) {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, index) => {
                 if (choiceLabel === choice.label) {
-                    this.switchToRepresentationAtIndex(index);
+                    this._currentRendererIndex = index;
                 }
             });
         }
+        return this._currentRendererIndex;
     }
 
     start() {
