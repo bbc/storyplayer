@@ -241,14 +241,14 @@ export default class StoryReasoner extends EventEmitter {
     // dive into the substory reasoners until we find one that has neid
     // as one of its narrative elements
     // if not found, returns null
-    _getSubReasonerWithNarrativeElement(
+    static _getSubReasonerWithNarrativeElement(
         narrativeElementId: string,
         reasoner: StoryReasoner,
     ): ?StoryReasoner {
-        if (this._isInReasoner(narrativeElementId)) {
+        if (reasoner._isInReasoner(narrativeElementId)) {
             return reasoner;
         } else if (reasoner._subStoryReasoner) {
-            return this._getSubReasonerWithNarrativeElement(
+            return StoryReasoner._getSubReasonerWithNarrativeElement(
                 narrativeElementId,
                 reasoner._subStoryReasoner,
             );
@@ -265,7 +265,7 @@ export default class StoryReasoner extends EventEmitter {
      * element, or null if one can't be found.
      */
     getSubReasonerContainingNarrativeElement(narrativeElementId: string): ?StoryReasoner {
-        return this._getSubReasonerWithNarrativeElement(narrativeElementId, this);
+        return StoryReasoner._getSubReasonerWithNarrativeElement(narrativeElementId, this);
     }
 
     /**
