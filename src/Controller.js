@@ -35,6 +35,8 @@ export default class Controller {
     start(storyId: string) {
         this._storyId = storyId;
 
+        this._upcomingRenderers = [];
+
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
             alert('Story ended!'); // eslint-disable-line no-alert
@@ -155,6 +157,52 @@ export default class Controller {
             }
         }
         return neObj;
+    }
+
+    // get a renderer for the given NE, and its Representation
+    // see if we've created one in advance, otherwise create a fresh one
+    _getRenderer(narrativeElement: NarrativeElement, representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
+        let newRenderer;
+        // have we already got a renderer?
+        if (this._upcomingRenderers.length === 1) {
+            const newRenderersList = this._upcomingRenderers.shift();
+            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
+                newRenderer = newRenderersList[narrativeElement.id];
+            }
+        }
+        // create the new Renderer if we need to
+        if (!newRenderer) {
+            newRenderer = this._createNewRenderer(representation, reasoner);
+        }
+        return newRenderer;
+    }
+
+    // create reasoners for the NEs that follow narrativeElement
+    _rendererLookahead(narrativeElement: NarrativeElement) {
+        // console.log('at', narrativeElement);
+        const upcomingIds = Controller._getIdsOfNextNodes(narrativeElement);
+        const upcomingRenderers = {};
+        upcomingIds.forEach((neid) => {
+            if (this._reasoner) {
+                // get the actual NarrativeElement object
+                const reasoner = this._reasoner;
+                const subReasoner = reasoner.getSubReasonerContainingNarrativeElement(neid);
+                let neObj;
+                if (subReasoner) {
+                    neObj = subReasoner._narrativeElements[neid];
+                }
+                if (neObj) {
+                    this._fetchPresentation(neObj.presentation.target)
+                        .then(presentation => this._representationReasoner(presentation))
+                        .then((representation) => {
+                            // create the new Renderer
+                            const newRenderer = this._createNewRenderer(representation, reasoner);
+                            upcomingRenderers[neid] = newRenderer;
+                        });
+                }
+            }
+        });
+        this._upcomingRenderers.push(upcomingRenderers);
     }
 
     // create a reasoner to do a shadow walk of the story graph
