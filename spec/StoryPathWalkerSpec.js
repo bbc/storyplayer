@@ -2,17 +2,17 @@
 
 import 'babel-polyfill';
 import chai, { expect } from 'chai';
-// import sinon from 'sinon';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import StoryPathWalker from '../src/StoryPathWalker';
 import StoryReasonerFactory from '../src/StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
-import ObjectDataResolver from '../src/resolvers/ObjectDataResolver';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 // import type { Presentation } from '../src/romper';
 
 const storyjson = require('./teststory.json');
 
 chai.use(sinonChai);
+const resolver = sinon.stub();
 
 const storyFetcher = id =>
     Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0]).then(storyObject => storyObject);
@@ -20,9 +20,9 @@ const storyFetcher = id =>
 const presentationFetcher = id =>
     Promise.resolve(storyjson.presentations.filter(presentationObject => presentationObject.id === id)[0]).then(presentationObject => presentationObject);
 
-const storyReasonerFactory = StoryReasonerFactory(storyFetcher, ObjectDataResolver);
+const storyReasonerFactory = StoryReasonerFactory(storyFetcher, resolver);
 
-const representationReasoner = RepresentationReasonerFactory(ObjectDataResolver);
+const representationReasoner = RepresentationReasonerFactory(resolver);
 
 describe('StoryPathWalker', () => {
     it('can create a new instance of StoryPathWalker', (done) => {
@@ -62,7 +62,7 @@ describe('StoryPathWalker', () => {
     it('returns empty list on multi-beginning story', (done) => {
         const intro = storyjson.story[1];
         intro.beginnings.push({
-            target: '619f999a-5535-4b05-9f20-9b523033078b',
+            id: '68cf2acd-0b62-45cc-ac1e-0eddc5c8e571',
             condition: { '==': [1, 0] },
         });
         const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);

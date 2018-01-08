@@ -1,11 +1,15 @@
+// @flow
+
 import BaseBehaviour from './BaseBehaviour';
 
 export default class ShowImageAndPauseBehaviour extends BaseBehaviour {
-    constructor(behaviourDefinition, onComplete) {
+    timerHandle: ?number;
+
+    constructor(behaviourDefinition: Object, onComplete: () => mixed) {
         super(behaviourDefinition, onComplete);
         this.timerHandle = null;
     }
-    
+
     start() {
         const pause = parseFloat(this.behaviourDefinition.pause);
         this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
