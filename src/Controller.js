@@ -221,14 +221,13 @@ export default class Controller {
             newRenderer.renderNextButton();
         }
 
-        newRenderer.willStart();
-
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
-                newRenderer.switchToRepresentationWithLabel(this
-                    ._rendererState.lastSwitchableLabel);
+                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
             }
         }
+
+        newRenderer.willStart();
     }
 
     // respond to a change in the Narrative Element: update the renderers

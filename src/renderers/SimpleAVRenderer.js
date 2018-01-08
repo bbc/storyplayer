@@ -68,11 +68,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                console.log('PVE - playing hls', this._representation.name);
                 videoElement.play();
             });
         } else {
             videoElement.setAttribute('src', mediaUrl);
             videoElement.addEventListener('loadeddata', () => {
+                console.log('PVE - playing non-hls', this._representation.name);
                 videoElement.play();
             });
         }
@@ -236,6 +238,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     getCurrentTime(): number {
+        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) return 0;
         return this._videoElement.currentTime;
     }
 
