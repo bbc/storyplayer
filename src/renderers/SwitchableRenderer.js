@@ -28,16 +28,25 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // create a renderer for each choice
     _getChoiceRenderers() {
+        let choices = [];
         if (this._representation.choices) {
-            return this._representation.choices.map(choice =>
+            choices = this._representation.choices.map(choice =>
                 RendererFactory(
                     choice.representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
                     this._choiceDiv,
                 ));
+            choices.forEach((choiceRenderer) => {
+                if (choiceRenderer) {
+                    const cr = choiceRenderer;
+                    cr.on('completeStartBehaviours', () => {
+                        cr.start();
+                    });
+                }
+            });
         }
-        return [];
+        return choices;
     }
 
     // display the buttons as IMG elements in a list in a div
@@ -124,7 +133,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
         if (firstChoice) {
-            firstChoice.start();
+            firstChoice.willStart();
         }
         // this._renderDataModelInfo();
     }
