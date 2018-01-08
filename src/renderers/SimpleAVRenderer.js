@@ -21,13 +21,32 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (Hls.isSupported()) {
             this._hls = new Hls();
         }
+        this.renderVideoElement();
     }
 
     start() {
         super.start();
-        this.renderVideoElement();
+        // render the video div
+        this._target.appendChild(this._videoElement);
+        // and control bar
         this.renderControlBar();
+        // start the video
+        this.playVideo();
         // this.renderDataModelInfo();
+    }
+
+    playVideo() {
+        if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
+            this._videoElement.play();
+        } else if (this._hls) {
+            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                this._videoElement.play();
+            });
+        } else {
+            this._videoElement.addEventListener('loadeddata', () => {
+                this._videoElement.play();
+            });
+        }
     }
 
     renderVideoElement() {
@@ -53,9 +72,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // console.error('No foreground source for AVRenderer');
         }
 
-        // render it
-        this._target.appendChild(this._videoElement);
-
         // automatically move on at video end
         this._videoElement.addEventListener('ended', () => {
             super.complete();
@@ -67,16 +83,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                console.log('PVE - playing hls', this._representation.name);
-                videoElement.play();
-            });
         } else {
             videoElement.setAttribute('src', mediaUrl);
-            videoElement.addEventListener('loadeddata', () => {
-                console.log('PVE - playing non-hls', this._representation.name);
-                videoElement.play();
-            });
         }
     }
 
@@ -247,9 +255,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     setStartTime(time: number) {
-        this._videoElement.addEventListener('loadeddata', () => {
+        if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this.setCurrentTime(time);
-        });
+        } else if (this._hls) {
+            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                this.setCurrentTime(time);
+            });
+        } else {
+            this._videoElement.addEventListener('loadeddata', () => {
+                this.setCurrentTime(time);
+            });
+        }
     }
 
     destroy() {
