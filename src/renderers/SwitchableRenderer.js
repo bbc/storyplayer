@@ -113,7 +113,7 @@ export default class SwitchableRenderer extends BaseRenderer {
      *
      * @param {string} choiceLabel label of choice to show
      *
-     * returns selected index, but does not make the switch
+     * returns selected index, but does not change the renderer
      */
     setChoiceToRepresentationWithLabel(choiceLabel: string) {
         if (this._representation.choices) {
