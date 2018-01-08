@@ -19,10 +19,15 @@ describe('RepresentationReasoner', () => {
                     condition: true,
                     representation: {
                         id: '2a64404d-8988-4cf3-a3e9-f7742ba4afe9',
-                        name: 'Test Representation',
                         version: '0:0',
-                        representation_type: 'TEST',
+                        name: 'Test Representation',
                         tags: {},
+                        representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
+                        asset_collection: {
+                            foreground: '852bd2f3-3b76-40af-bca6-b266a4c0d22e',
+                            background: ['d22484f9-da14-484b-8051-71be36b2227f'],
+                            icon: { default: 'A914B88E-46D3-4D55-BE5F-7DE0000487BC' },
+                        },
                     },
                 },
             ],
