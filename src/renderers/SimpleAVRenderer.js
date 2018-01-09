@@ -3,6 +3,8 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
+import CustomVideoContext from '../utils/custom-video-context';
+
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
 
@@ -10,6 +12,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _hls: Object;
     _videoElement: HTMLVideoElement;
+    _canvas: Object;
 
     constructor(
         representation: Representation,
@@ -31,6 +34,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
+        /* TEST VIDEO CTX HERE>... */
+
+
         this._videoElement = document.createElement('video');
 
         // set CSS classname
@@ -60,6 +66,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._videoElement.addEventListener('ended', () => {
             super.complete();
         });
+
+        this.videoContextExperiment();
     }
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
@@ -188,6 +196,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
         controls.appendChild(fullscreen);
         this._target.appendChild(scrubBar);
         this._target.appendChild(controls);
+    }
+
+    videoContextExperiment() {
+        this._canvas = document.createElement('canvas');
+        const canvas = this._canvas;
+        const videoCtx = new CustomVideoContext(canvas);
+
+        // const videoNode1 = videoCtx.video('./video1.mp4');
+        const videoNode1 = videoCtx.hls('https://vod-hls-uk-stage.akamaized.net/usp/auth/vod/piff_abr_full_sd/878e62-p01fqwrm/vf_p01fqwrm_22f3fd45-7ad6-474a-8fc7-c56a1d957316.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515534492_a7badb49b42715342a9b418cf0e1489c', 0, 4);
+        videoNode1.start(0);
+        // videoNode1.stop(4);
+
+        // const videoNode2 = videoCtx.video('./video2.mp4');
+        // videoNode2.start(2);
+        // videoNode2.stop(6);
+
+        // const crossFade = videoCtx.transition(VideoContext.DEFINITIONS.CROSSFADE);
+        // crossFade.transition(2, 4, 0.0, 1.0, 'mix');
+
+        // videoNode1.connect(crossFade);
+        // videoNode2.connect(crossFade);
+        videoNode1.connect(videoCtx.destination);
+        videoCtx.play();
+        this._target.appendChild(canvas);
     }
 
     renderDataModelInfo() {
