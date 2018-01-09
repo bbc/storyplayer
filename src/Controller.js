@@ -13,6 +13,8 @@ import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 import BackgroundRenderer from './renderers/BackgroundRenderer';
 
+import VideoContext from 'videocontext';
+
 export default class Controller {
     constructor(
         target: HTMLElement,
