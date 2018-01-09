@@ -124,6 +124,7 @@ export default class Controller {
         }
     }
 
+    /* MOVE TO RENDERER MANAGER? */
     // given a new representation, handle the background rendering
     // either:
     //     stop if there is no background
@@ -169,6 +170,7 @@ export default class Controller {
         });
     }
 
+    /* MOVE TO RENDERER MANAGER? */
     // create a new renderer for the given representation, and attach
     // the standard listeners to it
     _createNewRenderer(representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
@@ -205,6 +207,7 @@ export default class Controller {
         return newRenderer;
     }
 
+    /* MOVE TO RENDERER MANAGER? */
     // swap the renderers over
     // it's from here we might want to be clever with retaining elements if
     // Renderers are of the same type
@@ -263,6 +266,7 @@ export default class Controller {
             });
     }
 
+    /* MOVE TO RENDERER MANAGER? */
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
     _getRenderer(narrativeElement: NarrativeElement, representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
@@ -272,7 +276,7 @@ export default class Controller {
             const newRenderersList = this._upcomingRenderers.shift();
             if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
                 newRenderer = newRenderersList[narrativeElement.id];
-                console.log('renderer exists', newRenderer);
+                // console.log('renderer exists', newRenderer);
             }
         }
         // create the new Renderer if we need to
@@ -282,6 +286,7 @@ export default class Controller {
         return newRenderer;
     }
 
+    /* MOVE TO RENDERER MANAGER? */
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
         // console.log('at', narrativeElement);
@@ -289,22 +294,9 @@ export default class Controller {
         const upcomingRenderers = {};
         upcomingIds.forEach((neid) => {
             if (this._reasoner) {
-                // get the actual NarrativeElement object
                 const reasoner = this._reasoner;
-                const subReasoner = reasoner.getSubReasonerContainingNarrativeElement(neid);
-                let neObj;
-                if (subReasoner) {
-                    neObj = subReasoner._narrativeElements[neid];
-                }
-                if (!neObj && this._linearStoryPath) {
-                    // can't find it via reasoner if in different substoruy,
-                    // but can get from storyPath if linear
-                    this._linearStoryPath.forEach((storyPathItem) => {
-                        if (storyPathItem.narrative_element.id === neid) {
-                            neObj = storyPathItem.narrative_element;
-                        }
-                    });
-                }
+                // get the actual NarrativeElement object
+                const neObj = this._getNarrativeElement(neid);
                 if (neObj) {
                     this._fetchPresentation(neObj.presentation.target)
                         .then(presentation => this._representationReasoner(presentation))
@@ -317,6 +309,31 @@ export default class Controller {
             }
         });
         this._upcomingRenderers.push(upcomingRenderers);
+    }
+
+    // try to get the narrative element object with the given id
+    // returns NE if it is either in the current subStory, or if this story is
+    // linear (assuming id is valid).
+    // returns null otherwise
+    _getNarrativeElement(neid: string): ?NarrativeElement {
+        let neObj;
+        if (this._reasoner) {
+            // get the actual NarrativeElement object
+            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
+            if (subReasoner) {
+                neObj = subReasoner._narrativeElements[neid];
+            }
+            if (!neObj && this._linearStoryPath) {
+                // can't find it via reasoner if in different substoruy,
+                // but can get from storyPath if linear
+                this._linearStoryPath.forEach((storyPathItem) => {
+                    if (storyPathItem.narrative_element.id === neid) {
+                        neObj = storyPathItem.narrative_element;
+                    }
+                });
+            }
+        }
+        return neObj;
     }
 
     // create a reasoner to do a shadow walk of the story graph
@@ -429,6 +446,8 @@ export default class Controller {
     }
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
+    // finds next NARRATIVE_ELEMENTs, but does not look out of the current subStory,
+    // except in case of linear story
     _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
@@ -450,10 +469,11 @@ export default class Controller {
                 }
             }
         });
-        console.log('upcoming:', upcomingIds);
+        // console.log('upcoming:', upcomingIds);
         return upcomingIds;
     }
 
+    /* MOVE TO UI MANAGER? */
     // create new divs within the target to hold the storyIconRenderer and
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
