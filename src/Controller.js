@@ -132,7 +132,6 @@ export default class Controller {
         this._renderManager.handleNEChange(narrativeElement);
     }
 
-<<<<<<< HEAD
     // try to get the narrative element object with the given id
     // returns NE if it is either in the current subStory, or if this story is
     // linear (assuming id is valid).
@@ -153,59 +152,6 @@ export default class Controller {
                         neObj = storyPathItem.narrative_element;
                     }
                 });
-=======
-    // get a renderer for the given NE, and its Representation
-    // see if we've created one in advance, otherwise create a fresh one
-    _getRenderer(narrativeElement: NarrativeElement, representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
-        let newRenderer;
-        // have we already got a renderer?
-        if (this._upcomingRenderers.length === 1) {
-            const newRenderersList = this._upcomingRenderers.shift();
-            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
-                newRenderer = newRenderersList[narrativeElement.id];
-                console.log('renderer exists', newRenderer);
-            }
-        }
-        // create the new Renderer if we need to
-        if (!newRenderer) {
-            newRenderer = this._createNewRenderer(representation, reasoner);
-        }
-        return newRenderer;
-    }
-
-    // create reasoners for the NEs that follow narrativeElement
-    _rendererLookahead(narrativeElement: NarrativeElement) {
-        // console.log('at', narrativeElement);
-        const upcomingIds = this._getIdsOfNextNodes(narrativeElement);
-        const upcomingRenderers = {};
-        upcomingIds.forEach((neid) => {
-            if (this._reasoner) {
-                // get the actual NarrativeElement object
-                const reasoner = this._reasoner;
-                const subReasoner = reasoner.getSubReasonerContainingNarrativeElement(neid);
-                let neObj;
-                if (subReasoner) {
-                    neObj = subReasoner._narrativeElements[neid];
-                }
-                if (!neObj && this._linearStoryPath) {
-                    // can't find it via reasoner if in different substoruy,
-                    // but can get from storyPath if linear
-                    this._linearStoryPath.forEach((storyPathItem) => {
-                        if (storyPathItem.narrative_element.id === neid) {
-                            neObj = storyPathItem.narrative_element;
-                        }
-                    });
-                }
-                if (neObj) {
-                    this._fetchPresentation(neObj.presentation.target)
-                        .then(presentation => this._representationReasoner(presentation))
-                        .then((representation) => {
-                            // create the new Renderer
-                            const newRenderer = this._createNewRenderer(representation, reasoner);
-                            upcomingRenderers[neid] = newRenderer;
-                        });
-                }
->>>>>>> Lookahead extended across substory boundaries for linear experiences
             }
         }
         return neObj;
@@ -327,11 +273,8 @@ export default class Controller {
     }
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
-<<<<<<< HEAD
     // finds next NARRATIVE_ELEMENTs, but does not look out of the current subStory,
     // except in case of linear story
-=======
->>>>>>> Lookahead extended across substory boundaries for linear experiences
     _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
@@ -353,11 +296,7 @@ export default class Controller {
                 }
             }
         });
-<<<<<<< HEAD
         // console.log('upcoming:', upcomingIds);
-=======
-        console.log('upcoming:', upcomingIds);
->>>>>>> Lookahead extended across substory boundaries for linear experiences
         return upcomingIds;
     }
 
