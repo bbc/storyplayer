@@ -272,6 +272,7 @@ export default class Controller {
             const newRenderersList = this._upcomingRenderers.shift();
             if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
                 newRenderer = newRenderersList[narrativeElement.id];
+                console.log('renderer exists', newRenderer);
             }
         }
         // create the new Renderer if we need to
@@ -284,7 +285,7 @@ export default class Controller {
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
         // console.log('at', narrativeElement);
-        const upcomingIds = Controller._getIdsOfNextNodes(narrativeElement);
+        const upcomingIds = this._getIdsOfNextNodes(narrativeElement);
         const upcomingRenderers = {};
         upcomingIds.forEach((neid) => {
             if (this._reasoner) {
@@ -294,6 +295,15 @@ export default class Controller {
                 let neObj;
                 if (subReasoner) {
                     neObj = subReasoner._narrativeElements[neid];
+                }
+                if (!neObj && this._linearStoryPath) {
+                    // can't find it via reasoner if in different substoruy,
+                    // but can get from storyPath if linear
+                    this._linearStoryPath.forEach((storyPathItem) => {
+                        if (storyPathItem.narrative_element.id === neid) {
+                            neObj = storyPathItem.narrative_element;
+                        }
+                    });
                 }
                 if (neObj) {
                     this._fetchPresentation(neObj.presentation.target)
@@ -419,16 +429,28 @@ export default class Controller {
     }
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
-    static _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
+    _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
         nextNodes.forEach((link) => {
             if (link.link_type === 'NARRATIVE_ELEMENT' && link.target) {
                 upcomingIds.push(link.target);
             } else if (link.link_type === 'END_STORY') {
-                console.log('end of substory - cannot map next');
+                if (this._linearStoryPath) {
+                    let matchingId = null;
+                    this._linearStoryPath.forEach((storyPathItem, i) => {
+                        if (storyPathItem.narrative_element.id === narrativeElement.id
+                            && i < this._linearStoryPath.length) {
+                            matchingId = this._linearStoryPath[i + 1].narrative_element.id;
+                        }
+                    });
+                    if (matchingId) {
+                        upcomingIds.push(matchingId);
+                    }
+                }
             }
         });
+        console.log('upcoming:', upcomingIds);
         return upcomingIds;
     }
 
