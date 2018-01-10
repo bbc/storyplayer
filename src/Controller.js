@@ -25,8 +25,6 @@ export default class Controller {
     ) {
         this._storyId = null;
         this._reasoner = null;
-        this._currentRenderer = null;
-        this._backgroundRenderers = {};
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._fetchPresentation = fetchPresentation;
@@ -36,16 +34,19 @@ export default class Controller {
         this._fetchStory = fetchStory;
         this._createStoryAndElementDivs();
         this._linearStoryPath = [];
+
+        /* MOVE REST TO RENDERER MANAGER? */
+        this._currentRenderer = null;
+        this._upcomingRenderers = [];
+        this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
+            // also, audio muted/not...
         };
-        // probably want to instantiate a full history class?
     }
 
     start(storyId: string) {
         this._storyId = storyId;
-
-        this._upcomingRenderers = [];
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -93,16 +94,7 @@ export default class Controller {
         const _handleWalkEnd = () => {
             spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
                 this._linearStoryPath = storyItemPath;
-                this._renderStory = new StoryIconRenderer(
-                    storyItemPath,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._storyTarget,
-                );
-                this._renderStory.on('jumpToNarrativeElement', (neid) => {
-                    this._jumpToNarrativeElement(neid);
-                });
-                this._renderStory.start();
+                if (storyItemPath) this._createStoryIconRenderer(storyItemPath);
             });
         };
 
@@ -120,6 +112,21 @@ export default class Controller {
         } else {
             console.error('cannot resolve previous node to go to');
         }
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // create and start a StoryIconRenderer
+    _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
+        this._renderStory = new StoryIconRenderer(
+            storyItemPath,
+            this._fetchAssetCollection,
+            this._fetchMedia,
+            this._storyTarget,
+        );
+        this._renderStory.on('jumpToNarrativeElement', (neid) => {
+            this._jumpToNarrativeElement(neid);
+        });
+        this._renderStory.start();
     }
 
     /* MOVE TO RENDERER MANAGER? */
@@ -171,7 +178,7 @@ export default class Controller {
     /* MOVE TO RENDERER MANAGER? */
     // create a new renderer for the given representation, and attach
     // the standard listeners to it
-    _createNewRenderer(representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
+    _createNewRenderer(representation: Representation): ?BaseRenderer {
         const newRenderer = RendererFactory(
             representation,
             this._fetchAssetCollection,
@@ -179,7 +186,10 @@ export default class Controller {
             this._neTarget,
         );
 
-        if (newRenderer) {
+        /* pass these events back to Controller if we extract this function */
+        const reasoner = this._reasoner;
+
+        if (newRenderer && reasoner) {
             newRenderer.on('completeStartBehaviours', () => {
                 newRenderer.start();
             });
@@ -245,7 +255,7 @@ export default class Controller {
                 }
 
                 // get a Renderer for this new NE
-                const newRenderer = this._getRenderer(narrativeElement, representation, reasoner);
+                const newRenderer = this._getRenderer(narrativeElement, representation);
 
                 // look ahead and create new renderers for the next step
                 this._rendererLookahead(narrativeElement);
@@ -267,7 +277,7 @@ export default class Controller {
     /* MOVE TO RENDERER MANAGER? */
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
-    _getRenderer(narrativeElement: NarrativeElement, representation: Representation, reasoner: StoryReasoner): ?BaseRenderer {
+    _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
         if (this._upcomingRenderers.length === 1) {
@@ -279,7 +289,7 @@ export default class Controller {
         }
         // create the new Renderer if we need to
         if (!newRenderer) {
-            newRenderer = this._createNewRenderer(representation, reasoner);
+            newRenderer = this._createNewRenderer(representation);
         }
         return newRenderer;
     }
@@ -291,19 +301,16 @@ export default class Controller {
         const upcomingIds = this._getIdsOfNextNodes(narrativeElement);
         const upcomingRenderers = {};
         upcomingIds.forEach((neid) => {
-            if (this._reasoner) {
-                const reasoner = this._reasoner;
-                // get the actual NarrativeElement object
-                const neObj = this._getNarrativeElement(neid);
-                if (neObj) {
-                    this._fetchPresentation(neObj.presentation.target)
-                        .then(presentation => this._representationReasoner(presentation))
-                        .then((representation) => {
-                            // create the new Renderer
-                            const newRenderer = this._createNewRenderer(representation, reasoner);
-                            upcomingRenderers[neid] = newRenderer;
-                        });
-                }
+            // get the actual NarrativeElement object
+            const neObj = this._getNarrativeElement(neid);
+            if (neObj) {
+                this._fetchPresentation(neObj.presentation.target)
+                    .then(presentation => this._representationReasoner(presentation))
+                    .then((representation) => {
+                        // create the new Renderer
+                        const newRenderer = this._createNewRenderer(representation);
+                        upcomingRenderers[neid] = newRenderer;
+                    });
             }
         });
         this._upcomingRenderers.push(upcomingRenderers);
