@@ -1,6 +1,5 @@
 // @flow
 
-// @flowignore
 import VideoContext from 'videocontext';
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
