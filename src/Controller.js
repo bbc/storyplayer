@@ -315,7 +315,6 @@ export default class Controller {
         this._reasoner = null;
 
         this._renderManager.reset();
-        this._renderManager.reset();
     }
 
     _storyId: ?string;
