@@ -67,7 +67,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             super.complete();
         });
 
-        this.videoContextExperiment();
+        // Switch this on to play with video context
+        // this.videoContextExperiment();
     }
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
@@ -198,25 +199,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._target.appendChild(controls);
     }
 
+    // How to use Video Context:
     videoContextExperiment() {
         this._canvas = document.createElement('canvas');
         const canvas = this._canvas;
         const videoCtx = new CustomVideoContext(canvas);
-
-        // const videoNode1 = videoCtx.video('./video1.mp4');
-        const videoNode1 = videoCtx.hls('https://vod-hls-uk-stage.akamaized.net/usp/auth/vod/piff_abr_full_sd/878e62-p01fqwrm/vf_p01fqwrm_22f3fd45-7ad6-474a-8fc7-c56a1d957316.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515534492_a7badb49b42715342a9b418cf0e1489c', 0, 4);
+        const videoNode1 = videoCtx.hls('https://vod-hls-uk-live.akamaized.net/usp/auth/vod/piff_abr_full_sd/56932b-p04p74yq/vf_p04p74yq_aca390f5-5078-4a28-a464-527d3212c59e.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515598679_1246b8952e23432dcb5b5ea55ff60c28', 0, 4);
         videoNode1.start(0);
-        // videoNode1.stop(4);
-
-        // const videoNode2 = videoCtx.video('./video2.mp4');
-        // videoNode2.start(2);
-        // videoNode2.stop(6);
-
-        // const crossFade = videoCtx.transition(VideoContext.DEFINITIONS.CROSSFADE);
-        // crossFade.transition(2, 4, 0.0, 1.0, 'mix');
-
-        // videoNode1.connect(crossFade);
-        // videoNode2.connect(crossFade);
         videoNode1.connect(videoCtx.destination);
         videoCtx.play();
         this._target.appendChild(canvas);
