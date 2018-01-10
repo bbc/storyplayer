@@ -4,97 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>Romper Frog Demo</title>
-    <style>
-        .switchbuttons img {
-            width: 50px;
-            background: rgba(200, 200, 230, 0.5);
-            border: 1px solid lightgray;
-        }
-
-        .switchbuttons li {
-            list-style: none;
-        }
-
-        .switchbuttons ul {
-            position: absolute;
-            left: 10px;
-            top: 0;
-            margin-left: 0px;
-            padding-left: 5px;
-        }
-
-        .inactive {
-            opacity: 0.3;
-            /* visibility: hidden; */
-        }
-
-        .active {
-            visibility: visible;
-        }
-
-        #backNEbutton,
-        #nextNEbutton {
-            position: absolute;
-            top: 250px;
-            height: 30px;
-            width: 50px;
-            background: rgba(200, 200, 230, 0.5);
-            border: 1px solid lightgray;
-            border-radius: 0px;
-            color: white;
-            margin: 5px;
-            z-index: 5;
-        }
-
-        #backNEbutton {
-            left: 10px;
-        }
-
-        #nextNEbutton {
-            left: 445px
-        }
-
-        #romper-target img,
-        video {
-            max-height: 281px;
-        }
-
-        img.inactiveIcon {
-            width: 30px;
-        }
-
-        img.activeIcon {
-            width: 60px;
-        }
-
-        #chapterIcons li {
-            list-style: none;
-            /* display: inline; */
-        }
-
-        #chapterIcons {
-            /* position: absolute;
-            top: 0px;
-            left: 430px; */
-        }
-
-        div#render-element {
-            background-color: rgb(230, 247, 252);
-            padding-left: 0px;
-            padding-top: 0px;
-            /* padding: 10px; */
-        }
-
-        div#subrenderer {
-            background-color: rgb(214, 245, 214);
-            padding: 0px;
-        }
-
-        div#story_element {
-            background-color: rgb(253, 245, 231);
-            padding: 0px;
-        }
-    </style>
+    <link href="dist/romper.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -1254,7 +1164,7 @@
             ]
         }
     </script>
-    <script src="dist/romper.browser.js"></script>
+    <script src="dist/romper.js"></script>
     <script>
         (function () {
             const config = JSON.parse(document.getElementById('romper-story').textContent);
