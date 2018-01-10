@@ -46,8 +46,8 @@ export default class CustomVideoContext extends VideoContext {
         });
 
         videoNode.registerCallback('destroy', (node: Object) => {
-            if (node.dashplayer) {
-                node.dashplayer.reset();
+            if (node.hlsplayer) {
+                node.hlsplayer.reset();
             }
         });
         return videoNode;

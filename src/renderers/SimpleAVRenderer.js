@@ -12,7 +12,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _hls: Object;
     _videoElement: HTMLVideoElement;
-    _canvas: Object;
+    _canvas: HTMLCanvasElement;
 
     constructor(
         representation: Representation,
