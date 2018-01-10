@@ -7,8 +7,11 @@ import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
+<<<<<<< HEAD
 
 // import VideoContext from 'videocontext';
+=======
+>>>>>>> 7d35ec943bf911a7fa9c7824cdde99e0e5f79f53
 
 export default class Controller {
     constructor(
