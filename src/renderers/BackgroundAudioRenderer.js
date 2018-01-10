@@ -1,8 +1,9 @@
 // @flow
 
 import BackgroundRenderer from './BackgroundRenderer';
-import MediaFetcher from '../fetchers/MediaFetcher';
-import type { AssetCollection } from '../romper';
+import type { MediaFetcher, AssetCollection } from '../romper';
+
+// @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {

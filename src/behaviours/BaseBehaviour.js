@@ -1,8 +1,13 @@
+// @flow
+
 /* eslint-disable class-methods-use-this */
 export default class BaseBehaviour {
-    constructor(behaviourDefinition, onComplete) {
+    behaviourDefinition: Object;
+    onComplete: () => mixed;
+
+    constructor(behaviourDefinition: Object, onComplete: () => mixed) {
         this.behaviourDefinition = behaviourDefinition;
         this.onComplete = onComplete;
     }
-    destroy() {}
+    destroy() { }
 }

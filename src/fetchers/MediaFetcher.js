@@ -8,7 +8,7 @@
  * @return {Function} A resolver which returns data from the passed in object
  */
 
-export default function (params: Object) {
+export default function (params: Object) { // eslint-disable-line no-unused-vars
     /**
      * Converts a uri to a playable piece of media.
          *
