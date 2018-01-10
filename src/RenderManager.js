@@ -1,0 +1,295 @@
+// @flow
+
+import EventEmitter from 'events';
+// import type { StoryReasonerFactory } from './StoryReasonerFactory';
+// import StoryReasoner from './StoryReasoner';
+import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
+import type { RepresentationReasoner } from './RepresentationReasoner';
+import BaseRenderer from './renderers/BaseRenderer';
+import RendererFactory from './renderers/RendererFactory';
+// import StoryPathWalker from './StoryPathWalker';
+import type { StoryPathItem } from './StoryPathWalker';
+import StoryIconRenderer from './renderers/StoryIconRenderer';
+import SwitchableRenderer from './renderers/SwitchableRenderer';
+import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
+import BackgroundRenderer from './renderers/BackgroundRenderer';
+import Controller from './Controller';
+
+export default class RenderManager extends EventEmitter {
+    constructor(
+        controller: Controller,
+        target: HTMLElement,
+        fetchPresentation: PresentationFetcher,
+        fetchAssetCollection: AssetCollectionFetcher,
+        representationReasoner: RepresentationReasoner,
+        fetchMedia: MediaFetcher,
+    ) {
+        super();
+        this._controller = controller;
+        // this._reasoner = null;
+        this._target = target;
+        this._fetchPresentation = fetchPresentation;
+        this._representationReasoner = representationReasoner;
+        this._fetchAssetCollection = fetchAssetCollection;
+        this._fetchMedia = fetchMedia;
+
+        this._createStoryAndElementDivs();
+
+        /* MOVE REST TO RENDERER MANAGER? */
+        this._currentRenderer = null;
+        this._upcomingRenderers = [];
+        this._backgroundRenderers = {};
+        this._rendererState = {
+            lastSwitchableLabel: '', // the label of the last selected switchable choice
+            // also, audio muted/not...
+        };
+    }
+
+    handleNEChange(narrativeElement: NarrativeElement) {
+        this._fetchPresentation(narrativeElement.presentation.target)
+            .then(presentation => this._representationReasoner(presentation))
+            .then((representation) => {
+                // get a Renderer for this new NE
+                const newRenderer = this._getRenderer(narrativeElement, representation);
+
+                // look ahead and create new renderers for the next step
+                this._rendererLookahead(narrativeElement);
+
+                if (newRenderer) {
+                    // swap renderers
+                    this._swapRenderers(newRenderer);
+                    // handle backgrounds
+                    this._handleBackgroundRendering(newRenderer.getRepresentation());
+                }
+
+                // tell story renderer that we've changed
+                if (this._renderStory) {
+                    this._renderStory.handleNarrativeElementChanged(representation.id);
+                }
+            });
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // create and start a StoryIconRenderer
+    _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
+        this._renderStory = new StoryIconRenderer(
+            storyItemPath,
+            this._fetchAssetCollection,
+            this._fetchMedia,
+            this._storyTarget,
+        );
+        this._renderStory.on('jumpToNarrativeElement', (neid) => {
+            this._controller._jumpToNarrativeElement(neid);
+        });
+        this._renderStory.start();
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // given a new representation, handle the background rendering
+    // either:
+    //     stop if there is no background
+    //     continue with the current one (do nothing) if background is same asset_collection
+    //  or start a new background renderer
+    _handleBackgroundRendering(representation: Representation) {
+        let newBackgrounds = [];
+        if (representation
+            && representation.asset_collection.background) {
+            newBackgrounds = representation.asset_collection.background;
+        }
+
+        // remove dead backgrounds
+        Object.keys(this._backgroundRenderers).forEach((rendererACId) => {
+            if (newBackgrounds.indexOf(rendererACId) === -1) {
+                // console.log('destroying background', rendererACId);
+                this._backgroundRenderers[rendererACId].destroy();
+                delete this._backgroundRenderers[rendererACId];
+            }
+        });
+
+        newBackgrounds.forEach((backgroundAssetCollectionId) => {
+            // maintain ones in both, add new ones, remove old ones
+            if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
+                // console.log('maintain background', backgroundAssetCollectionId);
+            } else {
+                // console.log('new background', backgroundAssetCollectionId);
+                this._fetchAssetCollection(backgroundAssetCollectionId)
+                    .then((bgAssetCollection) => {
+                        const backgroundRenderer = BackgroundRendererFactory(
+                            bgAssetCollection.type,
+                            bgAssetCollection,
+                            this._fetchMedia,
+                            this._backgroundTarget,
+                        );
+                        if (backgroundRenderer) {
+                            backgroundRenderer.start();
+                            this._backgroundRenderers[backgroundAssetCollectionId]
+                                = backgroundRenderer;
+                        }
+                    });
+            }
+        });
+    }
+
+    /**
+     * Move on to the next node of this story.
+     *
+     * @fires RenderManager#complete
+     * @fires RenderManager#nextButtonClicked
+     * @fires RenderManager#backButtonClicked
+     */
+    /* MOVE TO RENDERER MANAGER? */
+    // create a new renderer for the given representation, and attach
+    // the standard listeners to it
+    _createNewRenderer(representation: Representation): ?BaseRenderer {
+        const newRenderer = RendererFactory(
+            representation,
+            this._fetchAssetCollection,
+            this._fetchMedia,
+            this._neTarget,
+        );
+
+        if (newRenderer) {
+            newRenderer.on('completeStartBehaviours', () => {
+                newRenderer.start();
+            });
+            newRenderer.on('complete', () => {
+                // reasoner.next();
+                this.emit('complete');
+            });
+            newRenderer.on('nextButtonClicked', () => {
+                // reasoner.next();
+                this.emit('nextButtonClicked');
+            });
+            newRenderer.on('backButtonClicked', () => {
+                this.emit('backButtonClicked');
+                // this._controller._goBackOneStepInStory();
+            });
+            newRenderer.on('switchedRepresentation', (choice) => {
+                this._rendererState.lastSwitchableLabel = choice.label;
+                this._handleBackgroundRendering(choice.representation);
+            });
+        } else {
+            console.error(
+                'Do not know how to render',
+                representation.representation_type,
+            );
+        }
+        return newRenderer;
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // swap the renderers over
+    // it's from here we might want to be clever with retaining elements if
+    // Renderers are of the same type
+    _swapRenderers(newRenderer: BaseRenderer) {
+        // if both same type, just update current
+        //   else
+        // destroy old renderer
+        if (this._currentRenderer) {
+            this._currentRenderer.destroy();
+        }
+        this._currentRenderer = newRenderer;
+
+        // render buttons if appropriate
+        if (this._controller._getIdOfPreviousNode()) newRenderer.renderBackButton();
+        if (this._controller.hasNextNode()) {
+            newRenderer.renderNextButton();
+        }
+
+        if (newRenderer instanceof SwitchableRenderer) {
+            if (this._rendererState.lastSwitchableLabel) {
+                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+            }
+        }
+
+        newRenderer.willStart();
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // get a renderer for the given NE, and its Representation
+    // see if we've created one in advance, otherwise create a fresh one
+    _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
+        let newRenderer;
+        // have we already got a renderer?
+        if (this._upcomingRenderers.length === 1) {
+            const newRenderersList = this._upcomingRenderers.shift();
+            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
+                newRenderer = newRenderersList[narrativeElement.id];
+                // console.log('renderer exists', newRenderer);
+            }
+        }
+        // create the new Renderer if we need to
+        if (!newRenderer) {
+            newRenderer = this._createNewRenderer(representation);
+        }
+        return newRenderer;
+    }
+
+    /* MOVE TO RENDERER MANAGER? */
+    // create reasoners for the NEs that follow narrativeElement
+    _rendererLookahead(narrativeElement: NarrativeElement) {
+        // console.log('at', narrativeElement);
+        const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
+        const upcomingRenderers = {};
+        upcomingIds.forEach((neid) => {
+            // get the actual NarrativeElement object
+            const neObj = this._controller._getNarrativeElement(neid);
+            if (neObj) {
+                this._fetchPresentation(neObj.presentation.target)
+                    .then(presentation => this._representationReasoner(presentation))
+                    .then((representation) => {
+                        // create the new Renderer
+                        const newRenderer = this._createNewRenderer(representation);
+                        upcomingRenderers[neid] = newRenderer;
+                    });
+            }
+        });
+        this._upcomingRenderers.push(upcomingRenderers);
+    }
+
+    /* MOVE TO UI MANAGER? */
+    // create new divs within the target to hold the storyIconRenderer and
+    // the renderer for the current NarrativeElement
+    _createStoryAndElementDivs() {
+        this._neTarget = document.createElement('div');
+        this._neTarget.id = 'render-element';
+        this._target.appendChild(this._neTarget);
+        this._storyTarget = document.createElement('div');
+        this._storyTarget.id = 'story_element';
+        this._target.appendChild(this._storyTarget);
+        this._backgroundTarget = document.createElement('div');
+        this._backgroundTarget.id = 'background_element';
+        this._target.appendChild(this._backgroundTarget);
+    }
+
+    reset() {
+        if (this._currentRenderer) {
+            this._currentRenderer.destroy();
+        }
+    }
+
+    _controller: Controller;
+    // _reasoner: ?StoryReasoner;
+    _currentRenderer: ?BaseRenderer;
+    _backgroundRenderers: { [key: string]: BackgroundRenderer };
+    _target: HTMLElement;
+    _backgroundTarget: HTMLElement;
+    // _storyReasonerFactory: StoryReasonerFactory;
+    _fetchPresentation: PresentationFetcher;
+    _fetchAssetCollection: AssetCollectionFetcher;
+    _representationReasoner: RepresentationReasoner;
+    _fetchMedia: MediaFetcher;
+    // _fetchStory: StoryFetcher;
+    // _handleError: ?Function;
+    // _handleStoryEnd: ?Function;
+    // _handleNarrativeElementChanged: ?Function;
+    _renderStory: StoryIconRenderer;
+    _neTarget: HTMLDivElement;
+    _storyTarget: HTMLDivElement;
+    _linearStoryPath: Array<StoryPathItem>;
+    _currentNarrativeElement: NarrativeElement;
+    _rendererState: {
+        lastSwitchableLabel: string,
+    };
+    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+}
