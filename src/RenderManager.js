@@ -254,6 +254,8 @@ export default class RenderManager extends EventEmitter {
         this._neTarget = document.createElement('div');
         this._neTarget.id = 'render-element';
         this._target.appendChild(this._neTarget);
+        // this._videoContextCanvas = document.createElement('canvas');
+        // this._neTarget.append(this._videoContextCanvas);
         this._storyTarget = document.createElement('div');
         this._storyTarget.id = 'story_element';
         this._target.appendChild(this._storyTarget);

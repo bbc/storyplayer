@@ -4,6 +4,44 @@ import VideoContext from 'videocontext';
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
 
+let videoContext;
+let canvas;
+
+const nodeRepresentationMap = {};
+
+export function getVideoContext() {
+    if (!videoContext) {
+        canvas = document.createElement('canvas');
+        videoContext = new VideoContext(canvas);
+    }
+    return videoContext;
+}
+
+export function getCanvas() {
+    return canvas;
+}
+
+export function getNodeRepresentationMap() {
+    return nodeRepresentationMap;
+}
+
+export function createNodeForRepresentation(representationId: string, mediaUrl: sting) {
+    let videoNode;
+    // if mediaUrl is hls
+    if (mediaUrl.indexOf('.m3u8') !== -1) {
+        videoNode = this._videoCtx.hls(mediaUrl, 0, 4);
+    } else {
+        videoNode = this._videoCtx.video(mediaUrl, 0, 4);
+    }
+    // MORE THOUGHT NEEDED HERE
+    videoNode.connect(this._videoCtx.destination);
+
+    nodeRepresentationMap[representationId] = videoNode;
+
+    return videoNode;
+}
+
+
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
 
@@ -18,7 +56,6 @@ export default class CustomVideoContext extends VideoContext {
 
             videoNode.hlsplayer = new Hls();
 
-
             let currentTimeOffset = 0;
             if (videoNode._currentTime > videoNode._startTime) {
                 currentTimeOffset = videoNode._currentTime - videoNode._startTime;
@@ -32,14 +69,7 @@ export default class CustomVideoContext extends VideoContext {
                 });
             }
 
-            videoNode.hlsplayer.seek(videoNode._sourceOffset + currentTimeOffset);
-
-            videoNode.hlsplayer.setAutoSwitchQualityFor('video', false);
-            videoNode.hlsplayer.on('playbackMetaDataLoaded', () => {
-                const videoQualities = videoNode.dashplayer.getBitrateInfoListFor('video');
-                videoNode.hlsplayer.setQualityFor('video', videoQualities.length - 1);
-            });
-            // videoNode.hlsplayer.setVolume(0.0);
+        //    videoNode.hlsplayer.startPosition(videoNode._sourceOffset + currentTimeOffset);
         });
 
         videoNode.registerCallback('play', () => {

@@ -2,7 +2,9 @@
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
+import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
@@ -52,11 +54,13 @@ export default class BaseRenderer extends EventEmitter {
     willStart() {
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
-            this.emit('completeStartBehaviours');
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
     }
 
-    start() { }
+    start() {
+        this.emit(RendererEvents.STARTED);
+    }
 
     /**
      * get the representation that this renderer is currently rendering
@@ -69,7 +73,7 @@ export default class BaseRenderer extends EventEmitter {
     complete() {
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours('complete', 'complete')) {
-            this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
+            this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }
     /**
@@ -82,6 +86,7 @@ export default class BaseRenderer extends EventEmitter {
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
         }
+        this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
     }
 
     renderNextButton() {
@@ -93,7 +98,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     handleNextButtonClick() {
-        this.emit('nextButtonClicked');
+        this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
     }
 
     renderBackButton() {
@@ -105,6 +110,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     handleBackButtonClick() {
-        this.emit('backButtonClicked');
+        this.emit(RendererEvents.BACK_BUTTON_CLICKED);
     }
 }
