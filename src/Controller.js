@@ -7,6 +7,7 @@ import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
+import RendererEvents from './renderers/RendererEvents';
 
 // import VideoContext from 'videocontext';
 
@@ -78,13 +79,13 @@ export default class Controller {
             this._fetchMedia,
         );
 
-        this._renderManager.on('complete', () => {
+        this._renderManager.on(RendererEvents.COMPLETED, () => {
             if (this._reasoner) this._reasoner.next();
         });
-        this._renderManager.on('nextButtonClicked', () => {
+        this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._reasoner) this._reasoner.next();
         });
-        this._renderManager.on('backButtonClicked', () => {
+        this._renderManager.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
             this._goBackOneStepInStory();
         });
     }

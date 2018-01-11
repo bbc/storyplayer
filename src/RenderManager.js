@@ -155,14 +155,14 @@ export default class RenderManager extends EventEmitter {
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
                 // reasoner.next();
-                this.emit('complete');
+                this.emit(RendererEvents.COMPLETED);
             });
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 // reasoner.next();
-                this.emit('nextButtonClicked');
+                this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
             });
             newRenderer.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
-                this.emit('backButtonClicked');
+                this.emit(RendererEvents.BACK_BUTTON_CLICKED);
                 // this._controller._goBackOneStepInStory();
             });
             newRenderer.on('switchedRepresentation', (choice) => {
