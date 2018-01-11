@@ -14,6 +14,7 @@ import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 import BackgroundRenderer from './renderers/BackgroundRenderer';
 import Controller from './Controller';
+import RendererEvents from './renderers/RendererEvents';
 
 export default class RenderManager extends EventEmitter {
     constructor(
@@ -149,18 +150,18 @@ export default class RenderManager extends EventEmitter {
         );
 
         if (newRenderer) {
-            newRenderer.on('completeStartBehaviours', () => {
+            newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                 newRenderer.start();
             });
-            newRenderer.on('complete', () => {
+            newRenderer.on(RendererEvents.COMPLETED, () => {
                 // reasoner.next();
                 this.emit('complete');
             });
-            newRenderer.on('nextButtonClicked', () => {
+            newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 // reasoner.next();
                 this.emit('nextButtonClicked');
             });
-            newRenderer.on('backButtonClicked', () => {
+            newRenderer.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
                 this.emit('backButtonClicked');
                 // this._controller._goBackOneStepInStory();
             });
