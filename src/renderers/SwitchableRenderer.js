@@ -86,6 +86,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (choiceIndex >= 0 && choiceIndex < this._choiceRenderers.length) {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
             if (currentChoice) {
+                // TODO: implement this in SimpleAVVideoContextRenderer
                 if (currentChoice instanceof SimpleAVRenderer) {
                     // store playhead time
                     this._previousRendererPlayheadTime = currentChoice.getCurrentTime();

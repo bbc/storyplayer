@@ -48,7 +48,7 @@ export default class BehaviourRunner {
         }
 
         this.behaviours.forEach((behaviour) => { behaviour.start(this.baseRenderer); });
-    
+
         return true;
     }
 

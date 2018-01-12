@@ -31,31 +31,25 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         this.renderVideoElement();
 
-        this.on('videoContextNodeCreated', () => { console.log('vctx node created 2'); this.NODE_CREATED = true; });
+        this.on('videoContextNodeCreated', () => { this.NODE_CREATED = true; });
     }
 
     start() {
         super.start();
-        // render the video div
-        // and control bar
-        // this.renderControlBar();
         // start the video
         this.playVideo();
-
-
         // this.renderDataModelInfo();
     }
 
     playVideo() {
         if (this.NODE_CREATED) {
             const node = this._videoNode;
-            // console.log('VCtx current time:', this._videoCtx.currentTime);
             node.start(0);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
         } else {
             const that = this;
-            this.on('videoContextNodeCreated', () => { console.log('vctx node created'); that.NODE_CREATED = true; that.playVideo(); });
+            this.on('videoContextNodeCreated', () => { that.NODE_CREATED = true; that.playVideo(); });
         }
     }
 
@@ -67,7 +61,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             videoNode1 = this._videoCtx.video(mediaUrl, 0, 4);
         }
-        // videoNode1.start(0);
         videoNode1.connect(this._videoCtx.destination);
 
         videoNode1.registerCallback('ended', this.complete.bind(this));
@@ -78,13 +71,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
-        /* TEST VIDEO CTX HERE>... */
-
-
-        // set CSS classname
-        // ????
-
-        // set its source
+        // get asset and call build node function
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
                 if (fg.assets.av_src) {
@@ -101,136 +88,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             // console.error('No foreground source for AVRenderer');
         }
-
-        // automatically move on at video end
-
-
-        // Switch this on to play with video context
-        // this.videoContextExperiment();
-    }
-
-    // Add player controls to the DOM and listen for events
-    renderControlBar() {
-        // target element by its class name rather than ID as there will be multiple videos on the page...
-        const video = this._videoElement;
-
-        // buttons
-        const playPause = document.createElement('button');
-        playPause.className = 'play-pause--playing';
-        const playVideo = () => {
-            video.play();
-            playPause.className = 'play-pause--playing';
-        };
-        const pauseVideo = () => {
-            video.pause();
-            playPause.className = 'play-pause--paused';
-        };
-
-        playPause.addEventListener('click', () => {
-            if (video.paused === true) {
-                playVideo();
-            } else {
-                pauseVideo();
-            }
-        });
-
-        const mute = document.createElement('button');
-        mute.className = 'mute-button--unmuted';
-        mute.addEventListener('click', () => {
-            if (!video.muted) {
-                // Mute the video
-                video.muted = true;
-                mute.className = 'mute-button--muted';
-            } else {
-                // Unmute the video
-                video.muted = false;
-                mute.className = 'mute-button--unmuted';
-            }
-        });
-
-        const fullscreen = document.createElement('button');
-        fullscreen.className = 'fullscreen';
-        // Event listener for the full-screen button
-        fullscreen.addEventListener('click', () => {
-            if (video.requestFullscreen) {
-                // @flowignore
-                video.requestFullscreen();
-            } else if (video.mozRequestFullScreen) {
-                // @flowignore
-                video.mozRequestFullScreen(); // Firefox
-            } else if (video.webkitRequestFullscreen) {
-                // @flowignore
-                video.webkitRequestFullscreen(); // Chrome and Safari
-            }
-        });
-
-        // ranges
-        const volume = document.createElement('input');
-        volume.type = 'range';
-        volume.className = 'volume-range';
-
-        const scrubBar = document.createElement('input');
-        scrubBar.type = 'range';
-        scrubBar.className = 'scrub-bar';
-
-        // update scrub bar position as video plays
-        scrubBar.addEventListener('change', () => {
-            // Calculate the new time
-            const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
-
-            // Update the video time
-            video.currentTime = time;
-        });
-
-        // allow clicking the scrub bar to seek to a video position
-        function seek(e: MouseEvent) {
-            const percent = e.offsetX / this.offsetWidth;
-            video.currentTime = percent * video.duration;
-        }
-
-        scrubBar.addEventListener('click', seek);
-
-        // Update the seek bar as the video plays
-        video.addEventListener('timeupdate', () => {
-            // Calculate the slider value
-            const value = (100 / video.duration) * video.currentTime;
-
-            // Update the slider value
-            scrubBar.value = value.toString();
-        });
-
-        // Pause the video when the slider handle is being dragged
-        scrubBar.addEventListener('mousedown', () => {
-            pauseVideo();
-        });
-
-        // Play the video when the slider handle is dropped
-        scrubBar.addEventListener('mouseup', () => {
-            playVideo();
-        });
-
-        // container to hold all controls
-        const controls = document.createElement('div');
-        controls.className = 'video-controls';
-
-        controls.appendChild(playPause);
-        controls.appendChild(volume);
-        controls.appendChild(mute);
-        controls.appendChild(fullscreen);
-        this._target.appendChild(scrubBar);
-        this._target.appendChild(controls);
-    }
-
-    // How to use Video Context:
-    videoContextExperiment() {
-        this._canvas = document.createElement('canvas');
-        const canvas = this._canvas;
-        const videoCtx = new CustomVideoContext(canvas);
-        const videoNode1 = videoCtx.hls('https://vod-hls-uk-live.akamaized.net/usp/auth/vod/piff_abr_full_sd/56932b-p04p74yq/vf_p04p74yq_aca390f5-5078-4a28-a464-527d3212c59e.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515598679_1246b8952e23432dcb5b5ea55ff60c28', 0, 4);
-        videoNode1.start();
-        videoNode1.connect(videoCtx.destination);
-        videoCtx.play();
-        this._target.appendChild(canvas);
     }
 
     renderDataModelInfo() {
@@ -278,32 +135,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
-    getCurrentTime(): number {
-        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) return 0;
-        return this._videoElement.currentTime;
-    }
-
-    setCurrentTime(time: number) {
-        this._videoElement.currentTime = time;
-    }
-
-    setStartTime(time: number) {
-        if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
-            this.setCurrentTime(time);
-        } else if (this._hls) {
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.setCurrentTime(time);
-            });
-        } else {
-            this._videoElement.addEventListener('loadeddata', () => {
-                this.setCurrentTime(time);
-            });
-        }
-    }
-
     stopAndDisconnect() {
-        console.log('simpleav vid ctx stop+dc)');
-
         this._videoNode.unregisterCallback();
 
         // Stop current active node
