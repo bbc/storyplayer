@@ -155,6 +155,7 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
+                console.log('COMPLETED in Render Man');
                 // reasoner.next();
                 this.emit(RendererEvents.COMPLETED);
             });

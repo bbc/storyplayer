@@ -70,7 +70,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // videoNode1.start(0);
         videoNode1.connect(this._videoCtx.destination);
 
-        // videoNode1.registerCallback('ended', this.complete.bind(this));
+        videoNode1.registerCallback('ended', this.complete.bind(this));
 
         this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
@@ -302,6 +302,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     stopAndDisconnect() {
+        console.log('simpleav vid ctx stop+dc)');
+
+        this._videoNode.unregisterCallback();
+
         // Stop current active node
         this._videoNode.stop(-1);
 
