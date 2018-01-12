@@ -56,6 +56,7 @@ export default class Controller {
             reasoner.on('error', _handleError);
 
             this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                console.log('Control rx event from reasoner', narrativeElement);
                 this._handleNEChange(reasoner, narrativeElement);
             };
 
@@ -239,7 +240,7 @@ export default class Controller {
         } else {
             console.log(narrativeElementId, 'not in substory - doing shadow walk');
             if (this._storyId) {
-                this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
+                //     this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }
         }
     }

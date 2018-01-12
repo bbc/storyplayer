@@ -15,6 +15,7 @@ import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 import BackgroundRenderer from './renderers/BackgroundRenderer';
 import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
+import SimpleAVVideoContextRenderer from './renderers/SimpleAVVideoContextRenderer';
 
 export default class RenderManager extends EventEmitter {
     constructor(
@@ -55,7 +56,7 @@ export default class RenderManager extends EventEmitter {
 
                 // look ahead and create new renderers for the next step
                 // this._rendererLookahead(narrativeElement);
-                // TODO: ^^^^^ PUT BACK IN
+                // TODO: ^^^^^
                 if (newRenderer) {
                     // swap renderers
                     this._swapRenderers(newRenderer);
@@ -186,7 +187,10 @@ export default class RenderManager extends EventEmitter {
         // if both same type, just update current
         //   else
         // destroy old renderer
-        if (this._currentRenderer) {
+        if (this._currentRenderer instanceof SimpleAVVideoContextRenderer &&
+            newRenderer instanceof SimpleAVVideoContextRenderer) {
+            this._currentRenderer.stopAndDisconnect();
+        } else if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
         this._currentRenderer = newRenderer;

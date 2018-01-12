@@ -10,7 +10,7 @@ import SwitchableRenderer from './SwitchableRenderer';
 export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, mediaFetcher: MediaFetcher, target: HTMLElement): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
-        'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVVideoContextRenderer,//SimpleAVRenderer,
+        'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVVideoContextRenderer, // SimpleAVRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
     };
 

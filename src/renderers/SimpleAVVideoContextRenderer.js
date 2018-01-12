@@ -70,7 +70,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // videoNode1.start(0);
         videoNode1.connect(this._videoCtx.destination);
 
-        videoNode1.registerCallback('ended', this.complete);
+        // videoNode1.registerCallback('ended', this.complete.bind(this));
 
         this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
@@ -227,7 +227,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         const canvas = this._canvas;
         const videoCtx = new CustomVideoContext(canvas);
         const videoNode1 = videoCtx.hls('https://vod-hls-uk-live.akamaized.net/usp/auth/vod/piff_abr_full_sd/56932b-p04p74yq/vf_p04p74yq_aca390f5-5078-4a28-a464-527d3212c59e.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515598679_1246b8952e23432dcb5b5ea55ff60c28', 0, 4);
-        videoNode1.start(0);
+        videoNode1.start();
         videoNode1.connect(videoCtx.destination);
         videoCtx.play();
         this._target.appendChild(canvas);
@@ -301,16 +301,19 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
-    destroy() {
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
-        }
-
+    stopAndDisconnect() {
         // Stop current active node
         this._videoNode.stop(-1);
 
         // disconnect current active node.
         this._videoNode.disconnect();
+    }
+
+    destroy() {
+        this.stopAndDisconnect();
+        while (this._target.lastChild) {
+            this._target.removeChild(this._target.lastChild);
+        }
 
         super.destroy();
     }

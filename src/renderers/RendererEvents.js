@@ -1,7 +1,7 @@
 const RendererEvents = {
     STARTED: 'started',
     RENDERER_READY: 'rendererReady', // the renderer has loaded all media and is ready to play
-    COMPLETED: 'completed', // the renderer has played all of its media+completed behaviours
+    COMPLETED: 'complete', // the renderer has played all of its media+completed behaviours
     DESTROYED: 'destroyed', // the renderer has been succesfully destroyed
     COMPLETE_START_BEHAVIOURS: 'completeStartBehaviours', // ronseal.
     NEXT_BUTTON_CLICKED: 'nextButtonClicked', // ronseal
