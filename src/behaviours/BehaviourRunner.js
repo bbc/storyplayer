@@ -43,8 +43,12 @@ export default class BehaviourRunner {
             }
         });
 
+        if (this.behaviours.length === 0) {
+            return false;
+        }
+
         this.behaviours.forEach((behaviour) => { behaviour.start(this.baseRenderer); });
-        if (this.behaviours.length === 0) { return false; }
+    
         return true;
     }
 
