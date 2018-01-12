@@ -41,7 +41,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     playVideo() {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this._videoElement.play();
-        } else if (this._hls) {
+        } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 this._videoElement.play();
             });
@@ -278,7 +278,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     setStartTime(time: number) {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this.setCurrentTime(time);
-        } else if (this._hls) {
+        } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 this.setCurrentTime(time);
             });
