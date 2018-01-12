@@ -9,38 +9,6 @@ let canvas;
 
 const nodeRepresentationMap = {};
 
-export function getVideoContext() {
-    if (!videoContext) {
-        canvas = document.createElement('canvas');
-        videoContext = new CustomVideoContext(canvas);
-    }
-    return videoContext;
-}
-
-export function getCanvas() {
-    return canvas;
-}
-
-export function getNodeRepresentationMap() {
-    return nodeRepresentationMap;
-}
-
-export function createNodeForRepresentation(representationId: string, mediaUrl: sting) {
-    let videoNode;
-    // if mediaUrl is hls
-    if (mediaUrl.indexOf('.m3u8') !== -1) {
-        videoNode = this._videoCtx.hls(mediaUrl, 0, 4);
-    } else {
-        videoNode = this._videoCtx.video(mediaUrl, 0, 4);
-    }
-    // MORE THOUGHT NEEDED HERE
-    videoNode.connect(this._videoCtx.destination);
-
-    nodeRepresentationMap[representationId] = videoNode;
-
-    return videoNode;
-}
-
 
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
@@ -77,9 +45,43 @@ export default class CustomVideoContext extends VideoContext {
 
         videoNode.registerCallback('destroy', (node: Object) => {
             if (node.hlsplayer) {
-                // node.hlsplayer.reset();
+                node.hlsplayer.destroy();
             }
         });
         return videoNode;
     }
+}
+
+
+export function getCanvas() {
+    return canvas;
+}
+
+export function getNodeRepresentationMap() {
+    return nodeRepresentationMap;
+}
+
+export function createNodeForRepresentation(representationId: string, mediaUrl: string) {
+    let videoNode;
+    // if mediaUrl is hls
+    if (mediaUrl.indexOf('.m3u8') !== -1) {
+        videoNode = this._videoCtx.hls(mediaUrl, 0, 4);
+    } else {
+        videoNode = this._videoCtx.video(mediaUrl, 0, 4);
+    }
+    // MORE THOUGHT NEEDED HERE
+    videoNode.connect(this._videoCtx.destination);
+
+    nodeRepresentationMap[representationId] = videoNode;
+
+    return videoNode;
+}
+
+
+export function getVideoContext() {
+    if (!videoContext) {
+        canvas = document.createElement('canvas');
+        videoContext = new CustomVideoContext(canvas);
+    }
+    return videoContext;
 }

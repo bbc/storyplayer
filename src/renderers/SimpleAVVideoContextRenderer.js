@@ -11,7 +11,7 @@ import RendererEvents from './RendererEvents';
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _canvas: HTMLCanvasElement;
-    _videoNodes: Array<Object>;
+    _videoNode: Object;
     _videoCtx: Object;
     NODE_CREATED: boolean;
 
@@ -26,7 +26,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._videoCtx = getVideoContext();
         const canvas = getCanvas();
         this._target.appendChild(canvas);
-        this._videoNodes = [];
+        this._videoNode = {};
         this.NODE_CREATED = false;
 
         this.renderVideoElement();
@@ -48,7 +48,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     playVideo() {
         if (this.NODE_CREATED) {
-            const node = this._videoNodes.shift();
+            const node = this._videoNode;
             // console.log('VCtx current time:', this._videoCtx.currentTime);
             node.start(0);
             this.emit(RendererEvents.STARTED);
@@ -72,7 +72,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         videoNode1.registerCallback('ended', this.complete);
 
-        this._videoNodes.push(videoNode1);
+        this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
         console.log('vctx node created. loaded.');
     }
@@ -305,6 +305,13 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         while (this._target.lastChild) {
             this._target.removeChild(this._target.lastChild);
         }
+
+        // Stop current active node
+        this._videoNode.stop(-1);
+
+        // disconnect current active node.
+        this._videoNode.disconnect();
+
         super.destroy();
     }
 }

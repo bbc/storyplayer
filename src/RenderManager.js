@@ -54,8 +54,8 @@ export default class RenderManager extends EventEmitter {
                 const newRenderer = this._getRenderer(narrativeElement, representation);
 
                 // look ahead and create new renderers for the next step
-                this._rendererLookahead(narrativeElement);
-
+                // this._rendererLookahead(narrativeElement);
+                // TODO: ^^^^^ PUT BACK IN
                 if (newRenderer) {
                     // swap renderers
                     this._swapRenderers(newRenderer);
