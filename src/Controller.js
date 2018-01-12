@@ -31,6 +31,7 @@ export default class Controller {
         this._fetchMedia = fetchMedia;
         this._fetchStory = fetchStory;
         this._linearStoryPath = [];
+        this._createRenderManager();
     }
 
     start(storyId: string) {
@@ -65,7 +66,7 @@ export default class Controller {
             this._reasoner = reasoner;
             this._reasoner.start();
 
-            this._createRenderManager();
+            this._addListenersToRenderManager();
         });
     }
 
@@ -79,7 +80,10 @@ export default class Controller {
             this._representationReasoner,
             this._fetchMedia,
         );
+    }
 
+    // add event listeners to manager
+    _addListenersToRenderManager() {
         this._renderManager.on(RendererEvents.COMPLETED, () => {
             if (this._reasoner) this._reasoner.next();
         });
@@ -107,6 +111,7 @@ export default class Controller {
         const _handleWalkEnd = () => {
             spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
                 this._linearStoryPath = storyItemPath;
+                console.log(storyItemPath);
                 if (storyItemPath) this._renderManager._createStoryIconRenderer(storyItemPath);
             });
         };
