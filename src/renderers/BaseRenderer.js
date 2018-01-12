@@ -53,7 +53,7 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart() {
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
+            !this._behaviourRunner.runBehaviours(RendererEvents.STARTED, RendererEvents.COMPLETE_START_BEHAVIOURS)) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
     }
@@ -72,7 +72,7 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours('complete', 'complete')) {
+            !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }

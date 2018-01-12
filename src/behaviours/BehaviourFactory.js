@@ -1,9 +1,10 @@
 // @flow
 import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
+import type { RendererEvent } from '../renderers/RendererEvents';
 
 export default function BehaviourFactory(
     behaviourDefinition: Object,
-    onComplete: (event: string, completionEvent: string) => void,
+    onComplete: (event: RendererEvent, completionEvent: RendererEvent) => void,
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,

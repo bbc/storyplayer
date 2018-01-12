@@ -2,6 +2,7 @@
 
 import BehaviourFactory from '../behaviours/BehaviourFactory';
 import BaseRenderer from '../renderers/BaseRenderer';
+import type { RendererEvent } from '../renderers/RendererEvents';
 
 export default class BehaviourRunner {
     behaviourDefinitions: Object;
@@ -23,10 +24,12 @@ export default class BehaviourRunner {
     }
 
     // Run behaviours for a specific event type. Returns true if there's a behaviour, false if none found
-    runBehaviours(event: string, completionEvent: string) {
+    runBehaviours(event: RendererEvent, completionEvent: RendererEvent) {
         if (this.behaviourDefinitions[event] === undefined || this.behaviourDefinitions[event] === []) {
+            console.log(`No behaviours for ${event}`);
             return false;
         }
+        console.log(`running behaviours for ${event}`);
 
         // Create all behaviours before starting any behaviours for correct handleOnComplete reference counting
         this.behaviourDefinitions[event].forEach((behaviourDefinition) => {
@@ -51,7 +54,7 @@ export default class BehaviourRunner {
     // Called on behaviour of a specific event type ending
     // Checks for number of behaviours of that type running
     //   - if it's zero, send the completion event
-    handleCompletion(event: string, completionEvent: string) {
+    handleCompletion(event: RendererEvent, completionEvent: RendererEvent) {
         if (this.eventCounters[event] === undefined) {
             return;
         }
