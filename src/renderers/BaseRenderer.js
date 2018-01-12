@@ -53,7 +53,7 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart() {
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
+            !this._behaviourRunner.runBehaviours(RendererEvents.STARTED, RendererEvents.COMPLETE_START_BEHAVIOURS)) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
     }
