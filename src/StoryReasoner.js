@@ -125,7 +125,6 @@ export default class StoryReasoner extends EventEmitter {
             .then((startElement) => {
                 this._resolving = false;
                 if (startElement) {
-                    console.log('choosebegining setCUrrentNarElemet', startElement.id);
                     this._setCurrentNarrativeElement(startElement.id);
                 } else {
                     this.emit('error', new Error('Unable to choose a valid beginning'));
@@ -154,7 +153,6 @@ export default class StoryReasoner extends EventEmitter {
             this._storyEnded = true;
             this.emit('storyEnd');
         } else if (nextElement.link_type === 'NARRATIVE_ELEMENT' && nextElement.target) {
-            console.log('Follow Link setcurrent element', nextElement.target);
             this._setCurrentNarrativeElement(nextElement.target);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this._chooseBeginning();
@@ -179,7 +177,6 @@ export default class StoryReasoner extends EventEmitter {
                         this.emit('error', err);
                     });
             } else {
-                console.log('_setCurrentNarrativeElement event',this._currentNarrativeElement);
                 this.emit('narrativeElementChanged', this._currentNarrativeElement);
             }
         }
@@ -191,8 +188,8 @@ export default class StoryReasoner extends EventEmitter {
         const branchLinkCallback = () => this.emit('choiceOfLinks');
 
         const elementChangedCallback = element => {
-            console.log('_initSubStoryReasoner event',element);
-            this.emit('narrativeElementChanged', element)};
+            this.emit('narrativeElementChanged', element)
+        };
 
         const storyEndCallback = () => {
             this._subStoryReasoner = null;
