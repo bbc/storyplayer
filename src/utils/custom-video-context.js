@@ -12,7 +12,7 @@ const nodeRepresentationMap = {};
 export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
-        videoContext = new VideoContext(canvas);
+        videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;
 }
@@ -69,7 +69,7 @@ export default class CustomVideoContext extends VideoContext {
                 });
             }
 
-        //    videoNode.hlsplayer.startPosition(videoNode._sourceOffset + currentTimeOffset);
+            //    videoNode.hlsplayer.startPosition(videoNode._sourceOffset + currentTimeOffset);
         });
 
         videoNode.registerCallback('play', () => {
@@ -77,7 +77,7 @@ export default class CustomVideoContext extends VideoContext {
 
         videoNode.registerCallback('destroy', (node: Object) => {
             if (node.hlsplayer) {
-                node.hlsplayer.reset();
+                // node.hlsplayer.reset();
             }
         });
         return videoNode;

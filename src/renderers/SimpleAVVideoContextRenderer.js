@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext } from '../utils/custom-video-context';
+import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -22,10 +22,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-
-        this._canvas = document.createElement('canvas');
-        const canvas = this._canvas;
-        this._videoCtx = getVideoContext(canvas);
+        // this._canvas = document.createElement('canvas');
+        this._videoCtx = getVideoContext();
+        const canvas = getCanvas();
         this._target.appendChild(canvas);
         this._videoNodes = [];
         this.NODE_CREATED = false;
@@ -50,6 +49,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     playVideo() {
         if (this.NODE_CREATED) {
             const node = this._videoNodes.shift();
+            // console.log('VCtx current time:', this._videoCtx.currentTime);
             node.start(0);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
@@ -70,7 +70,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // videoNode1.start(0);
         videoNode1.connect(this._videoCtx.destination);
 
-        videoNode1.registerCallback('ended', super.complete);
+        videoNode1.registerCallback('ended', this.complete);
 
         this._videoNodes.push(videoNode1);
         this.emit('videoContextNodeCreated');
