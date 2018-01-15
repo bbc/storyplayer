@@ -150,6 +150,18 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
+    getTimeData(): Object {
+        const timeObject = {
+            timeBased: true,
+            currentTime: this._videoNode.currentTime,
+        }
+        return timeObject;
+    }
+
+    setCurrentTime(time: number) {
+        this._videoNode.currentTime = time;
+    }
+
     stopAndDisconnect() {
         this._videoNode.unregisterCallback();
 

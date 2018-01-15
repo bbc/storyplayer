@@ -266,25 +266,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    getCurrentTime(): number {
-        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) return 0;
-        return this._videoElement.currentTime;
+    getTimeData(): Object {
+        let videoTime;
+        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) {
+            videoTime = 0;
+        } else {
+            videoTime = this._videoElement.currentTime;
+        }
+        const timeObject = {
+            timeBased: true,
+            currentTime: videoTime,
+        }
+        return timeObject;
     }
 
     setCurrentTime(time: number) {
-        this._videoElement.currentTime = time;
-    }
-
-    setStartTime(time: number) {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
-            this.setCurrentTime(time);
+            this._videoElement.currentTime = time;
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.setCurrentTime(time);
+                this._videoElement.currentTime = time;
             });
         } else {
             this._videoElement.addEventListener('loadeddata', () => {
-                this.setCurrentTime(time);
+                this._videoElement.currentTime = time;
             });
         }
     }

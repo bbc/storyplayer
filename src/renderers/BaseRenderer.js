@@ -70,6 +70,19 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
+    getTimeData(): Object {
+        console.warn('getting time data from on BaseRenderer');
+        const timeObject = {
+            timeBased: false,
+            currentTime: 0,
+        }
+        return timeObject;
+    }
+
+    setCurrentTime(time: number) {
+        console.warn('ignoring setting time on BaseRenderer');
+    }
+
     complete() {
         console.log('base renderer complete()');
         if (!this._behaviourRunner ||

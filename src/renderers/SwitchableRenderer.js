@@ -88,9 +88,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
             if (currentChoice) {
                 // TODO: implement this in SimpleAVVideoContextRenderer
-                if (currentChoice instanceof SimpleAVRenderer) {
+                const currentTimeData = currentChoice.getTimeData();
+                if (currentTimeData.timeBased) {
                     // store playhead time
-                    this._previousRendererPlayheadTime = currentChoice.getCurrentTime();
+                    this._previousRendererPlayheadTime = currentTimeData.currentTime;
                 }
                 currentChoice.destroy();
             }
@@ -102,9 +103,9 @@ export default class SwitchableRenderer extends BaseRenderer {
                     this.emit(RendererEvents.SWITCHED_REPRESENTATION, this._representation.choices[choiceIndex]);
                 }
             }
-            if (newChoice && newChoice instanceof SimpleAVRenderer) {
+            if (newChoice) {
                 // sync playhead time
-                newChoice.setStartTime(this._previousRendererPlayheadTime);
+                newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
         }
     }
