@@ -162,7 +162,7 @@ export default class StoryPathWalker extends EventEmitter {
 
             const _handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
                 // console.log('linear reasoner at', narrativeElement.name);
-                const parentStories = this._getStoryArray(linearReasoner, []);
+                const parentStories = [storyId].concat(this._getStoryArray(linearReasoner, []));
                 const pathItem = {
                     stories: parentStories,
                     ne: narrativeElement,

@@ -2,7 +2,9 @@
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
+import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
@@ -51,12 +53,14 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart() {
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours('start', 'completeStartBehaviours')) {
-            this.emit('completeStartBehaviours');
+            !this._behaviourRunner.runBehaviours(RendererEvents.STARTED, RendererEvents.COMPLETE_START_BEHAVIOURS)) {
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
     }
 
-    start() { }
+    start() {
+        this.emit(RendererEvents.STARTED);
+    }
 
     /**
      * get the representation that this renderer is currently rendering
@@ -67,9 +71,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        console.log('base renderer complete()');
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours('complete', 'complete')) {
-            this.emit('complete'); // we didn't find any behaviours to run, so emit completion event
+            !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
+            console.log('EMIT RendererEvents.COMPLETED');
+            this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }
     /**
@@ -82,29 +88,6 @@ export default class BaseRenderer extends EventEmitter {
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
         }
-    }
-
-    renderNextButton() {
-        const nextButton = document.createElement('button');
-        nextButton.id = 'nextNEbutton';
-        nextButton.textContent = 'Next';
-        nextButton.addEventListener('click', () => this.handleNextButtonClick());
-        this._target.appendChild(nextButton);
-    }
-
-    handleNextButtonClick() {
-        this.emit('nextButtonClicked');
-    }
-
-    renderBackButton() {
-        const backButton = document.createElement('button');
-        backButton.id = 'backNEbutton';
-        backButton.textContent = 'Back';
-        backButton.addEventListener('click', () => this.handleBackButtonClick());
-        this._target.appendChild(backButton);
-    }
-
-    handleBackButtonClick() {
-        this.emit('backButtonClicked');
+        this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
     }
 }
