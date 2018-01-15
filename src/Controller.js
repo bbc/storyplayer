@@ -293,7 +293,7 @@ export default class Controller {
                     let matchingId = null;
                     this._linearStoryPath.forEach((storyPathItem, i) => {
                         if (storyPathItem.narrative_element.id === narrativeElement.id
-                            && i < this._linearStoryPath.length) {
+                            && i < (this._linearStoryPath.length - 1)) {
                             matchingId = this._linearStoryPath[i + 1].narrative_element.id;
                         }
                     });
