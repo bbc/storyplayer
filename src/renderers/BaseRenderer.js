@@ -91,6 +91,15 @@ export default class BaseRenderer extends EventEmitter {
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }
+
+    switchFrom() {
+        this.destroy();
+    }
+
+    switchTo() {
+        this.start();
+    }
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.

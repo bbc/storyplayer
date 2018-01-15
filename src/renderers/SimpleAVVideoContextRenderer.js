@@ -37,7 +37,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     start() {
-        console.log('AV renderer stat called', this);
         super.start();
         // start the video
         this.playVideo();
@@ -46,6 +45,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     playVideo() {
         if (this._nodeCreated) {
+            this._videoNode.connect(this._videoCtx.destination);
             // console.log('callbacks', this._videoNode._callbacks.length);
             const node = this._videoNode;
             node.start(0);
@@ -68,7 +68,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             videoNode1 = this._videoCtx.video(mediaUrl, 0, 4);
         }
-        videoNode1.connect(this._videoCtx.destination);
 
         videoNode1.registerCallback('ended', () => {
             // console.log('VCtx node complete', mediaUrl);
@@ -153,13 +152,23 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     getTimeData(): Object {
         const timeObject = {
             timeBased: true,
-            currentTime: this._videoNode.currentTime,
+            currentTime: this._videoNode._currentTime,
         }
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        this._videoNode.currentTime = time;
+        this._videoNode.element.currentTime = time;
+    }
+
+    switchFrom() {
+        this._videoNode.disconnect();
+        this._videoNode.element.muted = true;
+    }
+
+    switchTo() {
+        this.playVideo();
+        this._videoNode.element.muted = false;
     }
 
     stopAndDisconnect() {
