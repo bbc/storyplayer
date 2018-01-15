@@ -1,13 +1,10 @@
 // @flow
 
 import EventEmitter from 'events';
-// import type { StoryReasonerFactory } from './StoryReasonerFactory';
-// import StoryReasoner from './StoryReasoner';
 import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
-// import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
@@ -28,7 +25,6 @@ export default class RenderManager extends EventEmitter {
     ) {
         super();
         this._controller = controller;
-        // this._reasoner = null;
         this._target = target;
         this._fetchPresentation = fetchPresentation;
         this._representationReasoner = representationReasoner;
@@ -39,7 +35,6 @@ export default class RenderManager extends EventEmitter {
         this._renderNextButton();
         this._renderBackButton();
 
-        /* MOVE REST TO RENDERER MANAGER? */
         this._currentRenderer = null;
         this._upcomingRenderers = [];
         this._backgroundRenderers = {};
@@ -58,7 +53,9 @@ export default class RenderManager extends EventEmitter {
 
                 // look ahead and create new renderers for the next step
                 // this._rendererLookahead(narrativeElement);
-                // TODO: ^^^^^
+
+                // TODO: need to clean up upcomingRenderers here too
+
                 if (newRenderer) {
                     // swap renderers
                     this._swapRenderers(newRenderer);
@@ -73,7 +70,6 @@ export default class RenderManager extends EventEmitter {
             });
     }
 
-    /* MOVE TO RENDERER MANAGER? */
     // create and start a StoryIconRenderer
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
         this._renderStory = new StoryIconRenderer(
@@ -88,7 +84,6 @@ export default class RenderManager extends EventEmitter {
         this._renderStory.start();
     }
 
-    /* MOVE TO RENDERER MANAGER? */
     // given a new representation, handle the background rendering
     // either:
     //     stop if there is no background
@@ -104,7 +99,6 @@ export default class RenderManager extends EventEmitter {
         // remove dead backgrounds
         Object.keys(this._backgroundRenderers).forEach((rendererACId) => {
             if (newBackgrounds.indexOf(rendererACId) === -1) {
-                // console.log('destroying background', rendererACId);
                 this._backgroundRenderers[rendererACId].destroy();
                 delete this._backgroundRenderers[rendererACId];
             }
@@ -113,9 +107,7 @@ export default class RenderManager extends EventEmitter {
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
             if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-                // console.log('maintain background', backgroundAssetCollectionId);
             } else {
-                // console.log('new background', backgroundAssetCollectionId);
                 this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
@@ -141,7 +133,6 @@ export default class RenderManager extends EventEmitter {
      * @fires RenderManager#nextButtonClicked
      * @fires RenderManager#backButtonClicked
      */
-    /* MOVE TO RENDERER MANAGER? */
     // create a new renderer for the given representation, and attach
     // the standard listeners to it
     _createNewRenderer(representation: Representation): ?BaseRenderer {
@@ -157,17 +148,13 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
-                // console.log('COMPLETED in Render Man', representation.name);
-                // reasoner.next();
                 this.emit(RendererEvents.COMPLETED);
             });
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
-                // reasoner.next();
                 this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
             });
             newRenderer.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.BACK_BUTTON_CLICKED);
-                // this._controller._goBackOneStepInStory();
             });
             newRenderer.on('switchedRepresentation', (choice) => {
                 this._rendererState.lastSwitchableLabel = choice.label;
@@ -182,9 +169,8 @@ export default class RenderManager extends EventEmitter {
         return newRenderer;
     }
 
-    /* MOVE TO RENDERER MANAGER? */
     // swap the renderers over
-    // it's from here we might want to be clever with retaining elements if
+    // it's here we might want to be clever with retaining elements if
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer) {
         // if both same type, just update current
@@ -199,7 +185,6 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
 
         // render buttons if appropriate
-        // TODO: move the actual rendering to this RenderManager and show/hide here
         this._setBackButtonVisible((this._controller._getIdOfPreviousNode() !== null));
         this._setNextButtonVisible(this._controller.hasNextNode());
 
@@ -245,7 +230,6 @@ export default class RenderManager extends EventEmitter {
     }
 
 
-    /* MOVE TO RENDERER MANAGER? */
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
     _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
@@ -265,10 +249,8 @@ export default class RenderManager extends EventEmitter {
         return newRenderer;
     }
 
-    /* MOVE TO RENDERER MANAGER? */
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
-        // console.log('at', narrativeElement);
         const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
         const upcomingRenderers = {};
         upcomingIds.forEach((neid) => {
@@ -287,15 +269,12 @@ export default class RenderManager extends EventEmitter {
         this._upcomingRenderers.push(upcomingRenderers);
     }
 
-    /* MOVE TO UI MANAGER? */
     // create new divs within the target to hold the storyIconRenderer and
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
         this._neTarget = document.createElement('div');
         this._neTarget.id = 'render-element';
         this._target.appendChild(this._neTarget);
-        // this._videoContextCanvas = document.createElement('canvas');
-        // this._neTarget.append(this._videoContextCanvas);
         this._storyTarget = document.createElement('div');
         this._storyTarget.id = 'story_element';
         this._target.appendChild(this._storyTarget);
@@ -311,20 +290,14 @@ export default class RenderManager extends EventEmitter {
     }
 
     _controller: Controller;
-    // _reasoner: ?StoryReasoner;
     _currentRenderer: ?BaseRenderer;
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
-    // _storyReasonerFactory: StoryReasonerFactory;
     _fetchPresentation: PresentationFetcher;
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
-    // _fetchStory: StoryFetcher;
-    // _handleError: ?Function;
-    // _handleStoryEnd: ?Function;
-    // _handleNarrativeElementChanged: ?Function;
     _renderStory: StoryIconRenderer;
     _neTarget: HTMLDivElement;
     _storyTarget: HTMLDivElement;
