@@ -57,7 +57,6 @@ export default class Controller {
             reasoner.on('error', _handleError);
 
             this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                console.log('Control rx event from reasoner', narrativeElement);
                 this._handleNEChange(reasoner, narrativeElement);
             };
 
@@ -111,7 +110,6 @@ export default class Controller {
         const _handleWalkEnd = () => {
             spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
                 this._linearStoryPath = storyItemPath;
-                console.log(storyItemPath);
                 if (storyItemPath) this._renderManager._createStoryIconRenderer(storyItemPath);
             });
         };
@@ -173,10 +171,10 @@ export default class Controller {
                 return;
             }
 
-            // const _shadowHandleStoryEnd = () => {
-            //     console.log('reached story end without meeting target node');
-            // };
-            // shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
+            const _shadowHandleStoryEnd = () => {
+                console.warn('reached story end without meeting target node');
+            };
+            shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
 
             // the 'normal' event listeners
             const _handleStoryEnd = () => {
@@ -191,10 +189,7 @@ export default class Controller {
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                // console.log('shadow reasoner at', narrativeElement.name);
                 if (narrativeElement.id === targetNeId) {
-                    // console.log('TARGET HIT!');
-
                     // remove event listeners for the original reasoner
                     this.reset();
 
@@ -243,7 +238,6 @@ export default class Controller {
         if (currentReasoner) {
             currentReasoner._setCurrentNarrativeElement(narrativeElementId);
         } else {
-            console.log(narrativeElementId, 'not in substory - doing shadow walk');
             if (this._storyId) {
                 this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }
@@ -261,7 +255,6 @@ export default class Controller {
     // if not will ask reasoner to try within ths substory
     // otherwise, returns null.
     _getIdOfPreviousNode(): ?string {
-        // console.log('getPrev', this._linearStoryPath);
         let matchingId = null;
         if (this._linearStoryPath) {
             // find current
@@ -303,7 +296,6 @@ export default class Controller {
                 }
             }
         });
-        // console.log('upcoming:', upcomingIds);
         return upcomingIds;
     }
 
