@@ -155,7 +155,7 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
-                console.log('COMPLETED in Render Man');
+                // console.log('COMPLETED in Render Man', representation.name);
                 // reasoner.next();
                 this.emit(RendererEvents.COMPLETED);
             });
@@ -197,6 +197,7 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
 
         // render buttons if appropriate
+        // TODO: move the actual rendering to this RenderManager and show/hide here
         if (this._controller._getIdOfPreviousNode()) newRenderer.renderBackButton();
         if (this._controller.hasNextNode()) {
             newRenderer.renderNextButton();
