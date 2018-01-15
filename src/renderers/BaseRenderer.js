@@ -90,28 +90,4 @@ export default class BaseRenderer extends EventEmitter {
         }
         this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
     }
-
-    renderNextButton() {
-        const nextButton = document.createElement('button');
-        nextButton.id = 'nextNEbutton';
-        nextButton.textContent = 'Next';
-        nextButton.addEventListener('click', () => this.handleNextButtonClick());
-        this._target.appendChild(nextButton);
-    }
-
-    handleNextButtonClick() {
-        this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
-    }
-
-    renderBackButton() {
-        const backButton = document.createElement('button');
-        backButton.id = 'backNEbutton';
-        backButton.textContent = 'Back';
-        backButton.addEventListener('click', () => this.handleBackButtonClick());
-        this._target.appendChild(backButton);
-    }
-
-    handleBackButtonClick() {
-        this.emit(RendererEvents.BACK_BUTTON_CLICKED);
-    }
 }

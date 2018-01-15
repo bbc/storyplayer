@@ -36,6 +36,8 @@ export default class RenderManager extends EventEmitter {
         this._fetchMedia = fetchMedia;
 
         this._createStoryAndElementDivs();
+        this._renderNextButton();
+        this._renderBackButton();
 
         /* MOVE REST TO RENDERER MANAGER? */
         this._currentRenderer = null;
@@ -198,10 +200,8 @@ export default class RenderManager extends EventEmitter {
 
         // render buttons if appropriate
         // TODO: move the actual rendering to this RenderManager and show/hide here
-        if (this._controller._getIdOfPreviousNode()) newRenderer.renderBackButton();
-        if (this._controller.hasNextNode()) {
-            newRenderer.renderNextButton();
-        }
+        this._setBackButtonVisible((this._controller._getIdOfPreviousNode() !== null));
+        this._setNextButtonVisible(this._controller.hasNextNode());
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
@@ -211,6 +211,39 @@ export default class RenderManager extends EventEmitter {
 
         newRenderer.willStart();
     }
+
+    _setBackButtonVisible(visible: boolean) {
+        this._backButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _setNextButtonVisible(visible: boolean) {
+        this._nextButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _renderNextButton() {
+        this._nextButton = document.createElement('button');
+        this._nextButton.id = 'nextNEbutton';
+        this._nextButton.textContent = 'Next';
+        this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
+        this._neTarget.appendChild(this._nextButton);
+    }
+
+    _handleNextButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
+    }
+
+    _renderBackButton() {
+        this._backButton = document.createElement('button');
+        this._backButton.id = 'backNEbutton';
+        this._backButton.textContent = 'Back';
+        this._backButton.addEventListener('click', () => this._handleBackButtonClick());
+        this._neTarget.appendChild(this._backButton);
+    }
+
+    _handleBackButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.BACK_BUTTON_CLICKED);
+    }
+
 
     /* MOVE TO RENDERER MANAGER? */
     // get a renderer for the given NE, and its Representation
@@ -301,4 +334,6 @@ export default class RenderManager extends EventEmitter {
         lastSwitchableLabel: string,
     };
     _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+    _nextButton: HTMLButtonElement;
+    _backButton: HTMLButtonElement;
 }
