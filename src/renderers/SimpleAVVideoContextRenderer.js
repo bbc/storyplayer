@@ -13,7 +13,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _canvas: HTMLCanvasElement;
     _videoNode: Object;
     _videoCtx: Object;
-    NODE_CREATED: boolean;
+    _nodeCreated: boolean;
+    _nodeCompleted: boolean;
 
     constructor(
         representation: Representation,
@@ -27,11 +28,12 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         const canvas = getCanvas();
         this._target.appendChild(canvas);
         this._videoNode = {};
-        this.NODE_CREATED = false;
+        this._nodeCreated = false;
+        this._nodeCompleted = false;
 
         this.renderVideoElement();
 
-        this.on('videoContextNodeCreated', () => { this.NODE_CREATED = true; });
+        this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
     }
 
     start() {
@@ -42,14 +44,18 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     playVideo() {
-        if (this.NODE_CREATED) {
+        if (this._nodeCreated) {
+            // console.log('callbacks', this._videoNode._callbacks.length);
             const node = this._videoNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
         } else {
             const that = this;
-            this.on('videoContextNodeCreated', () => { that.NODE_CREATED = true; that.playVideo(); });
+            this.on('videoContextNodeCreated', () => {
+                that._nodeCreated = true;
+                that.playVideo();
+            });
         }
     }
 
@@ -63,11 +69,19 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
         videoNode1.connect(this._videoCtx.destination);
 
-        videoNode1.registerCallback('ended', this.complete.bind(this));
+        videoNode1.registerCallback('ended', () => {
+            // console.log('VCtx node complete', mediaUrl);
+            if (!this._nodeCompleted) {
+                this.complete();//.bind(this);
+            } else {
+                console.warn('multiple VCtx ended events received');
+            }
+            this._nodeCompleted = true;
+        });
 
         this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
-        console.log('vctx node created. loaded.');
+        // console.log('vctx node created. loaded.', mediaUrl);
     }
 
     renderVideoElement() {
@@ -143,6 +157,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         // disconnect current active node.
         this._videoNode.disconnect();
+        this._videoNode.destroy();
     }
 
     destroy() {
