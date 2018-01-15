@@ -9,7 +9,8 @@
     "pretest": "flow-typed install",
     "test": "concurrently \"jest\" \"eslint src/ spec/\" \"flow check --all\"",
     "prewatch": "flow-typed install",
-    "watch": "concurrently \"webpack --watch --progress --profile --bail\" \"jest --watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\""
+    "watch": "concurrently \"webpack --watch --watch-poll 500 --progress --profile --bail\" \"jest --watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\"",
+    "dev": "webpack --watch --watch-poll 500 --progress --profile --bail"
   },
   "repository": {
     "type": "git",
