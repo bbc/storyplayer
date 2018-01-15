@@ -3,6 +3,7 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 import SimpleAVRenderer from './SimpleAVRenderer';
+import RendererEvents from './RendererEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
@@ -40,7 +41,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
-                    cr.on('completeStartBehaviours', () => {
+                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
                     });
                 }
@@ -98,7 +99,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             if (newChoice) {
                 newChoice.start();
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
-                    this.emit('switchedRepresentation', this._representation.choices[choiceIndex]);
+                    this.emit(RendererEvents.SWITCHED_REPRESENTATION, this._representation.choices[choiceIndex]);
                 }
             }
             if (newChoice && newChoice instanceof SimpleAVRenderer) {

@@ -10,6 +10,7 @@ const RendererEventNames = [
     'BACK_BUTTON_CLICKED',
     'ADD_TO_DOM',
     'REMOVE_FROM_DOM',
+    'SWITCHED_REPRESENTATION',
 ];
 
 const RendererEvents = {};

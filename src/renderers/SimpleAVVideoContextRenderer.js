@@ -37,6 +37,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     start() {
+        console.log('AV renderer stat called', this);
         super.start();
         // start the video
         this.playVideo();
@@ -72,7 +73,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         videoNode1.registerCallback('ended', () => {
             // console.log('VCtx node complete', mediaUrl);
             if (!this._nodeCompleted) {
-                this.complete();//.bind(this);
+                this.complete();// .bind(this);
             } else {
                 console.warn('multiple VCtx ended events received');
             }
