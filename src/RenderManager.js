@@ -237,10 +237,15 @@ export default class RenderManager extends EventEmitter {
         // have we already got a renderer?
         if (this._upcomingRenderers.length === 1) {
             const newRenderersList = this._upcomingRenderers.shift();
-            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
-                newRenderer = newRenderersList[narrativeElement.id];
-                // console.log('renderer exists', newRenderer);
-            }
+            Object.keys(newRenderersList).forEach((rendererNEId) => {
+                if (rendererNEId === narrativeElement.id) {
+                    // this is the correct one - use it
+                    newRenderer = newRenderersList[rendererNEId];
+                } else {
+                    // only using one - destroy any others
+                    newRenderersList[rendererNEId].destroy();
+                }
+            });
         }
         // create the new Renderer if we need to
         if (!newRenderer) {
