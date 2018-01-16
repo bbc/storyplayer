@@ -75,12 +75,12 @@ export default class BaseRenderer extends EventEmitter {
         const timeObject = {
             timeBased: false,
             currentTime: 0,
-        }
+        };
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        console.warn('ignoring setting time on BaseRenderer');
+        console.warn('ignoring setting time on BaseRenderer', time);
     }
 
     complete() {
@@ -95,6 +95,8 @@ export default class BaseRenderer extends EventEmitter {
     switchFrom() {
         this.destroy();
     }
+
+    queueUp() { }
 
     switchTo() {
         this.start();

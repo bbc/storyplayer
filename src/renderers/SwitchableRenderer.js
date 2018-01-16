@@ -2,7 +2,6 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
-import SimpleAVRenderer from './SimpleAVRenderer';
 import RendererEvents from './RendererEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
@@ -11,6 +10,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
+    _nodeCompleted: boolean;
 
     constructor(
         representation: Representation,
@@ -25,6 +25,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
+        this._nodeCompleted = false;
     }
 
     // create a renderer for each choice
@@ -43,6 +44,21 @@ export default class SwitchableRenderer extends BaseRenderer {
                     const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
+                    });
+                }
+            });
+            choices.forEach((choiceRenderer) => {
+                if (choiceRenderer) {
+                    const cr = choiceRenderer;
+                    cr.on(RendererEvents.COMPLETED, () => {
+                        if (!this._nodeCompleted) {
+                            // console.log('first switchable finished event');
+                            this.complete();// .bind(this);
+                        } // else {
+                        //     console.log('another of the switchables has finished');
+                        // }
+                        this._nodeCompleted = true;
+                        // this.emit(RendererEvents.COMPLETED);
                     });
                 }
             });
@@ -133,6 +149,10 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._target.appendChild(this._choiceDiv);
         this._renderSwitchButtons();
 
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.queueUp();
+        });
+
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
         if (firstChoice) {
@@ -212,9 +232,12 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.destroy();
+        });
+        super.destroy();
         while (this._target.lastChild) {
             this._target.removeChild(this._target.lastChild);
         }
-        super.destroy();
     }
 }

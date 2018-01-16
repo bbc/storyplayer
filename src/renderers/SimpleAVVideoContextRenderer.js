@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -46,10 +46,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     playVideo() {
         if (this._nodeCreated) {
             this._videoNode.connect(this._videoCtx.destination);
-            // console.log('callbacks', this._videoNode._callbacks.length);
             const node = this._videoNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
+            this._videoNode.element.muted = false;
             this._videoCtx.play();
         } else {
             const that = this;
@@ -81,7 +81,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
-        // console.log('vctx node created. loaded.', mediaUrl);
     }
 
     renderVideoElement() {
@@ -153,12 +152,22 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         const timeObject = {
             timeBased: true,
             currentTime: this._videoNode._currentTime,
-        }
+        };
         return timeObject;
     }
 
-    setCurrentTime(time: number) {
-        this._videoNode.element.currentTime = time;
+    queueUp() {
+        if (this._nodeCreated) {
+            this._videoNode.connect(this._videoCtx.destination);
+            this._videoNode.element.muted = true;
+            this._videoNode.start(0);
+            this._videoNode.disconnect();
+        } else {
+            const that = this;
+            this.on('videoContextNodeCreated', () => {
+                that.queueUp();
+            });
+        }
     }
 
     switchFrom() {
