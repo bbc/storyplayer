@@ -1,28 +1,32 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
+import RendererEvents from './RendererEvents';
 
 export default class ImageRenderer extends BaseRenderer {
+    _imageElement: HTMLImageElement;
+
     start() {
-        this.renderImageElement();
-        this.renderDataModelInfo();
+        if (!this._imageElement) this.renderImageElement();
+        this.emit(RendererEvents.STARTED);
+        // this.renderDataModelInfo();
     }
 
     renderImageElement() {
-        const imageElement = document.createElement('img');
+        this._imageElement = document.createElement('img');
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
                             console.log('FETCHED FROM MS MEDIA!', mediaUrl);
-                            imageElement.src = mediaUrl;
+                            this._imageElement.src = mediaUrl;
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
                 });
         }
 
-        this._target.appendChild(imageElement);
+        this._target.appendChild(this._imageElement);
     }
 
     renderDataModelInfo() {
@@ -43,10 +47,26 @@ export default class ImageRenderer extends BaseRenderer {
         }
     }
 
+    queueUp() {
+        this.renderImageElement();
+        this._setVisibility(false);
+    }
+
+    switchFrom() {
+        this._setVisibility(false);
+    }
+
+    switchTo() {
+        this._setVisibility(true);
+    }
+
+    _setVisibility(visible: boolean) {
+        // this._imageElement.style.visibility = visible ? 'visible' : 'hidden';
+        this._imageElement.style.display = visible ? 'initial' : 'none';
+    }
+
     destroy() {
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
-        }
+        this._target.removeChild(this._imageElement);
         super.destroy();
     }
 }
