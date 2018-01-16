@@ -276,7 +276,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
-        }
+        };
         return timeObject;
     }
 

@@ -106,8 +106,8 @@ export default class RenderManager extends EventEmitter {
 
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
-            if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-            } else {
+            if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
+                // } else {
                 this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(

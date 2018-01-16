@@ -231,14 +231,13 @@ export default class Controller {
     _jumpToNarrativeElement(narrativeElementId: string) {
         if (!this._reasoner) {
             console.error('no reasoner');
-            return;
-        }
-        const currentReasoner = this._reasoner
-            .getSubReasonerContainingNarrativeElement(narrativeElementId);
-        if (currentReasoner) {
-            currentReasoner._setCurrentNarrativeElement(narrativeElementId);
+            // return;
         } else {
-            if (this._storyId) {
+            const currentReasoner = this._reasoner
+                .getSubReasonerContainingNarrativeElement(narrativeElementId);
+            if (currentReasoner) {
+                currentReasoner._setCurrentNarrativeElement(narrativeElementId);
+            } else if (this._storyId) {
                 this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }
         }

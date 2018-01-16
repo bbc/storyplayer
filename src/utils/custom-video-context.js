@@ -24,10 +24,10 @@ export default class CustomVideoContext extends VideoContext {
 
             videoNode.hlsplayer = new Hls();
 
-            let currentTimeOffset = 0;
-            if (videoNode._currentTime > videoNode._startTime) {
-                currentTimeOffset = videoNode._currentTime - videoNode._startTime;
-            }
+            // let currentTimeOffset = 0;
+            // if (videoNode._currentTime > videoNode._startTime) {
+            //     currentTimeOffset = videoNode._currentTime - videoNode._startTime;
+            // }
 
             if (manifestUrl.indexOf('.m3u8') !== -1) {
                 videoNode.hlsplayer.loadSource(manifestUrl);
@@ -81,6 +81,7 @@ export function createNodeForRepresentation(representationId: string, mediaUrl: 
 export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
+        canvas.className = 'romper-video-element';
         videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;
