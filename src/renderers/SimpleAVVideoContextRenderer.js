@@ -175,7 +175,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     setVisible(visible: boolean) {
-        this._canvas.style.display = visible ? 'initial' : 'none';
+        this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
     switchFrom() {

@@ -9,6 +9,7 @@ export default class ImageRenderer extends BaseRenderer {
     start() {
         if (!this._imageElement) this.renderImageElement();
         this.emit(RendererEvents.STARTED);
+        this._setVisibility(true);
         // this.renderDataModelInfo();
     }
 

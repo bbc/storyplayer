@@ -43,15 +43,18 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         // start the video
         this.renderImage();
         // this.renderDataModelInfo();
+        this.setVisible(true);
     }
 
     renderImage() {
         if (this._nodeCreated) {
+            this._videoCtx.play();
             this._imageNode.connect(this._videoCtx.destination);
             // console.log('callbacks', this._imageNode._callbacks.length);
             const node = this._imageNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
+            this._videoCtx.pause(); // TODO: need to call this once the image is really showing...
         } else {
             const that = this;
             this.on('videoContextNodeCreated', () => {
@@ -124,7 +127,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     setVisible(visible: boolean) {
-        this._canvas.style.display = visible ? 'initial' : 'none';
+        console.log('image set vis', visible);
+        this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
     switchFrom() {
@@ -144,6 +148,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             this._imageNode.connect(this._videoCtx.destination);
             this._imageNode.start(0);
             this._imageNode.disconnect();
+            this.setVisible(false);
         } else {
             const that = this;
             this.on('videoContextNodeCreated', () => {

@@ -3,8 +3,6 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext from '../utils/custom-video-context';
-
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
 
@@ -32,7 +30,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // render the video div
         this._target.appendChild(this._videoElement);
         // and control bar
-        this.renderControlBar();
+        // this.renderControlBar();
         // start the video
         this.playVideo();
         // this.renderDataModelInfo();
@@ -53,9 +51,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
-        /* TEST VIDEO CTX HERE>... */
-
-
         this._videoElement = document.createElement('video');
 
         // set CSS classname
@@ -82,9 +77,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._videoElement.addEventListener('ended', () => {
             super.complete();
         });
-
-        // Switch this on to play with video context
-        // this.videoContextExperiment();
     }
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
@@ -209,18 +201,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._target.appendChild(controls);
     }
 
-    // How to use Video Context:
-    videoContextExperiment() {
-        this._canvas = document.createElement('canvas');
-        const canvas = this._canvas;
-        const videoCtx = new CustomVideoContext(canvas);
-        const videoNode1 = videoCtx.hls('https://vod-hls-uk-live.akamaized.net/usp/auth/vod/piff_abr_full_sd/56932b-p04p74yq/vf_p04p74yq_aca390f5-5078-4a28-a464-527d3212c59e.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?__gda__=1515598679_1246b8952e23432dcb5b5ea55ff60c28', 0, 4);
-        videoNode1.start(0);
-        videoNode1.connect(videoCtx.destination);
-        videoCtx.play();
-        this._target.appendChild(canvas);
-    }
-
     renderDataModelInfo() {
         const assetList = document.createElement('ul');
         const foregroundItem = document.createElement('li');
@@ -294,9 +274,19 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    switchFrom() {
+        this.destroy();
+    }
+
+    switchTo() {
+        this.start();
+    }
+
     destroy() {
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
+        try {
+            this._target.removeChild(this._videoElement);
+        } catch (e) {
+            // console.warn('simple video not on target');
         }
         super.destroy();
     }
