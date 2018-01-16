@@ -89,7 +89,7 @@ export default class Controller {
         this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._reasoner) this._reasoner.next();
         });
-        this._renderManager.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
+        this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
             this._goBackOneStepInStory();
         });
     }
