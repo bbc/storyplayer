@@ -11,6 +11,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
     _nodeCompleted: boolean;
+    _buttonPanel: HTMLDivElement;
 
     constructor(
         representation: Representation,
@@ -68,9 +69,9 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
-        const buttonPanel = document.createElement('div');
+        this._buttonPanel = document.createElement('div');
         const buttonList = document.createElement('ul');
-        buttonPanel.className = 'switchbuttons';
+        this._buttonPanel.className = 'switchbuttons';
         let i = 0;
         if (this._representation.choices) {
             this._representation.choices.forEach((choice) => {
@@ -88,8 +89,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                 buttonList.appendChild(switchListItem);
                 i += 1;
             });
-            buttonPanel.appendChild(buttonList);
-            this._target.appendChild(buttonPanel);
+            this._buttonPanel.appendChild(buttonList);
+            this._target.appendChild(this._buttonPanel);
         }
     }
 
@@ -235,9 +236,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
+        this._target.removeChild(this._buttonPanel);
         super.destroy();
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
-        }
     }
 }
