@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -15,6 +15,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     _videoCtx: Object;
     _nodeCreated: boolean;
     _nodeCompleted: boolean;
+    _effectNodes: Array<Object>;
 
     constructor(
         representation: Representation,
@@ -25,11 +26,12 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
         this._videoCtx = getVideoContext();
-        const canvas = getCanvas();
-        this._target.appendChild(canvas);
+        this._canvas = getCanvas();
+        this._target.appendChild(this._canvas);
         this._imageNode = {};
         this._nodeCreated = false;
         this._nodeCompleted = false;
+        this._effectNodes = [];
 
         this.renderImageElement();
 
@@ -50,7 +52,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             const node = this._imageNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
-            this._videoCtx.play();
         } else {
             const that = this;
             this.on('videoContextNodeCreated', () => {
@@ -64,7 +65,24 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._imageNode = this._videoCtx.image(mediaUrl);
         this._nodeCompleted = true;
         this.emit('videoContextNodeCreated');
-        // console.log('vctx node created. loaded.', mediaUrl);
+        console.log('vctx image node created', mediaUrl);
+    }
+
+    applyBlur() {
+        const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
+        const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
+        this._imageNode.disconnect();
+        this._imageNode.connect(blurEffectHoriz);
+        blurEffectHoriz.connect(blurEffectVert);
+        blurEffectVert.connect(this._videoCtx.destination);
+        this._effectNodes.push(blurEffectHoriz);
+        this._effectNodes.push(blurEffectVert);
+    }
+
+    _clearEffectNodes() {
+        this._effectNodes.forEach((node) => {
+            node.destroy();
+        });
     }
 
     renderImageElement() {
@@ -105,26 +123,49 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         }
     }
 
+    setVisible(visible: boolean) {
+        this._canvas.style.display = visible ? 'initial' : 'none';
+    }
+
     switchFrom() {
         this._imageNode.disconnect();
-        this._videoCtx.play();
+        this._clearEffectNodes();
+        this.setVisible(false);
     }
 
     switchTo() {
-        this.renderImage();
-        this._videoCtx.pause();
+        this._imageNode.connect(this._videoCtx.destination);
+        this.setVisible(true);
+        // this.applyBlur();
+    }
+
+    queueUp() {
+        if (this._nodeCreated) {
+            this._imageNode.connect(this._videoCtx.destination);
+            this._imageNode.start(0);
+            this._imageNode.disconnect();
+        } else {
+            const that = this;
+            this.on('videoContextNodeCreated', () => {
+                that.queueUp();
+            });
+        }
     }
 
     stopAndDisconnect() {
+        this._clearEffectNodes();
         this._imageNode.destroy();
     }
 
     destroy() {
         this.stopAndDisconnect();
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
+        try {
+            this._target.removeChild(this._canvas);
         }
-
+        catch (e) {
+            // shared element, may well have been removed elsewhere
+            console.warn('already removed canvas from VCtx image');
+        }
         super.destroy();
     }
 }

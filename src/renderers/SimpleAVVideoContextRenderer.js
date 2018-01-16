@@ -25,8 +25,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
         this._videoCtx = getVideoContext();
-        const canvas = getCanvas();
-        this._target.appendChild(canvas);
+        this._canvas = getCanvas();
+        this._target.appendChild(this._canvas);
         this._videoNode = {};
         this._nodeCreated = false;
         this._nodeCompleted = false;
@@ -49,8 +49,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             const node = this._videoNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
-            this._videoNode.element.muted = false;
             this._videoCtx.play();
+            this.setMute(false);
         } else {
             const that = this;
             this.on('videoContextNodeCreated', () => {
@@ -159,7 +159,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     queueUp() {
         if (this._nodeCreated) {
             this._videoNode.connect(this._videoCtx.destination);
-            this._videoNode.element.muted = true;
+            this.setMute(true);
             this._videoNode.start(0);
             this._videoNode.disconnect();
         } else {
@@ -170,14 +170,26 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
+    setMute(quiet: boolean) {
+        if (this._videoNode.element) this._videoNode.element.muted = quiet;
+    }
+
+    setVisible(visible: boolean) {
+        this._canvas.style.display = visible ? 'initial' : 'none';
+    }
+
     switchFrom() {
         this._videoNode.disconnect();
-        this._videoNode.element.muted = true;
+        this.setMute(true);
+        this.setVisible(false);
+        this._videoCtx.pause();
     }
 
     switchTo() {
+        this._videoCtx.play();
         this.playVideo();
-        this._videoNode.element.muted = false;
+        this.setMute(false);
+        this.setVisible(true);
     }
 
     stopAndDisconnect() {
@@ -193,10 +205,13 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     destroy() {
         this.stopAndDisconnect();
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
+        try {
+            this._target.removeChild(this._canvas);
         }
-
+        catch (e) {
+            // shared element, may well have been removed elsewhere
+            console.warn('already removed canvas from VCtx simple av');
+        }
         super.destroy();
     }
 }
