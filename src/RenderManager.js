@@ -33,7 +33,7 @@ export default class RenderManager extends EventEmitter {
 
         this._createStoryAndElementDivs();
         this._renderNextButton();
-        this._renderBackButton();
+        this._renderPreviousButton();
 
         this._currentRenderer = null;
         this._upcomingRenderers = [];
@@ -131,7 +131,7 @@ export default class RenderManager extends EventEmitter {
      *
      * @fires RenderManager#complete
      * @fires RenderManager#nextButtonClicked
-     * @fires RenderManager#backButtonClicked
+     * @fires RenderManager#PreviousButtonClicked
      */
     // create a new renderer for the given representation, and attach
     // the standard listeners to it
@@ -153,10 +153,10 @@ export default class RenderManager extends EventEmitter {
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
             });
-            newRenderer.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
-                this.emit(RendererEvents.BACK_BUTTON_CLICKED);
+            newRenderer.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
+                this.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
             });
-            newRenderer.on('switchedRepresentation', (choice) => {
+            newRenderer.on(RendererEvents.SWITCHED_REPRESENTATION, (choice) => {
                 this._rendererState.lastSwitchableLabel = choice.label;
                 this._handleBackgroundRendering(choice.representation);
             });
@@ -185,7 +185,7 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
 
         // render buttons if appropriate
-        this._setBackButtonVisible((this._controller._getIdOfPreviousNode() !== null));
+        this._setPreviousButtonVisible((this._controller._getIdOfPreviousNode() !== null));
         this._setNextButtonVisible(this._controller.hasNextNode());
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -197,8 +197,8 @@ export default class RenderManager extends EventEmitter {
         newRenderer.willStart();
     }
 
-    _setBackButtonVisible(visible: boolean) {
-        this._backButton.style.visibility = visible ? 'visible' : 'hidden';
+    _setPreviousButtonVisible(visible: boolean) {
+        this._previousButton.style.visibility = visible ? 'visible' : 'hidden';
     }
 
     _setNextButtonVisible(visible: boolean) {
@@ -217,16 +217,16 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
     }
 
-    _renderBackButton() {
-        this._backButton = document.createElement('button');
-        this._backButton.id = 'backNEbutton';
-        this._backButton.textContent = 'Back';
-        this._backButton.addEventListener('click', () => this._handleBackButtonClick());
-        this._neTarget.appendChild(this._backButton);
+    _renderPreviousButton() {
+        this._previousButton = document.createElement('button');
+        this._previousButton.id = 'backNEbutton';
+        this._previousButton.textContent = 'Back';
+        this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
+        this._neTarget.appendChild(this._previousButton);
     }
 
-    _handleBackButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.BACK_BUTTON_CLICKED);
+    _handlePreviousButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
     }
 
 
@@ -308,5 +308,5 @@ export default class RenderManager extends EventEmitter {
     };
     _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
     _nextButton: HTMLButtonElement;
-    _backButton: HTMLButtonElement;
+    _previousButton: HTMLButtonElement;
 }
