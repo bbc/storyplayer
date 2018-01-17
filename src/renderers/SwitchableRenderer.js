@@ -6,7 +6,7 @@ import RendererEvents from './RendererEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
-    _choiceDiv: HTMLDivElement;
+    _choiceDiv: HTMLElement;
     _fetchMedia: MediaFetcher;
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
@@ -20,9 +20,6 @@ export default class SwitchableRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-
-        this._choiceDiv = document.createElement('div');
-        this._choiceDiv.id = 'subrenderer';
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
@@ -38,7 +35,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     choice.representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
-                    this._choiceDiv,
+                    this._target,
                 ));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
@@ -147,7 +144,6 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
-        this._target.appendChild(this._choiceDiv);
         this._renderSwitchButtons();
 
         this._choiceRenderers.forEach((choice) => {
@@ -236,7 +232,9 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
-        this._target.removeChild(this._buttonPanel);
+        if (this._buttonPanel) {
+            this._target.removeChild(this._buttonPanel);
+        }
         super.destroy();
     }
 }
