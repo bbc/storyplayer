@@ -169,8 +169,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this.stopAndDisconnect();
         try {
             this._target.removeChild(this._canvas);
-        }
-        catch (e) {
+        } catch (e) {
             // shared element, may well have been removed elsewhere
             console.warn('already removed canvas from VCtx image');
         }
