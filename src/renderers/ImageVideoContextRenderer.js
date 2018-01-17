@@ -35,7 +35,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
         this.renderImageElement();
 
-        this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
+        this.on('videoContextImageNodeCreated', () => { this._nodeCreated = true; });
     }
 
     start() {
@@ -57,7 +57,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             this._videoCtx.pause(); // TODO: need to call this once the image is really showing...
         } else {
             const that = this;
-            this.on('videoContextNodeCreated', () => {
+            this.on('videoContextImageNodeCreated', () => {
                 that._nodeCreated = true;
                 that.renderImage();
             });
@@ -67,7 +67,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     addImageNodeToVideoCtxGraph(mediaUrl: string) {
         this._imageNode = this._videoCtx.image(mediaUrl);
         this._nodeCompleted = true;
-        this.emit('videoContextNodeCreated');
+        this.emit('videoContextImageNodeCreated');
         console.log('vctx image node created', mediaUrl);
     }
 
@@ -127,7 +127,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     setVisible(visible: boolean) {
-        console.log('image set vis', visible);
         this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
@@ -144,15 +143,19 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     queueUp() {
+        this.setVisible(false);
+        this._queueUpWhenReady();
+    }
+
+    _queueUpWhenReady() {
         if (this._nodeCreated) {
             this._imageNode.connect(this._videoCtx.destination);
             this._imageNode.start(0);
             this._imageNode.disconnect();
-            this.setVisible(false);
         } else {
             const that = this;
-            this.on('videoContextNodeCreated', () => {
-                that.queueUp();
+            this.on('videoContextImageNodeCreated', () => {
+                that._queueUpWhenReady();
             });
         }
     }

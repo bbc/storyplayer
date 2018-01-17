@@ -39,6 +39,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     start() {
         super.start();
         // start the video
+        this.setVisible(true);
         this.playVideo();
         // this.renderDataModelInfo();
     }
@@ -157,6 +158,12 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     queueUp() {
+        console.log('video queue up');
+        this.setVisible(false);
+        this._queueUpWhenReady();
+    }
+
+    _queueUpWhenReady() {
         if (this._nodeCreated) {
             this._videoNode.connect(this._videoCtx.destination);
             this.setMute(true);
@@ -165,7 +172,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             const that = this;
             this.on('videoContextNodeCreated', () => {
-                that.queueUp();
+                that._queueUpWhenReady();
             });
         }
     }
