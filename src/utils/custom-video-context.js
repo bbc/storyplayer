@@ -52,6 +52,44 @@ export default class CustomVideoContext extends VideoContext {
     }
 }
 
+export function registerMe(id: string) {
+    // console.log('registering', id);
+    nodeRepresentationMap[id] = false;
+}
+
+export function forgetMe(id: string) {
+    // console.log('forgetting', id);
+    nodeRepresentationMap[id] = false;
+}
+
+export function showMe(id: string) {
+    // console.log('show vtx', id);
+    if (nodeRepresentationMap.hasOwnProperty(id)) {
+        nodeRepresentationMap[id] = true;
+    } else {
+        console.warn('representation', id, 'not registered on VCtx');
+    }
+    _setShow();
+}
+
+export function hideMe(id: string) {
+    // console.log('hide vtx', id);
+    if (nodeRepresentationMap.hasOwnProperty(id)) {
+        nodeRepresentationMap[id] = false;
+    } else {
+        console.warn('representation', id, 'not registered on VCtx');
+    }
+    _setShow();
+}
+
+function _setShow() {
+    let show = false;
+    Object.keys(nodeRepresentationMap).forEach((user) => {
+        show = show || nodeRepresentationMap[user];
+    });
+    // console.log('canvas show', show);
+    canvas.style.display = show ? 'flex' : 'none';
+}
 
 export function getCanvas() {
     return canvas;

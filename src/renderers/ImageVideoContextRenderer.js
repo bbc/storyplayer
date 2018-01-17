@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import CustomVideoContext, { registerMe, hideMe, showMe, forgetMe, getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -33,6 +33,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._nodeCompleted = false;
         this._effectNodes = [];
 
+        registerMe(this._representation.id);
         this.renderImageElement();
 
         this.on('videoContextImageNodeCreated', () => { this._nodeCreated = true; });
@@ -127,7 +128,12 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     setVisible(visible: boolean) {
-        this._canvas.style.display = visible ? 'flex' : 'none';
+        if (visible) {
+            showMe(this._representation.id);
+        } else {
+            hideMe(this._representation.id);
+        }
+        // this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
     switchFrom() {
@@ -162,17 +168,16 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
     stopAndDisconnect() {
         this._clearEffectNodes();
-        this._imageNode.destroy();
+        try {
+            if (this._nodeCreated) this._imageNode.destroy();
+        } catch (e) {
+            console.warn('VCtx could not destroy image node:', e);
+        }
+        forgetMe(this._representation.id);
     }
 
     destroy() {
         this.stopAndDisconnect();
-        try {
-            this._target.removeChild(this._canvas);
-        } catch (e) {
-            // shared element, may well have been removed elsewhere
-            console.warn('already removed canvas from VCtx image');
-        }
         super.destroy();
     }
 }
