@@ -67,7 +67,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this._target.removeChild(this._imageElement);
+        if (this._imageElement) this._target.removeChild(this._imageElement);
         super.destroy();
     }
 }
