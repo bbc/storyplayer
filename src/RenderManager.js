@@ -34,14 +34,7 @@ export default class RenderManager extends EventEmitter {
         this._createStoryAndElementDivs();
         this._renderNextButton();
         this._renderPreviousButton();
-
-        this._currentRenderer = null;
-        this._upcomingRenderers = [];
-        this._backgroundRenderers = {};
-        this._rendererState = {
-            lastSwitchableLabel: '', // the label of the last selected switchable choice
-            // also, audio muted/not...
-        };
+        this._initiate();
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
@@ -52,7 +45,7 @@ export default class RenderManager extends EventEmitter {
                 const newRenderer = this._getRenderer(narrativeElement, representation);
 
                 // look ahead and create new renderers for the next step
-                // this._rendererLookahead(narrativeElement);
+                this._rendererLookahead(narrativeElement);
 
                 // TODO: need to clean up upcomingRenderers here too
 
@@ -197,39 +190,6 @@ export default class RenderManager extends EventEmitter {
         newRenderer.willStart();
     }
 
-    _setPreviousButtonVisible(visible: boolean) {
-        this._previousButton.style.visibility = visible ? 'visible' : 'hidden';
-    }
-
-    _setNextButtonVisible(visible: boolean) {
-        this._nextButton.style.visibility = visible ? 'visible' : 'hidden';
-    }
-
-    _renderNextButton() {
-        this._nextButton = document.createElement('button');
-        this._nextButton.id = 'nextNEbutton';
-        this._nextButton.textContent = 'Next';
-        this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
-        this._neTarget.appendChild(this._nextButton);
-    }
-
-    _handleNextButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
-    }
-
-    _renderPreviousButton() {
-        this._previousButton = document.createElement('button');
-        this._previousButton.id = 'backNEbutton';
-        this._previousButton.textContent = 'Back';
-        this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
-        this._neTarget.appendChild(this._previousButton);
-    }
-
-    _handlePreviousButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
-    }
-
-
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
     _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
@@ -274,6 +234,39 @@ export default class RenderManager extends EventEmitter {
         this._upcomingRenderers.push(upcomingRenderers);
     }
 
+    // button creation and handling
+    _setPreviousButtonVisible(visible: boolean) {
+        this._previousButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _setNextButtonVisible(visible: boolean) {
+        this._nextButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _renderNextButton() {
+        this._nextButton = document.createElement('button');
+        this._nextButton.id = 'nextNEbutton';
+        this._nextButton.textContent = 'Next';
+        this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
+        this._neTarget.appendChild(this._nextButton);
+    }
+
+    _handleNextButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
+    }
+
+    _renderPreviousButton() {
+        this._previousButton = document.createElement('button');
+        this._previousButton.id = 'backNEbutton';
+        this._previousButton.textContent = 'Back';
+        this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
+        this._neTarget.appendChild(this._previousButton);
+    }
+
+    _handlePreviousButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
+    }
+
     // create new divs within the target to hold the storyIconRenderer and
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
@@ -288,10 +281,22 @@ export default class RenderManager extends EventEmitter {
         this._target.appendChild(this._backgroundTarget);
     }
 
+    _initiate() {
+        this._currentRenderer = null;
+        this._upcomingRenderers = [];
+        this._backgroundRenderers = {};
+        this._rendererState = {
+            lastSwitchableLabel: '', // the label of the last selected switchable choice
+            // also, audio muted/not...
+        };
+    }
+
+
     reset() {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
+        this._initiate();
     }
 
     _controller: Controller;
