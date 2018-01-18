@@ -119,6 +119,8 @@ export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
         canvas.className = 'romper-video-element';
+        canvas.setAttribute('width', '512px');
+        canvas.setAttribute('height', '288px');
         videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;
