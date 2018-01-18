@@ -96,7 +96,8 @@ export default class BaseRenderer extends EventEmitter {
         this.destroy();
     }
 
-    queueUp() { }
+    // prepare rendere so it can be switched to quickly and in sync
+    cueUp() { }
 
     switchTo() {
         this.start();

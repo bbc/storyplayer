@@ -148,12 +148,13 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         // this.applyBlur();
     }
 
-    queueUp() {
+    // prepare rendere so it can be switched to quickly and in sync
+    cueUp() {
         this.setVisible(false);
-        this._queueUpWhenReady();
+        this._cueUpWhenReady();
     }
 
-    _queueUpWhenReady() {
+    _cueUpWhenReady() {
         if (this._nodeCreated) {
             this._imageNode.connect(this._videoCtx.destination);
             this._imageNode.start(0);
@@ -161,7 +162,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         } else {
             const that = this;
             this.on('videoContextImageNodeCreated', () => {
-                that._queueUpWhenReady();
+                that._cueUpWhenReady();
             });
         }
     }

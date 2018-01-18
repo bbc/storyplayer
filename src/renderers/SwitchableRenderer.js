@@ -147,7 +147,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._renderSwitchButtons();
 
         this._choiceRenderers.forEach((choice) => {
-            if (choice) choice.queueUp();
+            if (choice) choice.cueUp();
         });
 
         // start subrenderer for first choice
