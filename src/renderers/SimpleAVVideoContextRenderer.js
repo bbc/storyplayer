@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import { registerMe, hideMe, showMe, forgetMe, getVideoContext, getCanvas } from '../utils/custom-video-context';
+import { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -32,7 +32,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._nodeCompleted = false;
 
         this.renderVideoElement();
-        registerMe(this._representation.id);
+        this._videoCtx.registerMe(this._representation.id);
 
         this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
     }
@@ -183,9 +183,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     setVisible(visible: boolean) {
         if (visible) {
-            showMe(this._representation.id);
+            this._videoCtx.showMe(this._representation.id);
         } else {
-            hideMe(this._representation.id);
+            this._videoCtx.hideMe(this._representation.id);
         }
         // this._canvas.style.display = visible ? 'flex' : 'none';
     }
@@ -213,7 +213,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // disconnect current active node.
         this._videoNode.disconnect();
         this._videoNode.destroy();
-        forgetMe(this._representation.id);
+        this._videoCtx.forgetMe(this._representation.id);
     }
 
     destroy() {
