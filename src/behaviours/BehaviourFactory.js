@@ -1,6 +1,7 @@
 // @flow
 import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
 import PauseBehaviour from './PauseBehaviour';
+import BlurBehaviour from './BlurBehaviour';
 import type { RendererEvent } from '../renderers/RendererEvents';
 
 export default function BehaviourFactory(
@@ -10,6 +11,7 @@ export default function BehaviourFactory(
     const BEHAVIOURS = {
         'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,
         'urn:x-object-based-media:asset-mixin:pause/v1.0': PauseBehaviour,
+        'urn:x-object-based-media:asset-mixin:blur/v1.0': BlurBehaviour,
     };
 
     let currentBehaviour;

@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -15,6 +15,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _videoCtx: Object;
     _nodeCreated: boolean;
     _nodeCompleted: boolean;
+    _effectNodes: Array<Object>;
 
     constructor(
         representation: Representation,
@@ -30,6 +31,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._videoNode = {};
         this._nodeCreated = false;
         this._nodeCompleted = false;
+        this._effectNodes = [];
 
         this.renderVideoElement();
         this._videoCtx.registerMe(this._representation.id);
@@ -156,6 +158,18 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             currentTime: this._videoNode._currentTime,
         };
         return timeObject;
+    }
+
+    applyBlurBehaviour(blur: number) {
+        console.log('applying blur behaviour in VCtx simple av');
+        const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
+        const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
+        this._videoNode.disconnect();
+        this._videoNode.connect(blurEffectHoriz);
+        blurEffectHoriz.connect(blurEffectVert);
+        blurEffectVert.connect(this._videoCtx.destination);
+        this._effectNodes.push(blurEffectHoriz);
+        this._effectNodes.push(blurEffectVert);
     }
 
     // prepare rendere so it can be switched to quickly and in sync

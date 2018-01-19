@@ -103,6 +103,21 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
+    // Either have a generic function for all behaviours, and leave to individual renderers to parse
+    applyBehaviour(behaviourDefinition: Object) {
+        console.warn(`this Renderer does not know how to apply the ${behaviourDefinition.type} behaviour`);
+    }
+
+    // or have an explicit function for each behaviour
+    // which means we can give warnings when renderer instances can't yet handle new behaviours
+    applyBlurBehaviour(blur: number) {
+        console.warn('this Renderer does not know how to apply the blur behaviour');
+    }
+
+    applyShowImageBehaviour() {
+        console.warn('this Renderer does not know how to apply the showImage behaviour');
+    }
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.
