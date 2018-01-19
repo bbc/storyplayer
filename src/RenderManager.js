@@ -33,15 +33,8 @@ export default class RenderManager extends EventEmitter {
 
         this._createStoryAndElementDivs();
         this._renderNextButton();
-        this._renderBackButton();
-
-        this._currentRenderer = null;
-        this._upcomingRenderers = [];
-        this._backgroundRenderers = {};
-        this._rendererState = {
-            lastSwitchableLabel: '', // the label of the last selected switchable choice
-            // also, audio muted/not...
-        };
+        this._renderPreviousButton();
+        this._initialise();
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
@@ -52,7 +45,7 @@ export default class RenderManager extends EventEmitter {
                 const newRenderer = this._getRenderer(narrativeElement, representation);
 
                 // look ahead and create new renderers for the next step
-                // this._rendererLookahead(narrativeElement);
+                this._rendererLookahead(narrativeElement);
 
                 // TODO: need to clean up upcomingRenderers here too
 
@@ -106,8 +99,8 @@ export default class RenderManager extends EventEmitter {
 
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
-            if (this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-            } else {
+            if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
+                // } else {
                 this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
@@ -131,7 +124,7 @@ export default class RenderManager extends EventEmitter {
      *
      * @fires RenderManager#complete
      * @fires RenderManager#nextButtonClicked
-     * @fires RenderManager#backButtonClicked
+     * @fires RenderManager#PreviousButtonClicked
      */
     // create a new renderer for the given representation, and attach
     // the standard listeners to it
@@ -153,10 +146,10 @@ export default class RenderManager extends EventEmitter {
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
             });
-            newRenderer.on(RendererEvents.BACK_BUTTON_CLICKED, () => {
-                this.emit(RendererEvents.BACK_BUTTON_CLICKED);
+            newRenderer.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
+                this.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
             });
-            newRenderer.on('switchedRepresentation', (choice) => {
+            newRenderer.on(RendererEvents.SWITCHED_REPRESENTATION, (choice) => {
                 this._rendererState.lastSwitchableLabel = choice.label;
                 this._handleBackgroundRendering(choice.representation);
             });
@@ -185,7 +178,7 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
 
         // render buttons if appropriate
-        this._setBackButtonVisible((this._controller._getIdOfPreviousNode() !== null));
+        this._setPreviousButtonVisible((this._controller._getIdOfPreviousNode() !== null));
         this._setNextButtonVisible(this._controller.hasNextNode());
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -197,39 +190,6 @@ export default class RenderManager extends EventEmitter {
         newRenderer.willStart();
     }
 
-    _setBackButtonVisible(visible: boolean) {
-        this._backButton.style.visibility = visible ? 'visible' : 'hidden';
-    }
-
-    _setNextButtonVisible(visible: boolean) {
-        this._nextButton.style.visibility = visible ? 'visible' : 'hidden';
-    }
-
-    _renderNextButton() {
-        this._nextButton = document.createElement('button');
-        this._nextButton.id = 'nextNEbutton';
-        this._nextButton.textContent = 'Next';
-        this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
-        this._neTarget.appendChild(this._nextButton);
-    }
-
-    _handleNextButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
-    }
-
-    _renderBackButton() {
-        this._backButton = document.createElement('button');
-        this._backButton.id = 'backNEbutton';
-        this._backButton.textContent = 'Back';
-        this._backButton.addEventListener('click', () => this._handleBackButtonClick());
-        this._neTarget.appendChild(this._backButton);
-    }
-
-    _handleBackButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.BACK_BUTTON_CLICKED);
-    }
-
-
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
     _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
@@ -237,10 +197,15 @@ export default class RenderManager extends EventEmitter {
         // have we already got a renderer?
         if (this._upcomingRenderers.length === 1) {
             const newRenderersList = this._upcomingRenderers.shift();
-            if (newRenderersList.hasOwnProperty(narrativeElement.id)) {
-                newRenderer = newRenderersList[narrativeElement.id];
-                // console.log('renderer exists', newRenderer);
-            }
+            Object.keys(newRenderersList).forEach((rendererNEId) => {
+                if (rendererNEId === narrativeElement.id) {
+                    // this is the correct one - use it
+                    newRenderer = newRenderersList[rendererNEId];
+                } else {
+                    // only using one - destroy any others
+                    newRenderersList[rendererNEId].destroy();
+                }
+            });
         }
         // create the new Renderer if we need to
         if (!newRenderer) {
@@ -269,6 +234,39 @@ export default class RenderManager extends EventEmitter {
         this._upcomingRenderers.push(upcomingRenderers);
     }
 
+    // button creation and handling
+    _setPreviousButtonVisible(visible: boolean) {
+        this._previousButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _setNextButtonVisible(visible: boolean) {
+        this._nextButton.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
+    _renderNextButton() {
+        this._nextButton = document.createElement('button');
+        this._nextButton.id = 'nextNEbutton';
+        this._nextButton.textContent = 'Next';
+        this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
+        this._neTarget.appendChild(this._nextButton);
+    }
+
+    _handleNextButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
+    }
+
+    _renderPreviousButton() {
+        this._previousButton = document.createElement('button');
+        this._previousButton.id = 'backNEbutton';
+        this._previousButton.textContent = 'Back';
+        this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
+        this._neTarget.appendChild(this._previousButton);
+    }
+
+    _handlePreviousButtonClick() {
+        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
+    }
+
     // create new divs within the target to hold the storyIconRenderer and
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
@@ -283,10 +281,22 @@ export default class RenderManager extends EventEmitter {
         this._target.appendChild(this._backgroundTarget);
     }
 
+    _initialise() {
+        this._currentRenderer = null;
+        this._upcomingRenderers = [];
+        this._backgroundRenderers = {};
+        this._rendererState = {
+            lastSwitchableLabel: '', // the label of the last selected switchable choice
+            // also, audio muted/not...
+        };
+    }
+
+
     reset() {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
+        this._initialise();
     }
 
     _controller: Controller;
@@ -308,5 +318,5 @@ export default class RenderManager extends EventEmitter {
     };
     _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
     _nextButton: HTMLButtonElement;
-    _backButton: HTMLButtonElement;
+    _previousButton: HTMLButtonElement;
 }

@@ -9,9 +9,47 @@ let canvas;
 
 const nodeRepresentationMap = {};
 
-
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
+
+    registerVideoContextClient(id: string) {
+        // console.log('registering', id);
+        nodeRepresentationMap[id] = false;
+    }
+
+    unregisterVideoContextClient(id: string) {
+        // console.log('forgetting', id);
+        delete nodeRepresentationMap[id];
+    }
+
+    showVideoContextForClient(id: string) {
+        // console.log('show vtx', id);
+        if (nodeRepresentationMap.hasOwnProperty(id)) {
+            nodeRepresentationMap[id] = true;
+        } else {
+            console.warn('representation', id, 'not registered on VCtx');
+        }
+        this._calculateVisibility();
+    }
+
+    hideVideoContextForClient(id: string) {
+        // console.log('hide vtx', id);
+        if (nodeRepresentationMap.hasOwnProperty(id)) {
+            nodeRepresentationMap[id] = false;
+        } else {
+            console.warn('representation', id, 'not registered on VCtx');
+        }
+        this._calculateVisibility();
+    }
+
+    _calculateVisibility() {
+        let show = false;
+        Object.keys(nodeRepresentationMap).forEach((user) => {
+            show = show || nodeRepresentationMap[user];
+        });
+        // console.log('canvas show', show);
+        canvas.style.display = show ? 'flex' : 'none';
+    }
 
     hls(m3u8: Promise<string>, sourceOffset: number = 0, preloadTime: number = 4, attributes: Object = {}) {
         const videoElement = document.createElement('video');
@@ -24,11 +62,6 @@ export default class CustomVideoContext extends VideoContext {
 
             videoNode.hlsplayer = new Hls();
 
-            let currentTimeOffset = 0;
-            if (videoNode._currentTime > videoNode._startTime) {
-                currentTimeOffset = videoNode._currentTime - videoNode._startTime;
-            }
-
             if (manifestUrl.indexOf('.m3u8') !== -1) {
                 videoNode.hlsplayer.loadSource(manifestUrl);
                 videoNode.hlsplayer.attachMedia(videoElement);
@@ -36,8 +69,6 @@ export default class CustomVideoContext extends VideoContext {
                     videoElement.play();
                 });
             }
-
-            //    videoNode.hlsplayer.startPosition(videoNode._sourceOffset + currentTimeOffset);
         });
 
         videoNode.registerCallback('play', () => {
@@ -51,7 +82,6 @@ export default class CustomVideoContext extends VideoContext {
         return videoNode;
     }
 }
-
 
 export function getCanvas() {
     return canvas;
@@ -81,6 +111,9 @@ export function createNodeForRepresentation(representationId: string, mediaUrl: 
 export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
+        canvas.className = 'romper-video-element';
+        canvas.setAttribute('width', '512px');
+        canvas.setAttribute('height', '288px');
         videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;

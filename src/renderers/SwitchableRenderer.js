@@ -2,14 +2,16 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
-import SimpleAVRenderer from './SimpleAVRenderer';
+import RendererEvents from './RendererEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
-    _choiceDiv: HTMLDivElement;
+    _choiceDiv: HTMLElement;
     _fetchMedia: MediaFetcher;
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
+    _nodeCompleted: boolean;
+    _buttonPanel: HTMLDivElement;
 
     constructor(
         representation: Representation,
@@ -18,12 +20,10 @@ export default class SwitchableRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-
-        this._choiceDiv = document.createElement('div');
-        this._choiceDiv.id = 'subrenderer';
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
+        this._nodeCompleted = false;
     }
 
     // create a renderer for each choice
@@ -35,13 +35,28 @@ export default class SwitchableRenderer extends BaseRenderer {
                     choice.representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
-                    this._choiceDiv,
+                    this._target,
                 ));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
-                    cr.on('completeStartBehaviours', () => {
+                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
+                    });
+                }
+            });
+            choices.forEach((choiceRenderer) => {
+                if (choiceRenderer) {
+                    const cr = choiceRenderer;
+                    cr.on(RendererEvents.COMPLETED, () => {
+                        if (!this._nodeCompleted) {
+                            // console.log('first switchable finished event');
+                            this.complete();// .bind(this);
+                        } // else {
+                        //     console.log('another of the switchables has finished');
+                        // }
+                        this._nodeCompleted = true;
+                        // this.emit(RendererEvents.COMPLETED);
                     });
                 }
             });
@@ -51,9 +66,9 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
-        const buttonPanel = document.createElement('div');
+        this._buttonPanel = document.createElement('div');
         const buttonList = document.createElement('ul');
-        buttonPanel.className = 'switchbuttons';
+        this._buttonPanel.className = 'switchbuttons';
         let i = 0;
         if (this._representation.choices) {
             this._representation.choices.forEach((choice) => {
@@ -71,8 +86,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                 buttonList.appendChild(switchListItem);
                 i += 1;
             });
-            buttonPanel.appendChild(buttonList);
-            this._target.appendChild(buttonPanel);
+            this._buttonPanel.appendChild(buttonList);
+            this._target.appendChild(this._buttonPanel);
         }
     }
 
@@ -87,23 +102,24 @@ export default class SwitchableRenderer extends BaseRenderer {
             const currentChoice = this._choiceRenderers[this._currentRendererIndex];
             if (currentChoice) {
                 // TODO: implement this in SimpleAVVideoContextRenderer
-                if (currentChoice instanceof SimpleAVRenderer) {
+                const currentTimeData = currentChoice.getCurrentTime();
+                if (currentTimeData.timeBased) {
                     // store playhead time
-                    this._previousRendererPlayheadTime = currentChoice.getCurrentTime();
+                    this._previousRendererPlayheadTime = currentTimeData.currentTime;
                 }
-                currentChoice.destroy();
+                currentChoice.switchFrom();
             }
             this._currentRendererIndex = choiceIndex;
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
-                newChoice.start();
+                newChoice.switchTo();
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
-                    this.emit('switchedRepresentation', this._representation.choices[choiceIndex]);
+                    this.emit(RendererEvents.SWITCHED_REPRESENTATION, this._representation.choices[choiceIndex]);
                 }
             }
-            if (newChoice && newChoice instanceof SimpleAVRenderer) {
+            if (newChoice) {
                 // sync playhead time
-                newChoice.setStartTime(this._previousRendererPlayheadTime);
+                newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
         }
     }
@@ -128,8 +144,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
-        this._target.appendChild(this._choiceDiv);
         this._renderSwitchButtons();
+
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.cueUp();
+        });
 
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
@@ -210,8 +229,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.destroy();
+        });
+        if (this._buttonPanel) {
+            this._target.removeChild(this._buttonPanel);
         }
         super.destroy();
     }

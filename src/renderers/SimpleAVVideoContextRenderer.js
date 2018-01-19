@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -15,6 +15,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _videoCtx: Object;
     _nodeCreated: boolean;
     _nodeCompleted: boolean;
+    cueUp: Function;
+    _cueUpWhenReady: Function;
+    playVideo: Function;
 
     constructor(
         representation: Representation,
@@ -24,14 +27,19 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
+        this.playVideo = this.playVideo.bind(this);
+        this.cueUp = this.cueUp.bind(this);
+        this._cueUpWhenReady = this._cueUpWhenReady.bind(this)
+
         this._videoCtx = getVideoContext();
-        const canvas = getCanvas();
-        this._target.appendChild(canvas);
+        this._canvas = getCanvas();
+        this._target.appendChild(this._canvas);
         this._videoNode = {};
         this._nodeCreated = false;
         this._nodeCompleted = false;
 
         this.renderVideoElement();
+        this._videoCtx.registerVideoContextClient(this._representation.id);
 
         this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
     }
@@ -39,22 +47,23 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     start() {
         super.start();
         // start the video
+        this.setVisible(true);
         this.playVideo();
         // this.renderDataModelInfo();
     }
 
     playVideo() {
         if (this._nodeCreated) {
-            // console.log('callbacks', this._videoNode._callbacks.length);
+            this._videoNode.connect(this._videoCtx.destination);
             const node = this._videoNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
+            this.setMute(false);
         } else {
-            const that = this;
             this.on('videoContextNodeCreated', () => {
-                that._nodeCreated = true;
-                that.playVideo();
+                this._nodeCreated = true;
+                this.playVideo();
             });
         }
     }
@@ -67,12 +76,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             videoNode1 = this._videoCtx.video(mediaUrl, 0, 4);
         }
-        videoNode1.connect(this._videoCtx.destination);
 
         videoNode1.registerCallback('ended', () => {
             // console.log('VCtx node complete', mediaUrl);
             if (!this._nodeCompleted) {
-                this.complete();//.bind(this);
+                this.complete();
             } else {
                 console.warn('multiple VCtx ended events received');
             }
@@ -81,7 +89,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         this._videoNode = videoNode1;
         this.emit('videoContextNodeCreated');
-        // console.log('vctx node created. loaded.', mediaUrl);
     }
 
     renderVideoElement() {
@@ -149,6 +156,60 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
+    getCurrentTime(): Object {
+        const timeObject = {
+            timeBased: true,
+            currentTime: this._videoNode._currentTime,
+        };
+        return timeObject;
+    }
+
+    // prepare rendere so it can be switched to quickly and in sync
+    cueUp() {
+        this.setVisible(false);
+        this._cueUpWhenReady();
+    }
+
+    _cueUpWhenReady() {
+        if (this._nodeCreated) {
+            this._videoNode.connect(this._videoCtx.destination);
+            this.setMute(true);
+            this._videoNode.start(0);
+            this._videoNode.disconnect();
+        } else {
+            this.on('videoContextNodeCreated', () => {
+                this._cueUpWhenReady();
+            });
+        }
+    }
+
+    setMute(quiet: boolean) {
+        if (this._videoNode.element) this._videoNode.element.muted = quiet;
+    }
+
+    setVisible(visible: boolean) {
+        if (visible) {
+            this._videoCtx.showVideoContextForClient(this._representation.id);
+        } else {
+            this._videoCtx.hideVideoContextForClient(this._representation.id);
+        }
+        // this._canvas.style.display = visible ? 'flex' : 'none';
+    }
+
+    switchFrom() {
+        this._videoNode.disconnect();
+        this.setMute(true);
+        this.setVisible(false);
+        this._videoCtx.pause();
+    }
+
+    switchTo() {
+        this._videoCtx.play();
+        this.playVideo();
+        this.setMute(false);
+        this.setVisible(true);
+    }
+
     stopAndDisconnect() {
         this._videoNode.unregisterCallback();
 
@@ -158,14 +219,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // disconnect current active node.
         this._videoNode.disconnect();
         this._videoNode.destroy();
+        this._videoCtx.unregisterVideoContextClient(this._representation.id);
     }
 
     destroy() {
         this.stopAndDisconnect();
-        while (this._target.lastChild) {
-            this._target.removeChild(this._target.lastChild);
-        }
-
         super.destroy();
     }
 }

@@ -187,8 +187,8 @@ export default class StoryReasoner extends EventEmitter {
         const branchBeginningCallback = () => this.emit('choiceOfBeginnings');
         const branchLinkCallback = () => this.emit('choiceOfLinks');
 
-        const elementChangedCallback = element => {
-            this.emit('narrativeElementChanged', element)
+        const elementChangedCallback = (element) => {
+            this.emit('narrativeElementChanged', element);
         };
 
         const storyEndCallback = () => {

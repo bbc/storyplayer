@@ -70,6 +70,19 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
+    getCurrentTime(): Object {
+        console.warn('getting time data from on BaseRenderer');
+        const timeObject = {
+            timeBased: false,
+            currentTime: 0,
+        };
+        return timeObject;
+    }
+
+    setCurrentTime(time: number) {
+        console.warn('ignoring setting time on BaseRenderer', time);
+    }
+
     complete() {
         console.log('base renderer complete()');
         if (!this._behaviourRunner ||
@@ -78,6 +91,18 @@ export default class BaseRenderer extends EventEmitter {
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }
+
+    switchFrom() {
+        this.destroy();
+    }
+
+    // prepare rendere so it can be switched to quickly and in sync
+    cueUp() { }
+
+    switchTo() {
+        this.start();
+    }
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.

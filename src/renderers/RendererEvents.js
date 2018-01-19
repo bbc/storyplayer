@@ -7,9 +7,10 @@ const RendererEventNames = [
     'DESTROYED',
     'COMPLETE_START_BEHAVIOURS',
     'NEXT_BUTTON_CLICKED',
-    'BACK_BUTTON_CLICKED',
+    'PREVIOUS_BUTTON_CLICKED',
     'ADD_TO_DOM',
     'REMOVE_FROM_DOM',
+    'SWITCHED_REPRESENTATION',
 ];
 
 const RendererEvents = {};
