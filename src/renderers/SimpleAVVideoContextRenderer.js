@@ -178,6 +178,12 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._effectNodes.push(blurEffectVert);
     }
 
+    _clearEffectNodes() {
+        this._effectNodes.forEach((node) => {
+            node.destroy();
+        });
+    }
+
     // prepare rendere so it can be switched to quickly and in sync
     cueUp() {
         this.setVisible(false);
@@ -225,6 +231,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     stopAndDisconnect() {
+        this._clearEffectNodes();
         this._videoNode.unregisterCallback();
 
         // Stop current active node
