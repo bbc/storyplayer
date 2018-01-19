@@ -12,37 +12,37 @@ const nodeRepresentationMap = {};
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
 
-    registerMe(id: string) {
+    registerVideoContextClient(id: string) {
         // console.log('registering', id);
         nodeRepresentationMap[id] = false;
     }
 
-    forgetMe(id: string) {
+    unregisterVideoContextClient(id: string) {
         // console.log('forgetting', id);
         delete nodeRepresentationMap[id];
     }
 
-    showMe(id: string) {
+    showVideoContextForClient(id: string) {
         // console.log('show vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = true;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._setShow();
+        this._calculateVisibility();
     }
 
-    hideMe(id: string) {
+    hideVideoContextForClient(id: string) {
         // console.log('hide vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = false;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._setShow();
+        this._calculateVisibility();
     }
 
-    _setShow() {
+    _calculateVisibility() {
         let show = false;
         Object.keys(nodeRepresentationMap).forEach((user) => {
             show = show || nodeRepresentationMap[user];
@@ -62,11 +62,6 @@ export default class CustomVideoContext extends VideoContext {
 
             videoNode.hlsplayer = new Hls();
 
-            // let currentTimeOffset = 0;
-            // if (videoNode._currentTime > videoNode._startTime) {
-            //     currentTimeOffset = videoNode._currentTime - videoNode._startTime;
-            // }
-
             if (manifestUrl.indexOf('.m3u8') !== -1) {
                 videoNode.hlsplayer.loadSource(manifestUrl);
                 videoNode.hlsplayer.attachMedia(videoElement);
@@ -74,8 +69,6 @@ export default class CustomVideoContext extends VideoContext {
                     videoElement.play();
                 });
             }
-
-            //    videoNode.hlsplayer.startPosition(videoNode._sourceOffset + currentTimeOffset);
         });
 
         videoNode.registerCallback('play', () => {

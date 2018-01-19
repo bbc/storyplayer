@@ -70,7 +70,7 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
-    getTimeData(): Object {
+    getCurrentTime(): Object {
         console.warn('getting time data from on BaseRenderer');
         const timeObject = {
             timeBased: false,

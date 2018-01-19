@@ -16,6 +16,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     _nodeCreated: boolean;
     _nodeCompleted: boolean;
     _effectNodes: Array<Object>;
+    cueUp: Function;
+    _cueUpWhenReady: Function;
 
     constructor(
         representation: Representation,
@@ -25,6 +27,9 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
+        this.cueUp = this.cueUp.bind(this);
+        this._cueUpWhenReady = this._cueUpWhenReady.bind(this)
+
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
         this._target.appendChild(this._canvas);
@@ -33,7 +38,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._nodeCompleted = false;
         this._effectNodes = [];
 
-        this._videoCtx.registerMe(this._representation.id);
+        this._videoCtx.registerVideoContextClient(this._representation.id);
         this.renderImageElement();
 
         this.on('videoContextImageNodeCreated', () => { this._nodeCreated = true; });
@@ -44,7 +49,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         // start the video
         this.renderImage();
         // this.renderDataModelInfo();
-        this.setVisible(true);
+        this._setVisible(true);
     }
 
     renderImage() {
@@ -57,10 +62,9 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             this.emit(RendererEvents.STARTED);
             this._videoCtx.pause(); // TODO: need to call this once the image is really showing...
         } else {
-            const that = this;
             this.on('videoContextImageNodeCreated', () => {
-                that._nodeCreated = true;
-                that.renderImage();
+                this._nodeCreated = true;
+                this.renderImage();
             });
         }
     }
@@ -127,11 +131,11 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         }
     }
 
-    setVisible(visible: boolean) {
+    _setVisible(visible: boolean) {
         if (visible) {
-            this._videoCtx.showMe(this._representation.id);
+            this._videoCtx.showVideoContextForClient(this._representation.id);
         } else {
-            this._videoCtx.hideMe(this._representation.id);
+            this._videoCtx.hideVideoContextForClient(this._representation.id);
         }
         // this._canvas.style.display = visible ? 'flex' : 'none';
     }
@@ -139,18 +143,18 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     switchFrom() {
         this._imageNode.disconnect();
         this._clearEffectNodes();
-        this.setVisible(false);
+        this._setVisible(false);
     }
 
     switchTo() {
         this._imageNode.connect(this._videoCtx.destination);
-        this.setVisible(true);
+        this._setVisible(true);
         // this.applyBlur();
     }
 
     // prepare rendere so it can be switched to quickly and in sync
     cueUp() {
-        this.setVisible(false);
+        this._setVisible(false);
         this._cueUpWhenReady();
     }
 
@@ -160,9 +164,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             this._imageNode.start(0);
             this._imageNode.disconnect();
         } else {
-            const that = this;
             this.on('videoContextImageNodeCreated', () => {
-                that._cueUpWhenReady();
+                this._cueUpWhenReady();
             });
         }
     }
@@ -174,7 +177,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         } catch (e) {
             console.warn('VCtx could not destroy image node:', e);
         }
-        this._videoCtx.forgetMe(this._representation.id);
+        this._videoCtx.unregisterVideoContextClient(this._representation.id);
     }
 
     destroy() {

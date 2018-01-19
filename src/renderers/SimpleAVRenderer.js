@@ -246,7 +246,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    getTimeData(): Object {
+    getCurrentTime(): Object {
         let videoTime;
         if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) {
             videoTime = 0;

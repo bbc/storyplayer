@@ -34,7 +34,7 @@ export default class RenderManager extends EventEmitter {
         this._createStoryAndElementDivs();
         this._renderNextButton();
         this._renderPreviousButton();
-        this._initiate();
+        this._initialise();
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
@@ -281,7 +281,7 @@ export default class RenderManager extends EventEmitter {
         this._target.appendChild(this._backgroundTarget);
     }
 
-    _initiate() {
+    _initialise() {
         this._currentRenderer = null;
         this._upcomingRenderers = [];
         this._backgroundRenderers = {};
@@ -296,7 +296,7 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
-        this._initiate();
+        this._initialise();
     }
 
     _controller: Controller;
