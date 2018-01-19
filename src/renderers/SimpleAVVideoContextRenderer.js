@@ -19,6 +19,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _cueUpWhenReady: Function;
     playVideo: Function;
     _effectNodes: Array<Object>;
+    _applyBlurBehaviour: Function;
 
     constructor(
         representation: Representation,
@@ -30,7 +31,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // this._canvas = document.createElement('canvas');
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
-        this._cueUpWhenReady = this._cueUpWhenReady.bind(this)
+        this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
@@ -44,6 +45,12 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._videoCtx.registerVideoContextClient(this._representation.id);
 
         this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
+
+        this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+
+        this._behaviourRendererMap = {
+            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+        };
     }
 
     start() {
@@ -166,7 +173,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         return timeObject;
     }
 
-    applyBlurBehaviour(blur: number) {
+    _applyBlurBehaviour(behaviour: Object, behaviourAppliedCallback: () => void) {
         console.log('applying blur behaviour in VCtx simple av');
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
@@ -176,6 +183,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         blurEffectVert.connect(this._videoCtx.destination);
         this._effectNodes.push(blurEffectHoriz);
         this._effectNodes.push(blurEffectVert);
+        console.log(`Applied blur behaviour: blur value ${behaviour.blur}`);
+        behaviourAppliedCallback();
     }
 
     _clearEffectNodes() {

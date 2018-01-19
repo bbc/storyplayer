@@ -12,6 +12,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
     _behaviourRunner: ?BehaviourRunner;
+    _behaviourRendererMap: {[key: string]: () => void};
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -36,6 +37,7 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
+        this._behaviourRendererMap = {};
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience
@@ -103,20 +105,8 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
-    // Either have a generic function for all behaviours, and leave to individual renderers to parse
-    applyBehaviour(behaviourDefinition: Object) {
-        console.warn(`this Renderer does not know how to apply the ${behaviourDefinition.type} behaviour`);
-    }
-
-    // or have an explicit function for each behaviour
-    // which means we can give warnings when renderer instances can't yet handle new behaviours
-    applyBlurBehaviour(blur: number) {
-        console.warn('this Renderer does not know how to apply the blur behaviour');
-    }
-
-    applyShowImageBehaviour(assetCollectionId: string, callback: () => mixed) {
-        console.warn('this Renderer does not know how to apply the showImage behaviour');
-        callback();
+    getBehaviourRenderer(behaviourUrn: string): () => void {
+        return this._behaviourRendererMap[behaviourUrn];
     }
 
     /**

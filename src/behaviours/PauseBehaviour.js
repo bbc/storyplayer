@@ -1,7 +1,6 @@
 // @flow
 
 import BaseBehaviour from './BaseBehaviour';
-import BaseRenderer from '../renderers/BaseRenderer';
 
 export default class PauseBehaviour extends BaseBehaviour {
     timerHandle: ?number;
@@ -11,14 +10,14 @@ export default class PauseBehaviour extends BaseBehaviour {
         this.timerHandle = null;
     }
 
-    start(renderer: BaseRenderer) {
-        const pause = parseFloat(this.behaviourDefinition.pauseTime);
+    start() {
+        const pause = parseFloat(this._behaviourDefinition.pauseTime);
         this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
     }
 
     handleTimeout() {
         this.timerHandle = null;
-        this.onComplete();
+        this._handleDone();
     }
 
     destroy() {
