@@ -12,9 +12,8 @@ export default class PauseBehaviour extends BaseBehaviour {
     }
 
     start(renderer: BaseRenderer) {
-        const pause = parseFloat(this.behaviourDefinition.pause);
-        this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000 * 10);
-        // TODO ^^ current story has 1s pause - make 10s here for testing
+        const pause = parseFloat(this.behaviourDefinition.pauseTime);
+        this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
     }
 
     handleTimeout() {

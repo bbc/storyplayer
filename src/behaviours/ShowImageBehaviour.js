@@ -3,15 +3,19 @@
 import BaseBehaviour from './BaseBehaviour';
 import BaseRenderer from '../renderers/BaseRenderer';
 
-export default class BlurBehaviour extends BaseBehaviour {
+export default class ShowBehaviour extends BaseBehaviour {
 
     constructor(behaviourDefinition: Object, onComplete: () => mixed) {
         super(behaviourDefinition, onComplete);
     }
 
     start(renderer: BaseRenderer) {
-        const blur = parseFloat(this.behaviourDefinition.blur);
-        renderer.applyBlurBehaviour(blur);
+        const imageAssetCollectionId = this.behaviourDefinition.image;
+        renderer.applyShowImageBehaviour(imageAssetCollectionId, this._handleDone.bind(this));
+    }
+
+    _handleDone() {
+        console.log('show image complete');
         this.onComplete();
     }
 
