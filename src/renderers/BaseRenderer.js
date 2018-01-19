@@ -114,8 +114,9 @@ export default class BaseRenderer extends EventEmitter {
         console.warn('this Renderer does not know how to apply the blur behaviour');
     }
 
-    applyShowImageBehaviour() {
+    applyShowImageBehaviour(assetCollectionId: string, callback: () => mixed) {
         console.warn('this Renderer does not know how to apply the showImage behaviour');
+        callback();
     }
 
     /**

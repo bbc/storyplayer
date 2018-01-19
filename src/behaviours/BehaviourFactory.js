@@ -2,6 +2,7 @@
 import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
 import PauseBehaviour from './PauseBehaviour';
 import BlurBehaviour from './BlurBehaviour';
+import ShowImageBehaviour from './ShowImageBehaviour';
 import type { RendererEvent } from '../renderers/RendererEvents';
 
 export default function BehaviourFactory(
@@ -12,6 +13,7 @@ export default function BehaviourFactory(
         'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,
         'urn:x-object-based-media:asset-mixin:pause/v1.0': PauseBehaviour,
         'urn:x-object-based-media:asset-mixin:blur/v1.0': BlurBehaviour,
+        'urn:x-object-based-media:asset-mixin:showimage/v1.0': ShowImageBehaviour,
     };
 
     let currentBehaviour;
