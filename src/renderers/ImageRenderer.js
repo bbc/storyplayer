@@ -11,9 +11,10 @@ export default class ImageRenderer extends BaseRenderer {
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, player);
+        this._target = this._player.mediaTarget;
         this.renderImageElement();
     }
 

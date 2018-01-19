@@ -1,5 +1,6 @@
 // @flow
 
+import { PlayerEvents } from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
@@ -13,9 +14,11 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     constructor(
         assetCollection: AssetCollection,
         mediaFetcher: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
-        super(assetCollection, mediaFetcher, target);
+        super(assetCollection, mediaFetcher, player);
+        this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._target = this._player.backgroundTarget;
         if (Hls.isSupported()) {
             this._hls = new Hls();
         }
@@ -24,6 +27,14 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     start() {
         this._renderBackgroundAudio();
         // this._renderDataModelInfo();
+        this._player.addVolumeControl(this._assetCollection.id, 'Background');
+        this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
+    }
+
+    _handleVolumeClicked(event: Object): void {
+        if (event.id === this._assetCollection.id) {
+            this._audioElement.volume = event.value;
+        }
     }
 
     _renderBackgroundAudio() {
@@ -71,6 +82,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     destroy() {
         this._target.removeChild(this._audioElement);
+        this._player.removeVolumeControl(this._assetCollection.id);
+        this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
         super.destroy();
     }
 }

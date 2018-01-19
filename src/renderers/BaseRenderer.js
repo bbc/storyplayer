@@ -10,7 +10,7 @@ export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
-    _target: HTMLElement;
+    _player: Player;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: {[key: string]: () => void};
 
@@ -21,19 +21,19 @@ export default class BaseRenderer extends EventEmitter {
      * @param {Representation} representation the representation node to be rendered
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {MediaFetcher} MediaFetcher a fetcher for media
-     * @param {HTMLElement} target the DOM node this representation is targeted at
+     * @param {Player} player the Player used to manage DOM changes
      */
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         mediaFetcher: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
-        this._target = target;
+        this._player = player;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;

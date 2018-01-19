@@ -7,16 +7,16 @@ import type { AssetCollection, MediaFetcher } from '../romper';
 export default class BackgroundRenderer extends EventEmitter {
     _assetCollection: AssetCollection;
     _fetchMedia: MediaFetcher;
-    _target: HTMLElement;
+    _player: HTMLElement;
 
     constructor(
         assetCollection: AssetCollection,
         mediaFetcher: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
         super();
         this._fetchMedia = mediaFetcher;
-        this._target = target;
+        this._player = player;
         this._assetCollection = assetCollection;
     }
 
