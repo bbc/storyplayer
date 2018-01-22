@@ -1,5 +1,6 @@
 // @flow
-import ShowImageAndPauseBehaviour from './ShowImageAndPauseBehaviour';
+import PauseBehaviour from './PauseBehaviour';
+import BaseBehaviour from './BaseBehaviour';
 import type { RendererEvent } from '../renderers/RendererEvents';
 
 export default function BehaviourFactory(
@@ -7,7 +8,9 @@ export default function BehaviourFactory(
     onComplete: (event: RendererEvent, completionEvent: RendererEvent) => void,
 ) {
     const BEHAVIOURS = {
-        'urn:x-object-based-media:asset-mixin:show-image-and-pause': ShowImageAndPauseBehaviour,
+        'urn:x-object-based-media:asset-mixin:pause/v1.0': PauseBehaviour,
+        'urn:x-object-based-media:asset-mixin:blur/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:asset-mixin:showimage/v1.0': BaseBehaviour,
     };
 
     let currentBehaviour;

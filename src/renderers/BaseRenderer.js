@@ -12,6 +12,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
     _behaviourRunner: ?BehaviourRunner;
+    _behaviourRendererMap: {[key: string]: () => void};
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -36,6 +37,7 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
+        this._behaviourRendererMap = {};
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience
@@ -101,6 +103,10 @@ export default class BaseRenderer extends EventEmitter {
 
     switchTo() {
         this.start();
+    }
+
+    getBehaviourRenderer(behaviourUrn: string): () => void {
+        return this._behaviourRendererMap[behaviourUrn];
     }
 
     /**

@@ -2,7 +2,7 @@
 
 import BaseBehaviour from './BaseBehaviour';
 
-export default class ShowImageAndPauseBehaviour extends BaseBehaviour {
+export default class PauseBehaviour extends BaseBehaviour {
     timerHandle: ?number;
 
     constructor(behaviourDefinition: Object, onComplete: () => mixed) {
@@ -11,13 +11,13 @@ export default class ShowImageAndPauseBehaviour extends BaseBehaviour {
     }
 
     start() {
-        const pause = parseFloat(this.behaviourDefinition.pause);
+        const pause = parseFloat(this._behaviourDefinition.pauseTime);
         this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
     }
 
     handleTimeout() {
         this.timerHandle = null;
-        this.onComplete();
+        this._handleDone();
     }
 
     destroy() {

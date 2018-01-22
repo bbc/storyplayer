@@ -142,14 +142,12 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
     switchFrom() {
         this._imageNode.disconnect();
-        this._clearEffectNodes();
         this._setVisible(false);
     }
 
     switchTo() {
         this._imageNode.connect(this._videoCtx.destination);
         this._setVisible(true);
-        // this.applyBlur();
     }
 
     // prepare rendere so it can be switched to quickly and in sync

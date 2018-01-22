@@ -39,7 +39,8 @@ export default class Controller {
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
-            alert('Story ended!'); // eslint-disable-line no-alert
+            // alert('Story ended!'); // eslint-disable-line no-alert
+            console.warn('Story Ended!');
         };
         const _handleError = (err) => {
             alert(`Error: ${err}`); // eslint-disable-line no-alert
