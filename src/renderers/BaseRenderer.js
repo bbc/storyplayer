@@ -86,10 +86,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        console.log('base renderer complete()');
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
-            console.log('EMIT RendererEvents.COMPLETED');
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
         }
     }

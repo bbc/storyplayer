@@ -118,7 +118,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // waiting for VideoContext complete event means video is black/invisble
         // and can't have effects applied
         if ((this._videoNode.state === 2) && this._videoCtx.currentTime > (this._videoNode.stopTime - 0.1)) {
-            console.log('completed VCtx', this._representation.name);
             if (!this._nodeCompleted) {
                 this._videoCtx.pause();
                 if (this._isCurrentSwitchChoice) {
@@ -208,7 +207,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, behaviourAppliedCallback: () => void) {
-        console.log(`applying blur behaviour in VCtx simple av: blur value ${behaviour.blur}`);
         // create effect notes
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
@@ -231,12 +229,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     _overlayImage(mediaUrl: string) {
-        console.log('applying show image behaviour in VCtx simple av - drawing url', mediaUrl);
-
         // create image node
         const imageNode = this._videoCtx.image(mediaUrl);
         imageNode.start(0);
-        console.log('vctx image node created', mediaUrl);
 
         // create combine node
         const combine = this._videoCtx.compositor(CustomVideoContext.DEFINITIONS.COMBINE);
@@ -254,7 +249,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
-        console.log('VCtx Renderer applying the showImage behaviour');
         const assetCollectionId = behaviour.image;
         this._fetchAssetCollection(assetCollectionId).then((image) => {
             if (image.assets.image_src) {
