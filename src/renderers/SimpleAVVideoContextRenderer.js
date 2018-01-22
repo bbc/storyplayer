@@ -23,7 +23,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _monitorVideoTimelineForEnd: Function;
     _monitorVideoTimeoutHandle: number;
     _isCurrentSwitchChoice: boolean;
-
+    _destinationVideoContextNode: Object;
 
     constructor(
         representation: Representation,
@@ -55,7 +55,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._monitorVideoTimelineForEnd = this._monitorVideoTimelineForEnd.bind(this);
 
         this._behaviourRendererMap = {
-            // 'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
     }
@@ -71,6 +71,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     playVideo() {
         if (this._nodeCreated) {
+            this._destinationVideoContextNode = this._videoNode;
             this._videoNode.connect(this._videoCtx.destination);
             const node = this._videoNode;
             node.start(0);
@@ -215,10 +216,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         blurEffectVert.blurAmount = behaviour.blur;
 
         // rewire
-        this._videoNode.disconnect();
-        this._videoNode.connect(blurEffectHoriz);
+        this._destinationVideoContextNode.disconnect();
+        this._destinationVideoContextNode.connect(blurEffectHoriz);
         blurEffectHoriz.connect(blurEffectVert);
         blurEffectVert.connect(this._videoCtx.destination);
+        this._destinationVideoContextNode = blurEffectVert;
 
         // store effect nodes so they can be destroyed
         this._effectNodes.push(blurEffectHoriz);
@@ -241,11 +243,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         combine.a = 0.5;
 
         // rewire
-        this._videoNode.disconnect();
-        this._videoNode.connect(combine);
+        this._destinationVideoContextNode.disconnect();
+        this._destinationVideoContextNode.connect(combine);
         imageNode.connect(combine);
         combine.connect(this._videoCtx.destination);
-
+        this._destinationVideoContextNode = combine;
         // store extra nodes for deletion
         this._effectNodes.push(imageNode);
         this._effectNodes.push(combine);
