@@ -7,7 +7,6 @@ import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-
 
 import RendererEvents from './RendererEvents';
 
-
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _canvas: HTMLCanvasElement;
@@ -21,6 +20,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _effectNodes: Array<Object>;
     _applyBlurBehaviour: Function;
     _applyShowImageBehaviour: Function;
+    _monitorVideoTimelineForEnd: Function;
+    _monitorVideoTimeoutHandle: number;
+    _isCurrentSwitchChoice: boolean;
+
 
     constructor(
         representation: Representation,
@@ -29,7 +32,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         target: HTMLElement,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-        // this._canvas = document.createElement('canvas');
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
@@ -41,6 +43,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._nodeCreated = false;
         this._nodeCompleted = false;
         this._effectNodes = [];
+        this._isCurrentSwitchChoice = false;
 
         this.renderVideoElement();
         this._videoCtx.registerVideoContextClient(this._representation.id);
@@ -49,6 +52,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._monitorVideoTimelineForEnd = this._monitorVideoTimelineForEnd.bind(this);
 
         this._behaviourRendererMap = {
             // 'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
@@ -62,6 +66,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this.setVisible(true);
         this.playVideo();
         // this.renderDataModelInfo();
+        this._isCurrentSwitchChoice = true;
     }
 
     playVideo() {
@@ -73,6 +78,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
             this.setMute(false);
+            this._monitorVideoTimeoutHandle = setTimeout(this._monitorVideoTimelineForEnd, 200);
+            // setTimeout(this._overlayImage.bind(this), 5000);
         } else {
             this.on('videoContextNodeCreated', () => {
                 this._nodeCreated = true;
@@ -91,7 +98,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
 
         videoNode1.registerCallback('ended', () => {
-            // console.log('VCtx node complete', mediaUrl);
+            // this shouldn't be needed - should reach in _monitorVideoTimelineForEnd first
+            console.warn('VCtx node completed event received', mediaUrl);
             if (!this._nodeCompleted) {
                 this.complete();
             } else {
@@ -104,6 +112,28 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this.emit('videoContextNodeCreated');
     }
 
+    _monitorVideoTimelineForEnd() {
+        // TODO: this monitoring is to catch the video before it has completely finished:
+        // waiting for VideoContext complete event means video is black/invisble
+        // and can't have effects applied
+        if ((this._videoNode.state === 2) && this._videoCtx.currentTime > (this._videoNode.stopTime - 0.1)) {
+            console.log('completed VCtx', this._representation.name);
+            if (!this._nodeCompleted) {
+                this._videoCtx.pause();
+                if (this._isCurrentSwitchChoice) {
+                    this.complete();
+                } else {
+                    console.warn('completed VCtx simple av that was npt visible');
+                }
+            } else {
+                console.warn('multiple VCtx ended events received');
+            }
+            this._nodeCompleted = true;
+        } else {
+            this._monitorVideoTimeoutHandle = setTimeout(this._monitorVideoTimelineForEnd, 20);
+        }
+    }
+
     renderVideoElement() {
         // get asset and call build node function
         if (this._representation.asset_collection.foreground) {
@@ -111,7 +141,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
                 if (fg.assets.av_src) {
                     this._fetchMedia(fg.assets.av_src)
                         .then((mediaUrl) => {
-                            // this.populateVideoElement(this._videoElement, mediaUrl);
                             this.addVideoNodeToVideoCtxGraph(mediaUrl);
                         })
                         .catch((err) => {
@@ -178,45 +207,46 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, behaviourAppliedCallback: () => void) {
-        console.log('applying blur behaviour in VCtx simple av');
+        console.log(`applying blur behaviour in VCtx simple av: blur value ${behaviour.blur}`);
+        // create effect notes
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
         blurEffectHoriz.blurAmount = behaviour.blur;
         blurEffectVert.blurAmount = behaviour.blur;
+
+        // rewire
         this._videoNode.disconnect();
         this._videoNode.connect(blurEffectHoriz);
         blurEffectHoriz.connect(blurEffectVert);
         blurEffectVert.connect(this._videoCtx.destination);
+
+        // store effect nodes so they can be destroyed
         this._effectNodes.push(blurEffectHoriz);
         this._effectNodes.push(blurEffectVert);
-        console.log(`Applied blur behaviour: blur value ${behaviour.blur}`);
+
+        // behaviour completed
         behaviourAppliedCallback();
     }
 
     _overlayImage(mediaUrl: string) {
-        console.log('show image behaviour drawing url', mediaUrl);
+        console.log('applying show image behaviour in VCtx simple av - drawing url', mediaUrl);
+
+        // create image node
         const imageNode = this._videoCtx.image(mediaUrl);
         imageNode.start(0);
         console.log('vctx image node created', mediaUrl);
 
+        // create combine node
         const combine = this._videoCtx.compositor(CustomVideoContext.DEFINITIONS.COMBINE);
         combine.a = 0.5;
 
+        // rewire
         this._videoNode.disconnect();
-
         this._videoNode.connect(combine);
         imageNode.connect(combine);
-
-        // test - overlay 2 images
-        const imageNodeOne = this._videoCtx.image('https://rdux.files.bbci.co.uk/rd-ux-makealong/Step+2.png');
-        imageNodeOne.start(0);
-        // const opacityEffect = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.OPACITY);
-        // opacityEffect.opacity = 0.3; // { "type": "uniform", "value": 0.3 };
-
-        imageNodeOne.connect(combine);
-
         combine.connect(this._videoCtx.destination);
 
+        // store extra nodes for deletion
         this._effectNodes.push(imageNode);
         this._effectNodes.push(combine);
     }
@@ -267,10 +297,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         } else {
             this._videoCtx.hideVideoContextForClient(this._representation.id);
         }
-        // this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
     switchFrom() {
+        this._isCurrentSwitchChoice = false;
         this._videoNode.disconnect();
         this.setMute(true);
         this.setVisible(false);
@@ -278,6 +308,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     switchTo() {
+        this._isCurrentSwitchChoice = true;
         this._videoCtx.play();
         this.playVideo();
         this.setMute(false);
@@ -298,6 +329,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     }
 
     destroy() {
+        clearTimeout(this._monitorVideoTimeoutHandle);
         this.stopAndDisconnect();
         super.destroy();
     }
