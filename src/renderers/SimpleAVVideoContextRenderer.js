@@ -20,6 +20,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     playVideo: Function;
     _effectNodes: Array<Object>;
     _applyBlurBehaviour: Function;
+    _applyShowImageBehaviour: Function;
 
     constructor(
         representation: Representation,
@@ -47,9 +48,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
 
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
 
         this._behaviourRendererMap = {
-            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            // 'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
     }
 
@@ -66,6 +69,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             this._videoNode.connect(this._videoCtx.destination);
             const node = this._videoNode;
             node.start(0);
+            // node.stop(5);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
             this.setMute(false);
@@ -177,6 +181,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         console.log('applying blur behaviour in VCtx simple av');
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
+        blurEffectHoriz.blurAmount = behaviour.blur;
+        blurEffectVert.blurAmount = behaviour.blur;
         this._videoNode.disconnect();
         this._videoNode.connect(blurEffectHoriz);
         blurEffectHoriz.connect(blurEffectVert);
@@ -185,6 +191,45 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._effectNodes.push(blurEffectVert);
         console.log(`Applied blur behaviour: blur value ${behaviour.blur}`);
         behaviourAppliedCallback();
+    }
+
+    _overlayImage(mediaUrl: string) {
+        console.log('show image behaviour drawing url', mediaUrl);
+        const imageNode = this._videoCtx.image(mediaUrl);
+        imageNode.start(0);
+        console.log('vctx image node created', mediaUrl);
+
+        const combine = this._videoCtx.compositor(CustomVideoContext.DEFINITIONS.COMBINE);
+        combine.a = 0.5;
+
+        this._videoNode.disconnect();
+
+        this._videoNode.connect(combine);
+        imageNode.connect(combine);
+
+        // test - overlay 2 images
+        const imageNodeOne = this._videoCtx.image('https://rdux.files.bbci.co.uk/rd-ux-makealong/Step+2.png');
+        imageNodeOne.start(0);
+        // const opacityEffect = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.OPACITY);
+        // opacityEffect.opacity = 0.3; // { "type": "uniform", "value": 0.3 };
+
+        imageNodeOne.connect(combine);
+
+        combine.connect(this._videoCtx.destination);
+
+        this._effectNodes.push(imageNode);
+        this._effectNodes.push(combine);
+    }
+
+    _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
+        console.log('VCtx Renderer applying the showImage behaviour');
+        const assetCollectionId = behaviour.image;
+        this._fetchAssetCollection(assetCollectionId).then((image) => {
+            if (image.assets.image_src) {
+                this._overlayImage(image.assets.image_src);
+                callback();
+            }
+        });
     }
 
     _clearEffectNodes() {

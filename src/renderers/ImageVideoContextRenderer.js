@@ -89,7 +89,11 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
     _clearEffectNodes() {
         this._effectNodes.forEach((node) => {
-            node.destroy();
+            try {
+                node.destroy();
+            } catch (e) {
+                console.warn('VCtx effect node destroy error:', e);
+            }
         });
     }
 
