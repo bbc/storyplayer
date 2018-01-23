@@ -24,37 +24,37 @@ export default class CustomVideoContext extends VideoContext {
         return maxDuration;
     }
 
-    registerVideoContextClient(id: string) {
+    static registerVideoContextClient(id: string) {
         // console.log('registering', id);
         nodeRepresentationMap[id] = false;
     }
 
-    unregisterVideoContextClient(id: string) {
+    static unregisterVideoContextClient(id: string) {
         // console.log('forgetting', id);
         delete nodeRepresentationMap[id];
     }
 
-    showVideoContextForClient(id: string) {
+    static showVideoContextForClient(id: string) {
         // console.log('show vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = true;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._calculateVisibility();
+        CustomVideoContext._calculateVisibility();
     }
 
-    hideVideoContextForClient(id: string) {
+    static hideVideoContextForClient(id: string) {
         // console.log('hide vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = false;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._calculateVisibility();
+        CustomVideoContext._calculateVisibility();
     }
 
-    _calculateVisibility() {
+    static _calculateVisibility() {
         let show = false;
         Object.keys(nodeRepresentationMap).forEach((user) => {
             show = show || nodeRepresentationMap[user];
@@ -104,6 +104,17 @@ export function getNodeRepresentationMap() {
     return nodeRepresentationMap;
 }
 
+export function getVideoContext() {
+    if (!videoContext) {
+        canvas = document.createElement('canvas');
+        canvas.className = 'romper-video-element';
+        canvas.setAttribute('width', '1024px');
+        canvas.setAttribute('height', '576px');
+        videoContext = new CustomVideoContext(canvas);
+    }
+    return videoContext;
+}
+
 export function createVideoContextNodeForUrl(mediaUrl: string) {
     let videoNode;
     // if mediaUrl is hls
@@ -114,15 +125,4 @@ export function createVideoContextNodeForUrl(mediaUrl: string) {
     }
 
     return videoNode;
-}
-
-export function getVideoContext() {
-    if (!videoContext) {
-        canvas = document.createElement('canvas');
-        canvas.className = 'romper-video-element';
-        canvas.setAttribute('width', '1024px');
-        canvas.setAttribute('height', '576px');
-        videoContext = new CustomVideoContext(canvas);
-    }
-    return videoContext;
 }

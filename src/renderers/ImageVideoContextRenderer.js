@@ -29,7 +29,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
         this.cueUp = this.cueUp.bind(this);
-        this._cueUpWhenReady = this._cueUpWhenReady.bind(this)
+        this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
@@ -39,7 +39,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._nodeCompleted = false;
         this._effectNodes = [];
 
-        this._videoCtx.registerVideoContextClient(this._representation.id);
+        // this._videoCtx.registerVideoContextClient(this._representation.id);
+        CustomVideoContext.registerVideoContextClient(this._representation.id);
         this.renderImageElement();
 
         this.on('videoContextImageNodeCreated', () => { this._nodeCreated = true; });
@@ -137,9 +138,9 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
     _setVisible(visible: boolean) {
         if (visible) {
-            this._videoCtx.showVideoContextForClient(this._representation.id);
+            CustomVideoContext.showVideoContextForClient(this._representation.id);
         } else {
-            this._videoCtx.hideVideoContextForClient(this._representation.id);
+            CustomVideoContext.hideVideoContextForClient(this._representation.id);
         }
         // this._canvas.style.display = visible ? 'flex' : 'none';
     }
@@ -179,7 +180,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         } catch (e) {
             console.warn('VCtx could not destroy image node:', e);
         }
-        this._videoCtx.unregisterVideoContextClient(this._representation.id);
+        // this._videoCtx.unregisterVideoContextClient(this._representation.id);
+        CustomVideoContext.unRegisterVideoContextClient(this._representation.id);
     }
 
     destroy() {

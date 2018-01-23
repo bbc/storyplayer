@@ -47,7 +47,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._isCurrentSwitchChoice = false;
 
         this.renderVideoElement();
-        this._videoCtx.registerVideoContextClient(this._representation.id);
+        CustomVideoContext.registerVideoContextClient(this._representation.id);
 
         this.on('videoContextNodeCreated', () => { this._nodeCreated = true; });
 
@@ -62,7 +62,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         // after we've created it, wait a bit, then see if we can add to the end of the queue
         this._videoContextQueueTimeoutHandle = setTimeout(() => { this._addVideoNodeToVideoContextTimeline(); }, 500);
-
     }
 
     start() {
@@ -304,9 +303,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     setVisible(visible: boolean) {
         if (visible) {
-            this._videoCtx.showVideoContextForClient(this._representation.id);
+            CustomVideoContext.showVideoContextForClient(this._representation.id);
         } else {
-            this._videoCtx.hideVideoContextForClient(this._representation.id);
+            CustomVideoContext.hideVideoContextForClient(this._representation.id);
         }
     }
 
@@ -335,9 +334,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
         // disconnect current active node.
         this._videoNode.disconnect();
-        this._destinationVideoContextNode.disconnect();
         this._videoNode.destroy();
-        this._videoCtx.unregisterVideoContextClient(this._representation.id);
+        CustomVideoContext.unregisterVideoContextClient(this._representation.id);
     }
 
     destroy() {
