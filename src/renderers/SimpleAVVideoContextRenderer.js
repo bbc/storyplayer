@@ -3,7 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import CustomVideoContext, { getVideoContext, getCanvas, createVideoContextNodeForUrl } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 
@@ -22,6 +22,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _applyShowImageBehaviour: Function;
     _monitorVideoTimelineForEnd: Function;
     _monitorVideoTimeoutHandle: number;
+    _videoContextQueueTimeoutHandle: number;
     _isCurrentSwitchChoice: boolean;
     _destinationVideoContextNode: Object;
 
@@ -58,6 +59,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
+
+        // after we've created it, wait a bit, then see if we can add to the end of the queue
+        this._videoContextQueueTimeoutHandle = setTimeout(() => { this._addVideoNodeToVideoContextTimeline(); }, 500);
+
     }
 
     start() {
@@ -74,7 +79,12 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             this._destinationVideoContextNode = this._videoNode;
             this._videoNode.connect(this._videoCtx.destination);
             const node = this._videoNode;
-            node.start(0);
+
+            // if the video isn't queued in VideoContext, then set start time
+            if (this._videoNode.state <= 2) {
+                node.start(0);
+            }
+
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
             this.setMute(false);
@@ -87,15 +97,22 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         }
     }
 
-    addVideoNodeToVideoCtxGraph(mediaUrl: string) {
-        let videoNode1;
-        // if mediaUrl is hls
-        if (mediaUrl.indexOf('.m3u8') !== -1) {
-            videoNode1 = this._videoCtx.hls(mediaUrl, 0, 4);
-        } else {
-            videoNode1 = this._videoCtx.video(mediaUrl, 0, 4);
-        }
+    _addVideoNodeToVideoContextTimeline() {
+        // what is current finish time of VideoContext
+        const videoContextEndTime = this._videoCtx.guessContextFinishTime();
 
+        // if we don't already have a start time for our node, place it at
+        // the end of the timeline
+        if (this._nodeCreated && this._videoNode.state === 0) {
+            // console.log(this._representation.name, 'waiting - start at', videoContextEndTime);
+            this._videoNode.startAt(videoContextEndTime - 0.05);
+            this._videoNode.connect(this._videoCtx.destination);
+            this._destinationVideoContextNode = this._videoNode;
+        }
+    }
+
+    addVideoNodeToVideoCtxGraph(mediaUrl: string) {
+        const videoNode1 = createVideoContextNodeForUrl(mediaUrl);
         videoNode1.registerCallback('ended', () => {
             // this shouldn't be needed - should reach in _monitorVideoTimelineForEnd first
             console.warn('VCtx node completed event received', mediaUrl);
@@ -314,16 +331,18 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._videoNode.unregisterCallback();
 
         // Stop current active node
-        this._videoNode.stop(-1);
+        // this._videoNode.stop(-1);
 
         // disconnect current active node.
         this._videoNode.disconnect();
+        this._destinationVideoContextNode.disconnect();
         this._videoNode.destroy();
         this._videoCtx.unregisterVideoContextClient(this._representation.id);
     }
 
     destroy() {
         clearTimeout(this._monitorVideoTimeoutHandle);
+        clearTimeout(this._videoContextQueueTimeoutHandle);
         this.stopAndDisconnect();
         super.destroy();
     }

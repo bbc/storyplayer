@@ -12,6 +12,18 @@ const nodeRepresentationMap = {};
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
 
+    guessContextFinishTime() {
+        const snapshot = this.snapshot();
+        let maxDuration = 0;
+        Object.keys(snapshot.nodes).forEach((sn) => {
+            const node = snapshot.nodes[sn];
+            if (node.type === 'VideoNode' && node.stop !== Infinity) {
+                if (node.stop > maxDuration) maxDuration = node.stop;
+            }
+        });
+        return maxDuration;
+    }
+
     registerVideoContextClient(id: string) {
         // console.log('registering', id);
         nodeRepresentationMap[id] = false;
@@ -60,9 +72,9 @@ export default class CustomVideoContext extends VideoContext {
         videoNode.registerCallback('load', async () => {
             const manifestUrl = await m3u8;
 
-            videoNode.hlsplayer = new Hls({ startFragPrefetch: true, startLevel: 3});
+            videoNode.hlsplayer = new Hls({ startFragPrefetch: true, startLevel: 3 });
 
-        
+
             if (manifestUrl.indexOf('.m3u8') !== -1) {
                 videoNode.hlsplayer.loadSource(manifestUrl);
                 videoNode.hlsplayer.attachMedia(videoElement);
@@ -92,29 +104,24 @@ export function getNodeRepresentationMap() {
     return nodeRepresentationMap;
 }
 
-export function createNodeForRepresentation(representationId: string, mediaUrl: string) {
+export function createVideoContextNodeForUrl(mediaUrl: string) {
     let videoNode;
     // if mediaUrl is hls
     if (mediaUrl.indexOf('.m3u8') !== -1) {
-        videoNode = this._videoCtx.hls(mediaUrl, 0, 4);
+        videoNode = getVideoContext().hls(mediaUrl, 0, 4);
     } else {
-        videoNode = this._videoCtx.video(mediaUrl, 0, 4);
+        videoNode = getVideoContext().video(mediaUrl, 0, 4);
     }
-    // MORE THOUGHT NEEDED HERE
-    videoNode.connect(this._videoCtx.destination);
-
-    nodeRepresentationMap[representationId] = videoNode;
 
     return videoNode;
 }
-
 
 export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
         canvas.className = 'romper-video-element';
-        canvas.setAttribute('width', '512px');
-        canvas.setAttribute('height', '288px');
+        canvas.setAttribute('width', '1024px');
+        canvas.setAttribute('height', '576px');
         videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;
