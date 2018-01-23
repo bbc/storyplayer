@@ -61,7 +61,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         };
 
         // after we've created it, wait a bit, then see if we can add to the end of the queue
-        this._videoContextQueueTimeoutHandle = setTimeout(() => { this._addVideoNodeToVideoContextTimeline(); }, 500);
+        // this._videoContextQueueTimeoutHandle = setTimeout(() => { this._addVideoNodeToVideoContextTimeline(); }, 5000);
     }
 
     start() {
