@@ -26,11 +26,8 @@ export default class BehaviourRunner {
     // Run behaviours for a specific event type. Returns true if there's a behaviour, false if none found
     runBehaviours(event: RendererEvent, completionEvent: RendererEvent) {
         if (this.behaviourDefinitions[event] === undefined || this.behaviourDefinitions[event] === []) {
-            console.log(`No behaviours for ${event}`);
             return false;
         }
-        console.log(`running behaviours for ${event}`);
-
         // Create all behaviours before starting any behaviours for correct handleOnComplete reference counting
         this.behaviourDefinitions[event].forEach((behaviourDefinition) => {
             const behaviour = BehaviourFactory(

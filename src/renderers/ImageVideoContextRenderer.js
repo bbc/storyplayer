@@ -18,6 +18,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     _effectNodes: Array<Object>;
     cueUp: Function;
     _cueUpWhenReady: Function;
+    _renderImageTimeoutHandle: number;
 
     constructor(
         representation: Representation,
@@ -56,11 +57,10 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         if (this._nodeCreated) {
             this._videoCtx.play();
             this._imageNode.connect(this._videoCtx.destination);
-            // console.log('callbacks', this._imageNode._callbacks.length);
             const node = this._imageNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
-            this._videoCtx.pause(); // TODO: need to call this once the image is really showing...
+            this._renderImageTimeoutHandle = setTimeout(() => { this._videoCtx.pause(); }, 32); // TODO: we will miss first 20ms of video when we switch to them
         } else {
             this.on('videoContextImageNodeCreated', () => {
                 this._nodeCreated = true;
@@ -89,7 +89,11 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
 
     _clearEffectNodes() {
         this._effectNodes.forEach((node) => {
-            node.destroy();
+            try {
+                node.destroy();
+            } catch (e) {
+                console.warn('VCtx effect node destroy error:', e);
+            }
         });
     }
 
@@ -179,6 +183,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     destroy() {
+        clearTimeout(this._renderImageTimeoutHandle);
         this.stopAndDisconnect();
         super.destroy();
     }

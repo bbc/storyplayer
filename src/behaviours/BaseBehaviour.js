@@ -23,7 +23,6 @@ export default class BaseBehaviour {
     }
 
     _handleDone() {
-        console.log(`${this._behaviourDefinition.type} done`);
         this._onComplete();
     }
 
