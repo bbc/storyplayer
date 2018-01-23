@@ -39,7 +39,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._nodeCompleted = false;
         this._effectNodes = [];
 
-        // this._videoCtx.registerVideoContextClient(this._representation.id);
         CustomVideoContext.registerVideoContextClient(this._representation.id);
         this.renderImageElement();
 
@@ -180,8 +179,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         } catch (e) {
             console.warn('VCtx could not destroy image node:', e);
         }
-        // this._videoCtx.unregisterVideoContextClient(this._representation.id);
-        CustomVideoContext.unRegisterVideoContextClient(this._representation.id);
+        CustomVideoContext.unregisterVideoContextClient(this._representation.id);
     }
 
     destroy() {
