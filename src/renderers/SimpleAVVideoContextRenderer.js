@@ -75,12 +75,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             this._videoNode.connect(this._videoCtx.destination);
             const node = this._videoNode;
             node.start(0);
-            // node.stop(5);
             this.emit(RendererEvents.STARTED);
             this._videoCtx.play();
             this.setMute(false);
             this._monitorVideoTimeoutHandle = setTimeout(this._monitorVideoTimelineForEnd, 200);
-            // setTimeout(this._overlayImage.bind(this), 5000);
         } else {
             this.on('videoContextNodeCreated', () => {
                 this._nodeCreated = true;
