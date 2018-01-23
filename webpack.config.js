@@ -6,6 +6,7 @@ const extractSass = new ExtractTextPlugin('romper.css');
 
 const config = {
     entry: './src/romper.js',
+    devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'romper.js',
