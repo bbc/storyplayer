@@ -365,10 +365,14 @@
                                     "foreground": "ee7728a7-2abf-48d2-a166-002a3cddf987"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
-                                            "pauseTime": 1
+                                            "pauseTime": 10
+                                        },
+                                        {
+                                            "type": "urn:x-object-based-media:asset-mixin:showimage/v1.0",
+                                            "image": "4de27471-96f1-4e72-8f7b-a0ef61233862"
                                         },
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:blur/v1.0",
@@ -407,7 +411,7 @@
                                     "foreground": "0bd25034-ce1a-47ce-b18c-89c1e1946857"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -449,7 +453,7 @@
                                     "foreground": "69426759-c03c-4fad-a422-651e0eae5a64"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -491,7 +495,7 @@
                                     "foreground": "7045b322-fb54-409e-83c2-9812eda6e5b5"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -533,7 +537,7 @@
                                     "foreground": "ffd2836b-7b81-433a-976c-86772dd6db52"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -575,7 +579,7 @@
                                     "foreground": "ba70c31c-a8d9-4b60-a42c-7f22302a7f2a"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -617,7 +621,7 @@
                                     "foreground": "a80b869b-24ad-4a5b-94d7-d846c3da3b58"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -659,7 +663,7 @@
                                     "foreground": "eee79a69-2c6d-4f1f-baa6-9101f640f79d"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -701,7 +705,7 @@
                                     "foreground": "996bd362-bf29-40f2-a017-7a93c47aa4e1"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -743,7 +747,7 @@
                                     "foreground": "06cff3f2-c109-4f2d-ba1d-ca17ab5aa70d"
                                 },
                                 "behaviours": {
-                                    "complete": [
+                                    "COMPLETED": [
                                         {
                                             "type": "urn:x-object-based-media:asset-mixin:pause/v1.0",
                                             "pauseTime": 1
@@ -753,6 +757,84 @@
                                             "blur": 1
                                         }
                                     ]
+                                }
+                            },
+                            "condition": {
+                                "==": [
+                                    1,
+                                    1
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "a5ba5918-9e34-46a4-acc2-8f5fbfac7e85",
+                    "version": "0:0",
+                    "name": "Switchable Presentation Element",
+                    "tags": {},
+                    "representations": [
+                        {
+                            "representation": {
+                                "id": "839967d1-fa24-4d89-b2eb-9b56aa03b085",
+                                "version": "0:0",
+                                "name": "Switchable Representation Element",
+                                "tags": {},
+                                "representation_type": "urn:x-object-based-media:representation-types:switchable/v1.0",
+                                "choices": [
+                                    {
+                                        "label": "presenter",
+                                        "representation": {
+                                            "id": "4fb5c562-0f6c-49a4-ab7d-9be38a996763",
+                                            "version": "0:0",
+                                            "name": "Make Step 1 Camera 1 Representation Element",
+                                            "tags": {},
+                                            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                                            "asset_collection": {
+                                                "icon": {
+                                                    "default": "4de27471-96f1-4e72-8f7b-a0ef61233862"
+                                                },
+                                                "foreground": "ee7728a7-2abf-48d2-a166-002a3cddf987"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "label": "closeup",
+                                        "representation": {
+                                            "id": "5fb5c562-0f6c-49a4-ab7d-9be38a996763",
+                                            "version": "0:0",
+                                            "name": "Make Step 1 Camera 1 Representation Element",
+                                            "tags": {},
+                                            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                                            "asset_collection": {
+                                                "icon": {
+                                                    "default": "4713ac10-af0b-4a5d-9347-ce8fdbdf34da"
+                                                },
+                                                "foreground": "0bd25034-ce1a-47ce-b18c-89c1e1946857"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "label": "overhead",
+                                        "representation": {
+                                            "id": "6fb5c562-0f6c-49a4-ab7d-9be38a996763",
+                                            "version": "0:0",
+                                            "name": "Make Step 1 Camera 1 Representation Element",
+                                            "tags": {},
+                                            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+                                            "asset_collection": {
+                                                "icon": {
+                                                    "default": "7f62f7ac-e54f-4749-8938-81bf0297e599"
+                                                },
+                                                "foreground": "caa39eb1-232d-4c97-b161-3b1b61a9dacf"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "asset_collection": {
+                                    "icon": {
+                                        "default": "caa39eb1-232d-4c97-b161-3b1b61a9dacf"
+                                    }
                                 }
                             },
                             "condition": {
@@ -1384,6 +1466,208 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "id": "00000003-0000-0000-0000-000000000000",
+                    "version": "0:0",
+                    "name": "Newsround test story with switchable",
+                    "beginnings": [
+                        {
+                            "id": "bcc5d7ac-ab45-48a9-8c95-43539bec4a6f",
+                            "condition": {
+                                "==": [
+                                    1,
+                                    1
+                                ]
+                            }
+                        }
+                    ],
+                    "tags": {},
+                    "narrative_elements": [
+                        {
+                            "id": "bcc5d7ac-ab45-48a9-8c95-43539bec4a6f",
+                            "description": "Test story step 1",
+                            "version": "0:0",
+                            "name": "Test story step 1",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "a5ba5918-9e34-46a4-acc2-8f5fbfac7e85"
+                            },
+                            "links": [
+                                {
+                                    "target": "e5ca8e06-9dc1-4bf2-ad03-967bc95149ac",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "e5ca8e06-9dc1-4bf2-ad03-967bc95149ac",
+                            "description": "Test story step 4",
+                            "version": "0:0",
+                            "name": "Test story step 4",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "6f2852a5-9688-4273-a966-674569d1e5b1"
+                            },
+                            "links": [
+                                {
+                                    "target": "c34a9058-2170-4b39-b217-cb14f415a5be",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "c34a9058-2170-4b39-b217-cb14f415a5be",
+                            "description": "Test story step 5",
+                            "version": "0:0",
+                            "name": "Test story step 5",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "26c6be52-1ea5-4cdb-90c8-5fe1d7cbcc9d"
+                            },
+                            "links": [
+                                {
+                                    "target": "d8cd5255-78ad-42c5-8bc1-95786637d356",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "d8cd5255-78ad-42c5-8bc1-95786637d356",
+                            "description": "Test story step 6",
+                            "version": "0:0",
+                            "name": "Test story step 6",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "adb70310-33be-46c9-b9da-4d3ecee14a26"
+                            },
+                            "links": [
+                                {
+                                    "target": "6d49e691-eab3-49a9-af28-fe5d2b9914e5",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "6d49e691-eab3-49a9-af28-fe5d2b9914e5",
+                            "description": "Test story step 7",
+                            "version": "0:0",
+                            "name": "Test story step 7",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "6ddb0d4b-0bb8-4c27-b2c1-bbee42f50e50"
+                            },
+                            "links": [
+                                {
+                                    "target": "c50e69f7-a393-4aad-9fb8-e64633ebf3ba",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "c50e69f7-a393-4aad-9fb8-e64633ebf3ba",
+                            "description": "Test story step 8",
+                            "version": "0:0",
+                            "name": "Test story step 8",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "a1ca0c9c-aa69-4d58-a7b7-efc52ea10a3b"
+                            },
+                            "links": [
+                                {
+                                    "target": "71377b60-5cc3-4135-b1c4-a59bfbfc8d06",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "71377b60-5cc3-4135-b1c4-a59bfbfc8d06",
+                            "description": "Test story step 9",
+                            "version": "0:0",
+                            "name": "Test story step 9",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "361d621a-424c-44df-96a4-6b49d85b5e97"
+                            },
+                            "links": [
+                                {
+                                    "target": "cb015639-6d36-47d5-b9be-b05965d9b3d0",
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "NARRATIVE_ELEMENT"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "cb015639-6d36-47d5-b9be-b05965d9b3d0",
+                            "description": "Test story step 10",
+                            "version": "0:0",
+                            "name": "Test story step 10",
+                            "tags": {},
+                            "presentation": {
+                                "type": "PRESENTATION_ELEMENT",
+                                "target": "3d232402-be13-426f-bbb4-36ec47acf451"
+                            },
+                            "links": [
+                                {
+                                    "condition": {
+                                        "==": [
+                                            1,
+                                            1
+                                        ]
+                                    },
+                                    "link_type": "END_STORY"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         }
@@ -1412,6 +1696,12 @@
                 ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
             });
 
+            // 001 is simple linear
+            // 002 is nested linear
+            // 02a is substory 1
+            // 02b is substory 2
+            // 02c is substory 3
+            // 003 is linear with switchable as first NE
             romper.start('00000001-0000-0000-0000-000000000000');
         })();
     </script>
