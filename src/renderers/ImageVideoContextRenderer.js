@@ -29,7 +29,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
         this.cueUp = this.cueUp.bind(this);
-        this._cueUpWhenReady = this._cueUpWhenReady.bind(this)
+        this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
