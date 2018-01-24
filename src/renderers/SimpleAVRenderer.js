@@ -12,6 +12,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _videoElement: HTMLVideoElement;
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
+    _applyShowImageBehaviour: Function;
 
     constructor(
         representation: Representation,
@@ -25,8 +26,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
         this.renderVideoElement();
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
     }
 
@@ -96,6 +100,20 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour() {
         this._videoElement.style.filter = 'blur(5px)';
+    }
+
+    _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
+        const assetCollectionId = behaviour.image;
+        this._fetchAssetCollection(assetCollectionId).then((image) => {
+            if (image.assets.image_src) {
+                this._overlayImage(image.assets.image_src);
+                callback();
+            }
+        });
+    }
+
+    _overlayImage() {
+        console.log('applying overlay image behaviour');
     }
 
     // Add player controls to the DOM and listen for events
