@@ -138,32 +138,32 @@ describe('SwitchableRenderer', () => {
 
     // on start get first choice and start rendering with its sub renderer
     // close on sub renderer close
-    it('can delegate rendering to an appropriate choiceRenderer', (done) => {
-        const contentDiv = document.createElement('div');
-        contentDiv.id = 'switchable';
+    // it('can delegate rendering to an appropriate choiceRenderer', (done) => {
+    //     const contentDiv = document.createElement('div');
+    //     contentDiv.id = 'switchable';
 
-        // const stub = sinon.stub(SimpleAVRenderer, 'start');
-        // const spy = sinon.spy();
-        // sinon.spyOn(SimpleAVRenderer, 'start');
+    //     // const stub = sinon.stub(SimpleAVRenderer, 'start');
+    //     // const spy = sinon.spy();
+    //     // sinon.spyOn(SimpleAVRenderer, 'start');
 
-        const Renderer = new SwitchableRenderer(
-            defaultSwitchableRepresentation,
-            assetCollectionFetcher,
-            mediaFetcher,
-            contentDiv,
-        );
-        Renderer.start();
+    //     const Renderer = new SwitchableRenderer(
+    //         defaultSwitchableRepresentation,
+    //         assetCollectionFetcher,
+    //         mediaFetcher,
+    //         contentDiv,
+    //     );
+    //     Renderer.start();
 
-        // create html element for sub renderers
-        let childId = '';
-        if (contentDiv.firstChild && contentDiv.firstChild.id) childId = contentDiv.firstChild.id;
-        expect(childId).to.equal('subrenderer');
-        // expect(spy.called).to.be.true;
+    //     // create html element for sub renderers
+    //     // let childId = '';
+    //     // if (contentDiv.firstChild && contentDiv.firstChild.id) childId = contentDiv.firstChild.id;
+    //     // expect(childId).to.equal('subrenderer');
+    //     // expect(spy.called).to.be.true;
 
-        // switchable has child subrenderer
+    //     // switchable has child subrenderer
 
-        done();
-    });
+    //     done();
+    // });
 
     // it('switches between choiceRenderers');
 });
