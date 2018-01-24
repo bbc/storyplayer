@@ -13,6 +13,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
     _applyShowImageBehaviour: Function;
+    _behaviourElements: Array<HTMLElement>;
 
     constructor(
         representation: Representation,
@@ -27,6 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this.renderVideoElement();
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._behaviourElements = [];
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
@@ -98,8 +100,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    _applyBlurBehaviour() {
+    _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         this._videoElement.style.filter = 'blur(5px)';
+        callback();
     }
 
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
@@ -112,8 +115,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         });
     }
 
-    _overlayImage() {
-        console.log('applying overlay image behaviour');
+    _overlayImage(imageSrc: string) {
+        const overlayImageElement = document.createElement('img');
+        overlayImageElement.src = imageSrc;
+        overlayImageElement.className = 'overlayImage';
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
     }
 
     // Add player controls to the DOM and listen for events
@@ -309,8 +316,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this.start();
     }
 
+    _clearBehaviourElements() {
+        this._behaviourElements.forEach((be) => {
+            this._target.removeChild(be);
+        });
+    }
+
     destroy() {
         try {
+            this._clearBehaviourElements();
             this._target.removeChild(this._videoElement);
         } catch (e) {
             // console.warn('simple video not on target');
