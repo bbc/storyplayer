@@ -101,7 +101,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        this._videoElement.style.filter = 'blur(5px)';
+        const blur = behaviour.blur;
+        this._videoElement.style.filter = `blur(${blur}px)`;
         callback();
     }
 
