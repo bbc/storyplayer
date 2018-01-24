@@ -11,6 +11,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _hls: Object;
     _videoElement: HTMLVideoElement;
     _canvas: HTMLCanvasElement;
+    _applyBlurBehaviour: Function;
 
     constructor(
         representation: Representation,
@@ -23,6 +24,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._hls = new Hls();
         }
         this.renderVideoElement();
+        this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        this._behaviourRendererMap = {
+            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+        };
     }
 
     start() {
@@ -87,6 +92,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             videoElement.setAttribute('src', mediaUrl);
         }
+    }
+
+    _applyBlurBehaviour() {
+        this._videoElement.style.filter = 'blur(5px)';
     }
 
     // Add player controls to the DOM and listen for events
