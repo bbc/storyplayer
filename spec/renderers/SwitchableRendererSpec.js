@@ -5,10 +5,10 @@ import chai, { expect } from 'chai';
 // import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
-// import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
-// import ImageRenderer from '../../src/renderers/ImageRenderer';
-import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
-import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
+import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
+import ImageRenderer from '../../src/renderers/ImageRenderer';
+// import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
+// import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
 
 // import BaseRenderer from '../../src/renderers/BaseRenderer';
 
@@ -128,10 +128,14 @@ describe('SwitchableRenderer', () => {
 
         expect(Renderer).to.have.property('_choiceRenderers');
 
-        expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageVideoContextRenderer);
+        expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageRenderer);
+        // expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageVideoContextRenderer);
 
         done();
     });
