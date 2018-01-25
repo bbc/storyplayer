@@ -1,10 +1,21 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererEvents from './RendererEvents';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
+
+    constructor(
+        representation: Representation,
+        assetCollectionFetcher: AssetCollectionFetcher,
+        fetchMedia: MediaFetcher,
+        target: HTMLElement,
+    ) {
+        super(representation, assetCollectionFetcher, fetchMedia, target);
+        this.renderImageElement();
+    }
 
     start() {
         if (!this._imageElement) this.renderImageElement();
@@ -22,6 +33,7 @@ export default class ImageRenderer extends BaseRenderer {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
                             console.log('FETCHED FROM MS MEDIA!', mediaUrl);
                             this._imageElement.src = mediaUrl;
+                            this._setVisibility(false);
                         }).catch((err) => { console.error(err, 'Notfound'); });
                     }
                 });
@@ -63,7 +75,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _setVisibility(visible: boolean) {
         // this._imageElement.style.visibility = visible ? 'visible' : 'hidden';
-        this._imageElement.style.display = visible ? 'initial' : 'none';
+        if (this._imageElement) this._imageElement.style.display = visible ? 'initial' : 'none';
     }
 
     destroy() {

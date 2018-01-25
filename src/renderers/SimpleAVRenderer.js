@@ -11,6 +11,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _hls: Object;
     _videoElement: HTMLVideoElement;
     _canvas: HTMLCanvasElement;
+    _applyBlurBehaviour: Function;
+    _applyShowImageBehaviour: Function;
+    _behaviourElements: Array<HTMLElement>;
 
     constructor(
         representation: Representation,
@@ -23,6 +26,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._hls = new Hls();
         }
         this.renderVideoElement();
+        this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._behaviourElements = [];
+
+        this._behaviourRendererMap = {
+            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
+        };
     }
 
     start() {
@@ -87,6 +98,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             videoElement.setAttribute('src', mediaUrl);
         }
+    }
+
+    _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
+        const blur = behaviour.blur;
+        this._videoElement.style.filter = `blur(${blur}px)`;
+        callback();
+    }
+
+    _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
+        const assetCollectionId = behaviour.image;
+        this._fetchAssetCollection(assetCollectionId).then((image) => {
+            if (image.assets.image_src) {
+                this._overlayImage(image.assets.image_src);
+                callback();
+            }
+        });
+    }
+
+    _overlayImage(imageSrc: string) {
+        const overlayImageElement = document.createElement('img');
+        overlayImageElement.src = imageSrc;
+        overlayImageElement.className = 'overlayImage';
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
     }
 
     // Add player controls to the DOM and listen for events
@@ -282,8 +317,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this.start();
     }
 
+    _clearBehaviourElements() {
+        this._behaviourElements.forEach((be) => {
+            this._target.removeChild(be);
+        });
+    }
+
     destroy() {
         try {
+            this._clearBehaviourElements();
             this._target.removeChild(this._videoElement);
         } catch (e) {
             // console.warn('simple video not on target');
