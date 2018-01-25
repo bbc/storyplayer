@@ -12,7 +12,11 @@ export default class PauseBehaviour extends BaseBehaviour {
 
     start() {
         const pause = parseFloat(this._behaviourDefinition.pauseTime);
-        this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
+        if (pause < 0) {
+            console.warn('negative pause time: pause behaviour will never complete');
+        } else {
+            this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
+        }
     }
 
     handleTimeout() {
