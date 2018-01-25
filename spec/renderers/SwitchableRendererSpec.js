@@ -1,6 +1,7 @@
 // @flow
 
 import 'babel-polyfill';
+// @flowignore
 import chai, { expect } from 'chai';
 // import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
