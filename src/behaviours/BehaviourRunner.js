@@ -10,6 +10,7 @@ export default class BehaviourRunner {
     baseRenderer: BaseRenderer;
     eventNames: Array<string>;
     behaviours: Array<Object>;
+    handleCompletion: () => void;
 
     constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {
         this.behaviourDefinitions = behaviourDefinitions;

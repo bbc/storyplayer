@@ -1,14 +1,15 @@
 // @flow
 
 import 'babel-polyfill';
+// @flowignore
 import chai, { expect } from 'chai';
 // import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
-// import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
-// import ImageRenderer from '../../src/renderers/ImageRenderer';
-import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
-import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
+import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
+import ImageRenderer from '../../src/renderers/ImageRenderer';
+// import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
+// import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
 
 // import BaseRenderer from '../../src/renderers/BaseRenderer';
 
@@ -128,42 +129,15 @@ describe('SwitchableRenderer', () => {
 
         expect(Renderer).to.have.property('_choiceRenderers');
 
-        expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageVideoContextRenderer);
+        expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVRenderer);
+        expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageRenderer);
+        // expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
+        // expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageVideoContextRenderer);
 
         done();
     });
-
-    // on start get first choice and start rendering with its sub renderer
-    // close on sub renderer close
-    // it('can delegate rendering to an appropriate choiceRenderer', (done) => {
-    //     const contentDiv = document.createElement('div');
-    //     contentDiv.id = 'switchable';
-
-    //     // const stub = sinon.stub(SimpleAVRenderer, 'start');
-    //     // const spy = sinon.spy();
-    //     // sinon.spyOn(SimpleAVRenderer, 'start');
-
-    //     const Renderer = new SwitchableRenderer(
-    //         defaultSwitchableRepresentation,
-    //         assetCollectionFetcher,
-    //         mediaFetcher,
-    //         contentDiv,
-    //     );
-    //     Renderer.start();
-
-    //     // create html element for sub renderers
-    //     // let childId = '';
-    //     // if (contentDiv.firstChild && contentDiv.firstChild.id) childId = contentDiv.firstChild.id;
-    //     // expect(childId).to.equal('subrenderer');
-    //     // expect(spy.called).to.be.true;
-
-    //     // switchable has child subrenderer
-
-    //     done();
-    // });
-
-    // it('switches between choiceRenderers');
 });

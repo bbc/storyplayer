@@ -13,39 +13,51 @@ export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
     /* eslint-disable class-methods-use-this */
 
-    registerVideoContextClient(id: string) {
+    guessContextFinishTime() {
+        const snapshot = this.snapshot();
+        let maxDuration = 0;
+        Object.keys(snapshot.nodes).forEach((sn) => {
+            const node = snapshot.nodes[sn];
+            if (node.type === 'VideoNode' && node.stop !== Infinity) {
+                if (node.stop > maxDuration) maxDuration = node.stop;
+            }
+        });
+        return maxDuration;
+    }
+
+    static registerVideoContextClient(id: string) {
         // console.log('registering', id);
     /* eslint-disable class-methods-use-this */
         nodeRepresentationMap[id] = false;
     }
 
-    unregisterVideoContextClient(id: string) {
+    static unregisterVideoContextClient(id: string) {
         // console.log('forgetting', id);
     /* eslint-disable class-methods-use-this */
         delete nodeRepresentationMap[id];
     }
 
-    showVideoContextForClient(id: string) {
+    static showVideoContextForClient(id: string) {
         // console.log('show vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = true;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._calculateVisibility();
+        CustomVideoContext._calculateVisibility();
     }
 
-    hideVideoContextForClient(id: string) {
+    static hideVideoContextForClient(id: string) {
         // console.log('hide vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = false;
         } else {
             console.warn('representation', id, 'not registered on VCtx');
         }
-        this._calculateVisibility();
+        CustomVideoContext._calculateVisibility();
     }
 
-    _calculateVisibility() {
+    static _calculateVisibility() {
         let show = false;
         Object.keys(nodeRepresentationMap).forEach((user) => {
             show = show || nodeRepresentationMap[user];
@@ -94,30 +106,25 @@ export function getNodeRepresentationMap() {
     return nodeRepresentationMap;
 }
 
-export function createNodeForRepresentation(representationId: string, mediaUrl: string) {
-    let videoNode;
-    // if mediaUrl is hls
-    if (mediaUrl.indexOf('.m3u8') !== -1) {
-        videoNode = this._videoCtx.hls(mediaUrl, 0, 4);
-    } else {
-        videoNode = this._videoCtx.video(mediaUrl, 0, 4);
-    }
-    // MORE THOUGHT NEEDED HERE
-    videoNode.connect(this._videoCtx.destination);
-
-    nodeRepresentationMap[representationId] = videoNode;
-
-    return videoNode;
-}
-
-
 export function getVideoContext() {
     if (!videoContext) {
         canvas = document.createElement('canvas');
         canvas.className = 'romper-video-element';
-        canvas.setAttribute('width', '512px');
-        canvas.setAttribute('height', '288px');
+        canvas.setAttribute('width', '1024px');
+        canvas.setAttribute('height', '576px');
         videoContext = new CustomVideoContext(canvas);
     }
     return videoContext;
+}
+
+export function createVideoContextNodeForUrl(mediaUrl: string) {
+    let videoNode;
+    // if mediaUrl is hls
+    if (mediaUrl.indexOf('.m3u8') !== -1) {
+        videoNode = getVideoContext().hls(mediaUrl, 0, 4);
+    } else {
+        videoNode = getVideoContext().video(mediaUrl, 0, 4);
+    }
+
+    return videoNode;
 }
