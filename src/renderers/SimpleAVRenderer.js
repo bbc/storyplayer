@@ -101,7 +101,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        const blur = behaviour.blur;
+        const { blur } = behaviour;
         this._videoElement.style.filter = `blur(${blur}px)`; // eslint-disable-line prefer-destructuring
         callback();
     }
