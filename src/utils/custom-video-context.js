@@ -11,6 +11,7 @@ const nodeRepresentationMap = {};
 
 export default class CustomVideoContext extends VideoContext {
     /* eslint-disable no-param-reassign */
+    /* eslint-disable class-methods-use-this */
 
     guessContextFinishTime() {
         const snapshot = this.snapshot();
@@ -26,11 +27,13 @@ export default class CustomVideoContext extends VideoContext {
 
     static registerVideoContextClient(id: string) {
         // console.log('registering', id);
+    /* eslint-disable class-methods-use-this */
         nodeRepresentationMap[id] = false;
     }
 
     static unregisterVideoContextClient(id: string) {
         // console.log('forgetting', id);
+    /* eslint-disable class-methods-use-this */
         delete nodeRepresentationMap[id];
     }
 
@@ -73,7 +76,6 @@ export default class CustomVideoContext extends VideoContext {
             const manifestUrl = await m3u8;
 
             videoNode.hlsplayer = new Hls({ startFragPrefetch: true, startLevel: 3 });
-
 
             if (manifestUrl.indexOf('.m3u8') !== -1) {
                 videoNode.hlsplayer.loadSource(manifestUrl);
