@@ -317,7 +317,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._videoCtx.pause();
     }
 
-    switchTo() {
+    switchTo(time: number) {
         this._isCurrentSwitchChoice = true;
         this._videoCtx.play();
         this.playVideo();
