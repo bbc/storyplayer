@@ -23,7 +23,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         if (Hls.isSupported()) {
-            this._hls = new Hls();
+            this._hls = new Hls({ startFragPrefetch: true, startLevel: 3 });
         }
         this.renderVideoElement();
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
