@@ -6,7 +6,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
-
+import logger from '../logger';
 
 export default class ImageVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -73,7 +73,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         this._imageNode = this._videoCtx.image(mediaUrl);
         this._nodeCompleted = true;
         this.emit('videoContextImageNodeCreated');
-        console.log('vctx image node created', mediaUrl);
+        logger.info(`vctx image node created ${mediaUrl}`);
     }
 
     applyBlur() {
@@ -92,7 +92,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             try {
                 node.destroy();
             } catch (e) {
-                console.warn('VCtx effect node destroy error:', e);
+                logger.warn(`VCtx effect node destroy error: ${e}`);
             }
         });
     }
@@ -108,12 +108,10 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
                             this.addImageNodeToVideoCtxGraph(mediaUrl);
                         })
                         .catch((err) => {
-                            console.error(err, 'Notfound');
+                            logger.error(`${err} Notfound`);
                         });
                 }
             });
-        } else {
-            // console.error('No foreground source for AVRenderer');
         }
     }
 
@@ -177,7 +175,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         try {
             if (this._nodeCreated) this._imageNode.destroy();
         } catch (e) {
-            console.warn('VCtx could not destroy image node:', e);
+            logger.warn(`VCtx could not destroy image node: ${e}`);
         }
         CustomVideoContext.unregisterVideoContextClient(this._representation.id);
     }

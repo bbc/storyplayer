@@ -5,6 +5,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
+import logger from '../logger';
 
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -76,12 +77,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             this.populateVideoElement(this._videoElement, mediaUrl);
                         })
                         .catch((err) => {
-                            console.error(err, 'Notfound');
+                            logger.error(`${err} Notfound`);
                         });
                 }
             });
-        } else {
-            // console.error('No foreground source for AVRenderer');
         }
 
         // automatically move on at video end
@@ -324,12 +323,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
-        try {
-            this._clearBehaviourElements();
-            this._target.removeChild(this._videoElement);
-        } catch (e) {
-            // console.warn('simple video not on target');
-        }
+        this._clearBehaviourElements();
+        this._target.removeChild(this._videoElement);
+
         super.destroy();
     }
 }

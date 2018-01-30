@@ -1,5 +1,6 @@
 // @flow
 import BaseRenderer from '../renderers/BaseRenderer';
+import logger from '../logger';
 /* eslint-disable class-methods-use-this */
 export default class BaseBehaviour {
     _behaviourDefinition: Object;
@@ -17,7 +18,7 @@ export default class BaseBehaviour {
         if (behaviourRenderer) {
             behaviourRenderer(this._behaviourDefinition, this._handleDone);
         } else {
-            console.warn(`${renderer.constructor.name} does not support ${this._behaviourDefinition.type} - completing immediately`);
+            logger.warn(`${renderer.constructor.name} does not support ${this._behaviourDefinition.type} - completing immediately`);
             this._onComplete();
         }
     }
