@@ -261,7 +261,7 @@ export default class RenderManager extends EventEmitter {
 
     _renderPreviousButton() {
         this._previousButton = document.createElement('button');
-        this._previousButton.id = 'back-ne-button';
+        this._previousButton.className = 'back-ne-button';
         this._previousButton.textContent = 'Back';
         this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
         this._neTarget.appendChild(this._previousButton);
