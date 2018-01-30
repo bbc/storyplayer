@@ -249,7 +249,7 @@ export default class RenderManager extends EventEmitter {
 
     _renderNextButton() {
         this._nextButton = document.createElement('button');
-        this._nextButton.id = 'nextNEbutton';
+        this._nextButton.className = 'next-ne-button';
         this._nextButton.textContent = 'Next';
         this._nextButton.addEventListener('click', () => this._handleNextButtonClick());
         this._neTarget.appendChild(this._nextButton);
@@ -261,7 +261,7 @@ export default class RenderManager extends EventEmitter {
 
     _renderPreviousButton() {
         this._previousButton = document.createElement('button');
-        this._previousButton.id = 'backNEbutton';
+        this._previousButton.id = 'back-ne-button';
         this._previousButton.textContent = 'Back';
         this._previousButton.addEventListener('click', () => this._handlePreviousButtonClick());
         this._neTarget.appendChild(this._previousButton);
@@ -277,10 +277,10 @@ export default class RenderManager extends EventEmitter {
     // the renderer for the current NarrativeElement
     _createStoryAndElementDivs() {
         this._neTarget = document.createElement('div');
-        this._neTarget.id = 'render-element';
+        this._neTarget.className = 'render-element';
         this._target.appendChild(this._neTarget);
         this._storyTarget = document.createElement('div');
-        this._storyTarget.id = 'story_element';
+        this._storyTarget.className = 'story-element';
         this._target.appendChild(this._storyTarget);
         this._backgroundTarget = document.createElement('div');
         this._backgroundTarget.id = 'background_element';

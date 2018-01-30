@@ -56,7 +56,7 @@ export default class StoryIconRenderer extends EventEmitter {
             const iconImgElements = this._buildAssets(); // build icons
             this._deepestCommonSubstory = this._findSubStories();
             this._iconListElement = document.createElement('ul');
-            this._iconListElement.id = 'chapterIcons';
+            this._iconListElement.className = 'chapter-icons';
             iconImgElements.forEach((iconImageElement) => { // add icons to DOM
                 const iconListItem = document.createElement('li');
                 iconListItem.appendChild(iconImageElement);
@@ -159,9 +159,9 @@ export default class StoryIconRenderer extends EventEmitter {
         newIcon.setAttribute('src', sourceUrl);
         newIcon.addEventListener('click', () => this._iconClickHandler(representationId));
         if (representationId === this._currentRepresentationId) {
-            newIcon.className = 'activeIcon';
+            newIcon.className = 'active-icon';
         } else {
-            newIcon.className = 'inactiveIcon';
+            newIcon.className = 'inactive-icon';
         }
         return newIcon;
     }
@@ -179,14 +179,14 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconElementMap).forEach((mapKey) => {
             if (this._iconElementMap[mapKey]) {
                 const iconElement = this._iconElementMap[mapKey];
-                iconElement.className = 'inactiveIcon';
+                iconElement.className = 'inactive-icon';
                 if (this._iconUrlMap[mapKey] && this._iconUrlMap[mapKey].default) {
                     iconElement.setAttribute('src', this._iconUrlMap[mapKey].default);
                 }
             }
         });
         if (this._iconElementMap[representationId]) {
-            this._iconElementMap[representationId].className = 'activeIcon';
+            this._iconElementMap[representationId].className = 'active-icon';
             if (this._iconUrlMap[representationId] && this._iconUrlMap[representationId].active) {
                 this._iconElementMap[representationId]
                     .setAttribute('src', this._iconUrlMap[representationId].active);

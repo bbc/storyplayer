@@ -33,18 +33,18 @@ $background-colour: #50e3c2;
   @include button('../images/sound-off.svg');
 }
 
-#nextNEbutton {
+.next-ne-button {
   @include button('../images/next.svg');
   right: 0;
 }
 
-#backNEbutton {
+.back-ne-button {
   @include button('../images/previous.svg');
   left: 0;
 }
 
-#backNEbutton,
-#nextNEbutton {
+.back-ne-button,
+.next-ne-button {
   font-size: 0;
   height: 5vw;
   position: absolute;

@@ -5,6 +5,9 @@ $background-color: #fff;
 $shadow: rgba(77, 72, 77, 0.42);
 $highlight: #ff7f11;
 
+$switchbuttons-img-background: rgba(200, 200, 230, 0.5);
+$switchbuttons-img-border: #d3d3d3;
+
 .romper-container {
   display: flex;
   height: 100%;
@@ -14,13 +17,12 @@ $highlight: #ff7f11;
 }
 
 .romper-target,
-#render-element {
+.render-element {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
-  // padding-top: 1.5em;
   position: relative;
+  width: 100%;
 }
 
 .romper-video-element {
@@ -32,8 +34,6 @@ $highlight: #ff7f11;
 
 .video-controls {
   bottom: 0;
-  display: flex;
-  flex-direction: column;
   display: flex;
   flex-direction: row;
   height: 5vw;
@@ -58,83 +58,68 @@ $highlight: #ff7f11;
   width: 5vw;
 }
 
-.switchbuttons img {
-  width: 50px;
-  background: rgba(200, 200, 230, 0.5);
-  border: 1px solid lightgray;
-}
-
-.switchbuttons li {
-  list-style: none;
-  padding-top: 10px;
-}
-
-.switchbuttons ul {
-  padding-left: 0px;
-}
-
 .switchbuttons {
-  position: absolute;
   left: 10px;
+  margin-left: 0;
+  padding-left: 0;
+  position: absolute;
   top: 0;
-  margin-left: 0px;
-  padding-left: 0px;
+
+  img {
+    background: $switchbuttons-img-background;
+    border: 1px solid $switchbuttons-img-border;
+    width: 50px;
+  }
+
+  li {
+    list-style: none;
+    padding-top: 10px;
+  }
+
+  ul {
+    padding-left: 0;
+  }
 }
 
 .inactive {
   opacity: 0.3;
-  /* visibility: hidden; */
 }
 
 .active {
   visibility: visible;
 }
 
-#romper-target img,
-video {
-  // max-height: 281px;
+img {
+  .overlay-image {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  .active-icon {
+    width: 60px;
+  }
+
+  .inactive-icon {
+    width: 30px;
+  }
 }
 
-img.inactiveIcon {
-  width: 30px;
+.chapter-icons {
+  li {
+    list-style: none;
+  }
 }
 
-img.activeIcon {
-  width: 60px;
-}
+$render-element-background-color: rgb(230, 247, 252);
+$subrenderer-background-color: rgb(214, 245, 214);
+$story-element-background-color: rgb(253, 245, 231);
 
-#chapterIcons li {
-  list-style: none;
-  /* display: inline; */
-}
-
-#chapterIcons {
-  /* position: absolute;
-  top: 0px;
-  left: 430px; */
-}
-
-div#render_element {
-  background-color: rgb(230, 247, 252);
-  padding-left: 0px;
-  padding-top: 0px;
-  /* padding: 10px; */
-}
-
-div#subrenderer {
-  background-color: rgb(214, 245, 214);
-  padding: 0px;
-}
-
-div#story_element {
-  background-color: rgb(253, 245, 231);
-  padding: 0px;
-}
-
-img.overlayImage {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0px;
-  top: 0px;
+div {
+  .story-element {
+    background-color: $story-element-background-color;
+    padding: 0;
+  }
 }

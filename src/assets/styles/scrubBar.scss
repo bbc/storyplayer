@@ -5,7 +5,7 @@
 // MIT License
 
 $track-color: #50e3c2 !default;
-$thumb-color: #ffffff !default;
+$thumb-color: #fff !default;
 
 $thumb-radius: 3px !default;
 $thumb-height: 13px !default;
@@ -48,80 +48,82 @@ $contrast: 5% !default;
   width: $thumb-width;
 }
 
-[type='range'].scrub-bar {
-  -webkit-appearance: none;
-  align-self: center;
-  background: transparent;
-  margin: $thumb-height / 2 0;
-  margin-bottom: 10px;
-  width: $track-width;
+[type='range'] {
+  .scrub-bar {
+    -webkit-appearance: none;
+    align-self: center;
+    background: transparent;
+    margin: $thumb-height / 2 0;
+    margin-bottom: 10px;
+    width: $track-width;
 
-  &:focus {
-    outline: 0;
+    &:focus {
+      outline: 0;
+
+      &::-webkit-slider-runnable-track {
+        background: lighten($track-color, $contrast);
+      }
+
+      &::-ms-fill-lower {
+        background: $track-color;
+      }
+
+      &::-ms-fill-upper {
+        background: lighten($track-color, $contrast);
+      }
+    }
 
     &::-webkit-slider-runnable-track {
-      background: lighten($track-color, $contrast);
+      @include track;
+      @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+      background: $track-color;
+      border: $track-border-width solid $track-border-color;
+      border-radius: $track-radius;
+    }
+
+    &::-webkit-slider-thumb {
+      @include thumb;
+      -webkit-appearance: none;
+      margin-top: ((-$track-border-width * 2 + $track-height) / 2) - ($thumb-height / 2);
+    }
+
+    &::-moz-range-track {
+      @include track;
+      @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+      background: $track-color;
+      border: $track-border-width solid $track-border-color;
+      border-radius: $track-radius;
+    }
+
+    &::-moz-range-thumb {
+      @include thumb;
+    }
+
+    &::-ms-track {
+      @include track;
+      background: transparent;
+      border-color: transparent;
+      border-width: ($thumb-height / 2) 0;
+      color: transparent;
     }
 
     &::-ms-fill-lower {
-      background: $track-color;
+      @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+      background: darken($track-color, $contrast);
+      border: $track-border-width solid $track-border-color;
+      border-radius: $track-radius * 2;
     }
 
     &::-ms-fill-upper {
-      background: lighten($track-color, $contrast);
+      @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+      background: $track-color;
+      border: $track-border-width solid $track-border-color;
+      border-radius: $track-radius * 2;
     }
-  }
 
-  &::-webkit-slider-runnable-track {
-    @include track;
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius;
-  }
-
-  &::-webkit-slider-thumb {
-    @include thumb;
-    -webkit-appearance: none;
-    margin-top: ((-$track-border-width * 2 + $track-height) / 2) - ($thumb-height / 2);
-  }
-
-  &::-moz-range-track {
-    @include track;
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius;
-  }
-
-  &::-moz-range-thumb {
-    @include thumb;
-  }
-
-  &::-ms-track {
-    @include track;
-    background: transparent;
-    border-color: transparent;
-    border-width: ($thumb-height / 2) 0;
-    color: transparent;
-  }
-
-  &::-ms-fill-lower {
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
-    background: darken($track-color, $contrast);
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius * 2;
-  }
-
-  &::-ms-fill-upper {
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius * 2;
-  }
-
-  &::-ms-thumb {
-    @include thumb;
-    margin-top: 0;
+    &::-ms-thumb {
+      @include thumb;
+      margin-top: 0;
+    }
   }
 }
