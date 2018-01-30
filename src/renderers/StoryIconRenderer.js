@@ -208,7 +208,6 @@ export default class StoryIconRenderer extends EventEmitter {
     _showHideTarget() {
         const currentRepIndex = this._getRepresentationIndex(this._currentRepresentationId);
         const currentPathItem = this._pathItemList[currentRepIndex];
-        // console.log('in', currentPathItem, '- icon story is:', this._deepestCommonSubstory);
 
         this._target.classList.remove('active');
         this._target.classList.remove('inactive');

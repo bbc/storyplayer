@@ -2,6 +2,7 @@
 import PauseBehaviour from './PauseBehaviour';
 import BaseBehaviour from './BaseBehaviour';
 import type { RendererEvent } from '../renderers/RendererEvents';
+import logger from '../logger';
 
 export default function BehaviourFactory(
     behaviourDefinition: Object,
@@ -19,7 +20,7 @@ export default function BehaviourFactory(
         const Behaviour = BEHAVIOURS[behaviourDefinition.type];
         currentBehaviour = new Behaviour(behaviourDefinition, onComplete);
     } else {
-        console.warn(`Do not know how to handle behaviour ${behaviourDefinition.type} - ignoring`);
+        logger.warn(`Do not know how to handle behaviour ${behaviourDefinition.type} - ignoring`);
     }
     return currentBehaviour;
 }

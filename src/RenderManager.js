@@ -13,6 +13,7 @@ import BackgroundRenderer from './renderers/BackgroundRenderer';
 import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import SimpleAVVideoContextRenderer from './renderers/SimpleAVVideoContextRenderer';
+import logger from './logger';
 
 export default class RenderManager extends EventEmitter {
     constructor(
@@ -154,10 +155,7 @@ export default class RenderManager extends EventEmitter {
                 this._handleBackgroundRendering(choice.representation);
             });
         } else {
-            console.error(
-                'Do not know how to render',
-                representation.representation_type,
-            );
+            logger.error(`Do not know how to render ${representation.representation_type}`);
         }
         return newRenderer;
     }
