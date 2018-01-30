@@ -1,7 +1,7 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 import CustomVideoContext, { getVideoContext, getCanvas, createVideoContextNodeForUrl } from '../utils/custom-video-context';
 
@@ -32,8 +32,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, target, analytics);
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);

@@ -107,6 +107,8 @@ const assetCollectionFetcher = id =>
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
+const logger = (logObject) => { console.log('analytics', logObject); };
+
 describe('SwitchableRenderer', () => {
     it('can create an instance of SwitchableRenderer', (done) => {
         const Renderer = new SwitchableRenderer(
@@ -114,6 +116,7 @@ describe('SwitchableRenderer', () => {
             assetCollectionFetcher,
             mediaFetcher,
             document.createElement('div'),
+            logger,
         );
         expect(Renderer).to.have.property('_representation');
         done();
@@ -125,6 +128,7 @@ describe('SwitchableRenderer', () => {
             assetCollectionFetcher,
             mediaFetcher,
             document.createElement('div'),
+            logger,
         );
 
         expect(Renderer).to.have.property('_choiceRenderers');
