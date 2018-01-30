@@ -1,7 +1,7 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 import RendererEvents from './RendererEvents';
 
 export default class ImageRenderer extends BaseRenderer {
@@ -12,8 +12,9 @@ export default class ImageRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, target, analytics);
         this.renderImageElement();
     }
 

@@ -2,7 +2,7 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher } from './romper';
+import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
@@ -20,6 +20,7 @@ export default class Controller {
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
         fetchStory: StoryFetcher,
+        analytics: AnalyticsLogger,
     ) {
         this._storyId = null;
         this._reasoner = null;
@@ -30,6 +31,7 @@ export default class Controller {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._fetchStory = fetchStory;
+        this._analytics = analytics;
         this._linearStoryPath = [];
         this._createRenderManager();
     }
@@ -79,6 +81,7 @@ export default class Controller {
             this._fetchAssetCollection,
             this._representationReasoner,
             this._fetchMedia,
+            this._analytics,
         );
     }
 
@@ -327,6 +330,7 @@ export default class Controller {
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
     _fetchStory: StoryFetcher;
+    _analytics: AnalyticsLogger;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;

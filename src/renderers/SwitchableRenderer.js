@@ -1,6 +1,6 @@
 // @flow
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
 
@@ -18,8 +18,9 @@ export default class SwitchableRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, target, analytics);
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;

@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
+import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
@@ -22,6 +22,7 @@ export default class RenderManager extends EventEmitter {
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
+        analytics: AnalyticsLogger,
     ) {
         super();
         this._controller = controller;
@@ -30,6 +31,7 @@ export default class RenderManager extends EventEmitter {
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
+        this._analytics = analytics;
 
         this._createStoryAndElementDivs();
         this._renderNextButton();
@@ -38,6 +40,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
+        this._analytics({ message: `changed NE: ${narrativeElement.name}` });
         this._fetchPresentation(narrativeElement.presentation.target)
             .then(presentation => this._representationReasoner(presentation))
             .then((representation) => {
@@ -134,6 +137,7 @@ export default class RenderManager extends EventEmitter {
             this._fetchAssetCollection,
             this._fetchMedia,
             this._neTarget,
+            this._analytics,
         );
 
         if (newRenderer) {
@@ -308,6 +312,7 @@ export default class RenderManager extends EventEmitter {
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
+    _analytics: AnalyticsLogger;
     _renderStory: StoryIconRenderer;
     _neTarget: HTMLDivElement;
     _storyTarget: HTMLDivElement;

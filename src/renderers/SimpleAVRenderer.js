@@ -1,7 +1,7 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
@@ -20,8 +20,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         target: HTMLElement,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, target, analytics);
         if (Hls.isSupported()) {
             this._hls = new Hls();
         }

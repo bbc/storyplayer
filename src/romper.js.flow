@@ -101,6 +101,8 @@ export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
 
 export type MediaFetcher = (uri: string) => Promise<string>;
 
+export type AnalyticsLogger = (payload: Object) => mixed;
+
 export type BaseRenderer = {
     representation: Representation,
     assetCollectionFetcher: AssetCollectionFetcher,
