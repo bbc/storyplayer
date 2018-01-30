@@ -8,6 +8,7 @@ import logger from '../logger';
 import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 
+
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
