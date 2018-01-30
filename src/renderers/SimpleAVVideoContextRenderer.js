@@ -1,8 +1,8 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 import CustomVideoContext, {
     getVideoContext, getCanvas, createVideoContextNodeForUrl,
@@ -29,18 +29,21 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _videoContextQueueTimeoutHandle: number;
     _isCurrentSwitchChoice: boolean;
     _destinationVideoContextNode: Object;
+    _target: HTMLDivElement;
 
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player);
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
+        this._target = player.mediaTarget;
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
         this._target.appendChild(this._canvas);

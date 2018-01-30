@@ -1,8 +1,8 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
@@ -20,19 +20,23 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     cueUp: Function;
     _cueUpWhenReady: Function;
     _renderImageTimeoutHandle: number;
+    _target: HTMLDivElement;
 
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
-        target: Player,
+        player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        // this._canvas = document.createElement('canvas');
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
+        this._target = player.mediaTarget;
         this._target.appendChild(this._canvas);
         this._imageNode = {};
         this._nodeCreated = false;

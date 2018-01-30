@@ -1,7 +1,7 @@
 // @flow
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
@@ -21,12 +21,9 @@ export default class SwitchableRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player);
-        this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
-
-        this._choiceDiv = document.createElement('div');
-        this._choiceDiv.id = 'subrenderer';
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
@@ -199,49 +196,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                         }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
-        }
-    }
-
-    // display some text that shows what we're supposed to be rendering, according
-    // to the data model
-    _renderDataModelInfo() {
-        // next just displays info for debug
-        const para = document.createElement('p');
-        para.textContent = this._representation.name;
-        const optPara = document.createElement('p');
-        optPara.textContent = 'Options';
-        this._target.appendChild(para);
-        this._target.appendChild(optPara);
-
-        const switchlist = document.createElement('ul');
-        this._target.appendChild(switchlist);
-        const iconData = document.createElement('p');
-        iconData.textContent = 'icon: ';
-        this._target.appendChild(iconData);
-
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice) => {
-                const choiceLabel = choice.label;
-                let choiceRepresentationDetail = '';
-                if (choice.representation) {
-                    choiceRepresentationDetail = choice.representation.name;
-                }
-                const switchitem = document.createElement('li');
-                switchitem.textContent = `${choiceLabel}: ${choiceRepresentationDetail}`;
-                switchlist.appendChild(switchitem);
-            });
-        }
-
-        if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
-                .then((icon) => {
-                    iconData.textContent += `${icon.name}`;
-                    if (icon.assets.image_src) {
-                        iconData.textContent += ` from ${icon.assets.image_src}`;
-                    }
-                });
-        } else {
-            iconData.textContent += 'none';
         }
     }
 
