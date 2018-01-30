@@ -7,6 +7,7 @@ import ImageVideoContextRenderer from './ImageVideoContextRenderer';
 import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
+import logger from '../logger';
 
 export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, mediaFetcher: MediaFetcher, target: HTMLElement): ?BaseRenderer {
     const RENDERERS = {
@@ -28,7 +29,7 @@ export default function RendererFactory(representation: Representation, assetCol
             target,
         );
     } else {
-        console.error(`Do not know how to render ${representation.representation_type}`);
+        logger.error(`Do not know how to render ${representation.representation_type}`);
     }
     return currentRenderer;
 }

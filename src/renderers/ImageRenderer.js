@@ -3,6 +3,7 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererEvents from './RendererEvents';
+import logger from '../logger';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
@@ -31,10 +32,10 @@ export default class ImageRenderer extends BaseRenderer {
                 .then((fg) => {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
-                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
+                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                             this._imageElement.src = mediaUrl;
                             this._setVisibility(false);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
+                        }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
         }
