@@ -1,0 +1,9 @@
+files:
+  include:
+    - 'src/assets/styles/**/*.scss'
+rules:
+  class-name-format:
+    - 1
+    - convention: hyphenatedbem
+  leading-zero:
+    - 0
