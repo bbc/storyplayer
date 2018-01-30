@@ -1,8 +1,9 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 import CustomVideoContext, {
     getVideoContext, getCanvas, createVideoContextNodeForUrl,

@@ -2,7 +2,8 @@
 
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';

@@ -1,13 +1,14 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
 
 import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default class ImageVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
