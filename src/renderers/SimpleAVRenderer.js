@@ -29,12 +29,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-        this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         if (Hls.isSupported()) {
             this._hls = new Hls({ startFragPrefetch: true, startLevel: 3 });
         }
         this.renderVideoElement();
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+        this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
 
         this._target = player.mediaTarget;
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
