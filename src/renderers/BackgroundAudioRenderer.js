@@ -32,7 +32,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, 'audio').then((mediaUrl) => {
                 this._populateAudioElement(this._audioElement, mediaUrl);
-            }).catch((err) => { logger.error(`${err} Notfound`); });
+            }).catch((err) => { logger.error(err, 'Notfound'); });
         }
         this._target.appendChild(this._audioElement);
     }
