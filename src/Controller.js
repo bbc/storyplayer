@@ -10,6 +10,8 @@ import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
+import AnalyticEvents from './AnalyticEvents';
+import type { AnalyticsLogger } from './AnalyticEvents';
 import logger from './logger';
 
 export default class Controller {
@@ -42,6 +44,11 @@ export default class Controller {
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
+            const logData = {
+                type: AnalyticEvents.types.STORY_NAVIGATION,
+                name: AnalyticEvents.names.STORY_END,
+            };
+            this._analytics(logData);
             logger.warn('Story Ended!');
         };
         const _handleError = (err) => {
@@ -140,7 +147,22 @@ export default class Controller {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
+        this._logNEChange(this._currentNarrativeElement, narrativeElement);
         this._renderManager.handleNEChange(narrativeElement);
+    }
+
+    _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
+        let oldName = 'null';
+        if (oldNarrativeElement) {
+            oldName = oldNarrativeElement.name;
+        }
+        const logData = {
+            type: AnalyticEvents.types.STORY_NAVIGATION,
+            name: AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE,
+            from: oldName,
+            to: newNarrativeElement.name,
+        };
+        this._analytics(logData);
     }
 
     // try to get the narrative element object with the given id

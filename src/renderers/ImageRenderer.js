@@ -1,10 +1,11 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererEvents from './RendererEvents';
 import Player from '../Player';
 import logger from '../logger';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 
 export default class ImageRenderer extends BaseRenderer {

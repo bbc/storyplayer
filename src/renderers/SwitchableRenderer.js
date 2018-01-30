@@ -1,10 +1,12 @@
 // @flow
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
+import AnalyticEvents from '../AnalyticEvents';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
@@ -109,6 +111,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             this._currentRendererIndex = choiceIndex;
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
+                this._logSwitch();
                 newChoice.switchTo();
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
                     this.emit(
@@ -120,6 +123,20 @@ export default class SwitchableRenderer extends BaseRenderer {
                 newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
         }
+    }
+
+    _logSwitch() {
+        let targetName = 'unknown';
+        if (this._choiceRenderers[this._currentRendererIndex]) {
+            targetName = this._choiceRenderers[this._currentRendererIndex]._representation.name;
+        }
+        const logPayload = {
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.SWITCHABLE_REPRESENTATION_SWITCH,
+            from: this._representation.name,
+            to: targetName,
+        };
+        this._analytics(logPayload);
     }
 
     /**

@@ -4,10 +4,9 @@ import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import Player from '../Player';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 import logger from '../logger';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
-
-
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;

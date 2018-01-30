@@ -1,7 +1,7 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
 import ImageRenderer from './ImageRenderer';
 import ImageVideoContextRenderer from './ImageVideoContextRenderer';
 import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
@@ -9,6 +9,7 @@ import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import Player from '../Player';
 import logger from '../logger';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default function RendererFactory(
     representation: Representation,
