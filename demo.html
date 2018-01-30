@@ -1680,6 +1680,7 @@
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
+                analyticsLogger: dataObj => { console.log('ANALYTICS:', dataObj); },
                 storyFetcher: id => Promise.resolve(wait().then(() => config.story.filter(storyObject => storyObject.id === id)[0])),
                 // storyFetcher: id => Promise.resolve(
                 // config.story

@@ -2,7 +2,7 @@
 
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, AnalyticsLogger } from '../romper';
 
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
@@ -25,11 +25,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player);
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
-
         if (Hls.isSupported()) {
             this._hls = new Hls({ startFragPrefetch: true, startLevel: 3 });
         }
