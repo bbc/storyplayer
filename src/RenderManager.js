@@ -1,7 +1,9 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
+import type {
+    NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher,
+} from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
@@ -181,6 +183,7 @@ export default class RenderManager extends EventEmitter {
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
+                // eslint-disable-next-line max-len
                 newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
             }
         }
@@ -190,7 +193,10 @@ export default class RenderManager extends EventEmitter {
 
     // get a renderer for the given NE, and its Representation
     // see if we've created one in advance, otherwise create a fresh one
-    _getRenderer(narrativeElement: NarrativeElement, representation: Representation): ?BaseRenderer {
+    _getRenderer(
+        narrativeElement: NarrativeElement,
+        representation: Representation,
+    ): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
         if (this._upcomingRenderers.length === 1) {
@@ -262,7 +268,9 @@ export default class RenderManager extends EventEmitter {
     }
 
     _handlePreviousButtonClick() {
-        if (this._currentRenderer) this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
+        if (this._currentRenderer) {
+            this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
+        }
     }
 
     // create new divs within the target to hold the storyIconRenderer and

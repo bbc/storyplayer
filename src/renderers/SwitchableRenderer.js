@@ -112,7 +112,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             if (newChoice) {
                 newChoice.switchTo();
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
-                    this.emit(RendererEvents.SWITCHED_REPRESENTATION, this._representation.choices[choiceIndex]);
+                    this.emit(
+                        RendererEvents.SWITCHED_REPRESENTATION,
+                        this._representation.choices[choiceIndex],
+                    );
                 }
             }
             if (newChoice) {

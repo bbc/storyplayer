@@ -70,17 +70,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // set its source
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                if (fg.assets.av_src) {
-                    this._fetchMedia(fg.assets.av_src)
-                        .then((mediaUrl) => {
-                            this.populateVideoElement(this._videoElement, mediaUrl);
-                        })
-                        .catch((err) => {
-                            logger.error(err, 'Notfound');
-                        });
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    if (fg.assets.av_src) {
+                        this._fetchMedia(fg.assets.av_src)
+                            .then((mediaUrl) => {
+                                this.populateVideoElement(this._videoElement, mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Notfound');
+                            });
+                    }
+                });
         }
 
         // automatically move on at video end
@@ -101,7 +102,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         const { blur } = behaviour;
-        this._videoElement.style.filter = `blur(${blur}px)`; // eslint-disable-line prefer-destructuring
+        // eslint-disable-next-line prefer-destructuring
+        this._videoElement.style.filter = `blur(${blur}px)`;
         callback();
     }
 
@@ -125,7 +127,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     // Add player controls to the DOM and listen for events
     renderControlBar() {
-        // target element by its class name rather than ID as there will be multiple videos on the page...
+        // target element by its class name rather than ID as there will be multiple videos on the
+        // page...
         const video = this._videoElement;
 
         // buttons
@@ -246,35 +249,38 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._target.appendChild(assetList);
 
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                foregroundItem.textContent = `foreground: ${fg.name}`;
-                if (fg.assets.av_src) {
-                    foregroundItem.textContent += ` from ${fg.assets.av_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    foregroundItem.textContent = `foreground: ${fg.name}`;
+                    if (fg.assets.av_src) {
+                        foregroundItem.textContent += ` from ${fg.assets.av_src}`;
+                    }
+                });
         }
 
         if (
             this._representation.asset_collection.background &&
             this._representation.asset_collection.background.length > 0
         ) {
-            this._fetchAssetCollection(this._representation.asset_collection.background[0]).then((bg) => {
-                backgroundItem.textContent = `background: ${bg.name}`;
-                if (bg.assets.audio_src) {
-                    backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.background[0])
+                .then((bg) => {
+                    backgroundItem.textContent = `background: ${bg.name}`;
+                    if (bg.assets.audio_src) {
+                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
+                    }
+                });
         } else {
             backgroundItem.textContent = 'background: none';
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
-                iconItem.textContent = `icon: ${icon.name}`;
-                if (icon.assets.image_src) {
-                    iconItem.textContent += ` from ${icon.assets.image_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
+                .then((icon) => {
+                    iconItem.textContent = `icon: ${icon.name}`;
+                    if (icon.assets.image_src) {
+                        iconItem.textContent += ` from ${icon.assets.image_src}`;
+                    }
+                });
         } else {
             iconItem.textContent = 'icon: none';
         }
@@ -282,7 +288,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     getCurrentTime(): Object {
         let videoTime;
-        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) {
+        if (
+            !this._videoElement ||
+            this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA
+        ) {
             videoTime = 0;
         } else {
             videoTime = this._videoElement.currentTime;

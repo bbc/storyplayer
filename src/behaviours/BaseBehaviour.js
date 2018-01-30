@@ -18,7 +18,8 @@ export default class BaseBehaviour {
         if (behaviourRenderer) {
             behaviourRenderer(this._behaviourDefinition, this._handleDone);
         } else {
-            logger.warn(`${renderer.constructor.name} does not support ${this._behaviourDefinition.type} - completing immediately`);
+            logger.warn(`${renderer.constructor.name} does not support ` +
+                `${this._behaviourDefinition.type} - completing immediately`);
             this._onComplete();
         }
     }

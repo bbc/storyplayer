@@ -62,7 +62,12 @@ export default class CustomVideoContext extends VideoContext {
         canvas.style.display = show ? 'flex' : 'none';
     }
 
-    hls(m3u8: Promise<string>, sourceOffset: number = 0, preloadTime: number = 4, attributes: Object = {}) {
+    hls(
+        m3u8: Promise<string>,
+        sourceOffset: number = 0,
+        preloadTime: number = 4,
+        attributes: Object = {},
+    ) {
         const videoElement = document.createElement('video');
         attributes.crossorigin = 'anonymous';
         // $FlowIgnore

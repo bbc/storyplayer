@@ -2,7 +2,9 @@
 
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher } from './romper';
+import type {
+    StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher,
+} from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';

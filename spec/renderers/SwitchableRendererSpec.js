@@ -3,29 +3,14 @@
 import 'babel-polyfill';
 // @flowignore
 import chai, { expect } from 'chai';
-// import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
 import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
 import ImageRenderer from '../../src/renderers/ImageRenderer';
-// import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
-// import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
-
-// import BaseRenderer from '../../src/renderers/BaseRenderer';
 
 const storyjson = require('../teststory.json');
 
 chai.use(sinonChai);
-
-// const storyFetcher = id =>
-//     Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0])
-//         .then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id));
-
-// const presentationFetcher = id =>
-//     Promise.resolve(storyjson.presentations.filter(presentationObject => presentationObject.id === id)[0])
-//         .then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object ' + id));
-
-// const defaultSwitchableRepresentation = storyjson.presentations[4].representations[0];
 
 const defaultSwitchableRepresentation = {
     id: '0505ff24-83e6-4e07-9f0b-45f57c010189',
@@ -102,7 +87,9 @@ const defaultSwitchableRepresentation = {
 };
 
 const assetCollectionFetcher = id =>
-    Promise.resolve(storyjson.asset_collections.filter(assetCollectionObject => assetCollectionObject.id === id)[0]).then(assetCollectionObject => assetCollectionObject);
+    Promise.resolve(storyjson.asset_collections
+        .filter(assetCollectionObject => assetCollectionObject.id === id)[0])
+        .then(assetCollectionObject => assetCollectionObject);
 
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');

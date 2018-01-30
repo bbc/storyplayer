@@ -3,7 +3,9 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
-import CustomVideoContext, { getVideoContext, getCanvas, createVideoContextNodeForUrl } from '../utils/custom-video-context';
+import CustomVideoContext, {
+    getVideoContext, getCanvas, createVideoContextNodeForUrl,
+} from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
@@ -60,9 +62,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
-
-        // after we've created it, wait a bit, then see if we can add to the end of the queue
-        // this._videoContextQueueTimeoutHandle = setTimeout(() => { this._addVideoNodeToVideoContextTimeline(); }, 5000);
     }
 
     start() {
@@ -131,7 +130,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // TODO: this monitoring is to catch the video before it has completely finished:
         // waiting for VideoContext complete event means video is black/invisble
         // and can't have effects applied
-        if ((this._videoNode.state === 2) && this._videoCtx.currentTime > (this._videoNode.stopTime - 0.1)) {
+        if (
+            (this._videoNode.state === 2) &&
+            this._videoCtx.currentTime > (this._videoNode.stopTime - 0.1)
+        ) {
             if (!this._nodeCompleted) {
                 this._videoCtx.pause();
                 if (this._isCurrentSwitchChoice) {
@@ -151,17 +153,18 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     renderVideoElement() {
         // get asset and call build node function
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                if (fg.assets.av_src) {
-                    this._fetchMedia(fg.assets.av_src)
-                        .then((mediaUrl) => {
-                            this.addVideoNodeToVideoCtxGraph(mediaUrl);
-                        })
-                        .catch((err) => {
-                            logger.error(err, 'Notfound');
-                        });
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    if (fg.assets.av_src) {
+                        this._fetchMedia(fg.assets.av_src)
+                            .then((mediaUrl) => {
+                                this.addVideoNodeToVideoCtxGraph(mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Notfound');
+                            });
+                    }
+                });
         }
     }
 
@@ -176,35 +179,38 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._target.appendChild(assetList);
 
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                foregroundItem.textContent = `foreground: ${fg.name}`;
-                if (fg.assets.av_src) {
-                    foregroundItem.textContent += ` from ${fg.assets.av_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    foregroundItem.textContent = `foreground: ${fg.name}`;
+                    if (fg.assets.av_src) {
+                        foregroundItem.textContent += ` from ${fg.assets.av_src}`;
+                    }
+                });
         }
 
         if (
             this._representation.asset_collection.background &&
             this._representation.asset_collection.background.length > 0
         ) {
-            this._fetchAssetCollection(this._representation.asset_collection.background[0]).then((bg) => {
-                backgroundItem.textContent = `background: ${bg.name}`;
-                if (bg.assets.audio_src) {
-                    backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.background[0])
+                .then((bg) => {
+                    backgroundItem.textContent = `background: ${bg.name}`;
+                    if (bg.assets.audio_src) {
+                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
+                    }
+                });
         } else {
             backgroundItem.textContent = 'background: none';
         }
 
         if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default).then((icon) => {
-                iconItem.textContent = `icon: ${icon.name}`;
-                if (icon.assets.image_src) {
-                    iconItem.textContent += ` from ${icon.assets.image_src}`;
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
+                .then((icon) => {
+                    iconItem.textContent = `icon: ${icon.name}`;
+                    if (icon.assets.image_src) {
+                        iconItem.textContent += ` from ${icon.assets.image_src}`;
+                    }
+                });
         } else {
             iconItem.textContent = 'icon: none';
         }
@@ -220,6 +226,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
 
     _applyBlurBehaviour(behaviour: Object, behaviourAppliedCallback: () => void) {
         // create effect notes
+        // eslint-disable-next-line
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
         blurEffectHoriz.blurAmount = behaviour.blur;

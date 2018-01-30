@@ -60,7 +60,8 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
             const node = this._imageNode;
             node.start(0);
             this.emit(RendererEvents.STARTED);
-            this._renderImageTimeoutHandle = setTimeout(() => { this._videoCtx.pause(); }, 32); // TODO: we will miss first 20ms of video when we switch to them
+            // TODO: we will miss first 20ms of video when we switch to them
+            this._renderImageTimeoutHandle = setTimeout(() => { this._videoCtx.pause(); }, 32);
         } else {
             this.on('videoContextImageNodeCreated', () => {
                 this._nodeCreated = true;
@@ -77,6 +78,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     }
 
     applyBlur() {
+        // eslint-disable-next-line max-len
         const blurEffectHoriz = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.HORIZONTAL_BLUR);
         const blurEffectVert = this._videoCtx.effect(CustomVideoContext.DEFINITIONS.VERTICAL_BLUR);
         this._imageNode.disconnect();
@@ -100,18 +102,19 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
     renderImageElement() {
         // get asset and call build node function
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                if (fg.assets.image_src) {
-                    this._fetchMedia(fg.assets.image_src)
-                        .then((mediaUrl) => {
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    if (fg.assets.image_src) {
+                        this._fetchMedia(fg.assets.image_src)
+                            .then((mediaUrl) => {
                             // this.populateVideoElement(this._videoElement, mediaUrl);
-                            this.addImageNodeToVideoCtxGraph(mediaUrl);
-                        })
-                        .catch((err) => {
-                            logger.error(err, 'Notfound');
-                        });
-                }
-            });
+                                this.addImageNodeToVideoCtxGraph(mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Notfound');
+                            });
+                    }
+                });
         }
     }
 

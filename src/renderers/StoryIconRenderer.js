@@ -20,7 +20,9 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconListElement: HTMLElement; // the <ul> containing the icons
-    _iconUrlMap: { [key: string]: { default: ?string, active: ?string } }; // urls of default and active icons
+    _iconUrlMap: {
+        [key: string]: { default: ?string, active: ?string }
+    }; // urls of default and active icons
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -80,7 +82,8 @@ export default class StoryIconRenderer extends EventEmitter {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
             if (pathItem.representation.asset_collection.icon) {
-                const icon = pathItem.representation.asset_collection.icon; // eslint-disable-line prefer-destructuring
+                // eslint-disable-next-line prefer-destructuring
+                const icon = pathItem.representation.asset_collection.icon;
                 const defaultAssetCollectionId = icon.default;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
                 if (icon.active) {

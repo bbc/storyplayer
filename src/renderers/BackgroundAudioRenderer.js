@@ -24,7 +24,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     start() {
         this._renderBackgroundAudio();
-        // this._renderDataModelInfo();
     }
 
     _renderBackgroundAudio() {

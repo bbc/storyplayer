@@ -22,7 +22,6 @@ export default class ImageRenderer extends BaseRenderer {
         if (!this._imageElement) this.renderImageElement();
         this.emit(RendererEvents.STARTED);
         this._setVisibility(true);
-        // this.renderDataModelInfo();
     }
 
     renderImageElement() {
@@ -75,7 +74,6 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     _setVisibility(visible: boolean) {
-        // this._imageElement.style.visibility = visible ? 'visible' : 'hidden';
         if (this._imageElement) this._imageElement.style.display = visible ? 'initial' : 'none';
     }
 
