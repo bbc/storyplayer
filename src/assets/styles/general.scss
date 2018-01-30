@@ -89,22 +89,20 @@ $switchbuttons-img-border: #d3d3d3;
   visibility: visible;
 }
 
-img {
-  .overlay-image {
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
+.active-icon {
+  width: 60px;
+}
 
-  .active-icon {
-    width: 60px;
-  }
+.overlay-image {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
 
-  .inactive-icon {
-    width: 30px;
-  }
+.inactive-icon {
+  width: 30px;
 }
 
 .chapter-icons {
