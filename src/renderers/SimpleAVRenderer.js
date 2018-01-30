@@ -77,7 +77,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             this.populateVideoElement(this._videoElement, mediaUrl);
                         })
                         .catch((err) => {
-                            logger.error(`${err} Notfound`);
+                            logger.error(err, 'Notfound');
                         });
                 }
             });

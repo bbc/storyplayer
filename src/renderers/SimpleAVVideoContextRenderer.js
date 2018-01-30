@@ -158,7 +158,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
                             this.addVideoNodeToVideoCtxGraph(mediaUrl);
                         })
                         .catch((err) => {
-                            logger.error(`${err} Notfound`);
+                            logger.error(err, 'Notfound');
                         });
                 }
             });

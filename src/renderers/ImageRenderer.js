@@ -35,7 +35,7 @@ export default class ImageRenderer extends BaseRenderer {
                             logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                             this._imageElement.src = mediaUrl;
                             this._setVisibility(false);
-                        }).catch((err) => { logger.error(`${err} Notfound`); });
+                        }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
         }

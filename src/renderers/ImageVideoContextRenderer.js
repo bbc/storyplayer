@@ -108,7 +108,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
                             this.addImageNodeToVideoCtxGraph(mediaUrl);
                         })
                         .catch((err) => {
-                            logger.error(`${err} Notfound`);
+                            logger.error(err, 'Notfound');
                         });
                 }
             });
