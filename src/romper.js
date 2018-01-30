@@ -6,6 +6,7 @@ import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
+import logger from './logger';
 
 // @flowignore
 import './assets/styles/general.scss';
@@ -13,6 +14,7 @@ import './assets/styles/general.scss';
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
+    analyticsLogger: (logdata) => { logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`); },
 };
 
 module.exports = {

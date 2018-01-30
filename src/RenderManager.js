@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger } from './romper';
+import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
@@ -14,6 +14,7 @@ import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import SimpleAVVideoContextRenderer from './renderers/SimpleAVVideoContextRenderer';
 import logger from './logger';
+import type { AnalyticsLogger } from './AnalyticEvents';
 
 export default class RenderManager extends EventEmitter {
     constructor(
@@ -41,7 +42,6 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
-        this._analytics({ message: `changed NE: ${narrativeElement.name}` });
         this._fetchPresentation(narrativeElement.presentation.target)
             .then(presentation => this._representationReasoner(presentation))
             .then((representation) => {
