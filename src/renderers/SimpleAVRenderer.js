@@ -323,9 +323,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this._clearBehaviourElements();
-        this._target.removeChild(this._videoElement);
-
+        try {
+            this._clearBehaviourElements();
+            this._target.removeChild(this._videoElement);
+        } catch (e) {
+            //
+        }
         super.destroy();
     }
 }
