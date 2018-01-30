@@ -1,7 +1,7 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
 import ImageRenderer from './ImageRenderer';
 import ImageVideoContextRenderer from './ImageVideoContextRenderer';
 import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';

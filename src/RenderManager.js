@@ -60,7 +60,6 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
-        this._analytics({ message: `changed NE: ${narrativeElement.name}` });
         this._fetchPresentation(narrativeElement.presentation.target)
             .then(presentation => this._representationReasoner(presentation))
             .then((representation) => {
