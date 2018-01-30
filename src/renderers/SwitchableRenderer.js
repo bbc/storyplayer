@@ -41,6 +41,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     this._fetchAssetCollection,
                     this._fetchMedia,
                     this._player,
+                    this._analytics,
                 ));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
@@ -115,8 +116,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                         this._representation.choices[choiceIndex],
                     );
                 }
-            }
-            if (newChoice) {
                 // sync playhead time
                 newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
