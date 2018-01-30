@@ -13,15 +13,14 @@ export default function (params: Object) { // eslint-disable-line no-unused-vars
      * Converts a uri to a playable piece of media.
          *
      * @param {string} the uri of the media to be resolved
-     * @return {Promise.<any>} A promise which resolves to the requested variable, or null if the variable does not exist
+     * @return {Promise.<any>} A promise which resolves to the requested variable,
+     *         or null if the variable does not exist
      */
-    return function (uri: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            if (uri) {
-                resolve(uri);
-            } else {
-                reject(uri);
-            }
-        });
-    };
+    return (uri: string): Promise<any> => new Promise((resolve, reject) => {
+        if (uri) {
+            resolve(uri);
+        } else {
+            reject(uri);
+        }
+    });
 }
