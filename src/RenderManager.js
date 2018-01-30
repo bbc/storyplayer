@@ -155,10 +155,7 @@ export default class RenderManager extends EventEmitter {
                 this._handleBackgroundRendering(choice.representation);
             });
         } else {
-            logger.error(
-                'Do not know how to render',
-                representation.representation_type,
-            );
+            logger.error(`Do not know how to render ${representation.representation_type}`);
         }
         return newRenderer;
     }
