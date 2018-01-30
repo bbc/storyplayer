@@ -1,7 +1,7 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger } from '../romper';
 import ImageRenderer from './ImageRenderer';
 import ImageVideoContextRenderer from './ImageVideoContextRenderer';
 import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
@@ -9,7 +9,7 @@ import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import logger from '../logger';
 
-export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, mediaFetcher: MediaFetcher, target: HTMLElement): ?BaseRenderer {
+export default function RendererFactory(representation: Representation, assetCollectionFetcher: AssetCollectionFetcher, mediaFetcher: MediaFetcher, target: HTMLElement, analytics: AnalyticsLogger): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
         'urn:x-object-based-media:representation-types:image-vctx/v1.0': ImageVideoContextRenderer,
@@ -27,6 +27,7 @@ export default function RendererFactory(representation: Representation, assetCol
             assetCollectionFetcher,
             mediaFetcher,
             target,
+            analytics,
         );
     } else {
         logger.error(`Do not know how to render ${representation.representation_type}`);
