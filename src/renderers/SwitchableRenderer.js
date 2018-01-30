@@ -116,8 +116,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                         this._representation.choices[choiceIndex],
                     );
                 }
-            }
-            if (newChoice) {
                 // sync playhead time
                 newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
