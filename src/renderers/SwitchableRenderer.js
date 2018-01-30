@@ -41,6 +41,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     this._fetchAssetCollection,
                     this._fetchMedia,
                     this._player,
+                    this._analytics,
                 ));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
