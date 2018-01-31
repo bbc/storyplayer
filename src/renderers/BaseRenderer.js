@@ -12,7 +12,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
-    _behaviourRendererMap: {[key: string]: () => void};
+    _behaviourRendererMap: { [key: string]: () => void };
     _destroyed: boolean;
 
     /**
@@ -88,6 +88,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event

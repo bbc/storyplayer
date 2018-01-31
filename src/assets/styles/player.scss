@@ -71,6 +71,10 @@ $backing-colour: #50e3c2;
   background-color: $highlight;
 }
 
+.romper-disabled {
+  opacity: 0.2;
+}
+
 
 @mixin button($background-image) {
   background-color: $transparent;

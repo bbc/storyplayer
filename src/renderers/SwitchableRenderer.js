@@ -12,6 +12,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
     _nodeCompleted: boolean;
+    _inCompleteBehaviours: boolean;
 
     constructor(
         representation: Representation,
@@ -28,6 +29,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
+        this._inCompleteBehaviours = false;
     }
 
     // create a renderer for each choice
@@ -61,6 +63,10 @@ export default class SwitchableRenderer extends BaseRenderer {
                         // }
                         this._nodeCompleted = true;
                         // this.emit(RendererEvents.COMPLETED);
+                    });
+                    cr.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                        this._inCompleteBehaviours = true;
+                        this._disableSwitchButtons();
                     });
                 }
             });
@@ -158,8 +164,19 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     _handleChoiceClicked(event: Object): void {
-        // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
-        this.switchToRepresentationAtIndex(event.id);
+        if (!this._inCompleteBehaviours) {
+            // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
+            this.switchToRepresentationAtIndex(event.id);
+        }
+        // TODO: else show buttons are disabled
+    }
+
+    _disableSwitchButtons() {
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice, idx) => {
+                this._player.setRepresentationControl(idx, false);
+            });
+        }
     }
 
     // return the currently chosen representation, unless we can't
