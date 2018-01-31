@@ -234,9 +234,18 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
-        // while (this._target.lastChild) {
-        //     this._target.removeChild(this._target.lastChild);
-        // }
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.destroy();
+        });
+        if (this._buttonPanel) {
+            this._target.removeChild(this._buttonPanel);
+        }
+
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice, idx) => {
+                this._player.removeRepresentationControl(idx);
+            });
+        }
         this._player.removeListener(
             PlayerEvents.REPRESENTATION_CLICKED,
             this._handleChoiceClicked,
