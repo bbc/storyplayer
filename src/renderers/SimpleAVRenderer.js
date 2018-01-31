@@ -15,6 +15,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyBlurBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
+    _nodeCreated: boolean;
+
+    _runVideosInParallel: boolean;
 
     constructor(
         representation: Representation,
@@ -31,6 +34,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._behaviourElements = [];
 
+        this._runVideosInParallel = true; // do we run all videos in a switchable at the same time?
+
+        this._nodeCreated = false;
+        this.on('videoElementCreated', () => { this._nodeCreated = true; });
+
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
@@ -41,6 +49,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.start();
         // render the video div
         this._target.appendChild(this._videoElement);
+        this.setVisible(true);
         // and control bar
         // this.renderControlBar();
         // start the video
@@ -59,6 +68,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._videoElement.addEventListener('loadeddata', () => {
                 this._videoElement.play();
             });
+        }
+        if (!this._nodeCreated) {
+            this.on('videoElementCreated', () => { this.setMute(false); });
+        } else {
+            this.setMute(false);
         }
     }
 
@@ -97,6 +111,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             videoElement.setAttribute('src', mediaUrl);
         }
+        this.emit('videoElementCreated');
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
@@ -308,12 +323,53 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    switchFrom() {
-        this.destroy();
+    // prepare renderer so it can be switched to quickly and in sync
+    cueUp() {
+        if (this._runVideosInParallel) {
+            this.setVisible(false);
+            this._cueUpWhenReady();
+        }
     }
 
-    switchTo() {
-        this.start();
+    _cueUpWhenReady() {
+        if (this._nodeCreated) {
+            this.setMute(true);
+            this._target.appendChild(this._videoElement);
+            this._videoElement.play();
+        } else {
+            this.on('videoElementCreated', () => {
+                this._cueUpWhenReady();
+            });
+        }
+    }
+
+    setMute(quiet: boolean) {
+        if (this._videoElement) {
+            this._videoElement.muted = quiet;
+        }
+    }
+
+    setVisible(visible: boolean) {
+        this._videoElement.style.display = visible ? 'flex' : 'none';
+    }
+
+    switchFrom() {
+        if (this._runVideosInParallel) {
+            this.setMute(true);
+            this.setVisible(false);
+        } else {
+            this.destroy();
+        }
+    }
+
+    switchTo(time: number) {
+        if (this._runVideosInParallel) {
+            this.setMute(false);
+            this.setVisible(true);
+        } else {
+            this.start();
+            this.setCurrentTime(time);
+        }
     }
 
     _clearBehaviourElements() {

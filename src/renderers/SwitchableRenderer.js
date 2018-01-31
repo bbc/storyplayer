@@ -110,14 +110,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             this._currentRendererIndex = choiceIndex;
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
-                newChoice.switchTo();
+                newChoice.switchTo(this._previousRendererPlayheadTime);
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
                     this.emit(RendererEvents.SWITCHED_REPRESENTATION, this._representation.choices[choiceIndex]);
                 }
-            }
-            if (newChoice) {
-                // sync playhead time
-                newChoice.setCurrentTime(this._previousRendererPlayheadTime);
             }
         }
     }

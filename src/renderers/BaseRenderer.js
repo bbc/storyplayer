@@ -12,7 +12,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _target: HTMLElement;
     _behaviourRunner: ?BehaviourRunner;
-    _behaviourRendererMap: {[key: string]: () => void};
+    _behaviourRendererMap: { [key: string]: () => void };
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -99,8 +99,9 @@ export default class BaseRenderer extends EventEmitter {
     // prepare rendere so it can be switched to quickly and in sync
     cueUp() { }
 
-    switchTo() {
+    switchTo(time: number) {
         this.start();
+        this.setCurrentTime(time);
     }
 
     getBehaviourRenderer(behaviourUrn: string): () => void {
