@@ -3,9 +3,11 @@
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererEvents from './RendererEvents';
+import Player from '../Player';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
+    _target: HTMLDivElement;
 
     constructor(
         representation: Representation,

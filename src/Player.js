@@ -30,11 +30,13 @@ function createOverlay(name: string) {
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');
     button.onclick = () => {
-        Array.prototype.slice
-            .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
-            .filter(el => el !== overlay)
-            .forEach(el => el.classList.add('romper-inactive'));
-        overlay.classList.toggle('romper-inactive');
+        if (overlay.parentElement) {
+            Array.prototype.slice
+                .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
+                .filter(el => el !== overlay)
+                .forEach(el => el.classList.add('romper-inactive'));
+            overlay.classList.toggle('romper-inactive');
+        }
     };
 
     const elements = {};
@@ -198,8 +200,7 @@ class Player extends EventEmitter {
     deactivateRepresentationControl(id: string) {
         const representationControl = this._representation.get(id);
         if (representationControl) {
-            const icon = representationControl.children[0];
-            icon.classList.add('romper-disabled');
+            const icon = representationControl.children[0]; icon.classList.add('romper-disabled');
         }
     }
 
@@ -207,7 +208,7 @@ class Player extends EventEmitter {
         this._representation.remove(id);
     }
 
-    addIconControl(id: string, src: string, selected: boolean) {
+    addIconControl(id: string, src: string, selected: boolean = false) {
         const iconControl = document.createElement('div');
         iconControl.classList.add('romper-icon-control');
 
@@ -226,7 +227,7 @@ class Player extends EventEmitter {
         this._icon.add(id, iconControl);
     }
 
-    setIconControl(id: string, src: string, selected: boolean) {
+    setIconControl(id: string, src: string, selected: boolean = false) {
         const iconControl = this._icon.get(id);
 
         if (iconControl) {
@@ -279,6 +280,23 @@ class Player extends EventEmitter {
             this._backButton.classList.add('romper-inactive');
         }
     }
+
+    _player: HTMLDivElement;
+    _backgroundLayer: HTMLDivElement;
+    _mediaLayer: HTMLDivElement;
+    _guiLayer: HTMLDivElement;
+    backgroundTarget: HTMLDivElement;
+    mediaTarget: HTMLDivElement;
+    guiTarget: HTMLDivElement;
+    _overlays: HTMLDivElement;
+    _buttons: HTMLDivElement;
+    _playPauseButton: HTMLButtonElement;
+    _backButton: HTMLButtonElement;
+    _nextButton: HTMLButtonElement;
+    _fullscreenButton: HTMLButtonElement;
+    _volume: Object;
+    _representation: Object;
+    _icon: Object;
 }
 
 

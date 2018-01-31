@@ -1,6 +1,6 @@
 // @flow
 
-import { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
@@ -10,6 +10,8 @@ import Hls from '../../node_modules/hls.js/dist/hls';
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _audioElement: HTMLAudioElement;
     _hls: Object;
+    _target: HTMLDivElement;
+    _handleVolumeClicked: Function;
 
     constructor(
         assetCollection: AssetCollection,

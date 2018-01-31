@@ -4,6 +4,7 @@ import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import Player from '../Player';
 
 
 export default class BaseRenderer extends EventEmitter {
@@ -14,6 +15,7 @@ export default class BaseRenderer extends EventEmitter {
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: () => void };
     _destroyed: boolean;
+    _target: HTMLDivElement;
 
     /**
      * Load an particular representation. This should not actually render anything until start()

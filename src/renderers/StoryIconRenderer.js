@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../Player';
 import type { AssetCollection, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { StoryPathItem } from '../StoryPathWalker';
 
@@ -19,6 +19,8 @@ export default class StoryIconRenderer extends EventEmitter {
     _currentRepresentationId: string; // the id of the current representation
     _deepestCommonSubstory: string; // the story id of the deepest story with all icons
     _iconUrlMap: { [key: string]: { default: ?string, active: ?string } };
+    _player: Player;
+    _handleIconClicked: Function;
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -142,9 +144,9 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconUrlMap).forEach((mapKey) => {
             const iconUrls = this._iconUrlMap[mapKey];
 
-            if (mapKey === representationId) {
-                this._player.setIconControl(mapKey, iconUrls.active || iconUrls.default, true);
-            } else {
+            if (mapKey === representationId && iconUrls && iconUrls.active) {
+                this._player.setIconControl(mapKey, iconUrls.active, true);
+            } else if (iconUrls && iconUrls.default) {
                 this._player.setIconControl(mapKey, iconUrls.default, false);
             }
         });

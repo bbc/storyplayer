@@ -283,4 +283,5 @@ export default class RenderManager extends EventEmitter {
     _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
+    _player: Player;
 }

@@ -1,5 +1,5 @@
 // @flow
-import { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
@@ -13,6 +13,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _previousRendererPlayheadTime: number;
     _nodeCompleted: boolean;
     _inCompleteBehaviours: boolean;
+    _handleChoiceClicked: Function;
 
     constructor(
         representation: Representation,
@@ -85,7 +86,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                                 this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
                                     // console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
                                     // this._player.addRepresentationControl(`${idx}`, mediaUrl);
-                                    this._player.addRepresentationControl(idx, mediaUrl);
+                                    this._player.addRepresentationControl(`${idx}`, mediaUrl);
                                 }).catch((err) => { console.error(err, 'Notfound'); });
                             }
                         });
@@ -174,7 +175,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _disableSwitchButtons() {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
-                this._player.deactivateRepresentationControl(idx);
+                this._player.deactivateRepresentationControl(`${idx}`);
             });
         }
     }
@@ -256,7 +257,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
-                this._player.removeRepresentationControl(idx);
+                this._player.removeRepresentationControl(`${idx}`);
             });
         }
         this._player.removeListener(

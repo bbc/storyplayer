@@ -7,6 +7,7 @@ import ImageVideoContextRenderer from './ImageVideoContextRenderer';
 import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
+import Player from '../Player';
 
 export default function RendererFactory(
     representation: Representation,

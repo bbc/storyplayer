@@ -1,6 +1,6 @@
 // @flow
 
-import { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
@@ -15,7 +15,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyBlurBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
-    _target: HTMLElement;
+    _target: HTMLDivElement;
+    _handlePlayPauseButtonClicked: Function;
+    _handleFullscreenButtonClicked: Function;
+    _handleVolumeClicked: Function;
 
     constructor(
         representation: Representation,

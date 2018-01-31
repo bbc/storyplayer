@@ -3,11 +3,12 @@
 
 import EventEmitter from 'events';
 import type { AssetCollection, MediaFetcher } from '../romper';
+import Player from '../Player';
 
 export default class BackgroundRenderer extends EventEmitter {
     _assetCollection: AssetCollection;
     _fetchMedia: MediaFetcher;
-    _player: HTMLElement;
+    _player: Player;
     _disabled: boolean;
 
     constructor(
