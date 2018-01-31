@@ -215,8 +215,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this._target.removeChild(this._videoElement);
-        super.destroy();
+        this.destroy();
     }
 
     switchTo() {
