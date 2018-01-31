@@ -146,6 +146,8 @@ export default class StoryIconRenderer extends EventEmitter {
 
             if (mapKey === representationId && iconUrls && iconUrls.active) {
                 this._player.setIconControl(mapKey, iconUrls.active, true);
+            } else if (mapKey === representationId && iconUrls && iconUrls.default) {
+                this._player.setIconControl(mapKey, iconUrls.default, true);
             } else if (iconUrls && iconUrls.default) {
                 this._player.setIconControl(mapKey, iconUrls.default, false);
             }
