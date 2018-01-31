@@ -12,7 +12,6 @@ export default class SwitchableRenderer extends BaseRenderer {
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
     _nodeCompleted: boolean;
-    _buttonPanel: HTMLDivElement;
 
     constructor(
         representation: Representation,
@@ -237,9 +236,6 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
-        if (this._buttonPanel) {
-            this._target.removeChild(this._buttonPanel);
-        }
 
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
