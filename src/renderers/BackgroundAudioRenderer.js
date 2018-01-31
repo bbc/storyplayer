@@ -48,21 +48,33 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     _populateAudioElement(audioElement: HTMLAudioElement, mediaUrl: string) {
-        if (mediaUrl.indexOf('.m3u8') !== -1) {
-            this._hls.loadSource(mediaUrl);
-            this._hls.attachMedia(audioElement);
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                audioElement.play();
-            });
+        if (this._disabled) {
+            console.warn('trying to populate audio element that has been destroyed');
         } else {
-            audioElement.setAttribute('src', mediaUrl);
-            audioElement.addEventListener('loadeddata', () => {
-                audioElement.play();
-            });
-        }
-        if (this._assetCollection && this._assetCollection
-            .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-            this._audioElement.setAttribute('loop', 'true');
+            if (mediaUrl.indexOf('.m3u8') !== -1) {
+                this._hls.loadSource(mediaUrl);
+                this._hls.attachMedia(audioElement);
+                this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (this._disabled) {
+                        console.warn('loaded destroyed audio element - not playing');
+                    } else {
+                        audioElement.play();
+                    }
+                });
+            } else {
+                audioElement.setAttribute('src', mediaUrl);
+                audioElement.addEventListener('loadeddata', () => {
+                    if (this._disabled) {
+                        console.warn('loaded destroyed audio element - not playing');
+                    } else {
+                        audioElement.play();
+                    }
+                });
+            }
+            if (this._assetCollection && this._assetCollection
+                .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
+                this._audioElement.setAttribute('loop', 'true');
+            }
         }
     }
 

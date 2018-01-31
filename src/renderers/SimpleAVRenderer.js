@@ -16,7 +16,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyShowImageBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLElement;
-    _destroyed: boolean;
 
     constructor(
         representation: Representation,
@@ -28,7 +27,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleFullscreenButtonClicked = this._handleFullscreenButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
-        this._destroyed = false;
 
         if (Hls.isSupported()) {
             this._hls = new Hls();
@@ -47,10 +45,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
-        if (this._destroyed) {
-            console.warn('trying to start simpleAV that has been destroyed');
-            return;
-        }
         super.start();
         this._target.appendChild(this._videoElement);
 
@@ -236,7 +230,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this._destroyed = true;
         try {
             this._clearBehaviourElements();
             this._target.removeChild(this._videoElement);

@@ -8,6 +8,7 @@ export default class BackgroundRenderer extends EventEmitter {
     _assetCollection: AssetCollection;
     _fetchMedia: MediaFetcher;
     _player: HTMLElement;
+    _disabled: boolean;
 
     constructor(
         assetCollection: AssetCollection,
@@ -18,9 +19,12 @@ export default class BackgroundRenderer extends EventEmitter {
         this._fetchMedia = mediaFetcher;
         this._player = player;
         this._assetCollection = assetCollection;
+        this._disabled = false;
     }
 
     start() { }
 
-    destroy() { }
+    destroy() {
+        this._disabled = true;
+    }
 }

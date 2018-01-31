@@ -13,6 +13,7 @@ export default class BaseRenderer extends EventEmitter {
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: {[key: string]: () => void};
+    _destroyed: boolean;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -38,6 +39,7 @@ export default class BaseRenderer extends EventEmitter {
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
         this._behaviourRendererMap = {};
+        this._destroyed = false;
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience
@@ -118,5 +120,6 @@ export default class BaseRenderer extends EventEmitter {
             this._behaviourRunner.destroyBehaviours();
         }
         this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
+        this._destroyed = true;
     }
 }
