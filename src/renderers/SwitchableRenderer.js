@@ -174,7 +174,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _disableSwitchButtons() {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
-                this._player.setRepresentationControl(idx, false);
+                this._player.deactivateRepresentationControl(idx);
             });
         }
     }

@@ -187,16 +187,19 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    setRepresentationControl(id: string, selected: boolean) {
+    activateRepresentationControl(id: string) {
         const representationControl = this._representation.get(id);
-
         if (representationControl) {
             const icon = representationControl.children[0];
-            if (selected) {
-                icon.classList.remove('romper-disabled');
-            } else {
-                icon.classList.add('romper-disabled');
-            }
+            icon.classList.remove('romper-disabled');
+        }
+    }
+
+    deactivateRepresentationControl(id: string) {
+        const representationControl = this._representation.get(id);
+        if (representationControl) {
+            const icon = representationControl.children[0];
+            icon.classList.add('romper-disabled');
         }
     }
 
