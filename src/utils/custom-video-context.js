@@ -3,6 +3,7 @@
 import VideoContext from 'videocontext';
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
+import logger from '../logger';
 
 let videoContext;
 let canvas;
@@ -26,33 +27,29 @@ export default class CustomVideoContext extends VideoContext {
     }
 
     static registerVideoContextClient(id: string) {
-        // console.log('registering', id);
     /* eslint-disable class-methods-use-this */
         nodeRepresentationMap[id] = false;
     }
 
     static unregisterVideoContextClient(id: string) {
-        // console.log('forgetting', id);
     /* eslint-disable class-methods-use-this */
         delete nodeRepresentationMap[id];
     }
 
     static showVideoContextForClient(id: string) {
-        // console.log('show vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = true;
         } else {
-            console.warn('representation', id, 'not registered on VCtx');
+            logger.warn(`representation ${id} not registered on VCtx`);
         }
         CustomVideoContext._calculateVisibility();
     }
 
     static hideVideoContextForClient(id: string) {
-        // console.log('hide vtx', id);
         if (nodeRepresentationMap.hasOwnProperty(id)) {
             nodeRepresentationMap[id] = false;
         } else {
-            console.warn('representation', id, 'not registered on VCtx');
+            logger.warn(`representation${id} not registered on VCtx`);
         }
         CustomVideoContext._calculateVisibility();
     }
@@ -62,7 +59,6 @@ export default class CustomVideoContext extends VideoContext {
         Object.keys(nodeRepresentationMap).forEach((user) => {
             show = show || nodeRepresentationMap[user];
         });
-        // console.log('canvas show', show);
         canvas.style.display = show ? 'flex' : 'none';
     }
 

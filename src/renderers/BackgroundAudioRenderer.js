@@ -6,6 +6,7 @@ import type { MediaFetcher, AssetCollection } from '../romper';
 
 // @flowignore
 import Hls from '../../node_modules/hls.js/dist/hls';
+import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _audioElement: HTMLAudioElement;
@@ -44,7 +45,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, 'audio').then((mediaUrl) => {
                 this._populateAudioElement(this._audioElement, mediaUrl);
-            }).catch((err) => { console.error(err, 'Notfound'); });
+            }).catch((err) => { logger.error(err, 'Notfound'); });
         }
         this._target.appendChild(this._audioElement);
     }

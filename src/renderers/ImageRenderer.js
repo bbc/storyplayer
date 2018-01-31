@@ -4,6 +4,8 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererEvents from './RendererEvents';
 import Player from '../Player';
+import logger from '../logger';
+
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
@@ -29,15 +31,16 @@ export default class ImageRenderer extends BaseRenderer {
 
     renderImageElement() {
         this._imageElement = document.createElement('img');
+        this._imageElement.className = 'render-image';
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
-                            console.log('FETCHED FROM MS MEDIA!', mediaUrl);
+                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                             this._imageElement.src = mediaUrl;
                             this._setVisibility(false);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
+                        }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
         }

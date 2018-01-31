@@ -4,6 +4,7 @@ import type BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 import BackgroundAudioRenderer from './BackgroundAudioRenderer';
 import Player from '../Player';
+import logger from '../logger';
 
 export default function BackgroundRendererFactory(
     assetCollectionType: string,
@@ -26,7 +27,7 @@ export default function BackgroundRendererFactory(
             player,
         );
     } else {
-        console.error(`Do not know how to render background ${assetCollectionType}`);
+        logger.error(`Do not know how to render background ${assetCollectionType}`);
     }
     return currentRenderer;
 }

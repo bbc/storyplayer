@@ -293,10 +293,9 @@ export default class StoryReasoner extends EventEmitter {
             });
         });
         if (incomingLinkCount === 0) {
-            // console.log('cannot go back - at start of story');
             // need to start traversing the tree...
         } else if (incomingLinkCount > 1) {
-            // console.log('too many incoming links to define a previous');
+            //
         }
         return previousNodeId;
     }

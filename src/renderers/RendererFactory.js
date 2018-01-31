@@ -8,6 +8,7 @@ import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import Player from '../Player';
+import logger from '../logger';
 
 export default function RendererFactory(
     representation: Representation,
@@ -33,7 +34,7 @@ export default function RendererFactory(
             player,
         );
     } else {
-        console.error(`Do not know how to render ${representation.representation_type}`);
+        logger.error(`Do not know how to render ${representation.representation_type}`);
     }
     return currentRenderer;
 }

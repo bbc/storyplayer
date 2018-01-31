@@ -5,7 +5,7 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
-
+import logger from '../logger';
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
@@ -77,7 +77,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        console.warn('getting time data from on BaseRenderer');
+        logger.warn('getting time data from on BaseRenderer');
         const timeObject = {
             timeBased: false,
             currentTime: 0,
@@ -86,7 +86,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        console.warn('ignoring setting time on BaseRenderer', time);
+        logger.warn(`ignoring setting time on BaseRenderer ${time}`);
     }
 
     complete() {

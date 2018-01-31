@@ -7,6 +7,7 @@ import Player from '../Player';
 import CustomVideoContext, { getVideoContext, getCanvas, createVideoContextNodeForUrl } from '../utils/custom-video-context';
 
 import RendererEvents from './RendererEvents';
+import logger from '../logger';
 
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -104,7 +105,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // if we don't already have a start time for our node, place it at
         // the end of the timeline
         if (this._nodeCreated && this._videoNode.state === 0) {
-            // console.log(this._representation.name, 'waiting - start at', videoContextEndTime);
             this._videoNode.startAt(videoContextEndTime - 0.05);
             this._videoNode.connect(this._videoCtx.destination);
             this._destinationVideoContextNode = this._videoNode;
@@ -115,11 +115,11 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         const videoNode1 = createVideoContextNodeForUrl(mediaUrl);
         videoNode1.registerCallback('ended', () => {
             // this shouldn't be needed - should reach in _monitorVideoTimelineForEnd first
-            console.warn('VCtx node completed event received', mediaUrl);
+            logger.warn(`VCtx node completed event received ${mediaUrl}`);
             if (!this._nodeCompleted) {
                 this.complete();
             } else {
-                console.warn('multiple VCtx ended events received');
+                logger.warn('multiple VCtx ended events received');
             }
             this._nodeCompleted = true;
         });
@@ -138,10 +138,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
                 if (this._isCurrentSwitchChoice) {
                     this.complete();
                 } else {
-                    console.warn('completed VCtx simple av that was npt visible');
+                    logger.warn('completed VCtx simple av that was npt visible');
                 }
             } else {
-                console.warn('multiple VCtx ended events received');
+                logger.warn('multiple VCtx ended events received');
             }
             this._nodeCompleted = true;
         } else {
@@ -159,12 +159,10 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
                             this.addVideoNodeToVideoCtxGraph(mediaUrl);
                         })
                         .catch((err) => {
-                            console.error(err, 'Notfound');
+                            logger.error(err, 'Notfound');
                         });
                 }
             });
-        } else {
-            // console.error('No foreground source for AVRenderer');
         }
     }
 

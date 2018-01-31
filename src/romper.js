@@ -10,6 +10,7 @@ import MediaFetcher from './fetchers/MediaFetcher';
 // @flowignore
 import './assets/styles/player.scss';
 
+
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
 };

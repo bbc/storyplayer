@@ -4,6 +4,7 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
+import logger from '../logger';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
@@ -57,11 +58,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                     const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
-                            // console.log('first switchable finished event');
                             this.complete();// .bind(this);
-                        } // else {
-                        //     console.log('another of the switchables has finished');
-                        // }
+                        }
                         this._nodeCompleted = true;
                         // this.emit(RendererEvents.COMPLETED);
                     });
@@ -199,9 +197,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                            // console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
                             element.setAttribute('src', mediaUrl);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
+                        }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
         }

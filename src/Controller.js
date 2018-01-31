@@ -8,7 +8,7 @@ import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
-
+import logger from './logger';
 // import VideoContext from 'videocontext';
 
 export default class Controller {
@@ -39,11 +39,10 @@ export default class Controller {
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
-            // alert('Story ended!'); // eslint-disable-line no-alert
-            console.warn('Story Ended!');
+            logger.warn('Story Ended!');
         };
         const _handleError = (err) => {
-            alert(`Error: ${err}`); // eslint-disable-line no-alert
+            logger.warn(`Error: ${err}`);
         };
 
         // see if we have a linear story
@@ -127,14 +126,16 @@ export default class Controller {
         if (previous) {
             this._jumpToNarrativeElement(previous);
         } else {
-            console.error('cannot resolve previous node to go to');
+            logger.error('cannot resolve previous node to go to');
         }
     }
 
     // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
         this._currentNarrativeElement = narrativeElement;
-        console.log(narrativeElement); // eslint-disable-line no-console
+        logger.info({
+            obj: narrativeElement,
+        }, 'Narrative Element');
         this._renderManager.handleNEChange(narrativeElement);
     }
 
@@ -173,16 +174,16 @@ export default class Controller {
             }
 
             const _shadowHandleStoryEnd = () => {
-                console.warn('reached story end without meeting target node');
+                logger.warn('reached story end without meeting target node');
             };
             shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
 
             // the 'normal' event listeners
             const _handleStoryEnd = () => {
-                alert('Story ended!'); // eslint-disable-line no-alert
+                logger.warn('Story ended!');
             };
             const _handleError = (err) => {
-                alert(`Error: ${err}`); // eslint-disable-line no-alert
+                logger.warn(`Error: ${err}`);
             };
             shadowReasoner.on('error', _handleError);
 
@@ -231,7 +232,7 @@ export default class Controller {
     // @param neid: id of narrative element to jump to
     _jumpToNarrativeElement(narrativeElementId: string) {
         if (!this._reasoner) {
-            console.error('no reasoner');
+            logger.error('no reasoner');
             // return;
         } else {
             const currentReasoner = this._reasoner
