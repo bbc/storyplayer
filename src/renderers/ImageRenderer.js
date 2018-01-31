@@ -27,6 +27,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     renderImageElement() {
         this._imageElement = document.createElement('img');
+        this._imageElement.className = 'render-image';
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
