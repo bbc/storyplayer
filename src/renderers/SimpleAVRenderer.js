@@ -16,6 +16,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyShowImageBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLElement;
+    _destroyed: boolean;
 
     constructor(
         representation: Representation,
@@ -27,6 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleFullscreenButtonClicked = this._handleFullscreenButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._destroyed = false;
 
         if (Hls.isSupported()) {
             this._hls = new Hls();
@@ -45,6 +47,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
+        if (this._destroyed) {
+            console.warn('trying to start simpleAV that has been destroyed');
+            return;
+        }
         super.start();
         this._target.appendChild(this._videoElement);
 
@@ -70,11 +76,19 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._videoElement.play();
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this._videoElement.play();
+                if (this._destroyed) {
+                    console.warn('loaded destroyed video element - not playing');
+                } else {
+                    this._videoElement.play();
+                }
             });
         } else {
             this._videoElement.addEventListener('loadeddata', () => {
-                this._videoElement.play();
+                if (this._destroyed) {
+                    console.warn('loaded destroyed video element - not playing');
+                } else {
+                    this._videoElement.play();
+                }
             });
         }
     }
@@ -110,11 +124,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
             });
         } else {
             // console.error('No foreground source for AVRenderer');
-        }    }
+        }
+    }
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
-        // if mediaUrl is hls
-        if (mediaUrl.indexOf('.m3u8') !== -1) {
+        if (this._destroyed) {
+            console.warn('trying to populate video element that has been destroyed');
+        } else if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
         } else {
@@ -205,7 +221,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this.destroy();
+        this._target.removeChild(this._videoElement);
+        super.destroy();
     }
 
     switchTo() {
@@ -219,6 +236,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
+        this._destroyed = true;
         try {
             this._clearBehaviourElements();
             this._target.removeChild(this._videoElement);
