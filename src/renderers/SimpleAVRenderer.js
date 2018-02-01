@@ -33,7 +33,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
 
         if (Hls.isSupported()) {
-            this._hls = new Hls();
+            this._hls = new Hls({ startFragPrefetch: true, startLevel: 3 });
         }
         this.renderVideoElement();
 
