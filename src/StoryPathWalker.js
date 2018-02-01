@@ -5,6 +5,7 @@ import StoryReasoner from './StoryReasoner';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type { Representation, Presentation, StoryFetcher, PresentationFetcher, NarrativeElement } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
+import logger from './logger';
 
 export type StoryPathItem = {
     stories: Array<string>,
@@ -149,7 +150,7 @@ export default class StoryPathWalker extends EventEmitter {
             linearReasoner.on('storyEnd', _handleEnd);
 
             const _handleError = (err) => {
-                alert(`Error: ${err}`); // eslint-disable-line no-alert
+                logger.warn(`Error: ${err}`);
             };
             linearReasoner.on('error', _handleError);
 
@@ -161,7 +162,6 @@ export default class StoryPathWalker extends EventEmitter {
             linearReasoner.on('choiceOfLinks', _nonLinear);
 
             const _handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                // console.log('linear reasoner at', narrativeElement.name);
                 const parentStories = [storyId].concat(this._getStoryArray(linearReasoner, []));
                 const pathItem = {
                     stories: parentStories,

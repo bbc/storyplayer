@@ -1,6 +1,7 @@
 // @flow
 
 import BaseBehaviour from './BaseBehaviour';
+import logger from '../logger';
 
 export default class PauseBehaviour extends BaseBehaviour {
     timerHandle: ?number;
@@ -13,7 +14,7 @@ export default class PauseBehaviour extends BaseBehaviour {
     start() {
         const pause = parseFloat(this._behaviourDefinition.pauseTime);
         if (pause < 0) {
-            console.warn('negative pause time: pause behaviour will never complete');
+            logger.warn('negative pause time: pause behaviour will never complete');
         } else {
             this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
         }
@@ -30,4 +31,3 @@ export default class PauseBehaviour extends BaseBehaviour {
         }
     }
 }
-

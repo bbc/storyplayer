@@ -3,12 +3,14 @@
 import type BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 import BackgroundAudioRenderer from './BackgroundAudioRenderer';
+import Player from '../Player';
+import logger from '../logger';
 
 export default function BackgroundRendererFactory(
     assetCollectionType: string,
     assetCollection: AssetCollection,
     mediaFetcher: MediaFetcher,
-    target: HTMLElement,
+    player: Player,
 ): ?BackgroundRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0':
@@ -22,10 +24,10 @@ export default function BackgroundRendererFactory(
         currentRenderer = new Renderer(
             assetCollection,
             mediaFetcher,
-            target,
+            player,
         );
     } else {
-        console.error(`Do not know how to render background ${assetCollectionType}`);
+        logger.error(`Do not know how to render background ${assetCollectionType}`);
     }
     return currentRenderer;
 }

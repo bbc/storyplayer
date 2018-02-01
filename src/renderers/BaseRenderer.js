@@ -4,15 +4,18 @@ import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-
+import Player from '../Player';
+import logger from '../logger';
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
-    _target: HTMLElement;
+    _player: Player;
     _behaviourRunner: ?BehaviourRunner;
-    _behaviourRendererMap: {[key: string]: () => void};
+    _behaviourRendererMap: { [key: string]: () => void };
+    _destroyed: boolean;
+    _target: HTMLDivElement;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -21,23 +24,24 @@ export default class BaseRenderer extends EventEmitter {
      * @param {Representation} representation the representation node to be rendered
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {MediaFetcher} MediaFetcher a fetcher for media
-     * @param {HTMLElement} target the DOM node this representation is targeted at
+     * @param {Player} player the Player used to manage DOM changes
      */
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         mediaFetcher: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
-        this._target = target;
+        this._player = player;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
         this._behaviourRendererMap = {};
+        this._destroyed = false;
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience
@@ -73,7 +77,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        console.warn('getting time data from on BaseRenderer');
+        logger.warn('getting time data from on BaseRenderer');
         const timeObject = {
             timeBased: false,
             currentTime: 0,
@@ -82,10 +86,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        console.warn('ignoring setting time on BaseRenderer', time);
+        logger.warn(`ignoring setting time on BaseRenderer ${time}`);
     }
 
     complete() {
+        this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
             this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
@@ -118,5 +123,6 @@ export default class BaseRenderer extends EventEmitter {
             this._behaviourRunner.destroyBehaviours();
         }
         this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
+        this._destroyed = true;
     }
 }

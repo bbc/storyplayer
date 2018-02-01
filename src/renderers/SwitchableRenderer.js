@@ -1,8 +1,10 @@
 // @flow
+import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
+import logger from '../logger';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
@@ -11,19 +13,25 @@ export default class SwitchableRenderer extends BaseRenderer {
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;
     _nodeCompleted: boolean;
-    _buttonPanel: HTMLDivElement;
+    _inCompleteBehaviours: boolean;
+    _handleChoiceClicked: Function;
 
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, player);
+        this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
+
+        this._choiceDiv = document.createElement('div');
+        this._choiceDiv.id = 'subrenderer';
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
+        this._inCompleteBehaviours = false;
     }
 
     // create a renderer for each choice
@@ -35,7 +43,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     choice.representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
-                    this._target,
+                    this._player,
                 ));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
@@ -50,13 +58,14 @@ export default class SwitchableRenderer extends BaseRenderer {
                     const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
-                            // console.log('first switchable finished event');
                             this.complete();// .bind(this);
-                        } // else {
-                        //     console.log('another of the switchables has finished');
-                        // }
+                        }
                         this._nodeCompleted = true;
                         // this.emit(RendererEvents.COMPLETED);
+                    });
+                    cr.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                        this._inCompleteBehaviours = true;
+                        this._disableSwitchButtons();
                     });
                 }
             });
@@ -66,28 +75,21 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
-        this._buttonPanel = document.createElement('div');
-        const buttonList = document.createElement('ul');
-        this._buttonPanel.className = 'switchbuttons';
-        let i = 0;
         if (this._representation.choices) {
-            this._representation.choices.forEach((choice) => {
-                const index = i;
-                const switchListItem = document.createElement('li');
-                const switchButton = document.createElement('img');
-                switchButton.setAttribute('role', 'button');
-                switchButton.setAttribute('alt', choice.label);
-                switchButton.addEventListener('click', () => {
-                    this.switchToRepresentationAtIndex(index);
-                });
-                // switchButton.innerHTML = choice.label;
-                this._setIcon(switchButton, choice.representation);
-                switchListItem.appendChild(switchButton);
-                buttonList.appendChild(switchListItem);
-                i += 1;
+            this._representation.choices.forEach((choice, idx) => {
+                if (choice.representation.asset_collection.icon) {
+                    this._fetchAssetCollection(choice.representation.asset_collection.icon.default)
+                        .then((icon) => {
+                            if (icon.assets.image_src) {
+                                this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
+                                    // console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
+                                    // this._player.addRepresentationControl(`${idx}`, mediaUrl);
+                                    this._player.addRepresentationControl(`${idx}`, mediaUrl);
+                                }).catch((err) => { console.error(err, 'Notfound'); });
+                            }
+                        });
+                }
             });
-            this._buttonPanel.appendChild(buttonList);
-            this._target.appendChild(this._buttonPanel);
         }
     }
 
@@ -144,7 +146,9 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
+        // this._target.appendChild(this._choiceDiv);
         this._renderSwitchButtons();
+        this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
 
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.cueUp();
@@ -156,6 +160,22 @@ export default class SwitchableRenderer extends BaseRenderer {
             firstChoice.willStart();
         }
         // this._renderDataModelInfo();
+    }
+
+    _handleChoiceClicked(event: Object): void {
+        if (!this._inCompleteBehaviours) {
+            // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
+            this.switchToRepresentationAtIndex(event.id);
+        }
+        // TODO: else show buttons are disabled
+    }
+
+    _disableSwitchButtons() {
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice, idx) => {
+                this._player.deactivateRepresentationControl(`${idx}`);
+            });
+        }
     }
 
     // return the currently chosen representation, unless we can't
@@ -177,9 +197,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                            // console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
                             element.setAttribute('src', mediaUrl);
-                        }).catch((err) => { console.error(err, 'Notfound'); });
+                        }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
         }
@@ -232,9 +251,16 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
-        if (this._buttonPanel) {
-            this._target.removeChild(this._buttonPanel);
+
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice, idx) => {
+                this._player.removeRepresentationControl(`${idx}`);
+            });
         }
+        this._player.removeListener(
+            PlayerEvents.REPRESENTATION_CLICKED,
+            this._handleChoiceClicked,
+        );
         super.destroy();
     }
 }
