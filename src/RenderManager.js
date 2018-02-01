@@ -113,7 +113,6 @@ export default class RenderManager extends EventEmitter {
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
             if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-                // } else {
                 this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
@@ -258,18 +257,7 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
-        if (this._upcomingRenderers) {
-            this._upcomingRenderers.forEach((rendererDict) => {
-                Object.keys(rendererDict).forEach((rendererKey) => {
-                    rendererDict[rendererKey].destroy();
-                });
-            });
-        }
-        Object.keys(this._backgroundRenderers).forEach((rendererKey) => {
-            this._backgroundRenderers[rendererKey].destroy();
-            delete this._backgroundRenderers[rendererKey];
-        });
-        this._initialise();
+        this._currentRenderer = null;
     }
 
     _controller: Controller;
