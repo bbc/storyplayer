@@ -8,7 +8,7 @@ import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 
 // @flowignore
-import './assets/styles/general.scss';
+import './assets/styles/player.scss';
 
 
 const DEFAULT_SETTINGS = {

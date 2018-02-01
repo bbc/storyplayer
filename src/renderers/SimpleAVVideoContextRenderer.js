@@ -2,6 +2,7 @@
 
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import Player from '../Player';
 
 import CustomVideoContext, { getVideoContext, getCanvas, createVideoContextNodeForUrl } from '../utils/custom-video-context';
 
@@ -31,9 +32,9 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
-        target: HTMLElement,
+        player: Player,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, target);
+        super(representation, assetCollectionFetcher, fetchMedia, player);
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);

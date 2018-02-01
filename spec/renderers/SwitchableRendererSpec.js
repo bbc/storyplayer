@@ -8,6 +8,7 @@ import sinonChai from 'sinon-chai';
 import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
 import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
 import ImageRenderer from '../../src/renderers/ImageRenderer';
+import Player from '../../src/Player';
 // import ImageVideoContextRenderer from '../../src/renderers/ImageVideoContextRenderer';
 // import SimpleAVVideoContextRenderer from '../../src/renderers/SimpleAVVideoContextRenderer';
 
@@ -107,13 +108,15 @@ const assetCollectionFetcher = id =>
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
+const player = new Player(document.createElement('div'));
+
 describe('SwitchableRenderer', () => {
     it('can create an instance of SwitchableRenderer', (done) => {
         const Renderer = new SwitchableRenderer(
             defaultSwitchableRepresentation,
             assetCollectionFetcher,
             mediaFetcher,
-            document.createElement('div'),
+            player,
         );
         expect(Renderer).to.have.property('_representation');
         done();
@@ -124,7 +127,7 @@ describe('SwitchableRenderer', () => {
             defaultSwitchableRepresentation,
             assetCollectionFetcher,
             mediaFetcher,
-            document.createElement('div'),
+            player,
         );
 
         expect(Renderer).to.have.property('_choiceRenderers');
