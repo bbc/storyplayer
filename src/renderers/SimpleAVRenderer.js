@@ -75,7 +75,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 if (this._destroyed) {
-                    console.warn('loaded destroyed video element - not playing');
+                    logger.warn('loaded destroyed video element - not playing');
                 } else {
                     this._videoElement.play();
                 }
@@ -83,7 +83,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             this._videoElement.addEventListener('loadeddata', () => {
                 if (this._destroyed) {
-                    console.warn('loaded destroyed video element - not playing');
+                    logger.warn('loaded destroyed video element - not playing');
                 } else {
                     this._videoElement.play();
                 }
@@ -109,23 +109,24 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // set video source
         if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground).then((fg) => {
-                if (fg.assets.av_src) {
-                    this._fetchMedia(fg.assets.av_src)
-                        .then((mediaUrl) => {
-                            this.populateVideoElement(this._videoElement, mediaUrl);
-                        })
-                        .catch((err) => {
-                            logger.error(err, 'Notfound');
-                        });
-                }
-            });
+            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+                .then((fg) => {
+                    if (fg.assets.av_src) {
+                        this._fetchMedia(fg.assets.av_src)
+                            .then((mediaUrl) => {
+                                this.populateVideoElement(this._videoElement, mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Notfound');
+                            });
+                    }
+                });
         }
     }
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         if (this._destroyed) {
-            console.warn('trying to populate video element that has been destroyed');
+            logger.warn('trying to populate video element that has been destroyed');
         } else if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
@@ -136,7 +137,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         const { blur } = behaviour;
-        this._videoElement.style.filter = `blur(${blur}px)`; // eslint-disable-line prefer-destructuring
+        this._videoElement.style.filter = `blur(${blur}px)`;
         callback();
     }
 
@@ -190,7 +191,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     getCurrentTime(): Object {
         let videoTime;
-        if (!this._videoElement || this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA) {
+        if (
+            !this._videoElement ||
+            this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA
+        ) {
             videoTime = 0;
         } else {
             videoTime = this._videoElement.currentTime;

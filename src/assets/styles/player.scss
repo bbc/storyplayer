@@ -4,186 +4,186 @@ $highlight: #ff7f11;
 $accent-colour: #fff;
 $backing-colour: #50e3c2;
 
-
-// Reset styles for all elements within romper.
-.romper-player,
-.romper-player * {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  outline: none;
-}
+$romper-background-color: #ccc;
 
 .romper-player {
+  color: $accent-colour;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  width: 600px;
   height: calc(600px / 16 * 9);
-  color: $accent-colour;
+  justify-content: flex-end;
   position: relative;
+  width: 600px;
+
+  // Reset styles for all elements within romper.
+  * {
+    border: 0;
+    margin: 0;
+    outline: none;
+    padding: 0;
+  }
 
   .romper-background,
   .romper-media,
   .romper-gui {
+    bottom: 0;
+    left: 0;
     position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
+    right: 0;
+    top: 0;
   }
 
   .romper-media {
-    background-color: #ccc;
+    background-color: $romper-background-color;
   }
 
   .romper-video-element {
-    width: 100%;
     height: 100%;
+    width: 100%;
+  }
+
+  .romper-inactive {
+    display: none !important;
+    visibility: collapse !important;
+  }
+
+  .romper-selected {
+    background-color: $highlight;
+  }
+
+  .romper-play-button {
+    @include button('../images/play.svg');
+    margin-right: 20px;
+  }
+
+  .romper-pause-button {
+    @include button('../images/pause.svg');
+    margin-right: 20px;
+  }
+
+  .romper-volume-button {
+    @include button('../images/listen.svg');
+    margin-left: auto;
+  }
+
+  .romper-representation-button {
+    @include button('../images/series-stack.svg');
+  }
+
+  .romper-icon-button {
+    @include button('../images/chapters.svg');
+  }
+
+  .romper-fullscreen-button {
+    @include button('../images/fullscreen.svg');
+    margin-left: 20px;
+  }
+
+  .romper-back-button {
+    @include button('../images/previous.svg');
+  }
+
+  .romper-next-button {
+    @include button('../images/next.svg');
+  }
+
+
+  .romper-volume-overlay {
+    @include overlay;
+    flex-direction: column;
+
+    .romper-volume-control {
+      align-items: center;
+      display: flex;
+      flex: none;
+      flex-direction: row;
+      font-size: smaller;
+      justify-content: center;
+      width: 100%;
+
+      .romper-volume-label {
+        margin-right: 1em;
+        overflow-x: hidden;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 8em;
+      }
+
+      .romper-volume-range {
+        width: 100%;
+      }
+    }
+  }
+
+  .romper-representation-overlay {
+    @include overlay;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .romper-representation-icon {
+      width: 3em;
+    }
+  }
+
+  .romper-icon-overlay {
+    @include overlay;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .romper-icon {
+      width: 3em;
+    }
   }
 }
 
 .romper-player > .romper-gui {
   >.romper-overlays {
+    align-items: center;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
     height: 87%;
+    justify-content: center;
+    width: 100%;
   }
 
   > .romper-buttons {
-    display: flex;
-    width: 100%;
-    height: 13%;
     background-color: $backing-colour;
+    display: flex;
+    height: 13%;
+    width: 100%;
   }
-}
 
-.romper-player .romper-inactive {
-  visibility: collapse !important;
-  display: none !important;
-}
-
-.romper-player .romper-selected {
-  background-color: $highlight;
 }
 
 .romper-disabled {
   opacity: 0.2;
 }
 
-
 @mixin button($background-image) {
   background-color: $transparent;
   background-image: url($background-image);
   background-position: center;
   background-repeat: no-repeat;
-  padding: 4px;
   height: 100%;
+  padding: 4px;
   width: 8%;
 }
 
-.romper-player .romper-play-button {
-  @include button('../images/play.svg');
-  margin-right: 20px;
-}
 
-.romper-player .romper-pause-button {
-  @include button('../images/pause.svg');
-  margin-right: 20px;
-}
-
-.romper-player .romper-volume-button {
-  @include button('../images/listen.svg');
-  margin-left: auto;
-}
-
-.romper-player .romper-representation-button {
-  @include button('../images/series-stack.svg');
-}
-
-.romper-player .romper-icon-button {
-  @include button('../images/chapters.svg');
-}
-
-.romper-player .romper-fullscreen-button {
-  @include button('../images/fullscreen.svg');
-  margin-left: 20px;
-}
-
-.romper-player .romper-back-button {
-  @include button('../images/previous.svg');
-}
-
-.romper-player .romper-next-button {
-  @include button('../images/next.svg');
-}
-
-
-@mixin overlay() {
+@mixin overlay {
+  align-items: center;
   background-color: $backing-colour;
+  display: flex;
+  max-height: 70%;
+  max-width: 60%;
   opacity: 0.9;
   overflow-y: auto;
-  display: flex;
-  align-items: center;
-
-  max-width: 60%;
-  max-height: 70%;
   padding: 5px;
 
   & > * {
     padding: 5px;
-  }
-}
-
-.romper-player .romper-volume-overlay {
-  @include overlay();
-  flex-direction: column;
-
-  .romper-volume-control {
-    flex: none;
-    font-size: smaller;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-
-    .romper-volume-label {
-      text-align: left;
-      width: 8em;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
-      margin-right: 1em;
-      white-space: nowrap;
-    }
-
-    .romper-volume-range {
-      width: 100%;
-    }
-  }
-}
-
-.romper-player .romper-representation-overlay {
-  @include overlay();
-  flex-wrap: wrap;
-  justify-content: center;
-
-  .romper-representation-icon {
-    width: 3em;
-  }
-}
-
-.romper-player .romper-icon-overlay {
-  @include overlay();
-  flex-wrap: wrap;
-  justify-content: center;
-
-  .romper-icon {
-    width: 3em;
   }
 }
 
@@ -193,8 +193,8 @@ $backing-colour: #50e3c2;
 
 .romper-image-overlay,
 .romper-render-image {
-  top: 0;
-  left: 0;
-  width: 100%;
   height: 100%;
+  left: 0;
+  top: 0;
+  width: 100%;
 }

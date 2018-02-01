@@ -6,9 +6,9 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import StoryPathWalker from '../src/StoryPathWalker';
-import StoryReasonerFactory from '../src/StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
+// eslint-disable-next-line import/no-named-as-default
+import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
-// import type { Presentation } from '../src/romper';
 
 const storyjson = require('./teststory.json');
 
@@ -16,10 +16,13 @@ chai.use(sinonChai);
 const resolver = sinon.stub();
 
 const storyFetcher = id =>
-    Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0]).then(storyObject => storyObject);
+    Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0])
+        .then(storyObject => storyObject);
 
 const presentationFetcher = id =>
-    Promise.resolve(storyjson.presentations.filter(presentationObject => presentationObject.id === id)[0]).then(presentationObject => presentationObject);
+    Promise.resolve(storyjson.presentations
+        .filter(presentationObject => presentationObject.id === id)[0])
+        .then(presentationObject => presentationObject);
 
 const storyReasonerFactory = StoryReasonerFactory(storyFetcher, resolver);
 
@@ -40,7 +43,8 @@ describe('StoryPathWalker', () => {
         const handleWalkEnd = () => {
             expect(spw._linear).to.be.equal(true);
             expect(spw._pathmap.length).to.equal(7);
-            expect(spw._pathmap[1].narrative_element.presentation.target).to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
+            expect(spw._pathmap[1].narrative_element.presentation.target)
+                .to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
@@ -51,8 +55,10 @@ describe('StoryPathWalker', () => {
         const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
         const handleWalkEnd = () => {
             spw.getStoryItemList(representationReasoner).then((storyItemArray) => {
-                expect(storyItemArray[2].presentation.id).to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
-                expect(storyItemArray[2].presentation.representations[0].representation.id).to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
+                expect(storyItemArray[2].presentation.id)
+                    .to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
+                expect(storyItemArray[2].presentation.representations[0].representation.id)
+                    .to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
                 done();
             });
         };

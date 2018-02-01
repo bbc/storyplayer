@@ -24,10 +24,13 @@ describe('ObjectDataResolver', () => {
         });
     });
 
-    it('returns null when the requested keys are nested and a high-level object does not exist', () => {
-        const dataResolver = ObjectDataResolverFactory({});
-        return dataResolver('nested.test').then((result) => {
-            expect(result).to.equal(null);
-        });
-    });
+    it(
+        'returns null when the requested keys are nested and a high-level object does not exist',
+        () => {
+            const dataResolver = ObjectDataResolverFactory({});
+            return dataResolver('nested.test').then((result) => {
+                expect(result).to.equal(null);
+            });
+        },
+    );
 });

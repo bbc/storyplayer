@@ -412,14 +412,17 @@ describe('StoryReasoner', () => {
             buildStoryReasoner();
         });
 
-        it('will fetch a sub-story if the presentation of a narrative node is another story', (done) => {
-            subStoryReasoner.start.callsFake(() => {
-                expect(subStoryReasonerFactory).to.have.been.calledWith(PRESENTATION_OBJECT_ID);
-                done();
-            });
+        it(
+            'will fetch a sub-story if the presentation of a narrative node is another story',
+            (done) => {
+                subStoryReasoner.start.callsFake(() => {
+                    expect(subStoryReasonerFactory).to.have.been.calledWith(PRESENTATION_OBJECT_ID);
+                    done();
+                });
 
-            storyReasoner.start();
-        });
+                storyReasoner.start();
+            },
+        );
 
         it('will throw an error if it can not fetch a substory', (done) => {
             subStoryReasonerFactory.returns(Promise.reject());

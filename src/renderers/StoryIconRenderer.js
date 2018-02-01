@@ -168,16 +168,11 @@ export default class StoryIconRenderer extends EventEmitter {
         return index;
     }
 
-    // show or hide the target of this renderer according to whether we are in a substory
+    // eslint-disable-next-line
     _showHideTarget() {
-        const currentRepIndex = this._getRepresentationIndex(this._currentRepresentationId);
-        const currentPathItem = this._pathItemList[currentRepIndex];
-
-        if (currentPathItem.stories.indexOf(this._deepestCommonSubstory) === -1) {
-            // this._player.setIconsVisible(false);
-        } else {
-            // this._player.setIconsVisible(true);
-        }
+        // [TODO]: Code removed as it didn't do anything. If the user was in a substory which
+        // contained any of the chapter markers it would show them. If not, then they would be
+        // hidden. We still need to do this but using Player.
     }
 
     // find the deepest substory that includes all the representations with icons

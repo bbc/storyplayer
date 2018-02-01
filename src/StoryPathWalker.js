@@ -3,7 +3,9 @@
 import EventEmitter from 'events';
 import StoryReasoner from './StoryReasoner';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
-import type { Representation, Presentation, StoryFetcher, PresentationFetcher, NarrativeElement } from './romper';
+import type {
+    Representation, Presentation, StoryFetcher, PresentationFetcher, NarrativeElement,
+} from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import logger from './logger';
 
@@ -119,6 +121,7 @@ export default class StoryPathWalker extends EventEmitter {
      * which will be empty if the story is non-linear, or if this is called before the
      * walkComplete event has been emitted.
      */
+    // eslint-disable-next-line max-len
     getStoryItemList(representationReasoner: RepresentationReasoner): Promise<Array<StoryPathItem>> {
         const promises = [];
         this._pathmap.forEach((pathItem) => {

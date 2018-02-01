@@ -1,5 +1,5 @@
 // @flow
-/* eslint-disable class-methods-use-this */
+
 
 import EventEmitter from 'events';
 import type { AssetCollection, MediaFetcher } from '../romper';
@@ -23,6 +23,7 @@ export default class BackgroundRenderer extends EventEmitter {
         this._disabled = false;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     start() { }
 
     destroy() {

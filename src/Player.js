@@ -255,16 +255,6 @@ class Player extends EventEmitter {
         }
     }
 
-    // setFullscreen(isFullscreen: boolean) {
-    //     if (isFullscreen) {
-    //         this._fullscreenButton.classList.add('romper-exit-fullscreen-button');
-    //         this._fullscreenButton.classList.remove('romper-fullscreen-button');
-    //     } else {
-    //         this._fullscreenButton.classList.add('romper-fullscreen-button');
-    //         this._fullscreenButton.classList.remove('romper-exit-fullscreen-button');
-    //     }
-    // }
-
     setNextAvailable(isNextAvailable: boolean) {
         if (isNextAvailable) {
             this._nextButton.classList.remove('romper-inactive');

@@ -59,7 +59,11 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart() {
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(RendererEvents.STARTED, RendererEvents.COMPLETE_START_BEHAVIOURS)) {
+            !this._behaviourRunner.runBehaviours(
+                RendererEvents.STARTED,
+                RendererEvents.COMPLETE_START_BEHAVIOURS,
+            )
+        ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
     }
@@ -92,8 +96,13 @@ export default class BaseRenderer extends EventEmitter {
     complete() {
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(RendererEvents.COMPLETED, RendererEvents.COMPLETED)) {
-            this.emit(RendererEvents.COMPLETED); // we didn't find any behaviours to run, so emit completion event
+            !this._behaviourRunner.runBehaviours(
+                RendererEvents.COMPLETED,
+                RendererEvents.COMPLETED,
+            )
+        ) {
+            // we didn't find any behaviours to run, so emit completion event
+            this.emit(RendererEvents.COMPLETED);
         }
     }
 
@@ -122,7 +131,8 @@ export default class BaseRenderer extends EventEmitter {
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
         }
-        this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
+        // we didn't find any behaviours to run, so emit completion event
+        this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
     }
 }

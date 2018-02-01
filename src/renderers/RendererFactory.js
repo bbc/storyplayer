@@ -20,7 +20,7 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
         'urn:x-object-based-media:representation-types:image-vctx/v1.0': ImageVideoContextRenderer,
         'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
-        'urn:x-object-based-media:representation-types:simple-av-vctx/v1.0': SimpleAVVideoContextRenderer,
+        'urn:x-object-based-media:representation-types:simple-av-vctx/v1.0': SimpleAVVideoContextRenderer, // eslint-disable-line max-len
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
     };
 

@@ -23,7 +23,8 @@ describe('RepresentationReasoner', () => {
                         version: '0:0',
                         name: 'Test Representation',
                         tags: {},
-                        representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
+                        representation_type:
+                            'urn:x-object-based-media:representation-types:simple-av/v1.0',
                         asset_collection: {
                             foreground: '852bd2f3-3b76-40af-bca6-b266a4c0d22e',
                             background: ['d22484f9-da14-484b-8051-71be36b2227f'],

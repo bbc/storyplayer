@@ -29,7 +29,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     start() {
         this._renderBackgroundAudio();
-        // this._renderDataModelInfo();
         this._player.addVolumeControl(this._assetCollection.id, 'Background');
         this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
     }
@@ -52,14 +51,14 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _populateAudioElement(audioElement: HTMLAudioElement, mediaUrl: string) {
         if (this._disabled) {
-            console.warn('trying to populate audio element that has been destroyed');
+            logger.warn('trying to populate audio element that has been destroyed');
         } else {
             if (mediaUrl.indexOf('.m3u8') !== -1) {
                 this._hls.loadSource(mediaUrl);
                 this._hls.attachMedia(audioElement);
                 this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     if (this._disabled) {
-                        console.warn('loaded destroyed audio element - not playing');
+                        logger.warn('loaded destroyed audio element - not playing');
                     } else {
                         audioElement.play();
                     }
@@ -68,7 +67,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                 audioElement.setAttribute('src', mediaUrl);
                 audioElement.addEventListener('loadeddata', () => {
                     if (this._disabled) {
-                        console.warn('loaded destroyed audio element - not playing');
+                        logger.warn('loaded destroyed audio element - not playing');
                     } else {
                         audioElement.play();
                     }

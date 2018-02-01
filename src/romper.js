@@ -3,7 +3,8 @@
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import type { Settings } from './romper';
 import Controller from './Controller';
-import StoryReasonerFactory from './StoryReasonerFactory'; // eslint-disable-line import/no-named-as-default
+// eslint-disable-next-line import/no-named-as-default
+import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 
