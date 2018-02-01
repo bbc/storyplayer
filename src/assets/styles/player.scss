@@ -186,3 +186,15 @@ $backing-colour: #50e3c2;
     width: 3em;
   }
 }
+
+.romper-image-overlay {
+  position: absolute;
+}
+
+.romper-image-overlay,
+.romper-render-image {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

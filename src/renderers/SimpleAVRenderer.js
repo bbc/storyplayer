@@ -153,7 +153,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _overlayImage(imageSrc: string) {
         const overlayImageElement = document.createElement('img');
         overlayImageElement.src = imageSrc;
-        overlayImageElement.className = 'overlayImage';
+        overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
     }
