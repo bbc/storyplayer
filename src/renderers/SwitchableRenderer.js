@@ -58,10 +58,9 @@ export default class SwitchableRenderer extends BaseRenderer {
                     const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
-                            this.complete();// .bind(this);
+                            this.complete();
                         }
                         this._nodeCompleted = true;
-                        // this.emit(RendererEvents.COMPLETED);
                     });
                     cr.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
                         this._inCompleteBehaviours = true;
@@ -82,10 +81,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                         .then((icon) => {
                             if (icon.assets.image_src) {
                                 this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                                    // console.log('FETCHED ICON FROM MS MEDIA!', mediaUrl);
-                                    // this._player.addRepresentationControl(`${idx}`, mediaUrl);
                                     this._player.addRepresentationControl(`${idx}`, mediaUrl);
-                                }).catch((err) => { console.error(err, 'Notfound'); });
+                                }).catch((err) => { logger.error(err, 'Notfound'); });
                             }
                         });
                 }
@@ -149,7 +146,6 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
-        // this._target.appendChild(this._choiceDiv);
         this._renderSwitchButtons();
         this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
 
@@ -162,7 +158,6 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (firstChoice) {
             firstChoice.willStart();
         }
-        // this._renderDataModelInfo();
     }
 
     _handleChoiceClicked(event: Object): void {

@@ -131,7 +131,8 @@ export default class BaseRenderer extends EventEmitter {
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
         }
-        this.emit(RendererEvents.DESTROYED); // we didn't find any behaviours to run, so emit completion event
+        // we didn't find any behaviours to run, so emit completion event
+        this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
     }
 }

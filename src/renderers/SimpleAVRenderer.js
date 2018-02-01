@@ -75,7 +75,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 if (this._destroyed) {
-                    console.warn('loaded destroyed video element - not playing');
+                    logger.warn('loaded destroyed video element - not playing');
                 } else {
                     this._videoElement.play();
                 }
@@ -83,7 +83,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             this._videoElement.addEventListener('loadeddata', () => {
                 if (this._destroyed) {
-                    console.warn('loaded destroyed video element - not playing');
+                    logger.warn('loaded destroyed video element - not playing');
                 } else {
                     this._videoElement.play();
                 }
@@ -126,7 +126,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
         if (this._destroyed) {
-            console.warn('trying to populate video element that has been destroyed');
+            logger.warn('trying to populate video element that has been destroyed');
         } else if (mediaUrl.indexOf('.m3u8') !== -1) {
             this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
@@ -137,7 +137,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         const { blur } = behaviour;
-        // eslint-disable-next-line prefer-destructuring
         this._videoElement.style.filter = `blur(${blur}px)`;
         callback();
     }

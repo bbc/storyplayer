@@ -11,7 +11,6 @@ import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
-// import VideoContext from 'videocontext';
 
 export default class Controller {
     constructor(

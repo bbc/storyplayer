@@ -11,9 +11,6 @@ let canvas;
 const nodeRepresentationMap = {};
 
 export default class CustomVideoContext extends VideoContext {
-    /* eslint-disable no-param-reassign */
-    /* eslint-disable class-methods-use-this */
-
     guessContextFinishTime() {
         const snapshot = this.snapshot();
         let maxDuration = 0;
@@ -27,12 +24,10 @@ export default class CustomVideoContext extends VideoContext {
     }
 
     static registerVideoContextClient(id: string) {
-    /* eslint-disable class-methods-use-this */
         nodeRepresentationMap[id] = false;
     }
 
     static unregisterVideoContextClient(id: string) {
-    /* eslint-disable class-methods-use-this */
         delete nodeRepresentationMap[id];
     }
 
@@ -69,6 +64,7 @@ export default class CustomVideoContext extends VideoContext {
         attributes: Object = {},
     ) {
         const videoElement = document.createElement('video');
+        // eslint-disable-next-line no-param-reassign
         attributes.crossorigin = 'anonymous';
         // $FlowIgnore
         const videoNode: Object = this.video(videoElement, sourceOffset, preloadTime, attributes);

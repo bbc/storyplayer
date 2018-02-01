@@ -123,11 +123,6 @@ describe('SwitchableRenderer', () => {
         expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVRenderer);
         expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVRenderer);
         expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageRenderer);
-        // expect(Renderer._choiceRenderers[0]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        // expect(Renderer._choiceRenderers[1]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        // expect(Renderer._choiceRenderers[2]).to.be.an.instanceof(SimpleAVVideoContextRenderer);
-        // expect(Renderer._choiceRenderers[3]).to.be.an.instanceof(ImageVideoContextRenderer);
-
         done();
     });
 });

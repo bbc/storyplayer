@@ -70,7 +70,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         // start the video
         this.setVisible(true);
         this.playVideo();
-        // this.renderDataModelInfo();
         this._isCurrentSwitchChoice = true;
     }
 
@@ -334,9 +333,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     stopAndDisconnect() {
         this._clearEffectNodes();
         this._videoNode.unregisterCallback();
-
-        // Stop current active node
-        // this._videoNode.stop(-1);
 
         // disconnect current active node.
         this._videoNode.disconnect();

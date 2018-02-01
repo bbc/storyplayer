@@ -28,7 +28,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         target: Player,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
-        // this._canvas = document.createElement('canvas');
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
@@ -50,7 +49,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         super.start();
         // start the video
         this.renderImage();
-        // this.renderDataModelInfo();
         this._setVisible(true);
     }
 
@@ -108,7 +106,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src)
                             .then((mediaUrl) => {
-                            // this.populateVideoElement(this._videoElement, mediaUrl);
                                 this.addImageNodeToVideoCtxGraph(mediaUrl);
                             })
                             .catch((err) => {
@@ -143,7 +140,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         } else {
             CustomVideoContext.hideVideoContextForClient(this._representation.id);
         }
-        // this._canvas.style.display = visible ? 'flex' : 'none';
     }
 
     switchFrom() {

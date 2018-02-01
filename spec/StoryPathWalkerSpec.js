@@ -9,7 +9,6 @@ import StoryPathWalker from '../src/StoryPathWalker';
 // eslint-disable-next-line import/no-named-as-default
 import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
-// import type { Presentation } from '../src/romper';
 
 const storyjson = require('./teststory.json');
 
