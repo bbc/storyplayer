@@ -14,3 +14,5 @@ rules:
     - max-depth: 3
   leading-zero:
     - 0
+  no-important:
+    - 0
