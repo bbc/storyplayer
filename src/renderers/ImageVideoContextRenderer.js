@@ -2,6 +2,7 @@
 
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import Player from '../Player';
 
 import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
 
@@ -24,7 +25,7 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
-        target: HTMLElement,
+        target: Player,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, target);
         // this._canvas = document.createElement('canvas');
