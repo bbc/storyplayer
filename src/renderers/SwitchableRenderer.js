@@ -26,6 +26,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
