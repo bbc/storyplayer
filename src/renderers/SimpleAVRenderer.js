@@ -18,7 +18,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
-    _handleFullscreenButtonClicked: Function;
     _handleVolumeClicked: Function;
 
     constructor(
@@ -29,7 +28,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-        this._handleFullscreenButtonClicked = this._handleFullscreenButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
 
         if (Hls.isSupported()) {
@@ -58,10 +56,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
-        );
-        player.on(
-            PlayerEvents.FULLSCREEN_BUTTON_CLICKED,
-            this._handleFullscreenButtonClicked,
         );
         player.on(
             PlayerEvents.VOLUME_CHANGED,
@@ -169,21 +163,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    _handleFullscreenButtonClicked(): void {
-        const video = this._videoElement;
-
-        if (video.requestFullscreen) {
-            // @flowignore
-            video.requestFullscreen();
-        } else if (video.mozRequestFullScreen) {
-            // @flowignore
-            video.mozRequestFullScreen(); // Firefox
-        } else if (video.webkitRequestFullscreen) {
-            // @flowignore
-            video.webkitRequestFullscreen(); // Chrome and Safari
-        }
-    }
-
     _handleVolumeClicked(event: Object): void {
         if (event.id === this._representation.id) {
             this._videoElement.volume = event.value;
@@ -249,10 +228,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
-        );
-        player.removeListener(
-            PlayerEvents.FULLSCREEN_BUTTON_CLICKED,
-            this._handleFullscreenButtonClicked,
         );
         player.removeListener(
             PlayerEvents.VOLUME_CHANGED,

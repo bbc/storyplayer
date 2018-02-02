@@ -145,8 +145,7 @@ class Player extends EventEmitter {
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
-        this._fullscreenButton.onclick = this.emit
-            .bind(this, PlayerEvents.FULLSCREEN_BUTTON_CLICKED);
+        this._fullscreenButton.onclick = () => this._handleFullscreenButtonClicked();
         this._buttons.appendChild(this._fullscreenButton);
 
         target.appendChild(this._player);
@@ -347,6 +346,19 @@ class Player extends EventEmitter {
             this._backButton.classList.remove('romper-inactive');
         } else {
             this._backButton.classList.add('romper-inactive');
+        }
+    }
+
+    _handleFullscreenButtonClicked(): void {
+        if (this._player.requestFullscreen) {
+            // @flowignore
+            this._player.requestFullscreen();
+        } else if (this._player.mozRequestFullScreen) {
+            // @flowignore
+            this._player.mozRequestFullScreen(); // Firefox
+        } else if (this._player.webkitRequestFullscreen) {
+            // @flowignore
+            this._player.webkitRequestFullscreen(); // Chrome and Safari
         }
     }
 
