@@ -254,6 +254,29 @@ class Player extends EventEmitter {
         }
     }
 
+    enterCompleteBehavourPhase() {
+        this.disableScrubBar();
+        this.hidePlayButton();
+        this.showRepeatButton();
+    }
+
+    enterStartBehaviourPhase() {
+        this.hideRepeatButton();
+    }
+
+    exitStartBehaviourPhase() {
+        this.showPlayButton();
+        this.enableScrubBar();
+    }
+
+    enableScrubBar() {
+        this._scrubBar.removeAttribute('disabled');
+    }
+
+    disableScrubBar() {
+        this._scrubBar.setAttribute('disabled', 'true');
+    }
+
     connectScrubBar(video: HTMLVideoElement) {
         if (this._scrubBar) {
             this._buttons.removeChild(this._scrubBar);
