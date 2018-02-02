@@ -54,6 +54,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         const player = this._player;
         player.addVolumeControl(this._representation.id, 'Foreground');
+        player.connectScrubBar(this._videoElement);
         player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
@@ -136,7 +137,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        console.log('applying blur');
         const { blur } = behaviour;
         this._videoElement.style.filter = `blur(${blur}px)`;
         callback();
@@ -230,7 +230,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _clearBehaviourElements() {
-        this._videoElement.style.filter = ``; // eslint-disable-line prefer-destructuring
+        this._videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
         this._behaviourElements.forEach((be) => {
             this._target.removeChild(be);
         });

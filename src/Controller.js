@@ -135,7 +135,7 @@ export default class Controller {
     // repeat the current node in the current story, if we can
     //
     repeatStep() {
-        const current = this._currentNarrativeElement; //_getIdOfPreviousNode();
+        const current = this._currentNarrativeElement;
         if (this._reasoner && current) {
             this._handleNEChange(this._reasoner, current);
         } else {

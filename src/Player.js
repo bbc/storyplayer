@@ -105,7 +105,7 @@ class Player extends EventEmitter {
         this._repeatButton = document.createElement('button');
         this._repeatButton.classList.add('romper-button');
         this._repeatButton.classList.add('romper-repeat-button');
-        this._repeatButton.classList.add('hidden');
+        this._repeatButton.classList.add('romper-inactive');
         this._repeatButton.onclick = this.emit
             .bind(this, PlayerEvents.REPEAT_BUTTON_CLICKED);
         this._buttons.appendChild(this._repeatButton);
@@ -116,6 +116,11 @@ class Player extends EventEmitter {
         this._backButton.onclick = this.emit
             .bind(this, PlayerEvents.BACK_BUTTON_CLICKED);
         this._buttons.appendChild(this._backButton);
+
+        this._scrubBar = document.createElement('input');
+        this._scrubBar.type = 'range';
+        this._scrubBar.className = 'romper-scrub-bar';
+        this._buttons.appendChild(this._scrubBar);
 
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
@@ -250,20 +255,69 @@ class Player extends EventEmitter {
         }
     }
 
+    connectScrubBar(video: HTMLVideoElement) {
+        if (this._scrubBar) {
+            this._buttons.removeChild(this._scrubBar);
+        }
+        const scrubBar = document.createElement('input');
+        scrubBar.type = 'range';
+        scrubBar.value = '0';
+        scrubBar.className = 'scrub-bar';
+        this._buttons.insertBefore(scrubBar, this._nextButton);
+        this._scrubBar = scrubBar;
+
+        // update scrub bar position as video plays
+        scrubBar.addEventListener('change', () => {
+            // Calculate the new time
+            const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
+            // Update the video time
+            // eslint-disable-next-line no-param-reassign
+            video.currentTime = time;
+        });
+
+        // allow clicking the scrub bar to seek to a video position
+        function seek(e: MouseEvent) {
+            const percent = e.offsetX / this.offsetWidth;
+            // eslint-disable-next-line no-param-reassign
+            video.currentTime = percent * video.duration;
+        }
+
+        scrubBar.addEventListener('click', seek);
+
+        // Update the seek bar as the video plays
+        video.addEventListener('timeupdate', () => {
+            // Calculate the slider value
+            const value = (100 / video.duration) * video.currentTime;
+
+            // Update the slider value
+            scrubBar.value = value.toString();
+        });
+
+        // Pause the video when the slider handle is being dragged
+        scrubBar.addEventListener('mousedown', () => {
+            video.pause();
+        });
+
+        // Play the video when the slider handle is dropped
+        scrubBar.addEventListener('mouseup', () => {
+            video.play();
+        });
+    }
+
     hidePlayButton() {
-        this._playPauseButton.classList.add('hidden');
+        this._playPauseButton.classList.add('romper-inactive');
     }
 
     hideRepeatButton() {
-        this._repeatButton.classList.add('hidden');
+        this._repeatButton.classList.add('romper-inactive');
     }
 
     showPlayButton() {
-        this._playPauseButton.classList.remove('hidden');
+        this._playPauseButton.classList.remove('romper-inactive');
     }
 
     showRepeatButton() {
-        this._repeatButton.classList.remove('hidden');
+        this._repeatButton.classList.remove('romper-inactive');
     }
 
     removeIconControl(id: string) {
@@ -313,6 +367,7 @@ class Player extends EventEmitter {
     _volume: Object;
     _representation: Object;
     _icon: Object;
+    _scrubBar: HTMLInputElement;
 }
 
 
