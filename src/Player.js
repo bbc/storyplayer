@@ -105,6 +105,7 @@ class Player extends EventEmitter {
         this._repeatButton = document.createElement('button');
         this._repeatButton.classList.add('romper-button');
         this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.classList.add('hidden');
         this._repeatButton.onclick = this.emit
             .bind(this, PlayerEvents.REPEAT_BUTTON_CLICKED);
         this._buttons.appendChild(this._repeatButton);
@@ -247,6 +248,22 @@ class Player extends EventEmitter {
             }
             icon.src = src;
         }
+    }
+
+    hidePlayButton() {
+        this._playPauseButton.classList.add('hidden');
+    }
+
+    hideRepeatButton() {
+        this._repeatButton.classList.add('hidden');
+    }
+
+    showPlayButton() {
+        this._playPauseButton.classList.remove('hidden');
+    }
+
+    showRepeatButton() {
+        this._repeatButton.classList.remove('hidden');
     }
 
     removeIconControl(id: string) {

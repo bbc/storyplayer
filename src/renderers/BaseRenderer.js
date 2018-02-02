@@ -58,6 +58,8 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     willStart() {
+        this._player.showPlayButton();
+        this._player.hideRepeatButton();
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
                 RendererEvents.STARTED,
@@ -94,6 +96,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this._player.hidePlayButton();
+        this._player.showRepeatButton();
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(

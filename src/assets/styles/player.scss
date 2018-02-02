@@ -91,12 +91,12 @@ $romper-background-color: #ccc;
     margin-left: auto;
   }
 
-  .romper-player .romper-repeat-button {
-  @include button('../images/play.svg');
-  margin-right: 20px;
-}
+  .romper-repeat-button {
+    @include button('../images/replay.png');
+    margin-right: 20px;
+  }
 
-.romper-representation-button {
+  .romper-representation-button {
     @include button('../images/series-stack.svg');
   }
 
@@ -184,6 +184,10 @@ $romper-background-color: #ccc;
     width: 100%;
   }
 
+}
+
+.hidden {
+  display: none;
 }
 
 .romper-disabled {
