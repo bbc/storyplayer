@@ -155,11 +155,11 @@ export default class Controller {
 
     // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
-        this._currentNarrativeElement = narrativeElement;
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
+        this._currentNarrativeElement = narrativeElement;
         this._renderManager.handleNEChange(narrativeElement);
     }
 

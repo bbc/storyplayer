@@ -96,6 +96,7 @@ const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
 const player = new Player(document.createElement('div'));
+// eslint-disable-next-line no-console
 const logger = (logObject) => { console.log('analytics', logObject); };
 
 describe('SwitchableRenderer', () => {
