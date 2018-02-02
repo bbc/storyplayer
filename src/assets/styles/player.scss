@@ -111,7 +111,7 @@ $romper-background-color: #ccc;
   .romper-next-button {
     @include button('../images/next.svg');
   }
-  
+
   .romper-volume-overlay {
     @include overlay;
     flex-direction: column;

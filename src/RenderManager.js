@@ -1,7 +1,9 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
+import type {
+    NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher,
+} from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
