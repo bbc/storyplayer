@@ -13,6 +13,7 @@ const PlayerEvents = [
     'SCRUB_BAR_MOUSE_UP',
     'PLAY_PAUSE_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
+    'REPEAT_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -100,6 +101,13 @@ class Player extends EventEmitter {
         this._playPauseButton.onclick = this.emit
             .bind(this, PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
         this._buttons.appendChild(this._playPauseButton);
+
+        this._repeatButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.onclick = this.emit
+            .bind(this, PlayerEvents.REPEAT_BUTTON_CLICKED);
+        this._buttons.appendChild(this._repeatButton);
 
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
@@ -280,6 +288,7 @@ class Player extends EventEmitter {
     guiTarget: HTMLDivElement;
     _overlays: HTMLDivElement;
     _buttons: HTMLDivElement;
+    _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
     _nextButton: HTMLButtonElement;

@@ -131,6 +131,18 @@ export default class Controller {
         }
     }
 
+    //
+    // repeat the current node in the current story, if we can
+    //
+    repeatStep() {
+        const current = this._currentNarrativeElement; //_getIdOfPreviousNode();
+        if (this._reasoner && current) {
+            this._handleNEChange(this._reasoner, current);
+        } else {
+            logger.error('cannot resolve this node to repeat');
+        }
+    }
+
     // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
         this._currentNarrativeElement = narrativeElement;
