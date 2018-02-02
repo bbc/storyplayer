@@ -10,6 +10,7 @@ import CustomVideoContext, {
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
+import Player from '../Player';
 
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;

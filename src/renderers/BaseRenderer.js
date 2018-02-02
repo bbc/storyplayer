@@ -8,6 +8,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import logger from '../logger';
 
+
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;

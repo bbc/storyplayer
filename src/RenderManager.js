@@ -1,13 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-<<<<<<< HEAD
-import type {
-    NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher, AnalyticsLogger,
-} from './romper';
-=======
 import type { NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher } from './romper';
->>>>>>> Applying flow typing to AnalyticsEvents
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
