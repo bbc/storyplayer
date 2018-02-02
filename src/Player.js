@@ -145,7 +145,7 @@ class Player extends EventEmitter {
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
-        this._fullscreenButton.onclick = () => this._handleFullscreenButtonClicked();
+        this._fullscreenButton.onclick = () => this._toggleFullScreen();
         this._buttons.appendChild(this._fullscreenButton);
 
         target.appendChild(this._player);
@@ -349,7 +349,32 @@ class Player extends EventEmitter {
         }
     }
 
-    _handleFullscreenButtonClicked(): void {
+    _toggleFullScreen(): void {
+        if (Player._isFullScreen()) {
+            Player._exitFullScreen();
+        } else {
+            this._enterFullScreen();
+        }
+    }
+
+    static _isFullScreen() {
+        let isFullScreen = false;
+        if (document.fullscreenElement) {
+            isFullScreen = (document.fullscreenElement != null);
+        }
+        if (document.webkitFullscreenElement) {
+            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
+        }
+        if (document.mozFullScreenElement) {
+            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
+        }
+        if (document.msFullscreenElement) {
+            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
+        }
+        return isFullScreen;
+    }
+
+    _enterFullScreen() {
         if (this._player.requestFullscreen) {
             // @flowignore
             this._player.requestFullscreen();
@@ -359,6 +384,23 @@ class Player extends EventEmitter {
         } else if (this._player.webkitRequestFullscreen) {
             // @flowignore
             this._player.webkitRequestFullscreen(); // Chrome and Safari
+        }
+    }
+
+    static _exitFullScreen() {
+        // || document.webkitIsFullScreen);
+        if (document.exitFullscreen) {
+            // @flowignore
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            // @flowignore
+            document.mozCancelFullScreen(); // Firefox
+        } else if (document.webkitExitFullscreen) {
+            // @flowignore
+            document.webkitExitFullscreen(); // Chrome and Safari
+        } else if (document.msExitFullscreen) {
+            // @flowignore
+            document.msExitFullscreen(); // Chrome and Safari
         }
     }
 
@@ -381,7 +423,6 @@ class Player extends EventEmitter {
     _icon: Object;
     _scrubBar: HTMLInputElement;
 }
-
 
 export default Player;
 export { PlayerEvents };
