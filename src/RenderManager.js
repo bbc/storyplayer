@@ -39,7 +39,7 @@ export default class RenderManager extends EventEmitter {
         this._fetchMedia = fetchMedia;
         this._analytics = analytics;
 
-        this._player = new Player(this._target);
+        this._player = new Player(this._target, analytics);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);

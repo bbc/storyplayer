@@ -14,6 +14,11 @@ const names = [
     'VIDEO_PAUSE',
     'VIDEO_UNPAUSE',
     'VIDEO_END',
+    'PLAY_PAUSE_BUTTON_CLICKED',
+    'REPEAT_BUTTON_CLICKED',
+    'BACK_BUTTON_CLICKED',
+    'NEXT_BUTTON_CLICKED',
+    'FULLSCREEN_BUTTON_CLICKED',
 ];
 
 const AnalyticEvents = {
