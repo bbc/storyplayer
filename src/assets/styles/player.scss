@@ -92,7 +92,7 @@ $romper-background-color: #ccc;
   }
 
   .romper-repeat-button {
-    @include button('../images/replay.png');
+    @include button('../images/replay.svg');
     margin-right: 20px;
   }
 
