@@ -3,8 +3,8 @@
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
-import Player from '../Player';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import Player from '../Player';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import logger from '../logger';
 

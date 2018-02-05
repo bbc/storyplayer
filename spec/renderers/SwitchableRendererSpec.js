@@ -98,7 +98,6 @@ const mediaFetcher = uri =>
 // eslint-disable-next-line no-console
 const logger = (logObject) => { console.log('analytics', logObject); };
 const player = new Player(document.createElement('div'), logger);
-// eslint-disable-next-line no-console
 
 describe('SwitchableRenderer', () => {
     it('can create an instance of SwitchableRenderer', (done) => {
