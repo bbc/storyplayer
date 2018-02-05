@@ -287,7 +287,7 @@ class Player extends EventEmitter {
         const scrubBar = document.createElement('input');
         scrubBar.type = 'range';
         scrubBar.value = '0';
-        scrubBar.className = 'scrub-bar';
+        scrubBar.className = 'romper-scrub-bar';
         this._buttons.insertBefore(scrubBar, this._nextButton);
         this._scrubBar = scrubBar;
 

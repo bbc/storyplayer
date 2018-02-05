@@ -181,6 +181,7 @@ $romper-background-color: #ccc;
     background-color: $backing-colour;
     display: flex;
     height: 13%;
+    max-height: 60px;
     width: 100%;
   }
 
@@ -190,6 +191,9 @@ $romper-background-color: #ccc;
   opacity: 0.2;
 }
 
+.romper-scrub-bar {
+  height: 100%;
+}
 
 .romper-image-overlay {
   position: absolute;
