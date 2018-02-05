@@ -50,8 +50,6 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.REPEAT_BUTTON_CLICKED, () => {
             if (this._controller._currentNarrativeElement) {
                 this._controller.repeatStep();
-                // const currentNE = this._controller._currentNarrativeElement.id;
-                // this._controller._jumpToNarrativeElement(currentNE);
             }
         });
 

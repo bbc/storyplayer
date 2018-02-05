@@ -206,14 +206,15 @@ class Player extends EventEmitter {
         const representationControl = this._representation.get(id);
         if (representationControl) {
             const icon = representationControl.children[0];
-            icon.classList.remove('romper-disabled');
+            icon.classList.remove('romper-control-disabled');
         }
     }
 
     deactivateRepresentationControl(id: string) {
         const representationControl = this._representation.get(id);
         if (representationControl) {
-            const icon = representationControl.children[0]; icon.classList.add('romper-disabled');
+            const icon = representationControl.children[0];
+            icon.classList.add('romper-control-disabled');
         }
     }
 
@@ -271,10 +272,12 @@ class Player extends EventEmitter {
 
     enableScrubBar() {
         this._scrubBar.removeAttribute('disabled');
+        this._scrubBar.classList.remove('romper-control-disabled');
     }
 
     disableScrubBar() {
         this._scrubBar.setAttribute('disabled', 'true');
+        this._scrubBar.classList.add('romper-control-disabled');
     }
 
     connectScrubBar(video: HTMLVideoElement) {
