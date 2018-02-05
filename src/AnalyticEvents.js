@@ -19,6 +19,8 @@ const names = [
     'BACK_BUTTON_CLICKED',
     'NEXT_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
+    'VOLUME_CHANGED',
+    'VIDEO_SCRUBBED',
 ];
 
 const AnalyticEvents = {

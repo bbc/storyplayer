@@ -205,6 +205,13 @@ class Player extends EventEmitter {
         volumeRange.onchange = (event) => {
             const value = parseFloat(event.target.value);
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value });
+            const logdata = {
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.VOLUME_CHANGED,
+                from: '',
+                to: event.target.value,
+            };
+            this._analytics(logdata);
         };
 
         volumeControl.appendChild(volumeLabel);
@@ -329,6 +336,13 @@ class Player extends EventEmitter {
             // Update the video time
             // eslint-disable-next-line no-param-reassign
             video.currentTime = time;
+            const logdata = {
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.VIDEO_SCRUBBED,
+                from: '',
+                to: time.toString(),
+            };
+            this._analytics(logdata);
         });
 
         // allow clicking the scrub bar to seek to a video position
