@@ -58,6 +58,7 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     willStart() {
+        this._player.enterStartBehaviourPhase();
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
                 RendererEvents.STARTED,
@@ -70,6 +71,7 @@ export default class BaseRenderer extends EventEmitter {
 
     start() {
         this.emit(RendererEvents.STARTED);
+        this._player.exitStartBehaviourPhase();
     }
 
     /**
@@ -94,6 +96,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this._player.enterCompleteBehavourPhase();
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(

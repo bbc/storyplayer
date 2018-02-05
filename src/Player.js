@@ -13,6 +13,7 @@ const PlayerEvents = [
     'SCRUB_BAR_MOUSE_UP',
     'PLAY_PAUSE_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
+    'REPEAT_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -101,12 +102,25 @@ class Player extends EventEmitter {
             .bind(this, PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
         this._buttons.appendChild(this._playPauseButton);
 
+        this._repeatButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.classList.add('romper-inactive');
+        this._repeatButton.onclick = this.emit
+            .bind(this, PlayerEvents.REPEAT_BUTTON_CLICKED);
+        this._buttons.appendChild(this._repeatButton);
+
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
         this._backButton.onclick = this.emit
             .bind(this, PlayerEvents.BACK_BUTTON_CLICKED);
         this._buttons.appendChild(this._backButton);
+
+        this._scrubBar = document.createElement('input');
+        this._scrubBar.type = 'range';
+        this._scrubBar.className = 'romper-scrub-bar';
+        this._buttons.appendChild(this._scrubBar);
 
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
@@ -131,8 +145,7 @@ class Player extends EventEmitter {
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
-        this._fullscreenButton.onclick = this.emit
-            .bind(this, PlayerEvents.FULLSCREEN_BUTTON_CLICKED);
+        this._fullscreenButton.onclick = () => this._toggleFullScreen();
         this._buttons.appendChild(this._fullscreenButton);
 
         target.appendChild(this._player);
@@ -193,14 +206,15 @@ class Player extends EventEmitter {
         const representationControl = this._representation.get(id);
         if (representationControl) {
             const icon = representationControl.children[0];
-            icon.classList.remove('romper-disabled');
+            icon.classList.remove('romper-control-disabled');
         }
     }
 
     deactivateRepresentationControl(id: string) {
         const representationControl = this._representation.get(id);
         if (representationControl) {
-            const icon = representationControl.children[0]; icon.classList.add('romper-disabled');
+            const icon = representationControl.children[0];
+            icon.classList.add('romper-control-disabled');
         }
     }
 
@@ -241,6 +255,96 @@ class Player extends EventEmitter {
         }
     }
 
+    enterCompleteBehavourPhase() {
+        this.disableScrubBar();
+        this.hidePlayButton();
+        this.showRepeatButton();
+    }
+
+    enterStartBehaviourPhase() {
+        this.hideRepeatButton();
+    }
+
+    exitStartBehaviourPhase() {
+        this.showPlayButton();
+        this.enableScrubBar();
+    }
+
+    enableScrubBar() {
+        this._scrubBar.removeAttribute('disabled');
+        this._scrubBar.classList.remove('romper-control-disabled');
+    }
+
+    disableScrubBar() {
+        this._scrubBar.setAttribute('disabled', 'true');
+        this._scrubBar.classList.add('romper-control-disabled');
+    }
+
+    connectScrubBar(video: HTMLVideoElement) {
+        if (this._scrubBar) {
+            this._buttons.removeChild(this._scrubBar);
+        }
+        const scrubBar = document.createElement('input');
+        scrubBar.type = 'range';
+        scrubBar.value = '0';
+        scrubBar.className = 'romper-scrub-bar';
+        this._buttons.insertBefore(scrubBar, this._nextButton);
+        this._scrubBar = scrubBar;
+
+        // update scrub bar position as video plays
+        scrubBar.addEventListener('change', () => {
+            // Calculate the new time
+            const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
+            // Update the video time
+            // eslint-disable-next-line no-param-reassign
+            video.currentTime = time;
+        });
+
+        // allow clicking the scrub bar to seek to a video position
+        function seek(e: MouseEvent) {
+            const percent = e.offsetX / this.offsetWidth;
+            // eslint-disable-next-line no-param-reassign
+            video.currentTime = percent * video.duration;
+        }
+
+        scrubBar.addEventListener('click', seek);
+
+        // Update the seek bar as the video plays
+        video.addEventListener('timeupdate', () => {
+            // Calculate the slider value
+            const value = (100 / video.duration) * video.currentTime;
+
+            // Update the slider value
+            scrubBar.value = value.toString();
+        });
+
+        // Pause the video when the slider handle is being dragged
+        scrubBar.addEventListener('mousedown', () => {
+            video.pause();
+        });
+
+        // Play the video when the slider handle is dropped
+        scrubBar.addEventListener('mouseup', () => {
+            video.play();
+        });
+    }
+
+    hidePlayButton() {
+        this._playPauseButton.classList.add('romper-inactive');
+    }
+
+    hideRepeatButton() {
+        this._repeatButton.classList.add('romper-inactive');
+    }
+
+    showPlayButton() {
+        this._playPauseButton.classList.remove('romper-inactive');
+    }
+
+    showRepeatButton() {
+        this._repeatButton.classList.remove('romper-inactive');
+    }
+
     removeIconControl(id: string) {
         this._icon.remove(id);
     }
@@ -271,6 +375,61 @@ class Player extends EventEmitter {
         }
     }
 
+    _toggleFullScreen(): void {
+        if (Player._isFullScreen()) {
+            Player._exitFullScreen();
+        } else {
+            this._enterFullScreen();
+        }
+    }
+
+    static _isFullScreen() {
+        let isFullScreen = false;
+        if (document.fullscreenElement) {
+            isFullScreen = (document.fullscreenElement != null);
+        }
+        if (document.webkitFullscreenElement) {
+            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
+        }
+        if (document.mozFullScreenElement) {
+            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
+        }
+        if (document.msFullscreenElement) {
+            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
+        }
+        return isFullScreen;
+    }
+
+    _enterFullScreen() {
+        if (this._player.requestFullscreen) {
+            // @flowignore
+            this._player.requestFullscreen();
+        } else if (this._player.mozRequestFullScreen) {
+            // @flowignore
+            this._player.mozRequestFullScreen(); // Firefox
+        } else if (this._player.webkitRequestFullscreen) {
+            // @flowignore
+            this._player.webkitRequestFullscreen(); // Chrome and Safari
+        }
+    }
+
+    static _exitFullScreen() {
+        // || document.webkitIsFullScreen);
+        if (document.exitFullscreen) {
+            // @flowignore
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            // @flowignore
+            document.mozCancelFullScreen(); // Firefox
+        } else if (document.webkitExitFullscreen) {
+            // @flowignore
+            document.webkitExitFullscreen(); // Chrome and Safari
+        } else if (document.msExitFullscreen) {
+            // @flowignore
+            document.msExitFullscreen(); // Chrome and Safari
+        }
+    }
+
     _player: HTMLDivElement;
     _backgroundLayer: HTMLDivElement;
     _mediaLayer: HTMLDivElement;
@@ -280,6 +439,7 @@ class Player extends EventEmitter {
     guiTarget: HTMLDivElement;
     _overlays: HTMLDivElement;
     _buttons: HTMLDivElement;
+    _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
     _nextButton: HTMLButtonElement;
@@ -287,8 +447,8 @@ class Player extends EventEmitter {
     _volume: Object;
     _representation: Object;
     _icon: Object;
+    _scrubBar: HTMLInputElement;
 }
-
 
 export default Player;
 export { PlayerEvents };

@@ -91,6 +91,11 @@ $romper-background-color: #ccc;
     margin-left: auto;
   }
 
+  .romper-repeat-button {
+    @include button('../images/replay.svg');
+    margin-right: 20px;
+  }
+
   .romper-representation-button {
     @include button('../images/series-stack.svg');
   }
@@ -111,7 +116,7 @@ $romper-background-color: #ccc;
   .romper-next-button {
     @include button('../images/next.svg');
   }
-  
+
   .romper-volume-overlay {
     @include overlay;
     flex-direction: column;
@@ -176,15 +181,19 @@ $romper-background-color: #ccc;
     background-color: $backing-colour;
     display: flex;
     height: 13%;
+    max-height: 60px;
     width: 100%;
   }
 
 }
 
-.romper-disabled {
+.romper-control-disabled {
   opacity: 0.2;
 }
 
+.romper-scrub-bar {
+  height: 100%;
+}
 
 .romper-image-overlay {
   position: absolute;
