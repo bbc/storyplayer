@@ -1,7 +1,6 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import Player from '../Player';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
@@ -11,6 +10,7 @@ import CustomVideoContext, {
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
+import Player from '../Player';
 
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;

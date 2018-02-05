@@ -1,10 +1,10 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
-import Player from '../Player';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 
 import CustomVideoContext, { getVideoContext, getCanvas } from '../utils/custom-video-context';
+import Player from '../Player';
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';

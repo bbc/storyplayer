@@ -7,7 +7,6 @@ import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
-
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
     _target: HTMLDivElement;
