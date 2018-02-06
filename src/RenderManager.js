@@ -21,6 +21,29 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import Player, { PlayerEvents } from './Player';
 
 export default class RenderManager extends EventEmitter {
+    _controller: Controller;
+    _currentRenderer: ?BaseRenderer;
+    _backgroundRenderers: { [key: string]: BackgroundRenderer };
+    _target: HTMLElement;
+    _backgroundTarget: HTMLElement;
+    _fetchPresentation: PresentationFetcher;
+    _fetchAssetCollection: AssetCollectionFetcher;
+    _representationReasoner: RepresentationReasoner;
+    _fetchMedia: MediaFetcher;
+    _analytics: AnalyticsLogger;
+    _renderStory: StoryIconRenderer;
+    _neTarget: HTMLDivElement;
+    _storyTarget: HTMLDivElement;
+    _linearStoryPath: Array<StoryPathItem>;
+    _currentNarrativeElement: NarrativeElement;
+    _rendererState: {
+        lastSwitchableLabel: string,
+    };
+    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+    _nextButton: HTMLButtonElement;
+    _previousButton: HTMLButtonElement;
+    _player: Player;
+
     constructor(
         controller: Controller,
         target: HTMLElement,
@@ -39,7 +62,7 @@ export default class RenderManager extends EventEmitter {
         this._fetchMedia = fetchMedia;
         this._analytics = analytics;
 
-        this._player = new Player(this._target, analytics);
+        this._player = new Player(this._target, this._analytics);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
@@ -274,27 +297,4 @@ export default class RenderManager extends EventEmitter {
         }
         this._currentRenderer = null;
     }
-
-    _controller: Controller;
-    _currentRenderer: ?BaseRenderer;
-    _backgroundRenderers: { [key: string]: BackgroundRenderer };
-    _target: HTMLElement;
-    _backgroundTarget: HTMLElement;
-    _fetchPresentation: PresentationFetcher;
-    _fetchAssetCollection: AssetCollectionFetcher;
-    _representationReasoner: RepresentationReasoner;
-    _fetchMedia: MediaFetcher;
-    _analytics: AnalyticsLogger;
-    _renderStory: StoryIconRenderer;
-    _neTarget: HTMLDivElement;
-    _storyTarget: HTMLDivElement;
-    _linearStoryPath: Array<StoryPathItem>;
-    _currentNarrativeElement: NarrativeElement;
-    _rendererState: {
-        lastSwitchableLabel: string,
-    };
-    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
-    _nextButton: HTMLButtonElement;
-    _previousButton: HTMLButtonElement;
-    _player: Player;
 }

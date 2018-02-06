@@ -47,7 +47,7 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._target = player.mediaTarget;
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
-        this._player.mediaTarget.appendChild(this._canvas);
+        this._target.appendChild(this._canvas);
         this._videoNode = {};
         this._nodeCreated = false;
         this._nodeCompleted = false;

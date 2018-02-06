@@ -15,8 +15,16 @@ import './assets/styles/player.scss';
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
-    analyticsLogger: (logdata) => { logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`); },
+    analyticsLogger: (logdata) => {
+        if (logdata.to && logdata.from) {
+            // eslint-disable-next-line max-len
+            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}: ${logdata.from} - ${logdata.to}`);
+        } else {
+            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
+        }
+    },
 };
+
 
 module.exports = {
     RESOLVERS: {

@@ -31,7 +31,6 @@ export default class ImageVideoContextRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        // this._canvas = document.createElement('canvas');
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 

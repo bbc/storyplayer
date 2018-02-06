@@ -10,7 +10,6 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
-    _choiceDiv: HTMLElement;
     _fetchMedia: MediaFetcher;
     _currentRendererIndex: number;
     _previousRendererPlayheadTime: number;

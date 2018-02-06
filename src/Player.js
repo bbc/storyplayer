@@ -75,6 +75,27 @@ function createOverlay(name: string, logFunction: Function) {
 }
 
 class Player extends EventEmitter {
+    _player: HTMLDivElement;
+    _backgroundLayer: HTMLDivElement;
+    _mediaLayer: HTMLDivElement;
+    _guiLayer: HTMLDivElement;
+    backgroundTarget: HTMLDivElement;
+    mediaTarget: HTMLDivElement;
+    guiTarget: HTMLDivElement;
+    _overlays: HTMLDivElement;
+    _buttons: HTMLDivElement;
+    _repeatButton: HTMLButtonElement;
+    _playPauseButton: HTMLButtonElement;
+    _backButton: HTMLButtonElement;
+    _nextButton: HTMLButtonElement;
+    _fullscreenButton: HTMLButtonElement;
+    _volume: Object;
+    _representation: Object;
+    _icon: Object;
+    _scrubBar: HTMLInputElement;
+    _analytics: AnalyticsLogger;
+    _logUserInteraction: Function;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
         this._analytics = analytics;
@@ -182,7 +203,11 @@ class Player extends EventEmitter {
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
     }
 
-    _logUserInteraction(userEventName: AnalyticEventName, fromId: string = 'not_set', toId: string = 'not_set') {
+    _logUserInteraction(
+        userEventName: AnalyticEventName,
+        fromId: string = 'not_set',
+        toId: string = 'not_set',
+    ) {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names[userEventName],
@@ -479,27 +504,6 @@ class Player extends EventEmitter {
             document.msExitFullscreen(); // Chrome and Safari
         }
     }
-
-    _player: HTMLDivElement;
-    _backgroundLayer: HTMLDivElement;
-    _mediaLayer: HTMLDivElement;
-    _guiLayer: HTMLDivElement;
-    backgroundTarget: HTMLDivElement;
-    mediaTarget: HTMLDivElement;
-    guiTarget: HTMLDivElement;
-    _overlays: HTMLDivElement;
-    _buttons: HTMLDivElement;
-    _repeatButton: HTMLButtonElement;
-    _playPauseButton: HTMLButtonElement;
-    _backButton: HTMLButtonElement;
-    _nextButton: HTMLButtonElement;
-    _fullscreenButton: HTMLButtonElement;
-    _volume: Object;
-    _representation: Object;
-    _icon: Object;
-    _scrubBar: HTMLInputElement;
-    _analytics: AnalyticsLogger;
-    _logUserInteraction: Function;
 }
 
 export default Player;
