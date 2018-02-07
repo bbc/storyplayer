@@ -9,12 +9,14 @@ import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import Player from '../Player';
 import logger from '../logger';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default function RendererFactory(
     representation: Representation,
     assetCollectionFetcher: AssetCollectionFetcher,
     mediaFetcher: MediaFetcher,
     player: Player,
+    analytics: AnalyticsLogger,
 ): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
@@ -32,6 +34,7 @@ export default function RendererFactory(
             assetCollectionFetcher,
             mediaFetcher,
             player,
+            analytics,
         );
     } else {
         logger.error(`Do not know how to render ${representation.representation_type}`);

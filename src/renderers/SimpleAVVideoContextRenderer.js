@@ -1,8 +1,8 @@
 // @flow
 
 import BaseRenderer from './BaseRenderer';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import Player from '../Player';
 
 import CustomVideoContext, {
     getVideoContext, getCanvas, createVideoContextNodeForUrl,
@@ -10,6 +10,7 @@ import CustomVideoContext, {
 
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
+import Player from '../Player';
 
 export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -29,18 +30,21 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
     _videoContextQueueTimeoutHandle: number;
     _isCurrentSwitchChoice: boolean;
     _destinationVideoContextNode: Object;
+    _target: HTMLDivElement;
 
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player);
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this.playVideo = this.playVideo.bind(this);
         this.cueUp = this.cueUp.bind(this);
         this._cueUpWhenReady = this._cueUpWhenReady.bind(this);
 
+        this._target = player.mediaTarget;
         this._videoCtx = getVideoContext();
         this._canvas = getCanvas();
         this._target.appendChild(this._canvas);
@@ -165,54 +169,6 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
                             });
                     }
                 });
-        }
-    }
-
-    renderDataModelInfo() {
-        const assetList = document.createElement('ul');
-        const foregroundItem = document.createElement('li');
-        const backgroundItem = document.createElement('li');
-        const iconItem = document.createElement('li');
-        assetList.appendChild(foregroundItem);
-        assetList.appendChild(backgroundItem);
-        assetList.appendChild(iconItem);
-        this._target.appendChild(assetList);
-
-        if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
-                .then((fg) => {
-                    foregroundItem.textContent = `foreground: ${fg.name}`;
-                    if (fg.assets.av_src) {
-                        foregroundItem.textContent += ` from ${fg.assets.av_src}`;
-                    }
-                });
-        }
-
-        if (
-            this._representation.asset_collection.background &&
-            this._representation.asset_collection.background.length > 0
-        ) {
-            this._fetchAssetCollection(this._representation.asset_collection.background[0])
-                .then((bg) => {
-                    backgroundItem.textContent = `background: ${bg.name}`;
-                    if (bg.assets.audio_src) {
-                        backgroundItem.textContent += ` from ${bg.assets.audio_src}`;
-                    }
-                });
-        } else {
-            backgroundItem.textContent = 'background: none';
-        }
-
-        if (this._representation.asset_collection.icon) {
-            this._fetchAssetCollection(this._representation.asset_collection.icon.default)
-                .then((icon) => {
-                    iconItem.textContent = `icon: ${icon.name}`;
-                    if (icon.assets.image_src) {
-                        iconItem.textContent += ` from ${icon.assets.image_src}`;
-                    }
-                });
-        } else {
-            iconItem.textContent = 'icon: none';
         }
     }
 

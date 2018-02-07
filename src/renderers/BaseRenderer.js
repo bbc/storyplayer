@@ -5,7 +5,9 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 import logger from '../logger';
+
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
@@ -15,7 +17,7 @@ export default class BaseRenderer extends EventEmitter {
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: () => void };
     _destroyed: boolean;
-    _target: HTMLDivElement;
+    _analytics: AnalyticsLogger;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -31,6 +33,7 @@ export default class BaseRenderer extends EventEmitter {
         assetCollectionFetcher: AssetCollectionFetcher,
         mediaFetcher: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
         super();
         this._representation = representation;
@@ -42,6 +45,7 @@ export default class BaseRenderer extends EventEmitter {
             : null;
         this._behaviourRendererMap = {};
         this._destroyed = false;
+        this._analytics = analytics;
     }
     /**
      * An event which fires when this renderer has completed it's part of the experience

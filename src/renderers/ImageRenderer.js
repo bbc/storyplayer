@@ -5,7 +5,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import RendererEvents from './RendererEvents';
 import Player from '../Player';
 import logger from '../logger';
-
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
@@ -16,8 +16,9 @@ export default class ImageRenderer extends BaseRenderer {
         assetCollectionFetcher: AssetCollectionFetcher,
         fetchMedia: MediaFetcher,
         player: Player,
+        analytics: AnalyticsLogger,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player);
+        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._target = this._player.mediaTarget;
         this.renderImageElement();
     }

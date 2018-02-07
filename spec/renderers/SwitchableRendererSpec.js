@@ -8,6 +8,7 @@ import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
 import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
 import ImageRenderer from '../../src/renderers/ImageRenderer';
 import Player from '../../src/Player';
+import logger from '../../src/logger'
 
 const storyjson = require('../teststory.json');
 
@@ -95,7 +96,7 @@ const assetCollectionFetcher = id =>
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
-const player = new Player(document.createElement('div'));
+const player = new Player(document.createElement('div'), logger);
 
 describe('SwitchableRenderer', () => {
     it('can create an instance of SwitchableRenderer', (done) => {
@@ -104,6 +105,7 @@ describe('SwitchableRenderer', () => {
             assetCollectionFetcher,
             mediaFetcher,
             player,
+            logger,
         );
         expect(Renderer).to.have.property('_representation');
         done();
@@ -115,6 +117,7 @@ describe('SwitchableRenderer', () => {
             assetCollectionFetcher,
             mediaFetcher,
             player,
+            logger,
         );
 
         expect(Renderer).to.have.property('_choiceRenderers');

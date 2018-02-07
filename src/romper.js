@@ -7,6 +7,7 @@ import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
+import logger from './logger';
 
 // @flowignore
 import './assets/styles/player.scss';
@@ -14,7 +15,16 @@ import './assets/styles/player.scss';
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
+    analyticsLogger: (logdata) => {
+        if (logdata.to && logdata.from) {
+            // eslint-disable-next-line max-len
+            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}: ${logdata.from} - ${logdata.to}`);
+        } else {
+            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
+        }
+    },
 };
+
 
 module.exports = {
     RESOLVERS: {
@@ -38,6 +48,7 @@ module.exports = {
             representationReasoner,
             mergedSettings.mediaFetcher,
             mergedSettings.storyFetcher,
+            mergedSettings.analyticsLogger,
         );
     },
 };

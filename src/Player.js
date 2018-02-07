@@ -1,6 +1,8 @@
 // @flow
 
 import EventEmitter from 'events';
+import AnalyticEvents from './AnalyticEvents';
+import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -20,7 +22,7 @@ const PlayerEvents = [
     return events;
 }, {});
 
-function createOverlay(name: string) {
+function createOverlay(name: string, logFunction: Function) {
     const overlay = document.createElement('div');
     overlay.classList.add('romper-overlay');
     overlay.classList.add(`romper-${name}-overlay`);
@@ -36,6 +38,11 @@ function createOverlay(name: string) {
                 .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
                 .filter(el => el !== overlay)
                 .forEach(el => el.classList.add('romper-inactive'));
+            if (overlay.classList.contains('romper-inactive')) {
+                logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
+            } else {
+                logFunction('OVERLAY_BUTTON_CLICKED', `${name} visible`, `${name} hidden`);
+            }
             overlay.classList.toggle('romper-inactive');
         }
     };
@@ -68,8 +75,32 @@ function createOverlay(name: string) {
 }
 
 class Player extends EventEmitter {
-    constructor(target: HTMLElement) {
+    _player: HTMLDivElement;
+    _backgroundLayer: HTMLDivElement;
+    _mediaLayer: HTMLDivElement;
+    _guiLayer: HTMLDivElement;
+    backgroundTarget: HTMLDivElement;
+    mediaTarget: HTMLDivElement;
+    guiTarget: HTMLDivElement;
+    _overlays: HTMLDivElement;
+    _buttons: HTMLDivElement;
+    _repeatButton: HTMLButtonElement;
+    _playPauseButton: HTMLButtonElement;
+    _backButton: HTMLButtonElement;
+    _nextButton: HTMLButtonElement;
+    _fullscreenButton: HTMLButtonElement;
+    _volume: Object;
+    _representation: Object;
+    _icon: Object;
+    _scrubBar: HTMLInputElement;
+    _analytics: AnalyticsLogger;
+    _logUserInteraction: Function;
+
+    constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
+        this._analytics = analytics;
+        this._logUserInteraction = this._logUserInteraction.bind(this);
+
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
 
@@ -98,23 +129,20 @@ class Player extends EventEmitter {
         this._playPauseButton = document.createElement('button');
         this._playPauseButton.classList.add('romper-button');
         this._playPauseButton.classList.add('romper-play-button');
-        this._playPauseButton.onclick = this.emit
-            .bind(this, PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
+        this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
         this._buttons.appendChild(this._playPauseButton);
 
         this._repeatButton = document.createElement('button');
         this._repeatButton.classList.add('romper-button');
         this._repeatButton.classList.add('romper-repeat-button');
         this._repeatButton.classList.add('romper-inactive');
-        this._repeatButton.onclick = this.emit
-            .bind(this, PlayerEvents.REPEAT_BUTTON_CLICKED);
+        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
         this._buttons.appendChild(this._repeatButton);
 
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
-        this._backButton.onclick = this.emit
-            .bind(this, PlayerEvents.BACK_BUTTON_CLICKED);
+        this._backButton.onclick = this._backButtonClicked.bind(this);
         this._buttons.appendChild(this._backButton);
 
         this._scrubBar = document.createElement('input');
@@ -125,20 +153,19 @@ class Player extends EventEmitter {
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
-        this._nextButton.onclick = this.emit
-            .bind(this, PlayerEvents.NEXT_BUTTON_CLICKED);
+        this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._buttons.appendChild(this._nextButton);
 
         // Create the overlays.
-        this._volume = createOverlay('volume');
+        this._volume = createOverlay('volume', this._logUserInteraction);
         this._overlays.appendChild(this._volume.overlay);
         this._buttons.appendChild(this._volume.button);
 
-        this._representation = createOverlay('representation');
+        this._representation = createOverlay('representation', this._logUserInteraction);
         this._overlays.appendChild(this._representation.overlay);
         this._buttons.appendChild(this._representation.button);
 
-        this._icon = createOverlay('icon');
+        this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
         this._buttons.appendChild(this._icon.button);
 
@@ -154,6 +181,40 @@ class Player extends EventEmitter {
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
+    }
+
+    _playPauseButtonClicked() {
+        this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
+    }
+
+    _repeatButtonClicked() {
+        this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.REPEAT_BUTTON_CLICKED);
+    }
+
+    _backButtonClicked() {
+        this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
+    }
+
+    _nextButtonClicked() {
+        this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+    }
+
+    _logUserInteraction(
+        userEventName: AnalyticEventName,
+        fromId: string = 'not_set',
+        toId: string = 'not_set',
+    ) {
+        const logData = {
+            type: AnalyticEvents.types.USER_ACTION,
+            name: AnalyticEvents.names[userEventName],
+            from: fromId == null ? 'not_set' : fromId,
+            to: toId == null ? 'not_set' : toId,
+        };
+        this._analytics(logData);
     }
 
     addVolumeControl(id: string, label: string) {
@@ -174,6 +235,7 @@ class Player extends EventEmitter {
         volumeRange.onchange = (event) => {
             const value = parseFloat(event.target.value);
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value });
+            this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, null, event.target.value);
         };
 
         volumeControl.appendChild(volumeLabel);
@@ -195,6 +257,7 @@ class Player extends EventEmitter {
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.onclick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
+            this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
         representationControl.appendChild(representationIcon);
@@ -234,6 +297,7 @@ class Player extends EventEmitter {
         }
         icon.onclick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
+            this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
         iconControl.appendChild(icon);
@@ -298,6 +362,7 @@ class Player extends EventEmitter {
             // Update the video time
             // eslint-disable-next-line no-param-reassign
             video.currentTime = time;
+            this._logUserInteraction(AnalyticEvents.names.VIDEO_SCRUBBED, null, time.toString());
         });
 
         // allow clicking the scrub bar to seek to a video position
@@ -377,8 +442,18 @@ class Player extends EventEmitter {
 
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
+            this._logUserInteraction(
+                AnalyticEvents.names.FULLSCREEN_BUTTON_CLICKED,
+                'fullscreen',
+                'not-fullscreen',
+            );
             Player._exitFullScreen();
         } else {
+            this._logUserInteraction(
+                AnalyticEvents.names.FULLSCREEN_BUTTON_CLICKED,
+                'not-fullscreen',
+                'fullscreen',
+            );
             this._enterFullScreen();
         }
     }
@@ -429,25 +504,6 @@ class Player extends EventEmitter {
             document.msExitFullscreen(); // Chrome and Safari
         }
     }
-
-    _player: HTMLDivElement;
-    _backgroundLayer: HTMLDivElement;
-    _mediaLayer: HTMLDivElement;
-    _guiLayer: HTMLDivElement;
-    backgroundTarget: HTMLDivElement;
-    mediaTarget: HTMLDivElement;
-    guiTarget: HTMLDivElement;
-    _overlays: HTMLDivElement;
-    _buttons: HTMLDivElement;
-    _repeatButton: HTMLButtonElement;
-    _playPauseButton: HTMLButtonElement;
-    _backButton: HTMLButtonElement;
-    _nextButton: HTMLButtonElement;
-    _fullscreenButton: HTMLButtonElement;
-    _volume: Object;
-    _representation: Object;
-    _icon: Object;
-    _scrubBar: HTMLInputElement;
 }
 
 export default Player;

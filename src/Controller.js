@@ -10,6 +10,8 @@ import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
+import AnalyticEvents from './AnalyticEvents';
+import type { AnalyticsLogger } from './AnalyticEvents';
 import logger from './logger';
 
 export default class Controller {
@@ -21,6 +23,7 @@ export default class Controller {
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
         fetchStory: StoryFetcher,
+        analytics: AnalyticsLogger,
     ) {
         this._storyId = null;
         this._reasoner = null;
@@ -31,6 +34,7 @@ export default class Controller {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._fetchStory = fetchStory;
+        this._analytics = analytics;
         this._linearStoryPath = [];
         this._createRenderManager();
     }
@@ -40,6 +44,11 @@ export default class Controller {
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
+            const logData = {
+                type: AnalyticEvents.types.STORY_NAVIGATION,
+                name: AnalyticEvents.names.STORY_END,
+            };
+            this._analytics(logData);
             logger.warn('Story Ended!');
         };
         const _handleError = (err) => {
@@ -79,6 +88,7 @@ export default class Controller {
             this._fetchAssetCollection,
             this._representationReasoner,
             this._fetchMedia,
+            this._analytics,
         );
     }
 
@@ -145,11 +155,26 @@ export default class Controller {
 
     // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
-        this._currentNarrativeElement = narrativeElement;
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
+        this._logNEChange(this._currentNarrativeElement, narrativeElement);
+        this._currentNarrativeElement = narrativeElement;
         this._renderManager.handleNEChange(narrativeElement);
+    }
+
+    _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
+        let oldName = 'null';
+        if (oldNarrativeElement) {
+            oldName = oldNarrativeElement.name;
+        }
+        const logData = {
+            type: AnalyticEvents.types.STORY_NAVIGATION,
+            name: AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE,
+            from: oldName,
+            to: newNarrativeElement.name,
+        };
+        this._analytics(logData);
     }
 
     // try to get the narrative element object with the given id
@@ -341,6 +366,7 @@ export default class Controller {
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
     _fetchStory: StoryFetcher;
+    _analytics: AnalyticsLogger;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
