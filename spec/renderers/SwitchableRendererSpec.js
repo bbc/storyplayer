@@ -8,6 +8,7 @@ import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
 import SimpleAVRenderer from '../../src/renderers/SimpleAVRenderer';
 import ImageRenderer from '../../src/renderers/ImageRenderer';
 import Player from '../../src/Player';
+import logger from '../../src/logger'
 
 const storyjson = require('../teststory.json');
 
@@ -95,8 +96,6 @@ const assetCollectionFetcher = id =>
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
-// eslint-disable-next-line no-console
-const logger = (logObject) => { console.log('analytics', logObject); };
 const player = new Player(document.createElement('div'), logger);
 
 describe('SwitchableRenderer', () => {
