@@ -4,6 +4,8 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
+import HlsManager from './HlsManager';
+
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'ICON_CLICKED',
@@ -76,6 +78,7 @@ function createOverlay(name: string, logFunction: Function) {
 
 class Player extends EventEmitter {
     _player: HTMLDivElement;
+    _hlsManager: HlsManager;
     _backgroundLayer: HTMLDivElement;
     _mediaLayer: HTMLDivElement;
     _guiLayer: HTMLDivElement;
@@ -100,6 +103,7 @@ class Player extends EventEmitter {
         super();
         this._analytics = analytics;
         this._logUserInteraction = this._logUserInteraction.bind(this);
+        this._hlsManager = new HlsManager();
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -147,6 +151,7 @@ class Player extends EventEmitter {
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.type = 'range';
+        this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
         this._buttons.appendChild(this._scrubBar);
 
@@ -344,16 +349,19 @@ class Player extends EventEmitter {
         this._scrubBar.classList.add('romper-control-disabled');
     }
 
+    // eslint-disable-next-line
+    disconnectScrubBar() {
+        // if (this._scrubBar) {
+        //     const scrubBar = this._scrubBar;
+        //     // Remove event listeners on scrub bar by cloning and replacing old scrubBar
+        //     const newScrubBar = scrubBar.cloneNode(true);
+        //     this._buttons.replaceChild(newScrubBar, scrubBar);
+        //     this._scrubBar = newScrubBar;
+        // }
+    }
+
     connectScrubBar(video: HTMLVideoElement) {
-        if (this._scrubBar) {
-            this._buttons.removeChild(this._scrubBar);
-        }
-        const scrubBar = document.createElement('input');
-        scrubBar.type = 'range';
-        scrubBar.value = '0';
-        scrubBar.className = 'romper-scrub-bar';
-        this._buttons.insertBefore(scrubBar, this._nextButton);
-        this._scrubBar = scrubBar;
+        const scrubBar = this._scrubBar;
 
         // update scrub bar position as video plays
         scrubBar.addEventListener('change', () => {
@@ -366,21 +374,10 @@ class Player extends EventEmitter {
         });
 
         // allow clicking the scrub bar to seek to a video position
-        function seek(e: MouseEvent) {
-            const percent = e.offsetX / this.offsetWidth;
+        scrubBar.addEventListener('click', (e: MouseEvent) => {
+            const percent = e.offsetX / scrubBar.offsetWidth;
             // eslint-disable-next-line no-param-reassign
             video.currentTime = percent * video.duration;
-        }
-
-        scrubBar.addEventListener('click', seek);
-
-        // Update the seek bar as the video plays
-        video.addEventListener('timeupdate', () => {
-            // Calculate the slider value
-            const value = (100 / video.duration) * video.currentTime;
-
-            // Update the slider value
-            scrubBar.value = value.toString();
         });
 
         // Pause the video when the slider handle is being dragged
@@ -391,6 +388,15 @@ class Player extends EventEmitter {
         // Play the video when the slider handle is dropped
         scrubBar.addEventListener('mouseup', () => {
             video.play();
+        });
+
+        // Update the seek bar as the video plays
+        video.addEventListener('timeupdate', () => {
+            // Calculate the slider value
+            const value = (100 / video.duration) * video.currentTime;
+
+            // Update the slider value
+            scrubBar.value = value.toString();
         });
     }
 

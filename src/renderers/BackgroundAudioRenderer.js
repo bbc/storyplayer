@@ -98,6 +98,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._target.removeChild(this._audioElement);
         this._player.removeVolumeControl(this._assetCollection.id);
         this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
+
+        this._hls.detachMedia();
+        this._hls.destroy();
         super.destroy();
     }
 }
