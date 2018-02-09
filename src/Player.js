@@ -349,15 +349,14 @@ class Player extends EventEmitter {
         this._scrubBar.classList.add('romper-control-disabled');
     }
 
-    // eslint-disable-next-line
     disconnectScrubBar() {
-        // if (this._scrubBar) {
-        //     const scrubBar = this._scrubBar;
-        //     // Remove event listeners on scrub bar by cloning and replacing old scrubBar
-        //     const newScrubBar = scrubBar.cloneNode(true);
-        //     this._buttons.replaceChild(newScrubBar, scrubBar);
-        //     this._scrubBar = newScrubBar;
-        // }
+        if (this._scrubBar) {
+            const scrubBar = this._scrubBar;
+            // Remove event listeners on scrub bar by cloning and replacing old scrubBar
+            const newScrubBar = scrubBar.cloneNode(true);
+            this._buttons.replaceChild(newScrubBar, scrubBar);
+            this._scrubBar = newScrubBar;
+        }
     }
 
     connectScrubBar(video: HTMLVideoElement) {
