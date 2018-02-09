@@ -16,15 +16,10 @@ export class HlsInstance {
         this._hls = new Hls(config);
         this._id = uuidv4();
         this._eventList = [];
-        this._attached = false;
     }
 
     getId(): string {
         return this._id;
-    }
-
-    getAttached(): boolean {
-        return this._attached;
     }
 
     // Copy existing Hls methods
@@ -34,12 +29,10 @@ export class HlsInstance {
 
     attachMedia(videoElement: HTMLVideoElement) {
         this._hls.attachMedia(videoElement);
-        this._attached = true;
     }
 
     detachMedia() {
         this._hls.detachMedia();
-        this._attached = false;
     }
 
     on(event: string, callback: Function) {
@@ -51,11 +44,13 @@ export class HlsInstance {
     }
 
     flush() {
+        // Manual force flush of buffer.
         const bufferController = this._hls.coreComponents[4];
         bufferController.doFlush();
     }
 
     clearEvents() {
+        // Cleanup all events added to hls
         this._eventList.forEach((eventListObject) => {
             this._hls.off(eventListObject.event, eventListObject.callback);
         });
@@ -72,6 +67,12 @@ export default class HlsManager {
             startFragPrefetch: true,
             startLevel: 3,
             debug: false,
+        };
+    }
+
+    static get Events() {
+        return {
+            MANIFEST_PARSED: Hls.Events.MANIFEST_PARSED,
         };
     }
 
@@ -105,11 +106,6 @@ export default class HlsManager {
     returnHlsToPool(hls: HlsInstance) {
         hls.clearEvents();
         hls.flush();
-
-        // if (hls.getAttached() === false) {
-        //     const _videoElement = document.createElement('video');
-        //     hls.attachMedia(_videoElement);
-        // }
 
         hls.detachMedia();
 

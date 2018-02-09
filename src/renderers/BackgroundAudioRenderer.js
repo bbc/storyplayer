@@ -4,8 +4,7 @@ import Player, { PlayerEvents } from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
-// @flowignore
-import Hls from '../../node_modules/hls.js/dist/hls';
+import HlsManager from '../HlsManager';
 import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
@@ -13,6 +12,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _hls: Object;
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
+    _hlsManager: HlsManager;
 
     constructor(
         assetCollection: AssetCollection,
@@ -22,8 +22,10 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         super(assetCollection, mediaFetcher, player);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._target = this._player.backgroundTarget;
-        if (Hls.isSupported()) {
-            this._hls = new Hls();
+
+        this._hlsManager = player._hlsManager;
+        if (this._hlsManager.isSupported()) {
+            this._hls = this._hlsManager.getHlsFromPool();
         }
     }
 
@@ -56,7 +58,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             if (mediaUrl.indexOf('.m3u8') !== -1) {
                 this._hls.loadSource(mediaUrl);
                 this._hls.attachMedia(audioElement);
-                this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
                     if (this._disabled) {
                         logger.warn('loaded destroyed audio element - not playing');
                     } else {
@@ -99,8 +101,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._player.removeVolumeControl(this._assetCollection.id);
         this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
 
-        this._hls.detachMedia();
-        this._hls.destroy();
+        this._hlsManager.returnHlsToPool(this._hls);
         super.destroy();
     }
 }

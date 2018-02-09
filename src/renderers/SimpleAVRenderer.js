@@ -5,8 +5,6 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
-// @flowignore
-import Hls from '../../node_modules/hls.js/dist/hls';
 import HlsManager from '../HlsManager';
 import logger from '../logger';
 
@@ -109,7 +107,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this._videoElement.play();
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(Hls.Events.MANIFEST_PARSED, this._playVideoCallback);
+            this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
         } else {
             this._videoElement.addEventListener('loadeddata', this._playVideoCallback);
         }
@@ -219,7 +217,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this._videoElement.currentTime = time;
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
                 this._videoElement.currentTime = time;
             });
         } else {
