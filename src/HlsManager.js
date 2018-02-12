@@ -1,6 +1,5 @@
 // @flow
 
-// @flowignore
 import uuidv4 from 'uuid/v4';
 import Hls from 'hls.js';
 import logger from './logger';
