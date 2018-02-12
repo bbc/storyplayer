@@ -7,3 +7,4 @@ spec/decls/
 
 [options]
 suppress_comment= \\(.\\|\n\\)*\\@flowignore
+unsafe.enable_getters_and_setters=true
