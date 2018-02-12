@@ -5,8 +5,7 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
-// @flowignore
-import Hls from '../../node_modules/hls.js/dist/hls';
+import HlsManager from '../HlsManager';
 import logger from '../logger';
 
 export default class SimpleAVRenderer extends BaseRenderer {
@@ -20,6 +19,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
     _handleVolumeClicked: Function;
+    _playVideoCallback: Function;
+    _hlsManager: HlsManager;
 
     constructor(
         representation: Representation,
@@ -29,8 +30,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        if (Hls.isSupported()) {
-            this._hls = new Hls({ startFragPrefetch: true, startLevel: 3 });
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+        this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._playVideoCallback = this._playVideoCallback.bind(this);
+
+        this._hlsManager = player._hlsManager;
+
+        if (this._hlsManager.isSupported()) {
+            this._hls = this._hlsManager.getHlsFromPool();
         }
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -65,25 +72,44 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this.playVideo();
     }
 
+    end() {
+        this._videoElement.pause();
+
+        try {
+            this._clearBehaviourElements();
+            this._target.removeChild(this._videoElement);
+        } catch (e) {
+            //
+        }
+
+        const player = this._player;
+        player.removeVolumeControl(this._representation.id);
+        player.disconnectScrubBar();
+        player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+        player.removeListener(
+            PlayerEvents.VOLUME_CHANGED,
+            this._handleVolumeClicked,
+        );
+    }
+
+    _playVideoCallback(): void {
+        if (this._destroyed) {
+            logger.warn('loaded destroyed video element - not playing');
+        } else {
+            this._videoElement.play();
+        }
+    }
+
     playVideo() {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this._videoElement.play();
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                if (this._destroyed) {
-                    logger.warn('loaded destroyed video element - not playing');
-                } else {
-                    this._videoElement.play();
-                }
-            });
+            this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
         } else {
-            this._videoElement.addEventListener('loadeddata', () => {
-                if (this._destroyed) {
-                    logger.warn('loaded destroyed video element - not playing');
-                } else {
-                    this._videoElement.play();
-                }
-            });
+            this._videoElement.addEventListener('loadeddata', this._playVideoCallback);
         }
     }
 
@@ -191,7 +217,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
             this._videoElement.currentTime = time;
         } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
                 this._videoElement.currentTime = time;
             });
         } else {
@@ -202,7 +228,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this.destroy();
+        this.end();
     }
 
     switchTo() {
@@ -217,23 +243,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
-        try {
-            this._clearBehaviourElements();
-            this._target.removeChild(this._videoElement);
-        } catch (e) {
-            //
-        }
+        this.end();
 
-        const player = this._player;
-        player.removeVolumeControl(this._representation.id);
-        player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-        player.removeListener(
-            PlayerEvents.VOLUME_CHANGED,
-            this._handleVolumeClicked,
-        );
+        this._hlsManager.returnHlsToPool(this._hls);
+
+        delete this._videoElement;
 
         super.destroy();
     }
