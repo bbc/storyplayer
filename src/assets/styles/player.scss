@@ -167,6 +167,8 @@ $romper-background-color: #ccc;
 }
 
 .romper-player > .romper-gui {
+
+
   >.romper-overlays {
     align-items: center;
     display: flex;
@@ -177,15 +179,41 @@ $romper-background-color: #ccc;
     width: 100%;
   }
 
-  > .romper-buttons {
-    background-color: $backing-colour;
-    display: flex;
+
+  >.romper-buttons-activate-area {
+    display: block;
+    position: absolute;
     height: 13%;
     max-height: 60px;
     width: 100%;
-  }
+    opacity: 0;
+  } 
 
+
+  > .romper-buttons.show {
+    background-color: $backing-colour;
+    display: flex;
+    height: 100%;
+    max-height: 60px;
+    opacity: 1;
+    width: 100%;
+  }
+  
+
+  > .romper-buttons {
+    position: absolute;
+    background-color: $backing-colour;
+    display: flex;
+    height: 100%;
+    max-height: 60px;
+    opacity: 0;
+    transition: all 1.0s ease;
+    width: 100%;
+  }
 }
+
+
+
 
 .romper-control-disabled {
   opacity: 0.2;

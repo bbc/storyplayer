@@ -120,6 +120,7 @@ class Player extends EventEmitter {
     guiTarget: HTMLDivElement;
     _overlays: HTMLDivElement;
     _buttons: HTMLDivElement;
+    _buttonsActivateArea: HTMLDivElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -157,11 +158,20 @@ class Player extends EventEmitter {
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
 
+
+        this._buttonsActivateArea = document.createElement('div');
+        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
+        this._buttonsActivateArea.onmouseleave = this._hideRomperButtons.bind(this);
+        this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
+
+
         this._buttons = document.createElement('div');
         this._buttons.classList.add('romper-buttons');
 
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._buttons);
+        this._guiLayer.appendChild(this._buttonsActivateArea);
+
 
         this._playPauseButton = document.createElement('button');
         this._playPauseButton.classList.add('romper-button');
@@ -220,6 +230,15 @@ class Player extends EventEmitter {
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
     }
+
+    _showRomperButtons() {
+        this._buttons.classList.add('show');
+    }
+
+    _hideRomperButtons() {
+        this._buttons.classList.remove('show');
+    }
+
 
     _playPauseButtonClicked() {
         this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
