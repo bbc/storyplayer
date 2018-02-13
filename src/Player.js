@@ -159,13 +159,14 @@ class Player extends EventEmitter {
         this._overlays.classList.add('romper-overlays');
 
         this._buttonsActivateArea = document.createElement('div');
-        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
-        this._buttonsActivateArea.onmouseleave = this._hideRomperButtons.bind(this);
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
 
 
         this._buttons = document.createElement('div');
         this._buttons.classList.add('romper-buttons');
+
+        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
+        this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._buttons);
@@ -232,10 +233,12 @@ class Player extends EventEmitter {
 
     _showRomperButtons() {
         this._buttons.classList.add('show');
+        this._buttonsActivateArea.classList.add('hide');
     }
 
     _hideRomperButtons() {
         this._buttons.classList.remove('show');
+        this._buttonsActivateArea.classList.remove('hide');
     }
 
 
