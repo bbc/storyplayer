@@ -158,7 +158,6 @@ class Player extends EventEmitter {
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
 
-
         this._buttonsActivateArea = document.createElement('div');
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttonsActivateArea.onmouseleave = this._hideRomperButtons.bind(this);
