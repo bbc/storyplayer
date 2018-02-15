@@ -166,8 +166,22 @@ $romper-background-color: #ccc;
   }
 }
 
+
+.romper-player > .romper-gui > .romper-buttons {
+
+  >.romper-media-transport{
+  width:100%;
+  }
+
+>.romper-narrative-element-transport{
+  width:100%;
+  }
+
+}
+
 .romper-player > .romper-gui {
 
+  
   >.romper-overlays {
     align-items: center;
     display: flex;
@@ -178,6 +192,7 @@ $romper-background-color: #ccc;
     width: 100%;
   }
 
+  
   >.romper-buttons-activate-area.hide {
     display: hidden;
     height: 0%;
@@ -225,6 +240,7 @@ $romper-background-color: #ccc;
 
 .romper-scrub-bar {
   height: 100%;
+  width: 70%;
 }
 
 .romper-image-overlay {
