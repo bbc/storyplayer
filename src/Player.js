@@ -121,6 +121,8 @@ class Player extends EventEmitter {
     _overlays: HTMLDivElement;
     _buttons: HTMLDivElement;
     _buttonsActivateArea: HTMLDivElement;
+    _narrativeElementTransport: HTMLDivElement;
+    _mediaTransport: HTMLDivElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -158,6 +160,16 @@ class Player extends EventEmitter {
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
 
+        /*
+                <buttons>
+                    <narrativeElementTransport />
+                    <scrub />
+                    <lower section>
+                        <play vol>
+                        <time sub FS>
+                    </lowersection>
+        */
+
         this._buttonsActivateArea = document.createElement('div');
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
 
@@ -173,24 +185,21 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
 
-        this._playPauseButton = document.createElement('button');
-        this._playPauseButton.classList.add('romper-button');
-        this._playPauseButton.classList.add('romper-play-button');
-        this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
-        this._buttons.appendChild(this._playPauseButton);
-
-        this._repeatButton = document.createElement('button');
-        this._repeatButton.classList.add('romper-button');
-        this._repeatButton.classList.add('romper-repeat-button');
-        this._repeatButton.classList.add('romper-inactive');
-        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
-        this._buttons.appendChild(this._repeatButton);
+        this._narrativeElementTransport = document.createElement('div');
+        this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
 
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
         this._backButton.onclick = this._backButtonClicked.bind(this);
-        this._buttons.appendChild(this._backButton);
+        this._narrativeElementTransport.appendChild(this._backButton);
+
+        this._nextButton = document.createElement('button');
+        this._nextButton.classList.add('romper-button');
+        this._nextButton.classList.add('romper-next-button');
+        this._nextButton.onclick = this._nextButtonClicked.bind(this);
+        this._narrativeElementTransport.appendChild(this._nextButton);
+        this._buttons.appendChild(this._narrativeElementTransport);
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.type = 'range';
@@ -198,30 +207,45 @@ class Player extends EventEmitter {
         this._scrubBar.className = 'romper-scrub-bar';
         this._buttons.appendChild(this._scrubBar);
 
-        this._nextButton = document.createElement('button');
-        this._nextButton.classList.add('romper-button');
-        this._nextButton.classList.add('romper-next-button');
-        this._nextButton.onclick = this._nextButtonClicked.bind(this);
-        this._buttons.appendChild(this._nextButton);
+
+        this._mediaTransport = document.createElement('div');
+        this._mediaTransport.classList.add('romper-media-transport');
+
+        this._playPauseButton = document.createElement('button');
+        this._playPauseButton.classList.add('romper-button');
+        this._playPauseButton.classList.add('romper-play-button');
+        this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
+        this._mediaTransport.appendChild(this._playPauseButton);
+
+        this._repeatButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.classList.add('romper-inactive');
+        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
+        this._mediaTransport.appendChild(this._repeatButton);
 
         // Create the overlays.
         this._volume = createOverlay('volume', this._logUserInteraction);
         this._overlays.appendChild(this._volume.overlay);
-        this._buttons.appendChild(this._volume.button);
+        this._mediaTransport.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
         this._overlays.appendChild(this._representation.overlay);
-        this._buttons.appendChild(this._representation.button);
+        this._mediaTransport.appendChild(this._representation.button);
 
         this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
-        this._buttons.appendChild(this._icon.button);
+        this._mediaTransport.appendChild(this._icon.button);
 
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
         this._fullscreenButton.onclick = () => this._toggleFullScreen();
-        this._buttons.appendChild(this._fullscreenButton);
+        this._mediaTransport.appendChild(this._fullscreenButton);
+
+
+        this._buttons.appendChild(this._mediaTransport);
+
 
         target.appendChild(this._player);
 
