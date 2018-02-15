@@ -53,6 +53,11 @@ function createOverlay(name: string, logFunction: Function) {
 
     const add = (id: string, el: HTMLElement) => {
         elements[id] = el;
+        if (Object.keys(elements).length === 1) {
+            el.classList.add('romper-control-selected');
+        } else {
+            el.classList.add('romper-control-unselected');
+        }
         overlay.appendChild(el);
         button.classList.remove('romper-inactive');
     };
@@ -69,10 +74,38 @@ function createOverlay(name: string, logFunction: Function) {
         }
     };
 
+    const setActive = (id: string) => {
+        Object.keys(elements).forEach((key) => {
+            if (key === id) {
+                elements[key].classList.add('romper-control-selected');
+                elements[key].classList.remove('romper-control-unselected');
+            } else {
+                elements[key].classList.add('romper-control-unselected');
+                elements[key].classList.remove('romper-control-selected');
+            }
+        });
+    };
+
+    const addClass = (id: string, classname: string) => {
+        Object.keys(elements).forEach((key) => {
+            if (key === id) {
+                elements[key].classList.add(classname);
+            }
+        });
+    };
+
+    const removeClass = (id: string, classname: string) => {
+        Object.keys(elements).forEach((key) => {
+            if (key === id) {
+                elements[key].classList.remove(classname);
+            }
+        });
+    };
+
     // Consider a set or select method.
 
     return {
-        overlay, button, add, remove, get,
+        overlay, button, add, remove, get, setActive, addClass, removeClass,
     };
 }
 
@@ -262,6 +295,7 @@ class Player extends EventEmitter {
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.onclick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
+            this._representation.setActive(id);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
@@ -271,19 +305,11 @@ class Player extends EventEmitter {
     }
 
     activateRepresentationControl(id: string) {
-        const representationControl = this._representation.get(id);
-        if (representationControl) {
-            const icon = representationControl.children[0];
-            icon.classList.remove('romper-control-disabled');
-        }
+        this._representation.removeClass(id, 'romper-control-disabled');
     }
 
     deactivateRepresentationControl(id: string) {
-        const representationControl = this._representation.get(id);
-        if (representationControl) {
-            const icon = representationControl.children[0];
-            icon.classList.add('romper-control-disabled');
-        }
+        this._representation.addClass(id, 'romper-control-disabled');
     }
 
     removeRepresentationControl(id: string) {
@@ -322,6 +348,10 @@ class Player extends EventEmitter {
             }
             icon.src = src;
         }
+    }
+
+    setActiveRepresentationControl(id: string) {
+        this._representation.setActive(id);
     }
 
     enterCompleteBehavourPhase() {
