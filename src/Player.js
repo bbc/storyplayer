@@ -160,6 +160,15 @@ class Player extends EventEmitter {
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
 
+        /*
+                <buttons>
+                    <narrativeElementTransport />
+                    <scrub />
+                    <lower section>
+                        <play vol time sub FS>
+                    </lowersection>
+        */
+
         this._buttonsActivateArea = document.createElement('div');
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
 
