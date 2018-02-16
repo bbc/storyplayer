@@ -8,10 +8,20 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import HlsManager from '../HlsManager';
 import logger from '../logger';
 
+export type HTMLTrackElement = HTMLElement & {
+    kind: string,
+    label: string,
+    srclang: string,
+    src: string,
+    mode: string,
+    default: boolean,
+}
+
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _hls: Object;
     _videoElement: HTMLVideoElement;
+    _videoTrack: HTMLTrackElement;
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
     _applyColourOverlayBehaviour: Function;
@@ -120,6 +130,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     renderVideoElement() {
         this._videoElement = document.createElement('video');
         this._videoElement.className = 'romper-video-element';
+        this._videoElement.crossOrigin = 'anonymous';
 
         // automatically move on at video end
         this._videoElement.addEventListener('ended', () => {
@@ -143,7 +154,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                 this.populateVideoElement(this._videoElement, mediaUrl);
                             })
                             .catch((err) => {
-                                logger.error(err, 'Notfound');
+                                logger.error(err, 'Video not found');
+                            });
+                    }
+                    if (fg.assets.sub_src) {
+                        this._fetchMedia(fg.assets.sub_src)
+                            .then((mediaUrl) => {
+                                this.populateVideoSubs(this._videoElement, mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Subs not found');
                             });
                     }
                 });
@@ -158,6 +178,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._hls.attachMedia(videoElement);
         } else {
             videoElement.setAttribute('src', mediaUrl);
+        }
+    }
+
+    populateVideoSubs(videoElement: HTMLVideoElement, mediaUrl: string) {
+        console.log('Video SUBS!');
+        if (this._destroyed) {
+            logger.warn('trying to populate subs of video element that has been destroyed');
+        } else {
+            videoElement.addEventListener('loadedmetadata', () => {
+                logger.info('Starting loading subtitles');
+
+                // Load Subtitles
+                this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
+                this._videoTrack.kind = 'captions';
+                this._videoTrack.label = 'English';
+                this._videoTrack.srclang = 'en';
+                this._videoTrack.src = mediaUrl;
+                this._videoTrack.default = true;
+                this._videoElement.appendChild(this._videoTrack);
+
+                // Show Subtitles
+                this._videoTrack.mode = 'showing';
+                this._videoElement.textTracks[0].mode = 'showing';
+            });
         }
     }
 
@@ -261,6 +305,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._hlsManager.returnHlsToPool(this._hls);
 
+        delete this._videoTrack;
         delete this._videoElement;
 
         super.destroy();
