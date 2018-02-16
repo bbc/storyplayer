@@ -14,6 +14,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _videoElement: HTMLVideoElement;
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
+    _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
@@ -45,11 +46,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._target = player.mediaTarget;
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._behaviourElements = [];
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
     }
@@ -160,6 +164,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         const { blur } = behaviour;
         this._videoElement.style.filter = `blur(${blur}px)`;
+        callback();
+    }
+
+    _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.className = 'romper-image-overlay';
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
         callback();
     }
 
