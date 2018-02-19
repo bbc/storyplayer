@@ -384,12 +384,15 @@ class Player extends EventEmitter {
         const iconControl = this._icon.get(id);
 
         if (iconControl) {
-            const icon = iconControl.children[0];
             if (selected) {
-                icon.classList.add('romper-selected');
+                iconControl.classList.remove('romper-control-unselected');
+                iconControl.classList.add('romper-control-selected');
+                // scroll to here...
             } else {
-                icon.classList.remove('romper-selected');
+                iconControl.classList.add('romper-control-unselected');
+                iconControl.classList.remove('romper-control-selected');
             }
+            const icon = iconControl.children[0];
             icon.src = src;
         }
     }
