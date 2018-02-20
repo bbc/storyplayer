@@ -117,6 +117,14 @@ $romper-background-color: #ccc;
     @include button('../images/next.svg');
   }
 
+  .romper-subtitles-button {
+    @include button('../images/black/timeline.svg');
+
+    &.subtitles-on {
+      @include button('../images/black/music.svg');
+    }
+  }
+
   .romper-volume-overlay {
     @include overlay;
     flex-direction: column;

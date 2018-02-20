@@ -30,8 +30,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
     _handleVolumeClicked: Function;
+    _handleSubtitlesClicked: Function;
     _playVideoCallback: Function;
     _hlsManager: HlsManager;
+    _showingSubtitles: boolean;
 
     constructor(
         representation: Representation,
@@ -43,6 +45,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._playVideoCallback = this._playVideoCallback.bind(this);
 
         this._hlsManager = player._hlsManager;
@@ -59,6 +62,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._behaviourElements = [];
+
+        this._showingSubtitles = player.showingSubtitles;
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
@@ -83,6 +88,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+        player.on(
+            PlayerEvents.SUBTITLES_BUTTON_CLICKED,
+            this._handleSubtitlesClicked,
+        );
         this.playVideo();
     }
 
@@ -106,6 +115,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         player.removeListener(
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
+        );
+        player.removeListener(
+            PlayerEvents.SUBTITLES_BUTTON_CLICKED,
+            this._handleSubtitlesClicked,
         );
     }
 
@@ -182,7 +195,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     populateVideoSubs(videoElement: HTMLVideoElement, mediaUrl: string) {
-        console.log('Video SUBS!');
         if (this._destroyed) {
             logger.warn('trying to populate subs of video element that has been destroyed');
         } else {
@@ -198,10 +210,20 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 this._videoTrack.default = true;
                 this._videoElement.appendChild(this._videoTrack);
 
-                // Show Subtitles
-                this._videoTrack.mode = 'showing';
-                this._videoElement.textTracks[0].mode = 'showing';
+                this._showHideSubtitles();
             });
+        }
+    }
+
+    _showHideSubtitles() {
+        if (this._showingSubtitles) {
+            // Show Subtitles
+            this._videoTrack.mode = 'showing';
+            this._videoElement.textTracks[0].mode = 'showing';
+        } else {
+            // Hide Subtitles
+            this._videoTrack.mode = 'hidden';
+            this._videoElement.textTracks[0].mode = 'hidden';
         }
     }
 
@@ -252,6 +274,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (event.id === this._representation.id) {
             this._videoElement.volume = event.value;
         }
+    }
+
+    _handleSubtitlesClicked(): void {
+        this._showingSubtitles = !this._showingSubtitles;
+        this._showHideSubtitles();
     }
 
     getCurrentTime(): Object {
