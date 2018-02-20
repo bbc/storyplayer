@@ -526,6 +526,7 @@ class Player extends EventEmitter {
                 'fullscreen',
                 'not-fullscreen',
             );
+            this._buttons.classList.remove('romper-buttons-fullscreen');
             Player._exitFullScreen();
         } else {
             this._logUserInteraction(
@@ -533,6 +534,7 @@ class Player extends EventEmitter {
                 'not-fullscreen',
                 'fullscreen',
             );
+            this._buttons.classList.add('romper-buttons-fullscreen');
             this._enterFullScreen();
         }
     }
