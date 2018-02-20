@@ -49,7 +49,6 @@
     "file-loader": "^1.1.6",
     "flow-bin": "^0.41.0",
     "flow-typed": "^2.0.0",
-    "hls.js": "0.8.9",
     "jest": "^22.0.5",
     "node-sass": "^4.7.2",
     "nodemon": "^1.11.0",
@@ -58,14 +57,15 @@
     "sinon": "^2.0.0",
     "sinon-chai": "^2.8.0",
     "style-loader": "^0.19.1",
-    "videocontext": "^0.51.4",
     "webpack": "^3.10.0"
   },
   "dependencies": {
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "browser-bunyan": "^1.2.2",
+    "hls.js": "^0.8.9",
     "json-logic-js": "^1.0.11",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "videocontext": "^0.51.6"
   }
 }

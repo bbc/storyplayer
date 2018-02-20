@@ -3126,7 +3126,7 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
-hls.js@0.8.9:
+hls.js@^0.8.9:
   version "0.8.9"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/hls.js/-/hls.js-0.8.9.tgz#db367cc99ce5b0976ea3e059a1d044d7b0790697"
   dependencies:
@@ -6724,9 +6724,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-videocontext@^0.51.4:
-  version "0.51.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/videocontext/-/videocontext-0.51.5.tgz#0d8eea6ff7c9d9c3b71d720f0624e2750c70e43b"
+videocontext@^0.51.6:
+  version "0.51.6"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/videocontext/-/videocontext-0.51.6.tgz#9864f93303cbb970871d5718cde5a5676e877740"
 
 vm-browserify@0.0.4:
   version "0.0.4"
