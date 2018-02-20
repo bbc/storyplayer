@@ -244,6 +244,7 @@ class Player extends EventEmitter {
         this._subtitlesButton = document.createElement('button');
         this._subtitlesButton.classList.add('romper-button');
         this._subtitlesButton.classList.add('romper-subtitles-button');
+        this._subtitlesButton.classList.add('romper-subtitles-off-button');
         this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
         this._mediaTransport.appendChild(this._subtitlesButton);
 
@@ -298,13 +299,25 @@ class Player extends EventEmitter {
     _subtitlesButtonClicked() {
         this.showingSubtitles = !this.showingSubtitles;
         if (this.showingSubtitles) {
-            this._subtitlesButton.classList.add('subtitles-on');
+            this._subtitlesButton.classList.add('romper-subtitles-on-button');
+            this._subtitlesButton.classList.remove('romper-subtitles-off-button');
         } else {
-            this._subtitlesButton.classList.remove('subtitles-on');
+            this._subtitlesButton.classList.remove('romper-subtitles-on-button');
+            this._subtitlesButton.classList.add('romper-subtitles-off-button');
         }
 
+        const showingTest = [
+            'hidden',
+            'showing',
+        ];
+
         this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED);
-        this._logUserInteraction(AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED);
+        // The + here converts bool to int
+        this._logUserInteraction(
+            AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED,
+            showingTest[+!this.showingSubtitles],
+            showingTest[+this.showingSubtitles],
+        );
     }
 
     _logUserInteraction(

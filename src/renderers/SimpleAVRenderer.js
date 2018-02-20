@@ -33,7 +33,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _handleSubtitlesClicked: Function;
     _playVideoCallback: Function;
     _hlsManager: HlsManager;
-    _showingSubtitles: boolean;
+    _subtitlesLoaded: boolean;
+    _subtitlesShowing: boolean;
 
     constructor(
         representation: Representation,
@@ -63,7 +64,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._behaviourElements = [];
 
-        this._showingSubtitles = player.showingSubtitles;
+        this._subtitlesShowing = player.showingSubtitles;
+        this._subtitlesLoaded = false;
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
@@ -199,8 +201,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             logger.warn('trying to populate subs of video element that has been destroyed');
         } else {
             videoElement.addEventListener('loadedmetadata', () => {
-                logger.info('Starting loading subtitles');
-
                 // Load Subtitles
                 this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
                 this._videoTrack.kind = 'captions';
@@ -210,20 +210,23 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 this._videoTrack.default = true;
                 this._videoElement.appendChild(this._videoTrack);
 
+                this._subtitlesLoaded = true;
                 this._showHideSubtitles();
             });
         }
     }
 
     _showHideSubtitles() {
-        if (this._showingSubtitles) {
-            // Show Subtitles
-            this._videoTrack.mode = 'showing';
-            this._videoElement.textTracks[0].mode = 'showing';
-        } else {
-            // Hide Subtitles
-            this._videoTrack.mode = 'hidden';
-            this._videoElement.textTracks[0].mode = 'hidden';
+        if (this._subtitlesLoaded) {
+            if (this._subtitlesShowing) {
+                // Show Subtitles
+                this._videoTrack.mode = 'showing';
+                this._videoElement.textTracks[0].mode = 'showing';
+            } else {
+                // Hide Subtitles
+                this._videoTrack.mode = 'hidden';
+                this._videoElement.textTracks[0].mode = 'hidden';
+            }
         }
     }
 
@@ -277,7 +280,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handleSubtitlesClicked(): void {
-        this._showingSubtitles = !this._showingSubtitles;
+        this._subtitlesShowing = !this._subtitlesShowing;
         this._showHideSubtitles();
     }
 

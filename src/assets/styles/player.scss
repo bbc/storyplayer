@@ -118,10 +118,12 @@ $romper-background-color: #ccc;
   }
 
   .romper-subtitles-button {
-    @include button('../images/black/timeline.svg');
-
-    &.subtitles-on {
+    &.romper-subtitles-on-button {
       @include button('../images/black/music.svg');
+    }
+
+    &.romper-subtitles-off-button {
+      @include button('../images/black/timeline.svg');
     }
   }
 
