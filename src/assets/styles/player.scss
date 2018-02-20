@@ -72,7 +72,7 @@ $romper-background-color: #ccc;
     visibility: collapse !important;
   }
 
-  .romper-selected {
+  .romper-control-selected > .romper-icon {
     background-color: $highlight;
   }
 
