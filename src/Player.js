@@ -387,7 +387,6 @@ class Player extends EventEmitter {
             if (selected) {
                 iconControl.classList.remove('romper-control-unselected');
                 iconControl.classList.add('romper-control-selected');
-                // scroll to here...
             } else {
                 iconControl.classList.add('romper-control-unselected');
                 iconControl.classList.remove('romper-control-selected');
