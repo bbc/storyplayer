@@ -8,7 +8,7 @@
     "build": "webpack",
     "test": "flow-typed install && concurrently --names \"eslint,flow,jest,sass-lint\" -c \"blue.bgWhite,cyan.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:flow\" \"yarn test:jest\" \"yarn test:sass-lint\"",
     "test-noinstall": "concurrently --names \"eslint,flow,jest,sass-lint\" -c \"blue.bgWhite,cyan.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:flow\" \"yarn test:jest\" \"yarn test:sass-lint\"",
-    "test-watch": "nodemon -L --watch src --exec yarn test-noinstall",
+    "test-watch": "flow-typed install && nodemon -L --watch src --exec yarn test-noinstall",
     "test:eslint": "eslint src/ spec/",
     "test:flow": "flow check --all",
     "test:jest": "jest",
