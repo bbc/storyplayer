@@ -54,11 +54,7 @@ function createOverlay(name: string, logFunction: Function) {
 
     const add = (id: string, el: HTMLElement) => {
         elements[id] = el;
-        if (Object.keys(elements).length === 1) {
-            el.classList.add('romper-control-selected');
-        } else {
-            el.classList.add('romper-control-unselected');
-        }
+        el.classList.add('romper-control-unselected');
         overlay.appendChild(el);
         button.classList.remove('romper-inactive');
     };
