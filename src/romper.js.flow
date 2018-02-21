@@ -81,6 +81,7 @@ export type AssetCollection = {
         audio_src?: string,
         image_src?: string,
         av_src?: string,
+        sub_src?: string,
     },
 };
 

@@ -16,6 +16,7 @@ const PlayerEvents = [
     'SCRUB_BAR_CHANGED',
     'SCRUB_BAR_MOUSE_UP',
     'PLAY_PAUSE_BUTTON_CLICKED',
+    'SUBTITLES_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
     'REPEAT_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
@@ -118,6 +119,7 @@ class Player extends EventEmitter {
     backgroundTarget: HTMLDivElement;
     mediaTarget: HTMLDivElement;
     guiTarget: HTMLDivElement;
+    showingSubtitles: boolean;
     _overlays: HTMLDivElement;
     _buttons: HTMLDivElement;
     _buttonsActivateArea: HTMLDivElement;
@@ -127,6 +129,7 @@ class Player extends EventEmitter {
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
     _nextButton: HTMLButtonElement;
+    _subtitlesButton: HTMLButtonElement;
     _fullscreenButton: HTMLButtonElement;
     _volume: Object;
     _representation: Object;
@@ -137,6 +140,8 @@ class Player extends EventEmitter {
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
+        this.showingSubtitles = false;
+
         this._analytics = analytics;
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this._hlsManager = new HlsManager();
@@ -236,12 +241,18 @@ class Player extends EventEmitter {
         this._overlays.appendChild(this._icon.overlay);
         this._mediaTransport.appendChild(this._icon.button);
 
+        this._subtitlesButton = document.createElement('button');
+        this._subtitlesButton.classList.add('romper-button');
+        this._subtitlesButton.classList.add('romper-subtitles-button');
+        this._subtitlesButton.classList.add('romper-subtitles-off-button');
+        this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
+        this._mediaTransport.appendChild(this._subtitlesButton);
+
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
         this._fullscreenButton.onclick = () => this._toggleFullScreen();
         this._mediaTransport.appendChild(this._fullscreenButton);
-
 
         this._buttons.appendChild(this._mediaTransport);
 
@@ -283,6 +294,30 @@ class Player extends EventEmitter {
     _nextButtonClicked() {
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+    }
+
+    _subtitlesButtonClicked() {
+        this.showingSubtitles = !this.showingSubtitles;
+        if (this.showingSubtitles) {
+            this._subtitlesButton.classList.add('romper-subtitles-on-button');
+            this._subtitlesButton.classList.remove('romper-subtitles-off-button');
+        } else {
+            this._subtitlesButton.classList.remove('romper-subtitles-on-button');
+            this._subtitlesButton.classList.add('romper-subtitles-off-button');
+        }
+
+        const showingSubtitlesIntToString = [
+            'hidden',
+            'showing',
+        ];
+
+        this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED);
+        // The + here converts bool to int
+        this._logUserInteraction(
+            AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED,
+            showingSubtitlesIntToString[+!this.showingSubtitles],
+            showingSubtitlesIntToString[+this.showingSubtitles],
+        );
     }
 
     _logUserInteraction(
