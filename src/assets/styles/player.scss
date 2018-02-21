@@ -118,13 +118,18 @@ $romper-background-color: #ccc;
   }
 
   .romper-subtitles-button {
+    @include button('../images/subtitles.svg');
+
     &.romper-subtitles-on-button {
-      @include button('../images/black/music.svg');
+      border-bottom: 2px solid $highlight;
+      padding-top: 2px;
     }
 
     &.romper-subtitles-off-button {
-      @include button('../images/black/timeline.svg');
+      padding-bottom: 2px;
+      padding-top: 2px;
     }
+
   }
 
   .romper-volume-overlay {
