@@ -306,7 +306,7 @@ class Player extends EventEmitter {
             this._subtitlesButton.classList.add('romper-subtitles-off-button');
         }
 
-        const showingTest = [
+        const showingSubtitlesIntToString = [
             'hidden',
             'showing',
         ];
@@ -315,8 +315,8 @@ class Player extends EventEmitter {
         // The + here converts bool to int
         this._logUserInteraction(
             AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED,
-            showingTest[+!this.showingSubtitles],
-            showingTest[+this.showingSubtitles],
+            showingSubtitlesIntToString[+!this.showingSubtitles],
+            showingSubtitlesIntToString[+this.showingSubtitles],
         );
     }
 
