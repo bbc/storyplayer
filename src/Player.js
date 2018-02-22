@@ -35,7 +35,10 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const deactivateOverlay = () => {
-        overlay.classList.add('romper-inactive');
+        if (!overlay.classList.contains('romper-inactive')) {
+            logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
+            overlay.classList.add('romper-inactive');
+        }
     };
 
     const button = document.createElement('button');
