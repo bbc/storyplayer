@@ -80,6 +80,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._target.appendChild(this._videoElement);
 
         const player = this._player;
+        this._subtitlesShowing = player.showingSubtitles;
+        this._showHideSubtitles();
+
         player.addVolumeControl(this._representation.id, 'Foreground');
         player.connectScrubBar(this._videoElement);
         player.on(
