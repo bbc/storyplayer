@@ -80,7 +80,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._target.appendChild(this._videoElement);
 
         const player = this._player;
-        player.addVolumeControl(this._representation.id, 'Video');
+        player.addVolumeControl(this._representation.id, 'Foreground');
         player.connectScrubBar(this._videoElement);
         player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
