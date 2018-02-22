@@ -51,9 +51,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._hlsManager = player._hlsManager;
 
-        if (this._hlsManager.isSupported()) {
-            this._hls = this._hlsManager.getHlsFromPool();
-        }
+        this._hls = this._hlsManager.getHlsFromPool();
+
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);

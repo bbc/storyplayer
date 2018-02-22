@@ -117,8 +117,7 @@ export default class HlsManager {
         });
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    isSupported() {
+    static isSupported() {
         return Hls.isSupported();
     }
 }
