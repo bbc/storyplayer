@@ -180,7 +180,7 @@ class Player extends EventEmitter {
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
-        this._overlays.onclick = this._overlayClickAway.bind(this);
+        this._overlays.onclick = this._hideAllOverlays.bind(this);
 
         /*
                 <buttons>
@@ -304,16 +304,18 @@ class Player extends EventEmitter {
     }
 
     _backButtonClicked() {
+        this._hideAllOverlays();
         this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
     }
 
     _nextButtonClicked() {
+        this._hideAllOverlays();
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
     }
 
-    _overlayClickAway() {
+    _hideAllOverlays() {
         if (this._representation) {
             this._representation.deactivateOverlay();
         }
