@@ -61,7 +61,7 @@ export class HlsInstance {
     }
 
     detachMedia() {
-        this._hls.loadSource('https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8');
+        // this._hls.loadSource('https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8');
         // this._hls.currentLevel = 3;
         logger.info(`HLSInstance ${this._idNum}: detachMedia`);
         if (this._hls.media === null || this._hls.media === undefined) {
@@ -86,6 +86,11 @@ export class HlsInstance {
         // this._hls.stopLoad();
         // const bufferController = this._hls.coreComponents[4];
         // bufferController.doFlush();
+    }
+
+    destroy() {
+        // this._hls.loadSource('https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8');
+        this._hls.destroy();
     }
 
     clearEvents() {
@@ -170,6 +175,7 @@ export default class HlsManager {
         hls.detachMedia();
 
         hls.flush();
+        hls.destroy();
 
         let activePools = 0;
         this._hlsPool.forEach((HlsPoolObject) => {
@@ -181,8 +187,10 @@ export default class HlsManager {
         const id = hls.getId();
         this._hlsPool.forEach((HlsPoolObject, index: number) => {
             if (HlsPoolObject.hlsInstance.getId() === id) {
-                this._hlsPool[index].active = false;
-                // this._hlsPool.splice(index, 1);
+                // this._hlsPool[index].active = false;
+
+                this._hlsPool.splice(index, 1);
+
                 logger.info('HLS Returned to Pool. ' +
                     `Total HLS Instances: ${this._hlsPool.length - 1}. Active: ${activePools - 1}`);
             }
