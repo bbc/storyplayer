@@ -8,13 +8,16 @@ import logger from './logger';
 export class HlsInstance {
     _hls: Object
     _id: string
+    _idNum: number
     _eventList: Array<Object>
     _attached: boolean
 
-    constructor(config: Object) {
+    constructor(config: Object, idNum: number) {
         this._hls = new Hls(config);
         this._id = uuidv4();
         this._eventList = [];
+        this._idNum = idNum;
+        logger.info(`HLSInstance ${this._idNum}: Created`);
     }
 
     getId(): string {
@@ -23,15 +26,27 @@ export class HlsInstance {
 
     // Copy existing Hls methods
     loadSource(src: string) {
+        logger.info(`HLSInstance ${this._idNum}: loadSource`);
         this._hls.loadSource(src);
+        if (this._hls.media !== null && this._hls.media !== undefined) {
+            logger.info(`HLSInstance ${this._idNum}: loadedSourceYES`);
+        }
     }
 
     attachMedia(videoElement: HTMLVideoElement) {
+        logger.info(`HLSInstance ${this._idNum}: attachMedia`);
         this._hls.attachMedia(videoElement);
     }
 
     detachMedia() {
+        logger.info(`HLSInstance ${this._idNum}: detachMedia`);
+        if (this._hls.media === null || this._hls.media === undefined) {
+            logger.info(`HLSInstance ${this._idNum}: MEDIA NULL`);
+            console.trace();
+        }
+        this._hls.media.pause();
         this._hls.detachMedia();
+        this._hls.stopLoad();
     }
 
     on(event: string, callback: Function) {
@@ -43,22 +58,30 @@ export class HlsInstance {
     }
 
     flush() {
+        logger.info(`HLSInstance ${this._idNum}: flush`);
         // Manual force flush of buffer.
         const bufferController = this._hls.coreComponents[4];
         bufferController.doFlush();
     }
 
     clearEvents() {
+        logger.info(`HLSInstance ${this._idNum}: clearEvents`);
         // Cleanup all events added to hls
         this._eventList.forEach((eventListObject) => {
             this._hls.off(eventListObject.event, eventListObject.callback);
         });
+        this._eventList = [];
+    }
+
+    destroy() {
+        this._hls.destroy();
     }
 }
 
 export default class HlsManager {
     _hlsPool: Array<Object>
     _defaultConfig: Object
+    _idTotal: number
 
     constructor() {
         this._hlsPool = [];
@@ -67,6 +90,7 @@ export default class HlsManager {
             startLevel: 3,
             debug: false,
         };
+        this._idTotal = 0;
     }
 
     static get Events() {
@@ -84,35 +108,54 @@ export default class HlsManager {
             }
             return false;
         });
+        let activePools = 0;
+        this._hlsPool.forEach((HlsPoolObject) => {
+            if (HlsPoolObject.active) {
+                activePools += 1;
+            }
+        });
 
         // Use existing pool instance
         if (useExistingPoolIndex !== -1) {
-            logger.info(`HLS Taken from Pool. Total HLS Instances: ${this._hlsPool.length}`);
+            logger.info('HLS Taken from Pool. ' +
+                `Total HLS Instances: ${this._hlsPool.length}. Active: ${activePools + 1}`);
             this._hlsPool[useExistingPoolIndex].active = true;
             return this._hlsPool[useExistingPoolIndex].hlsInstance;
         }
         // Create new pool instance
-        const newHls = new HlsInstance(this._defaultConfig);
+        const newHls = new HlsInstance(this._defaultConfig, this._idTotal);
+        this._idTotal += 1;
         this._hlsPool.push({
             hlsInstance: newHls,
             active: true,
         });
-        logger.info(`New HLS Created. Total HLS Instances: ${this._hlsPool.length}`);
+        logger.info('New HLS Instance Created. ' +
+            `Total HLS Instances: ${this._hlsPool.length}. Active: ${activePools + 1}`);
         return newHls;
     }
 
 
     returnHlsToPool(hls: HlsInstance) {
         hls.clearEvents();
-        hls.flush();
-
         hls.detachMedia();
+
+        hls.flush();
+        // hls.destroy();
+
+        let activePools = 0;
+        this._hlsPool.forEach((HlsPoolObject) => {
+            if (HlsPoolObject.active) {
+                activePools += 1;
+            }
+        });
 
         const id = hls.getId();
         this._hlsPool.forEach((HlsPoolObject, index: number) => {
             if (HlsPoolObject.hlsInstance.getId() === id) {
                 this._hlsPool[index].active = false;
-                logger.info(`HLS Returned to Pool. Total HLS Instances: ${this._hlsPool.length}`);
+                // this._hlsPool.splice(index, 1);
+                logger.info('HLS Returned to Pool. ' +
+                    `Total HLS Instances: ${this._hlsPool.length - 1}. Active: ${activePools - 1}`);
             }
         });
     }

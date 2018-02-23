@@ -35,6 +35,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _hlsManager: HlsManager;
     _subtitlesLoaded: boolean;
     _subtitlesShowing: boolean;
+    _avSrc: string;
 
     constructor(
         representation: Representation,
@@ -72,6 +73,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
+
+        this._avSrc = '';
     }
 
     start() {
@@ -132,19 +135,24 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } else {
             this._videoElement.play();
         }
+        logger.warn('NOW PLAY');
     }
 
     playVideo() {
         if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
+            logger.info('PLAY: Has Data');
             this._videoElement.play();
-        } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
+        } else if (this._avSrc.indexOf('m3u8') !== -1) {
+            logger.info('PLAY: Manifest callback');
             this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
         } else {
+            logger.info('PLAY: Loaded Video callback');
             this._videoElement.addEventListener('loadeddata', this._playVideoCallback);
         }
     }
 
     renderVideoElement() {
+        logger.error(new Error('Oh dear me'), 'Massive Error');
         this._videoElement = document.createElement('video');
         this._videoElement.className = 'romper-video-element';
         this._videoElement.crossOrigin = 'anonymous';
@@ -168,6 +176,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
+                                this._avSrc = mediaUrl;
                                 this.populateVideoElement(this._videoElement, mediaUrl);
                             })
                             .catch((err) => {
@@ -191,8 +200,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else if (mediaUrl.indexOf('.m3u8') !== -1) {
-            this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
+            this._hls.loadSource(mediaUrl);
         } else {
             videoElement.setAttribute('src', mediaUrl);
         }

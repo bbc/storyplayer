@@ -54,8 +54,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
             if (mediaUrl.indexOf('.m3u8') !== -1) {
-                this._hls.loadSource(mediaUrl);
                 this._hls.attachMedia(audioElement);
+                this._hls.loadSource(mediaUrl);
                 this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
                     if (this._disabled) {
                         logger.warn('loaded destroyed audio element - not playing');
