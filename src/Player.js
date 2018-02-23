@@ -65,7 +65,7 @@ function createOverlay(name: string, logFunction: Function) {
 
     const add = (id: string, el: HTMLElement, label?: string) => {
         elements[id] = el;
-        if (label) { 
+        if (label) {
             labels[label] = id;
         }
         el.classList.add('romper-control-unselected');
@@ -79,6 +79,7 @@ function createOverlay(name: string, logFunction: Function) {
         if (labels[label]) {
             return labels[label];
         }
+        return null;
     };
 
     const remove = (id: string) => {
@@ -122,7 +123,16 @@ function createOverlay(name: string, logFunction: Function) {
     // Consider a set or select method.
 
     return {
-        overlay, button, add, remove, get, setActive, addClass, removeClass, deactivateOverlay, getIdForLabel,
+        overlay,
+        button,
+        add,
+        remove,
+        get,
+        setActive,
+        addClass,
+        removeClass,
+        deactivateOverlay,
+        getIdForLabel,
     };
 }
 
@@ -365,14 +375,14 @@ class Player extends EventEmitter {
         this._analytics(logData);
     }
 
-    setVolumeControlLevel(label: string, value: number){
+    setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
         if (overlay.childNodes[1]) {
             overlay.childNodes[1].value = value;
         }
         this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
-     }
+    }
 
     addVolumeControl(id: string, label: string) {
         const volumeControl = document.createElement('div');

@@ -79,8 +79,8 @@ export default class RenderManager extends EventEmitter {
                 this._controller.repeatStep();
             }
         });
-        this._player.on(PlayerEvents.VOLUME_CHANGED, ({id, value, label}) => {
-            this._rendererState.volumes[label] = value;
+        this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
+            this._rendererState.volumes[event.label] = event.value;
         });
 
         this._initialise();
@@ -234,13 +234,12 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
             }
         }
-        
+
         newRenderer.willStart();
-        
+
         // ensure volume persistence
         Object.keys(this._rendererState.volumes).forEach((label) => {
             const value = this._rendererState.volumes[label];
-            const id = newRenderer._representation.id;
             this._player.setVolumeControlLevel(label, value);
         });
     }
