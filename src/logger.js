@@ -1,6 +1,7 @@
 // @flow
 
-import { createLogger, ConsoleFormattedStream, stdSerializers } from 'browser-bunyan';
+import { createLogger, stdSerializers } from 'browser-bunyan';
+import ConsoleFormattedStream from './logger/logger_formatter';
 
 module.exports = createLogger({
     name: 'romper',
