@@ -11,6 +11,7 @@ export class HlsInstance {
     _idNum: number
     _eventList: Array<Object>
     _attached: boolean
+    _lastSource: string
 
     constructor(config: Object, idNum: number) {
         this._hls = new Hls(config);
@@ -18,6 +19,28 @@ export class HlsInstance {
         this._eventList = [];
         this._idNum = idNum;
         logger.info(`HLSInstance ${this._idNum}: Created`);
+        this._hls.on(Hls.Events.ERROR, this._errorHandler.bind(this));
+    }
+
+    _errorHandler(event: Object, data: Object) {
+        if (data.fatal) {
+            switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+                // try to recover network error
+                logger.warn('fatal network error encountered, try to recover');
+                this._hls.startLoad();
+                break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+                logger.warn('fatal media error encountered, try to recover');
+                this._hls.recoverMediaError();
+                break;
+            default:
+                logger.fatal('fatal media error, cannot recover');
+                // cannot recover
+                this._hls.destroy();
+                break;
+            }
+        }
     }
 
     getId(): string {
@@ -26,11 +49,10 @@ export class HlsInstance {
 
     // Copy existing Hls methods
     loadSource(src: string) {
+        // this._hls.currentLevel = 3;
         logger.info(`HLSInstance ${this._idNum}: loadSource`);
+        this._lastSource = src;
         this._hls.loadSource(src);
-        if (this._hls.media !== null && this._hls.media !== undefined) {
-            logger.info(`HLSInstance ${this._idNum}: loadedSourceYES`);
-        }
     }
 
     attachMedia(videoElement: HTMLVideoElement) {
@@ -39,14 +61,14 @@ export class HlsInstance {
     }
 
     detachMedia() {
+        this._hls.loadSource('https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8');
+        // this._hls.currentLevel = 3;
         logger.info(`HLSInstance ${this._idNum}: detachMedia`);
         if (this._hls.media === null || this._hls.media === undefined) {
-            logger.info(`HLSInstance ${this._idNum}: MEDIA NULL`);
-            console.trace();
+            logger.error(new Error(`HLSInstance ${this._idNum}: MEDIA NULL`));
+            return;
         }
-        this._hls.media.pause();
         this._hls.detachMedia();
-        this._hls.stopLoad();
     }
 
     on(event: string, callback: Function) {
@@ -59,9 +81,11 @@ export class HlsInstance {
 
     flush() {
         logger.info(`HLSInstance ${this._idNum}: flush`);
+        // this._hls.currentLevel = 3;
         // Manual force flush of buffer.
-        const bufferController = this._hls.coreComponents[4];
-        bufferController.doFlush();
+        // this._hls.stopLoad();
+        // const bufferController = this._hls.coreComponents[4];
+        // bufferController.doFlush();
     }
 
     clearEvents() {
@@ -71,10 +95,6 @@ export class HlsInstance {
             this._hls.off(eventListObject.event, eventListObject.callback);
         });
         this._eventList = [];
-    }
-
-    destroy() {
-        this._hls.destroy();
     }
 }
 
@@ -123,7 +143,17 @@ export default class HlsManager {
             return this._hlsPool[useExistingPoolIndex].hlsInstance;
         }
         // Create new pool instance
-        const newHls = new HlsInstance(this._defaultConfig, this._idTotal);
+        let newHls;
+        if (this._idTotal === 0) {
+            newHls = new HlsInstance({
+                startFragPrefetch: true,
+                startLevel: 3,
+                debug: false,
+            }, this._idTotal);
+        } else {
+            newHls = new HlsInstance(this._defaultConfig, this._idTotal);
+        }
+
         this._idTotal += 1;
         this._hlsPool.push({
             hlsInstance: newHls,
@@ -140,7 +170,6 @@ export default class HlsManager {
         hls.detachMedia();
 
         hls.flush();
-        // hls.destroy();
 
         let activePools = 0;
         this._hlsPool.forEach((HlsPoolObject) => {

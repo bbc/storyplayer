@@ -152,7 +152,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
-        logger.error(new Error('Oh dear me'), 'Massive Error');
         this._videoElement = document.createElement('video');
         this._videoElement.className = 'romper-video-element';
         this._videoElement.crossOrigin = 'anonymous';

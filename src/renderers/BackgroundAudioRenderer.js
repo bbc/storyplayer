@@ -57,6 +57,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                 this._hls.attachMedia(audioElement);
                 this._hls.loadSource(mediaUrl);
                 this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
+                    logger.warn('Audio Parsed');
                     if (this._disabled) {
                         logger.warn('loaded destroyed audio element - not playing');
                     } else {
