@@ -30,6 +30,16 @@ function createOverlay(name: string, logFunction: Function) {
     overlay.classList.add('romper-overlay');
     overlay.classList.add(`romper-${name}-overlay`);
     overlay.classList.add('romper-inactive');
+    overlay.onclick = (e) => {
+        e.stopPropagation();
+    };
+
+    const deactivateOverlay = () => {
+        if (!overlay.classList.contains('romper-inactive')) {
+            logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
+            overlay.classList.add('romper-inactive');
+        }
+    };
 
     const button = document.createElement('button');
     button.classList.add('romper-button');
@@ -51,15 +61,26 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const elements = {};
+    const labels = {};
 
-    const add = (id: string, el: HTMLElement) => {
+    const add = (id: string, el: HTMLElement, label?: string) => {
         elements[id] = el;
+        if (label) {
+            labels[label] = id;
+        }
         el.classList.add('romper-control-unselected');
         overlay.appendChild(el);
         button.classList.remove('romper-inactive');
     };
 
     const get = (id: string) => elements[id];
+
+    const getIdForLabel = (label: string) => {
+        if (labels[label]) {
+            return labels[label];
+        }
+        return null;
+    };
 
     const remove = (id: string) => {
         if (elements[id]) {
@@ -102,7 +123,16 @@ function createOverlay(name: string, logFunction: Function) {
     // Consider a set or select method.
 
     return {
-        overlay, button, add, remove, get, setActive, addClass, removeClass,
+        overlay,
+        button,
+        add,
+        remove,
+        get,
+        setActive,
+        addClass,
+        removeClass,
+        deactivateOverlay,
+        getIdForLabel,
     };
 }
 
@@ -163,6 +193,7 @@ class Player extends EventEmitter {
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
+        this._overlays.onclick = this._hideAllOverlays.bind(this);
 
         /*
                 <buttons>
@@ -286,13 +317,27 @@ class Player extends EventEmitter {
     }
 
     _backButtonClicked() {
+        this._hideAllOverlays();
         this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
     }
 
     _nextButtonClicked() {
+        this._hideAllOverlays();
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+    }
+
+    _hideAllOverlays() {
+        if (this._representation) {
+            this._representation.deactivateOverlay();
+        }
+        if (this._volume) {
+            this._volume.deactivateOverlay();
+        }
+        if (this._icon) {
+            this._icon.deactivateOverlay();
+        }
     }
 
     _subtitlesButtonClicked() {
@@ -333,9 +378,19 @@ class Player extends EventEmitter {
         this._analytics(logData);
     }
 
+    setVolumeControlLevel(label: string, value: number) {
+        const id = this._volume.getIdForLabel(label);
+        const overlay = this._volume.get(id);
+        if (overlay.childNodes[1]) {
+            overlay.childNodes[1].value = value;
+        }
+        this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
+    }
+
     addVolumeControl(id: string, label: string) {
         const volumeControl = document.createElement('div');
         volumeControl.classList.add('romper-volume-control');
+        volumeControl.classList.add(`romper-volume-label-${label.toLowerCase()}`);
 
         const volumeLabel = document.createElement('div');
         volumeLabel.classList.add('romper-volume-label');
@@ -350,14 +405,14 @@ class Player extends EventEmitter {
         volumeRange.classList.add('romper-volume-range');
         volumeRange.onchange = (event) => {
             const value = parseFloat(event.target.value);
-            this.emit(PlayerEvents.VOLUME_CHANGED, { id, value });
+            this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
             this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, null, event.target.value);
         };
 
         volumeControl.appendChild(volumeLabel);
         volumeControl.appendChild(volumeRange);
 
-        this._volume.add(id, volumeControl);
+        this._volume.add(id, volumeControl, label);
     }
 
     removeVolumeControl(id: string) {
@@ -373,6 +428,7 @@ class Player extends EventEmitter {
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.onclick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
+            this._representation.deactivateOverlay();
             this._representation.setActive(id);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
@@ -406,6 +462,7 @@ class Player extends EventEmitter {
         }
         icon.onclick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
+            this._icon.deactivateOverlay();
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 

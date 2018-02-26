@@ -38,6 +38,7 @@ export default class RenderManager extends EventEmitter {
     _currentNarrativeElement: NarrativeElement;
     _rendererState: {
         lastSwitchableLabel: string,
+        volumes: { [key: string]: number },
     };
     _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
     _nextButton: HTMLButtonElement;
@@ -77,6 +78,9 @@ export default class RenderManager extends EventEmitter {
             if (this._controller._currentNarrativeElement) {
                 this._controller.repeatStep();
             }
+        });
+        this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
+            this._rendererState.volumes[event.label] = event.value;
         });
 
         this._initialise();
@@ -232,6 +236,12 @@ export default class RenderManager extends EventEmitter {
         }
 
         newRenderer.willStart();
+
+        // ensure volume persistence
+        Object.keys(this._rendererState.volumes).forEach((label) => {
+            const value = this._rendererState.volumes[label];
+            this._player.setVolumeControlLevel(label, value);
+        });
     }
 
     // get a renderer for the given NE, and its Representation
@@ -288,6 +298,7 @@ export default class RenderManager extends EventEmitter {
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
             // also, audio muted/not...
+            volumes: {},
         };
     }
 
