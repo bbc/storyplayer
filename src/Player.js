@@ -379,12 +379,14 @@ class Player extends EventEmitter {
         this._volume.remove(id);
     }
 
-    addRepresentationControl(id: string, label: string) {
+    addRepresentationControl(id: string, src: string, label: string) {
         const representationControl = document.createElement('div');
         representationControl.classList.add('romper-representation-control');
+        representationControl.setAttribute('title', label);
+        representationControl.setAttribute('aria-label', label);
 
         const representationIcon = document.createElement('img');
-        representationIcon.src = label;
+        representationIcon.src = src;
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.onclick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
@@ -409,13 +411,15 @@ class Player extends EventEmitter {
         this._representation.remove(id);
     }
 
-    addIconControl(id: string, src: string, selected: boolean = false) {
+    addIconControl(id: string, src: string, selected: boolean = false, representationName: string) {
         const iconControl = document.createElement('div');
         iconControl.classList.add('romper-icon-control');
 
         const icon = document.createElement('img');
         icon.src = src;
         icon.classList.add('romper-icon');
+        icon.setAttribute('title', representationName);
+        icon.setAttribute('aria-label', representationName);
         if (selected) {
             icon.classList.add('romper-selected');
         }
