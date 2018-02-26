@@ -1,24 +1,23 @@
 // @flow
 
-import uuidv4 from 'uuid/v4';
 import Hls from 'hls.js';
 import logger from './logger';
 
 // Class wraps Hls giving it a unique id
 export class HlsInstance {
     _hls: Object
-    _id: string
-    _idNum: number
+    _id: number
     _eventList: Array<Object>
     _attached: boolean
     _lastSource: string
+    _debug: boolean
 
-    constructor(config: Object, idNum: number) {
+    constructor(config: Object, idNum: number, debug: boolean = false) {
         this._hls = new Hls(config);
-        this._id = uuidv4();
+        this._id = idNum;
         this._eventList = [];
-        this._idNum = idNum;
-        logger.info(`HLSInstance ${this._idNum}: Created`);
+        this._debug = debug;
+        if (this._debug) logger.info(`HLSInstance ${this._id}: Created`);
         this.on(Hls.Events.ERROR, this._errorHandler.bind(this));
     }
 
@@ -43,26 +42,26 @@ export class HlsInstance {
         }
     }
 
-    getId(): string {
+    getId(): number {
         return this._id;
     }
 
     // Copy existing Hls methods
     loadSource(src: string) {
-        logger.info(`HLSInstance ${this._idNum}: loadSource`);
+        if (this._debug) logger.info(`HLSInstance ${this._id}: loadSource`);
         this._lastSource = src;
         this._hls.loadSource(src);
     }
 
     attachMedia(videoElement: HTMLVideoElement) {
-        logger.info(`HLSInstance ${this._idNum}: attachMedia`);
+        if (this._debug) logger.info(`HLSInstance ${this._id}: attachMedia`);
         this._hls.attachMedia(videoElement);
     }
 
     detachMedia() {
-        logger.info(`HLSInstance ${this._idNum}: detachMedia`);
+        if (this._debug) logger.info(`HLSInstance ${this._id}: detachMedia`);
         if (this._hls.media === null || this._hls.media === undefined) {
-            logger.error(new Error(`HLSInstance ${this._idNum}: MEDIA NULL`));
+            logger.error(new Error(`HLSInstance ${this._id}: MEDIA NULL`));
             return;
         }
         this._hls.detachMedia();
@@ -81,7 +80,7 @@ export class HlsInstance {
     }
 
     clearEvents() {
-        logger.info(`HLSInstance ${this._idNum}: clearEvents`);
+        if (this._debug) logger.info(`HLSInstance ${this._id}: clearEvents`);
         // Cleanup all events added to hls
         this._eventList.forEach((eventListObject) => {
             this._hls.off(eventListObject.event, eventListObject.callback);
@@ -94,8 +93,10 @@ export default class HlsManager {
     _hlsPool: Array<Object>
     _defaultConfig: Object
     _idTotal: number
+    _debug: boolean
 
-    constructor() {
+    constructor(debug: boolean = false) {
+        this._debug = debug;
         this._hlsPool = [];
         this._defaultConfig = {
             startFragPrefetch: true,
@@ -111,7 +112,7 @@ export default class HlsManager {
         };
     }
 
-    getHlsFromPool(): HlsInstance {
+    getHls(): HlsInstance {
         let useExistingPoolIndex = -1;
         this._hlsPool.some((HlsPoolObject, index: number) => {
             if (HlsPoolObject.active === false) {
@@ -135,7 +136,7 @@ export default class HlsManager {
             return this._hlsPool[useExistingPoolIndex].hlsInstance;
         }
         // Create new pool instance
-        const newHls = new HlsInstance(this._defaultConfig, this._idTotal);
+        const newHls = new HlsInstance(this._defaultConfig, this._idTotal, this._debug);
 
         this._idTotal += 1;
         this._hlsPool.push({
@@ -148,10 +149,9 @@ export default class HlsManager {
     }
 
 
-    returnHlsToPool(hls: HlsInstance) {
+    returnHls(hls: HlsInstance) {
         hls.clearEvents();
         hls.detachMedia();
-
         hls.destroy();
 
         let activePools = 0;

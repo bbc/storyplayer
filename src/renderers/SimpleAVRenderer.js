@@ -51,8 +51,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._hlsManager = player._hlsManager;
 
-        this._hls = this._hlsManager.getHlsFromPool();
-
+        this._hls = this._hlsManager.getHls();
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
@@ -335,7 +334,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     destroy() {
         this.end();
 
-        this._hlsManager.returnHlsToPool(this._hls);
+        this._hlsManager.returnHls(this._hls);
 
         delete this._videoTrack;
         delete this._videoElement;
