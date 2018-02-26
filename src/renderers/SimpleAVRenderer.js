@@ -51,8 +51,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._hlsManager = player._hlsManager;
 
-        this._hls = this._hlsManager.getHlsFromPool();
-
+        this._hls = this._hlsManager.getHls();
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
@@ -191,8 +190,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else if (mediaUrl.indexOf('.m3u8') !== -1) {
-            this._hls.loadSource(mediaUrl);
             this._hls.attachMedia(videoElement);
+            this._hls.loadSource(mediaUrl);
         } else {
             videoElement.setAttribute('src', mediaUrl);
         }
@@ -335,7 +334,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     destroy() {
         this.end();
 
-        this._hlsManager.returnHlsToPool(this._hls);
+        this._hlsManager.returnHls(this._hls);
 
         delete this._videoTrack;
         delete this._videoElement;

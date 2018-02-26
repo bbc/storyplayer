@@ -24,7 +24,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._target = this._player.backgroundTarget;
 
         this._hlsManager = player._hlsManager;
-        this._hls = this._hlsManager.getHlsFromPool();
+        this._hls = this._hlsManager.getHls();
     }
 
     start() {
@@ -54,8 +54,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
             if (mediaUrl.indexOf('.m3u8') !== -1) {
-                this._hls.loadSource(mediaUrl);
                 this._hls.attachMedia(audioElement);
+                this._hls.loadSource(mediaUrl);
                 this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
                     if (this._disabled) {
                         logger.warn('loaded destroyed audio element - not playing');
@@ -99,7 +99,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._player.removeVolumeControl(this._assetCollection.id);
         this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
 
-        this._hlsManager.returnHlsToPool(this._hls);
+        this._hlsManager.returnHls(this._hls);
         super.destroy();
     }
 }
