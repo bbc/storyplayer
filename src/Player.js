@@ -136,11 +136,14 @@ class Player extends EventEmitter {
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
+
+        this._hlsManager = new HlsManager();
+
         this.showingSubtitles = false;
 
         this._analytics = analytics;
         this._logUserInteraction = this._logUserInteraction.bind(this);
-        this._hlsManager = new HlsManager();
+
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');

@@ -24,9 +24,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._target = this._player.backgroundTarget;
 
         this._hlsManager = player._hlsManager;
-        if (this._hlsManager.isSupported()) {
-            this._hls = this._hlsManager.getHlsFromPool();
-        }
+        this._hls = this._hlsManager.getHlsFromPool();
     }
 
     start() {

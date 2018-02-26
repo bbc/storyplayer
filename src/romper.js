@@ -3,10 +3,12 @@
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
 import type { Settings } from './romper';
 import Controller from './Controller';
+
 // eslint-disable-next-line import/no-named-as-default
 import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
+import HlsManager from './HlsManager';
 import logger from './logger';
 
 // @flowignore
@@ -31,8 +33,21 @@ module.exports = {
         FROM_OBJECT: ObjectDataResolver,
     },
 
-    init: (settings: Settings) => {
+    init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+
+        if (!HlsManager.isSupported()) {
+            const noHlsWarning = document.createElement('div');
+            noHlsWarning.classList.add('romper-no-hls-support');
+            const noHlsWarningDiv = document.createElement('div');
+            noHlsWarningDiv.classList.add('romper-no-hls-support-div');
+            noHlsWarningDiv.innerHTML = 'Your browser is not compatible with this experience. ' +
+                'Please use Chrome or Firefox and update them to the newest version.';
+
+            noHlsWarning.appendChild(noHlsWarningDiv);
+            mergedSettings.target.appendChild(noHlsWarning);
+            return null;
+        }
 
         const storyReasonerFactory = StoryReasonerFactory(
             mergedSettings.storyFetcher,
