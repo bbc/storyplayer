@@ -81,7 +81,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                         .then((icon) => {
                             if (icon.assets.image_src) {
                                 this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                                    this._player.addRepresentationControl(`${idx}`, mediaUrl);
+                                    this._player.addRepresentationControl(`${idx}`, mediaUrl, choice.representation.name);
                                     const currentSelection = this._currentRendererIndex.toString();
                                     this._player.setActiveRepresentationControl(currentSelection);
                                 }).catch((err) => { logger.error(err, 'Notfound'); });
