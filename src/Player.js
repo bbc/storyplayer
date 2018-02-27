@@ -42,6 +42,8 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const button = document.createElement('button');
+    button.setAttribute('title', `${name} Button`);
+    button.setAttribute('aria-label', `${name} Button`);
     button.classList.add('romper-button');
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');

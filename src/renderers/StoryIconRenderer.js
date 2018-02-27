@@ -48,7 +48,7 @@ export default class StoryIconRenderer extends EventEmitter {
         this._iconUrlMap = {};
     }
 
-    start() {
+    start(startingRepresentationId: string) {
         this._currentRepresentationId = this._pathItemList[0].representation.id;
         this._getIconAssets().then((iconAssets) => {
             this._iconUrlMap = StoryIconRenderer._buildUrlMap(this._pathItemList, iconAssets);
@@ -59,10 +59,16 @@ export default class StoryIconRenderer extends EventEmitter {
                 const iconUrls = this._iconUrlMap[representationId];
 
                 if (iconUrls && iconUrls.default) {
-                    this._player.addIconControl(representationId, iconUrls.default, false, representationName);
+                    this._player.addIconControl(
+                        representationId,
+                        iconUrls.default,
+                        false,
+                        representationName,
+                    );
                 }
             });
             this._showHideTarget();
+            this.handleNarrativeElementChanged(startingRepresentationId);
         });
 
         this._player.on(PlayerEvents.ICON_CLICKED, this._handleIconClicked);

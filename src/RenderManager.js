@@ -124,7 +124,9 @@ export default class RenderManager extends EventEmitter {
         this._renderStory.on('jumpToNarrativeElement', (neid) => {
             this._controller._jumpToNarrativeElement(neid);
         });
-        this._renderStory.start();
+        if (this._currentRenderer) {
+            this._renderStory.start(this._currentRenderer.getRepresentation().id);
+        }
     }
 
     // given a new representation, handle the background rendering
