@@ -20,7 +20,6 @@ export type HTMLTrackElement = HTMLElement & {
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _hls: Object;
-    _videoElement: HTMLVideoElement;
     _videoTrack: HTMLTrackElement;
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
@@ -36,6 +35,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _subtitlesLoaded: boolean;
     _subtitlesShowing: boolean;
 
+    _endedEventListener: Function;
+    _playEventListener: Function;
+    _pauseEventListener: Function;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -49,9 +52,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._playVideoCallback = this._playVideoCallback.bind(this);
 
+        this._endedEventListener = this._endedEventListener.bind(this);
+        this._playEventListener = this._playEventListener.bind(this);
+        this._pauseEventListener = this._pauseEventListener.bind(this);
+
         this._hlsManager = player._hlsManager;
 
-        this._hls = this._hlsManager.getHls();
+        this._hls = this._hlsManager.getHls('video');
+
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
@@ -73,16 +81,36 @@ export default class SimpleAVRenderer extends BaseRenderer {
         };
     }
 
+    _endedEventListener() {
+        this._player.setPlaying(false);
+        super.complete();
+    }
+
+    _playEventListener() {
+        this._player.setPlaying(true);
+    }
+
+    _pauseEventListener() {
+        this._player.setPlaying(false);
+    }
+
     start() {
         super.start();
-        this._target.appendChild(this._videoElement);
+        this._hls.start(this._target);
+        const videoElement = this._hls.getMediaElement();
+        logger.info(`Started: ${this._representation.id}`);
+
+        // automatically move on at video end
+        videoElement.addEventListener('ended', this._endedEventListener);
+        videoElement.addEventListener('play', this._playEventListener);
+        videoElement.addEventListener('pause', this._pauseEventListener);
 
         const player = this._player;
         this._subtitlesShowing = player.showingSubtitles;
         this._showHideSubtitles();
 
         player.addVolumeControl(this._representation.id, 'Foreground');
-        player.connectScrubBar(this._videoElement);
+        player.connectScrubBar(videoElement);
         player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
@@ -99,11 +127,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     end() {
-        this._videoElement.pause();
+        const videoElement = this._hls.getMediaElement();
+        videoElement.pause();
+        logger.info(`Ended: ${this._representation.id}`);
+
+        videoElement.removeEventListener('ended', this._endedEventListener);
+        videoElement.removeEventListener('play', this._playEventListener);
+        videoElement.removeEventListener('pause', this._pauseEventListener);
 
         try {
             this._clearBehaviourElements();
-            this._target.removeChild(this._videoElement);
+            this._hls.end(this._target);
         } catch (e) {
             //
         }
@@ -126,39 +160,72 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _playVideoCallback(): void {
+        this._hls.off(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
+
+        const videoElement = this._hls.getMediaElement();
         if (this._destroyed) {
+            logger.info(`NOTPLAYING: ${this._representation.id}`);
             logger.warn('loaded destroyed video element - not playing');
         } else {
-            this._videoElement.play();
+            logger.info('Playing Video!');
+            logger.info(videoElement.src);
+            // const promise = videoElement.load();
+            // if (promise !== undefined) {
+            //     promise.catch((error) => {
+            //         logger.warn('Load Error: _playVideoCallback');
+            //         logger.warn(error);
+            //         // Auto-play was prevented
+            //         // Show a UI element to let the user manually start playback
+            //     }).then(() => {
+            //         // Auto-play started
+            //         logger.info('loading started');
+            //     });
+            // }
+
+            const promise2 = videoElement.play();
+            if (promise2 !== undefined) {
+                promise2.catch((error) => {
+                    logger.warn('Play Error: _playVideoCallback');
+                    logger.warn(error);
+                    // Auto-play was prevented
+                    // Show a UI element to let the user manually start playback
+                }).then(() => {
+                    // Auto-play started
+                    logger.info('playing started');
+                });
+            }
         }
     }
 
     playVideo() {
-        if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
-            this._videoElement.play();
-        } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
+        const videoElement = this._hls.getMediaElement();
+        if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
+            const promise = videoElement.play();
+            if (promise !== undefined) {
+                promise.catch((error) => {
+                    logger.warn('Play Error: playVideo');
+                    logger.warn(error);
+                    // Auto-play was prevented
+                    // Show a UI element to let the user manually start playback
+                }).then(() => {
+                    // Auto-play started
+                });
+            }
+        } else
+        if (videoElement.src.indexOf('m3u8') !== -1) {
+            logger.info('manifest parsed');
             this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
         } else {
-            this._videoElement.addEventListener('loadeddata', this._playVideoCallback);
+            logger.info('loadeddata');
+            videoElement.addEventListener('loadeddata', this._playVideoCallback);
         }
     }
 
     renderVideoElement() {
-        this._videoElement = document.createElement('video');
-        this._videoElement.className = 'romper-video-element';
-        this._videoElement.crossOrigin = 'anonymous';
-
-        // automatically move on at video end
-        this._videoElement.addEventListener('ended', () => {
-            this._player.setPlaying(false);
-            super.complete();
-        });
-        this._videoElement.addEventListener('play', () => {
-            this._player.setPlaying(true);
-        });
-        this._videoElement.addEventListener('pause', () => {
-            this._player.setPlaying(false);
-        });
+        const videoElement = document.createElement('video');
+        videoElement.className = 'romper-video-element';
+        videoElement.crossOrigin = 'anonymous';
+        this._hls.attachMedia(videoElement);
 
         // set video source
         if (this._representation.asset_collection.foreground) {
@@ -167,7 +234,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
-                                this.populateVideoElement(this._videoElement, mediaUrl);
+                                this.populateVideoElement(mediaUrl);
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -176,7 +243,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                     if (fg.assets.sub_src) {
                         this._fetchMedia(fg.assets.sub_src)
                             .then((mediaUrl) => {
-                                this.populateVideoSubs(this._videoElement, mediaUrl);
+                                this.populateVideoSubs(mediaUrl);
                             })
                             .catch((err) => {
                                 logger.error(err, 'Subs not found');
@@ -186,54 +253,54 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(videoElement: HTMLVideoElement, mediaUrl: string) {
+    populateVideoElement(mediaUrl: string) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
-        } else if (mediaUrl.indexOf('.m3u8') !== -1) {
-            this._hls.attachMedia(videoElement);
+        } else {
             this._hls.loadSource(mediaUrl);
-        } else {
-            videoElement.setAttribute('src', mediaUrl);
         }
     }
 
-    populateVideoSubs(videoElement: HTMLVideoElement, mediaUrl: string) {
-        if (this._destroyed) {
-            logger.warn('trying to populate subs of video element that has been destroyed');
-        } else {
-            videoElement.addEventListener('loadedmetadata', () => {
-                // Load Subtitles
-                this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
-                this._videoTrack.kind = 'captions';
-                this._videoTrack.label = 'English';
-                this._videoTrack.srclang = 'en';
-                this._videoTrack.src = mediaUrl;
-                this._videoTrack.default = true;
-                this._videoElement.appendChild(this._videoTrack);
-
-                this._subtitlesLoaded = true;
-                this._showHideSubtitles();
-            });
-        }
+    // eslint-disable-next-line
+    populateVideoSubs(mediaUrl: string) {
+        // if (this._destroyed) {
+        //     logger.warn('trying to populate subs of video element that has been destroyed');
+        // } else {
+        //     videoElement.addEventListener('loadedmetadata', () => {
+        //         // Load Subtitles
+        //         this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
+        //         this._videoTrack.kind = 'captions';
+        //         this._videoTrack.label = 'English';
+        //         this._videoTrack.srclang = 'en';
+        //         this._videoTrack.src = mediaUrl;
+        //         this._videoTrack.default = true;
+        //         this._videoElement.appendChild(this._videoTrack);
+        //
+        //         this._subtitlesLoaded = true;
+        //         this._showHideSubtitles();
+        //     });
+        // }
     }
 
+    // eslint-disable-next-line
     _showHideSubtitles() {
-        if (this._subtitlesLoaded) {
-            if (this._subtitlesShowing) {
-                // Show Subtitles
-                this._videoTrack.mode = 'showing';
-                this._videoElement.textTracks[0].mode = 'showing';
-            } else {
-                // Hide Subtitles
-                this._videoTrack.mode = 'hidden';
-                this._videoElement.textTracks[0].mode = 'hidden';
-            }
-        }
+        // if (this._subtitlesLoaded) {
+        //     if (this._subtitlesShowing) {
+        //         // Show Subtitles
+        //         this._videoTrack.mode = 'showing';
+        //         this._videoElement.textTracks[0].mode = 'showing';
+        //     } else {
+        //         // Hide Subtitles
+        //         this._videoTrack.mode = 'hidden';
+        //         this._videoElement.textTracks[0].mode = 'hidden';
+        //     }
+        // }
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
+        const videoElement = this._hls.getMediaElement();
         const { blur } = behaviour;
-        this._videoElement.style.filter = `blur(${blur}px)`;
+        videoElement.style.filter = `blur(${blur}px)`;
         callback();
     }
 
@@ -266,17 +333,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        const video = this._videoElement;
-        if (video.paused === true) {
-            video.play();
+        const videoElement = this._hls.getMediaElement();
+        if (videoElement.paused === true) {
+            videoElement.play();
         } else {
-            video.pause();
+            videoElement.pause();
         }
     }
 
     _handleVolumeClicked(event: Object): void {
+        const videoElement = this._hls.getMediaElement();
         if (event.id === this._representation.id) {
-            this._videoElement.volume = event.value;
+            videoElement.volume = event.value;
         }
     }
 
@@ -286,14 +354,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     getCurrentTime(): Object {
+        const videoElement = this._hls.getMediaElement();
         let videoTime;
         if (
-            !this._videoElement ||
-            this._videoElement.readyState < this._videoElement.HAVE_CURRENT_DATA
+            !videoElement ||
+            videoElement.readyState < videoElement.HAVE_CURRENT_DATA
         ) {
             videoTime = 0;
         } else {
-            videoTime = this._videoElement.currentTime;
+            videoTime = videoElement.currentTime;
         }
         const timeObject = {
             timeBased: true,
@@ -303,15 +372,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     setCurrentTime(time: number) {
-        if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
-            this._videoElement.currentTime = time;
-        } else if (this._videoElement.src.indexOf('m3u8') !== -1) {
+        const videoElement = this._hls.getMediaElement();
+        if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
+            videoElement.currentTime = time;
+        } else if (videoElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
-                this._videoElement.currentTime = time;
+                videoElement.currentTime = time;
             });
         } else {
-            this._videoElement.addEventListener('loadeddata', () => {
-                this._videoElement.currentTime = time;
+            videoElement.addEventListener('loadeddata', () => {
+                videoElement.currentTime = time;
             });
         }
     }
@@ -325,7 +395,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _clearBehaviourElements() {
-        this._videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
+        const videoElement = this._hls.getMediaElement();
+        videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
         this._behaviourElements.forEach((be) => {
             this._target.removeChild(be);
         });
@@ -335,9 +406,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this.end();
 
         this._hlsManager.returnHls(this._hls);
-
-        delete this._videoTrack;
-        delete this._videoElement;
 
         super.destroy();
     }

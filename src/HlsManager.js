@@ -11,18 +11,29 @@ import logger from './logger';
 // This is using the built-in support of the plain video element, without using hls.js.
 export class HlsInstance {
     _hls: Object
-    _videoElement: ?HTMLVideoElement
+    _iOSElement: HTMLMediaElement
     _id: number
     _eventList: Array<Object>
     _attached: boolean
     _debug: boolean
     _useHlsJs: boolean
+    _mediaSrc: string
+    _mediaElement: HTMLMediaElement
 
-    constructor(config: Object, idNum: number, useHlsJs: boolean, debug: boolean = false) {
-        this._id = idNum;
+    constructor(
+        config: Object,
+        idNum: number,
+        useHlsJs: boolean,
+        iOSElement: HTMLMediaElement,
+        debug: boolean = false,
+    ) {
         this._eventList = [];
-        this._debug = debug;
+        this._id = idNum;
         this._useHlsJs = useHlsJs;
+        this._iOSElement = iOSElement;
+        this._debug = debug;
+
+
         if (this._useHlsJs) {
             this._hls = new Hls(config);
             this.on(Hls.Events.ERROR, this._errorHandler.bind(this));
@@ -55,35 +66,52 @@ export class HlsInstance {
         return this._id;
     }
 
-    // Copy existing Hls methods
-    loadSource(src: string) {
-        if (this._debug) logger.info(`HLSInstance ${this._id}: loadSource`);
+    getMediaElement(): HTMLMediaElement {
+        return this._mediaElement;
+    }
+
+    start(target: HTMLDivElement) {
         if (this._useHlsJs) {
-            // Using HLS.js
-            this._hls.loadSource(src);
+            target.appendChild(this._mediaElement);
         } else {
-            // Using Video Element
-            // eslint-disable-next-line no-lonely-if
-            if (this._videoElement) {
-                this._videoElement.src = src;
-                this._videoElement.addEventListener('canplay', () => {
-                    this._videoElement.play();
-                });
-            } else {
-                logger.warn('No Video Element to set src of');
+            this._mediaElement = this._iOSElement;
+            if (this._mediaSrc && this._mediaSrc !== '') {
+                this.loadSource(this._mediaSrc);
             }
         }
     }
 
-    attachMedia(videoElement: HTMLVideoElement) {
-        if (this._debug) logger.info(`HLSInstance ${this._id}: attachMedia`);
+    end(target: HTMLDivElement) {
+        this._mediaSrc = '';
         if (this._useHlsJs) {
-            // Using HLS.js
-            this._hls.attachMedia(videoElement);
-        } else {
-            // Using Video Element
-            this._videoElement = videoElement;
+            target.removeChild(this._mediaElement);
         }
+    }
+
+    // Copy existing Hls methods
+    loadSource(src: string) {
+        if (this._debug) logger.info(`HLSInstance ${this._id}: loadSource`);
+
+        this._mediaSrc = src;
+        if (this._mediaSrc.indexOf('.m3u8') !== -1) {
+            if (this._useHlsJs) {
+                // Using HLS.js
+                this._hls.loadSource(this._mediaSrc);
+            } else {
+                // Using Video Element
+                // eslint-disable-next-line no-lonely-if
+                this._mediaElement.src = src;
+            }
+        } else {
+            this._mediaElement.setAttribute('src', this._mediaSrc);
+        }
+    }
+
+    attachMedia(element: HTMLMediaElement) {
+        if (this._useHlsJs) {
+            this._hls.attachMedia(element);
+        }
+        this._mediaElement = element;
     }
 
     detachMedia() {
@@ -95,22 +123,27 @@ export class HlsInstance {
                 return;
             }
             this._hls.detachMedia();
-        } else {
-            // Using Video Element
-            this._videoElement = undefined;
         }
     }
 
     on(event: string, callback: Function) {
-        this._hls.on(event, callback);
-        this._eventList.push({
-            event,
-            callback,
-        });
+        if (this._useHlsJs) {
+            this._hls.on(event, callback);
+            this._eventList.push({
+                event,
+                callback,
+            });
+        } else {
+            this._iOSElement.addEventListener(event, callback);
+        }
     }
 
     off(event: string, callback: Function) {
-        this._hls.off(event, callback);
+        if (this._useHlsJs) {
+            this._hls.off(event, callback);
+        } else {
+            this._iOSElement.removeEventListener(event, callback);
+        }
     }
 
     destroy() {
@@ -118,8 +151,6 @@ export class HlsInstance {
         if (this._useHlsJs) {
             // Using HLS.js
             this._hls.destroy();
-        } else {
-            // Using Video Element
         }
     }
 
@@ -137,13 +168,21 @@ export default class HlsManager {
     _hlsPool: Array<Object>
     _defaultConfig: Object
     _idTotal: number
+    _iOSVideoElement: HTMLVideoElement
+    _iOSAudioElement: HTMLAudioElement
     _debug: boolean
     static _hlsjsSupported: boolean
     static _hlsSupported: boolean
 
-    constructor(debug: boolean = false) {
-        this._debug = debug;
+    constructor(
+        iOSVideoElement: HTMLVideoElement,
+        iOSAudioElement: HTMLAudioElement,
+        debug: boolean = false,
+    ) {
         this._hlsPool = [];
+        this._iOSVideoElement = iOSVideoElement;
+        this._iOSAudioElement = iOSAudioElement;
+        this._debug = debug;
         this._defaultConfig = {
             startFragPrefetch: true,
             startLevel: 3,
@@ -152,44 +191,39 @@ export default class HlsManager {
         this._idTotal = 0;
     }
 
-    getHls(): HlsInstance {
-        let useExistingPoolIndex = -1;
-        this._hlsPool.some((HlsPoolObject, index: number) => {
-            if (HlsPoolObject.active === false) {
-                useExistingPoolIndex = index;
-                return true;
-            }
-            return false;
-        });
-        let activePools = 0;
-        this._hlsPool.forEach((HlsPoolObject) => {
-            if (HlsPoolObject.active) {
-                activePools += 1;
-            }
-        });
-
-        // Use existing pool instance
-        if (useExistingPoolIndex !== -1) {
-            logger.info('HLS Taken from Pool. ' +
-                `Total HLS Instances: ${this._hlsPool.length}. Active: ${activePools + 1}`);
-            this._hlsPool[useExistingPoolIndex].active = true;
-            return this._hlsPool[useExistingPoolIndex].hlsInstance;
+    getHls(type: string): HlsInstance {
+        let newHls;
+        if (type === 'video') {
+            newHls = new HlsInstance(
+                this._defaultConfig,
+                this._idTotal,
+                HlsManager._hlsjsSupported,
+                this._iOSVideoElement,
+                this._debug,
+            );
+        } else if (type === 'audio') {
+            newHls = new HlsInstance(
+                this._defaultConfig,
+                this._idTotal,
+                HlsManager._hlsjsSupported,
+                this._iOSAudioElement,
+                this._debug,
+            );
+        } else {
+            logger.fatal('invalid hls type');
+            throw new Error('invalid hls type');
         }
-        // Create new pool instance
-        const newHls = new HlsInstance(
-            this._defaultConfig,
-            this._idTotal,
-            HlsManager._hlsjsSupported,
-            this._debug,
-        );
 
         this._idTotal += 1;
         this._hlsPool.push({
             hlsInstance: newHls,
+            type,
             active: true,
         });
-        logger.info('New HLS Instance Created. ' +
-            `Total HLS Instances: ${this._hlsPool.length}. Active: ${activePools + 1}`);
+        if (this._debug) {
+            logger.info('New HLS Instance Created. ' +
+            `Total HLS Instances: ${this._hlsPool.length}.`);
+        }
         return newHls;
     }
 
@@ -199,19 +233,14 @@ export default class HlsManager {
         hls.detachMedia();
         hls.destroy();
 
-        let activePools = 0;
-        this._hlsPool.forEach((HlsPoolObject) => {
-            if (HlsPoolObject.active) {
-                activePools += 1;
-            }
-        });
-
         const id = hls.getId();
         this._hlsPool.forEach((HlsPoolObject, index: number) => {
             if (HlsPoolObject.hlsInstance.getId() === id) {
                 this._hlsPool.splice(index, 1);
-                logger.info('HLS Returned to Pool. ' +
-                    `Total HLS Instances: ${this._hlsPool.length - 1}. Active: ${activePools - 1}`);
+                if (this._debug) {
+                    logger.info('HLS Returned to Pool. ' +
+                    `Total HLS Instances: ${this._hlsPool.length}.`);
+                }
             }
         });
     }

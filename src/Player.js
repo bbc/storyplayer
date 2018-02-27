@@ -174,11 +174,27 @@ class Player extends EventEmitter {
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
     _logUserInteraction: Function;
+    _iOSVideoElement: HTMLVideoElement;
+    _iOSAudioElement: HTMLAudioElement;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
 
-        this._hlsManager = new HlsManager();
+        this._iOSVideoElement = document.createElement('video');
+        this._iOSVideoElement.className = 'romper-video-element test';
+        this._iOSVideoElement.autoplay = true;
+        this._iOSVideoElement.crossOrigin = 'anonymous';
+        this._iOSAudioElement = document.createElement('audio');
+
+        const validateButton = document.createElement('button');
+        validateButton.innerHTML = 'Start';
+        validateButton.onclick = () => {
+            this._iOSAudioElement.play();
+            this._iOSVideoElement.play();
+        };
+        target.appendChild(validateButton);
+
+        this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
 
         this.showingSubtitles = false;
 
@@ -354,6 +370,11 @@ class Player extends EventEmitter {
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
+
+        if (HlsManager._hlsjsSupported !== true) {
+            this.mediaTarget.appendChild(this._iOSVideoElement);
+            this.backgroundTarget.appendChild(this._iOSAudioElement);
+        }
     }
 
     _showRomperButtons() {
