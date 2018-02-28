@@ -65,17 +65,20 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _playAudioCallback(): void {
         const audioElement = this._hls.getMediaElement();
+        this._hls.off(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
+        audioElement.removeEventListener('loadeddata', this._playAudioCallback);
+
         if (this._destroyed) {
             logger.warn('loaded destroyed video element - not playing');
         } else {
-            audioElement.play();
+            this._hls.play();
         }
     }
 
     playAudio() {
         const audioElement = this._hls.getMediaElement();
         if (audioElement.readyState >= audioElement.HAVE_CURRENT_DATA) {
-            audioElement.play();
+            this._hls.play();
         } else if (audioElement.src.indexOf('m3u8') !== -1) {
             this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
         } else {
