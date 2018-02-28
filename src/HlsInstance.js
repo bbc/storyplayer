@@ -18,7 +18,6 @@ export default class HlsInstance {
     _debug: boolean
     _useHlsJs: boolean
     _mediaSrc: string
-    // _mediaSubs: string
     _mediaElement: HTMLMediaElement
 
     constructor(
@@ -100,9 +99,6 @@ export default class HlsInstance {
                 this.loadSource(this._mediaSrc);
             }
         }
-        // if (this._mediaSubs && this._mediaSubs !== '') {
-        //     this.loadSubs(this._mediaSubs);
-        // }
     }
 
     end(target: HTMLDivElement) {
@@ -111,22 +107,6 @@ export default class HlsInstance {
             target.removeChild(this._mediaElement);
         }
     }
-    //
-    // loadSubs(src: string) {
-    //     if (this._debug) logger.info(`HLSInstance ${this._id}: loadSubs`);
-    //
-    //     this._mediaSubs = src;
-    //     this._mediaElement.addEventListener('loadedmetadata', () => {
-    //         // Load Subtitles
-    //         this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
-    //         this._videoTrack.kind = 'captions';
-    //         this._videoTrack.label = 'English';
-    //         this._videoTrack.srclang = 'en';
-    //         this._videoTrack.src = src;
-    //         this._videoTrack.default = true;
-    //         this._subtitlesLoaded = true;
-    //     });
-    // }
 
     // Copy existing Hls methods
     loadSource(src: string) {
