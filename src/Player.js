@@ -216,11 +216,6 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
-        this._guiLayer.appendChild(this._overlays);
-        this._guiLayer.appendChild(this._buttons);
-        this._guiLayer.appendChild(this._buttonsActivateArea);
-
-
         this._narrativeElementTransport = document.createElement('div');
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
 
@@ -248,7 +243,12 @@ class Player extends EventEmitter {
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._nextButton);
-        this._buttons.appendChild(this._narrativeElementTransport);
+        // this._buttons.appendChild(this._narrativeElementTransport);
+
+        this._guiLayer.appendChild(this._overlays);
+        this._guiLayer.appendChild(this._narrativeElementTransport);
+        this._guiLayer.appendChild(this._buttons);
+        this._guiLayer.appendChild(this._buttonsActivateArea);
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.setAttribute('title', 'Scrub bar');
