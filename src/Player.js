@@ -232,6 +232,15 @@ class Player extends EventEmitter {
         this._backButton.onclick = this._backButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._backButton);
 
+        this._repeatButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.classList.add('romper-inactive');
+        this._repeatButton.setAttribute('title', 'Repeat Button');
+        this._repeatButton.setAttribute('aria-label', 'Repeat Button');
+        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
+        this._narrativeElementTransport.appendChild(this._repeatButton);
+
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
@@ -260,15 +269,6 @@ class Player extends EventEmitter {
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
         this._mediaTransport.appendChild(this._playPauseButton);
-
-        this._repeatButton = document.createElement('button');
-        this._repeatButton.classList.add('romper-button');
-        this._repeatButton.classList.add('romper-repeat-button');
-        this._repeatButton.classList.add('romper-inactive');
-        this._repeatButton.setAttribute('title', 'Repeat Button');
-        this._repeatButton.setAttribute('aria-label', 'Repeat Button');
-        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
-        this._mediaTransport.appendChild(this._repeatButton);
 
         // Create the overlays.
         this._volume = createOverlay('volume', this._logUserInteraction);
@@ -514,7 +514,7 @@ class Player extends EventEmitter {
 
     enterCompleteBehavourPhase() {
         this.disableScrubBar();
-        this.hidePlayButton();
+        this.disablePlayButton();
         this.showRepeatButton();
     }
 
@@ -523,7 +523,7 @@ class Player extends EventEmitter {
     }
 
     exitStartBehaviourPhase() {
-        this.showPlayButton();
+        this.enablePlayButton();
         this.enableScrubBar();
     }
 
@@ -587,16 +587,18 @@ class Player extends EventEmitter {
         });
     }
 
-    hidePlayButton() {
-        this._playPauseButton.classList.add('romper-inactive');
+    disablePlayButton() {
+        this._playPauseButton.classList.add('romper-control-disabled');
+        this._playPauseButton.setAttribute('disabled', 'true');
     }
 
     hideRepeatButton() {
         this._repeatButton.classList.add('romper-inactive');
     }
 
-    showPlayButton() {
-        this._playPauseButton.classList.remove('romper-inactive');
+    enablePlayButton() {
+        this._playPauseButton.classList.remove('romper-control-disabled');
+        this._playPauseButton.removeAttribute('disabled');
     }
 
     showRepeatButton() {
