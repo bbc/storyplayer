@@ -146,6 +146,7 @@ function createOverlay(name: string, logFunction: Function) {
 
 class Player extends EventEmitter {
     _player: HTMLDivElement;
+    _playerParent: HTMLElement;
     _hlsManager: HlsManager;
     _backgroundLayer: HTMLDivElement;
     _mediaLayer: HTMLDivElement;
@@ -207,6 +208,8 @@ class Player extends EventEmitter {
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
+
+        this._playerParent = target;
 
         this._backgroundLayer = document.createElement('div');
         this._backgroundLayer.classList.add('romper-background');
@@ -291,8 +294,8 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
         this._scrubBar = document.createElement('input');
-        this._scrubBar.setAttribute('title', 'Scrub bar');
-        this._scrubBar.setAttribute('aria-label', 'Scrub bar');
+        this._scrubBar.setAttribute('title', 'Seek bar');
+        this._scrubBar.setAttribute('aria-label', 'Seek bar');
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
@@ -739,6 +742,7 @@ class Player extends EventEmitter {
                 'not-fullscreen',
             );
             this._buttons.classList.remove('romper-buttons-fullscreen');
+            this._player.classList.remove('romper-player-fullscreen');
             Player._exitFullScreen();
         } else {
             this._logUserInteraction(
@@ -747,6 +751,7 @@ class Player extends EventEmitter {
                 'fullscreen',
             );
             this._buttons.classList.add('romper-buttons-fullscreen');
+            this._player.classList.add('romper-player-fullscreen');
             this._enterFullScreen();
         }
     }
@@ -769,15 +774,15 @@ class Player extends EventEmitter {
     }
 
     _enterFullScreen() {
-        if (this._player.requestFullscreen) {
+        if (this._playerParent.requestFullscreen) {
             // @flowignore
-            this._player.requestFullscreen();
-        } else if (this._player.mozRequestFullScreen) {
+            this._playerParent.requestFullscreen();
+        } else if (this._playerParent.mozRequestFullScreen) {
             // @flowignore
-            this._player.mozRequestFullScreen(); // Firefox
-        } else if (this._player.webkitRequestFullscreen) {
+            this._playerParent.mozRequestFullScreen(); // Firefox
+        } else if (this._playerParent.webkitRequestFullscreen) {
             // @flowignore
-            this._player.webkitRequestFullscreen(); // Chrome and Safari
+            this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         }
     }
 
