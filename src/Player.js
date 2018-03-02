@@ -42,8 +42,8 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const button = document.createElement('button');
-    button.setAttribute('title', `${name} Button`);
-    button.setAttribute('aria-label', `${name} Button`);
+    button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
+    button.setAttribute('aria-label', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.classList.add('romper-button');
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');
@@ -55,12 +55,18 @@ function createOverlay(name: string, logFunction: Function) {
                 .forEach(el => el.classList.add('romper-inactive'));
             if (overlay.classList.contains('romper-inactive')) {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
+                button.classList.add('romper-button-selected');
             } else {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} visible`, `${name} hidden`);
+                button.classList.remove('romper-button-selected');
             }
             overlay.classList.toggle('romper-inactive');
         }
     };
+    const buttonIconDiv = document.createElement('div');
+    buttonIconDiv.classList.add('romper-button-icon-div');
+    buttonIconDiv.classList.add(`romper-${name}-button-icon-div`);
+    button.appendChild(buttonIconDiv);
 
     const elements = {};
     const labels = {};
@@ -229,6 +235,10 @@ class Player extends EventEmitter {
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
         this._backButton.onclick = this._backButtonClicked.bind(this);
+        const backButtonIconDiv = document.createElement('div');
+        backButtonIconDiv.classList.add('romper-button-icon-div');
+        backButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._backButton.appendChild(backButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._backButton);
 
         this._repeatButton = document.createElement('button');
@@ -238,6 +248,10 @@ class Player extends EventEmitter {
         this._repeatButton.setAttribute('title', 'Repeat Button');
         this._repeatButton.setAttribute('aria-label', 'Repeat Button');
         this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
+        const repeatButtonIconDiv = document.createElement('div');
+        repeatButtonIconDiv.classList.add('romper-button-icon-div');
+        repeatButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._repeatButton.appendChild(repeatButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._repeatButton);
 
         this._nextButton = document.createElement('button');
@@ -247,6 +261,13 @@ class Player extends EventEmitter {
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._nextButton);
+<<<<<<< HEAD
+=======
+        const nextButtonIconDiv = document.createElement('div');
+        nextButtonIconDiv.classList.add('romper-button-icon-div');
+        nextButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._nextButton.appendChild(nextButtonIconDiv);
+>>>>>>> e2f402e02fd8ac3b28ef1299e34cb922b234f8c5
 
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._narrativeElementTransport);
@@ -271,6 +292,10 @@ class Player extends EventEmitter {
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
+        const playPauseButtonIconDiv = document.createElement('div');
+        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
+        playPauseButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._playPauseButton.appendChild(playPauseButtonIconDiv);
         this._mediaTransport.appendChild(this._playPauseButton);
 
         // Create the overlays.
@@ -304,9 +329,11 @@ class Player extends EventEmitter {
         this._subtitlesButton.setAttribute('title', 'Subtitles Button');
         this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
         this._subtitlesButton.classList.add('romper-subtitles-button');
-        this._subtitlesButton.classList.add('romper-subtitles-off-button');
-
         this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
+        const subtitlesButtonIconDiv = document.createElement('div');
+        subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
+        subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._subtitlesButton.appendChild(subtitlesButtonIconDiv);
         this._mediaTransport.appendChild(this._subtitlesButton);
 
         this._fullscreenButton = document.createElement('button');
@@ -315,6 +342,10 @@ class Player extends EventEmitter {
         this._fullscreenButton.setAttribute('title', 'Fullscreen Button');
         this._fullscreenButton.setAttribute('aria-label', 'Fullscreen Button');
         this._fullscreenButton.onclick = () => this._toggleFullScreen();
+        const fullscreenButtonIconDiv = document.createElement('div');
+        fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
+        fullscreenButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._fullscreenButton.appendChild(fullscreenButtonIconDiv);
         this._mediaTransport.appendChild(this._fullscreenButton);
 
         this._buttons.appendChild(this._mediaTransport);
@@ -378,11 +409,9 @@ class Player extends EventEmitter {
     _subtitlesButtonClicked() {
         this.showingSubtitles = !this.showingSubtitles;
         if (this.showingSubtitles) {
-            this._subtitlesButton.classList.add('romper-subtitles-on-button');
-            this._subtitlesButton.classList.remove('romper-subtitles-off-button');
+            this._subtitlesButton.classList.add('romper-button-selected');
         } else {
-            this._subtitlesButton.classList.remove('romper-subtitles-on-button');
-            this._subtitlesButton.classList.add('romper-subtitles-off-button');
+            this._subtitlesButton.classList.remove('romper-button-selected');
         }
 
         const showingSubtitlesIntToString = [
