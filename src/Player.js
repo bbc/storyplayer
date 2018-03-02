@@ -261,13 +261,10 @@ class Player extends EventEmitter {
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._nextButton);
-<<<<<<< HEAD
-=======
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
         nextButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
->>>>>>> e2f402e02fd8ac3b28ef1299e34cb922b234f8c5
 
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._narrativeElementTransport);
