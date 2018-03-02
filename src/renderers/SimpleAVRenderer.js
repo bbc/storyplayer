@@ -248,6 +248,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 this._videoTrack.src = mediaUrl;
                 this._videoTrack.default = false;
                 this._subtitlesLoaded = true;
+
+                this._showHideSubtitles();
             });
         }
     }
@@ -258,11 +260,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
             if (this._subtitlesShowing) {
                 // Show Subtitles
                 this._videoTrack.mode = 'showing';
-                videoElement.textTracks[0].mode = 'showing';
+
+                if (videoElement.textTracks[0]) {
+                    videoElement.textTracks[0].mode = 'showing';
+                }
             } else {
                 // Hide Subtitles
                 this._videoTrack.mode = 'hidden';
-                videoElement.textTracks[0].mode = 'hidden';
+                if (videoElement.textTracks[0]) {
+                    videoElement.textTracks[0].mode = 'hidden';
+                }
             }
         }
     }
