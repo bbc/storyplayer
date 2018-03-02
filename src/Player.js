@@ -291,8 +291,8 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
         this._scrubBar = document.createElement('input');
-        this._scrubBar.setAttribute('title', 'Scrub bar');
-        this._scrubBar.setAttribute('aria-label', 'Scrub bar');
+        this._scrubBar.setAttribute('title', 'Seek bar');
+        this._scrubBar.setAttribute('aria-label', 'Seek bar');
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
