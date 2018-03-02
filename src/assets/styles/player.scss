@@ -131,6 +131,13 @@ $romper-background-color: #ccc;
     @include button('../images/next.svg');
   }
 
+  .romper-timer {
+    padding-left: 10px;
+    padding-right: 20px;
+    padding-top: 20px;
+    vertical-align: middle;
+  }
+
   .romper-subtitles-button {
     @include button('../images/subtitles.svg');
 

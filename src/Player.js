@@ -163,6 +163,9 @@ class Player extends EventEmitter {
     _representation: Object;
     _icon: Object;
     _scrubBar: HTMLInputElement;
+    _timeFeedback: HTMLDivElement;
+    _currentTime: HTMLSpanElement;
+    _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
     _logUserInteraction: Function;
 
@@ -198,11 +201,12 @@ class Player extends EventEmitter {
         this._overlays.onclick = this._hideAllOverlays.bind(this);
 
         /*
+                <narrativeElementTransport>
+                    <previous, repeat, next />
                 <buttons>
-                    <narrativeElementTransport />
                     <scrub />
                     <lower section>
-                        <play vol time sub FS>
+                        <play vol representations icons time sub FS>
                     </lowersection>
         */
 
@@ -243,7 +247,6 @@ class Player extends EventEmitter {
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._nextButton);
-        // this._buttons.appendChild(this._narrativeElementTransport);
 
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._narrativeElementTransport);
@@ -282,6 +285,19 @@ class Player extends EventEmitter {
         this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
         this._mediaTransport.appendChild(this._icon.button);
+
+        this._timeFeedback = document.createElement('div');
+        this._timeFeedback.classList.add('romper-timer');
+        this._currentTime = document.createElement('span');
+        this._currentTime.innerHTML = '0:00';
+        this._totalTime = document.createElement('span');
+        this._totalTime.innerHTML = '0:00';
+        this._timeFeedback.appendChild(this._currentTime);
+        const divider = document.createElement('span');
+        divider.innerHTML = ' &#47; ';
+        this._timeFeedback.appendChild(divider);
+        this._timeFeedback.appendChild(this._totalTime);
+        this._mediaTransport.appendChild(this._timeFeedback);
 
         this._subtitlesButton = document.createElement('button');
         this._subtitlesButton.classList.add('romper-button');
@@ -586,7 +602,21 @@ class Player extends EventEmitter {
 
             // Update the slider value
             scrubBar.value = value.toString();
+            // update timer feedback
+            this._totalTime.innerHTML = Player._formatTime(video.duration);
+            this._currentTime.innerHTML = Player._formatTime(video.currentTime);
         });
+    }
+
+    static _formatTime(time: number): string {
+        let seconds = parseInt(time, 10);
+        if (Number.isNaN(seconds)) {
+            return '0:00';
+        }
+        const minutes = Math.floor(seconds / 60);
+        seconds %= 60;
+        seconds = seconds < 10 ? `0${seconds}` : seconds;
+        return `${minutes}:${seconds}`;
     }
 
     disablePlayButton() {
