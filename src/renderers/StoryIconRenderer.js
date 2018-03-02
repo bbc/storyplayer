@@ -63,7 +63,7 @@ export default class StoryIconRenderer extends EventEmitter {
                         representationId,
                         iconUrls.default,
                         false,
-                        representationName,
+                        `Chapter ${index}`,
                         `${index}`,
                     );
                 }
