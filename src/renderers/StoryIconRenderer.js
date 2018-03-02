@@ -55,7 +55,6 @@ export default class StoryIconRenderer extends EventEmitter {
             this._deepestCommonSubstory = this._findSubStories();
             this._pathItemList.forEach((pathItem, index) => {
                 const representationId = pathItem.representation.id;
-                const representationName = pathItem.representation.name;
                 const iconUrls = this._iconUrlMap[representationId];
 
                 if (iconUrls && iconUrls.default) {
