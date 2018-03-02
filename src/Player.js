@@ -42,8 +42,8 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const button = document.createElement('button');
-    button.setAttribute('title', `${name} Button`);
-    button.setAttribute('aria-label', `${name} Button`);
+    button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
+    button.setAttribute('aria-label', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.classList.add('romper-button');
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');
@@ -55,12 +55,18 @@ function createOverlay(name: string, logFunction: Function) {
                 .forEach(el => el.classList.add('romper-inactive'));
             if (overlay.classList.contains('romper-inactive')) {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
+                button.classList.add('romper-button-selected');
             } else {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} visible`, `${name} hidden`);
+                button.classList.remove('romper-button-selected');
             }
             overlay.classList.toggle('romper-inactive');
         }
     };
+    const buttonIconDiv = document.createElement('div');
+    buttonIconDiv.classList.add('romper-button-icon-div');
+    buttonIconDiv.classList.add(`romper-${name}-button-icon-div`);
+    button.appendChild(buttonIconDiv);
 
     const elements = {};
     const labels = {};
@@ -163,6 +169,9 @@ class Player extends EventEmitter {
     _representation: Object;
     _icon: Object;
     _scrubBar: HTMLInputElement;
+    _timeFeedback: HTMLDivElement;
+    _currentTime: HTMLSpanElement;
+    _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
     _logUserInteraction: Function;
 
@@ -198,11 +207,12 @@ class Player extends EventEmitter {
         this._overlays.onclick = this._hideAllOverlays.bind(this);
 
         /*
+                <narrativeElementTransport>
+                    <previous, repeat, next />
                 <buttons>
-                    <narrativeElementTransport />
                     <scrub />
                     <lower section>
-                        <play vol time sub FS>
+                        <play vol representations icons time sub FS>
                     </lowersection>
         */
 
@@ -216,11 +226,6 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
-        this._guiLayer.appendChild(this._overlays);
-        this._guiLayer.appendChild(this._buttons);
-        this._guiLayer.appendChild(this._buttonsActivateArea);
-
-
         this._narrativeElementTransport = document.createElement('div');
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
 
@@ -230,7 +235,24 @@ class Player extends EventEmitter {
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
         this._backButton.onclick = this._backButtonClicked.bind(this);
+        const backButtonIconDiv = document.createElement('div');
+        backButtonIconDiv.classList.add('romper-button-icon-div');
+        backButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._backButton.appendChild(backButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._backButton);
+
+        this._repeatButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._repeatButton.classList.add('romper-repeat-button');
+        this._repeatButton.classList.add('romper-inactive');
+        this._repeatButton.setAttribute('title', 'Repeat Button');
+        this._repeatButton.setAttribute('aria-label', 'Repeat Button');
+        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
+        const repeatButtonIconDiv = document.createElement('div');
+        repeatButtonIconDiv.classList.add('romper-button-icon-div');
+        repeatButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._repeatButton.appendChild(repeatButtonIconDiv);
+        this._narrativeElementTransport.appendChild(this._repeatButton);
 
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
@@ -239,7 +261,15 @@ class Player extends EventEmitter {
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
         this._narrativeElementTransport.appendChild(this._nextButton);
-        this._buttons.appendChild(this._narrativeElementTransport);
+        const nextButtonIconDiv = document.createElement('div');
+        nextButtonIconDiv.classList.add('romper-button-icon-div');
+        nextButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._nextButton.appendChild(nextButtonIconDiv);
+
+        this._guiLayer.appendChild(this._overlays);
+        this._guiLayer.appendChild(this._narrativeElementTransport);
+        this._guiLayer.appendChild(this._buttons);
+        this._guiLayer.appendChild(this._buttonsActivateArea);
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.setAttribute('title', 'Scrub bar');
@@ -259,16 +289,11 @@ class Player extends EventEmitter {
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
+        const playPauseButtonIconDiv = document.createElement('div');
+        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
+        playPauseButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._playPauseButton.appendChild(playPauseButtonIconDiv);
         this._mediaTransport.appendChild(this._playPauseButton);
-
-        this._repeatButton = document.createElement('button');
-        this._repeatButton.classList.add('romper-button');
-        this._repeatButton.classList.add('romper-repeat-button');
-        this._repeatButton.classList.add('romper-inactive');
-        this._repeatButton.setAttribute('title', 'Repeat Button');
-        this._repeatButton.setAttribute('aria-label', 'Repeat Button');
-        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
-        this._mediaTransport.appendChild(this._repeatButton);
 
         // Create the overlays.
         this._volume = createOverlay('volume', this._logUserInteraction);
@@ -283,14 +308,29 @@ class Player extends EventEmitter {
         this._overlays.appendChild(this._icon.overlay);
         this._mediaTransport.appendChild(this._icon.button);
 
+        this._timeFeedback = document.createElement('div');
+        this._timeFeedback.classList.add('romper-timer');
+        this._currentTime = document.createElement('span');
+        this._currentTime.innerHTML = '0:00';
+        this._totalTime = document.createElement('span');
+        this._totalTime.innerHTML = '0:00';
+        this._timeFeedback.appendChild(this._currentTime);
+        const divider = document.createElement('span');
+        divider.innerHTML = ' &#47; ';
+        this._timeFeedback.appendChild(divider);
+        this._timeFeedback.appendChild(this._totalTime);
+        this._mediaTransport.appendChild(this._timeFeedback);
+
         this._subtitlesButton = document.createElement('button');
         this._subtitlesButton.classList.add('romper-button');
         this._subtitlesButton.setAttribute('title', 'Subtitles Button');
         this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
         this._subtitlesButton.classList.add('romper-subtitles-button');
-        this._subtitlesButton.classList.add('romper-subtitles-off-button');
-
         this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
+        const subtitlesButtonIconDiv = document.createElement('div');
+        subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
+        subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._subtitlesButton.appendChild(subtitlesButtonIconDiv);
         this._mediaTransport.appendChild(this._subtitlesButton);
 
         this._fullscreenButton = document.createElement('button');
@@ -299,6 +339,10 @@ class Player extends EventEmitter {
         this._fullscreenButton.setAttribute('title', 'Fullscreen Button');
         this._fullscreenButton.setAttribute('aria-label', 'Fullscreen Button');
         this._fullscreenButton.onclick = () => this._toggleFullScreen();
+        const fullscreenButtonIconDiv = document.createElement('div');
+        fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
+        fullscreenButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        this._fullscreenButton.appendChild(fullscreenButtonIconDiv);
         this._mediaTransport.appendChild(this._fullscreenButton);
 
         this._buttons.appendChild(this._mediaTransport);
@@ -314,11 +358,13 @@ class Player extends EventEmitter {
 
     _showRomperButtons() {
         this._buttons.classList.add('show');
+        this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
     }
 
     _hideRomperButtons() {
         this._buttons.classList.remove('show');
+        this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
     }
 
@@ -360,11 +406,9 @@ class Player extends EventEmitter {
     _subtitlesButtonClicked() {
         this.showingSubtitles = !this.showingSubtitles;
         if (this.showingSubtitles) {
-            this._subtitlesButton.classList.add('romper-subtitles-on-button');
-            this._subtitlesButton.classList.remove('romper-subtitles-off-button');
+            this._subtitlesButton.classList.add('romper-button-selected');
         } else {
-            this._subtitlesButton.classList.remove('romper-subtitles-on-button');
-            this._subtitlesButton.classList.add('romper-subtitles-off-button');
+            this._subtitlesButton.classList.remove('romper-button-selected');
         }
 
         const showingSubtitlesIntToString = [
@@ -514,7 +558,7 @@ class Player extends EventEmitter {
 
     enterCompleteBehavourPhase() {
         this.disableScrubBar();
-        this.hidePlayButton();
+        this.disablePlayButton();
         this.showRepeatButton();
     }
 
@@ -523,7 +567,7 @@ class Player extends EventEmitter {
     }
 
     exitStartBehaviourPhase() {
-        this.showPlayButton();
+        this.enablePlayButton();
         this.enableScrubBar();
     }
 
@@ -584,19 +628,35 @@ class Player extends EventEmitter {
 
             // Update the slider value
             scrubBar.value = value.toString();
+            // update timer feedback
+            this._totalTime.innerHTML = Player._formatTime(video.duration);
+            this._currentTime.innerHTML = Player._formatTime(video.currentTime);
         });
     }
 
-    hidePlayButton() {
-        this._playPauseButton.classList.add('romper-inactive');
+    static _formatTime(time: number): string {
+        let seconds = parseInt(time, 10);
+        if (Number.isNaN(seconds)) {
+            return '0:00';
+        }
+        const minutes = Math.floor(seconds / 60);
+        seconds %= 60;
+        seconds = seconds < 10 ? `0${seconds}` : seconds;
+        return `${minutes}:${seconds}`;
+    }
+
+    disablePlayButton() {
+        this._playPauseButton.classList.add('romper-control-disabled');
+        this._playPauseButton.setAttribute('disabled', 'true');
     }
 
     hideRepeatButton() {
         this._repeatButton.classList.add('romper-inactive');
     }
 
-    showPlayButton() {
-        this._playPauseButton.classList.remove('romper-inactive');
+    enablePlayButton() {
+        this._playPauseButton.classList.remove('romper-control-disabled');
+        this._playPauseButton.removeAttribute('disabled');
     }
 
     showRepeatButton() {
