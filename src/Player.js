@@ -174,11 +174,30 @@ class Player extends EventEmitter {
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
     _logUserInteraction: Function;
+    _iOSVideoElement: HTMLVideoElement;
+    _iOSAudioElement: HTMLAudioElement;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
 
-        this._hlsManager = new HlsManager();
+        this._iOSVideoElement = document.createElement('video');
+        this._iOSVideoElement.className = 'romper-video-element';
+        this._iOSVideoElement.autoplay = true;
+        this._iOSVideoElement.crossOrigin = 'anonymous';
+        this._iOSAudioElement = document.createElement('audio');
+
+        this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
+
+        if (HlsManager.hlsJsIsSupported() === false) {
+            const validateButton = document.createElement('button');
+            validateButton.classList.add('ios-start-button');
+            validateButton.innerHTML = 'Start';
+            validateButton.onclick = () => {
+                this._iOSAudioElement.play();
+                this._iOSVideoElement.play();
+            };
+            target.appendChild(validateButton);
+        }
 
         this.showingSubtitles = false;
 
@@ -354,6 +373,11 @@ class Player extends EventEmitter {
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
+
+        if (HlsManager.hlsJsIsSupported() !== true) {
+            this.mediaTarget.appendChild(this._iOSVideoElement);
+            this.backgroundTarget.appendChild(this._iOSAudioElement);
+        }
     }
 
     _showRomperButtons() {

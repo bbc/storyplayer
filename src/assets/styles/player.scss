@@ -50,6 +50,11 @@ $romper-background-color: #ccc;
   }
 }
 
+.ios-start-button {
+  position: fixed;
+  top: 0;
+}
+
 .romper-no-hls-support {
   display: table;
   height: 100%;

@@ -8,10 +8,10 @@ import HlsManager from '../HlsManager';
 import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
-    _audioElement: HTMLAudioElement;
     _hls: Object;
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
+    _playAudioCallback: Function;
     _hlsManager: HlsManager;
 
     constructor(
@@ -23,60 +23,84 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._target = this._player.backgroundTarget;
 
+        this._playAudioCallback = this._playAudioCallback.bind(this);
+
         this._hlsManager = player._hlsManager;
-        this._hls = this._hlsManager.getHls();
+        this._hls = this._hlsManager.getHls('audio');
+
+        this._renderBackgroundAudio();
     }
 
     start() {
-        this._renderBackgroundAudio();
+        this._hls.start(this._target);
         this._player.addVolumeControl(this._assetCollection.id, 'Background');
         this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
+
+        if (this._assetCollection && this._assetCollection
+            .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
+            const audioElement = this._hls.getMediaElement();
+            audioElement.setAttribute('loop', 'true');
+        }
+
+        this.playAudio();
+    }
+
+    end() {
+        try {
+            this._hls.end(this._target);
+        } catch (e) {
+            //
+        }
+
+        this._player.removeVolumeControl(this._assetCollection.id);
+        this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
     }
 
     _handleVolumeClicked(event: Object): void {
+        const audioElement = this._hls.getMediaElement();
         if (event.id === this._assetCollection.id) {
-            this._audioElement.volume = event.value;
+            audioElement.volume = event.value;
+        }
+    }
+
+    _playAudioCallback(): void {
+        const audioElement = this._hls.getMediaElement();
+        this._hls.off(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
+        audioElement.removeEventListener('loadeddata', this._playAudioCallback);
+
+        if (this._destroyed) {
+            logger.warn('loaded destroyed video element - not playing');
+        } else {
+            this._hls.play();
+        }
+    }
+
+    playAudio() {
+        const audioElement = this._hls.getMediaElement();
+        if (audioElement.readyState >= audioElement.HAVE_CURRENT_DATA) {
+            this._hls.play();
+        } else if (audioElement.src.indexOf('m3u8') !== -1) {
+            this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
+        } else {
+            audioElement.addEventListener('loadeddata', this._playAudioCallback);
         }
     }
 
     _renderBackgroundAudio() {
-        this._audioElement = document.createElement('audio');
+        const audioElement = document.createElement('audio');
+        this._hls.attachMedia(audioElement);
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, 'audio').then((mediaUrl) => {
-                this._populateAudioElement(this._audioElement, mediaUrl);
+                this._populateAudioElement(mediaUrl);
             }).catch((err) => { logger.error(err, 'Notfound'); });
         }
-        this._target.appendChild(this._audioElement);
     }
 
-    _populateAudioElement(audioElement: HTMLAudioElement, mediaUrl: string) {
+    _populateAudioElement(mediaUrl: string) {
         if (this._disabled) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
-            if (mediaUrl.indexOf('.m3u8') !== -1) {
-                this._hls.attachMedia(audioElement);
-                this._hls.loadSource(mediaUrl);
-                this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
-                    if (this._disabled) {
-                        logger.warn('loaded destroyed audio element - not playing');
-                    } else {
-                        audioElement.play();
-                    }
-                });
-            } else {
-                audioElement.setAttribute('src', mediaUrl);
-                audioElement.addEventListener('loadeddata', () => {
-                    if (this._disabled) {
-                        logger.warn('loaded destroyed audio element - not playing');
-                    } else {
-                        audioElement.play();
-                    }
-                });
-            }
-            if (this._assetCollection && this._assetCollection
-                .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-                this._audioElement.setAttribute('loop', 'true');
-            }
+            this._hls.loadSource(mediaUrl);
         }
     }
 
@@ -95,9 +119,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     destroy() {
-        this._target.removeChild(this._audioElement);
-        this._player.removeVolumeControl(this._assetCollection.id);
-        this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
+        this.end();
 
         this._hlsManager.returnHls(this._hls);
         super.destroy();
