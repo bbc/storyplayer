@@ -314,11 +314,13 @@ class Player extends EventEmitter {
 
     _showRomperButtons() {
         this._buttons.classList.add('show');
+        this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
     }
 
     _hideRomperButtons() {
         this._buttons.classList.remove('show');
+        this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
     }
 
