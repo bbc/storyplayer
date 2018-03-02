@@ -513,7 +513,13 @@ class Player extends EventEmitter {
         this._representation.remove(id);
     }
 
-    addIconControl(id: string, src: string, selected: boolean = false, representationName: string) {
+    addIconControl(
+        id: string,
+        src: string,
+        selected: boolean = false,
+        representationName: string,
+        labelString: ?string,
+    ) {
         const iconControl = document.createElement('div');
         iconControl.classList.add('romper-icon-control');
 
@@ -532,6 +538,14 @@ class Player extends EventEmitter {
         };
 
         iconControl.appendChild(icon);
+
+        if (labelString) {
+            const label = document.createElement('span');
+            label.classList.add('romper-icon-label');
+            label.classList.add(`romper-icon-label-${labelString}`);
+            label.textContent = labelString;
+            iconControl.appendChild(label);
+        }
 
         this._icon.add(id, iconControl);
     }

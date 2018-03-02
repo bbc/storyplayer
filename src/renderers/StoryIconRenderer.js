@@ -53,7 +53,7 @@ export default class StoryIconRenderer extends EventEmitter {
         this._getIconAssets().then((iconAssets) => {
             this._iconUrlMap = StoryIconRenderer._buildUrlMap(this._pathItemList, iconAssets);
             this._deepestCommonSubstory = this._findSubStories();
-            this._pathItemList.forEach((pathItem) => {
+            this._pathItemList.forEach((pathItem, index) => {
                 const representationId = pathItem.representation.id;
                 const representationName = pathItem.representation.name;
                 const iconUrls = this._iconUrlMap[representationId];
@@ -64,6 +64,7 @@ export default class StoryIconRenderer extends EventEmitter {
                         iconUrls.default,
                         false,
                         representationName,
+                        `${index}`,
                     );
                 }
             });
