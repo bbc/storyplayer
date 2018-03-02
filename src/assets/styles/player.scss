@@ -78,6 +78,16 @@ $romper-background-color: #ccc;
   position: relative;
   width: 600px;
 
+  &.romper-player-fullscreen {
+    height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
+
+    // Center Video Box
+    margin-top: -28.125vw; // height/2
+    position: absolute;
+    top: 50%;
+    width: 100vw;
+  }
+
   // Reset styles for all elements within romper.
   * {
     border: 0;
