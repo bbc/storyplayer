@@ -50,7 +50,7 @@ $romper-background-color: #ccc;
   }
 }
 
-/* Safari */
+// Safari
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(360deg); }
@@ -59,11 +59,6 @@ $romper-background-color: #ccc;
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.ios-start-button {
-  position: fixed;
-  top: 0;
 }
 
 .romper-no-hls-support {
@@ -188,6 +183,17 @@ $romper-background-color: #ccc;
 
     div {
       @include button-icon('../images/listen.svg');
+      height: 50%;
+      width: 50%;
+    }
+  }
+
+  .romper-start-button {
+    @include button;
+    margin-right: 20px;
+
+    .romper-button-icon-div {
+      @include button-icon('../images/play.svg');
       height: 50%;
       width: 50%;
     }

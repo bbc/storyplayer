@@ -13,6 +13,8 @@ export default class HlsManager {
     _iOSVideoElement: HTMLVideoElement
     _iOSAudioElement: HTMLAudioElement
     _debug: boolean
+    _getPermissionToPlay: Function
+    _permissionToPlay: boolean
     static _hlsjsSupported: boolean
     static _hlsSupported: boolean
 
@@ -39,12 +41,20 @@ export default class HlsManager {
             maxMaxBufferLength: 2,
         };
         this._idTotal = 0;
+        this._permissionToPlay = false;
+
+        this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
+    }
+
+    _getPermissionToPlay() {
+        return this._permissionToPlay;
     }
 
     getHls(type: string): HlsInstance {
         let newHls;
         if (type === 'video') {
             newHls = new HlsInstance(
+                this._getPermissionToPlay,
                 this._defaultConfig,
                 this._activeConfig,
                 this._inactiveConfig,
@@ -55,6 +65,7 @@ export default class HlsManager {
             );
         } else if (type === 'audio') {
             newHls = new HlsInstance(
+                this._getPermissionToPlay,
                 this._defaultConfig,
                 this._activeConfig,
                 this._inactiveConfig,
@@ -97,6 +108,10 @@ export default class HlsManager {
                 }
             }
         });
+    }
+
+    setPermissionToPlay(value: boolean) {
+        this._permissionToPlay = value;
     }
 
     static get Events() {

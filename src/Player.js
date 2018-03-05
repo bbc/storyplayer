@@ -160,6 +160,7 @@ class Player extends EventEmitter {
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
     _mediaTransport: HTMLDivElement;
+    _startButton: HTMLButtonElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -189,22 +190,10 @@ class Player extends EventEmitter {
 
         this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
 
-        if (HlsManager.hlsJsIsSupported() === false) {
-            const validateButton = document.createElement('button');
-            validateButton.classList.add('ios-start-button');
-            validateButton.innerHTML = 'Start';
-            validateButton.onclick = () => {
-                this._iOSAudioElement.play();
-                this._iOSVideoElement.play();
-            };
-            target.appendChild(validateButton);
-        }
-
         this.showingSubtitles = false;
 
         this._analytics = analytics;
         this._logUserInteraction = this._logUserInteraction.bind(this);
-
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -298,10 +287,28 @@ class Player extends EventEmitter {
         nextButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
+        this._startButton = document.createElement('button');
+        this._repeatButton.classList.add('romper-button');
+        this._startButton.classList.add('romper-start-button');
+        this._startButton.setAttribute('title', 'Start Button');
+        this._startButton.setAttribute('aria-label', 'Start Button');
+        this._startButton.onclick = this._startButtonClicked.bind(this);
+        const startButtonIconDiv = document.createElement('div');
+        startButtonIconDiv.classList.add('romper-button-icon-div');
+        startButtonIconDiv.classList.add('romper-start-button-icon-div');
+        this._startButton.appendChild(startButtonIconDiv);
+        const startButtonTextDiv = document.createElement('div');
+        startButtonTextDiv.innerHTML = 'Start';
+        startButtonTextDiv.classList.add('romper-button-text-div');
+        startButtonTextDiv.classList.add('romper-start-button-text-div');
+        this._startButton.appendChild(startButtonTextDiv);
+        this._narrativeElementTransport.appendChild(this._startButton);
+
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._narrativeElementTransport);
         this._guiLayer.appendChild(this._buttons);
         this._guiLayer.appendChild(this._buttonsActivateArea);
+        this._guiLayer.appendChild(this._startButton);
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.setAttribute('title', 'Seek bar');
@@ -310,7 +317,6 @@ class Player extends EventEmitter {
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
         this._buttons.appendChild(this._scrubBar);
-
 
         this._mediaTransport = document.createElement('div');
         this._mediaTransport.classList.add('romper-media-transport');
@@ -382,6 +388,12 @@ class Player extends EventEmitter {
 
         target.appendChild(this._player);
 
+        // Hide gui elements until start clicked
+        this._overlays.classList.add('romper-inactive');
+        this._narrativeElementTransport.classList.add('romper-inactive');
+        this._buttons.classList.add('romper-inactive');
+        this._buttonsActivateArea.classList.add('romper-inactive');
+
         // Expose the layers for external manipulation if needed.
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
@@ -405,6 +417,20 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.classList.remove('hide');
     }
 
+    _startButtonClicked() {
+        this._overlays.classList.remove('romper-inactive');
+        this._narrativeElementTransport.classList.remove('romper-inactive');
+        this._buttons.classList.remove('romper-inactive');
+        this._buttonsActivateArea.classList.remove('romper-inactive');
+        this._startButton.classList.add('romper-inactive');
+
+        this._hlsManager.setPermissionToPlay(true);
+        this._playPauseButtonClicked();
+        if (HlsManager.hlsJsIsSupported() === false) {
+            this._iOSAudioElement.play();
+            this._iOSVideoElement.play();
+        }
+    }
 
     _playPauseButtonClicked() {
         this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
