@@ -50,6 +50,17 @@ $romper-background-color: #ccc;
   }
 }
 
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .ios-start-button {
   position: fixed;
   top: 0;
@@ -110,9 +121,34 @@ $romper-background-color: #ccc;
     background-color: $romper-background-color;
   }
 
+  .romper-loading {
+    display: table;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+  }
+
+  .romper-loading-middle {
+    display: table-cell;
+    vertical-align: middle;
+  }
+
+  .romper-loading-inner {
+    @include button-icon('../images/loading.svg')
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 50px;
+    width: 20%;
+  }
+
   .romper-video-element {
     height: 100%;
+    position: absolute;
     width: 100%;
+    z-index: 1;
   }
 
   .romper-inactive {
@@ -372,6 +408,8 @@ $romper-background-color: #ccc;
 .romper-render-image {
   height: 100%;
   left: 0;
+  position: absolute;
   top: 0;
   width: 100%;
+  z-index: 2;
 }
