@@ -19,9 +19,13 @@ export default class HlsInstance {
     _useHlsJs: boolean
     _mediaSrc: string
     _mediaElement: HTMLMediaElement
+    _activeConfig: Object
+    _inactiveConfig: Object
 
     constructor(
-        config: Object,
+        defaultConfig: Object,
+        activeConfig: Object,
+        inactiveConfig: Object,
         idNum: number,
         useHlsJs: boolean,
         iOSElement: HTMLMediaElement,
@@ -33,7 +37,10 @@ export default class HlsInstance {
         this._iOSElement = iOSElement;
         this._debug = debug;
 
+        this._activeConfig = activeConfig;
+        this._inactiveConfig = inactiveConfig;
 
+        const config = Object.assign({}, defaultConfig, inactiveConfig);
         if (this._useHlsJs) {
             this._hls = new Hls(config);
             this.on(Hls.Events.ERROR, this._errorHandler.bind(this));
@@ -93,6 +100,7 @@ export default class HlsInstance {
     start(target: HTMLDivElement) {
         if (this._useHlsJs) {
             target.appendChild(this._mediaElement);
+            this._hls.config = Object.assign({}, this._hls.config, this._activeConfig);
         } else {
             this._mediaElement = this._iOSElement;
             if (this._mediaSrc && this._mediaSrc !== '') {
@@ -105,6 +113,7 @@ export default class HlsInstance {
         this._mediaSrc = '';
         if (this._useHlsJs) {
             target.removeChild(this._mediaElement);
+            this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig);
         }
     }
 
