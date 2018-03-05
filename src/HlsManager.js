@@ -7,6 +7,8 @@ import HlsInstance from './HlsInstance';
 export default class HlsManager {
     _hlsPool: Array<Object>
     _defaultConfig: Object
+    _activeConfig: Object
+    _inactiveConfig: Object
     _idTotal: number
     _iOSVideoElement: HTMLVideoElement
     _iOSAudioElement: HTMLAudioElement
@@ -28,6 +30,14 @@ export default class HlsManager {
             startLevel: 3,
             debug: false,
         };
+        this._activeConfig = {
+            maxBufferLength: 30,
+            maxMaxBufferLength: 600,
+        };
+        this._inactiveConfig = {
+            maxBufferLength: 1,
+            maxMaxBufferLength: 2,
+        };
         this._idTotal = 0;
     }
 
@@ -36,6 +46,8 @@ export default class HlsManager {
         if (type === 'video') {
             newHls = new HlsInstance(
                 this._defaultConfig,
+                this._activeConfig,
+                this._inactiveConfig,
                 this._idTotal,
                 HlsManager._hlsjsSupported,
                 this._iOSVideoElement,
@@ -44,6 +56,8 @@ export default class HlsManager {
         } else if (type === 'audio') {
             newHls = new HlsInstance(
                 this._defaultConfig,
+                this._activeConfig,
+                this._inactiveConfig,
                 this._idTotal,
                 HlsManager._hlsjsSupported,
                 this._iOSAudioElement,
