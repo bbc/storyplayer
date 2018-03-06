@@ -516,6 +516,7 @@ class Player extends EventEmitter {
         const representationIcon = document.createElement('img');
         representationIcon.src = src;
         representationIcon.classList.add('romper-representation-icon');
+        representationIcon.setAttribute('draggable', 'false');
         representationIcon.onclick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
             this._representation.deactivateOverlay();
@@ -555,6 +556,7 @@ class Player extends EventEmitter {
         icon.classList.add('romper-icon');
         icon.setAttribute('title', representationName);
         icon.setAttribute('aria-label', representationName);
+        icon.setAttribute('draggable', 'false');
         if (selected) {
             icon.classList.add('romper-selected');
         }
