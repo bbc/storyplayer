@@ -805,6 +805,9 @@ class Player extends EventEmitter {
         if (document.msFullscreenElement) {
             isFullScreen = isFullScreen || (document.msFullscreenElement != null);
         }
+        if (document.getElementsByClassName('fullscreen-container-fullscreen').length > 0) {
+            isFullScreen = true;
+        }
         return isFullScreen;
     }
 
@@ -818,6 +821,12 @@ class Player extends EventEmitter {
         } else if (this._playerParent.webkitRequestFullscreen) {
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
+        } else {
+            const fullscreenContainers = document.getElementsByClassName('fullscreen-container');
+            if (fullscreenContainers.length > 0) {
+                // iOS
+                fullscreenContainers[0].classList.add('fullscreen-container-fullscreen');
+            }
         }
     }
 
@@ -835,6 +844,12 @@ class Player extends EventEmitter {
         } else if (document.msExitFullscreen) {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
+        } else {
+            const fullscreenContainers = document.getElementsByClassName('fullscreen-container');
+            if (fullscreenContainers.length > 0) {
+                // iOS
+                fullscreenContainers[0].classList.remove('fullscreen-container-fullscreen');
+            }
         }
     }
 }
