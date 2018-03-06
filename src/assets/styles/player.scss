@@ -189,7 +189,7 @@ $romper-background-color: #ccc;
   }
 
   .romper-fullscreen-button {
-    @include button
+    @include button;
     margin-left: 20px;
 
     div {
