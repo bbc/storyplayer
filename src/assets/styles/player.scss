@@ -117,15 +117,9 @@ $romper-background-color: #ccc;
   }
 
   .romper-loading {
-    display: table;
     height: 100%;
     position: absolute;
     width: 100%;
-  }
-
-  .romper-loading-middle {
-    display: table-cell;
-    vertical-align: middle;
   }
 
   .romper-loading-inner {
@@ -143,7 +137,6 @@ $romper-background-color: #ccc;
     height: 100%;
     position: absolute;
     width: 100%;
-    z-index: 1;
   }
 
   .romper-inactive {

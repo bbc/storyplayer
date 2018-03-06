@@ -208,12 +208,9 @@ class Player extends EventEmitter {
 
         const loadingLayer = document.createElement('div');
         loadingLayer.classList.add('romper-loading');
-        const loadingLayerDiv = document.createElement('div');
-        loadingLayerDiv.classList.add('romper-loading-middle');
-        const loadingLayerDivDiv = document.createElement('div');
-        loadingLayerDivDiv.classList.add('romper-loading-inner');
-        loadingLayerDiv.appendChild(loadingLayerDivDiv);
-        loadingLayer.appendChild(loadingLayerDiv);
+        const loadingLayerInner = document.createElement('div');
+        loadingLayerInner.classList.add('romper-loading-inner');
+        loadingLayer.appendChild(loadingLayerInner);
         this._mediaLayer.appendChild(loadingLayer);
 
         this._guiLayer = document.createElement('div');
