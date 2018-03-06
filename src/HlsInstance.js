@@ -21,8 +21,10 @@ export default class HlsInstance {
     _mediaElement: HTMLMediaElement
     _activeConfig: Object
     _inactiveConfig: Object
+    _permissionToPlay: Function
 
     constructor(
+        permissionToPlay: Function,
         defaultConfig: Object,
         activeConfig: Object,
         inactiveConfig: Object,
@@ -32,6 +34,7 @@ export default class HlsInstance {
         debug: boolean = false,
     ) {
         this._eventList = [];
+        this._permissionToPlay = permissionToPlay;
         this._id = idNum;
         this._useHlsJs = useHlsJs;
         this._iOSElement = iOSElement;
@@ -78,12 +81,16 @@ export default class HlsInstance {
     }
 
     play() {
-        const promise = this._mediaElement.play();
-        if (promise !== undefined) {
-            promise.then(() => {}).catch((error) => {
-                logger.warn(error, 'Not got permission to play');
-                // Auto-play was prevented
-            });
+        if (this._permissionToPlay()) {
+            const promise = this._mediaElement.play();
+            if (promise !== undefined) {
+                promise.then(() => {}).catch((error) => {
+                    logger.warn(error, 'Not got permission to play');
+                    // Auto-play was prevented
+                });
+            }
+        } else {
+            logger.info('Not got permission to play');
         }
     }
 
