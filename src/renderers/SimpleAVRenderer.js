@@ -97,7 +97,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hls.start(this._target);
+        this._hls.start();
         const videoElement = this._hls.getMediaElement();
         logger.info(`Started: ${this._representation.id}`);
 
@@ -134,6 +134,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     end() {
         this._hls.pause();
+
         logger.info(`Ended: ${this._representation.id}`);
 
         const videoElement = this._hls.getMediaElement();
@@ -148,7 +149,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         try {
             this._clearBehaviourElements();
-            this._hls.end(this._target);
+            this._hls.end();
         } catch (e) {
             //
         }

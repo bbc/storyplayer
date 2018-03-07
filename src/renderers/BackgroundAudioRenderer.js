@@ -32,7 +32,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     start() {
-        this._hls.start(this._target);
+        this._hls.start();
         this._player.addVolumeControl(this._assetCollection.id, 'Background');
         this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
 
@@ -47,7 +47,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     end() {
         try {
-            this._hls.end(this._target);
+            this._hls.end();
         } catch (e) {
             //
         }

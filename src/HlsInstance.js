@@ -104,7 +104,7 @@ export default class HlsInstance {
         }
     }
 
-    start(target: HTMLDivElement) {
+    start() {
         this._mediaElement = this._iOSElement;
         if (this._useHlsJs) {
             this._hls.detachMedia();
@@ -115,7 +115,7 @@ export default class HlsInstance {
         }
     }
 
-    end(target: HTMLDivElement) {
+    end() {
         this._mediaSrc = '';
         if (this._useHlsJs) {
             this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig);
