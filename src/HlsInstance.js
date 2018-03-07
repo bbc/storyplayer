@@ -105,21 +105,19 @@ export default class HlsInstance {
     }
 
     start(target: HTMLDivElement) {
+        this._mediaElement = this._iOSElement;
         if (this._useHlsJs) {
-            target.appendChild(this._mediaElement);
+            this._hls.detachMedia();
+            this._hls.attachMedia(this._mediaElement);
             this._hls.config = Object.assign({}, this._hls.config, this._activeConfig);
-        } else {
-            this._mediaElement = this._iOSElement;
-            if (this._mediaSrc && this._mediaSrc !== '') {
-                this.loadSource(this._mediaSrc);
-            }
+        } else if (this._mediaSrc && this._mediaSrc !== '') {
+            this.loadSource(this._mediaSrc);
         }
     }
 
     end(target: HTMLDivElement) {
         this._mediaSrc = '';
         if (this._useHlsJs) {
-            target.removeChild(this._mediaElement);
             this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig);
         }
     }

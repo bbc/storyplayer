@@ -184,9 +184,9 @@ class Player extends EventEmitter {
 
         this._iOSVideoElement = document.createElement('video');
         this._iOSVideoElement.className = 'romper-video-element';
-        this._iOSVideoElement.autoplay = true;
         this._iOSVideoElement.crossOrigin = 'anonymous';
         this._iOSAudioElement = document.createElement('audio');
+        this._iOSAudioElement.crossOrigin = 'anonymous';
 
         this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
 
@@ -396,10 +396,8 @@ class Player extends EventEmitter {
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
 
-        if (HlsManager.hlsJsIsSupported() !== true) {
-            this.mediaTarget.appendChild(this._iOSVideoElement);
-            this.backgroundTarget.appendChild(this._iOSAudioElement);
-        }
+        this.mediaTarget.appendChild(this._iOSVideoElement);
+        this.backgroundTarget.appendChild(this._iOSAudioElement);
     }
 
     _showRomperButtons() {
