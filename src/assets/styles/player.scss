@@ -75,6 +75,25 @@ $romper-background-color: #ccc;
   }
 }
 
+.romper-target {
+  height: 100%;
+  width: 100%;
+
+  &.romper-target-fullscreen {
+    background-color: $romper-background-color;
+    bottom: 0;
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100vw;
+    z-index: 1;
+  }
+}
+
+
+
 .romper-player {
   color: $accent-colour;
   display: flex;
@@ -90,7 +109,7 @@ $romper-background-color: #ccc;
     // Center Video Box
     margin-top: -28.125vw; // height/2
     position: absolute;
-    top: 50%;
+    top: 50vh;
     width: 100vw;
   }
 

@@ -778,7 +778,7 @@ class Player extends EventEmitter {
             );
             this._buttons.classList.remove('romper-buttons-fullscreen');
             this._player.classList.remove('romper-player-fullscreen');
-            Player._exitFullScreen();
+            this._exitFullScreen();
         } else {
             this._logUserInteraction(
                 AnalyticEvents.names.FULLSCREEN_BUTTON_CLICKED,
@@ -805,6 +805,9 @@ class Player extends EventEmitter {
         if (document.msFullscreenElement) {
             isFullScreen = isFullScreen || (document.msFullscreenElement != null);
         }
+        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
+            isFullScreen = true;
+        }
         return isFullScreen;
     }
 
@@ -818,10 +821,13 @@ class Player extends EventEmitter {
         } else if (this._playerParent.webkitRequestFullscreen) {
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
+        } else {
+            window.scrollTo(0, 1);
+            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
     }
 
-    static _exitFullScreen() {
+    _exitFullScreen() {
         // || document.webkitIsFullScreen);
         if (document.exitFullscreen) {
             // @flowignore
@@ -835,6 +841,9 @@ class Player extends EventEmitter {
         } else if (document.msExitFullscreen) {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
+        } else {
+            this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
+            window.scroll(0, 0);
         }
     }
 }
