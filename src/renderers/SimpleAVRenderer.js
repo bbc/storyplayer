@@ -34,6 +34,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _hlsManager: HlsManager;
     _subtitlesLoaded: boolean;
     _subtitlesShowing: boolean;
+    _subtitlesSrc: string;
 
     _endedEventListener: Function;
     _playEventListener: Function;
@@ -72,7 +73,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._subtitlesShowing = player.showingSubtitles;
         this._subtitlesLoaded = false;
-        this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
+        this._subtitlesSrc = '';
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
@@ -108,12 +109,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         const player = this._player;
 
-        if (this._videoTrack.parentNode !== videoElement) {
-            videoElement.appendChild(this._videoTrack);
-        }
-
         this._subtitlesShowing = player.showingSubtitles;
         this._showHideSubtitles();
+        videoElement.addEventListener('loadedmetadata', () => {
+            this._showHideSubtitles();
+        });
 
         player.addVolumeControl(this._representation.id, 'Foreground');
         player.connectScrubBar(videoElement);
@@ -134,12 +134,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     end() {
         this._hls.pause();
+        this._subtitlesShowing = false;
+        this._showHideSubtitles();
 
         logger.info(`Ended: ${this._representation.id}`);
 
         const videoElement = this._hls.getMediaElement();
 
-        if (this._videoTrack.parentNode === videoElement) {
+        if (this._videoTrack && this._videoTrack.parentNode === videoElement) {
+            this._subtitlesLoaded = false;
             videoElement.removeChild(this._videoTrack);
         }
 
@@ -243,11 +246,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // this._hls.loadSubs(mediaUrl);
             videoElement.addEventListener('loadedmetadata', () => {
                 // Load Subtitles
-                this._videoTrack.kind = 'captions';
-                this._videoTrack.label = 'English';
-                this._videoTrack.srclang = 'en';
-                this._videoTrack.src = mediaUrl;
-                this._videoTrack.default = false;
+                this._subtitlesSrc = mediaUrl;
                 this._subtitlesLoaded = true;
 
                 this._showHideSubtitles();
@@ -258,18 +257,27 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _showHideSubtitles() {
         const videoElement = this._hls.getMediaElement();
         if (this._subtitlesLoaded) {
+            if (this._videoTrack) {
+                const videoTrackParent = this._videoTrack.parentNode;
+                if (videoTrackParent) {
+                    videoTrackParent.removeChild(this._videoTrack);
+                }
+            }
+
             if (this._subtitlesShowing) {
+                this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
+                this._videoTrack.kind = 'captions';
+                this._videoTrack.label = 'English';
+                this._videoTrack.srclang = 'en';
+                this._videoTrack.src = this._subtitlesSrc;
+                this._videoTrack.default = false;
+                videoElement.appendChild(this._videoTrack);
+
                 // Show Subtitles
                 this._videoTrack.mode = 'showing';
 
                 if (videoElement.textTracks[0]) {
                     videoElement.textTracks[0].mode = 'showing';
-                }
-            } else {
-                // Hide Subtitles
-                this._videoTrack.mode = 'hidden';
-                if (videoElement.textTracks[0]) {
-                    videoElement.textTracks[0].mode = 'hidden';
                 }
             }
         }

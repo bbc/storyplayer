@@ -116,6 +116,7 @@ export default class HlsInstance {
     }
 
     end() {
+        this._hls.detachMedia();
         this._mediaSrc = '';
         if (this._useHlsJs) {
             this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig);
@@ -153,7 +154,6 @@ export default class HlsInstance {
         if (this._useHlsJs) {
             // Using HLS.js
             if (this._hls.media === null || this._hls.media === undefined) {
-                logger.error(new Error(`HLSInstance ${this._id}: MEDIA NULL`));
                 return;
             }
             this._hls.detachMedia();
