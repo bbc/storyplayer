@@ -1,6 +1,6 @@
 {
   "name": "@bbc/romper",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
