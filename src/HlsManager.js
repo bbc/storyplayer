@@ -37,8 +37,8 @@ export default class HlsManager {
             maxMaxBufferLength: 600,
         };
         this._inactiveConfig = {
-            maxBufferLength: 1,
-            maxMaxBufferLength: 2,
+            maxBufferLength: 2,
+            maxMaxBufferLength: 4,
         };
         this._idTotal = 0;
         this._permissionToPlay = false;
