@@ -163,13 +163,13 @@ export default class HlsInstance {
     on(event: string, callback: Function) {
         if (this._useHlsJs) {
             this._hls.on(event, callback);
-            this._eventList.push({
-                event,
-                callback,
-            });
         } else {
             this._iOSElement.addEventListener(event, callback);
         }
+        this._eventList.push({
+            event,
+            callback,
+        });
     }
 
     off(event: string, callback: Function) {
@@ -177,6 +177,15 @@ export default class HlsInstance {
             this._hls.off(event, callback);
         } else {
             this._iOSElement.removeEventListener(event, callback);
+        }
+        let index = -1;
+        this._eventList.forEach((eventObj, eventInd) => {
+            if (eventObj.event === event && eventObj.callback === callback) {
+                index = eventInd;
+            }
+        });
+        if (index > -1) {
+            this._eventList.splice(index, 1);
         }
     }
 
