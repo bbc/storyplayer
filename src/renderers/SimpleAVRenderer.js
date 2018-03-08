@@ -36,6 +36,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _subtitlesShowing: boolean;
     _subtitlesSrc: string;
 
+    _lastSetTime: number
+
     _endedEventListener: Function;
     _playEventListener: Function;
     _pauseEventListener: Function;
@@ -81,6 +83,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
         };
+
+        this._lastSetTime = 0;
     }
 
     _endedEventListener() {
@@ -101,6 +105,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._hls.start();
         const videoElement = this._hls.getMediaElement();
         logger.info(`Started: ${this._representation.id}`);
+
+        this.setCurrentTime(0);
 
         // automatically move on at video end
         videoElement.addEventListener('ended', this._endedEventListener);
@@ -346,7 +352,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             !videoElement ||
             videoElement.readyState < videoElement.HAVE_CURRENT_DATA
         ) {
-            videoTime = 0;
+            videoTime = this._lastSetTime;
         } else {
             videoTime = videoElement.currentTime;
         }
@@ -358,6 +364,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     setCurrentTime(time: number) {
+        this._lastSetTime = time;
         const videoElement = this._hls.getMediaElement();
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
