@@ -4,7 +4,6 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
-
 import BrowserUserAgent from './BrowserUserAgent';
 import HlsManager from './HlsManager';
 
@@ -180,9 +179,13 @@ class Player extends EventEmitter {
     _logUserInteraction: Function;
     _iOSVideoElement: HTMLVideoElement;
     _iOSAudioElement: HTMLAudioElement;
+    _showRomperButtonsTimeout: number;
+    _RomperButtonsShowing: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
+
+        this._RomperButtonsShowing = false;
 
         this._iOSVideoElement = document.createElement('video');
         this._iOSVideoElement.className = 'romper-video-element';
@@ -248,9 +251,6 @@ class Player extends EventEmitter {
 
         this._buttons = document.createElement('div');
         this._buttons.classList.add('romper-buttons');
-
-        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
-        this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
         this._narrativeElementTransport = document.createElement('div');
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
@@ -406,15 +406,78 @@ class Player extends EventEmitter {
 
         this.mediaTarget.appendChild(this._iOSVideoElement);
         this.backgroundTarget.appendChild(this._iOSAudioElement);
+
+        // Event Listeners
+        document.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
+        this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
+        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
+        this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
+        this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
+    }
+
+    _handleTouchEndEvent(event: Object) {
+        // Get the element that was clicked on
+        const endTarget = document.elementFromPoint(
+            event.changedTouches[0].pageX,
+            event.changedTouches[0].pageY,
+        );
+
+        if (!this._RomperButtonsShowing) {
+            // Open romper buttons if user touches anywhere on screen that is background
+            const openTriggerElements = [
+                this._overlays,
+                this._narrativeElementTransport,
+                this._buttonsActivateArea,
+            ];
+            if (openTriggerElements.some(el => (el === endTarget))) {
+                this._showRomperButtons();
+                // Hide buttons after 5 seconds
+                this._showRomperButtonsTimeout = setTimeout(() => {
+                    this._hideRomperButtons();
+                }, 5000);
+                event.preventDefault();
+            }
+        } else {
+            // Close romper buttons if user touches anywhere above buttons bar
+            const closeTriggerElements = [
+                this._overlays,
+                this._narrativeElementTransport,
+            ];
+            // Prevent touch being converted to click on button bar
+            // (which would then trigger activate area mouseenter events)
+            const proventClickTriggerElements = [
+                this._buttons,
+            ];
+            if (closeTriggerElements.some(el => (el === endTarget))) {
+                this._hideRomperButtons();
+                event.preventDefault();
+            } else if (proventClickTriggerElements.some(el => (el === endTarget))) {
+                event.preventDefault();
+            }
+        }
+    }
+
+    _handleKeyboardEvent(event: Object) {
+        if (event.code === 'Escape') {
+            if (this._RomperButtonsShowing) this._hideRomperButtons();
+        } else if (!this._RomperButtonsShowing) {
+            this._showRomperButtons();
+            this._showRomperButtonsTimeout = setTimeout(() => {
+                this._hideRomperButtons();
+            }, 5000);
+        }
     }
 
     _showRomperButtons() {
+        this._RomperButtonsShowing = true;
         this._buttons.classList.add('show');
         this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
     }
 
     _hideRomperButtons() {
+        if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
+        this._RomperButtonsShowing = false;
         this._buttons.classList.remove('show');
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
