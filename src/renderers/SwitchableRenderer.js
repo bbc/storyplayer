@@ -165,6 +165,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
+        this._previousRendererPlayheadTime = 0;
         this._renderSwitchButtons();
         this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
 
