@@ -4,6 +4,8 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
+
+import BrowserUserAgent from './BrowserUserAgent';
 import HlsManager from './HlsManager';
 
 const PlayerEvents = [
@@ -187,6 +189,12 @@ class Player extends EventEmitter {
         this._iOSVideoElement.crossOrigin = 'anonymous';
         this._iOSAudioElement = document.createElement('audio');
         this._iOSAudioElement.crossOrigin = 'anonymous';
+
+        // Permission to play not granted on iOS without the autplay tag
+        if (BrowserUserAgent.iOS()) {
+            this._iOSVideoElement.autoplay = true;
+            this._iOSAudioElement.autoplay = true;
+        }
 
         this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
 
