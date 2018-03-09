@@ -179,12 +179,14 @@ class Player extends EventEmitter {
     _logUserInteraction: Function;
     _iOSVideoElement: HTMLVideoElement;
     _iOSAudioElement: HTMLAudioElement;
+    _volumeEventTimeouts: Object;
     _showRomperButtonsTimeout: number;
     _RomperButtonsShowing: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
 
+        this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
         this._iOSVideoElement = document.createElement('video');
@@ -599,10 +601,21 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
-        volumeRange.onchange = (event) => {
+        volumeRange.oninput = (event) => {
             const value = parseFloat(event.target.value);
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
-            this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, null, event.target.value);
+
+            // Don't spam analtics with lots of volume changes
+            // Wait 1 second after volume stops changing before sending analytics
+            if (this._volumeEventTimeouts[label]) {
+                clearTimeout(this._volumeEventTimeouts[label]);
+            }
+            this._volumeEventTimeouts[label] = setTimeout(() => {
+                this._logUserInteraction(
+                    AnalyticEvents.names.VOLUME_CHANGED, null,
+                    `${label}: ${event.target.value}`,
+                );
+            }, 1000);
         };
 
         volumeControl.appendChild(volumeLabel);
