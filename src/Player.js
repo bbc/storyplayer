@@ -450,6 +450,7 @@ class Player extends EventEmitter {
             ];
             if (closeTriggerElements.some(el => (el === endTarget))) {
                 this._hideRomperButtons();
+                this._hideAllOverlays();
                 event.preventDefault();
             } else if (proventClickTriggerElements.some(el => (el === endTarget))) {
                 event.preventDefault();
