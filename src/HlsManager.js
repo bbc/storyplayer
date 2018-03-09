@@ -44,7 +44,9 @@ export default class HlsManager {
         this._idTotal = 0;
         this._permissionToPlay = false;
 
-        this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContext = (window.AudioContext || window.webkitAudioContext);
+
+        this._audioContext = new AudioContext();
 
         this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
     }
