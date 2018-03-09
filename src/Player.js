@@ -190,8 +190,13 @@ class Player extends EventEmitter {
         this._iOSVideoElement = document.createElement('video');
         this._iOSVideoElement.className = 'romper-video-element';
         this._iOSVideoElement.crossOrigin = 'anonymous';
+        this._iOSVideoElement.src =
+            'https://github.com/kud/blank-video/blob/master/blank.m4v?raw=true';
         this._iOSAudioElement = document.createElement('audio');
+        this._iOSAudioElement.className = 'romper-audio-element';
         this._iOSAudioElement.crossOrigin = 'anonymous';
+        this._iOSAudioElement.src =
+            'https://github.com/anars/blank-audio/blob/master/1-hour-of-silence.mp3?raw=true';
 
         // Permission to play not granted on iOS without the autplay tag
         if (BrowserUserAgent.iOS()) {
