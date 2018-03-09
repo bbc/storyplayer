@@ -57,9 +57,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     _handleVolumeClicked(event: Object): void {
-        const audioElement = this._hls.getMediaElement();
         if (event.id === this._assetCollection.id) {
-            audioElement.volume = event.value;
+            this._hls.setVolume(event.value);
         }
     }
 

@@ -15,6 +15,7 @@ export default class HlsManager {
     _debug: boolean
     _getPermissionToPlay: Function
     _permissionToPlay: boolean
+    _audioContext: AudioContext
     static _hlsjsSupported: boolean
     static _hlsSupported: boolean
 
@@ -43,6 +44,8 @@ export default class HlsManager {
         this._idTotal = 0;
         this._permissionToPlay = false;
 
+        this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
         this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
     }
 
@@ -61,6 +64,7 @@ export default class HlsManager {
                 this._idTotal,
                 HlsManager._hlsjsSupported,
                 this._iOSVideoElement,
+                this._audioContext,
                 this._debug,
             );
         } else if (type === 'audio') {
@@ -72,6 +76,7 @@ export default class HlsManager {
                 this._idTotal,
                 HlsManager._hlsjsSupported,
                 this._iOSAudioElement,
+                this._audioContext,
                 this._debug,
             );
         } else {

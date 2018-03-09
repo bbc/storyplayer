@@ -585,6 +585,25 @@ class Player extends EventEmitter {
         this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
     }
 
+    _setVolumeCallback(id: string, label: string) {
+        return (event: Object) => {
+            const value = parseFloat(event.target.value);
+            this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
+
+            // Don't spam analtics with lots of volume changes
+            // Wait 1 second after volume stops changing before sending analytics
+            if (this._volumeEventTimeouts[label]) {
+                clearTimeout(this._volumeEventTimeouts[label]);
+            }
+            this._volumeEventTimeouts[label] = setTimeout(() => {
+                this._logUserInteraction(
+                    AnalyticEvents.names.VOLUME_CHANGED, null,
+                    `${label}: ${event.target.value}`,
+                );
+            }, 1000);
+        };
+    }
+
     addVolumeControl(id: string, label: string) {
         const volumeControl = document.createElement('div');
         volumeControl.classList.add('romper-volume-control');
@@ -601,22 +620,8 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
-        volumeRange.oninput = (event) => {
-            const value = parseFloat(event.target.value);
-            this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
-
-            // Don't spam analtics with lots of volume changes
-            // Wait 1 second after volume stops changing before sending analytics
-            if (this._volumeEventTimeouts[label]) {
-                clearTimeout(this._volumeEventTimeouts[label]);
-            }
-            this._volumeEventTimeouts[label] = setTimeout(() => {
-                this._logUserInteraction(
-                    AnalyticEvents.names.VOLUME_CHANGED, null,
-                    `${label}: ${event.target.value}`,
-                );
-            }, 1000);
-        };
+        volumeRange.oninput = this._setVolumeCallback(id, label).bind(this);
+        volumeRange.onchange = this._setVolumeCallback(id, label).bind(this);
 
         volumeControl.appendChild(volumeLabel);
         volumeControl.appendChild(volumeRange);

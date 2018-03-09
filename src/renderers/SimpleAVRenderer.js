@@ -334,9 +334,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handleVolumeClicked(event: Object): void {
-        const videoElement = this._hls.getMediaElement();
         if (event.id === this._representation.id) {
-            videoElement.volume = event.value;
+            this._hls.setVolume(event.value);
         }
     }
 

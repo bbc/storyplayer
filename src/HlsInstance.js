@@ -22,6 +22,9 @@ export default class HlsInstance {
     _activeConfig: Object
     _inactiveConfig: Object
     _permissionToPlay: Function
+    _audioContext: AudioContext
+    _mediaSource: MediaElementAudioSourceNode
+    _gainNode: GainNode
 
     constructor(
         permissionToPlay: Function,
@@ -31,13 +34,15 @@ export default class HlsInstance {
         idNum: number,
         useHlsJs: boolean,
         iOSElement: HTMLMediaElement,
+        audioContext: AudioContext,
         debug: boolean = false,
     ) {
         this._eventList = [];
         this._permissionToPlay = permissionToPlay;
         this._id = idNum;
-        this._useHlsJs = useHlsJs;
+        this._useHlsJs = false;// useHlsJs;
         this._iOSElement = iOSElement;
+        this._audioContext = audioContext;
         this._debug = debug;
 
         this._activeConfig = activeConfig;
@@ -110,8 +115,14 @@ export default class HlsInstance {
             this._hls.detachMedia();
             this._hls.attachMedia(this._mediaElement);
             this._hls.config = Object.assign({}, this._hls.config, this._activeConfig);
-        } else if (this._mediaSrc && this._mediaSrc !== '') {
-            this.loadSource(this._mediaSrc);
+        } else {
+            if (this._mediaSrc && this._mediaSrc !== '') {
+                this.loadSource(this._mediaSrc);
+            }
+            this._mediaSource = this._audioContext.createMediaElementSource(this._mediaElement);
+            this._gainNode = this._audioContext.createGain();
+            this._mediaSource.connect(this._gainNode);
+            this._gainNode.connect(this._audioContext.destination);
         }
     }
 
@@ -120,6 +131,10 @@ export default class HlsInstance {
         this._mediaSrc = '';
         if (this._useHlsJs) {
             this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig);
+        } else {
+            this._gainNode.disconnect();
+            this._mediaSource.disconnect();
+            this._mediaElement.src = '';
         }
     }
 
@@ -135,7 +150,7 @@ export default class HlsInstance {
             } else {
                 // Using Video Element
                 // eslint-disable-next-line no-lonely-if
-                this._mediaElement.src = src;
+                this._mediaElement.src = this._mediaSrc;
             }
         } else {
             this._mediaElement.setAttribute('src', this._mediaSrc);
@@ -187,6 +202,23 @@ export default class HlsInstance {
         if (index > -1) {
             this._eventList.splice(index, 1);
         }
+    }
+
+    setVolume(volume: number) {
+        if (this._useHlsJs) {
+            this._mediaElement.volume = volume;
+        } else {
+            this._gainNode.gain.value = volume;
+            this._mediaElement.volume = volume;
+        }
+    }
+
+    // [TODO]
+    getVolume() {
+        if (this._useHlsJs) {
+            return this._mediaElement.volume;
+        }
+        return 1;
     }
 
     destroy() {
