@@ -183,6 +183,7 @@ class Player extends EventEmitter {
     guiTarget: HTMLDivElement;
     showingSubtitles: boolean;
     _overlays: HTMLDivElement;
+    _overlayToggleButtons: HTMLDivElement;
     _buttons: HTMLDivElement;
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
@@ -362,17 +363,21 @@ class Player extends EventEmitter {
         this._mediaTransport.appendChild(this._playPauseButton);
 
         // Create the overlays.
+        this._overlayToggleButtons = document.createElement('div');
+        this._overlayToggleButtons.classList.add('romper-overlay-controls');
+        this._guiLayer.appendChild(this._overlayToggleButtons);
+
         this._volume = createOverlay('volume', this._logUserInteraction);
         this._overlays.appendChild(this._volume.overlay);
         this._mediaTransport.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
         this._overlays.appendChild(this._representation.overlay);
-        this._mediaTransport.appendChild(this._representation.button);
+        this._overlayToggleButtons.appendChild(this._representation.button);
 
         this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
-        this._mediaTransport.appendChild(this._icon.button);
+        this._overlayToggleButtons.appendChild(this._icon.button);
 
         this._timeFeedback = document.createElement('div');
         this._timeFeedback.classList.add('romper-timer');
