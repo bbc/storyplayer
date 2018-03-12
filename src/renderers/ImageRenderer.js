@@ -32,6 +32,7 @@ export default class ImageRenderer extends BaseRenderer {
     renderImageElement() {
         this._imageElement = document.createElement('img');
         this._imageElement.className = 'romper-render-image';
+        this._setVisibility(false);
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
@@ -39,7 +40,6 @@ export default class ImageRenderer extends BaseRenderer {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
                             logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                             this._imageElement.src = mediaUrl;
-                            this._setVisibility(false);
                         }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });
