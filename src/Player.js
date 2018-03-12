@@ -37,6 +37,8 @@ function handleButtonTouchEvent(callback: Function) {
     };
 }
 
+const overlays = [];
+
 function createOverlay(name: string, logFunction: Function) {
     const overlay = document.createElement('div');
     overlay.classList.add('romper-overlay');
@@ -46,20 +48,28 @@ function createOverlay(name: string, logFunction: Function) {
         e.stopPropagation();
     };
 
+    const button = document.createElement('button');
+
     const deactivateOverlay = () => {
         if (!overlay.classList.contains('romper-inactive')) {
             logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
             overlay.classList.add('romper-inactive');
         }
+        if (button.classList.contains('romper-button-selected')) {
+            button.classList.remove('romper-button-selected');
+        }
     };
 
-    const button = document.createElement('button');
+    overlays.push({ overlay, deactivateOverlay });
+
     button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.setAttribute('aria-label', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.classList.add('romper-button');
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');
     const onClick = () => {
+        overlays.filter(overlayObj => overlayObj.overlay !== overlay)
+            .forEach(overlayObj => overlayObj.deactivateOverlay());
         if (overlay.parentElement) {
             Array.prototype.slice
                 .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
