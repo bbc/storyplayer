@@ -36,7 +36,8 @@ function handleButtonTouchEvent(callback: Function) {
         callback();
     };
 }
-let overlays = [];
+
+const overlays = [];
 
 function createOverlay(name: string, logFunction: Function) {
     const overlay = document.createElement('div');
@@ -46,7 +47,9 @@ function createOverlay(name: string, logFunction: Function) {
     overlay.onclick = (e) => {
         e.stopPropagation();
     };
-    
+
+    const button = document.createElement('button');
+
     const deactivateOverlay = () => {
         if (!overlay.classList.contains('romper-inactive')) {
             logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
@@ -56,10 +59,9 @@ function createOverlay(name: string, logFunction: Function) {
             button.classList.remove('romper-button-selected');
         }
     };
-    
-    overlays.push({overlay, deactivateOverlay});
 
-    const button = document.createElement('button');
+    overlays.push({ overlay, deactivateOverlay });
+
     button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.setAttribute('aria-label', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
     button.classList.add('romper-button');
@@ -67,12 +69,12 @@ function createOverlay(name: string, logFunction: Function) {
     button.classList.add('romper-inactive');
     const onClick = () => {
         overlays.filter(overlayObj => overlayObj.overlay !== overlay)
-        .forEach(overlayObj => overlayObj.deactivateOverlay());
+            .forEach(overlayObj => overlayObj.deactivateOverlay());
         if (overlay.parentElement) {
             Array.prototype.slice
-            .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
-            .filter(el => el !== overlay)
-            .forEach(el => el.classList.add('romper-inactive'));
+                .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
+                .filter(el => el !== overlay)
+                .forEach(el => el.classList.add('romper-inactive'));
             if (overlay.classList.contains('romper-inactive')) {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
                 button.classList.add('romper-button-selected');
