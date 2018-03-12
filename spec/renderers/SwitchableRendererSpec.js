@@ -14,8 +14,6 @@ const storyjson = require('../teststory.json');
 
 chai.use(sinonChai);
 
-window.AudioContext = () => {};
-
 const defaultSwitchableRepresentation = {
     id: '0505ff24-83e6-4e07-9f0b-45f57c010189',
     version: '0: 0',
