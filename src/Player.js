@@ -36,6 +36,7 @@ function handleButtonTouchEvent(callback: Function) {
         callback();
     };
 }
+let overlays = [];
 
 function createOverlay(name: string, logFunction: Function) {
     const overlay = document.createElement('div');
@@ -45,13 +46,18 @@ function createOverlay(name: string, logFunction: Function) {
     overlay.onclick = (e) => {
         e.stopPropagation();
     };
-
+    
     const deactivateOverlay = () => {
         if (!overlay.classList.contains('romper-inactive')) {
             logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
             overlay.classList.add('romper-inactive');
         }
+        if (button.classList.contains('romper-button-selected')) {
+            button.classList.remove('romper-button-selected');
+        }
     };
+    
+    overlays.push({overlay, deactivateOverlay});
 
     const button = document.createElement('button');
     button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
@@ -60,11 +66,13 @@ function createOverlay(name: string, logFunction: Function) {
     button.classList.add(`romper-${name}-button`);
     button.classList.add('romper-inactive');
     const onClick = () => {
+        overlays.filter(overlayObj => overlayObj.overlay !== overlay)
+        .forEach(overlayObj => overlayObj.deactivateOverlay());
         if (overlay.parentElement) {
             Array.prototype.slice
-                .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
-                .filter(el => el !== overlay)
-                .forEach(el => el.classList.add('romper-inactive'));
+            .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
+            .filter(el => el !== overlay)
+            .forEach(el => el.classList.add('romper-inactive'));
             if (overlay.classList.contains('romper-inactive')) {
                 logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
                 button.classList.add('romper-button-selected');
