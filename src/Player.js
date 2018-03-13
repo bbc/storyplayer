@@ -159,18 +159,16 @@ function createOverlay(name: string, logFunction: Function) {
 
     const clearButtonClass = () => {
         button.classList.forEach((buttonClass) => {
-            if (buttonClass.indexOf(buttonClassPrefix) === 0){
-                console.log('removing button class', buttonClass);
+            if (buttonClass.indexOf(buttonClassPrefix) === 0) {
                 button.classList.remove(buttonClass);
             }
         });
-        console.log('button classes now:', button.classList);
     };
 
     const setButtonClass = (classname: string) => {
         clearButtonClass();
         button.classList.add(`${buttonClassPrefix}${classname}`);
-    };    
+    };
 
     // Consider a set or select method.
 
