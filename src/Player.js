@@ -155,6 +155,21 @@ function createOverlay(name: string, logFunction: Function) {
         });
     };
 
+    const buttonClassPrefix = 'romper-overlay-button-choice-';
+
+    const clearButtonClass = () => {
+        button.classList.forEach((buttonClass) => {
+            if (buttonClass.indexOf(buttonClassPrefix) === 0) {
+                button.classList.remove(buttonClass);
+            }
+        });
+    };
+
+    const setButtonClass = (classname: string) => {
+        clearButtonClass();
+        button.classList.add(`${buttonClassPrefix}${classname}`);
+    };
+
     // Consider a set or select method.
 
     return {
@@ -168,6 +183,7 @@ function createOverlay(name: string, logFunction: Function) {
         removeClass,
         deactivateOverlay,
         getIdForLabel,
+        setButtonClass,
     };
 }
 
@@ -183,6 +199,7 @@ class Player extends EventEmitter {
     guiTarget: HTMLDivElement;
     showingSubtitles: boolean;
     _overlays: HTMLDivElement;
+    _overlayToggleButtons: HTMLDivElement;
     _buttons: HTMLDivElement;
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
@@ -362,17 +379,22 @@ class Player extends EventEmitter {
         this._mediaTransport.appendChild(this._playPauseButton);
 
         // Create the overlays.
+        this._overlayToggleButtons = document.createElement('div');
+        this._overlayToggleButtons.classList.add('romper-overlay-controls');
+        this._overlayToggleButtons.classList.add('romper-inactive');
+        this._guiLayer.appendChild(this._overlayToggleButtons);
+
         this._volume = createOverlay('volume', this._logUserInteraction);
         this._overlays.appendChild(this._volume.overlay);
         this._mediaTransport.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
         this._overlays.appendChild(this._representation.overlay);
-        this._mediaTransport.appendChild(this._representation.button);
+        this._overlayToggleButtons.appendChild(this._representation.button);
 
         this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
-        this._mediaTransport.appendChild(this._icon.button);
+        this._overlayToggleButtons.appendChild(this._icon.button);
 
         this._timeFeedback = document.createElement('div');
         this._timeFeedback.classList.add('romper-timer');
@@ -497,6 +519,7 @@ class Player extends EventEmitter {
             ];
             if (openTriggerElements.some(el => (el === endTarget))) {
                 this._showRomperButtons();
+                this._hideAllOverlays();
                 // Hide buttons after 5 seconds
                 this._showRomperButtonsTimeout = setTimeout(() => {
                     this._hideRomperButtons();
@@ -555,6 +578,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
+        this._overlayToggleButtons.classList.remove('romper-inactive');
         this._startButton.classList.add('romper-inactive');
 
         this._hlsManager.setPermissionToPlay(true);
@@ -698,21 +722,33 @@ class Player extends EventEmitter {
     addRepresentationControl(id: string, src: string, label: string) {
         const representationControl = document.createElement('div');
         representationControl.classList.add('romper-representation-control');
+        representationControl.classList.add(`romper-representation-choice-${id}`);
         representationControl.setAttribute('title', label);
         representationControl.setAttribute('aria-label', label);
+
+        const iconContainer = document.createElement('div');
+        iconContainer.classList.add('romper-representation-icon-container');
 
         const representationIcon = document.createElement('img');
         representationIcon.src = src;
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
-        representationIcon.onclick = () => {
+        const representationIconClick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
             this._representation.deactivateOverlay();
             this._representation.setActive(id);
+            this._representation.setButtonClass(`${id}`);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
-        representationControl.appendChild(representationIcon);
+        representationIcon.onclick = representationIconClick;
+        representationIcon.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(representationIconClick),
+        );
+
+        iconContainer.appendChild(representationIcon);
+        representationControl.appendChild(iconContainer);
 
         this._representation.add(id, representationControl);
     }
@@ -742,17 +778,27 @@ class Player extends EventEmitter {
         const icon = document.createElement('img');
         icon.src = src;
         icon.classList.add('romper-icon');
+        if (labelString) {
+            icon.classList.add(`romper-icon-choice-${labelString}`);
+        }
         icon.setAttribute('title', representationName);
         icon.setAttribute('aria-label', representationName);
         icon.setAttribute('draggable', 'false');
         if (selected) {
             icon.classList.add('romper-selected');
         }
-        icon.onclick = () => {
+        const iconClick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
             this._icon.deactivateOverlay();
+            this._icon.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
+
+        icon.onclick = iconClick;
+        icon.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(iconClick),
+        );
 
         iconControl.appendChild(icon);
 
