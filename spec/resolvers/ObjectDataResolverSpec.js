@@ -1,4 +1,3 @@
-// @flowignore
 import { expect } from 'chai';
 import ObjectDataResolverFactory from '../../src/resolvers/ObjectDataResolver';
 
