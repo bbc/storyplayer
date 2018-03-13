@@ -738,7 +738,6 @@ class Player extends EventEmitter {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
             this._representation.deactivateOverlay();
             this._representation.setActive(id);
-            this._representation.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
