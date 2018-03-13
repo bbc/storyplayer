@@ -158,6 +158,7 @@ export default class StoryIconRenderer extends EventEmitter {
             } else if (iconUrls && iconUrls.default) {
                 this._player.setIconControl(mapKey, iconUrls.default, false);
             }
+            this._player._icon.setButtonClass(representationId);
         });
 
         this._showHideTarget();

@@ -783,7 +783,7 @@ class Player extends EventEmitter {
         icon.onclick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
             this._icon.deactivateOverlay();
-            this._icon.setButtonClass(labelString);
+            this._icon.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
