@@ -383,6 +383,7 @@ class Player extends EventEmitter {
         // Create the overlays.
         this._overlayToggleButtons = document.createElement('div');
         this._overlayToggleButtons.classList.add('romper-overlay-controls');
+        this._overlayToggleButtons.classList.add('romper-inactive');
         this._guiLayer.appendChild(this._overlayToggleButtons);
 
         this._volume = createOverlay('volume', this._logUserInteraction);
@@ -578,6 +579,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
+        this._overlayToggleButtons.classList.remove('romper-inactive');
         this._startButton.classList.add('romper-inactive');
 
         this._hlsManager.setPermissionToPlay(true);
