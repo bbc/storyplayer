@@ -519,6 +519,7 @@ class Player extends EventEmitter {
             ];
             if (openTriggerElements.some(el => (el === endTarget))) {
                 this._showRomperButtons();
+                this._hideAllOverlays();
                 // Hide buttons after 5 seconds
                 this._showRomperButtonsTimeout = setTimeout(() => {
                     this._hideRomperButtons();
@@ -732,13 +733,19 @@ class Player extends EventEmitter {
         representationIcon.src = src;
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
-        representationIcon.onclick = () => {
+        const representationIconClick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
             this._representation.deactivateOverlay();
             this._representation.setActive(id);
-            this._representation.setButtonClass(`${id}`)
+            this._representation.setButtonClass(`${id}`);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
+
+        representationIcon.onclick = representationIconClick;
+        representationIcon.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(representationIconClick),
+        );
 
         iconContainer.appendChild(representationIcon);
         representationControl.appendChild(iconContainer);
@@ -780,12 +787,18 @@ class Player extends EventEmitter {
         if (selected) {
             icon.classList.add('romper-selected');
         }
-        icon.onclick = () => {
+        const iconClick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
             this._icon.deactivateOverlay();
             this._icon.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
+
+        icon.onclick = iconClick;
+        icon.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(iconClick),
+        );
 
         iconControl.appendChild(icon);
 
