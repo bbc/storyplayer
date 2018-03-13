@@ -13,7 +13,10 @@ export default class PauseBehaviour extends BaseBehaviour {
 
     start(renderer: BaseRenderer) {
         const player = renderer._player;
-        player._applyExitFullscreenBehaviour.bind(player)(this._behaviourDefinition, this._handleDone);
+        player._applyExitFullscreenBehaviour.bind(player)(
+            this._behaviourDefinition,
+            this._handleDone,
+        );
     }
 
     destroy() {
