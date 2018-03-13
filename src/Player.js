@@ -155,6 +155,23 @@ function createOverlay(name: string, logFunction: Function) {
         });
     };
 
+    const buttonClassPrefix = 'romper-overlay-button-choice-';
+
+    const clearButtonClass = () => {
+        button.classList.forEach((buttonClass) => {
+            if (buttonClass.indexOf(buttonClassPrefix) === 0){
+                console.log('removing button class', buttonClass);
+                button.classList.remove(buttonClass);
+            }
+        });
+        console.log('button classes now:', button.classList);
+    };
+
+    const setButtonClass = (classname: string) => {
+        clearButtonClass();
+        button.classList.add(`${buttonClassPrefix}${classname}`);
+    };    
+
     // Consider a set or select method.
 
     return {
@@ -168,6 +185,7 @@ function createOverlay(name: string, logFunction: Function) {
         removeClass,
         deactivateOverlay,
         getIdForLabel,
+        setButtonClass,
     };
 }
 
@@ -703,8 +721,12 @@ class Player extends EventEmitter {
     addRepresentationControl(id: string, src: string, label: string) {
         const representationControl = document.createElement('div');
         representationControl.classList.add('romper-representation-control');
+        representationControl.classList.add(`romper-representation-choice-${id}`);
         representationControl.setAttribute('title', label);
         representationControl.setAttribute('aria-label', label);
+
+        const iconContainer = document.createElement('div');
+        iconContainer.classList.add('romper-representation-icon-container');
 
         const representationIcon = document.createElement('img');
         representationIcon.src = src;
@@ -714,10 +736,12 @@ class Player extends EventEmitter {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
             this._representation.deactivateOverlay();
             this._representation.setActive(id);
+            this._representation.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
-        representationControl.appendChild(representationIcon);
+        iconContainer.appendChild(representationIcon);
+        representationControl.appendChild(iconContainer);
 
         this._representation.add(id, representationControl);
     }
@@ -747,6 +771,9 @@ class Player extends EventEmitter {
         const icon = document.createElement('img');
         icon.src = src;
         icon.classList.add('romper-icon');
+        if (labelString) {
+            icon.classList.add(`romper-icon-choice-${labelString}`);
+        }
         icon.setAttribute('title', representationName);
         icon.setAttribute('aria-label', representationName);
         icon.setAttribute('draggable', 'false');
@@ -756,6 +783,7 @@ class Player extends EventEmitter {
         icon.onclick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
             this._icon.deactivateOverlay();
+            this._icon.setButtonClass(labelString);
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
