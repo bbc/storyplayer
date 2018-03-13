@@ -1,7 +1,6 @@
 // @flow
 
 import 'babel-polyfill';
-// @flowignore
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import SwitchableRenderer from '../../src/renderers/SwitchableRenderer';
