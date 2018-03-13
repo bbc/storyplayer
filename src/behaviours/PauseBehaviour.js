@@ -14,7 +14,7 @@ export default class PauseBehaviour extends BaseBehaviour {
     start() {
         const pause = parseFloat(this._behaviourDefinition.pauseTime);
         if (pause < 0) {
-            logger.warn('negative pause time: pause behaviour will never complete');
+            logger.info('negative pause time: pause behaviour will never complete');
         } else {
             this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
         }
