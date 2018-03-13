@@ -959,6 +959,14 @@ class Player extends EventEmitter {
         }
     }
 
+    _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {
+        if (Player._isFullScreen()) {
+            this._exitFullScreen();
+        }
+        window.scrollTo(0, 0);
+        callback();
+    }
+
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
             this._logUserInteraction(
@@ -966,8 +974,6 @@ class Player extends EventEmitter {
                 'fullscreen',
                 'not-fullscreen',
             );
-            this._buttons.classList.remove('romper-buttons-fullscreen');
-            this._player.classList.remove('romper-player-fullscreen');
             this._exitFullScreen();
         } else {
             this._logUserInteraction(
@@ -975,8 +981,6 @@ class Player extends EventEmitter {
                 'not-fullscreen',
                 'fullscreen',
             );
-            this._buttons.classList.add('romper-buttons-fullscreen');
-            this._player.classList.add('romper-player-fullscreen');
             this._enterFullScreen();
         }
     }
@@ -1002,6 +1006,8 @@ class Player extends EventEmitter {
     }
 
     _enterFullScreen() {
+        this._buttons.classList.add('romper-buttons-fullscreen');
+        this._player.classList.add('romper-player-fullscreen');
         if (this._playerParent.requestFullscreen) {
             // @flowignore
             this._playerParent.requestFullscreen();
@@ -1018,6 +1024,8 @@ class Player extends EventEmitter {
     }
 
     _exitFullScreen() {
+        this._buttons.classList.remove('romper-buttons-fullscreen');
+        this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
         if (document.exitFullscreen) {
             // @flowignore
