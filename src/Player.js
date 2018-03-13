@@ -159,18 +159,16 @@ function createOverlay(name: string, logFunction: Function) {
 
     const clearButtonClass = () => {
         button.classList.forEach((buttonClass) => {
-            if (buttonClass.indexOf(buttonClassPrefix) === 0){
-                console.log('removing button class', buttonClass);
+            if (buttonClass.indexOf(buttonClassPrefix) === 0) {
                 button.classList.remove(buttonClass);
             }
         });
-        console.log('button classes now:', button.classList);
     };
 
     const setButtonClass = (classname: string) => {
         clearButtonClass();
         button.classList.add(`${buttonClassPrefix}${classname}`);
-    };    
+    };
 
     // Consider a set or select method.
 
@@ -859,15 +857,18 @@ class Player extends EventEmitter {
     connectScrubBar(video: HTMLVideoElement) {
         const scrubBar = this._scrubBar;
 
-        // update scrub bar position as video plays
-        scrubBar.addEventListener('change', () => {
+        const scrubBarChangeFunc = () => {
             // Calculate the new time
             const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
             // Update the video time
             // eslint-disable-next-line no-param-reassign
             video.currentTime = time;
             this._logUserInteraction(AnalyticEvents.names.VIDEO_SCRUBBED, null, time.toString());
-        });
+        };
+
+        // update scrub bar position as video plays
+        scrubBar.oninput = scrubBarChangeFunc;
+        scrubBar.onchange = scrubBarChangeFunc;
 
         // allow clicking the scrub bar to seek to a video position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
@@ -958,6 +959,14 @@ class Player extends EventEmitter {
         }
     }
 
+    _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {
+        if (Player._isFullScreen()) {
+            this._exitFullScreen();
+        }
+        window.scrollTo(0, 0);
+        callback();
+    }
+
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
             this._logUserInteraction(
@@ -965,8 +974,6 @@ class Player extends EventEmitter {
                 'fullscreen',
                 'not-fullscreen',
             );
-            this._buttons.classList.remove('romper-buttons-fullscreen');
-            this._player.classList.remove('romper-player-fullscreen');
             this._exitFullScreen();
         } else {
             this._logUserInteraction(
@@ -974,8 +981,6 @@ class Player extends EventEmitter {
                 'not-fullscreen',
                 'fullscreen',
             );
-            this._buttons.classList.add('romper-buttons-fullscreen');
-            this._player.classList.add('romper-player-fullscreen');
             this._enterFullScreen();
         }
     }
@@ -1001,6 +1006,8 @@ class Player extends EventEmitter {
     }
 
     _enterFullScreen() {
+        this._buttons.classList.add('romper-buttons-fullscreen');
+        this._player.classList.add('romper-player-fullscreen');
         if (this._playerParent.requestFullscreen) {
             // @flowignore
             this._playerParent.requestFullscreen();
@@ -1017,6 +1024,8 @@ class Player extends EventEmitter {
     }
 
     _exitFullScreen() {
+        this._buttons.classList.remove('romper-buttons-fullscreen');
+        this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
         if (document.exitFullscreen) {
             // @flowignore

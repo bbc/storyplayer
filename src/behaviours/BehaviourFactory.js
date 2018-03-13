@@ -1,6 +1,7 @@
 // @flow
 import PauseBehaviour from './PauseBehaviour';
 import BaseBehaviour from './BaseBehaviour';
+import ExitFullscreenBehaviour from './ExitFullscreenBehaviour';
 import type { RendererEvent } from '../renderers/RendererEvents';
 import logger from '../logger';
 
@@ -10,6 +11,7 @@ export default function BehaviourFactory(
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:asset-mixin:pause/v1.0': PauseBehaviour,
+        'urn:x-object-based-media:asset-mixin:exit-fullscreen/v1.0': ExitFullscreenBehaviour,
         'urn:x-object-based-media:asset-mixin:blur/v1.0': BaseBehaviour,
         'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': BaseBehaviour,
         'urn:x-object-based-media:asset-mixin:showimage/v1.0': BaseBehaviour,
