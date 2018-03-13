@@ -825,15 +825,18 @@ class Player extends EventEmitter {
     connectScrubBar(video: HTMLVideoElement) {
         const scrubBar = this._scrubBar;
 
-        // update scrub bar position as video plays
-        scrubBar.addEventListener('change', () => {
+        const scrubBarChangeFunc = () => {
             // Calculate the new time
             const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
             // Update the video time
             // eslint-disable-next-line no-param-reassign
             video.currentTime = time;
             this._logUserInteraction(AnalyticEvents.names.VIDEO_SCRUBBED, null, time.toString());
-        });
+        };
+
+        // update scrub bar position as video plays
+        scrubBar.oninput = scrubBarChangeFunc;
+        scrubBar.onchange = scrubBarChangeFunc;
 
         // allow clicking the scrub bar to seek to a video position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
