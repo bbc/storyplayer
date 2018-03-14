@@ -3,6 +3,7 @@
 import Hls from 'hls.js';
 import logger from './logger';
 import HlsInstance from './HlsInstance';
+import BrowserUserAgent from './BrowserUserAgent';
 
 export default class HlsManager {
     _hlsPool: Array<Object>
@@ -152,6 +153,11 @@ export default class HlsManager {
     static isSupported() {
         if (HlsManager._hlsSupported !== undefined) {
             return HlsManager._hlsSupported;
+        }
+        // HLS doesn't seem to work on IE or Edge :(
+        if (BrowserUserAgent.edge() || BrowserUserAgent.ie()) {
+            HlsManager._hlsSupported = false;
+            return false;
         }
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
