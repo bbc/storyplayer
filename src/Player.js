@@ -26,6 +26,23 @@ const PlayerEvents = [
     return events;
 }, {});
 
+function scrollToTop() {
+    window.setTimeout(() => {
+        window.scrollTo(0, 0);
+        if (
+            document.getElementsByClassName('taster-offsite-panel').length > 0 &&
+            document.getElementsByClassName('taster-offsite-panel')[0].scrollIntoView
+        ) {
+            document.getElementsByClassName('taster-offsite-panel')[0].scrollIntoView();
+        } else if (
+            document.getElementsByClassName('offsite-panel').length > 0 &&
+            document.getElementsByClassName('offsite-panel')[0].scrollIntoView
+        ) {
+            document.getElementsByClassName('offsite-panel')[0].scrollIntoView();
+        }
+    }, 100);
+}
+
 function handleButtonTouchEvent(callback: Function) {
     return (event: Object) => {
         // Stop propagation of touch event.
@@ -977,7 +994,7 @@ class Player extends EventEmitter {
         if (Player._isFullScreen()) {
             this._exitFullScreen();
         }
-        window.scrollTo(0, 0);
+        scrollToTop();
         callback();
     }
 
@@ -1055,8 +1072,8 @@ class Player extends EventEmitter {
             document.msExitFullscreen(); // Chrome and Safari
         } else {
             this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
-            window.scroll(0, 0);
         }
+        scrollToTop();
     }
 }
 
