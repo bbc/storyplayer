@@ -854,6 +854,7 @@ class Player extends EventEmitter {
         this.disableScrubBar();
         this.disablePlayButton();
         this.showRepeatButton();
+        this.disableRepresentationControl();
     }
 
     enterStartBehaviourPhase() {
@@ -863,6 +864,17 @@ class Player extends EventEmitter {
     exitStartBehaviourPhase() {
         this.enablePlayButton();
         this.enableScrubBar();
+        this.enableRepresentationControl();
+    }
+
+    enableRepresentationControl() {
+        this._representation.button.removeAttribute('disabled');
+        this._representation.button.classList.remove('romper-control-disabled');
+    }
+
+    disableRepresentationControl() {
+        this._representation.button.setAttribute('disabled', 'true');
+        this._representation.button.classList.add('romper-control-disabled');
     }
 
     enableScrubBar() {
