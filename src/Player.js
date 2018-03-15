@@ -240,6 +240,7 @@ class Player extends EventEmitter {
     _iOSVideoElement: HTMLVideoElement;
     _iOSAudioElement: HTMLAudioElement;
     _volumeEventTimeouts: Object;
+    _scrubbedEventTimeout: number;
     _showRomperButtonsTimeout: number;
     _RomperButtonsShowing: boolean;
 
@@ -906,7 +907,19 @@ class Player extends EventEmitter {
             // Update the video time
             // eslint-disable-next-line no-param-reassign
             video.currentTime = time;
-            this._logUserInteraction(AnalyticEvents.names.VIDEO_SCRUBBED, null, time.toString());
+
+            // Don't spam analtics with lots of volume changes
+            // Wait 1 second after volume stops changing before sending analytics
+            if (this._scrubbedEventTimeout) {
+                clearTimeout(this._scrubbedEventTimeout);
+            }
+            this._scrubbedEventTimeout = setTimeout(() => {
+                this._logUserInteraction(
+                    AnalyticEvents.names.VIDEO_SCRUBBED,
+                    null,
+                    time.toString(),
+                );
+            }, 1000);
         };
 
         // update scrub bar position as video plays
