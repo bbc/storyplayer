@@ -607,6 +607,8 @@ class Player extends EventEmitter {
         this._iOSAudioElement.pause();
         this._iOSVideoElement.pause();
 
+        this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
+
         this._playPauseButtonClicked();
     }
 
