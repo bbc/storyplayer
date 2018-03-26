@@ -78,10 +78,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._subtitlesSrc = '';
 
         this._behaviourRendererMap = {
-            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:representation-behaviour:blur/v1.0': this._applyBlurBehaviour,
             // eslint-disable-next-line max-len
-            'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
-            'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
+            'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
+            'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
         };
 
         this._lastSetTime = 0;

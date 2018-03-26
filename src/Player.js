@@ -1067,7 +1067,6 @@ class Player extends EventEmitter {
         this._buttons.classList.add('romper-buttons-fullscreen');
         this._player.classList.add('romper-player-fullscreen');
         if (this._playerParent.requestFullscreen) {
-            // @flowignore
             this._playerParent.requestFullscreen();
         } else if (this._playerParent.mozRequestFullScreen) {
             // @flowignore
