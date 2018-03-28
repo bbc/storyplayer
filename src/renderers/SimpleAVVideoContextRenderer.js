@@ -64,8 +64,8 @@ export default class SimpleAVVideoContextRenderer extends BaseRenderer {
         this._monitorVideoTimelineForEnd = this._monitorVideoTimelineForEnd.bind(this);
 
         this._behaviourRendererMap = {
-            'urn:x-object-based-media:asset-mixin:blur/v1.0': this._applyBlurBehaviour,
-            'urn:x-object-based-media:asset-mixin:showimage/v1.0': this._applyShowImageBehaviour,
+            'urn:x-object-based-media:representation-behaviour:blur/v1.0': this._applyBlurBehaviour,
+            'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
         };
     }
 

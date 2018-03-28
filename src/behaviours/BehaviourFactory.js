@@ -10,11 +10,11 @@ export default function BehaviourFactory(
     onComplete: (event: RendererEvent, completionEvent: RendererEvent) => void,
 ) {
     const BEHAVIOURS = {
-        'urn:x-object-based-media:asset-mixin:pause/v1.0': PauseBehaviour,
-        'urn:x-object-based-media:asset-mixin:exit-fullscreen/v1.0': ExitFullscreenBehaviour,
-        'urn:x-object-based-media:asset-mixin:blur/v1.0': BaseBehaviour,
-        'urn:x-object-based-media:asset-mixin:colouroverlay/v1.0': BaseBehaviour,
-        'urn:x-object-based-media:asset-mixin:showimage/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:exit-fullscreen/v1.0': ExitFullscreenBehaviour,
+        'urn:x-object-based-media:representation-behaviour:blur/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:showimage/v1.0': BaseBehaviour,
     };
 
     let currentBehaviour;
