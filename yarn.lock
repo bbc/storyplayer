@@ -2643,7 +2643,7 @@ flow-bin@^0.41.0:
   version "0.41.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-bin/-/flow-bin-0.41.0.tgz#8badac9a19da45004997e599bd316518db489b2e"
 
-flow-typed@^2.0.0:
+flow-typed@2.3.0:
   version "2.3.0"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-typed/-/flow-typed-2.3.0.tgz#0f8604faab60691b885024e16ec0e3256e3b680e"
   dependencies:
