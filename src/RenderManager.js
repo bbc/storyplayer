@@ -14,7 +14,6 @@ import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 import BackgroundRenderer from './renderers/BackgroundRenderer';
 import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
-import SimpleAVVideoContextRenderer from './renderers/SimpleAVVideoContextRenderer';
 import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
 
@@ -218,10 +217,7 @@ export default class RenderManager extends EventEmitter {
         // if both same type, just update current
         //   else
         // destroy old renderer
-        if (this._currentRenderer instanceof SimpleAVVideoContextRenderer &&
-            newRenderer instanceof SimpleAVVideoContextRenderer) {
-            this._currentRenderer.stopAndDisconnect();
-        } else if (this._currentRenderer) {
+        if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
         this._currentRenderer = newRenderer;

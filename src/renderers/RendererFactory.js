@@ -3,8 +3,6 @@
 import type BaseRenderer from './BaseRenderer';
 import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
 import ImageRenderer from './ImageRenderer';
-import ImageVideoContextRenderer from './ImageVideoContextRenderer';
-import SimpleAVVideoContextRenderer from './SimpleAVVideoContextRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import Player from '../Player';
@@ -20,9 +18,7 @@ export default function RendererFactory(
 ): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
-        'urn:x-object-based-media:representation-types:image-vctx/v1.0': ImageVideoContextRenderer,
         'urn:x-object-based-media:representation-types:simple-av/v1.0': SimpleAVRenderer,
-        'urn:x-object-based-media:representation-types:simple-av-vctx/v1.0': SimpleAVVideoContextRenderer, // eslint-disable-line max-len
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
     };
 
