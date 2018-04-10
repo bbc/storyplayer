@@ -4,15 +4,16 @@ import Player, { PlayerEvents } from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
-import HlsManager from '../HlsManager';
+import MediaManager from '../MediaManager';
+import MediaInstance from '../MediaInstance';
+
 import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
-    _hls: Object;
+    _mediaInstance: MediaInstance;
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
-    _playAudioCallback: Function;
-    _hlsManager: HlsManager;
+    _mediaManager: MediaManager;
 
     constructor(
         assetCollection: AssetCollection,
@@ -23,31 +24,29 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._target = this._player.backgroundTarget;
 
-        this._playAudioCallback = this._playAudioCallback.bind(this);
-
-        this._hlsManager = player._hlsManager;
-        this._hls = this._hlsManager.getHls('audio');
+        this._mediaManager = player._mediaManager;
+        this._mediaInstance = this._mediaManager.getMediaInstance('background');
 
         this._renderBackgroundAudio();
     }
 
     start() {
-        this._hls.start();
+        this._mediaInstance.start();
         this._player.addVolumeControl(this._assetCollection.id, 'Background');
         this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
 
         if (this._assetCollection && this._assetCollection
             .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-            const audioElement = this._hls.getMediaElement();
+            const audioElement = this._mediaInstance.getMediaElement();
             audioElement.setAttribute('loop', 'true');
         }
 
-        this.playAudio();
+        this._mediaInstance.play();
     }
 
     end() {
         try {
-            this._hls.end();
+            this._mediaInstance.end();
         } catch (e) {
             //
         }
@@ -58,36 +57,13 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _handleVolumeClicked(event: Object): void {
         if (event.id === this._assetCollection.id) {
-            this._hls.setVolume(event.value);
-        }
-    }
-
-    _playAudioCallback(): void {
-        const audioElement = this._hls.getMediaElement();
-        this._hls.off(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
-        audioElement.removeEventListener('loadeddata', this._playAudioCallback);
-
-        if (this._destroyed) {
-            logger.warn('loaded destroyed video element - not playing');
-        } else {
-            this._hls.play();
-        }
-    }
-
-    playAudio() {
-        const audioElement = this._hls.getMediaElement();
-        if (audioElement.readyState >= audioElement.HAVE_CURRENT_DATA) {
-            this._hls.play();
-        } else if (audioElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playAudioCallback);
-        } else {
-            audioElement.addEventListener('loadeddata', this._playAudioCallback);
+            this._mediaInstance.setVolume(event.value);
         }
     }
 
     _renderBackgroundAudio() {
         const audioElement = document.createElement('audio');
-        this._hls.attachMedia(audioElement);
+        this._mediaInstance.attachMedia(audioElement);
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, 'audio').then((mediaUrl) => {
                 this._populateAudioElement(mediaUrl);
@@ -99,7 +75,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (this._disabled) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
-            this._hls.loadSource(mediaUrl);
+            this._mediaInstance.loadSource(mediaUrl);
         }
     }
 
@@ -120,7 +96,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     destroy() {
         this.end();
 
-        this._hlsManager.returnHls(this._hls);
+        this._mediaManager.returnMediaInstance(this._mediaInstance);
         super.destroy();
     }
 }

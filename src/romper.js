@@ -8,7 +8,7 @@ import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
-import HlsManager from './HlsManager';
+import MediaManager from './MediaManager';
 import logger from './logger';
 
 // @flowignore
@@ -36,7 +36,7 @@ module.exports = {
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
-        if (!HlsManager.isSupported()) {
+        if (!MediaManager.isSupported()) {
             const noHlsWarning = document.createElement('div');
             noHlsWarning.classList.add('romper-no-hls-support');
             const noHlsWarningDiv = document.createElement('div');
