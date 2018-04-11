@@ -1,6 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
+import dashjs from 'dashjs';
 import logger from './logger';
 
 const MediaTypesArray = [
@@ -29,6 +30,7 @@ const getMediaType = (src: string) => {
 // This is using the built-in support of the plain video element, without using hls.js.
 export default class HlsInstance {
     _hls: Object
+    _dashjs: Object
     _mountedMediaElement: HTMLMediaElement
     _id: number
     _eventList: Array<Object>
@@ -170,13 +172,16 @@ export default class HlsInstance {
             case MediaTypes.HLS:
                 if (this._useHlsJs) {
                     // Using HLS.js
-                    this._hls.detachMedia();
-                    this._hls.attachMedia(this._mediaElement);
+                    this.detachMedia();
+                    this.attachMedia(this._mediaElement);
                     this._hls.config = Object.assign({}, this._hls.config, this._activeConfig.hls);
                 } else {
                     // Using Video Element
                     this.loadSource(this._mediaSrc);
                 }
+                break;
+            case MediaTypes.DASH:
+                this.attachMedia(this._mediaElement);
                 break;
             case MediaTypes.OTHER:
                 this.loadSource(this._mediaSrc);
@@ -197,10 +202,13 @@ export default class HlsInstance {
             case MediaTypes.HLS:
                 if (this._useHlsJs) {
                     // Using HLS.js
-                    this._hls.detachMedia();
+                    this.detachMedia();
                     // eslint-disable-next-line max-len
                     this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig.hls);
                 }
+                break;
+            case MediaTypes.DASH:
+                this.detachMedia();
                 break;
             case MediaTypes.OTHER:
                 break;
@@ -235,6 +243,14 @@ export default class HlsInstance {
                 this._mediaElement.src = this._mediaSrc;
             }
             break;
+        case MediaTypes.DASH:
+            this._dashjs = dashjs.MediaPlayer().create();
+            this._dashjs.initialize(null, this._mediaSrc, false);
+            if (!this._debug) {
+                this._dashjs.getDebug().setLogToBrowserConsole(false);
+            }
+
+            break;
         case MediaTypes.OTHER:
             this._mediaElement.src = this._mediaSrc;
             // this.play();
@@ -265,6 +281,13 @@ export default class HlsInstance {
                     this._hls.attachMedia(element);
                 }
                 break;
+            case MediaTypes.DASH:
+                try {
+                    this._dashjs.attachView(element);
+                } catch (err) {
+                    logger.warning(err, 'attachMedia Failed');
+                }
+                break;
             case MediaTypes.OTHER:
                 break;
             default:
@@ -285,6 +308,12 @@ export default class HlsInstance {
                         return;
                     }
                     this._hls.detachMedia();
+                }
+                break;
+            case MediaTypes.DASH:
+                this._dashjs.reset();
+                if (this._mediaSrc && this._mediaSrc !== '') {
+                    this._dashjs.attachSource(this._mediaSrc);
                 }
                 break;
             case MediaTypes.OTHER:
@@ -374,6 +403,9 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.OTHER:
+                break;
+            case MediaTypes.DASH:
+                this._dashjs.reset();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (attachMedia)');

@@ -11,6 +11,7 @@ export default function BehaviourFactory(
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
+        // eslint-disable-next-line max-len
         'urn:x-object-based-media:representation-behaviour:exit-fullscreen/v1.0': ExitFullscreenBehaviour,
         'urn:x-object-based-media:representation-behaviour:blur/v1.0': BaseBehaviour,
         'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': BaseBehaviour,
