@@ -3,18 +3,29 @@ $transparent: rgba(0, 0, 0, 0);
 $highlight: #ff7f11;
 $accent-colour: #fff;
 $backing-colour: #50e3c2;
-
+$white: #fff;
+$backing-colour-dark: #189a7e;
 $romper-background-color: #ccc;
+$start-button-colour: #e83d42;
+$start-button-colour-dark: #b7151b;
+
+$romper-button-height: 50px;
+$romper-button-width: 50px;
+$romper-buttons-max-height: 60px;
+$romper-hover-text-size: 25px;
 
 @mixin button {
-  background-color: $transparent;
-  border-bottom: 0;
+  background-color: $backing-colour;
+  border: 0;
   height: 100%;
-  padding-bottom: 4px;
-  width: 8%;
+  margin: 0;
+  outline: none;
+  padding: 4px 0;
+  vertical-align: top;
+  width: $romper-button-width;
 
   &:hover {
-    background-color: $background-colour;
+    background-color: $backing-colour-dark;
   }
 
   &.romper-button-selected {
@@ -98,27 +109,19 @@ $romper-background-color: #ccc;
   color: $accent-colour;
   display: flex;
   flex-direction: column;
-  height: calc(600px / 16 * 9);
+  height: calc(800px / 16 * 9);
   justify-content: flex-end;
   position: relative;
-  width: 600px;
+  width: 800px;
 
   &.romper-player-fullscreen {
     height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
-
+    left: 0;
     // Center Video Box
     margin-top: -28.125vw; // height/2
     position: absolute;
     top: 50vh;
     width: 100vw;
-  }
-
-  // Reset styles for all elements within romper.
-  * {
-    border: 0;
-    margin: 0;
-    outline: none;
-    padding: 0;
   }
 
   .romper-background,
@@ -203,6 +206,7 @@ $romper-background-color: #ccc;
   .romper-start-button {
     @include button;
     margin-right: 20px;
+    padding: 0;
 
     .romper-button-icon-div {
       @include button-icon('../images/play.svg');
@@ -213,12 +217,12 @@ $romper-background-color: #ccc;
 
   .romper-repeat-button {
     @include button;
-    margin-right: 20px;
+    // margin-right: 20px;
 
     div {
       @include button-icon('../images/replay.svg');
-      height: 50%;
-      width: 50%;
+      height: 40px;
+      width: 40px;
     }
   }
 
@@ -284,10 +288,11 @@ $romper-background-color: #ccc;
   }
 
   .romper-timer {
+    display: inline-flex;
+    height: 40px;
     padding-left: 10px;
     padding-right: 20px;
     padding-top: 20px;
-    vertical-align: middle;
   }
 
   .romper-subtitles-button {
@@ -351,34 +356,110 @@ $romper-background-color: #ccc;
 
 .romper-player > .romper-gui {
 
+  >.romper-start-button {
+    background-color: $start-button-colour;
+    bottom: 30%;
+    display: flex;
+    height: $romper-button-height;
+    left: 50%;
+    margin-right: -50%;
+    margin-top: -30%;
+    position: absolute;
+    transform: translate(-50%, 0%);
+    width: 170px;
+    z-index: 10;
+
+    .romper-start-button-icon-div {
+      display: flex;
+      flex: 0 0 auto;
+      height: $romper-button-height;
+      margin-left: 0;
+      margin-right: 0;
+      width: $romper-button-height;
+    }
+
+    .romper-start-button-text-div {
+      color: $white;
+      display: flex;
+      flex: 1 1 auto;
+      font-size: $romper-hover-text-size;
+      font-weight: bold;
+      line-height: $romper-button-height;
+      margin-left: 10px;
+    }
+
+    &:hover {
+      background-color: $start-button-colour-dark;
+    }
+  }
+
   >.romper-buttons {
 
     background-color: $backing-colour;
+    bottom: 0;
     display: flex;
     height: 100%;
-    max-height: 60px;
+    max-height: $romper-buttons-max-height;
     opacity: 0;
     position: absolute;
     transition: all 1s ease;
     width: 100%;
+    z-index: 10;
 
     >.romper-media-transport {
       width: 100%;
-    }
+   }
 
     &.show {
-      background-color: $backing-colour;
-      display: flex;
-      height: 100%;
-      max-height: 60px;
       opacity: 1;
-      width: 100%;
     }
 
   }
 
   >.romper-narrative-element-transport {
+    bottom: $romper-buttons-max-height;
+    display: flex;
+    opacity: 1; // set to 0 to hide with rest of buttons
+    position: absolute;
+    transition: all 1s ease;
     width: 100%;
+    z-index: 30; // remove to hide with rest of buttons
+
+    &.show {
+      opacity: 1;
+    }
+
+    >.romper-repeat-button {
+      background-color: $backing-colour;
+      height: $romper-button-height;
+      left: 50%;
+      margin-right: -50%;
+      position: absolute;
+      transform: translate(-50%, 0%);
+
+      &:hover {
+        background-color: $backing-colour-dark;
+      }
+    }
+
+    >.romper-back-button {
+      background-color: $backing-colour;
+      height: $romper-button-height;
+
+      &:hover {
+        background-color: $backing-colour-dark;
+      }
+    }
+
+    >.romper-next-button {
+      background-color: $backing-colour;
+      height: $romper-button-height;
+      margin-left: auto;
+
+      &:hover {
+        background-color: $backing-colour-dark;
+      }
+    }
   }
 
   >.romper-overlays {
@@ -389,15 +470,47 @@ $romper-background-color: #ccc;
     height: 87%;
     justify-content: center;
     width: 100%;
+
+    .romper-icon-label {
+      display: none;
+    }
+  }
+
+  >.romper-overlay-controls {
+    >.romper-icon-button {
+      background-color: $backing-colour;
+      border: 0;
+      bottom: $romper-buttons-max-height;
+      height: $romper-button-height;
+      padding: 0 0 4px;
+      position: absolute;
+      right: 70px;
+      transition: opacity 1s 1s ease;
+      z-index: 51;
+    }
+
+    >.romper-representation-button {
+      background-color: $backing-colour;
+      border: 0;
+      height: $romper-button-height;
+      left: 0;
+      padding: 0 0 4px;
+      position: absolute;
+      top: 0;
+      transition: opacity 1s 1s ease;
+      z-index: 51;
+    }
   }
 
   >.romper-buttons-activate-area {
+    bottom: 0;
     display: block;
     height: 13%;
-    max-height: 60px;
+    max-height: $romper-buttons-max-height;
     opacity: 0;
     position: absolute;
     width: 100%;
+    z-index: 10;
 
     &.hide {
       display: hidden;
@@ -412,7 +525,11 @@ $romper-background-color: #ccc;
 }
 
 .romper-scrub-bar {
-  width: 70%;
+  display: flex;
+  height: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 100%;
 }
 
 .romper-image-overlay {
