@@ -503,6 +503,7 @@ $romper-hover-text-size: 25px;
   }
 
   >.romper-buttons-activate-area {
+    bottom: 0;
     display: block;
     height: 13%;
     max-height: $romper-buttons-max-height;
