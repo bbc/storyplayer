@@ -175,9 +175,9 @@ $romper-hover-text-size: 25px;
     margin-right: 20px;
 
     div {
-      @include button-icon('../images/play.svg');
-      height: 90%;
-      width: 90%;
+      @include button-icon('../images/media-play.svg');
+      height: 50%;
+      width: 50%;
     }
   }
 
@@ -186,7 +186,7 @@ $romper-hover-text-size: 25px;
     margin-right: 20px;
 
     div {
-      @include button-icon('../images/pause.svg');
+      @include button-icon('../images/media-pause.svg');
       height: 50%;
       width: 50%;
     }
@@ -197,7 +197,7 @@ $romper-hover-text-size: 25px;
     margin-left: auto;
 
     div {
-      @include button-icon('../images/listen.svg');
+      @include button-icon('../images/volume-high.svg');
       height: 50%;
       width: 50%;
     }
@@ -209,7 +209,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     .romper-button-icon-div {
-      @include button-icon('../images/play.svg');
+      @include button-icon('../images/media-play.svg');
       height: 50%;
       width: 50%;
     }
@@ -220,7 +220,7 @@ $romper-hover-text-size: 25px;
     // margin-right: 20px;
 
     div {
-      @include button-icon('../images/replay.svg');
+      @include button-icon('../images/reload.svg');
       height: 40px;
       width: 40px;
     }
@@ -230,7 +230,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/series-stack.svg');
+      @include button-icon('../images/layers.svg');
       height: 50%;
       width: 50%;
     }
@@ -240,7 +240,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/chapters.svg');
+      @include button-icon('../images/list.svg');
       height: 50%;
       width: 50%;
     }
@@ -251,18 +251,18 @@ $romper-hover-text-size: 25px;
     margin-left: 20px;
 
     div {
-      @include button-icon('../images/fullscreen.svg');
-      height: 60%;
-      width: 60%;
+      @include button-icon('../images/fullscreen-enter.svg');
+      height: 50%;
+      width: 50%;
     }
   }
 
   .romper-buttons-fullscreen {
     .romper-fullscreen-button {
       div {
-        @include button-icon('../images/exit-fullscreen.svg');
-        height: 60%;
-        width: 60%;
+        @include button-icon('../images/fullscreen-exit.svg');
+        height: 50%;
+        width: 50%;
       }
     }
   }
@@ -271,7 +271,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/previous.svg');
+      @include button-icon('../images/media-step-backward.svg');
       height: 50%;
       width: 50%;
     }
@@ -281,7 +281,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/next.svg');
+      @include button-icon('../images/media-step-forward.svg');
       height: 50%;
       width: 50%;
     }
