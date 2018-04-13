@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="34"
    height="34"
    id="svg4829"
-   version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="loading.svg">
+   version="1.1">
   <metadata
      id="metadata4839">
     <rdf:RDF>
@@ -26,26 +23,6 @@
   </metadata>
   <defs
      id="defs4837" />
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1227"
-     inkscape:window-height="693"
-     id="namedview4835"
-     showgrid="false"
-     inkscape:zoom="9.8163059"
-     inkscape:cx="7.755156"
-     inkscape:cy="15.860695"
-     inkscape:window-x="1326"
-     inkscape:window-y="88"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg4829" />
   <path
      d="m 16.977523,0.24095147 c -9.2629169,0 -16.73280045,7.51449143 -16.73280045,16.77740253 0,9.262912 7.46988355,16.777403 16.73280045,16.777403 9.262917,0 16.777413,-7.514491 16.777413,-16.777403 0,-9.2629111 -7.514496,-16.77740253 -16.777413,-16.77740253 z m 0,4.14972823 c 6.966927,0 12.627682,5.6607523 12.627682,12.6276743 0,6.966923 -5.660755,12.583053 -12.627682,12.583053 -6.966937,0 -12.5830596,-5.61613 -12.5830596,-12.583053 0,-6.966922 5.6161226,-12.6276743 12.5830596,-12.6276743 z"
      style="color:#000000;fill:#000000;fill-opacity:0.08333333;stroke:none;stroke-width:0.5;stroke-opacity:0.19607843"
