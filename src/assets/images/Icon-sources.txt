@@ -1,0 +1,16 @@
+The following icons were taken from https://useiconic.com/open/, under MIT license.  They retain their original names, but had <?xml> and  <!DOCTYPE> tags added
+
+fullscreen-enter.svg
+fullscreen-exit.svg
+layers.svg
+list.svg
+media-pause.svg
+media-play.svg
+media-step-forward.svg
+media-step-backward.svg
+reload.svg
+volume-high.svg
+
+The subtitles icon was created from scratch using Inkscape.
+
+The loading icon was modified in Inkscape from https://commons.wikimedia.org/wiki/File:Vector_Loading.svg, under the GPL 2 license.
