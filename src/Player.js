@@ -5,7 +5,7 @@ import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
 import BrowserUserAgent from './BrowserUserAgent';
-import HlsManager from './HlsManager';
+import MediaManager from './MediaManager';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -207,7 +207,7 @@ function createOverlay(name: string, logFunction: Function) {
 class Player extends EventEmitter {
     _player: HTMLDivElement;
     _playerParent: HTMLElement;
-    _hlsManager: HlsManager;
+    _mediaManager: MediaManager;
     _backgroundLayer: HTMLDivElement;
     _mediaLayer: HTMLDivElement;
     _guiLayer: HTMLDivElement;
@@ -237,8 +237,8 @@ class Player extends EventEmitter {
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
     _logUserInteraction: Function;
-    _iOSVideoElement: HTMLVideoElement;
-    _iOSAudioElement: HTMLAudioElement;
+    _foregroundMediaElement: HTMLVideoElement;
+    _backgroundMediaElement: HTMLAudioElement;
     _volumeEventTimeouts: Object;
     _scrubbedEventTimeout: number;
     _showRomperButtonsTimeout: number;
@@ -250,21 +250,24 @@ class Player extends EventEmitter {
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
-        this._iOSVideoElement = document.createElement('video');
-        this._iOSVideoElement.className = 'romper-video-element';
-        this._iOSVideoElement.crossOrigin = 'anonymous';
+        this._foregroundMediaElement = document.createElement('video');
+        this._foregroundMediaElement.className = 'romper-video-element';
+        this._foregroundMediaElement.crossOrigin = 'anonymous';
 
-        this._iOSAudioElement = document.createElement('audio');
-        this._iOSAudioElement.className = 'romper-audio-element';
-        this._iOSAudioElement.crossOrigin = 'anonymous';
+        this._backgroundMediaElement = document.createElement('audio');
+        this._backgroundMediaElement.className = 'romper-audio-element';
+        this._backgroundMediaElement.crossOrigin = 'anonymous';
 
         // Permission to play not granted on iOS without the autplay tag
         if (BrowserUserAgent.iOS()) {
-            this._iOSVideoElement.autoplay = true;
-            this._iOSAudioElement.autoplay = true;
+            this._foregroundMediaElement.autoplay = true;
+            this._backgroundMediaElement.autoplay = true;
         }
 
-        this._hlsManager = new HlsManager(this._iOSVideoElement, this._iOSAudioElement);
+        this._mediaManager = new MediaManager(
+            this._foregroundMediaElement,
+            this._backgroundMediaElement,
+        );
 
         this.showingSubtitles = false;
 
@@ -465,8 +468,8 @@ class Player extends EventEmitter {
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
 
-        this.mediaTarget.appendChild(this._iOSVideoElement);
-        this.backgroundTarget.appendChild(this._iOSAudioElement);
+        this.mediaTarget.appendChild(this._foregroundMediaElement);
+        this.backgroundTarget.appendChild(this._backgroundMediaElement);
 
         // Event Listeners
         this._overlays.onclick = this._hideAllOverlays.bind(this);
@@ -599,13 +602,13 @@ class Player extends EventEmitter {
         this._overlayToggleButtons.classList.remove('romper-inactive');
         this._startButton.classList.add('romper-inactive');
 
-        this._hlsManager.setPermissionToPlay(true);
+        this._mediaManager.setPermissionToPlay(true);
 
         // Give permission to elements to play
-        this._iOSAudioElement.play();
-        this._iOSVideoElement.play();
-        this._iOSAudioElement.pause();
-        this._iOSVideoElement.pause();
+        this._backgroundMediaElement.play();
+        this._foregroundMediaElement.play();
+        this._backgroundMediaElement.pause();
+        this._foregroundMediaElement.pause();
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
 
@@ -900,15 +903,15 @@ class Player extends EventEmitter {
         }
     }
 
-    connectScrubBar(video: HTMLVideoElement) {
+    connectScrubBar(media: HTMLMediaElement) {
         const scrubBar = this._scrubBar;
 
         const scrubBarChangeFunc = () => {
             // Calculate the new time
-            const time = video.duration * (parseInt(scrubBar.value, 10) / 100);
-            // Update the video time
+            const time = media.duration * (parseInt(scrubBar.value, 10) / 100);
+            // Update the media time
             // eslint-disable-next-line no-param-reassign
-            video.currentTime = time;
+            media.currentTime = time;
 
             // Don't spam analtics with lots of volume changes
             // Wait 1 second after volume stops changing before sending analytics
@@ -924,37 +927,37 @@ class Player extends EventEmitter {
             }, 1000);
         };
 
-        // update scrub bar position as video plays
+        // update scrub bar position as media plays
         scrubBar.oninput = scrubBarChangeFunc;
         scrubBar.onchange = scrubBarChangeFunc;
 
-        // allow clicking the scrub bar to seek to a video position
+        // allow clicking the scrub bar to seek to a media position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
             const percent = e.offsetX / scrubBar.offsetWidth;
             // eslint-disable-next-line no-param-reassign
-            video.currentTime = percent * video.duration;
+            media.currentTime = percent * media.duration;
         });
 
-        // Pause the video when the slider handle is being dragged
+        // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
-            video.pause();
+            media.pause();
         });
 
-        // Play the video when the slider handle is dropped
+        // Play the media when the slider handle is dropped
         scrubBar.addEventListener('mouseup', () => {
-            video.play();
+            media.play();
         });
 
-        // Update the seek bar as the video plays
-        video.addEventListener('timeupdate', () => {
+        // Update the seek bar as the media plays
+        media.addEventListener('timeupdate', () => {
             // Calculate the slider value
-            const value = (100 / video.duration) * video.currentTime;
+            const value = (100 / media.duration) * media.currentTime;
 
             // Update the slider value
             scrubBar.value = value.toString();
             // update timer feedback
-            this._totalTime.innerHTML = Player._formatTime(video.duration);
-            this._currentTime.innerHTML = Player._formatTime(video.currentTime);
+            this._totalTime.innerHTML = Player._formatTime(media.duration);
+            this._currentTime.innerHTML = Player._formatTime(media.currentTime);
         });
     }
 

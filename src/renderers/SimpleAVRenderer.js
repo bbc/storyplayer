@@ -5,7 +5,9 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
-import HlsManager from '../HlsManager';
+import MediaManager from '../MediaManager';
+import MediaInstance from '../MediaInstance';
+
 import logger from '../logger';
 
 export type HTMLTrackElement = HTMLElement & {
@@ -19,7 +21,7 @@ export type HTMLTrackElement = HTMLElement & {
 
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
-    _hls: Object;
+    _mediaInstance: MediaInstance;
     _videoTrack: HTMLTrackElement;
     _canvas: HTMLCanvasElement;
     _applyBlurBehaviour: Function;
@@ -30,8 +32,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked: Function;
     _handleVolumeClicked: Function;
     _handleSubtitlesClicked: Function;
-    _playVideoCallback: Function;
-    _hlsManager: HlsManager;
+    _mediaManager: MediaManager;
     _subtitlesLoaded: boolean;
     _subtitlesShowing: boolean;
     _subtitlesSrc: string;
@@ -53,15 +54,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
-        this._playVideoCallback = this._playVideoCallback.bind(this);
 
         this._endedEventListener = this._endedEventListener.bind(this);
         this._playEventListener = this._playEventListener.bind(this);
         this._pauseEventListener = this._pauseEventListener.bind(this);
 
-        this._hlsManager = player._hlsManager;
+        this._mediaManager = player._mediaManager;
 
-        this._hls = this._hlsManager.getHls('video');
+        this._mediaInstance = this._mediaManager.getMediaInstance('foreground');
 
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -81,6 +81,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             'urn:x-object-based-media:representation-behaviour:blur/v1.0': this._applyBlurBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
+            // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
         };
 
@@ -102,8 +103,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hls.start();
-        const videoElement = this._hls.getMediaElement();
+        this._mediaInstance.start();
+        const videoElement = this._mediaInstance.getMediaElement();
         logger.info(`Started: ${this._representation.id}`);
 
         this.setCurrentTime(0);
@@ -135,17 +136,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
             PlayerEvents.SUBTITLES_BUTTON_CLICKED,
             this._handleSubtitlesClicked,
         );
-        this.playVideo();
+
+        this._mediaInstance.play();
     }
 
     end() {
-        this._hls.pause();
+        this._mediaInstance.pause();
         this._subtitlesShowing = false;
         this._showHideSubtitles();
 
         logger.info(`Ended: ${this._representation.id}`);
 
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
 
         if (this._videoTrack && this._videoTrack.parentNode === videoElement) {
             this._subtitlesLoaded = false;
@@ -158,7 +160,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         try {
             this._clearBehaviourElements();
-            this._hls.end();
+            this._mediaInstance.end();
         } catch (e) {
             //
         }
@@ -180,34 +182,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         );
     }
 
-    _playVideoCallback(): void {
-        const videoElement = this._hls.getMediaElement();
-        this._hls.off(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
-        videoElement.removeEventListener('loadeddata', this._playVideoCallback);
-
-        if (this._destroyed) {
-            logger.warn('loaded destroyed video element - not playing');
-        } else {
-            this._hls.play();
-        }
-    }
-
-    playVideo() {
-        const videoElement = this._hls.getMediaElement();
-        if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
-            this._hls.play();
-        } else if (videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(HlsManager.Events.MANIFEST_PARSED, this._playVideoCallback);
-        } else {
-            videoElement.addEventListener('loadeddata', this._playVideoCallback);
-        }
-    }
-
     renderVideoElement() {
         const videoElement = document.createElement('video');
         videoElement.className = 'romper-video-element';
         videoElement.crossOrigin = 'anonymous';
-        this._hls.attachMedia(videoElement);
+        this._mediaInstance.attachMedia(videoElement);
 
         // set video source
         if (this._representation.asset_collection.foreground) {
@@ -239,17 +218,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
-            this._hls.loadSource(mediaUrl);
+            this._mediaInstance.loadSource(mediaUrl);
         }
     }
 
     // eslint-disable-next-line
     populateVideoSubs(mediaUrl: string) {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
-            // this._hls.loadSubs(mediaUrl);
+            // this._mediaInstance.loadSubs(mediaUrl);
             videoElement.addEventListener('loadedmetadata', () => {
                 // Load Subtitles
                 this._subtitlesSrc = mediaUrl;
@@ -261,7 +240,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _showHideSubtitles() {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         if (this._subtitlesLoaded) {
             if (this._videoTrack) {
                 const videoTrackParent = this._videoTrack.parentNode;
@@ -290,7 +269,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         const { blur } = behaviour;
         videoElement.style.filter = `blur(${blur}px)`;
         callback();
@@ -325,17 +304,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         if (videoElement.paused === true) {
-            this._hls.play();
+            this._mediaInstance.play();
         } else {
-            this._hls.pause();
+            this._mediaInstance.pause();
         }
     }
 
     _handleVolumeClicked(event: Object): void {
         if (event.id === this._representation.id) {
-            this._hls.setVolume(event.value);
+            this._mediaInstance.setVolume(event.value);
         }
     }
 
@@ -345,7 +324,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     getCurrentTime(): Object {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         let videoTime;
         if (
             !videoElement ||
@@ -364,11 +343,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     setCurrentTime(time: number) {
         this._lastSetTime = time;
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
-            this._hls.on(HlsManager.Events.MANIFEST_PARSED, () => {
+            this._mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
                 videoElement.currentTime = time;
             });
         } else {
@@ -387,7 +366,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _clearBehaviourElements() {
-        const videoElement = this._hls.getMediaElement();
+        const videoElement = this._mediaInstance.getMediaElement();
         videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
         this._behaviourElements.forEach((be) => {
             this._target.removeChild(be);
@@ -397,7 +376,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     destroy() {
         this.end();
 
-        this._hlsManager.returnHls(this._hls);
+        this._mediaManager.returnMediaInstance(this._mediaInstance);
 
         super.destroy();
     }
