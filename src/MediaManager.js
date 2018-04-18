@@ -3,7 +3,7 @@
 import Hls from 'hls.js';
 import logger from './logger';
 import MediaInstance from './MediaInstance';
-import BrowserUserAgent from './BrowserUserAgent';
+// import BrowserUserAgent from './BrowserUserAgent';
 
 export default class MediaManager {
     _mediaInstancePool: Array<Object>
@@ -16,8 +16,7 @@ export default class MediaManager {
     _debug: boolean
     _getPermissionToPlay: Function
     _permissionToPlay: boolean
-    static _hlsjsSupported: boolean
-    static _hlsSupported: boolean
+    _hlsjsSupported: boolean
 
     constructor(
         foregroundMediaElement: HTMLVideoElement,
@@ -50,6 +49,13 @@ export default class MediaManager {
         this._permissionToPlay = false;
 
         this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
+
+        if (Hls.isSupported()) {
+            logger.info('HLS.js being used');
+            this._hlsjsSupported = true;
+        } else {
+            this._hlsjsSupported = false;
+        }
     }
 
     _getPermissionToPlay() {
@@ -64,7 +70,7 @@ export default class MediaManager {
                 this._activeConfig,
                 this._inactiveConfig,
                 this._idTotal,
-                MediaManager._hlsjsSupported,
+                this._hlsjsSupported,
                 this._foregroundMediaElement,
                 this._debug,
             );
@@ -74,7 +80,7 @@ export default class MediaManager {
                 this._activeConfig,
                 this._inactiveConfig,
                 this._idTotal,
-                MediaManager._hlsjsSupported,
+                this._hlsjsSupported,
                 this._backgroundMediaElement,
                 this._debug,
             );
@@ -129,53 +135,5 @@ export default class MediaManager {
         return {
             MANIFEST_PARSED: 'canplay',
         };
-    }
-
-    static hlsJsIsSupported() {
-        if (MediaManager._hlsjsSupported !== undefined) {
-            return MediaManager._hlsjsSupported;
-        }
-        if (Hls.isSupported()) {
-            logger.info('HLS.js being used');
-            MediaManager._hlsSupported = true;
-            MediaManager._hlsjsSupported = true;
-            return true;
-        }
-        const video = document.createElement('video');
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            logger.info('HLS.js not being used');
-            MediaManager._hlsSupported = true;
-            MediaManager._hlsjsSupported = false;
-            return false;
-        }
-        MediaManager._hlsSupported = false;
-        MediaManager._hlsjsSupported = false;
-        return false;
-    }
-
-    static isSupported() {
-        if (MediaManager._hlsSupported !== undefined) {
-            return MediaManager._hlsSupported;
-        }
-        // HLS doesn't seem to work on IE or Edge :(
-        if (BrowserUserAgent.edge() || BrowserUserAgent.ie()) {
-            MediaManager._hlsSupported = false;
-            return false;
-        }
-        if (Hls.isSupported()) {
-            logger.info('HLS.js being used');
-            MediaManager._hlsSupported = true;
-            MediaManager._hlsjsSupported = true;
-            return true;
-        }
-        const video = document.createElement('video');
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            logger.info('HLS.js not being used');
-            MediaManager._hlsSupported = true;
-            MediaManager._hlsjsSupported = false;
-            return true;
-        }
-        MediaManager._hlsSupported = false;
-        return false;
     }
 }
