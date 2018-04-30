@@ -111,6 +111,13 @@ export default class RenderManager extends EventEmitter {
             });
     }
 
+    handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
+        logger.warn('RenderManager choice of links - inform player');
+        narrativeElements.forEach((choiceNarrativeElement, i) => {
+            logger.info(`choice ${(i+1)}: ${choiceNarrativeElement.id}`);
+        });
+    }
+
     // create and start a StoryIconRenderer
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
         this._renderStory = new StoryIconRenderer(

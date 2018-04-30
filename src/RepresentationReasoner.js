@@ -23,6 +23,6 @@ export default function RepresentationReasonerFactory(dataResolver: DataResolver
         evaluateConditions(presentation.representations, dataResolver)
             .then(representationContainer =>
                 (representationContainer ?
-                    representationContainer.representation :
+                    representationContainer[0].representation :
                     Promise.reject(new Error('no suitable representations found'))));
 }

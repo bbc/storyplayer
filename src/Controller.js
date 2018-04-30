@@ -55,6 +55,17 @@ export default class Controller {
             logger.warn(`Error: ${err}`);
         };
 
+        const _handleLinkChoice = (choices) => {
+            logger.info(`ROMPER: choice of ${choices.length} links`);
+            const narrativeElementList = [];
+            choices.forEach((c) => {
+                if (this._reasoner){
+                    narrativeElementList.push(this._reasoner._narrativeElements[c.target]);
+                }
+            });
+            this._renderManager.handleLinkChoice(narrativeElementList);
+        };
+
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId);
 
@@ -71,13 +82,15 @@ export default class Controller {
             };
 
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
+            
+            reasoner.on('multipleValidLinks', _handleLinkChoice);
 
             this._reasoner = reasoner;
             this._reasoner.start();
 
             this._addListenersToRenderManager();
-        });
-    }
+        });    
+    }    
 
     // create a manager to handle the rendering
     _createRenderManager() {
@@ -343,6 +356,9 @@ export default class Controller {
         if (this._reasoner && this._handleStoryEnd) {
             this._reasoner.removeListener('storyEnd', this._handleStoryEnd);
         }
+        if (this._reasoner && this._handleLinkChoice) {
+            this._reasoner.removeListener('multipleValidLinks', this._handleLinkChoice);
+        }
         if (this._reasoner && this._handleError) {
             this._reasoner.removeListener('error', this._handleError);
         }
@@ -370,6 +386,7 @@ export default class Controller {
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
+    _handleLinkChoice: ?Function;
     _linearStoryPath: Array<StoryPathItem>;
     _currentNarrativeElement: NarrativeElement;
     _renderManager: RenderManager;
