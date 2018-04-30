@@ -435,6 +435,7 @@ class Player extends EventEmitter {
         this._subtitlesButton.setAttribute('title', 'Subtitles Button');
         this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
         this._subtitlesButton.classList.add('romper-subtitles-button');
+        this.disableSubtitlesControl();
         const subtitlesButtonIconDiv = document.createElement('div');
         subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
         subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
@@ -669,6 +670,16 @@ class Player extends EventEmitter {
             showingSubtitlesIntToString[+!this.showingSubtitles],
             showingSubtitlesIntToString[+this.showingSubtitles],
         );
+    }
+
+    enableSubtitlesControl() {
+        this._subtitlesButton.classList.remove('romper-control-disabled');
+        this._subtitlesButton.removeAttribute('disabled');
+    }
+
+    disableSubtitlesControl() {
+        this._subtitlesButton.classList.add('romper-control-disabled');
+        this._subtitlesButton.setAttribute('disabled', 'true');
     }
 
     _logUserInteraction(
