@@ -78,7 +78,7 @@ export default function evaluateConditions<T>(
                     logger.info(`LOGIC: choice of ${evaluateConditions.length} conditions`);
                 }
                 const sortedCandidates = [];
-                evaluatedCandidates.sort(sortCandidates).forEach( (c) => {
+                evaluatedCandidates.sort(sortCandidates).forEach((c) => {
                     sortedCandidates.push(candidates[c.i]);
                 });
                 return sortedCandidates;

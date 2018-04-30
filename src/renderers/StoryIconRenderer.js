@@ -49,7 +49,7 @@ export default class StoryIconRenderer extends EventEmitter {
     }
 
     start(startingRepresentationId: string) {
-        if(this._pathItemList.length <= 0) { console.log('no path for chapters'); return; }
+        if (this._pathItemList.length <= 0) { return; }
         this._currentRepresentationId = this._pathItemList[0].representation.id;
         this._getIconAssets().then((iconAssets) => {
             this._iconUrlMap = StoryIconRenderer._buildUrlMap(this._pathItemList, iconAssets);

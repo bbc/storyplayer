@@ -142,7 +142,7 @@ export default class StoryReasoner extends EventEmitter {
             .then((nextElementChoices) => {
                 this._resolving = false;
                 if (nextElementChoices) {
-                    if (nextElementChoices.length > 1){
+                    if (nextElementChoices.length > 1) {
                         this.emit('multipleValidLinks', nextElementChoices);
                         logger.info('StoryReasoner: choice of paths - waiting for user');
                     } else {

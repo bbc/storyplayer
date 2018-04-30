@@ -59,7 +59,7 @@ export default class Controller {
             logger.info(`ROMPER: choice of ${choices.length} links`);
             const narrativeElementList = [];
             choices.forEach((c) => {
-                if (this._reasoner){
+                if (this._reasoner) {
                     narrativeElementList.push(this._reasoner._narrativeElements[c.target]);
                 }
             });
@@ -82,15 +82,15 @@ export default class Controller {
             };
 
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
-            
+
             reasoner.on('multipleValidLinks', _handleLinkChoice);
 
             this._reasoner = reasoner;
             this._reasoner.start();
 
             this._addListenersToRenderManager();
-        });    
-    }    
+        });
+    }
 
     // create a manager to handle the rendering
     _createRenderManager() {
