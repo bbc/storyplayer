@@ -34,6 +34,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _handleSubtitlesClicked: Function;
     _mediaManager: MediaManager;
     _subtitlesLoaded: boolean;
+    _subtitlesExist: boolean;
     _subtitlesShowing: boolean;
     _subtitlesSrc: string;
 
@@ -42,6 +43,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _endedEventListener: Function;
     _playEventListener: Function;
     _pauseEventListener: Function;
+
+    _enableSubtitlesButton: Function;
+    _disableSubtitlesButton: Function;
 
     constructor(
         representation: Representation,
@@ -75,7 +79,19 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._subtitlesShowing = player.showingSubtitles;
         this._subtitlesLoaded = false;
+        this._subtitlesExist = true;
         this._subtitlesSrc = '';
+
+        this._enableSubtitlesButton = () => {
+            // Either activate subtitles control or wait until subtitles are loaded
+            if (this._subtitlesLoaded) {
+                player.enableSubtitlesControl();
+            } else if (this._subtitlesExist) {
+                // If _subtitlesExist is false then subtitles cannot be loaded so don't set timeout
+                setTimeout(() => { this._enableSubtitlesButton(); }, 1000);
+            }
+        };
+        this._disableSubtitlesButton = () => { player.disableSubtitlesControl(); };
 
         this._behaviourRendererMap = {
             'urn:x-object-based-media:representation-behaviour:blur/v1.0': this._applyBlurBehaviour,
@@ -138,9 +154,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         );
 
         this._mediaInstance.play();
+
+        this._enableSubtitlesButton();
     }
 
     end() {
+        this._disableSubtitlesButton();
         this._mediaInstance.pause();
         this._subtitlesShowing = false;
         this._showHideSubtitles();
@@ -208,7 +227,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             })
                             .catch((err) => {
                                 logger.error(err, 'Subs not found');
+                                this._subtitlesExist = false;
                             });
+                    } else {
+                        this._subtitlesExist = false;
                     }
                 });
         }
@@ -241,29 +263,30 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _showHideSubtitles() {
         const videoElement = this._mediaInstance.getMediaElement();
-        if (this._subtitlesLoaded) {
-            if (this._videoTrack) {
-                const videoTrackParent = this._videoTrack.parentNode;
-                if (videoTrackParent) {
-                    videoTrackParent.removeChild(this._videoTrack);
-                }
+        if (this._videoTrack) {
+            this._videoTrack.mode = 'hidden';
+            if (videoElement.textTracks[0]) {
+                videoElement.textTracks[0].mode = 'hidden';
             }
+            const videoTrackParent = this._videoTrack.parentNode;
+            if (videoTrackParent) {
+                videoTrackParent.removeChild(this._videoTrack);
+            }
+        }
+        if (this._subtitlesLoaded && this._subtitlesShowing) {
+            this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
+            this._videoTrack.kind = 'captions';
+            this._videoTrack.label = 'English';
+            this._videoTrack.srclang = 'en';
+            this._videoTrack.src = this._subtitlesSrc;
+            this._videoTrack.default = false;
+            videoElement.appendChild(this._videoTrack);
 
-            if (this._subtitlesShowing) {
-                this._videoTrack = ((document.createElement('track'): any): HTMLTrackElement);
-                this._videoTrack.kind = 'captions';
-                this._videoTrack.label = 'English';
-                this._videoTrack.srclang = 'en';
-                this._videoTrack.src = this._subtitlesSrc;
-                this._videoTrack.default = false;
-                videoElement.appendChild(this._videoTrack);
+            // Show Subtitles
+            this._videoTrack.mode = 'showing';
 
-                // Show Subtitles
-                this._videoTrack.mode = 'showing';
-
-                if (videoElement.textTracks[0]) {
-                    videoElement.textTracks[0].mode = 'showing';
-                }
+            if (videoElement.textTracks[0]) {
+                videoElement.textTracks[0].mode = 'showing';
             }
         }
     }
