@@ -2,7 +2,6 @@
 
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import RendererEvents from './RendererEvents';
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -10,6 +9,11 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
     _target: HTMLDivElement;
+    _disablePlayButton: Function;
+    _disableScrubBar: Function;
+    _enablePlayButton: Function;
+    _enableScrubBar: Function;
+
 
     constructor(
         representation: Representation,
@@ -21,12 +25,24 @@ export default class ImageRenderer extends BaseRenderer {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._target = this._player.mediaTarget;
         this.renderImageElement();
+        this._disablePlayButton = () => { this._player.disablePlayButton(); };
+        this._enablePlayButton = () => { this._player.enablePlayButton(); };
+        this._disableScrubBar = () => { this._player.disableScrubBar(); };
+        this._enableScrubBar = () => { this._player.enableScrubBar(); };
     }
 
     start() {
+        super.start();
         if (!this._imageElement) this.renderImageElement();
-        this.emit(RendererEvents.STARTED);
         this._setVisibility(true);
+        this._disablePlayButton();
+        this._disableScrubBar();
+    }
+
+    end() {
+        this._setVisibility(false);
+        this._enablePlayButton();
+        this._enableScrubBar();
     }
 
     renderImageElement() {
@@ -66,17 +82,12 @@ export default class ImageRenderer extends BaseRenderer {
         }
     }
 
-    queueUp() {
-        this.renderImageElement();
-        this._setVisibility(false);
-    }
-
     switchFrom() {
-        this._setVisibility(false);
+        this.end();
     }
 
     switchTo() {
-        this._setVisibility(true);
+        this.start();
     }
 
     _setVisibility(visible: boolean) {
@@ -84,6 +95,8 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     destroy() {
+        this.end();
+
         if (this._imageElement) this._target.removeChild(this._imageElement);
         super.destroy();
     }
