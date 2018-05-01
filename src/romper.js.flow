@@ -35,6 +35,7 @@ export type Story = {
     tags?: Tags,
     beginnings: Array<Beginning>,
     narrative_elements: Array<NarrativeElement>,
+    requirements?: any,
 };
 
 export type DataResolver = (name: string) => Promise<any>;

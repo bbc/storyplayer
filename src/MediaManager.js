@@ -3,7 +3,6 @@
 import Hls from 'hls.js';
 import logger from './logger';
 import MediaInstance from './MediaInstance';
-// import BrowserUserAgent from './BrowserUserAgent';
 
 export default class MediaManager {
     _mediaInstancePool: Array<Object>
