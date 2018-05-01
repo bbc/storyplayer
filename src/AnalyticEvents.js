@@ -27,6 +27,7 @@ const names = [
     'OVERLAY_DEACTIVATED',
     'CHANGE_CHAPTER_BUTTON_CLICKED',
     'SWITCH_VIEW_BUTTON_CLICKED',
+    'LINK_CHOICE_CLICKED',
 ];
 
 const AnalyticEvents = {

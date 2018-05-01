@@ -428,7 +428,7 @@ class Player extends EventEmitter {
         this._overlays.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
 
-        this._linkChoice = createOverlay('linkChoice', this._logUserInteraction);
+        this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
         this._overlays.appendChild(this._linkChoice.overlay);
         // no need for toggle button
 
@@ -820,10 +820,9 @@ class Player extends EventEmitter {
         linkChoiceIcon.classList.add('romper-link-icon');
         linkChoiceIcon.setAttribute('draggable', 'false');
         const linkChoiceIconClick = () => {
-            // console.log('link chosen', id);
             this.emit(PlayerEvents.LINK_CHOSEN, { id });
             this._linkChoice.deactivateOverlay();
-            // this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_BUTTON_CLICKED, null, id);
+            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
         };
 
         linkChoiceIcon.onclick = linkChoiceIconClick;
