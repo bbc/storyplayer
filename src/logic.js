@@ -2,6 +2,7 @@
 
 import JsonLogic from 'json-logic-js';
 import type { DataResolver } from './romper';
+import logger from './logger';
 
 /**
  * Evaluate a pair of JSONLogic results for sorting such that true is like Infinity and false like
@@ -60,7 +61,7 @@ function convertDotNotationToNestedObjects(resolvedVars) {
 export default function evaluateConditions<T>(
     candidates: Array<{condition: any} & T>,
     dataResolver: DataResolver,
-): Promise<?T> {
+): Promise<?Array<T>> {
     const interestingVars = Array.from(new Set(...candidates.map(candidate =>
         JsonLogic.uses_data(candidate.condition))).values());
     return Promise.all(interestingVars.map(interestingVar => dataResolver(interestingVar)
@@ -73,8 +74,15 @@ export default function evaluateConditions<T>(
                     ({ i, result: JsonLogic.apply(candidate.condition, resolvedVars) }))
                 .filter(candidate => candidate.result > 0);
             if (evaluatedCandidates.length > 0) {
-                const bestCandidate = evaluatedCandidates.sort(sortCandidates)[0];
-                return candidates[bestCandidate.i];
+                if (evaluatedCandidates.length > 1) {
+                    logger.info(`LOGIC: choice of ${evaluateConditions.length} conditions`);
+                }
+                const sortedCandidates = [];
+                evaluatedCandidates.sort(sortCandidates).forEach((c) => {
+                    sortedCandidates.push(candidates[c.i]);
+                });
+                return sortedCandidates;
+                // return [candidates[bestCandidate.i]];
             }
             return null;
         });

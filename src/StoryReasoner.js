@@ -5,6 +5,7 @@ import EventEmitter from 'events';
 import type { Story, NarrativeElement, Link, DataResolver } from './romper';
 import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
+import logger from './logger';
 
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
@@ -125,7 +126,7 @@ export default class StoryReasoner extends EventEmitter {
             .then((startElement) => {
                 this._resolving = false;
                 if (startElement) {
-                    this._setCurrentNarrativeElement(startElement.id);
+                    this._setCurrentNarrativeElement(startElement[0].id);
                 } else {
                     this.emit('error', new Error('Unable to choose a valid beginning'));
                 }
@@ -138,10 +139,15 @@ export default class StoryReasoner extends EventEmitter {
             this.emit('choiceOfLinks');
         }
         evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
-            .then((nextElement) => {
+            .then((nextElementChoices) => {
                 this._resolving = false;
-                if (nextElement) {
-                    this._followLink(nextElement);
+                if (nextElementChoices) {
+                    if (nextElementChoices.length > 1) {
+                        this.emit('multipleValidLinks', nextElementChoices);
+                        logger.info('StoryReasoner: choice of paths - waiting for user');
+                    } else {
+                        this._followLink(nextElementChoices[0]);
+                    }
                 } else {
                     this.emit('error', new Error('There are no possible links'));
                 }
