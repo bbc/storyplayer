@@ -158,6 +158,7 @@ export default class RenderManager extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        this._player.clearLinkChoices();
         const link = {
             condition: true,
             link_type: 'NARRATIVE_ELEMENT',

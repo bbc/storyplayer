@@ -188,6 +188,14 @@ function createOverlay(name: string, logFunction: Function) {
         button.classList.add(`${buttonClassPrefix}${classname}`);
     };
 
+    const clearAll = () => {
+        Object.keys(elements).forEach((key) => {
+            overlay.removeChild(elements[key]);
+            delete elements[key];
+            delete labels[key];
+        });
+    };
+
     // Consider a set or select method.
 
     return {
@@ -202,6 +210,7 @@ function createOverlay(name: string, logFunction: Function) {
         deactivateOverlay,
         getIdForLabel,
         setButtonClass,
+        clearAll,
     };
 }
 
@@ -654,6 +663,9 @@ class Player extends EventEmitter {
         if (this._icon) {
             this._icon.deactivateOverlay();
         }
+        if (this._linkChoice) {
+            this._linkChoice.deactivateOverlay();
+        }
     }
 
     _subtitlesButtonClicked() {
@@ -929,6 +941,10 @@ class Player extends EventEmitter {
 
     disableLinkChoiceControl() {
         this._linkChoice.overlay.classList.add('romper-inactive');
+    }
+
+    clearLinkChoices() {
+        this._linkChoice.clearAll();
     }
 
     enableRepresentationControl() {
