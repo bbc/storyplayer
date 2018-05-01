@@ -278,6 +278,17 @@ export default class Controller {
         });
     }
 
+    // follow link from the narrative element to one following it
+    followLink(narrativeElementId: string) {
+        this._currentNarrativeElement.links.forEach((link) => {
+            if (link.target === narrativeElementId) {
+                if (this._reasoner) {
+                    this._reasoner._followLink(link);
+                }
+            }
+        });
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to

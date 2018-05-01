@@ -159,14 +159,7 @@ export default class RenderManager extends EventEmitter {
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
         this._player.clearLinkChoices();
-        const link = {
-            condition: true,
-            link_type: 'NARRATIVE_ELEMENT',
-            target: narrativeElementId,
-        };
-        if (this._controller._reasoner) {
-            this._controller._reasoner._followLink(link);
-        }
+        this._controller.followLink(narrativeElementId);
     }
 
     // create and start a StoryIconRenderer
