@@ -352,6 +352,14 @@ $romper-hover-text-size: 25px;
       width: 3em;
     }
   }
+
+  .romper-linkChoice-overlay {
+    display: flex;
+    
+    .romper-link-icon {
+      width: 3em;
+    }
+  }
 }
 
 .romper-player > .romper-gui {

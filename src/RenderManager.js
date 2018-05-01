@@ -81,6 +81,10 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
             this._rendererState.volumes[event.label] = event.value;
         });
+        this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
+            this._player.disableLinkChoiceControl();
+            this._followLink(event.id);
+        });
 
         this._initialise();
     }
@@ -111,12 +115,57 @@ export default class RenderManager extends EventEmitter {
             });
     }
 
+    // Reasoner has told us that there are multiple valid paths:
+    // give choice to user
     // eslint-disable-next-line class-methods-use-this
     handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
         logger.warn('RenderManager choice of links - inform player');
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
+            // fetch representation
+            this._fetchPresentation(choiceNarrativeElement.presentation.target)
+                .then(presentation => this._representationReasoner(presentation))
+                .then((representation) => {
+                    this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
+                });
         });
+    }
+
+    // display an icon for a choice of links (at a branch in the story)
+    _renderLinkChoiceIcon(
+        choiceId: number,
+        representation: Representation,
+        narrativeElementId: string,
+    ) {
+        // fetch icon
+        if (representation.asset_collection.icon) {
+            const iconAssetCollectionId = representation.asset_collection.icon.default;
+            this._fetchAssetCollection(iconAssetCollectionId)
+                .then((iconAssetCollection) => {
+                    if (iconAssetCollection.assets.image_src) {
+                        // tell Player to render icon
+                        this._player.addLinkChoiceControl(
+                            narrativeElementId,
+                            iconAssetCollection.assets.image_src,
+                            `Option ${(choiceId + 1)}`,
+                        );
+                    }
+                });
+        }
+        // make overlay visible
+        this._player.enableLinkChoiceControl();
+    }
+
+    // user has made a choice of link to follow - do it
+    _followLink(narrativeElementId: string) {
+        const link = {
+            condition: true,
+            link_type: 'NARRATIVE_ELEMENT',
+            target: narrativeElementId,
+        };
+        if (this._controller._reasoner) {
+            this._controller._reasoner._followLink(link);
+        }
     }
 
     // create and start a StoryIconRenderer
@@ -232,7 +281,11 @@ export default class RenderManager extends EventEmitter {
 
         // Update availability of back and next buttons.
         this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
-        this._player.setNextAvailable(this._controller.hasNextNode());
+        // this._player.setNextAvailable(
+        this._controller.hasUniqueNextNode().then((show) => {
+            this._player.setNextAvailable(show);
+        });
+        // );
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {

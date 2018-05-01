@@ -20,6 +20,7 @@ const PlayerEvents = [
     'SUBTITLES_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
     'REPEAT_BUTTON_CLICKED',
+    'LINK_CHOSEN',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -231,6 +232,7 @@ class Player extends EventEmitter {
     _volume: Object;
     _representation: Object;
     _icon: Object;
+    _linkChoice: Object;
     _scrubBar: HTMLInputElement;
     _timeFeedback: HTMLDivElement;
     _currentTime: HTMLSpanElement;
@@ -416,6 +418,10 @@ class Player extends EventEmitter {
         this._icon = createOverlay('icon', this._logUserInteraction);
         this._overlays.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
+
+        this._linkChoice = createOverlay('linkChoice', this._logUserInteraction);
+        this._overlays.appendChild(this._linkChoice.overlay);
+        // no need for toggle button
 
         this._timeFeedback = document.createElement('div');
         this._timeFeedback.classList.add('romper-timer');
@@ -787,6 +793,39 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
+    addLinkChoiceControl(id: string, src: string, label: string) {
+        const linkChoiceControl = document.createElement('div');
+        linkChoiceControl.classList.add('romper-link-control');
+        linkChoiceControl.classList.add(`romper-link-choice-${id}`);
+        linkChoiceControl.setAttribute('title', label);
+        linkChoiceControl.setAttribute('aria-label', label);
+
+        const iconContainer = document.createElement('div');
+        iconContainer.classList.add('romper-link-choice-icon-container');
+
+        const linkChoiceIcon = document.createElement('img');
+        linkChoiceIcon.src = src;
+        linkChoiceIcon.classList.add('romper-link-icon');
+        linkChoiceIcon.setAttribute('draggable', 'false');
+        const linkChoiceIconClick = () => {
+            // console.log('link chosen', id);
+            this.emit(PlayerEvents.LINK_CHOSEN, { id });
+            this._linkChoice.deactivateOverlay();
+            // this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_BUTTON_CLICKED, null, id);
+        };
+
+        linkChoiceIcon.onclick = linkChoiceIconClick;
+        linkChoiceIcon.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(linkChoiceIconClick),
+        );
+
+        iconContainer.appendChild(linkChoiceIcon);
+        linkChoiceControl.appendChild(iconContainer);
+
+        this._linkChoice.add(id, linkChoiceControl);
+    }
+
     activateRepresentationControl(id: string) {
         this._representation.removeClass(id, 'romper-control-disabled');
     }
@@ -882,6 +921,14 @@ class Player extends EventEmitter {
         this.enablePlayButton();
         this.enableScrubBar();
         this.enableRepresentationControl();
+    }
+
+    enableLinkChoiceControl() {
+        this._linkChoice.overlay.classList.remove('romper-inactive');
+    }
+
+    disableLinkChoiceControl() {
+        this._linkChoice.overlay.classList.add('romper-inactive');
     }
 
     enableRepresentationControl() {

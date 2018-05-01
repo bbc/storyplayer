@@ -297,9 +297,12 @@ export default class Controller {
     }
 
     // is the current Narrative Element followed by another?
-    hasNextNode(): boolean {
-        if (this._reasoner && this._reasoner.hasNextNode()) return true;
-        return false;
+    hasUniqueNextNode(): Promise<boolean> {
+        if (this._reasoner) {
+            return this._reasoner.hasNextNode()
+                .then(count => (count === 1));
+        }
+        return Promise.resolve(false);
     }
 
     // get the id of the previous node
