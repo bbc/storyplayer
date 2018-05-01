@@ -55,16 +55,16 @@ export default class Controller {
             logger.warn(`Error: ${err}`);
         };
 
-        const _handleLinkChoice = (choices) => {
-            logger.info(`ROMPER: choice of ${choices.length} links`);
-            const narrativeElementList = [];
-            choices.forEach((c) => {
-                if (this._reasoner) {
-                    narrativeElementList.push(this._reasoner._narrativeElements[c.target]);
-                }
-            });
-            this._renderManager.handleLinkChoice(narrativeElementList);
-        };
+        // const _handleLinkChoice = (choices) => {
+        //     logger.info(`ROMPER: choice of ${choices.length} links`);
+        //     const narrativeElementList = [];
+        //     choices.forEach((c) => {
+        //         if (this._reasoner) {
+        //             narrativeElementList.push(this._reasoner._narrativeElements[c.target]);
+        //         }
+        //     });
+        //     this._renderManager.handleLinkChoice(narrativeElementList);
+        // };
 
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId);
@@ -83,7 +83,7 @@ export default class Controller {
 
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
-            reasoner.on('multipleValidLinks', _handleLinkChoice);
+            // reasoner.on('multipleValidLinks', _handleLinkChoice);
 
             this._reasoner = reasoner;
             this._reasoner.start();
@@ -311,9 +311,27 @@ export default class Controller {
     hasUniqueNextNode(): Promise<boolean> {
         if (this._reasoner) {
             return this._reasoner.hasNextNode()
-                .then(count => (count === 1));
+                .then(links => (links.length === 1));
         }
         return Promise.resolve(false);
+    }
+
+    // find what the next steps in the story can be
+    getValidNextSteps(): Promise<Array<NarrativeElement>> {
+        if (this._reasoner) {
+            return this._reasoner.hasNextNode()
+                .then((links) => {
+                    const narrativeElementList = [];
+                    links.forEach((link) => {
+                        if (this._reasoner && link.target) {
+                            narrativeElementList
+                                .push(this._reasoner._narrativeElements[link.target]);
+                        }
+                    });
+                    return narrativeElementList;
+                }, () => []);
+        }
+        return Promise.resolve([]);
     }
 
     // get the id of the previous node

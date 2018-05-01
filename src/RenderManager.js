@@ -275,11 +275,10 @@ export default class RenderManager extends EventEmitter {
 
         // Update availability of back and next buttons.
         this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
-        // this._player.setNextAvailable(
-        this._controller.hasUniqueNextNode().then((show) => {
-            this._player.setNextAvailable(show);
-        });
-        // );
+        this._showOnwardIcons();
+        // this._controller.hasUniqueNextNode().then((show) => {
+        //     this._player.setNextAvailable(show);
+        // });
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
@@ -295,6 +294,24 @@ export default class RenderManager extends EventEmitter {
             const value = this._rendererState.volumes[label];
             this._player.setVolumeControlLevel(label, value);
         });
+    }
+
+    // show next button, or icons if choice
+    _showOnwardIcons() {
+        const next = this._controller.getValidNextSteps();
+        if (next) {
+            next.then((nextNarrativeElements) => {
+                if (nextNarrativeElements.length === 1) {
+                    this._player.setNextAvailable(true);
+                } else {
+                    this._player.setNextAvailable(false);
+                }
+                if (nextNarrativeElements.length > 1) {
+                    // render icons
+                    this.handleLinkChoice(nextNarrativeElements);
+                }
+            });
+        }
     }
 
     // get a renderer for the given NE, and its Representation
@@ -353,6 +370,7 @@ export default class RenderManager extends EventEmitter {
             // also, audio muted/not...
             volumes: {},
         };
+        // this._showOnwardIcons();
     }
 
     reset() {
