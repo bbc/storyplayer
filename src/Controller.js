@@ -13,7 +13,7 @@ import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger } from './AnalyticEvents';
-import BrowserCapabilities from './browserCapabilities';
+import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 
 export default class Controller {
@@ -118,6 +118,11 @@ export default class Controller {
             supports: {
                 hls: BrowserCapabilities.hlsSupport(),
                 dash: BrowserCapabilities.dashSupport(),
+            },
+            browser: {
+                ie: BrowserUserAgent.ie(),
+                edge: BrowserUserAgent.edge(),
+                iOS: BrowserUserAgent.iOS(),
             },
         };
         const anyRequirementsFailed = requirements.some((req) => {

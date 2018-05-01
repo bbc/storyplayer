@@ -70,8 +70,12 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     getRequirements() {
-        if ('requirements' in this._story) {
-            return this._story.requirements;
+        if (
+            this._story.meta !== undefined &&
+            this._story.meta.romper !== undefined &&
+            this._story.meta.romper.requirements !== undefined
+        ) {
+            return this._story.meta.romper.requirements;
         }
         return [];
     }
