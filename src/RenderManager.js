@@ -54,6 +54,7 @@ export default class RenderManager extends EventEmitter {
         analytics: AnalyticsLogger,
     ) {
         super();
+
         this._controller = controller;
         this._target = target;
         this._fetchPresentation = fetchPresentation;

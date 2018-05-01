@@ -69,6 +69,17 @@ export default class StoryReasoner extends EventEmitter {
         });
     }
 
+    getRequirements() {
+        if (
+            this._story.meta !== undefined &&
+            this._story.meta.romper !== undefined &&
+            this._story.meta.romper.requirements !== undefined
+        ) {
+            return this._story.meta.romper.requirements;
+        }
+        return [];
+    }
+
     /**
      * Start this particular story. This initially causes a narrativeElementChanged
      * event to fire to indicate which narrative element is the first in this story.

@@ -1,5 +1,6 @@
 // @flow
 
+import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
 import type {
@@ -12,6 +13,7 @@ import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger } from './AnalyticEvents';
+import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 
 export default class Controller {
@@ -73,6 +75,9 @@ export default class Controller {
             if (this._storyId !== storyId) {
                 return;
             }
+            if (this._checkStoryPlayable(reasoner.getRequirements()) === -1) {
+                return;
+            }
 
             reasoner.on('storyEnd', _handleStoryEnd);
             reasoner.on('error', _handleError);
@@ -90,6 +95,59 @@ export default class Controller {
 
             this._addListenersToRenderManager();
         });
+    }
+
+    /*
+    requirements:[
+        // First Requirement
+        {
+            logic: {//json logic here}
+            errorMsg: "Error to show to user"
+        },
+        // Second Requirement
+        {
+            logic: {//json logic here}
+            errorMsg: "Error to show to user"
+        },
+        ...
+    ]
+    */
+
+    _checkStoryPlayable(requirements: Array<Object>) {
+        const data = {
+            supports: {
+                hls: BrowserCapabilities.hlsSupport(),
+                dash: BrowserCapabilities.dashSupport(),
+            },
+            browser: {
+                ie: BrowserUserAgent.ie(),
+                edge: BrowserUserAgent.edge(),
+                iOS: BrowserUserAgent.iOS(),
+            },
+        };
+        const anyRequirementsFailed = requirements.some((req) => {
+            if (JsonLogic.apply(req.logic, data) === false) {
+                this._target.innerHTML = '';
+                const warningDiv = document.createElement('div');
+                warningDiv.classList.add('romper-warning');
+                const warningDivDiv = document.createElement('div');
+                warningDivDiv.classList.add('romper-warning-div');
+                warningDivDiv.innerHTML = req.errorMsg;
+                warningDiv.appendChild(warningDivDiv);
+                this._target.appendChild(warningDiv);
+
+                logger.warn(`Using Data: ${JSON.stringify(data)}`);
+                logger.warn(`Requirement Failed: ${JSON.stringify(req.logic)}`);
+                return true;
+            }
+            return false;
+        });
+
+        if (anyRequirementsFailed) {
+            return -1;
+        }
+        logger.info(`All requirements satisfied: ${JSON.stringify(requirements)}`);
+        return 0;
     }
 
     // create a manager to handle the rendering

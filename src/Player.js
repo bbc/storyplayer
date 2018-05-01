@@ -4,7 +4,7 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 
-import BrowserUserAgent from './BrowserUserAgent';
+import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
 
 const PlayerEvents = [
