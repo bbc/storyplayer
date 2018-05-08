@@ -276,9 +276,6 @@ export default class RenderManager extends EventEmitter {
         // Update availability of back and next buttons.
         this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
-        // this._controller.hasUniqueNextNode().then((show) => {
-        //     this._player.setNextAvailable(show);
-        // });
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
@@ -370,7 +367,6 @@ export default class RenderManager extends EventEmitter {
             // also, audio muted/not...
             volumes: {},
         };
-        // this._showOnwardIcons();
     }
 
     reset() {

@@ -55,17 +55,6 @@ export default class Controller {
             logger.warn(`Error: ${err}`);
         };
 
-        // const _handleLinkChoice = (choices) => {
-        //     logger.info(`ROMPER: choice of ${choices.length} links`);
-        //     const narrativeElementList = [];
-        //     choices.forEach((c) => {
-        //         if (this._reasoner) {
-        //             narrativeElementList.push(this._reasoner._narrativeElements[c.target]);
-        //         }
-        //     });
-        //     this._renderManager.handleLinkChoice(narrativeElementList);
-        // };
-
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId);
 
@@ -82,8 +71,6 @@ export default class Controller {
             };
 
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
-
-            // reasoner.on('multipleValidLinks', _handleLinkChoice);
 
             this._reasoner = reasoner;
             this._reasoner.start();
