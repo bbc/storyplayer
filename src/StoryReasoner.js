@@ -227,11 +227,17 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     /**
-     * Does the current narrative element have any ongoing links, or is it the end of the story?
-     * Recurses into substories.
+     * Does the current narrative element have any valid ongoing links?
+     * returns a list of links to valid following nodes
      */
-    hasNextNode(): boolean {
-        return this._isFollowedByAnotherNode(this);
+    hasNextNode(): Promise<Array<Link>> {
+        return evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
+            .then((nextElementChoices) => {
+                if (nextElementChoices) {
+                    return nextElementChoices;
+                }
+                return [];
+            }, () => []);
     }
 
     // is there a next node in the path.  Takes a reasoner and
