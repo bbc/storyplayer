@@ -1700,38 +1700,35 @@
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
-                analyticsLogger: dataObj => { console.log('ANALYTICS:', dataObj);
-        },
+                analyticsLogger: dataObj => {
+                    console.log('ANALYTICS:', dataObj);
+                },
                 storyFetcher: id => Promise.resolve(wait().then(() => config.story.filter(storyObject => storyObject.id === id)[
-            0
-        ])),
-        // storyFetcher: id => Promise.resolve(
-        // config.story
-        //         .filter(storyObject => storyObject.id === id)[0]
-        // ).then(storyObject => storyObject ? storyObject : Promise.reject('no such story object ' + id)),
+                    0
+                ])),
                 mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri')),
                 presentationFetcher: id => Promise.resolve(
                     config.presentations
                         .filter(presentationObject => presentationObject.id === id)[
-            0
-        ]
+                    0
+                    ]
                 ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object: ' + id)),
                 assetCollectionFetcher: id => Promise.resolve(
                     config.asset_collections
                         .filter(assetCollectionObject => assetCollectionObject.id === id)[
-            0
-        ]
+                    0
+                    ]
                 ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
-    });
+            });
 
             // 001 is simple linear
-    // 002 is nested linear
-    // 02a is substory 1
-    // 02b is substory 2
-    // 02c is substory 3
-    // 003 is linear with switchable as first NE
+            // 002 is nested linear
+            // 02a is substory 1
+            // 02b is substory 2
+            // 02c is substory 3
+            // 003 is linear with switchable as first NE
             romper.start('00000001-0000-0000-0000-000000000000');
-})();
+        })();
     </script>
 </body>
 
