@@ -373,8 +373,9 @@ export default class Controller {
                     const narrativeElementList = [];
                     links.forEach((link) => {
                         if (this._reasoner && link.target_narrative_element_id) {
-                            narrativeElementList
-                                .push(this._reasoner._narrativeElements[link.target_narrative_element_id]);
+                            narrativeElementList.push(this._reasoner._narrativeElements[
+                                link.target_narrative_element_id
+                            ]);
                         }
                     });
                     return narrativeElementList;

@@ -52,7 +52,7 @@ export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
 export type RepresentationChoice = {
     label: string,
     choice_representation_id: string,
-    choice_representation: Representation,
+    choice_representation?: Representation,
 }
 
 export type Representation = {
@@ -129,6 +129,8 @@ export type Settings = {
     renderers?: Renderers,
     dataResolver: DataResolver,
     storyFetcher: StoryFetcher,
-    presentationFetcher: PresentationFetcher,
+    narrativeElementFetcher: NarrativeElementFetcher,
+    representationCollectionFetcher: RepresentationCollectionFetcher,
+    representationFetcher: RepresentationFetcher,
     mediaFetcher: MediaFetcher,
 };

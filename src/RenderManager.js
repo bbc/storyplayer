@@ -95,7 +95,8 @@ export default class RenderManager extends EventEmitter {
         if (narrativeElement.body.representation_collection_target) {
             // eslint-disable-next-line max-len
             this._fetchRepresentationCollection(narrativeElement.body.representation_collection_target)
-                .then(representationCollection => this._representationReasoner(representationCollection))
+                .then(representationCollection =>
+                    this._representationReasoner(representationCollection))
                 .then((representation) => {
                     // get a Renderer for this new NE
                     const newRenderer = this._getRenderer(narrativeElement, representation);
@@ -129,6 +130,7 @@ export default class RenderManager extends EventEmitter {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
             // fetch representation
             if (choiceNarrativeElement.body.representation_collection_target) {
+                // eslint-disable-next-line max-len
                 this._fetchRepresentationCollection(choiceNarrativeElement.body.representation_collection_target)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
@@ -262,7 +264,9 @@ export default class RenderManager extends EventEmitter {
                 RendererEvents.SWITCHED_REPRESENTATION,
                 (choice: RepresentationChoice) => {
                     this._rendererState.lastSwitchableLabel = choice.label;
-                    this._handleBackgroundRendering(choice.choice_representation);
+                    if (choice.choice_representation) {
+                        this._handleBackgroundRendering(choice.choice_representation);
+                    }
                 },
             );
         } else {
