@@ -1,6 +1,8 @@
 // @flow
 
-import type { DataResolver, StoryFetcher } from './romper';
+import type {
+    DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement,
+} from './romper';
 import StoryReasoner from './StoryReasoner';
 
 export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;
@@ -12,7 +14,11 @@ export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;
  * @param {Function} dataResolver an instance of the data resolver using for resolving world state
  * @return {Factory} an instance of the Factory which can be used to fetch an individual story
  */
-export default function (fetcher: StoryFetcher, dataResolver: DataResolver): StoryReasonerFactory {
+export default function (
+    storyFetcher: StoryFetcher,
+    narrativeElementFetcher: NarrativeElementFetcher,
+    dataResolver: DataResolver,
+): StoryReasonerFactory {
     /**
      * Given a story ID, this will give you an instance of a StoryReasoner
      * which can reason over that ID
@@ -21,7 +27,22 @@ export default function (fetcher: StoryFetcher, dataResolver: DataResolver): Sto
      * @return {Promise.<StoryReasoner>} a promise which will resolve to an instance of a reasoner
      */
     function Factory(id: string): Promise<StoryReasoner> {
-        return fetcher(id).then(story => new StoryReasoner(story, dataResolver, Factory));
+        let returnedStory;
+        return storyFetcher(id)
+            .then((story) => {
+                returnedStory = story;
+                const nePromiseArray = [];
+                story.narrative_elements.forEach((narrativeElementId) => {
+                    nePromiseArray.push(narrativeElementFetcher(narrativeElementId));
+                });
+                return Promise.all(nePromiseArray);
+            })
+            .then((narrativeElements: Array<NarrativeElement>) => new StoryReasoner(
+                returnedStory,
+                narrativeElements,
+                dataResolver,
+                Factory,
+            ));
     }
 
     return Factory;

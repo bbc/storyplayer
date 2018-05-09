@@ -39,7 +39,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (this._representation.choices) {
             choices = this._representation.choices.map(choice =>
                 RendererFactory(
-                    choice.representation,
+                    choice.choice_representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
                     this._player,
@@ -76,15 +76,15 @@ export default class SwitchableRenderer extends BaseRenderer {
     _renderSwitchButtons() {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
-                if (choice.representation.asset_collection.icon) {
-                    this._fetchAssetCollection(choice.representation.asset_collection.icon.default)
+                if (choice.choice_representation.asset_collections.icon) {
+                    this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default)
                         .then((icon) => {
                             if (icon.assets.image_src) {
                                 this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
                                     this._player.addRepresentationControl(
                                         `${idx}`,
                                         mediaUrl,
-                                        choice.representation.name,
+                                        choice.choice_representation.name,
                                     );
                                     const currentSelection = this._currentRendererIndex.toString();
                                     this._player.setActiveRepresentationControl(currentSelection);
@@ -201,7 +201,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (this._representation.choices && this._representation
             .choices.length >= this._currentRendererIndex) {
             return this._representation
-                .choices[this._currentRendererIndex].representation;
+                .choices[this._currentRendererIndex].choice_representation;
         }
         return this._representation;
     }
@@ -209,8 +209,8 @@ export default class SwitchableRenderer extends BaseRenderer {
     // fetch the icon asset for the given representation and set
     // the source of the IMG element
     _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
-        if (choiceRepresentation.asset_collection.icon) {
-            this._fetchAssetCollection(choiceRepresentation.asset_collection.icon.default)
+        if (choiceRepresentation.asset_collections.icon) {
+            this._fetchAssetCollection(choiceRepresentation.asset_collections.icon.default)
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {

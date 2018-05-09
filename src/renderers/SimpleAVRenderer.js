@@ -215,8 +215,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._mediaInstance.attachMedia(videoElement);
 
         // set video source
-        if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+        if (this._representation.asset_collections.foreground) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground)
                 .then((fg) => {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src)
