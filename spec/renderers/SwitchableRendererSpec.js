@@ -23,7 +23,8 @@ const defaultSwitchableRepresentation = {
     choices: [
         {
             label: 'overhead',
-            representation: {
+            choice_representation_id: '8037d1c0-8ea3-4833-9aa8-dd910f3e89f3',
+            choice_representation: {
                 id: '8037d1c0-8ea3-4833-9aa8-dd910f3e89f3',
                 version: '0:0',
                 name: 'Make Step 1 Camera 1 Representation Element',
@@ -40,7 +41,8 @@ const defaultSwitchableRepresentation = {
         },
         {
             label: 'presenter',
-            representation: {
+            choice_representation_id: 'aa7ff82e-5cf2-40bd-b9fb-48d0ed829458',
+            choice_representation: {
                 id: 'aa7ff82e-5cf2-40bd-b9fb-48d0ed829458',
                 version: '0:0',
                 name: 'Make Step 1 Camera 2 Representation Element',
@@ -55,7 +57,8 @@ const defaultSwitchableRepresentation = {
         },
         {
             label: 'close-up',
-            representation: {
+            choice_representation_id: '3d22492b-ec4c-4cc0-80d1-b7f880aff0d5',
+            choice_representation: {
                 id: '3d22492b-ec4c-4cc0-80d1-b7f880aff0d5',
                 version: '0:0',
                 name: 'Make Step 1 Camera 3 Representation Element',
@@ -70,7 +73,8 @@ const defaultSwitchableRepresentation = {
         },
         {
             label: 'graphic',
-            representation: {
+            choice_representation_id: '91a9bef3-acfd-4aab-ac5b-ac06d0ee4e85',
+            choice_representation: {
                 id: '91a9bef3-acfd-4aab-ac5b-ac06d0ee4e85',
                 version: '0:0',
                 name: 'Make Step 1 Image Representation Element',

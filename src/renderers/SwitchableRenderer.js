@@ -38,13 +38,13 @@ export default class SwitchableRenderer extends BaseRenderer {
         let choices = [];
         if (this._representation.choices) {
             choices = this._representation.choices.map(choice =>
-                RendererFactory(
+                (choice.choice_representation ? RendererFactory(
                     choice.choice_representation,
                     this._fetchAssetCollection,
                     this._fetchMedia,
                     this._player,
                     this._analytics,
-                ));
+                ) : null));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
@@ -76,7 +76,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     _renderSwitchButtons() {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
-                if (choice.choice_representation.asset_collections.icon) {
+                if (choice.choice_representation &&
+                    choice.choice_representation.asset_collections.icon
+                ) {
+                    const choiceName = choice.choice_representation.name;
+                    // eslint-disable-next-line max-len
                     this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default)
                         .then((icon) => {
                             if (icon.assets.image_src) {
@@ -84,7 +88,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                                     this._player.addRepresentationControl(
                                         `${idx}`,
                                         mediaUrl,
-                                        choice.choice_representation.name,
+                                        choiceName,
                                     );
                                     const currentSelection = this._currentRendererIndex.toString();
                                     this._player.setActiveRepresentationControl(currentSelection);
@@ -200,8 +204,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     getRepresentation() {
         if (this._representation.choices && this._representation
             .choices.length >= this._currentRendererIndex) {
-            return this._representation
-                .choices[this._currentRendererIndex].choice_representation;
+            const choice = this._representation
+                .choices[this._currentRendererIndex];
+            if (choice.choice_representation) {
+                return choice.choice_representation;
+            }
         }
         return this._representation;
     }

@@ -14,7 +14,6 @@ export type RepresentationReasoner = (representationCollection: RepresentationCo
  * @param {Function} dataResolver an instance of the data resolver using for resolving world state
  * @return {RepresentationReasoner} an instance of the reasoner
  */
-// eslint-disable-next-line max-len
 export default function RepresentationReasonerFactory(
     representationFetcher: RepresentationFetcher,
     dataResolver: DataResolver,
@@ -52,9 +51,11 @@ export default function RepresentationReasonerFactory(
                     repsId[rep.id] = rep;
                 });
                 if (representation.choices) {
-                    representation.choices.forEach((choice, index) => {
-                        representation.choices[index].choice_representation = repsId[choice.choice_representation_id];
-                    });
+                    representation.choices = representation.choices.map(choice => ({
+                        label: choice.label,
+                        choice_representation_id: choice.choice_representation_id,
+                        choice_representation: repsId[choice.choice_representation_id],
+                    }));
                 }
                 return representation;
             });
