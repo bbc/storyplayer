@@ -29,7 +29,7 @@ const defaultSwitchableRepresentation = {
                 name: 'Make Step 1 Camera 1 Representation Element',
                 tags: {},
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
-                asset_collection: {
+                asset_collections: {
                     foreground: 'f1482c67-1c5b-407b-90c3-c2f7288e253c',
                     background: ['d22484f9-da14-484b-8051-71be36b2227f'],
                     icon: {
@@ -46,7 +46,7 @@ const defaultSwitchableRepresentation = {
                 name: 'Make Step 1 Camera 2 Representation Element',
                 tags: {},
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
-                asset_collection: {
+                asset_collections: {
                     foreground: 'fa20bde6-a388-4ec8-a457-ceaecdddcb4d',
                     background: ['d22484f9-da14-484b-8051-71be36b2227f'],
                     icon: { default: '265ECCF4-B4B0-4E55-9B9A-FAE9849330B1' },
@@ -61,7 +61,7 @@ const defaultSwitchableRepresentation = {
                 name: 'Make Step 1 Camera 3 Representation Element',
                 tags: {},
                 representation_type: 'urn:x-object-based-media:representation-types:simple-av/v1.0',
-                asset_collection: {
+                asset_collections: {
                     foreground: '852bd2f3-3b76-40af-bca6-b266a4c0d22e',
                     background: ['d22484f9-da14-484b-8051-71be36b2227f'],
                     icon: { default: 'A914B88E-46D3-4D55-BE5F-7DE0000487BC' },
@@ -76,14 +76,14 @@ const defaultSwitchableRepresentation = {
                 name: 'Make Step 1 Image Representation Element',
                 tags: {},
                 representation_type: 'urn:x-object-based-media:representation-types:image/v1.0',
-                asset_collection: {
+                asset_collections: {
                     foreground: 'adeb8f74-00d1-45ce-bf92-8328bc66457a',
                     icon: { default: 'adeb8f74-00d1-45ce-bf92-8328bc66457a' },
                 },
             },
         },
     ],
-    asset_collection: {
+    asset_collections: {
         icon: { default: 'adeb8f74-00d1-45ce-bf92-8328bc66457a' },
     },
 };
