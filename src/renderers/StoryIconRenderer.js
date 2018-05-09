@@ -88,9 +88,9 @@ export default class StoryIconRenderer extends EventEmitter {
     _getIconAssets(): Promise<Array<AssetCollectionPair>> {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
-            if (pathItem.representation.asset_collection.icon) {
+            if (pathItem.representation.asset_collections.icon) {
                 // eslint-disable-next-line prefer-destructuring
-                const icon = pathItem.representation.asset_collection.icon;
+                const icon = pathItem.representation.asset_collections.icon;
                 const defaultAssetCollectionId = icon.default;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
                 if (icon.active) {

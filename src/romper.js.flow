@@ -5,14 +5,14 @@ export type Tags = { [key: string]: Array<string> };
 export type SourceLocation = { [key: string]: string };
 
 export type Beginning = {
-    id: string,
+    narrative_element_id: string,
     condition: any,
 };
 
 export type Link = {
     link_type: string,
     condition: any,
-    target?: string,
+    target_narrative_element_id?: string,
 };
 
 export type NarrativeElement = {
@@ -21,9 +21,10 @@ export type NarrativeElement = {
     name: string,
     description: string,
     tags: Tags,
-    presentation: {
+    body: {
         type: string,
-        target: string,
+        representation_collection_target?: string,
+        story_target?: string,
     },
     links: Array<Link>,
 };
@@ -34,7 +35,7 @@ export type Story = {
     name: string,
     tags?: Tags,
     beginnings: Array<Beginning>,
-    narrative_elements: Array<NarrativeElement>,
+    narrative_elements: Array<string>,
     meta?: any,
 };
 
@@ -42,13 +43,21 @@ export type DataResolver = (name: string) => Promise<any>;
 
 export type StoryFetcher = (id: string) => Promise<Story>;
 
+export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
+
+export type RepresentationChoice = {
+    label: string,
+    choice_representation_id: string,
+    choice_representation?: Representation,
+}
+
 export type Representation = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
     representation_type: string,
-    asset_collection: {
+    asset_collections: {
         foreground?: string,
         background?: Array<string>,
         icon?: {
@@ -56,10 +65,7 @@ export type Representation = {
             active?: string,
         },
     },
-    choices?: Array<{
-        label: string,
-        representation: Representation,
-    }>,
+    choices?: Array<RepresentationChoice>,
     behaviours?: {
         start?: {
             type: string,
@@ -72,12 +78,14 @@ export type Representation = {
     },
 };
 
+export type RepresentationFetcher = (id: string) => Promise<Representation>;
+
 export type AssetCollection = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
-    type: string,
+    asset_collection_type: string,
     assets: {
         audio_src?: string,
         image_src?: string,
@@ -86,20 +94,20 @@ export type AssetCollection = {
     },
 };
 
-export type Presentation = {
+export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+
+export type RepresentationCollection = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
     representations: Array<{
-        representation: Representation,
+        representation_id: string,
         condition: any,
     }>,
 };
 
-export type PresentationFetcher = (id: string) => Promise<Presentation>;
-
-export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+export type RepresentationCollectionFetcher = (id: string) => Promise<RepresentationCollection>;
 
 export type MediaFetcher = (uri: string) => Promise<string>;
 
@@ -117,6 +125,8 @@ export type Settings = {
     renderers?: Renderers,
     dataResolver: DataResolver,
     storyFetcher: StoryFetcher,
-    presentationFetcher: PresentationFetcher,
+    narrativeElementFetcher: NarrativeElementFetcher,
+    representationCollectionFetcher: RepresentationCollectionFetcher,
+    representationFetcher: RepresentationFetcher,
     mediaFetcher: MediaFetcher,
 };

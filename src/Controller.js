@@ -4,7 +4,8 @@ import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
 import type {
-    StoryFetcher, NarrativeElement, PresentationFetcher, AssetCollectionFetcher, MediaFetcher,
+    StoryFetcher, NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher,
+    MediaFetcher,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
@@ -20,7 +21,7 @@ export default class Controller {
     constructor(
         target: HTMLElement,
         storyReasonerFactory: StoryReasonerFactory,
-        fetchPresentation: PresentationFetcher,
+        fetchRepresentationCollection: RepresentationCollectionFetcher,
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
@@ -31,7 +32,7 @@ export default class Controller {
         this._reasoner = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
-        this._fetchPresentation = fetchPresentation;
+        this._fetchRepresentationCollection = fetchRepresentationCollection;
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
@@ -142,7 +143,7 @@ export default class Controller {
         this._renderManager = new RenderManager(
             this,
             this._target,
-            this._fetchPresentation,
+            this._fetchRepresentationCollection,
             this._fetchAssetCollection,
             this._representationReasoner,
             this._fetchMedia,
@@ -169,7 +170,7 @@ export default class Controller {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
             this._fetchStory,
-            this._fetchPresentation,
+            this._fetchRepresentationCollection,
             this._storyReasonerFactory,
         );
 
@@ -326,7 +327,7 @@ export default class Controller {
     // follow link from the narrative element to one following it
     followLink(narrativeElementId: string) {
         this._currentNarrativeElement.links.forEach((link) => {
-            if (link.target === narrativeElementId) {
+            if (link.target_narrative_element_id === narrativeElementId) {
                 if (this._reasoner) {
                     this._reasoner._followLink(link);
                 }
@@ -368,9 +369,10 @@ export default class Controller {
                 .then((links) => {
                     const narrativeElementList = [];
                     links.forEach((link) => {
-                        if (this._reasoner && link.target) {
-                            narrativeElementList
-                                .push(this._reasoner._narrativeElements[link.target]);
+                        if (this._reasoner && link.target_narrative_element_id) {
+                            narrativeElementList.push(this._reasoner._narrativeElements[
+                                link.target_narrative_element_id
+                            ]);
                         }
                     });
                     return narrativeElementList;
@@ -408,8 +410,8 @@ export default class Controller {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
         nextNodes.forEach((link) => {
-            if (link.link_type === 'NARRATIVE_ELEMENT' && link.target) {
-                upcomingIds.push(link.target);
+            if (link.link_type === 'NARRATIVE_ELEMENT' && link.target_narrative_element_id) {
+                upcomingIds.push(link.target_narrative_element_id);
             } else if (link.link_type === 'END_STORY') {
                 if (this._linearStoryPath) {
                     let matchingId = null;
@@ -454,7 +456,7 @@ export default class Controller {
     _reasoner: ?StoryReasoner;
     _target: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
-    _fetchPresentation: PresentationFetcher;
+    _fetchRepresentationCollection: RepresentationCollectionFetcher;
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;

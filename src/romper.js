@@ -36,29 +36,20 @@ module.exports = {
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
-        // if (!MediaManager.isSupported()) {
-        //     const noHlsWarning = document.createElement('div');
-        //     noHlsWarning.classList.add('romper-no-hls-support');
-        //     const noHlsWarningDiv = document.createElement('div');
-        //     noHlsWarningDiv.classList.add('romper-no-hls-support-div');
-        //     noHlsWarningDiv.innerHTML = 'Your browser is not compatible with this experience. ' +
-        //         'Please use Chrome or Firefox and update them to the newest version.';
-        //
-        //     noHlsWarning.appendChild(noHlsWarningDiv);
-        //     mergedSettings.target.appendChild(noHlsWarning);
-        //     return null;
-        // }
-
         const storyReasonerFactory = StoryReasonerFactory(
             mergedSettings.storyFetcher,
+            mergedSettings.narrativeElementFetcher,
             mergedSettings.dataResolver,
         );
 
-        const representationReasoner = RepresentationReasonerFactory(mergedSettings.dataResolver);
+        const representationReasoner = RepresentationReasonerFactory(
+            mergedSettings.representationFetcher,
+            mergedSettings.dataResolver,
+        );
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
-            mergedSettings.presentationFetcher,
+            mergedSettings.representationCollectionFetcher,
             mergedSettings.assetCollectionFetcher,
             representationReasoner,
             mergedSettings.mediaFetcher,
