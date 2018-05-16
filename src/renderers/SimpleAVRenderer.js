@@ -4,7 +4,7 @@ import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
-import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 
 import MediaManager from '../MediaManager';
 import MediaInstance from '../MediaInstance';
