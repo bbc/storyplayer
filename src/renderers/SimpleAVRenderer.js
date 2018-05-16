@@ -333,7 +333,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE, 'paused', 'playing');
             this._mediaInstance.play();
         } else {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE, 'paused', 'playing');
+            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE, 'playing', 'paused');
             this._mediaInstance.pause();
         }
     }
