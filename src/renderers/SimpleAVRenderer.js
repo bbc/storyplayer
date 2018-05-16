@@ -3,7 +3,8 @@
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import type { AnalyticsLogger } from '../AnalyticEvents';
+import AnalyticEvents from '../AnalyticEvents';
+import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 
 import MediaManager from '../MediaManager';
 import MediaInstance from '../MediaInstance';
@@ -329,8 +330,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked(): void {
         const videoElement = this._mediaInstance.getMediaElement();
         if (videoElement.paused === true) {
+            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE, 'paused', 'playing');
             this._mediaInstance.play();
         } else {
+            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE, 'paused', 'playing');
             this._mediaInstance.pause();
         }
     }
