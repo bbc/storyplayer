@@ -355,6 +355,7 @@ $romper-hover-text-size: 25px;
 
   .romper-link-choice-overlay {
     display: flex;
+    z-index: 5;
 
     .romper-link-icon {
       width: 3em;
