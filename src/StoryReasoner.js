@@ -201,9 +201,9 @@ export default class StoryReasoner extends EventEmitter {
 
     setVariableValue(name: string, value: any) {
         logger.info(`Setting variable ${name} to ${value}`);
-        this._dataResolver.set(name, value);        
+        this._dataResolver.set(name, value);
     }
-    
+
     appendToHistory(narrativeElementId: string) {
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get('romper_path_history')
@@ -212,7 +212,6 @@ export default class StoryReasoner extends EventEmitter {
                 if (value !== null) {
                     neList = neList.concat(value);
                 }
-                // console.log(neList);
                 neList.push(narrativeElementId);
                 this.setVariableValue('romper_path_history', neList);
             });
