@@ -538,6 +538,8 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
+
+        this._startButtonClicked();
     }
 
     _handleTouchEndEvent(event: Object) {
