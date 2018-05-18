@@ -182,17 +182,6 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _setCurrentNarrativeElement(narrativeElementId: string) {
-        this._dataResolver.get('romper_path_history')
-            .then((value) => {
-                let neList = [];
-                if (value !== null) {
-                    neList = neList.concat(value);
-                }
-                // console.log(neList);
-                neList.push(narrativeElementId);
-                this._dataResolver.set('romper_path_history', neList);
-            });
-
         if (!(narrativeElementId in this._narrativeElements)) {
             this.emit('error', new Error('Link is to an narrative object not in the graph'));
         } else {
@@ -208,6 +197,25 @@ export default class StoryReasoner extends EventEmitter {
                 this.emit('narrativeElementChanged', this._currentNarrativeElement);
             }
         }
+    }
+
+    setVariableValue(name: string, value: any) {
+        logger.info(`Setting variable ${name} to ${value}`);
+        this._dataResolver.set(name, value);        
+    }
+    
+    appendToHistory(narrativeElementId: string) {
+        logger.info(`Storing ${narrativeElementId} in history`);
+        this._dataResolver.get('romper_path_history')
+            .then((value) => {
+                let neList = [];
+                if (value !== null) {
+                    neList = neList.concat(value);
+                }
+                // console.log(neList);
+                neList.push(narrativeElementId);
+                this.setVariableValue('romper_path_history', neList);
+            });
     }
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
