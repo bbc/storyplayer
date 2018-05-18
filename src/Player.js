@@ -694,6 +694,16 @@ class Player extends EventEmitter {
         this._analytics(logData);
     }
 
+    _logRendererAction(userEventName: AnalyticEventName) {
+        const logData = {
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names[userEventName],
+            from: 'not_set',
+            to: 'not_set',
+        };
+        this._analytics(logData);
+    }
+
     setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
@@ -898,6 +908,7 @@ class Player extends EventEmitter {
     }
 
     enterCompleteBehavourPhase() {
+        this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
         this.disablePlayButton();
         this.showRepeatButton();
@@ -905,10 +916,12 @@ class Player extends EventEmitter {
     }
 
     enterStartBehaviourPhase() {
+        this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
         this.hideRepeatButton();
     }
 
     exitStartBehaviourPhase() {
+        this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
         this.enablePlayButton();
         this.enableScrubBar();
         this.enableRepresentationControl();
