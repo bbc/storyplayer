@@ -5,7 +5,8 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
-import type { AnalyticsLogger } from '../AnalyticEvents';
+import AnalyticEvents from '../AnalyticEvents';
+import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import logger from '../logger';
 
 
@@ -76,6 +77,17 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._player.exitStartBehaviourPhase();
+    }
+
+    /* record some analytics for the renderer - not user actions though */
+    logRendererAction(userEventName: AnalyticEventName) {
+        const logData = {
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names[userEventName],
+            from: 'not_set',
+            to: 'not_set',
+        };
+        this._analytics(logData);
     }
 
     /**
