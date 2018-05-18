@@ -156,6 +156,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._mediaInstance.play();
 
         this._enableSubtitlesButton();
+
+        try {
+            this._clearBehaviourElements();
+        } catch (e) {
+            //
+        }
     }
 
     end() {
