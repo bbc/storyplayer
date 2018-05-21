@@ -1409,6 +1409,13 @@
                         }
                     }
                 ],
+                "variables": {
+                    "age": {
+                        "default_value": 18,
+                        "type": "integer",
+                        "description": "age of the user"
+                    }
+                },
                 "tags": {},
                 "narrative_elements": [
                     {
@@ -2060,32 +2067,23 @@
     <script src="dist/romper.js"></script>
     <script>
         (function () {
-            const variable_state = {
-                'age': 18,
-            };
             const config = JSON.parse(document.getElementById('romper-story').textContent);
-            const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 100));
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
-                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(variable_state),
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
                 },
-                storyFetcher: id => Promise.resolve(wait().then(() => config.story.filter(storyObject => storyObject.id === id)[
-                    0
-                ])),
+                storyFetcher: id => Promise.resolve().then(
+                    () => config.story.filter(storyObject => storyObject.id === id)[0]
+                ),
                 mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri')),
                 presentationFetcher: id => Promise.resolve(
                     config.presentations
-                        .filter(presentationObject => presentationObject.id === id)[
-                    0
-                    ]
+                        .filter(presentationObject => presentationObject.id === id)[0]
                 ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object: ' + id)),
                 assetCollectionFetcher: id => Promise.resolve(
                     config.asset_collections
-                        .filter(assetCollectionObject => assetCollectionObject.id === id)[
-                    0
-                    ]
+                        .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
                 ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
             });
 

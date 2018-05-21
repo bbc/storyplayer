@@ -95,22 +95,42 @@ export default class StoryReasoner extends EventEmitter {
             throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
+        this._fetchVariablesFromStory();
         this._chooseBeginning();
     }
 
+    /*
+       * Get the variables defined in this story, and store the default values in our dataresolver
+       */
+    _fetchVariablesFromStory() {
+        if (this._story.variables) {
+            // eslint-disable-next-line prefer-destructuring
+            const variables = this._story.variables;
+            Object.keys(variables).forEach((storyVariableName) => {
+                const storyVariable = variables[storyVariableName];
+                // eslint-disable-next-line max-len
+                this.setVariableValue(storyVariableName, storyVariable.default_value);
+                // eslint-disable-next-line max-len
+                logger.info(`Setting story variable ${storyVariableName} to: ${storyVariable.default_value}`);
+            });
+        } else {
+            logger.info('No variables in story');
+        }
+    }
+
     /**
-     * Move on to the next node of this story.
-     *
-     * @fires StoryReasoner#error
-     * @fires StoryReasoner#narrativeElementChanged
-     * @fires StoryReasoner#storyEnd
-     * @fires StoryReasoner#choiceOfLinks
-     * @throws when the story has not yet started, or has already ended
-     * @throws if the reasoner is currently reasoning something
-     *         (e.g,. next() has been called but a new narrative
-     *         element has not yet been thought about)
-     * @return {void}
-     */
+         * Move on to the next node of this story.
+         *
+         * @fires StoryReasoner#error
+         * @fires StoryReasoner#narrativeElementChanged
+         * @fires StoryReasoner#storyEnd
+         * @fires StoryReasoner#choiceOfLinks
+         * @throws when the story has not yet started, or has already ended
+         * @throws if the reasoner is currently reasoning something
+         *         (e.g,. next() has been called but a new narrative
+         *         element has not yet been thought about)
+         * @return {void}
+         */
     next() {
         if (!this._storyStarted) {
             throw new Error('InvalidState: this story has not yet started');
