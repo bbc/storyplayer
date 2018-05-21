@@ -350,6 +350,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const buttonClickHandler = () => {
             this._player._enableUserInteraction();
             this._player._narrativeElementTransport.classList.remove('romper-inactive');
+            this.logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             callback();
         };
         continueButton.onclick = buttonClickHandler;
