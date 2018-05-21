@@ -28,7 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyBlurBehaviour: Function;
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
-    _applyShowImageWithButtonBehaviour: Function;
+    _applyWaitForButtonBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
@@ -77,7 +77,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
-        this._applyShowImageWithButtonBehaviour = this._applyShowImageWithButtonBehaviour.bind(this);
+        this._applyWaitForButtonBehaviour = this._applyWaitForButtonBehaviour.bind(this);
         this._behaviourElements = [];
 
         this._subtitlesShowing = player.showingSubtitles;
@@ -103,7 +103,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
             // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showimagewithbutton/v1.0': this._applyShowImageWithButtonBehaviour,
+            'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': this._applyWaitForButtonBehaviour,
         };
 
         this._lastSetTime = 0;
@@ -329,26 +329,19 @@ export default class SimpleAVRenderer extends BaseRenderer {
         });
     }
 
-    _applyShowImageWithButtonBehaviour(behaviour: Object, callback: () => mixed) {
-        const assetCollectionId = behaviour.image;
-        this._fetchAssetCollection(assetCollectionId).then((image) => {
-            if (image.assets.image_src) {
-                this._overlayImage(image.assets.image_src);
-            }
-        });
-
+    _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {
         const continueButton = document.createElement('button');
         continueButton.classList.add(behaviour.button_class);
-        continueButton.setAttribute('title', 'Start Button');
-        continueButton.setAttribute('aria-label', 'Start Button');
+        continueButton.setAttribute('title', 'Continue Button');
+        continueButton.setAttribute('aria-label', 'Continue Button');
         const continueButtonIconDiv = document.createElement('div');
         continueButtonIconDiv.classList.add('romper-button-icon-div');
-        continueButtonIconDiv.classList.add('romper-start-button-icon-div');
+        continueButtonIconDiv.classList.add(`${behaviour.button_class}-icon-div`);
         continueButton.appendChild(continueButtonIconDiv);
         const continueButtonTextDiv = document.createElement('div');
         continueButtonTextDiv.innerHTML = behaviour.text;
         continueButtonTextDiv.classList.add('romper-button-text-div');
-        continueButtonTextDiv.classList.add('romper-start-button-text-div');
+        continueButtonTextDiv.classList.add(`${behaviour.button_class}-text-div`);
         continueButton.appendChild(continueButtonTextDiv);
 
         this._target.appendChild(continueButton);
@@ -361,7 +354,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         };
         continueButton.onclick = buttonClickHandler;
 
-        if (behaviour.hide_next_button) {
+        if (behaviour.hide_narrative_buttons) {
             // can't use player.setNextAvailable
             // as this may get reset after this by NE change handling
             this._player._narrativeElementTransport.classList.add('romper-inactive');
