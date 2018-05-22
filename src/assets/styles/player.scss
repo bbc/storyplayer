@@ -355,9 +355,11 @@ $romper-hover-text-size: 25px;
 
   .romper-link-choice-overlay {
     display: flex;
+    z-index: 5;
 
     .romper-link-icon {
-      width: 3em;
+      padding: 10px;
+      width: 100px;
     }
   }
 }
@@ -439,6 +441,7 @@ $romper-hover-text-size: 25px;
 
     >.romper-repeat-button {
       background-color: $backing-colour;
+      bottom: 0;
       height: $romper-button-height;
       left: 50%;
       margin-right: -50%;

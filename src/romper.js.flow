@@ -38,7 +38,10 @@ export type Story = {
     meta?: any,
 };
 
-export type DataResolver = (name: string) => Promise<any>;
+export type DataResolver = { 
+    get: (name: string) => Promise<any>, 
+    set: (name: string, value: any) => any,
+}
 
 export type StoryFetcher = (id: string) => Promise<Story>;
 

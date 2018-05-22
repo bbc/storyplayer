@@ -62,9 +62,11 @@ export default function evaluateConditions<T>(
     candidates: Array<{condition: any} & T>,
     dataResolver: DataResolver,
 ): Promise<?Array<T>> {
-    const interestingVars = Array.from(new Set(...candidates.map(candidate =>
-        JsonLogic.uses_data(candidate.condition))).values());
-    return Promise.all(interestingVars.map(interestingVar => dataResolver(interestingVar)
+    const interestingVars = [];
+    candidates.forEach(candidate =>
+        JsonLogic.uses_data(candidate.condition).forEach(cv => interestingVars.push(cv)));
+
+    return Promise.all(interestingVars.map(interestingVar => dataResolver.get(interestingVar)
         .catch(() => null)
         .then(value => ({ key: interestingVar, value }))))
         .then(convertDotNotationToNestedObjects)
@@ -82,7 +84,6 @@ export default function evaluateConditions<T>(
                     sortedCandidates.push(candidates[c.i]);
                 });
                 return sortedCandidates;
-                // return [candidates[bestCandidate.i]];
             }
             return null;
         });
