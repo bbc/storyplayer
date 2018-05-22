@@ -1412,11 +1412,24 @@
                 "variables": {
                     "profile": {
                         "default_value": {
-                            "age": 18,
-                            "location": "UK"
+                            "age": {
+                                "default_value": 18,
+                                "description": "how old user is",
+                                "type": "integer"
+                            },
+                            "location": {
+                                "default_value": "UK",
+                                "description": "where user is",
+                                "type": "string"
+                            }
                         },
                         "type": "integer",
-                        "description": "age of the user"
+                        "description": "profile of the user"
+                    },
+                    "bandwidth": {
+                        "default_value": 3,
+                        "description": "how much data user can consume",
+                        "type": "integer"
                     }
                 },
                 "tags": {},
