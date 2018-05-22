@@ -99,9 +99,7 @@ export default class StoryReasoner extends EventEmitter {
         this._chooseBeginning();
     }
 
-    /*
-       * Get the variables defined in this story, and store the default values in our dataresolver
-       */
+    // Get the variables defined in this story, and store the default values in our dataresolver
     _fetchVariablesFromStory() {
         if (this._story.variables) {
             // eslint-disable-next-line prefer-destructuring
@@ -119,18 +117,18 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     /**
-         * Move on to the next node of this story.
-         *
-         * @fires StoryReasoner#error
-         * @fires StoryReasoner#narrativeElementChanged
-         * @fires StoryReasoner#storyEnd
-         * @fires StoryReasoner#choiceOfLinks
-         * @throws when the story has not yet started, or has already ended
-         * @throws if the reasoner is currently reasoning something
-         *         (e.g,. next() has been called but a new narrative
-         *         element has not yet been thought about)
-         * @return {void}
-         */
+     * Move on to the next node of this story.
+     *
+     * @fires StoryReasoner#error
+     * @fires StoryReasoner#narrativeElementChanged
+     * @fires StoryReasoner#storyEnd
+     * @fires StoryReasoner#choiceOfLinks
+     * @throws when the story has not yet started, or has already ended
+     * @throws if the reasoner is currently reasoning something
+     *         (e.g,. next() has been called but a new narrative
+     *         element has not yet been thought about)
+     * @return {void}
+     */
     next() {
         if (!this._storyStarted) {
             throw new Error('InvalidState: this story has not yet started');
@@ -219,11 +217,23 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
+    /**
+     * Store or change a variable for the reasoner to use while reasoning
+     *
+     * @param {String} name The name of the variable to set
+     * @param {any} value Its value
+     */
     setVariableValue(name: string, value: any) {
         logger.info(`Setting variable ${name} to ${value}`);
         this._dataResolver.set(name, value);
     }
 
+    /**
+     * Record the fact that a given Narrative Element has been visited
+     * A special case of storing a variable
+     *
+     * @param {string} narrativeElementId The id of the narrative element visited
+     */
     appendToHistory(narrativeElementId: string) {
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get('romper_path_history')
