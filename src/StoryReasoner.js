@@ -240,7 +240,7 @@ export default class StoryReasoner extends EventEmitter {
      * @param {any} value Its value
      */
     setVariableValue(name: string, value: any) {
-        logger.info(`Setting variable ${name} to ${value}`);
+        logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
     }
 
