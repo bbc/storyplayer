@@ -1042,7 +1042,7 @@
                     },
                     "condition": {
                         "<": [
-                            { "var": "profile.age" },
+                            { "var": "profile_age" },
                             18
                         ]
                     }
@@ -1070,7 +1070,7 @@
                     },
                     "condition": {
                         ">=": [
-                            { "var": "profile.age" },
+                            { "var": "profile_age" },
                             18
                         ]
                     }
@@ -1410,21 +1410,15 @@
                     }
                 ],
                 "variables": {
-                    "profile": {
-                        "default_value": {
-                            "age": {
-                                "default_value": 18,
-                                "description": "how old user is",
-                                "type": "integer"
-                            },
-                            "location": {
-                                "default_value": "UK",
-                                "description": "where user is",
-                                "type": "string"
-                            }
-                        },
-                        "type": "integer",
-                        "description": "profile of the user"
+                    "profile_age": {
+                        "default_value": 16,
+                        "description": "how old user is",
+                        "type": "integer"
+                    },
+                    "profile_location": {
+                        "default_value": "UK",
+                        "description": "where user is",
+                        "type": "string"
                     },
                     "bandwidth": {
                         "default_value": 3,
@@ -1494,7 +1488,7 @@
                             {
                                 "condition": {
                                     ">": [
-                                        { "var": "profile.age" },
+                                        { "var": "profile_age" },
                                         15
                                     ]
                                 },
@@ -1932,7 +1926,7 @@
                             {
                                 "condition": {
                                     "==": [
-                                        { "var": "profile.location" },
+                                        { "var": "profile_location" },
                                         "UK"
                                     ]
                                 },

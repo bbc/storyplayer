@@ -102,34 +102,14 @@ export default class StoryReasoner extends EventEmitter {
     // Get the variables defined in this story, and store the default values in our dataresolver
     _fetchVariablesFromStory() {
         if (this._story.variables) {
-            const variableTree = this._parseVariableDefinitions(this._story.variables);
+            const variableTree = this._story.variables;
             Object.keys(variableTree).forEach((storyVariableName) => {
-                const storyVariableValue = variableTree[storyVariableName];
+                const storyVariableValue = variableTree[storyVariableName].default_value;
                 this.setVariableValue(storyVariableName, storyVariableValue);
             });
         } else {
             logger.info('No variables in story');
         }
-    }
-
-    // extract default values from nested variable tree, preserving tree structure
-    _parseVariableDefinitions(variables: Object) {
-        const result = {};
-        Object.keys(variables).forEach((varName) => {
-            const storyVar = variables[varName];
-            // is this a leaf or a node?
-            // nodes have an object as default_value
-            const varDefaultValue = storyVar.default_value;
-            if (varDefaultValue !== null && typeof varDefaultValue === 'object') {
-                // recurse
-                const subVar = this._parseVariableDefinitions(varDefaultValue);
-                result[varName] = subVar;
-            } else {
-                // return value
-                result[varName] = varDefaultValue;
-            }
-        });
-        return result;
     }
 
     /**
