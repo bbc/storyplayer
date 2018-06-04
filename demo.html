@@ -2126,7 +2126,7 @@
             const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 100));
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
-                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(config.state),
+                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT({}),
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
                 },
@@ -2148,12 +2148,6 @@
                 ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
             });
 
-            // 001 is simple linear
-            // 002 is nested linear
-            // 02a is substory 1
-            // 02b is substory 2
-            // 02c is substory 3
-            // 003 is linear with switchable as first NE
             romper.start('axyx17x5x9rv9wvkcapr1f3ftj');
         })();
     </script>

@@ -199,6 +199,24 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
+    setVariableValue(name: string, value: any) {
+        logger.info(`Setting variable ${name} to ${value}`);
+        this._dataResolver.set(name, value);
+    }
+
+    appendToHistory(narrativeElementId: string) {
+        logger.info(`Storing ${narrativeElementId} in history`);
+        this._dataResolver.get('romper_path_history')
+            .then((value) => {
+                let neList = [];
+                if (value !== null) {
+                    neList = neList.concat(value);
+                }
+                neList.push(narrativeElementId);
+                this.setVariableValue('romper_path_history', neList);
+            });
+    }
+
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
         const errorCallback = err => this.emit('error', err);
         const branchBeginningCallback = () => this.emit('choiceOfBeginnings');

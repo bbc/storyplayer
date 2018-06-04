@@ -216,6 +216,9 @@ export default class Controller {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
+        if (this._reasoner) {
+            this._reasoner.appendToHistory(narrativeElement.id);
+        }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
         this._currentNarrativeElement = narrativeElement;
         this._renderManager.handleNEChange(narrativeElement);
