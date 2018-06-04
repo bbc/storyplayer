@@ -95,7 +95,41 @@ export default class StoryReasoner extends EventEmitter {
             throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
+        this._fetchVariablesFromStory();
         this._chooseBeginning();
+    }
+
+    // Get the variables defined in this story, and store the default values in our dataresolver
+    _fetchVariablesFromStory() {
+        if (this._story.variables) {
+            const variableTree = this._parseVariableDefinitions(this._story.variables);
+            Object.keys(variableTree).forEach((storyVariableName) => {
+                const storyVariableValue = variableTree[storyVariableName];
+                this.setVariableValue(storyVariableName, storyVariableValue);
+            });
+        } else {
+            logger.info('No variables in story');
+        }
+    }
+
+    // extract default values from nested variable tree, preserving tree structure
+    _parseVariableDefinitions(variables: Object) {
+        const result = {};
+        Object.keys(variables).forEach((varName) => {
+            const storyVar = variables[varName];
+            // is this a leaf or a node?
+            // nodes have an object as default_value
+            const varDefaultValue = storyVar.default_value;
+            if (varDefaultValue !== null && typeof varDefaultValue === 'object') {
+                // recurse
+                const subVar = this._parseVariableDefinitions(varDefaultValue);
+                result[varName] = subVar;
+            } else {
+                // return value
+                result[varName] = varDefaultValue;
+            }
+        });
+        return result;
     }
 
     /**
@@ -199,11 +233,23 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
+    /**
+     * Store or change a variable for the reasoner to use while reasoning
+     *
+     * @param {String} name The name of the variable to set
+     * @param {any} value Its value
+     */
     setVariableValue(name: string, value: any) {
-        logger.info(`Setting variable ${name} to ${value}`);
+        logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
     }
 
+    /**
+     * Record the fact that a given Narrative Element has been visited
+     * A special case of storing a variable
+     *
+     * @param {string} narrativeElementId The id of the narrative element visited
+     */
     appendToHistory(narrativeElementId: string) {
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get('romper_path_history')

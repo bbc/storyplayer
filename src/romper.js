@@ -36,6 +36,11 @@ module.exports = {
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
+        if (!mergedSettings.dataResolver) {
+            logger.info('No data resolver passed to romper - creating one');
+            mergedSettings.dataResolver = ObjectDataResolver({});
+        }
+
         const storyReasonerFactory = StoryReasonerFactory(
             mergedSettings.storyFetcher,
             mergedSettings.dataResolver,
