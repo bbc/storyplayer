@@ -99,8 +99,8 @@ export default class BaseRenderer extends EventEmitter {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names[userEventName],
-            from: fromId == null ? 'not_set' : fromId,
-            to: toId == null ? 'not_set' : toId,
+            from: fromId === null ? 'not_set' : fromId,
+            to: toId === null ? 'not_set' : toId,
         };
         this._analytics(logData);
     }

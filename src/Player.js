@@ -459,7 +459,6 @@ class Player extends EventEmitter {
 
         // Hide gui elements until start clicked
         this._overlays.classList.add('romper-inactive');
-        // this._narrativeElementTransport.classList.add('romper-inactive');
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
 

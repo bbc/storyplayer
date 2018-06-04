@@ -162,11 +162,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._enableSubtitlesButton();
 
-        try {
-            this._clearBehaviourElements();
-        } catch (e) {
-            //
-        }
+        this._clearBehaviourElements();
     }
 
     end() {
@@ -438,7 +434,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const videoElement = this._mediaInstance.getMediaElement();
         videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
         this._behaviourElements.forEach((be) => {
-            this._target.removeChild(be);
+            try {
+                this._target.removeChild(be);
+            } catch (e) {
+                logger.warn(`could not remove behaviour element ${be.id} from SimpleAVRenderer`);
+            }
         });
     }
 
