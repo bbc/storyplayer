@@ -231,7 +231,6 @@ class Player extends EventEmitter {
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
     _mediaTransport: HTMLDivElement;
-    _startButton: HTMLButtonElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -254,6 +253,7 @@ class Player extends EventEmitter {
     _scrubbedEventTimeout: number;
     _showRomperButtonsTimeout: number;
     _RomperButtonsShowing: boolean;
+    _userInteractionStarted: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger) {
         super();
@@ -274,6 +274,7 @@ class Player extends EventEmitter {
             this._foregroundMediaElement.autoplay = true;
             this._backgroundMediaElement.autoplay = true;
         }
+        this._userInteractionStarted = false;
 
         this._mediaManager = new MediaManager(
             this._foregroundMediaElement,
@@ -366,27 +367,10 @@ class Player extends EventEmitter {
         nextButtonIconDiv.classList.add('romper-next-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
-        this._startButton = document.createElement('button');
-        this._repeatButton.classList.add('romper-button');
-        this._startButton.classList.add('romper-start-button');
-        this._startButton.setAttribute('title', 'Start Button');
-        this._startButton.setAttribute('aria-label', 'Start Button');
-        const startButtonIconDiv = document.createElement('div');
-        startButtonIconDiv.classList.add('romper-button-icon-div');
-        startButtonIconDiv.classList.add('romper-start-button-icon-div');
-        this._startButton.appendChild(startButtonIconDiv);
-        const startButtonTextDiv = document.createElement('div');
-        startButtonTextDiv.innerHTML = 'Start';
-        startButtonTextDiv.classList.add('romper-button-text-div');
-        startButtonTextDiv.classList.add('romper-start-button-text-div');
-        this._startButton.appendChild(startButtonTextDiv);
-        this._narrativeElementTransport.appendChild(this._startButton);
-
         this._guiLayer.appendChild(this._overlays);
         this._guiLayer.appendChild(this._narrativeElementTransport);
         this._guiLayer.appendChild(this._buttons);
         this._guiLayer.appendChild(this._buttonsActivateArea);
-        this._guiLayer.appendChild(this._startButton);
 
         this._scrubBar = document.createElement('input');
         this._scrubBar.setAttribute('title', 'Seek bar');
@@ -475,7 +459,6 @@ class Player extends EventEmitter {
 
         // Hide gui elements until start clicked
         this._overlays.classList.add('romper-inactive');
-        this._narrativeElementTransport.classList.add('romper-inactive');
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
 
@@ -506,12 +489,6 @@ class Player extends EventEmitter {
         this._nextButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._nextButtonClicked.bind(this)),
-        );
-
-        this._startButton.onclick = this._startButtonClicked.bind(this);
-        this._startButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._startButtonClicked.bind(this)),
         );
 
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
@@ -610,13 +587,15 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.classList.remove('hide');
     }
 
-    _startButtonClicked() {
+    _enableUserInteraction() {
+        if (this._userInteractionStarted) {
+            return;
+        }
+        this._userInteractionStarted = true;
         this._overlays.classList.remove('romper-inactive');
-        this._narrativeElementTransport.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._overlayToggleButtons.classList.remove('romper-inactive');
-        this._startButton.classList.add('romper-inactive');
 
         this._mediaManager.setPermissionToPlay(true);
 
@@ -648,6 +627,9 @@ class Player extends EventEmitter {
     }
 
     _nextButtonClicked() {
+        if (!this._userInteractionStarted) {
+            this._enableUserInteraction();
+        }
         this._hideAllOverlays();
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);

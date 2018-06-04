@@ -32,6 +32,7 @@ const names = [
     'CHANGE_CHAPTER_BUTTON_CLICKED',
     'SWITCH_VIEW_BUTTON_CLICKED',
     'LINK_CHOICE_CLICKED',
+    'BEHAVIOUR_CONTINUE_BUTTON_CLICKED',
 ];
 
 const AnalyticEvents = {

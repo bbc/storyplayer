@@ -28,6 +28,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _applyBlurBehaviour: Function;
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
+    _applyWaitForButtonBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
@@ -76,6 +77,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._applyWaitForButtonBehaviour = this._applyWaitForButtonBehaviour.bind(this);
         this._behaviourElements = [];
 
         this._subtitlesShowing = player.showingSubtitles;
@@ -100,6 +102,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': this._applyWaitForButtonBehaviour,
         };
 
         this._lastSetTime = 0;
@@ -157,6 +161,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._mediaInstance.play();
 
         this._enableSubtitlesButton();
+
+        this._clearBehaviourElements();
     }
 
     end() {
@@ -319,6 +325,39 @@ export default class SimpleAVRenderer extends BaseRenderer {
         });
     }
 
+    _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {
+        const continueButton = document.createElement('button');
+        continueButton.classList.add(behaviour.button_class);
+        continueButton.setAttribute('title', 'Continue Button');
+        continueButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconDiv = document.createElement('div');
+        continueButtonIconDiv.classList.add('romper-button-icon-div');
+        continueButtonIconDiv.classList.add(`${behaviour.button_class}-icon-div`);
+        continueButton.appendChild(continueButtonIconDiv);
+        const continueButtonTextDiv = document.createElement('div');
+        continueButtonTextDiv.innerHTML = behaviour.text;
+        continueButtonTextDiv.classList.add('romper-button-text-div');
+        continueButtonTextDiv.classList.add(`${behaviour.button_class}-text-div`);
+        continueButton.appendChild(continueButtonTextDiv);
+
+        this._target.appendChild(continueButton);
+        this._behaviourElements.push(continueButton);
+
+        const buttonClickHandler = () => {
+            this._player._enableUserInteraction();
+            this._player._narrativeElementTransport.classList.remove('romper-inactive');
+            this.logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+            callback();
+        };
+        continueButton.onclick = buttonClickHandler;
+
+        if (behaviour.hide_narrative_buttons) {
+            // can't use player.setNextAvailable
+            // as this may get reset after this by NE change handling
+            this._player._narrativeElementTransport.classList.add('romper-inactive');
+        }
+    }
+
     _overlayImage(imageSrc: string) {
         const overlayImageElement = document.createElement('img');
         overlayImageElement.src = imageSrc;
@@ -395,7 +434,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const videoElement = this._mediaInstance.getMediaElement();
         videoElement.style.filter = ''; // eslint-disable-line prefer-destructuring
         this._behaviourElements.forEach((be) => {
-            this._target.removeChild(be);
+            try {
+                this._target.removeChild(be);
+            } catch (e) {
+                logger.warn(`could not remove behaviour element ${be.id} from SimpleAVRenderer`);
+            }
         });
     }
 
