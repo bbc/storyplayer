@@ -5,12 +5,11 @@
     <meta charset="utf-8">
     <title>Romper Frog Demo</title>
     <link href="dist/romper.css" rel="stylesheet" type="text/css">
-    <link href="dist/democontent/newsround/styles.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
     <div id="romper-target"></div>
-    <script type="application/json" id="romper-story"> {
+    <script type="application/json" id="romper-story">{
         "asset_collections": [
             {
                 "id": "kvw1g6r47mnzv6p99blnm2q52d",
@@ -406,6 +405,16 @@
                 }
             },
             {
+                "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
+                "description": "",
+                "version": "",
+                "name": "",
+                "tags": {},
+                "assets": {
+                    "image_src": "./dist/democontent/newsround/Intro pane.png"
+                }
+            },
+            {
                 "id": "p2cunpcyloebz8fisqql0g2cb8",
                 "description": "",
                 "version": "",
@@ -506,6 +515,41 @@
         ],
         "presentations": [
             {
+                "id": "96hz3ctyubpl2bz4yzeuohz5fi",
+                "version": "0.0",
+                "name": "Intro frame",
+                "representations": [
+                    {
+                        "representation": {
+                            "id": "z3f0zzm4bvnl1ksoakr46xi563",
+                            "version": "0.0",
+                            "name": "Representation Item",
+                            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+                            "tags": {},
+                            "choices": [],
+                            "asset_collection": {
+                                "foreground": "b165c26a-48b2-455d-85b8-4920c070d51b",
+                                "background": [],
+                                "icon": {
+                                    "active": "",
+                                    "default": ""
+                                }
+                            },
+                            "behaviours": {
+                                "STARTED": [],
+                                "COMPLETED": []
+                            }
+                        },
+                        "condition": {
+                            "==": [
+                                1,
+                                1
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
                 "id": "86hz3ctyubpl2bz4yzeuohz5fi",
                 "version": "0.0",
                 "name": "Intro video",
@@ -527,7 +571,18 @@
                                 }
                             },
                             "behaviours": {
-                                "STARTED": [],
+                                "STARTED": [
+                                    {
+                                        "type": "urn:x-object-based-media:representation-behaviour:showimage/v1.0",
+                                        "image": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                                    },
+                                    {
+                                        "type": "urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0",
+                                        "button_class": "romper-start-button",
+                                        "text": "Start",
+                                        "hide_narrative_buttons": true
+                                    }
+                                ],
                                 "COMPLETED": []
                             }
                         },
@@ -1041,9 +1096,9 @@
                         }
                     },
                     "condition": {
-                        "<": [
-                            { "var": "age" },
-                            18
+                        "==": [
+                            1,
+                            1
                         ]
                     }
                 },
@@ -1069,9 +1124,9 @@
                         }
                     },
                     "condition": {
-                        ">=": [
-                            { "var": "age" },
-                            18
+                        "==": [
+                            1,
+                            1
                         ]
                     }
                 }
@@ -1412,6 +1467,29 @@
                 "tags": {},
                 "narrative_elements": [
                     {
+                        "id": "uk3czilt2nsy9flx2ybwhmu0rc",
+                        "version": "0.0",
+                        "name": "Intro image",
+                        "description": "Enter description here",
+                        "tags": {},
+                        "presentation": {
+                            "type": "PRESENTATION_ELEMENT",
+                            "target": "96hz3ctyubpl2bz4yzeuohz5fi"
+                        },
+                        "links": [
+                            {
+                                "condition": {
+                                    "==": [
+                                        1,
+                                        1
+                                    ]
+                                },
+                                "link_type": "NARRATIVE_ELEMENT",
+                                "target": "us3czilt2nsy9flx2ybwhmu0rc"
+                            }
+                        ]
+                    },
+                    {
                         "id": "us3czilt2nsy9flx2ybwhmu0rc",
                         "version": "0.0",
                         "name": "Intro video",
@@ -1434,7 +1512,7 @@
                             }
                         ]
                     },
-                    {
+                {
                         "id": "ccbm3vzunrhm5p9x5mwwq0g1r0",
                         "version": "0.0",
                         "name": "Celebrities",
@@ -1470,9 +1548,9 @@
                         "links": [
                             {
                                 "condition": {
-                                    ">": [
-                                        { "var": "age" },
-                                        15
+                                    "==": [
+                                        1,
+                                        1
                                     ]
                                 },
                                 "link_type": "NARRATIVE_ELEMENT",
@@ -1500,25 +1578,9 @@
                             },
                             {
                                 "condition": {
-                                    "or": [
-                                        {
-                                            "in": [
-                                                "oiminrzzx5u571ew39mx50qgn0",
-                                                { "var": "romper_path_history" }
-                                            ]
-                                        },
-                                        {
-                                            "in": [
-                                                "iq3a7rejmj0gg5o3pzd4w76r7y",
-                                                { "var": "romper_path_history" }
-                                            ]
-                                        },
-                                        {
-                                            "in": [
-                                                "tix7ubtivifrwp37s7wr0i4qsv",
-                                                { "var": "romper_path_history" }
-                                            ]
-                                        }
+                                    "==": [
+                                        1,
+                                        1
                                     ]
                                 },
                                 "link_type": "NARRATIVE_ELEMENT",
@@ -2060,14 +2122,11 @@
     <script src="dist/romper.js"></script>
     <script>
         (function () {
-            const variable_state = {
-                'age': 18,
-            };
             const config = JSON.parse(document.getElementById('romper-story').textContent);
             const wait = () => new Promise(resolve => setTimeout(resolve, Math.random() * 100));
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
-                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT(variable_state),
+                dataResolver: window.Romper.RESOLVERS.FROM_OBJECT({}),
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
                 },

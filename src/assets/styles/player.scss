@@ -364,7 +364,8 @@ $romper-hover-text-size: 25px;
   }
 }
 
-.romper-player > .romper-gui {
+
+.romper-player > .romper-media {
 
   >.romper-start-button {
     background-color: $start-button-colour;
@@ -402,6 +403,9 @@ $romper-hover-text-size: 25px;
       background-color: $start-button-colour-dark;
     }
   }
+}
+
+.romper-player > .romper-gui {
 
   >.romper-buttons {
 
