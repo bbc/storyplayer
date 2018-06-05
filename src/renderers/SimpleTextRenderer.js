@@ -60,11 +60,33 @@ export default class SimpleTextRenderer extends BaseRenderer {
                 .then((fg) => {
                     if (fg.assets.text_content) {
                         this.populateTextElement(fg.assets.text_content);
+                    } else if (fg.assets.text_src) {
+                        this._fetchMedia(fg.assets.text_src)
+                            .then((textFileUrl) => {
+                                this._fetchTextContent(textFileUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'audio not found');
+                            });
+                        
                     } else {
                         logger.warn('No text content found');
                     }
                 });
         }
+    }
+
+    _fetchTextContent(mediaUrl: string) {
+        fetch(mediaUrl)
+            .then((response) => {
+                if(response.ok) {
+                    return response.text();
+                } else {
+                    return Promise.reject(response);
+                }
+            })
+            .then(text => this.populateTextElement(text))
+            .catch((rejection) => logger.error(`could not fetch text content ${mediaUrl}: ${rejection.status} ${rejection.statusText}`));
     }
 
     populateTextElement(textContent: string) {

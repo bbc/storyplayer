@@ -88,6 +88,7 @@ export type AssetCollection = {
         av_src?: string,
         sub_src?: string,
         text_content?: string,
+        text_src?: string,
     },
 };
 
