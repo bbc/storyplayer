@@ -24,6 +24,37 @@
                 }
             },
             {
+                "id": "zvw1g6r47mnzv6p99blnm2q52d",
+                "description": "",
+                "version": "",
+                "name": "",
+                "tags": {},
+                "type": "urn:x-object-based-media:asset-collection-types:simple-audio/v1.0",
+                "assets": {
+                    "audio_src": "./dist/democontent/pgshort.mov"
+                }
+            },
+            {
+                "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
+                "description": "",
+                "version": "",
+                "name": "",
+                "tags": {},
+                "assets": {
+                    "image_src": "./dist/democontent/newsround/Intro pane.png"
+                }
+            },
+            {
+                "id": "abw1g6r56mnzv6p99blnm2q52d",
+                "description": "",
+                "version": "",
+                "name": "",
+                "tags": {},
+                "assets": {
+                    "text_content": "Test text content"
+                }
+            },
+            {
                 "id": "gipwncg45qwekueuuwpc8zwo68",
                 "description": "",
                 "version": "",
@@ -515,11 +546,11 @@
                             "id": "q3f0zzm4bvnl1ksoakr46xi563",
                             "version": "0.0",
                             "name": "Representation Item",
-                            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+                            "representation_type": "urn:x-object-based-media:representation-types:simple-audio/v1.0",
                             "tags": {},
                             "choices": [],
                             "asset_collection": {
-                                "foreground": "kvw1g6r47mnzv6p99blnm2q52d",
+                                "foreground": "zvw1g6r47mnzv6p99blnm2q52d",
                                 "background": [],
                                 "icon": {
                                     "active": "",
@@ -527,8 +558,50 @@
                                 }
                             },
                             "behaviours": {
-                                "STARTED": [],
+                                "STARTED": [
+                                    {
+                                        "type": "urn:x-object-based-media:representation-behaviour:showimage/v1.0",
+                                        "image": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                                    },
+                                    {
+                                        "type": "urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0",
+                                        "button_class": "romper-start-button",
+                                        "text": "Start",
+                                        "hide_narrative_buttons": true
+                                    }
+                                ],
                                 "COMPLETED": []
+                            }
+                        },
+                        "condition": {
+                            "==": [
+                                1,
+                                1
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "97hz3ctyubpl2bz4yzeuohz5fi",
+                "version": "0.0",
+                "name": "Demo text",
+                "representations": [
+                    {
+                        "representation": {
+                            "id": "q6f0zzm4bvnl1ksoakr46xi563",
+                            "version": "0.0",
+                            "name": "Text Representation Item",
+                            "representation_type": "urn:x-object-based-media:representation-types:simple-text/v1.0",
+                            "tags": {},
+                            "choices": [],
+                            "asset_collection": {
+                                "foreground": "abw1g6r56mnzv6p99blnm2q52d",
+                                "background": [],
+                                "icon": {
+                                    "active": "",
+                                    "default": ""
+                                }
                             }
                         },
                         "condition": {
@@ -1410,22 +1483,6 @@
                     }
                 ],
                 "variables": {
-                    "profile": {
-                        "default_value": {
-                            "age": {
-                                "default_value": 18,
-                                "description": "how old user is",
-                                "type": "integer"
-                            },
-                            "location": {
-                                "default_value": "UK",
-                                "description": "where user is",
-                                "type": "string"
-                            }
-                        },
-                        "type": "integer",
-                        "description": "profile of the user"
-                    },
                     "bandwidth": {
                         "default_value": 3,
                         "description": "how much data user can consume",
@@ -1443,6 +1500,29 @@
                         "presentation": {
                             "type": "PRESENTATION_ELEMENT",
                             "target": "86hz3ctyubpl2bz4yzeuohz5fi"
+                        },
+                        "links": [
+                            {
+                                "condition": {
+                                    "==": [
+                                        1,
+                                        1
+                                    ]
+                                },
+                                "link_type": "NARRATIVE_ELEMENT",
+                                "target": "gb4czilt2nsy9flx2ybwhmu0rc"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "gb4czilt2nsy9flx2ybwhmu0rc",
+                        "version": "0.0",
+                        "name": "Intro text",
+                        "description": "Enter description here",
+                        "tags": {},
+                        "presentation": {
+                            "type": "PRESENTATION_ELEMENT",
+                            "target": "97hz3ctyubpl2bz4yzeuohz5fi"
                         },
                         "links": [
                             {
