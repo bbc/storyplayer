@@ -1,9 +1,8 @@
 // @flow
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
 import logger from '../logger';
@@ -33,13 +32,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        
+
         this._target = player.mediaTarget;
 
-        
-        this._behaviourRendererMap = { };
+        this._behaviourRendererMap = {};
     }
-    
+
     start() {
         super.start();
         this.renderTextElement();
@@ -68,7 +66,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
                             .catch((err) => {
                                 logger.error(err, 'audio not found');
                             });
-                        
                     } else {
                         logger.warn('No text content found');
                     }
@@ -79,14 +76,16 @@ export default class SimpleTextRenderer extends BaseRenderer {
     _fetchTextContent(mediaUrl: string) {
         fetch(mediaUrl)
             .then((response) => {
-                if(response.ok) {
+                if (response.ok) {
                     return response.text();
-                } else {
-                    return Promise.reject(response);
                 }
+                return Promise.reject(response);
             })
             .then(text => this.populateTextElement(text))
-            .catch((rejection) => logger.error(`could not fetch text content ${mediaUrl}: ${rejection.status} ${rejection.statusText}`));
+            .catch((rejection) => {
+                // eslint-disable-next-line max-len
+                logger.error(`could not fetch text content ${mediaUrl}: ${rejection.status} ${rejection.statusText}`);
+            });
     }
 
     populateTextElement(textContent: string) {

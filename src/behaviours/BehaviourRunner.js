@@ -76,7 +76,13 @@ export default class BehaviourRunner {
     }
 
     // have all behaviours completed
-    hasCompleted() {
-        return this.eventCounters[event] === 0;
+    hasCompleted(): boolean {
+        let allDone = true;
+        Object.keys(this.eventCounters).forEach((event) => {
+            if (this.eventCounters[event] > 0) {
+                allDone = false;
+            }
+        });
+        return allDone;
     }
 }

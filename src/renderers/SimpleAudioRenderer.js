@@ -106,7 +106,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _endedEventListener() {
         this._player.setPlaying(false);
-        console.log('ended audio');
         super.complete();
     }
 
@@ -154,7 +153,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             this._handleSubtitlesClicked,
         );
 
-        console.log('calling play');
         this._mediaInstance.play();
 
         this._enableSubtitlesButton();
