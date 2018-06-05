@@ -28,7 +28,7 @@ export default class BehaviourRunner {
     // false if none found
     runBehaviours(event: RendererEvent, completionEvent: RendererEvent) {
         if (this.behaviourDefinitions[event] === undefined ||
-             this.behaviourDefinitions[event] === []
+            this.behaviourDefinitions[event] === []
         ) {
             return false;
         }
@@ -73,5 +73,10 @@ export default class BehaviourRunner {
         if (this.eventCounters[event] === 0) {
             this.baseRenderer.emit(completionEvent);
         }
+    }
+
+    // have all behaviours completed
+    hasCompleted() {
+        return this.eventCounters[event] === 0;
     }
 }
