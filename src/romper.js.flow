@@ -12,6 +12,7 @@ export type Beginning = {
 export type Link = {
     link_type: string,
     condition: any,
+    description?: string,
     target_narrative_element_id?: string,
 };
 
@@ -23,8 +24,8 @@ export type NarrativeElement = {
     tags: Tags,
     body: {
         type: string,
-        representation_collection_target?: string,
-        story_target?: string,
+        representation_collection_target_id?: string,
+        story_target_id?: string,
     },
     links: Array<Link>,
 };
@@ -35,7 +36,7 @@ export type Story = {
     name: string,
     tags?: Tags,
     beginnings: Array<Beginning>,
-    narrative_elements: Array<string>,
+    narrative_element_ids: Array<string>,
     meta?: any,
 };
 
@@ -58,20 +59,24 @@ export type Representation = {
     tags: Tags,
     representation_type: string,
     asset_collections: {
-        foreground?: string,
-        background?: Array<string>,
+        foreground_id?: string,
+        background_ids?: Array<string>,
         icon?: {
-            default: string,
-            active?: string,
+            default_id: string,
+            active_id?: string,
         },
+        behaviours?: Array<{
+            behaviour_asset_collection_mapping_id: string,
+            asset_collection_id: string
+        }>
     },
     choices?: Array<RepresentationChoice>,
     behaviours?: {
-        start?: {
+        started?: {
             type: string,
             image: string,
         },
-        complete?: {
+        completed?: {
             type: string,
             image: string,
         },

@@ -81,7 +81,8 @@ export default class StoryPathWalker extends EventEmitter {
     _getRepresentationCollections(path: Array<PathGather>): Promise<Array<PartialStoryPathItem>> {
         const promises = [];
         path.forEach((pathGather) => {
-            const representationCollectionId = pathGather.ne.body.representation_collection_target;
+            // eslint-disable-next-line max-len
+            const representationCollectionId = pathGather.ne.body.representation_collection_target_id;
             if (representationCollectionId) {
                 promises.push(this._representationCollectionFetcher(representationCollectionId));
             }

@@ -32,7 +32,7 @@ export default function (
             .then((story) => {
                 returnedStory = story;
                 const nePromiseArray = [];
-                story.narrative_elements.forEach((narrativeElementId) => {
+                story.narrative_element_ids.forEach((narrativeElementId) => {
                     nePromiseArray.push(narrativeElementFetcher(narrativeElementId));
                 });
                 return Promise.all(nePromiseArray);

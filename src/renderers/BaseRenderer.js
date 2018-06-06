@@ -128,6 +128,26 @@ export default class BaseRenderer extends EventEmitter {
         return this._behaviourRendererMap[behaviourUrn];
     }
 
+
+    // Takes a UUID used in a behaviour and resolves it to an asset collection
+    resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId: string) {
+        if (this._representation.asset_collections.behaviours) {
+            let returnId = null;
+            this._representation.asset_collections.behaviours
+                .some((assetCollectionsBehaviour) => {
+                    if (assetCollectionsBehaviour.behaviour_asset_collection_mapping_id
+                            === behaviourAssetCollectionMappingId) {
+                        returnId = assetCollectionsBehaviour.asset_collection_id;
+                        return true;
+                    }
+                    return false;
+                });
+            return returnId;
+        }
+        return null;
+    }
+
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.

@@ -49,8 +49,8 @@ export default class ImageRenderer extends BaseRenderer {
         this._imageElement = document.createElement('img');
         this._imageElement.className = 'romper-render-image';
         this._setVisibility(false);
-        if (this._representation.asset_collections.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground)
+        if (this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
@@ -71,8 +71,8 @@ export default class ImageRenderer extends BaseRenderer {
         this._target.appendChild(assetList);
 
 
-        if (this._representation.asset_collections.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground)
+        if (this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     foregroundItem.textContent = `foreground: ${fg.name}`;
                     if (fg.assets.image_src) {
