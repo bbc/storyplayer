@@ -69,7 +69,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         this._mediaInstance = this._mediaManager.getMediaInstance('foreground');
 
-        this.renderAudioElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
 
@@ -119,6 +118,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this.renderAudioElement();
         this._mediaInstance.start();
         const audioElement = this._mediaInstance.getMediaElement();
         logger.info(`Started: ${this._representation.id}`);

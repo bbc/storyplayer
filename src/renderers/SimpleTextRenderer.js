@@ -45,7 +45,11 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     end() {
         logger.info(`Ended: ${this._representation.id}`);
-        this._target.removeChild(this._textDiv);
+        try {
+            this._target.removeChild(this._textDiv);
+        } catch(e) {
+            logger.warn('could not remove text renderer element');
+        }
     }
 
     renderTextElement() {
