@@ -164,6 +164,10 @@ $romper-hover-text-size: 25px;
 
   .romper-audio-element {
     background: $romper-background-color;
+    background-image: url('../images/volume-high.svg');
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: 30%;
   }
 
   .romper-text-element {

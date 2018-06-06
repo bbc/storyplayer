@@ -254,7 +254,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (this._destroyed) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
-            // this._mediaInstance.loadSubs(mediaUrl);
             audioElement.addEventListener('loadedmetadata', () => {
                 // Load Subtitles
                 this._subtitlesSrc = mediaUrl;
