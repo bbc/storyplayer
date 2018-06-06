@@ -1115,9 +1115,9 @@
                         }
                     },
                     "condition": {
-                        "<": [
-                            { "var": "profile.age" },
-                            18
+                        "==": [
+                            1,
+                            1
                         ]
                     }
                 },
@@ -1143,13 +1143,13 @@
                         }
                     },
                     "condition": {
-                        ">=": [
-                            { "var": "profile.age" },
-                            18
+                        "==": [
+                            1,
+                            1
                         ]
                     }
                 }
-        ]
+                ]
             },
             {
                 "id": "wf2wq8fzsz696q0k3g0cvr8yuk",
@@ -1487,7 +1487,7 @@
                     "bandwidth": {
                         "default_value": 3,
                         "description": "how much data user can consume",
-                        "type": "integer"
+                        "variable_type": "integer"
                     }
                 },
                 "tags": {},
@@ -1574,11 +1574,11 @@
                         "links": [
                             {
                                 "condition": {
-                                    ">": [
-                                        { "var": "profile.age" },
-                                        15
-                                    ]
-                                },
+                                    "==": [
+                                    1,
+                                    1
+                                ]
+                            },
                                 "link_type": "NARRATIVE_ELEMENT",
                                 "target": "oiminrzzx5u571ew39mx50qgn0"
                             },
@@ -2013,8 +2013,8 @@
                             {
                                 "condition": {
                                     "==": [
-                                        { "var": "profile.location" },
-                                        "UK"
+                                        1,
+                                        1
                                     ]
                                 },
                                 "link_type": "NARRATIVE_ELEMENT",
