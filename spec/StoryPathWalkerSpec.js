@@ -56,7 +56,7 @@ describe('StoryPathWalker', () => {
         const handleWalkEnd = () => {
             expect(spw._linear).to.be.equal(true);
             expect(spw._pathmap.length).to.equal(29);
-            expect(spw._pathmap[1].narrative_element.body.representation_collection_target)
+            expect(spw._pathmap[1].narrative_element.body.representation_collection_target_id)
                 .to.equal('3566322a-05ec-4f38-a428-a2fd990ef588');
             done();
         };
