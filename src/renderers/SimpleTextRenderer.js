@@ -56,15 +56,13 @@ export default class SimpleTextRenderer extends BaseRenderer {
         if (this._representation.asset_collection.foreground) {
             this._fetchAssetCollection(this._representation.asset_collection.foreground)
                 .then((fg) => {
-                    if (fg.assets.text_content) {
-                        this.populateTextElement(fg.assets.text_content);
-                    } else if (fg.assets.text_src) {
+                    if (fg.assets.text_src) {
                         this._fetchMedia(fg.assets.text_src)
                             .then((textFileUrl) => {
                                 this._fetchTextContent(textFileUrl);
                             })
                             .catch((err) => {
-                                logger.error(err, 'audio not found');
+                                logger.error(err, 'text not found');
                             });
                     } else {
                         logger.warn('No text content found');
