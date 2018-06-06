@@ -230,8 +230,8 @@ export default class StoryReasoner extends EventEmitter {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
             if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
                 this._resolving = true;
-                if (this._currentNarrativeElement.body.story_target) {
-                    this._reasonerFactory(this._currentNarrativeElement.body.story_target)
+                if (this._currentNarrativeElement.body.story_target_id) {
+                    this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
                         .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
                         .catch((err) => {
                             this.emit('error', err);

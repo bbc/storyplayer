@@ -92,9 +92,9 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
-        if (narrativeElement.body.representation_collection_target) {
+        if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
-            this._fetchRepresentationCollection(narrativeElement.body.representation_collection_target)
+            this._fetchRepresentationCollection(narrativeElement.body.representation_collection_target_id)
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
@@ -129,9 +129,9 @@ export default class RenderManager extends EventEmitter {
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
             // fetch representation
-            if (choiceNarrativeElement.body.representation_collection_target) {
+            if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
-                this._fetchRepresentationCollection(choiceNarrativeElement.body.representation_collection_target)
+                this._fetchRepresentationCollection(choiceNarrativeElement.body.representation_collection_target_id)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
                         this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
@@ -148,7 +148,7 @@ export default class RenderManager extends EventEmitter {
     ) {
         // fetch icon
         if (representation.asset_collections.icon) {
-            const iconAssetCollectionId = representation.asset_collections.icon.default;
+            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
             this._fetchAssetCollection(iconAssetCollectionId)
                 .then((iconAssetCollection) => {
                     if (iconAssetCollection.assets.image_src) {
@@ -196,8 +196,8 @@ export default class RenderManager extends EventEmitter {
     _handleBackgroundRendering(representation: Representation) {
         let newBackgrounds = [];
         if (representation
-            && representation.asset_collections.background) {
-            newBackgrounds = representation.asset_collections.background;
+            && representation.asset_collections.background_ids) {
+            newBackgrounds = representation.asset_collections.background_ids;
         }
 
         // remove dead backgrounds
@@ -359,8 +359,8 @@ export default class RenderManager extends EventEmitter {
         upcomingIds.forEach((neid) => {
             // get the actual NarrativeElement object
             const neObj = this._controller._getNarrativeElement(neid);
-            if (neObj && neObj.body.representation_collection_target) {
-                this._fetchRepresentationCollection(neObj.body.representation_collection_target)
+            if (neObj && neObj.body.representation_collection_target_id) {
+                this._fetchRepresentationCollection(neObj.body.representation_collection_target_id)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
                         // create the new Renderer

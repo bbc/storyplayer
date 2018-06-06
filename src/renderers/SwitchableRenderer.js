@@ -81,7 +81,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                 ) {
                     const choiceName = choice.choice_representation.name;
                     // eslint-disable-next-line max-len
-                    this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default)
+                    this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
                         .then((icon) => {
                             if (icon.assets.image_src) {
                                 this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
@@ -217,7 +217,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     // the source of the IMG element
     _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
         if (choiceRepresentation.asset_collections.icon) {
-            this._fetchAssetCollection(choiceRepresentation.asset_collections.icon.default)
+            this._fetchAssetCollection(choiceRepresentation.asset_collections.icon.default_id)
                 .then((icon) => {
                     if (icon.assets.image_src) {
                         this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {

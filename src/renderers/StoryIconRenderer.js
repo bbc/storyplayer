@@ -91,10 +91,10 @@ export default class StoryIconRenderer extends EventEmitter {
             if (pathItem.representation.asset_collections.icon) {
                 // eslint-disable-next-line prefer-destructuring
                 const icon = pathItem.representation.asset_collections.icon;
-                const defaultAssetCollectionId = icon.default;
+                const defaultAssetCollectionId = icon.default_id;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
-                if (icon.active) {
-                    promises.push(this._fetchAssetCollection(icon.active));
+                if (icon.active_id) {
+                    promises.push(this._fetchAssetCollection(icon.active_id));
                 } else {
                     promises.push(Promise.resolve(null));
                 }
