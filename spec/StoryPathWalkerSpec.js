@@ -10,7 +10,9 @@ import StoryPathWalker from '../src/StoryPathWalker';
 import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 
-const storyjson = require('./teststory.json');
+import type { Experience } from '../src/romper';
+
+const storyjson: Experience = require('./teststory.json');
 
 chai.use(sinonChai);
 const resolver = sinon.stub();
@@ -47,7 +49,7 @@ describe('StoryPathWalker', () => {
         done();
     });
 
-    it('can parse straight story to presentation ids', (done) => {
+    it('can parse straight story to representation collection id', (done) => {
         const spw = new StoryPathWalker(
             storyFetcher,
             representationCollectionFetcher,
@@ -57,7 +59,7 @@ describe('StoryPathWalker', () => {
             expect(spw._linear).to.be.equal(true);
             expect(spw._pathmap.length).to.equal(29);
             expect(spw._pathmap[1].narrative_element.body.representation_collection_target_id)
-                .to.equal('3566322a-05ec-4f38-a428-a2fd990ef588');
+                .to.equal('d220a2f8-3df1-4a47-a710-4ec7ce394e90');
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
@@ -73,9 +75,9 @@ describe('StoryPathWalker', () => {
         const handleWalkEnd = () => {
             spw.getStoryItemList(representationReasoner).then((storyItemArray) => {
                 expect(storyItemArray[2].representation_collection.id)
-                    .to.equal('8e1d19ea-1bfc-45ae-873b-42d4b8bf4a41');
+                    .to.equal('5723f542-5821-4003-9cc2-e34723793c9a');
                 expect(storyItemArray[2].representation_collection.representations[0]
-                    .representation_id).to.equal('d51046af-4504-4093-940a-e3b190668f1f');
+                    .representation_id).to.equal('259d08ec-b2a9-44f2-8564-39f746d453f2');
                 done();
             });
         };

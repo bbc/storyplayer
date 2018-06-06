@@ -4,6 +4,14 @@ export type Tags = { [key: string]: Array<string> };
 
 export type SourceLocation = { [key: string]: string };
 
+export type Experience = {
+    stories: Array<Story>,
+    narrative_elements: Array<NarrativeElement>,
+    representation_collections: Array<RepresentationCollection>,
+    representations: Array<Representation>,
+    asset_collections: Array<AssetCollection>,
+}
+
 export type Beginning = {
     narrative_element_id: string,
     condition: any,
@@ -76,14 +84,20 @@ export type Representation = {
     },
     choices?: Array<RepresentationChoice>,
     behaviours?: {
-        started?: {
+        started?: Array<{
             type: string,
-            image: string,
-        },
-        completed?: {
+            pauseTime?: number,
+            colour?: string,
+            image?: string,
+            blur?: string,
+        }>,
+        completed?: Array<{
             type: string,
-            image: string,
-        },
+            pauseTime?: number,
+            colour?: string,
+            image?: string,
+            blur?: string,
+        }>,
     },
 };
 
