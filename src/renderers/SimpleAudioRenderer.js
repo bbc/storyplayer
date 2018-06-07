@@ -295,13 +295,17 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
-        const assetCollectionId = behaviour.image;
-        this._fetchAssetCollection(assetCollectionId).then((image) => {
-            if (image.assets.image_src) {
-                this._overlayImage(image.assets.image_src);
-                callback();
-            }
-        });
+        const behaviourAssetCollectionMappingId = behaviour.image;
+        const assetCollectionId =
+            this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
+        if (assetCollectionId) {
+            this._fetchAssetCollection(assetCollectionId).then((image) => {
+                if (image.assets.image_src) {
+                    this._overlayImage(image.assets.image_src);
+                    callback();
+                }
+            });
+        }
     }
 
     _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {

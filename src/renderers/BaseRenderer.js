@@ -131,7 +131,6 @@ export default class BaseRenderer extends EventEmitter {
         this._player.enterCompleteBehavourPhase();
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
-            this._behaviourRunner.hasCompleted() ||
             !this._behaviourRunner.runBehaviours(
                 BehaviourTimings.completed,
                 RendererEvents.COMPLETED,
