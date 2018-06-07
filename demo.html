@@ -1115,9 +1115,9 @@
                         }
                     },
                     "condition": {
-                        "==": [
-                            1,
-                            1
+                        "<": [
+                            { "var": "profile_age" },
+                            18
                         ]
                     }
                 },
@@ -1143,9 +1143,9 @@
                         }
                     },
                     "condition": {
-                        "==": [
-                            1,
-                            1
+                        ">=": [
+                            { "var": "profile_age" },
+                            18
                         ]
                     }
                 }
@@ -1484,6 +1484,16 @@
                     }
                 ],
                 "variables": {
+                    "profile_age": {
+                        "default_value": 16,
+                        "description": "how old user is",
+                        "type": "integer"
+                    },
+                    "profile_location": {
+                        "default_value": "UK",
+                        "description": "where user is",
+                        "type": "string"
+                    },
                     "bandwidth": {
                         "default_value": 3,
                         "description": "how much data user can consume",
@@ -1574,11 +1584,11 @@
                         "links": [
                             {
                                 "condition": {
-                                    "==": [
-                                    1,
-                                    1
-                                ]
-                            },
+                                    ">": [
+                                        { "var": "profile_age" },
+                                        15
+                                    ]
+                                },
                                 "link_type": "NARRATIVE_ELEMENT",
                                 "target": "oiminrzzx5u571ew39mx50qgn0"
                             },
@@ -2013,8 +2023,8 @@
                             {
                                 "condition": {
                                     "==": [
-                                        1,
-                                        1
+                                        { "var": "profile_location" },
+                                        "UK"
                                     ]
                                 },
                                 "link_type": "NARRATIVE_ELEMENT",

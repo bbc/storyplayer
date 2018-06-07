@@ -47,7 +47,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
-        } catch(e) {
+        } catch (e) {
             logger.warn('could not remove text renderer element');
         }
     }
@@ -57,8 +57,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._textDiv.classList.add('romper-text-element');
 
         // set audio source
-        if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+        if (this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.text_src) {
                         this._fetchMedia(fg.assets.text_src)

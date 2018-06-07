@@ -211,8 +211,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._mediaInstance.attachMedia(audioElement);
 
         // set audio source
-        if (this._representation.asset_collection.foreground) {
-            this._fetchAssetCollection(this._representation.asset_collection.foreground)
+        if (this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.audio_src) {
                         this._fetchMedia(fg.assets.audio_src)

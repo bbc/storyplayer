@@ -10,41 +10,56 @@ import StoryPathWalker from '../src/StoryPathWalker';
 import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 
-const storyjson = require('./teststory.json');
+import type { Experience } from '../src/romper';
+
+const storyjson: Experience = require('./teststory.json');
 
 chai.use(sinonChai);
 const resolver = sinon.stub();
 
 const storyFetcher = id =>
-    Promise.resolve(storyjson.story.filter(storyObject => storyObject.id === id)[0])
-        .then(storyObject => storyObject);
+    Promise.resolve(storyjson.stories.filter(storyObject => storyObject.id === id)[0]);
 
-const presentationFetcher = id =>
-    Promise.resolve(storyjson.presentations
-        .filter(presentationObject => presentationObject.id === id)[0])
-        .then(presentationObject => presentationObject);
+const narrativeElementFetcher = id =>
+    Promise.resolve(storyjson.narrative_elements.filter(neObject => neObject.id === id)[0]);
 
-const storyReasonerFactory = StoryReasonerFactory(storyFetcher, resolver);
+const representationCollectionFetcher = id =>
+    Promise.resolve(storyjson.representation_collections
+        .filter(representationCollectionObject => representationCollectionObject.id === id)[0]);
 
-const representationReasoner = RepresentationReasonerFactory(resolver);
+const representationFetcher = id =>
+    Promise.resolve(storyjson.representations
+        .filter(representationObject => representationObject.id === id)[0]);
+
+const storyReasonerFactory = StoryReasonerFactory(storyFetcher, narrativeElementFetcher, resolver);
+
+const representationReasoner = RepresentationReasonerFactory(representationFetcher, resolver);
 
 describe('StoryPathWalker', () => {
     it('can create a new instance of StoryPathWalker', (done) => {
-        const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
+        const spw = new StoryPathWalker(
+            storyFetcher,
+            representationCollectionFetcher,
+            storyReasonerFactory,
+        );
         expect(spw).to.be.an.instanceof(StoryPathWalker);
         expect(spw).to.have.property('_pathmap');
         expect(spw._pathmap.length).to.equal(0);
-        expect(spw._presentationFetcher).to.equal(presentationFetcher);
+        expect(spw._representationCollectionFetcher).to.equal(representationCollectionFetcher);
         done();
     });
 
-    it('can parse straight story to presentation ids', (done) => {
-        const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
+    it('can parse straight story to representation collection id', (done) => {
+        const spw = new StoryPathWalker(
+            storyFetcher,
+            representationCollectionFetcher,
+            storyReasonerFactory,
+        );
         const handleWalkEnd = () => {
             expect(spw._linear).to.be.equal(true);
-            expect(spw._pathmap.length).to.equal(7);
-            expect(spw._pathmap[1].narrative_element.presentation.target)
-                .to.equal('86f69eca-47a7-4b30-810c-d3f51dd63b9a');
+            expect(spw._pathmap.length).to.equal(29);
+            expect(spw._pathmap[1].narrative_element.body.representation_collection_target_id)
+                .to.equal('d220a2f8-3df1-4a47-a710-4ec7ce394e90');
             done();
         };
         spw.on('walkComplete', handleWalkEnd);
@@ -52,13 +67,17 @@ describe('StoryPathWalker', () => {
     });
 
     it('can parse straight story to presentation objects', (done) => {
-        const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
+        const spw = new StoryPathWalker(
+            storyFetcher,
+            representationCollectionFetcher,
+            storyReasonerFactory,
+        );
         const handleWalkEnd = () => {
             spw.getStoryItemList(representationReasoner).then((storyItemArray) => {
-                expect(storyItemArray[2].presentation.id)
-                    .to.equal('abed0e16-b284-46a2-9a0a-6351aa0215cc');
-                expect(storyItemArray[2].presentation.representations[0].representation.id)
-                    .to.equal('53cc9301-10fd-42a8-ae83-74f1e6354ad2');
+                expect(storyItemArray[2].representation_collection.id)
+                    .to.equal('5723f542-5821-4003-9cc2-e34723793c9a');
+                expect(storyItemArray[2].representation_collection.representations[0]
+                    .representation_id).to.equal('259d08ec-b2a9-44f2-8564-39f746d453f2');
                 done();
             });
         };
@@ -67,32 +86,19 @@ describe('StoryPathWalker', () => {
     });
 
     it('returns empty list on multi-beginning story', (done) => {
-        const intro = storyjson.story[1];
+        const intro = storyjson.stories[1];
         intro.beginnings.push({
-            id: '68cf2acd-0b62-45cc-ac1e-0eddc5c8e571',
+            narrative_element_id: '68cf2acd-0b62-45cc-ac1e-0eddc5c8e571',
             condition: { '==': [1, 0] },
         });
-        const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
+        const spw = new StoryPathWalker(
+            storyFetcher,
+            representationCollectionFetcher,
+            storyReasonerFactory,
+        );
         const handleWalkEnd = () => {
             expect(spw._pathmap.length).to.be.equal(0);
             expect(spw._linear).to.be.equal(false);
-            done();
-        };
-        spw.on('walkComplete', handleWalkEnd);
-        spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
-    });
-
-    it('returns empty list on story with link branch', (done) => {
-        const introsubs = storyjson.story[1].narrative_elements[0];
-        introsubs.links.push({
-            target: 'ed5304f6-b500-478d-b71d-c6632db95cf1',
-            condition: { '==': [1, 1] },
-            link_type: 'NARRATIVE_ELEMENT',
-        });
-        const spw = new StoryPathWalker(storyFetcher, presentationFetcher, storyReasonerFactory);
-        const handleWalkEnd = () => {
-            expect(spw._linear).to.be.equal(false);
-            expect(spw._pathmap.length).to.be.equal(0);
             done();
         };
         spw.on('walkComplete', handleWalkEnd);

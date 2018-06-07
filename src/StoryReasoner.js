@@ -54,7 +54,12 @@ export default class StoryReasoner extends EventEmitter {
      *                      which are referenced in JSONLogic expressions
      * @param {StoryReasonerFactory} reasonerFactory used for building reasons for sub-stories
      */
-    constructor(story: Story, dataResolver: DataResolver, reasonerFactory: StoryReasonerFactory) {
+    constructor(
+        story: Story,
+        narrativeElements: Array<NarrativeElement>,
+        dataResolver: DataResolver,
+        reasonerFactory: StoryReasonerFactory,
+    ) {
         super();
         this._story = story;
         this._dataResolver = dataResolver;
@@ -64,7 +69,7 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = false;
 
         this._narrativeElements = {};
-        this._story.narrative_elements.forEach((narrativeElement) => {
+        narrativeElements.forEach((narrativeElement) => {
             this._narrativeElements[narrativeElement.id] = narrativeElement;
         });
     }
@@ -102,34 +107,14 @@ export default class StoryReasoner extends EventEmitter {
     // Get the variables defined in this story, and store the default values in our dataresolver
     _fetchVariablesFromStory() {
         if (this._story.variables) {
-            const variableTree = this._parseVariableDefinitions(this._story.variables);
+            const variableTree = this._story.variables;
             Object.keys(variableTree).forEach((storyVariableName) => {
-                const storyVariableValue = variableTree[storyVariableName];
+                const storyVariableValue = variableTree[storyVariableName].default_value;
                 this.setVariableValue(storyVariableName, storyVariableValue);
             });
         } else {
             logger.info('No variables in story');
         }
-    }
-
-    // extract default values from nested variable tree, preserving tree structure
-    _parseVariableDefinitions(variables: Object) {
-        const result = {};
-        Object.keys(variables).forEach((varName) => {
-            const storyVar = variables[varName];
-            // is this a leaf or a node?
-            // nodes have an object as default_value
-            const varDefaultValue = storyVar.default_value;
-            if (varDefaultValue !== null && typeof varDefaultValue === 'object') {
-                // recurse
-                const subVar = this._parseVariableDefinitions(varDefaultValue);
-                result[varName] = subVar;
-            } else {
-                // return value
-                result[varName] = varDefaultValue;
-            }
-        });
-        return result;
     }
 
     /**
@@ -171,7 +156,7 @@ export default class StoryReasoner extends EventEmitter {
             .then((startElement) => {
                 this._resolving = false;
                 if (startElement) {
-                    this._setCurrentNarrativeElement(startElement[0].id);
+                    this._setCurrentNarrativeElement(startElement[0].narrative_element_id);
                 } else {
                     this.emit('error', new Error('Unable to choose a valid beginning'));
                 }
@@ -203,8 +188,11 @@ export default class StoryReasoner extends EventEmitter {
         if (nextElement.link_type === 'END_STORY') {
             this._storyEnded = true;
             this.emit('storyEnd');
-        } else if (nextElement.link_type === 'NARRATIVE_ELEMENT' && nextElement.target) {
-            this._setCurrentNarrativeElement(nextElement.target);
+        } else if (
+            nextElement.link_type === 'NARRATIVE_ELEMENT' &&
+            nextElement.target_narrative_element_id
+        ) {
+            this._setCurrentNarrativeElement(nextElement.target_narrative_element_id);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this._chooseBeginning();
         } else {
@@ -220,13 +208,15 @@ export default class StoryReasoner extends EventEmitter {
             this.emit('error', new Error('Link is to an narrative object not in the graph'));
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
-            if (this._currentNarrativeElement.presentation.type === 'STORY_ELEMENT') {
+            if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
                 this._resolving = true;
-                this._reasonerFactory(this._currentNarrativeElement.presentation.target)
-                    .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
-                    .catch((err) => {
-                        this.emit('error', err);
-                    });
+                if (this._currentNarrativeElement.body.story_target_id) {
+                    this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                        .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
+                        .catch((err) => {
+                            this.emit('error', err);
+                        });
+                }
             } else {
                 this.emit('narrativeElementChanged', this._currentNarrativeElement);
             }
@@ -371,9 +361,10 @@ export default class StoryReasoner extends EventEmitter {
         const currentId = this._currentNarrativeElement.id;
         let incomingLinkCount = 0;
         let previousNodeId = null;
-        this._story.narrative_elements.forEach((ne) => {
+        Object.keys(this._narrativeElements).forEach((neId) => {
+            const ne = this._narrativeElements[neId];
             ne.links.forEach((link) => {
-                if (link.target === currentId) {
+                if (link.target_narrative_element_id === currentId) {
                     previousNodeId = ne.id;
                     incomingLinkCount += 1;
                 }

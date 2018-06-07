@@ -43,14 +43,18 @@ module.exports = {
 
         const storyReasonerFactory = StoryReasonerFactory(
             mergedSettings.storyFetcher,
+            mergedSettings.narrativeElementFetcher,
             mergedSettings.dataResolver,
         );
 
-        const representationReasoner = RepresentationReasonerFactory(mergedSettings.dataResolver);
+        const representationReasoner = RepresentationReasonerFactory(
+            mergedSettings.representationFetcher,
+            mergedSettings.dataResolver,
+        );
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
-            mergedSettings.presentationFetcher,
+            mergedSettings.representationCollectionFetcher,
             mergedSettings.assetCollectionFetcher,
             representationReasoner,
             mergedSettings.mediaFetcher,

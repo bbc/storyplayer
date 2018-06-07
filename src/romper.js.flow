@@ -4,15 +4,24 @@ export type Tags = { [key: string]: Array<string> };
 
 export type SourceLocation = { [key: string]: string };
 
+export type Experience = {
+    stories: Array<Story>,
+    narrative_elements: Array<NarrativeElement>,
+    representation_collections: Array<RepresentationCollection>,
+    representations: Array<Representation>,
+    asset_collections: Array<AssetCollection>,
+}
+
 export type Beginning = {
-    id: string,
+    narrative_element_id: string,
     condition: any,
 };
 
 export type Link = {
     link_type: string,
     condition: any,
-    target?: string,
+    description?: string,
+    target_narrative_element_id?: string,
 };
 
 export type NarrativeElement = {
@@ -21,9 +30,10 @@ export type NarrativeElement = {
     name: string,
     description: string,
     tags: Tags,
-    presentation: {
+    body: {
         type: string,
-        target: string,
+        representation_collection_target_id?: string,
+        story_target_id?: string,
     },
     links: Array<Link>,
 };
@@ -34,7 +44,7 @@ export type Story = {
     name: string,
     tags?: Tags,
     beginnings: Array<Beginning>,
-    narrative_elements: Array<NarrativeElement>,
+    narrative_element_ids: Array<string>,
     meta?: any,
     variables?: Object,
 };
@@ -46,42 +56,59 @@ export type DataResolver = {
 
 export type StoryFetcher = (id: string) => Promise<Story>;
 
+export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
+
+export type RepresentationChoice = {
+    label: string,
+    choice_representation_id: string,
+    choice_representation?: Representation,
+}
+
 export type Representation = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
     representation_type: string,
-    asset_collection: {
-        foreground?: string,
-        background?: Array<string>,
+    asset_collections: {
+        foreground_id?: string,
+        background_ids?: Array<string>,
         icon?: {
-            default: string,
-            active?: string,
+            default_id: string,
+            active_id?: string,
         },
+        behaviours?: Array<{
+            behaviour_asset_collection_mapping_id: string,
+            asset_collection_id: string
+        }>
     },
-    choices?: Array<{
-        label: string,
-        representation: Representation,
-    }>,
+    choices?: Array<RepresentationChoice>,
     behaviours?: {
-        start?: {
+        started?: Array<{
             type: string,
-            image: string,
-        },
-        complete?: {
+            pauseTime?: number,
+            colour?: string,
+            image?: string,
+            blur?: string,
+        }>,
+        completed?: Array<{
             type: string,
-            image: string,
-        },
+            pauseTime?: number,
+            colour?: string,
+            image?: string,
+            blur?: string,
+        }>,
     },
 };
+
+export type RepresentationFetcher = (id: string) => Promise<Representation>;
 
 export type AssetCollection = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
-    type: string,
+    asset_collection_type: string,
     assets: {
         audio_src?: string,
         image_src?: string,
@@ -92,20 +119,20 @@ export type AssetCollection = {
     },
 };
 
-export type Presentation = {
+export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+
+export type RepresentationCollection = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
     representations: Array<{
-        representation: Representation,
+        representation_id: string,
         condition: any,
     }>,
 };
 
-export type PresentationFetcher = (id: string) => Promise<Presentation>;
-
-export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+export type RepresentationCollectionFetcher = (id: string) => Promise<RepresentationCollection>;
 
 export type MediaFetcher = (uri: string) => Promise<string>;
 
@@ -123,6 +150,8 @@ export type Settings = {
     renderers?: Renderers,
     dataResolver: DataResolver,
     storyFetcher: StoryFetcher,
-    presentationFetcher: PresentationFetcher,
+    narrativeElementFetcher: NarrativeElementFetcher,
+    representationCollectionFetcher: RepresentationCollectionFetcher,
+    representationFetcher: RepresentationFetcher,
     mediaFetcher: MediaFetcher,
 };
