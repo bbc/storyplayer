@@ -176,9 +176,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             audioElement.removeChild(this._audioTrack);
         }
 
-        audioElement.removeEventListener('ended', this._endedEventListener);
-        audioElement.removeEventListener('play', this._playEventListener);
-        audioElement.removeEventListener('pause', this._pauseEventListener);
+        if (audioElement) {
+            audioElement.removeEventListener('ended', this._endedEventListener);
+            audioElement.removeEventListener('play', this._playEventListener);
+            audioElement.removeEventListener('pause', this._pauseEventListener);
+        }
 
         try {
             this._clearBehaviourElements();
