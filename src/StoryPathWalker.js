@@ -4,7 +4,8 @@ import EventEmitter from 'events';
 import StoryReasoner from './StoryReasoner';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type {
-    Representation, Presentation, StoryFetcher, PresentationFetcher, NarrativeElement,
+    Representation, RepresentationCollectionFetcher, StoryFetcher, NarrativeElement,
+    RepresentationCollection,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import logger from './logger';
@@ -12,14 +13,14 @@ import logger from './logger';
 export type StoryPathItem = {
     stories: Array<string>,
     narrative_element: NarrativeElement,
-    presentation: Presentation,
+    representation_collection: RepresentationCollection,
     representation: Representation,
 };
 
 export type PartialStoryPathItem = {
     stories: Array<string>,
     narrative_element: NarrativeElement,
-    presentation: Presentation,
+    representation_collection: RepresentationCollection,
 };
 
 // the things we create as we walk the story
@@ -33,7 +34,7 @@ const convertPartialToFull = (
     const full = {
         stories: partial.stories,
         narrative_element: partial.narrative_element,
-        presentation: partial.presentation,
+        representation_collection: partial.representation_collection,
         representation: representationObject,
     };
     return full;
@@ -45,7 +46,7 @@ const convertPartialToFull = (
  */
 export default class StoryPathWalker extends EventEmitter {
     _storyFetcher: StoryFetcher;
-    _presentationFetcher: PresentationFetcher;
+    _representationCollectionFetcher: RepresentationCollectionFetcher;
     _storyReasonerFactory: StoryReasonerFactory;
     _linear: boolean;
     _pathmap: Array<PartialStoryPathItem>;
@@ -64,12 +65,12 @@ export default class StoryPathWalker extends EventEmitter {
      */
     constructor(
         storyFetcher: StoryFetcher,
-        presentationFetcher: PresentationFetcher,
+        representationCollectionFetcher: RepresentationCollectionFetcher,
         storyReasonerFactory: StoryReasonerFactory,
     ) {
         super();
         this._storyFetcher = storyFetcher;
-        this._presentationFetcher = presentationFetcher;
+        this._representationCollectionFetcher = representationCollectionFetcher;
         this._storyReasonerFactory = storyReasonerFactory;
         this._linear = true;
         this._pathmap = [];
@@ -77,20 +78,23 @@ export default class StoryPathWalker extends EventEmitter {
     }
 
     // populate path with presentations
-    _getPresentations(path: Array<PathGather>): Promise<Array<PartialStoryPathItem>> {
+    _getRepresentationCollections(path: Array<PathGather>): Promise<Array<PartialStoryPathItem>> {
         const promises = [];
         path.forEach((pathGather) => {
-            const presentationId = pathGather.ne.presentation.target;
-            promises.push(this._presentationFetcher(presentationId));
+            // eslint-disable-next-line max-len
+            const representationCollectionId = pathGather.ne.body.representation_collection_target_id;
+            if (representationCollectionId) {
+                promises.push(this._representationCollectionFetcher(representationCollectionId));
+            }
         });
 
-        return Promise.all(promises).then((presentations) => {
-            presentations.forEach((pres, i) => {
+        return Promise.all(promises).then((representationCollections) => {
+            representationCollections.forEach((repCol, i) => {
                 const pathGather = path[i];
                 const pathmapitem: PartialStoryPathItem = {
                     stories: pathGather.stories,
                     narrative_element: pathGather.ne,
-                    presentation: pres,
+                    representation_collection: repCol,
                 };
                 this._pathmap.push(pathmapitem);
             });
@@ -109,7 +113,7 @@ export default class StoryPathWalker extends EventEmitter {
 
     // finished the walk - notify listeners
     _walkComplete(path: Array<PathGather>) {
-        this._getPresentations(path).then(() => this.emit('walkComplete'));
+        this._getRepresentationCollections(path).then(() => this.emit('walkComplete'));
     }
 
     /**
@@ -125,7 +129,7 @@ export default class StoryPathWalker extends EventEmitter {
     getStoryItemList(representationReasoner: RepresentationReasoner): Promise<Array<StoryPathItem>> {
         const promises = [];
         this._pathmap.forEach((pathItem) => {
-            promises.push(representationReasoner(pathItem.presentation));
+            promises.push(representationReasoner(pathItem.representation_collection));
         });
 
         return Promise.all(promises).then((representations) => {

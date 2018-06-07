@@ -3,6 +3,7 @@
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
+import BehaviourTimings from '../behaviours/BehaviourTimings';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
 import AnalyticEvents from '../AnalyticEvents';
@@ -66,7 +67,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.enterStartBehaviourPhase();
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
-                RendererEvents.STARTED,
+                BehaviourTimings.started,
                 RendererEvents.COMPLETE_START_BEHAVIOURS,
             )
         ) {
@@ -131,7 +132,7 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
-                RendererEvents.COMPLETED,
+                BehaviourTimings.completed,
                 RendererEvents.COMPLETED,
             )
         ) {
@@ -154,6 +155,26 @@ export default class BaseRenderer extends EventEmitter {
     getBehaviourRenderer(behaviourUrn: string): () => void {
         return this._behaviourRendererMap[behaviourUrn];
     }
+
+
+    // Takes a UUID used in a behaviour and resolves it to an asset collection
+    resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId: string) {
+        if (this._representation.asset_collections.behaviours) {
+            let returnId = null;
+            this._representation.asset_collections.behaviours
+                .some((assetCollectionsBehaviour) => {
+                    if (assetCollectionsBehaviour.behaviour_asset_collection_mapping_id
+                            === behaviourAssetCollectionMappingId) {
+                        returnId = assetCollectionsBehaviour.asset_collection_id;
+                        return true;
+                    }
+                    return false;
+                });
+            return returnId;
+        }
+        return null;
+    }
+
 
     /**
      * Destroy is called as this representation is unloaded from being visible.

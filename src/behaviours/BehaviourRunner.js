@@ -3,6 +3,7 @@
 import BehaviourFactory from '../behaviours/BehaviourFactory';
 import BaseRenderer from '../renderers/BaseRenderer';
 import type { RendererEvent } from '../renderers/RendererEvents';
+import type { BehaviourTiming } from './BehaviourTimings';
 
 export default class BehaviourRunner {
     behaviourDefinitions: Object;
@@ -17,16 +18,18 @@ export default class BehaviourRunner {
         this.eventCounters = {};
         this.behaviours = [];
         this.baseRenderer = baseRenderer;
+
+        // Events in romper are upper case, events in json schema are lower case
         this.eventNames = Object.keys(behaviourDefinitions);
 
-        for (let i = 0; i < this.eventNames.length; i += 1) {
-            this.eventCounters[this.eventNames[i]] = 0;
-        }
+        this.eventNames.forEach((eventName) => {
+            this.eventCounters[eventName] = 0;
+        });
     }
 
     // Run behaviours for a specific event type. Returns true if there's a behaviour,
     // false if none found
-    runBehaviours(event: RendererEvent, completionEvent: RendererEvent) {
+    runBehaviours(event: BehaviourTiming, completionEvent: RendererEvent) {
         if (this.behaviourDefinitions[event] === undefined ||
              this.behaviourDefinitions[event] === []
         ) {
@@ -45,12 +48,11 @@ export default class BehaviourRunner {
             }
         });
 
+
         if (this.behaviours.length === 0) {
             return false;
         }
-
         this.behaviours.forEach((behaviour) => { behaviour.start(this.baseRenderer); });
-
         return true;
     }
 
@@ -61,7 +63,7 @@ export default class BehaviourRunner {
     // Called on behaviour of a specific event type ending
     // Checks for number of behaviours of that type running
     //   - if it's zero, send the completion event
-    handleCompletion(event: RendererEvent, completionEvent: RendererEvent) {
+    handleCompletion(event: BehaviourTiming, completionEvent: RendererEvent) {
         if (this.eventCounters[event] === undefined) {
             return;
         }

@@ -2,7 +2,8 @@
 
 import EventEmitter from 'events';
 import type {
-    NarrativeElement, PresentationFetcher, AssetCollectionFetcher, Representation, MediaFetcher,
+    NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher, Representation,
+    MediaFetcher, RepresentationChoice,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -25,7 +26,7 @@ export default class RenderManager extends EventEmitter {
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
-    _fetchPresentation: PresentationFetcher;
+    _fetchRepresentationCollection: RepresentationCollectionFetcher;
     _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
     _fetchMedia: MediaFetcher;
@@ -47,7 +48,7 @@ export default class RenderManager extends EventEmitter {
     constructor(
         controller: Controller,
         target: HTMLElement,
-        fetchPresentation: PresentationFetcher,
+        fetchRepresentationCollection: RepresentationCollectionFetcher,
         fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
@@ -57,7 +58,7 @@ export default class RenderManager extends EventEmitter {
 
         this._controller = controller;
         this._target = target;
-        this._fetchPresentation = fetchPresentation;
+        this._fetchRepresentationCollection = fetchRepresentationCollection;
         this._representationReasoner = representationReasoner;
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
@@ -91,29 +92,33 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
-        this._fetchPresentation(narrativeElement.presentation.target)
-            .then(presentation => this._representationReasoner(presentation))
-            .then((representation) => {
-                // get a Renderer for this new NE
-                const newRenderer = this._getRenderer(narrativeElement, representation);
+        if (narrativeElement.body.representation_collection_target_id) {
+            // eslint-disable-next-line max-len
+            this._fetchRepresentationCollection(narrativeElement.body.representation_collection_target_id)
+                .then(representationCollection =>
+                    this._representationReasoner(representationCollection))
+                .then((representation) => {
+                    // get a Renderer for this new NE
+                    const newRenderer = this._getRenderer(narrativeElement, representation);
 
-                // look ahead and create new renderers for the next step
-                this._rendererLookahead(narrativeElement);
+                    // look ahead and create new renderers for the next step
+                    this._rendererLookahead(narrativeElement);
 
-                // TODO: need to clean up upcomingRenderers here too
+                    // TODO: need to clean up upcomingRenderers here too
 
-                if (newRenderer) {
-                    // swap renderers
-                    this._swapRenderers(newRenderer);
-                    // handle backgrounds
-                    this._handleBackgroundRendering(newRenderer.getRepresentation());
-                }
+                    if (newRenderer) {
+                        // swap renderers
+                        this._swapRenderers(newRenderer);
+                        // handle backgrounds
+                        this._handleBackgroundRendering(newRenderer.getRepresentation());
+                    }
 
-                // tell story renderer that we've changed
-                if (this._renderStory) {
-                    this._renderStory.handleNarrativeElementChanged(representation.id);
-                }
-            });
+                    // tell story renderer that we've changed
+                    if (this._renderStory) {
+                        this._renderStory.handleNarrativeElementChanged(representation.id);
+                    }
+                });
+        }
     }
 
     // Reasoner has told us that there are multiple valid paths:
@@ -124,11 +129,14 @@ export default class RenderManager extends EventEmitter {
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
             // fetch representation
-            this._fetchPresentation(choiceNarrativeElement.presentation.target)
-                .then(presentation => this._representationReasoner(presentation))
-                .then((representation) => {
-                    this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
-                });
+            if (choiceNarrativeElement.body.representation_collection_target_id) {
+                // eslint-disable-next-line max-len
+                this._fetchRepresentationCollection(choiceNarrativeElement.body.representation_collection_target_id)
+                    .then(presentation => this._representationReasoner(presentation))
+                    .then((representation) => {
+                        this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
+                    });
+            }
         });
     }
 
@@ -139,8 +147,8 @@ export default class RenderManager extends EventEmitter {
         narrativeElementId: string,
     ) {
         // fetch icon
-        if (representation.asset_collection.icon) {
-            const iconAssetCollectionId = representation.asset_collection.icon.default;
+        if (representation.asset_collections.icon) {
+            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
             this._fetchAssetCollection(iconAssetCollectionId)
                 .then((iconAssetCollection) => {
                     if (iconAssetCollection.assets.image_src) {
@@ -188,8 +196,8 @@ export default class RenderManager extends EventEmitter {
     _handleBackgroundRendering(representation: Representation) {
         let newBackgrounds = [];
         if (representation
-            && representation.asset_collection.background) {
-            newBackgrounds = representation.asset_collection.background;
+            && representation.asset_collections.background_ids) {
+            newBackgrounds = representation.asset_collections.background_ids;
         }
 
         // remove dead backgrounds
@@ -206,7 +214,7 @@ export default class RenderManager extends EventEmitter {
                 this._fetchAssetCollection(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
-                            bgAssetCollection.type,
+                            bgAssetCollection.asset_collection_type,
                             bgAssetCollection,
                             this._fetchMedia,
                             this._player,
@@ -252,10 +260,15 @@ export default class RenderManager extends EventEmitter {
             newRenderer.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
             });
-            newRenderer.on(RendererEvents.SWITCHED_REPRESENTATION, (choice) => {
-                this._rendererState.lastSwitchableLabel = choice.label;
-                this._handleBackgroundRendering(choice.representation);
-            });
+            newRenderer.on(
+                RendererEvents.SWITCHED_REPRESENTATION,
+                (choice: RepresentationChoice) => {
+                    this._rendererState.lastSwitchableLabel = choice.label;
+                    if (choice.choice_representation) {
+                        this._handleBackgroundRendering(choice.choice_representation);
+                    }
+                },
+            );
         } else {
             logger.error(`Do not know how to render ${representation.representation_type}`);
         }
@@ -346,8 +359,8 @@ export default class RenderManager extends EventEmitter {
         upcomingIds.forEach((neid) => {
             // get the actual NarrativeElement object
             const neObj = this._controller._getNarrativeElement(neid);
-            if (neObj) {
-                this._fetchPresentation(neObj.presentation.target)
+            if (neObj && neObj.body.representation_collection_target_id) {
+                this._fetchRepresentationCollection(neObj.body.representation_collection_target_id)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
                         // create the new Renderer
