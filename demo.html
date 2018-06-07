@@ -23,14 +23,6 @@
                 })
                 .then((text) => {
                     const config = JSON.parse(text);
-                    /* 
-                        set the bandwidth:
-                        1 - lowest => text representations
-                        2 => image representations
-                        3 => audio representations
-                        4 - highest => video representations
-                    */
-                    config.stories[0].variables.bandwidth.default_value = 4;
 
                     let romper = window.Romper.init({
                         target: document.getElementById('romper-target'),
@@ -59,7 +51,7 @@
                         ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
                     });
 
-                    romper.start('axyx17x5x9rv9wvkcapr1f3ftj');
+                    romper.start(config.stories[0].id);
                 })
                 .catch((rejection) => {
                     // eslint-disable-next-line max-len
