@@ -93,7 +93,7 @@ export default class StoryIconRenderer extends EventEmitter {
                 const icon = pathItem.representation.asset_collections.icon;
                 const defaultAssetCollectionId = icon.default_id;
                 promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
-                if (icon.active_id && icon.active_id !== undefined) {
+                if (icon.active_id) {
                     promises.push(this._fetchAssetCollection(icon.active_id));
                 } else {
                     promises.push(Promise.resolve(null));
