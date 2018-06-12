@@ -31,7 +31,7 @@ export default class BehaviourRunner {
     // false if none found
     runBehaviours(event: BehaviourTiming, completionEvent: RendererEvent) {
         if (this.behaviourDefinitions[event] === undefined ||
-             this.behaviourDefinitions[event] === []
+            this.behaviourDefinitions[event].length === 0
         ) {
             return false;
         }
