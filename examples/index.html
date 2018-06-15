@@ -53,16 +53,20 @@
         </div>
     </div>
     <h2>Rendering</h2>
-    <h2 id='story-title' class='story-title'></h2>
-    <div id="romper-target"></div>
+    <h2 id='story-title' class='story-title'>No story selected</h2>
+    <div id="romper-target">
+        <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+    </div>
     <div>
             <h2>Data Model JSON</h2>
-            <pre class='json' id='json-view'></pre>
+            <pre class='json' id='json-view'>
+                    <p>Select a demo story and the story json will be shown here.</p>
+            </pre>
     </div>
     <script src="../dist/romper.js"></script>
     <script>
-        const default_filename = 'demo1.json';
-        run(default_filename);
+        // const default_filename = 'demo1.json';
+        // run(default_filename);
         function run(filepath){
             document.getElementById('romper-target').innerHTML = '';
             fetch(filepath)

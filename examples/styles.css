@@ -10,7 +10,7 @@ h1 {
 
 .json {
   color: darkgrey;
-  font-size: 70%;
+  font-size: 80%;
   padding: 10px;
   width: 780px;
 }
@@ -25,8 +25,6 @@ h1 {
 .selection {
   background-color: #eee;
   padding: 10px 10px 20px 30px;
-  /* padding-bottom: 50px; */
-  /* padding-left: 20px; */
   width: 760px;
 }
 
@@ -34,8 +32,19 @@ h1 {
   border-bottom: 1px solid #777 ;
 }
 
+.render-placeholder {
+  background: lightblue;
+  color: black;
+  height: 50px;
+  padding-bottom: 200px;
+  padding-top: 200px;
+  text-align: center;
+  vertical-align: middle;
+  width: 800px;
+}
+
 .selection button {
-  background-color: rgb(190, 46, 2); /* Green */
+  background-color: rgb(190, 46, 2);
   border: none;
   color: white;
   padding: 10px 24px;
