@@ -10,15 +10,7 @@
                     "condition": {"==": [1,1]}
                 }
             ],
-            "tags": {
-                "loaded_asset_collections": [
-                    "3b517ea3-ded9-4431-8bc8-c9dbd65db956",
-                    "5187db97-ae7d-4aa5-98c5-30d6015cfd79",
-                    "24c695bc-312d-475a-92cf-3018644e10a8",
-                    "ec8226c6-a20e-4d2a-b026-253ede28ac01",
-                    "dd99992a-027a-48b6-a852-c488a2c66bf0"
-                ]
-            },
+            "tags": {},
             "meta": {},
             "object_class": "STORY",
             "narrative_element_ids": [
