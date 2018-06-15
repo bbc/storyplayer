@@ -352,7 +352,7 @@ export default class RenderManager extends EventEmitter {
         return newRenderer;
     }
 
-    clearLookahead(){
+    clearLookahead() {
         this._upcomingRenderers = [];
     }
 
