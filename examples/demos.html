@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Romper Demo Stories</title>
+    <link href="../dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <h1>OBM Toolkit Experience Demos</h1>
+    <h2>Choose a story:</h2>
+    <div class='selection'>
+        <div>
+            <h3>Linear</h3>
+            <p>A simple linear story with 3 parts.</p>
+            <p><button onclick="run('demo1.json')">Run</button></p>
+        </div>
+        <div>
+            <h3>Branching</h3> 
+            <p>A branching story with a shared start, then two alternatives: a short conclusion, or a more in-depth version with two more parts.</p>
+            <p>Either specify the variable value:</p> 
+                <p><span class='slider-choice'>brief</span>
+                <label class="switch"> 
+                    <input id='in-depth' type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class='slider-choice'>in-depth</span></p>
+                <p>or give the user explicit choice:</p>
+                <p><span class='slider-choice'>set by variable</span>
+                <label class="switch"> 
+                    <input id='user-choice' type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class='slider-choice'>user chooses path</span></p>
+            </p>
+            <p><button onclick="run('demo2.json')">Run</button></p>
+        </p>
+        </div>
+        <div>
+            <h3>Multi-representation</h3>
+            <p>A simple linear story with 3 parts, with the option to view a video version or an image-based version.</p>
+            <p>
+                <span class='slider-choice'>video</span>
+                <label class="switch">
+                    <input id='image-version' type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class='slider-choice'>images</span>
+            </p>
+            <p><button onclick="run('demo3.json')">Run</button></p>
+        </div>
+    </div>
+    <h2>Rendering</h2>
+    <h2 id='story-title' class='story-title'></h2>
+    <div id="romper-target"></div>
+    <div>
+            <h2>Data Model JSON</h2>
+            <pre class='json' id='json-view'></pre>
+    </div>
+    <script src="../dist/romper.js"></script>
+    <script>
+        const default_filename = 'demo1.json';
+        run(default_filename);
+        function run(filepath){
+            document.getElementById('romper-target').innerHTML = '';
+            fetch(filepath)
+            .then((response) => {
+                if (response.ok) {
+                    return Promise.resolve(response.text());
+                }
+                return Promise.reject(response);
+            })
+            .then((text) => {
+                const config = JSON.parse(text);
+                document.getElementById('story-title').textContent = config.stories[0].name;
+                document.getElementById('json-view').textContent = JSON.stringify(config, null, 2);
+                let romper = window.Romper.init({
+                    target: document.getElementById('romper-target'),
+                    analyticsLogger: dataObj => {
+                        console.log('ANALYTICS:', dataObj);
+                    },
+                    storyFetcher: id => Promise.resolve().then(
+                        () => config.stories.filter(storyObject => storyObject.id === id)[0]
+                    ),
+                    mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri')),
+                    representationCollectionFetcher: id => Promise.resolve(
+                        config.representation_collections
+                            .filter(presentationObject => presentationObject.id === id)[0]
+                    ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object: ' + id)),
+                    assetCollectionFetcher: id => Promise.resolve(
+                        config.asset_collections
+                            .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
+                    ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
+                    representationFetcher: id => Promise.resolve(
+                        config.representations
+                            .filter(representationObject => representationObject.id === id)[0]
+                    ).then(representationObject => representationObject ? representationObject : Promise.reject('no such representation: ' + id)),
+                    narrativeElementFetcher: id => Promise.resolve(
+                        config.narrative_elements
+                            .filter(narrativeElementObject => narrativeElementObject.id === id)[0]
+                    ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
+                });
+
+                romper.start(config.stories[0].id);
+                romper.on('ControllerReady', () => {
+                    console.log('romper ready - setting variable values');
+
+                    const indepth = document.getElementById('in-depth');
+                    romper.setVariableValue('in_depth', indepth.checked);
+                    indepth.onchange = () => romper.setVariableValue('in_depth', indepth.checked);
+
+                    const userchoice = document.getElementById('user-choice');
+                    romper.setVariableValue('user_choice', userchoice.checked);
+                    userchoice.onchange = () => romper.setVariableValue('user_choice', userchoice.checked);
+
+                    const image = document.getElementById('image-version');
+                    romper.setVariableValue('images', image.checked);
+                    image.onchange = () => romper.setVariableValue('images', image.checked);
+                });
+            })
+            .catch((rejection) => {
+                // eslint-disable-next-line max-len
+                console.log(`could not fetch story content: ${rejection.status} ${rejection.statusText}`);
+            });
+        };
+    </script>
+</body>
+
+</html>
