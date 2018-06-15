@@ -352,6 +352,10 @@ export default class RenderManager extends EventEmitter {
         return newRenderer;
     }
 
+    clearLookahead(){
+        this._upcomingRenderers = [];
+    }
+
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
         const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
