@@ -350,7 +350,7 @@ export default class Controller extends EventEmitter {
     setVariableValue(name: string, value: any) {
         if (this._reasoner) {
             this._reasoner.setVariableValue(name, value);
-            this._renderManager.clearLookahead();
+            this._renderManager.refreshLookahead();
         } else {
             logger.warn(`Controller cannot set variable '${name}' - no reasoner`);
         }

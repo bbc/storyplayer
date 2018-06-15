@@ -107,6 +107,7 @@ export default class RenderManager extends EventEmitter {
                     // TODO: need to clean up upcomingRenderers here too
 
                     if (newRenderer) {
+                        this._currentNarrativeElement = narrativeElement;
                         // swap renderers
                         this._swapRenderers(newRenderer);
                         // handle backgrounds
@@ -352,8 +353,11 @@ export default class RenderManager extends EventEmitter {
         return newRenderer;
     }
 
-    clearLookahead() {
+    refreshLookahead() {
         this._upcomingRenderers = [];
+        if (this._currentNarrativeElement) {
+            this._rendererLookahead(this._currentNarrativeElement);
+        }
     }
 
     // create reasoners for the NEs that follow narrativeElement
