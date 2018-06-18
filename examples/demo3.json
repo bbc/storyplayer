@@ -294,7 +294,7 @@
             "tags": {},
             "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
             "assets": {
-                "image_src": "startimage.jpg"
+                "image_src": "https://rdux.files.bbci.co.uk/romper/startimage.jpg"
             }
         },
         {
@@ -306,7 +306,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "step1.m4v"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
             }
         },
         {
@@ -318,7 +318,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "step2.m4v"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step2.m4v"
             }
         },
         {
@@ -330,7 +330,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "step3.m4v"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step3.m4v"
             }
         },
         {
@@ -342,7 +342,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
-                "image_src": "step1.jpeg"
+                "image_src": "https://rdux.files.bbci.co.uk/romper/step1.jpeg"
             }
         },
         {
@@ -354,7 +354,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
-                "image_src": "step2.jpeg"
+                "image_src": "https://rdux.files.bbci.co.uk/romper/step2.jpeg"
             }
         },
         {
@@ -366,7 +366,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
-                "image_src": "step3.jpeg"
+                "image_src": "https://rdux.files.bbci.co.uk/romper/step3.jpeg"
             }
         }
     ]
