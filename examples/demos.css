@@ -1,0 +1,170 @@
+body {
+  font-family: system-ui;
+}
+
+h1 {
+  text-align: center;
+  padding: 10px;
+  width: 780px;
+}
+
+.jsoncontent textarea{
+  color: darkgrey;
+  font-size: 80%;
+  height: 500px;
+  padding: 10px;
+  width: 780px;
+}
+
+.story-title {
+  background: lightgray;
+  padding: 10px;
+  text-align: center;
+  width: 780px;
+}
+
+.selection {
+  background-color: #eee;
+  padding: 10px 10px 20px 30px;
+  width: 760px;
+}
+
+.selection div {
+  border-bottom: 1px solid #777 ;
+}
+
+.render-placeholder {
+  background: lightblue;
+  color: black;
+  height: 50px;
+  padding-bottom: 200px;
+  padding-top: 200px;
+  text-align: center;
+  vertical-align: middle;
+  width: 800px;
+}
+
+.jsoncontent button, .selection button {
+    background-color: lightgray;
+    border: none;
+    color: white;
+    padding: 10px 34px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.selection button, .jsoncontent button.active {
+  background-color: rgb(190, 46, 2);
+}
+
+ /* Style the tab */
+ .tab {
+   border: 1px solid #ccc;
+   background-color: #f1f1f1;
+   margin-top: 20px;
+   overflow: hidden;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-size: 130%;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+  font-weight: bold;
+}
+
+.variable-setter {
+  display: none;
+}
+
+.variable-setter.active{
+  display: block;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+} 
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+.slider-choice {
+  color: gray;
+  font-style: oblique;
+}
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(15px);
+  -ms-transform: translateX(15px);
+  transform: translateX(15px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+

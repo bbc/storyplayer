@@ -6,21 +6,51 @@
     <title>Romper Demo Stories</title>
     <link href="../dist/romper.css" rel="stylesheet" type="text/css">
     <link href="styles.css" rel="stylesheet" type="text/css">
+    <link href="demos.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
     <h1>OBM Toolkit Experience Demos</h1>
-    <h2>Choose a story:</h2>
-    <div class='selection'>
-        <div>
-            <h3>Linear</h3>
-            <p>A simple linear story with 3 parts.</p>
-            <p><button onclick="run('demo1.json')">Run</button></p>
+    
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
+        <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
+        <button class="tablinks" onclick="openTab(event, 'renderer')">Render</button>
+    </div>
+
+    <!-- Select a story -->
+    <div id='chooser' class='tabcontent' style='display: block;'>
+        <div class='selection'>
+            <div>
+                <h3>Linear</h3>
+                <p>A simple linear story with 3 parts.</p>
+                <p><button onclick="selectStory('demo1')">Select</button></p>
+            </div>
+            <div>
+                <h3>Branching</h3> 
+                <p>A branching story with a shared start, then two alternatives: a short conclusion, or a more in-depth version with two more parts.</p>
+                <p><button onclick="selectStory('demo2')">Select</button></p>
+            </p>
+            </div>
+            <div>
+                <h3>Multi-representation</h3>
+                <p>A simple linear story with 3 parts, with the option to view a video version or an image-based version.</p>
+                <p><button onclick="selectStory('demo3')">Select</button></p>    
+            </div>
         </div>
-        <div>
-            <h3>Branching</h3> 
-            <p>A branching story with a shared start, then two alternatives: a short conclusion, or a more in-depth version with two more parts.</p>
-            <p>Either specify the variable value:</p> 
+    </div>
+
+    <!-- View rendered content -->
+    <div id='renderer' class='tabcontent'>
+        <h2 id='story-title' class='story-title'>No story selected</h2>
+        <div id="romper-target">
+            <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+        </div>
+
+        <!-- Allow user to modify variables -->
+        <div class='variable-setter' id='variables-demo1'></div>
+        <div class='variable-setter' id='variables-demo2'>
+            <p>Either specify the detail the user gets by setting a variable:</p> 
                 <p><span class='slider-choice'>brief</span>
                 <label class="switch"> 
                     <input id='in-depth' type="checkbox">
@@ -35,13 +65,10 @@
                 </label>
                 <span class='slider-choice'>user chooses path</span></p>
             </p>
-            <p><button onclick="run('demo2.json')">Run</button></p>
-        </p>
         </div>
-        <div>
-            <h3>Multi-representation</h3>
-            <p>A simple linear story with 3 parts, with the option to view a video version or an image-based version.</p>
-            <p>
+        <div class='variable-setter' id='variables-demo3'>
+                <p>Set the variable that determines the representation that is rendered:</p> 
+                <p>
                 <span class='slider-choice'>video</span>
                 <label class="switch">
                     <input id='image-version' type="checkbox">
@@ -49,27 +76,123 @@
                 </label>
                 <span class='slider-choice'>images</span>
             </p>
-            <p><button onclick="run('demo3.json')">Run</button></p>
         </div>
     </div>
-    <h2>Rendering</h2>
-    <h2 id='story-title' class='story-title'>No story selected</h2>
-    <div id="romper-target">
-        <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+
+    <!-- View/edit json -->
+    <div id='jsoncontent' class='jsoncontent tabcontent'>
+        <textarea id='json-view'>
+Select a demo story and the story json will be shown here.
+        </textarea>
+        <p id='json-feedback'></p>
+        <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>    
     </div>
-    <div>
-            <h2>Data Model JSON</h2>
-            <pre class='json' id='json-view'>
-                    <p>Select a demo story and the story json will be shown here.</p>
-            </pre>
-    </div>
+
     <script src="../dist/romper.js"></script>
     <script>
-        // const default_filename = 'demo1.json';
-        // run(default_filename);
-        function run(filepath){
+        // handle changing tabs
+        function openTab(evt, demoName) {
+            
+            // Get all elements with class="tabcontent" and hide them
+            var tabcontent = document.getElementsByClassName("tabcontent");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+        
+            // Get all elements with class="tablinks" and remove the class "active"
+            var tablinks = document.getElementsByClassName("tablinks");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+        
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(demoName).style.display = "block";
+            evt.currentTarget.className += " active";
+        } 
+
+        // run edited json
+        function runEditedJson() {
             document.getElementById('romper-target').innerHTML = '';
-            fetch(filepath)
+            const storyJson = document.getElementById('json-view').value;
+            try {
+                run(storyJson);
+                document.getElementById('json-feedback').textContent = 'Story loaded - view the renderer.';
+
+            } catch (e) {
+                document.getElementById('json-feedback').textContent = 'Could not run your json - see the console!';
+                console.log(e);
+            }
+        }
+
+        // run some json through romper
+        function run(jsoncontent) {
+            document.getElementById('json-feedback').textContent = '';
+            const config = JSON.parse(jsoncontent);
+            document.getElementById('runjson').removeAttribute('disabled');
+            document.getElementById('runjson').classList.add('active');
+            document.getElementById('story-title').textContent = config.stories[0].name;
+            document.getElementById('json-view').textContent = JSON.stringify(config, null, 2);
+            let romper = window.Romper.init({
+                target: document.getElementById('romper-target'),
+                analyticsLogger: dataObj => {
+                    console.log('ANALYTICS:', dataObj);
+                },
+                storyFetcher: id => Promise.resolve().then(
+                    () => config.stories.filter(storyObject => storyObject.id === id)[0]
+                ),
+                mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri')),
+                representationCollectionFetcher: id => Promise.resolve(
+                    config.representation_collections
+                        .filter(presentationObject => presentationObject.id === id)[0]
+                ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object: ' + id)),
+                assetCollectionFetcher: id => Promise.resolve(
+                    config.asset_collections
+                        .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
+                ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
+                representationFetcher: id => Promise.resolve(
+                    config.representations
+                        .filter(representationObject => representationObject.id === id)[0]
+                ).then(representationObject => representationObject ? representationObject : Promise.reject('no such representation: ' + id)),
+                narrativeElementFetcher: id => Promise.resolve(
+                    config.narrative_elements
+                        .filter(narrativeElementObject => narrativeElementObject.id === id)[0]
+                ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
+            });
+
+            romper.start(config.stories[0].id);
+            romper.on('ControllerReady', () => {
+                console.log('romper ready - setting variable values');
+
+                const indepth = document.getElementById('in-depth');
+                romper.setVariableValue('in_depth', indepth.checked);
+                indepth.onchange = () => romper.setVariableValue('in_depth', indepth.checked);
+
+                const userchoice = document.getElementById('user-choice');
+                romper.setVariableValue('user_choice', userchoice.checked);
+                userchoice.onchange = () => romper.setVariableValue('user_choice', userchoice.checked);
+
+                const image = document.getElementById('image-version');
+                romper.setVariableValue('images', image.checked);
+                image.onchange = () => romper.setVariableValue('images', image.checked);
+            });
+        }
+
+        // fetch a story, load and run it
+        function selectStory(filepath){
+            // reveal variables pane for this, and only this demo
+            variables = document.getElementsByClassName("variable-setter");
+            for (i = 0; i < variables.length; i++) {
+                variables[i].className = variables[i].className.replace(" active", "");
+            }
+            var variablesDiv = document.getElementById('variables-' + filepath);
+            if (variablesDiv) {
+                variablesDiv.classList.add('active');
+            }
+
+            // fetch the json
+            var fullFilename = filepath + '.json';
+            document.getElementById('romper-target').innerHTML = '';
+            fetch(fullFilename)
             .then((response) => {
                 if (response.ok) {
                     return Promise.resolve(response.text());
@@ -77,52 +200,7 @@
                 return Promise.reject(response);
             })
             .then((text) => {
-                const config = JSON.parse(text);
-                document.getElementById('story-title').textContent = config.stories[0].name;
-                document.getElementById('json-view').textContent = JSON.stringify(config, null, 2);
-                let romper = window.Romper.init({
-                    target: document.getElementById('romper-target'),
-                    analyticsLogger: dataObj => {
-                        console.log('ANALYTICS:', dataObj);
-                    },
-                    storyFetcher: id => Promise.resolve().then(
-                        () => config.stories.filter(storyObject => storyObject.id === id)[0]
-                    ),
-                    mediaFetcher: uri => Promise.resolve(uri).then(resolvedUri => resolvedUri ? resolvedUri : Promise.reject('cannot resolve uri')),
-                    representationCollectionFetcher: id => Promise.resolve(
-                        config.representation_collections
-                            .filter(presentationObject => presentationObject.id === id)[0]
-                    ).then(presentationObject => presentationObject ? presentationObject : Promise.reject('no such presentation object: ' + id)),
-                    assetCollectionFetcher: id => Promise.resolve(
-                        config.asset_collections
-                            .filter(assetCollectionObject => assetCollectionObject.id === id)[0]
-                    ).then(assetCollectionObject => assetCollectionObject ? assetCollectionObject : Promise.reject('no such asset collection: ' + id)),
-                    representationFetcher: id => Promise.resolve(
-                        config.representations
-                            .filter(representationObject => representationObject.id === id)[0]
-                    ).then(representationObject => representationObject ? representationObject : Promise.reject('no such representation: ' + id)),
-                    narrativeElementFetcher: id => Promise.resolve(
-                        config.narrative_elements
-                            .filter(narrativeElementObject => narrativeElementObject.id === id)[0]
-                    ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
-                });
-
-                romper.start(config.stories[0].id);
-                romper.on('ControllerReady', () => {
-                    console.log('romper ready - setting variable values');
-
-                    const indepth = document.getElementById('in-depth');
-                    romper.setVariableValue('in_depth', indepth.checked);
-                    indepth.onchange = () => romper.setVariableValue('in_depth', indepth.checked);
-
-                    const userchoice = document.getElementById('user-choice');
-                    romper.setVariableValue('user_choice', userchoice.checked);
-                    userchoice.onchange = () => romper.setVariableValue('user_choice', userchoice.checked);
-
-                    const image = document.getElementById('image-version');
-                    romper.setVariableValue('images', image.checked);
-                    image.onchange = () => romper.setVariableValue('images', image.checked);
-                });
+                run(text);
             })
             .catch((rejection) => {
                 // eslint-disable-next-line max-len
