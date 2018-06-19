@@ -7,6 +7,8 @@
     <link href="../dist/romper.css" rel="stylesheet" type="text/css">
     <link href="styles.css" rel="stylesheet" type="text/css">
     <link href="demos.css" rel="stylesheet" type="text/css">
+    <link href="../node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="../node_modules/jsoneditor/dist/jsoneditor.min.js"></script>
 </head>
 
 <body>
@@ -81,15 +83,20 @@
 
     <!-- View/edit json -->
     <div id='jsoncontent' class='jsoncontent tabcontent'>
-        <textarea id='json-view'>
+        <div id='json-view'>
 Select a demo story and the story json will be shown here.
-        </textarea>
+        </div>
         <p id='json-feedback'></p>
         <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>    
     </div>
 
     <script src="../dist/romper.js"></script>
     <script>
+        const options = {
+            mode: 'tree',
+        };
+        const jsonEditor = new JSONEditor(document.getElementById('json-view'), options);
+
         // handle changing tabs
         function openTab(evt, demoName) {
             
@@ -113,7 +120,7 @@ Select a demo story and the story json will be shown here.
         // run edited json
         function runEditedJson() {
             document.getElementById('romper-target').innerHTML = '';
-            const storyJson = document.getElementById('json-view').value;
+            const storyJson = jsonEditor.get();
             try {
                 run(storyJson);
                 document.getElementById('json-feedback').textContent = 'Story loaded - view the renderer.';
@@ -125,13 +132,12 @@ Select a demo story and the story json will be shown here.
         }
 
         // run some json through romper
-        function run(jsoncontent) {
+        function run(config) {
             document.getElementById('json-feedback').textContent = '';
-            const config = JSON.parse(jsoncontent);
             document.getElementById('runjson').removeAttribute('disabled');
             document.getElementById('runjson').classList.add('active');
             document.getElementById('story-title').textContent = config.stories[0].name;
-            document.getElementById('json-view').textContent = JSON.stringify(config, null, 2);
+            jsonEditor.set(config);
             let romper = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 analyticsLogger: dataObj => {
@@ -200,7 +206,7 @@ Select a demo story and the story json will be shown here.
                 return Promise.reject(response);
             })
             .then((text) => {
-                run(text);
+                run(JSON.parse(text));
             })
             .catch((rejection) => {
                 // eslint-disable-next-line max-len
