@@ -1,4 +1,5 @@
 // @flow
+import EventEmitter from 'events';
 
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
@@ -17,7 +18,7 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 
-export default class Controller {
+export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
         storyReasonerFactory: StoryReasonerFactory,
@@ -28,6 +29,7 @@ export default class Controller {
         fetchStory: StoryFetcher,
         analytics: AnalyticsLogger,
     ) {
+        super();
         this._storyId = null;
         this._reasoner = null;
         this._target = target;
@@ -82,6 +84,7 @@ export default class Controller {
             this._reasoner.start();
 
             this._addListenersToRenderManager();
+            this.emit('ControllerReady');
         });
     }
 
@@ -338,6 +341,21 @@ export default class Controller {
         });
     }
 
+    /**
+     * Store or change a variable for the reasoner to use while reasoning
+     *
+     * @param {String} name The name of the variable to set
+     * @param {any} value Its value
+     */
+    setVariableValue(name: string, value: any) {
+        if (this._reasoner) {
+            this._reasoner.setVariableValue(name, value);
+            this._renderManager.refreshLookahead();
+        } else {
+            logger.warn(`Controller cannot set variable '${name}' - no reasoner`);
+        }
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to
@@ -350,6 +368,13 @@ export default class Controller {
                 .getSubReasonerContainingNarrativeElement(narrativeElementId);
             if (currentReasoner) {
                 currentReasoner._setCurrentNarrativeElement(narrativeElementId);
+                currentReasoner.hasNextNode()
+                    .then((nodes) => {
+                        if (nodes.length > 0 && currentReasoner._storyEnded) {
+                            logger.info('Jumped back from finish: resetting storyEnded');
+                            currentReasoner._storyEnded = false;
+                        }
+                    });
             } else if (this._storyId) {
                 this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }

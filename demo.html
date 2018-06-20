@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
-
+<!-- An example of a minimal wrapper for romper -->
 <head>
     <meta charset="utf-8">
-    <title>Romper Frog Demo</title>
+    <title>Romper Wrapper Demo</title>
     <link href="dist/romper.css" rel="stylesheet" type="text/css">
-    <link href="dist/democontent/newslabs/styles.css" rel="stylesheet" type="text/css">
+    <link href="examples/styles.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -14,7 +14,7 @@
     <script>
         (function () {
 
-            fetch('./dist/democontent/newslabs/story.json')
+            fetch('./examples/demo1.json')
                 .then((response) => {
                     if (response.ok) {
                         return Promise.resolve(response.text());
