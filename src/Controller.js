@@ -368,6 +368,13 @@ export default class Controller extends EventEmitter {
                 .getSubReasonerContainingNarrativeElement(narrativeElementId);
             if (currentReasoner) {
                 currentReasoner._setCurrentNarrativeElement(narrativeElementId);
+                currentReasoner.hasNextNode()
+                    .then((nodes) => {
+                        if (nodes.length > 0 && currentReasoner._storyEnded) {
+                            logger.info('Jumped back from finish: resetting storyEnded');
+                            currentReasoner._storyEnded = false;
+                        }
+                    });
             } else if (this._storyId) {
                 this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElementId);
             }
