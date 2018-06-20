@@ -8,7 +8,6 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
-    _target: HTMLDivElement;
     _disablePlayButton: Function;
     _disableScrubBar: Function;
     _enablePlayButton: Function;
@@ -23,7 +22,6 @@ export default class ImageRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        this._target = this._player.mediaTarget;
         this.renderImageElement();
         this._disablePlayButton = () => { this._player.disablePlayButton(); };
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
@@ -62,24 +60,6 @@ export default class ImageRenderer extends BaseRenderer {
         }
 
         this._target.appendChild(this._imageElement);
-    }
-
-    renderDataModelInfo() {
-        const assetList = document.createElement('ul');
-        const foregroundItem = document.createElement('li');
-        assetList.appendChild(foregroundItem);
-        this._target.appendChild(assetList);
-
-
-        if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    foregroundItem.textContent = `foreground: ${fg.name}`;
-                    if (fg.assets.image_src) {
-                        foregroundItem.textContent += ` from ${fg.assets.image_src}`;
-                    }
-                });
-        }
     }
 
     switchFrom() {
