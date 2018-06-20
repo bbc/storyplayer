@@ -8,19 +8,24 @@ h1 {
   width: 780px;
 }
 
-.jsoncontent textarea{
-  color: darkgrey;
-  font-size: 80%;
-  height: 500px;
-  padding: 10px;
-  width: 780px;
-}
-
 .story-title {
   background: lightgray;
   padding: 10px;
   text-align: center;
   width: 780px;
+}
+
+.feedback {
+    color: darkgrey;
+    font-size: 80%;
+    height: 500px;
+    padding: 10px;
+    width: 780px;
+}
+
+.warning {
+    color: darkred;
+    font-weight: bold;
 }
 
 .selection {

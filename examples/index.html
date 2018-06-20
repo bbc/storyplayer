@@ -86,12 +86,38 @@
         <div id='json-view'>
 Select a demo story and the story json will be shown here.
         </div>
-        <p id='json-feedback'></p>
         <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>    
     </div>
 
+    <div id='feedback' class='feedback'></div>
+
     <script src="../dist/romper.js"></script>
     <script>
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function showMessage(messageText, error=false) {
+            const messageDiv = document.getElementById('feedback');
+            messageDiv.textContent = messageText;
+            if (error) {
+                messageDiv.classList.add('warning');
+            } else {
+                messageDiv.classList.remove('warning');
+            }
+        }
+
+        const getFilename = getParameterByName('storyjson');
+        if (getFilename) {
+            loadStory(getFilename);
+        }
+
         const options = {
             mode: 'tree',
         };
@@ -123,17 +149,16 @@ Select a demo story and the story json will be shown here.
             const storyJson = jsonEditor.get();
             try {
                 run(storyJson);
-                document.getElementById('json-feedback').textContent = 'Story loaded - view the renderer.';
+                showMessage('Story loaded - view the renderer.');
 
             } catch (e) {
-                document.getElementById('json-feedback').textContent = 'Could not run your json - see the console!';
+                showMessage('Could not run your json - see the console!');
                 console.log(e);
             }
         }
 
         // run some json through romper
         function run(config) {
-            document.getElementById('json-feedback').textContent = '';
             document.getElementById('runjson').removeAttribute('disabled');
             document.getElementById('runjson').classList.add('active');
             document.getElementById('story-title').textContent = config.stories[0].name;
@@ -197,8 +222,13 @@ Select a demo story and the story json will be shown here.
 
             // fetch the json
             var fullFilename = filepath + '.json';
+            loadStory(fullFilename);
+        }
+
+        function loadStory(filepath) {
+            showMessage(`Loading ${filepath}`);
             document.getElementById('romper-target').innerHTML = '';
-            fetch(fullFilename)
+            fetch(filepath)
             .then((response) => {
                 if (response.ok) {
                     return Promise.resolve(response.text());
@@ -206,11 +236,12 @@ Select a demo story and the story json will be shown here.
                 return Promise.reject(response);
             })
             .then((text) => {
+                showMessage('Story loaded');
                 run(JSON.parse(text));
             })
             .catch((rejection) => {
                 // eslint-disable-next-line max-len
-                console.log(`could not fetch story content: ${rejection.status} ${rejection.statusText}`);
+                showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
             });
         };
     </script>
