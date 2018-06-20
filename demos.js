@@ -1,3 +1,4 @@
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -15,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Upload JSON story and playback
 // WARNING: This is example code and should NEVER be deployed to a server as the following
-// upload function could easily be used for mallious purposes
+// upload function could easily be used by hackers
 app.post('/upload', (request, respond) => {
     const id = uuid();
     const filePath = `${__dirname}/tmp/${id}.json`;
