@@ -16,16 +16,16 @@ h1 {
 }
 
 .feedback {
-    color: darkgrey;
-    font-size: 80%;
-    height: 500px;
-    padding: 10px;
-    width: 780px;
+  color: darkgrey;
+  font-size: 80%;
+  height: 500px;
+  padding: 10px;
+  width: 780px;
 }
 
 .warning {
-    color: darkred;
-    font-weight: bold;
+  color: darkred;
+  font-weight: bold;
 }
 
 .selection {
@@ -50,14 +50,14 @@ h1 {
 }
 
 .jsoncontent button, .selection button {
-    background-color: lightgray;
-    border: none;
-    color: white;
-    padding: 10px 34px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
+  background-color: lightgray;
+  border: none;
+  color: white;
+  padding: 10px 34px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
 }
 
 .selection button, .jsoncontent button.active {
@@ -66,10 +66,10 @@ h1 {
 
  /* Style the tab */
  .tab {
-   border: 1px solid #ccc;
-   background-color: #f1f1f1;
-   margin-top: 20px;
-   overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  margin-top: 20px;
+  overflow: hidden;
 }
 
 /* Style the buttons that are used to open the tab content */
