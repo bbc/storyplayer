@@ -195,48 +195,80 @@ Select a demo story and the story json will be shown here.
                     showMessage('Story loaded');
                     run(JSON.parse(text));
                 })
-                .catch((rejection) => {
-                    showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
-                });
+                // .catch((rejection) => {
+                //     showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
+                // });
         };
 
         function addVariableControls(variableDeclaration, romperInstance) {
             const varPanel = document.getElementById('variables-generic');
             varPanel.innerHTML = '';
             Object.keys(variableDeclaration).forEach((varName) => {
-                const varDecl = variableDeclaration[varName]
-                const varType = varDecl.variable_type;
-                if (varType === 'boolean') {
-                    addBooleanVariableSwitch(varName, varDecl, romperInstance);
-                }
+                addVariableSetter(varName, variableDeclaration[varName], romperInstance);
             });
         }
 
-        function addBooleanVariableSwitch(varName, variableDecl, romperInstance){
-            console.log('adding boolean');
-            const varValue = variableDecl.default_value;
+        function addVariableSetter(varName, variableDecl, romperInstance){
+            const varType = variableDecl.variable_type;
             const varDesc = variableDecl.description;
             const parEl = document.createElement('p');
             const nameSpan = document.createElement('span');
             nameSpan.classList.add('slider-choice');
             nameSpan.textContent = varName;
-            varInput = document.createElement('input');
-            varInput.id = varName;
-            varInput.type = 'checkbox';
+
             const sliderSpan = document.createElement('span');
             const label = document.createElement('label');
             label.classList.add('switch');
+
+            let varInput;
+            if (varType === 'boolean') {
+                varInput = getBooleanVariableSwitch(varName, variableDecl, romperInstance);
+            } else if (varType === 'integer') {
+                varInput = getIntegerVariableSetter(varName, variableDecl, romperInstance);
+            } else if (varType === 'string') {
+                varInput = getStringVariableSetter(varName, variableDecl, romperInstance);
+            } else {
+                console.warn(`Cannot adjust variable of type ${varType}`);
+                return;
+            }
 
             label.appendChild(varInput);
             label.appendChild(sliderSpan);
             parEl.appendChild(label);
             parEl.appendChild(nameSpan);
 
-            if (varValue) { varInput.setAttribute('checked', true); }
-            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.checked);
-
             const varPanel = document.getElementById('variables-generic');
             varPanel.appendChild(parEl);
+        }
+
+        function getIntegerVariableSetter(varName, variableDecl, romperInstance){
+            const varInput = document.createElement('input');
+            varInput.type = 'number';
+
+            if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
+            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
+
+            return varInput;                
+        }
+
+        function getStringVariableSetter(varName, variableDecl, romperInstance){
+            const varInput = document.createElement('input');
+            varInput.type = 'text';
+
+            if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
+            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
+
+            return varInput;                
+        }
+
+        function getBooleanVariableSwitch(varName, variableDecl, romperInstance){
+            const varInput = document.createElement('input');
+            varInput.type = 'checkbox';
+
+            if (variableDecl.default_value) { varInput.setAttribute('checked', true); }
+            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.checked);
+
+            return varInput;                
         }
 
     </script>
