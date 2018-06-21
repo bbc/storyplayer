@@ -26,18 +26,18 @@
             <div>
                 <h3>Linear</h3>
                 <p>A simple linear story with 3 parts.</p>
-                <p><button onclick="selectStory('demo1')">Select</button></p>
+                <p><button onclick="loadStory('demo1.json')">Select</button></p>
             </div>
             <div>
                 <h3>Branching</h3> 
                 <p>A branching story with a shared start, then two alternatives: a short conclusion, or a more in-depth version with two more parts.</p>
-                <p><button onclick="selectStory('demo2')">Select</button></p>
+                <p><button onclick="loadStory('demo2.json')">Select</button></p>
             </p>
             </div>
             <div>
                 <h3>Multi-representation</h3>
                 <p>A simple linear story with 3 parts, with the option to view a video version or an image-based version.</p>
-                <p><button onclick="selectStory('demo3')">Select</button></p>    
+                <p><button onclick="loadStory('demo3')">Select</button></p>    
             </div>
         </div>
     </div>
@@ -50,34 +50,10 @@
         </div>
 
         <!-- Allow user to modify variables -->
-        <div class='variable-setter' id='variables-demo1'></div>
-        <div class='variable-setter' id='variables-demo2'>
-            <p>Either specify the detail the user gets by setting a variable:</p> 
-                <p><span class='slider-choice'>brief</span>
-                <label class="switch"> 
-                    <input id='in-depth' type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <span class='slider-choice'>in-depth</span></p>
-                <p>or give the user explicit choice:</p>
-                <p><span class='slider-choice'>set by variable</span>
-                <label class="switch"> 
-                    <input id='user-choice' type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <span class='slider-choice'>user chooses path</span></p>
-            </p>
-        </div>
-        <div class='variable-setter' id='variables-demo3'>
-                <p>Set the variable that determines the representation that is rendered:</p> 
-                <p>
-                <span class='slider-choice'>video</span>
-                <label class="switch">
-                    <input id='image-version' type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <span class='slider-choice'>images</span>
-            </p>
+        <div id='variable-pane'class='variable-setter active'>
+            <h3>Modify variable values here</h3>
+            <p>The first Narrative Element is already loaded, so will not be immediately affected by changes.</p>
+            <div id='variables-generic'>Load a story to see its variables.</div>
         </div>
     </div>
 
@@ -190,41 +166,21 @@ Select a demo story and the story json will be shown here.
                 ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
             });
 
+            if (config.stories[0].variables) {
+                console.log(config.stories[0].variables);
+                addVariableControls(config.stories[0].variables, romper);
+            } else {
+                const varPanel = document.getElementById('variables-generic');
+                varPanel.innerHTML = 'There are no variables in this story';
+            }
+
             romper.start(config.stories[0].id);
             romper.on('ControllerReady', () => {
                 console.log('romper ready - setting variable values');
-
-                const indepth = document.getElementById('in-depth');
-                romper.setVariableValue('in_depth', indepth.checked);
-                indepth.onchange = () => romper.setVariableValue('in_depth', indepth.checked);
-
-                const userchoice = document.getElementById('user-choice');
-                romper.setVariableValue('user_choice', userchoice.checked);
-                userchoice.onchange = () => romper.setVariableValue('user_choice', userchoice.checked);
-
-                const image = document.getElementById('image-version');
-                romper.setVariableValue('images', image.checked);
-                image.onchange = () => romper.setVariableValue('images', image.checked);
             });
         }
 
         // fetch a story, load and run it
-        function selectStory(filepath){
-            // reveal variables pane for this, and only this demo
-            variables = document.getElementsByClassName("variable-setter");
-            for (i = 0; i < variables.length; i++) {
-                variables[i].className = variables[i].className.replace(" active", "");
-            }
-            var variablesDiv = document.getElementById('variables-' + filepath);
-            if (variablesDiv) {
-                variablesDiv.classList.add('active');
-            }
-
-            // fetch the json
-            var fullFilename = filepath + '.json';
-            loadStory(fullFilename);
-        }
-
         function loadStory(filepath) {
             showMessage(`Loading ${filepath}`);
             document.getElementById('romper-target').innerHTML = '';
@@ -243,6 +199,46 @@ Select a demo story and the story json will be shown here.
                     showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
                 });
         };
+
+        function addVariableControls(variableDeclaration, romperInstance) {
+            const varPanel = document.getElementById('variables-generic');
+            varPanel.innerHTML = '';
+            Object.keys(variableDeclaration).forEach((varName) => {
+                const varDecl = variableDeclaration[varName]
+                const varType = varDecl.variable_type;
+                if (varType === 'boolean') {
+                    addBooleanVariableSwitch(varName, varDecl, romperInstance);
+                }
+            });
+        }
+
+        function addBooleanVariableSwitch(varName, variableDecl, romperInstance){
+            console.log('adding boolean');
+            const varValue = variableDecl.default_value;
+            const varDesc = variableDecl.description;
+            const parEl = document.createElement('p');
+            const nameSpan = document.createElement('span');
+            nameSpan.classList.add('slider-choice');
+            nameSpan.textContent = varName;
+            varInput = document.createElement('input');
+            varInput.id = varName;
+            varInput.type = 'checkbox';
+            const sliderSpan = document.createElement('span');
+            const label = document.createElement('label');
+            label.classList.add('switch');
+
+            label.appendChild(varInput);
+            label.appendChild(sliderSpan);
+            parEl.appendChild(label);
+            parEl.appendChild(nameSpan);
+
+            if (varValue) { varInput.setAttribute('checked', true); }
+            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.checked);
+
+            const varPanel = document.getElementById('variables-generic');
+            varPanel.appendChild(parEl);
+        }
+
     </script>
 </body>
 

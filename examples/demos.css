@@ -118,9 +118,6 @@ h1 {
   height: 22px;
 }
 
-/* Hide default HTML checkbox */
-.switch input {display:none;}
-
 .slider-choice {
   color: gray;
   font-style: oblique;
