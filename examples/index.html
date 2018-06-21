@@ -14,6 +14,7 @@
 <body>
     <h1>OBM Toolkit Experience Demos</h1>
     
+    <!-- tab switcher -->
     <div class="tab">
         <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
         <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
@@ -43,11 +44,12 @@
     <!-- View/edit json -->
     <div id='jsoncontent' class='jsoncontent tabcontent'>
         <div id='json-view'>
-Select a demo story and the story json will be shown here.
+            <p>Select a demo story and the story json will be shown here.</p>
         </div>
         <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>    
     </div>
 
+    <!-- information for users -->
     <div id='feedback' class='feedback'></div>
 
     <script src="../dist/romper.js"></script>
@@ -73,7 +75,7 @@ Select a demo story and the story json will be shown here.
                     addStoryOption(filename, name, description);
                 })
                 .catch((rejection) => {
-                    showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
+                    console.warn(`could not fetch story content: ${rejection.status} ${rejection.statusText}`);
                 });
         }
 
@@ -200,7 +202,6 @@ Select a demo story and the story json will be shown here.
             });
 
             if (config.stories[0].variables) {
-                console.log(config.stories[0].variables);
                 addVariableControls(config.stories[0].variables, romper);
             } else {
                 const varPanel = document.getElementById('variables-generic');
@@ -209,7 +210,7 @@ Select a demo story and the story json will be shown here.
 
             romper.start(config.stories[0].id);
             romper.on('ControllerReady', () => {
-                console.log('romper ready - setting variable values');
+                // can set variable values now
             });
         }
 
