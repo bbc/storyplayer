@@ -24,13 +24,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
     _mediaInstance: MediaInstance;
     _audioTrack: HTMLTrackElement;
-    _canvas: HTMLCanvasElement;
-    _applyBlurBehaviour: Function;
-    _applyColourOverlayBehaviour: Function;
-    _applyShowImageBehaviour: Function;
-    _applyWaitForButtonBehaviour: Function;
-    _behaviourElements: Array<HTMLElement>;
-    _target: HTMLDivElement;
     _handlePlayPauseButtonClicked: Function;
     _handleVolumeClicked: Function;
     _handleSubtitlesClicked: Function;
@@ -66,16 +59,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._pauseEventListener = this._pauseEventListener.bind(this);
 
         this._mediaManager = player._mediaManager;
-
         this._mediaInstance = this._mediaManager.getMediaInstance('foreground');
 
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
-
-        this._target = player.mediaTarget;
-        this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
-        this._applyWaitForButtonBehaviour = this._applyWaitForButtonBehaviour.bind(this);
-        this._behaviourElements = [];
 
         this._subtitlesShowing = player.showingSubtitles;
         this._subtitlesLoaded = false;
@@ -92,13 +79,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             }
         };
         this._disableSubtitlesButton = () => { player.disableSubtitlesControl(); };
-
-        this._behaviourRendererMap = {
-            // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
-            // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': this._applyWaitForButtonBehaviour,
-        };
 
         this._lastSetTime = 0;
     }
@@ -156,8 +136,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._mediaInstance.play();
 
         this._enableSubtitlesButton();
-
-        this._clearBehaviourElements();
     }
 
     end() {
@@ -296,61 +274,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
-    _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
-        const behaviourAssetCollectionMappingId = behaviour.image;
-        const assetCollectionId =
-            this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
-        if (assetCollectionId) {
-            this._fetchAssetCollection(assetCollectionId).then((image) => {
-                if (image.assets.image_src) {
-                    this._overlayImage(image.assets.image_src);
-                    callback();
-                }
-            });
-        }
-    }
-
-    _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {
-        const continueButton = document.createElement('button');
-        continueButton.classList.add(behaviour.button_class);
-        continueButton.setAttribute('title', 'Continue Button');
-        continueButton.setAttribute('aria-label', 'Continue Button');
-        const continueButtonIconDiv = document.createElement('div');
-        continueButtonIconDiv.classList.add('romper-button-icon-div');
-        continueButtonIconDiv.classList.add(`${behaviour.button_class}-icon-div`);
-        continueButton.appendChild(continueButtonIconDiv);
-        const continueButtonTextDiv = document.createElement('div');
-        continueButtonTextDiv.innerHTML = behaviour.text;
-        continueButtonTextDiv.classList.add('romper-button-text-div');
-        continueButtonTextDiv.classList.add(`${behaviour.button_class}-text-div`);
-        continueButton.appendChild(continueButtonTextDiv);
-
-        this._target.appendChild(continueButton);
-        this._behaviourElements.push(continueButton);
-
-        const buttonClickHandler = () => {
-            this._player._enableUserInteraction();
-            this._player._narrativeElementTransport.classList.remove('romper-inactive');
-            this.logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            callback();
-        };
-        continueButton.onclick = buttonClickHandler;
-
-        if (behaviour.hide_narrative_buttons) {
-            // can't use player.setNextAvailable
-            // as this may get reset after this by NE change handling
-            this._player._narrativeElementTransport.classList.add('romper-inactive');
-        }
-    }
-
-    _overlayImage(imageSrc: string) {
-        const overlayImageElement = document.createElement('img');
-        overlayImageElement.src = imageSrc;
-        overlayImageElement.className = 'romper-image-overlay';
-        this._target.appendChild(overlayImageElement);
-        this._behaviourElements.push(overlayImageElement);
-    }
-
     _handlePlayPauseButtonClicked(): void {
         const audioElement = this._mediaInstance.getMediaElement();
         if (audioElement.paused === true) {
@@ -413,18 +336,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     switchTo() {
         this.start();
-    }
-
-    _clearBehaviourElements() {
-        const audioElement = this._mediaInstance.getMediaElement();
-        audioElement.style.filter = ''; // eslint-disable-line prefer-destructuring
-        this._behaviourElements.forEach((be) => {
-            try {
-                this._target.removeChild(be);
-            } catch (e) {
-                logger.warn(`could not remove behaviour element ${be.id} from SimpleAVRenderer`);
-            }
-        });
     }
 
     destroy() {

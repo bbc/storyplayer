@@ -18,6 +18,11 @@ export default class BaseRenderer extends EventEmitter {
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: () => void };
+    _applyColourOverlayBehaviour: Function;
+    _applyShowImageBehaviour: Function;
+    _applyWaitForButtonBehaviour: Function;
+    _behaviourElements: Array<HTMLElement>;
+    _target: HTMLDivElement;
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
 
@@ -42,10 +47,25 @@ export default class BaseRenderer extends EventEmitter {
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
         this._player = player;
+        this._target = player.mediaTarget;
+
+        this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
+        this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._applyWaitForButtonBehaviour = this._applyWaitForButtonBehaviour.bind(this);
+
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
-        this._behaviourRendererMap = {};
+        this._behaviourRendererMap = {
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': this._applyWaitForButtonBehaviour,
+        };
+        this._behaviourElements = [];
+
         this._destroyed = false;
         this._analytics = analytics;
     }
@@ -78,6 +98,7 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._player.exitStartBehaviourPhase();
+        this._clearBehaviourElements();
     }
 
     /* record some analytics for the renderer - not user actions though */
@@ -156,6 +177,80 @@ export default class BaseRenderer extends EventEmitter {
         return this._behaviourRendererMap[behaviourUrn];
     }
 
+    _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.className = 'romper-image-overlay';
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+        callback();
+    }
+
+    _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
+        const behaviourAssetCollectionMappingId = behaviour.image;
+        const assetCollectionId =
+            this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
+        if (assetCollectionId) {
+            this._fetchAssetCollection(assetCollectionId).then((image) => {
+                if (image.assets.image_src) {
+                    this._overlayImage(image.assets.image_src);
+                    callback();
+                }
+            });
+        }
+    }
+
+    _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {
+        const continueButton = document.createElement('button');
+        continueButton.classList.add(behaviour.button_class);
+        continueButton.setAttribute('title', 'Continue Button');
+        continueButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconDiv = document.createElement('div');
+        continueButtonIconDiv.classList.add('romper-button-icon-div');
+        continueButtonIconDiv.classList.add(`${behaviour.button_class}-icon-div`);
+        continueButton.appendChild(continueButtonIconDiv);
+        const continueButtonTextDiv = document.createElement('div');
+        continueButtonTextDiv.innerHTML = behaviour.text;
+        continueButtonTextDiv.classList.add('romper-button-text-div');
+        continueButtonTextDiv.classList.add(`${behaviour.button_class}-text-div`);
+        continueButton.appendChild(continueButtonTextDiv);
+
+        this._target.appendChild(continueButton);
+        this._behaviourElements.push(continueButton);
+
+        const buttonClickHandler = () => {
+            this._player._enableUserInteraction();
+            this._player._narrativeElementTransport.classList.remove('romper-inactive');
+            this.logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+            callback();
+        };
+        continueButton.onclick = buttonClickHandler;
+
+        if (behaviour.hide_narrative_buttons) {
+            // can't use player.setNextAvailable
+            // as this may get reset after this by NE change handling
+            this._player._narrativeElementTransport.classList.add('romper-inactive');
+        }
+    }
+
+    _overlayImage(imageSrc: string) {
+        const overlayImageElement = document.createElement('img');
+        overlayImageElement.src = imageSrc;
+        overlayImageElement.className = 'romper-image-overlay';
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+    }
+
+    _clearBehaviourElements() {
+        this._behaviourElements.forEach((be) => {
+            try {
+                this._target.removeChild(be);
+            } catch (e) {
+                logger.warn(`could not remove behaviour element ${be.id} from Renderer`);
+            }
+        });
+    }
 
     // Takes a UUID used in a behaviour and resolves it to an asset collection
     resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId: string) {
@@ -175,7 +270,6 @@ export default class BaseRenderer extends EventEmitter {
         return null;
     }
 
-
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.
@@ -183,6 +277,7 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
+        this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
         }
