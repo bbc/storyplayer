@@ -15,6 +15,11 @@ h1 {
   width: 780px;
 }
 
+.variable-description {
+  color: darkgrey;
+  padding-left: 10px;
+}
+
 .feedback {
   color: darkgrey;
   font-size: 80%;

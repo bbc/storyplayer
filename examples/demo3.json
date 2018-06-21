@@ -20,10 +20,10 @@
                 "3c2a2442-b9b8-4cca-b934-d067c8967a20"
             ],
             "variables": {
-                "images": {
-                    "default_value": false,
-                    "description": "does the user want an image only version",
-                    "variable_type": "boolean"
+                "  bandwidth": {
+                    "default_value": 2,
+                    "description": "How much bandwidth does the user have? (2 or more gives video, less gives images)",
+                    "variable_type": "integer"
                 }
             }
         }
@@ -119,11 +119,11 @@
             "representations": [
                 {
                     "representation_id": "3ab4c455-5165-4ffc-9152-05755282dad0",
-                    "condition": {"==": [{"var": "images"}, false]}
+                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "4bb4c455-5165-4ffc-9152-05755282dad0",
-                    "condition": {"==": [{"var": "images"}, true]}
+                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
                 }
             ]
         },
@@ -137,11 +137,11 @@
             "representations": [
                 {
                     "representation_id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
-                    "condition": {"==": [{"var": "images"}, false]}
+                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "802d66ce-d6fd-444f-9268-6d8474632da6",
-                    "condition": {"==": [{"var": "images"}, true]}
+                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
                 }
             ]
         },
@@ -155,11 +155,11 @@
             "representations": [
                 {
                     "representation_id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
-                    "condition": {"==": [{"var": "images"}, false]}
+                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "ea36c7ac-7453-4a52-8495-6ca58e944fe8",
-                    "condition": {"==": [{"var": "images"}, true]}
+                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
                 }
             ]
         }

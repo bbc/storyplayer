@@ -251,6 +251,10 @@
             nameSpan.classList.add('slider-choice');
             nameSpan.textContent = varName;
 
+            const descSpan = document.createElement('span');
+            descSpan.classList.add('variable-description');
+            descSpan.textContent = `(${varDesc})`;
+
             const sliderSpan = document.createElement('span');
             const label = document.createElement('label');
             label.classList.add('switch');
@@ -271,6 +275,7 @@
             label.appendChild(sliderSpan);
             parEl.appendChild(label);
             parEl.appendChild(nameSpan);
+            parEl.appendChild(descSpan);
 
             const varPanel = document.getElementById('variables-generic');
             varPanel.appendChild(parEl);
