@@ -22,8 +22,8 @@
 
     <!-- Select a story -->
     <div id='chooser' class='tabcontent' style='display: block;'>
-        <div class='selection'>
-            <div>
+        <div id='choices' class='selection'>
+            <!-- <div>
                 <h3>Linear</h3>
                 <p>A simple linear story with 3 parts.</p>
                 <p><button onclick="loadStory('demo1.json')">Select</button></p>
@@ -38,7 +38,7 @@
                 <h3>Multi-representation</h3>
                 <p>A simple linear story with 3 parts, with the option to view a video version or an image-based version.</p>
                 <p><button onclick="loadStory('demo3')">Select</button></p>    
-            </div>
+            </div> -->
         </div>
     </div>
 
@@ -69,6 +69,52 @@ Select a demo story and the story json will be shown here.
 
     <script src="../dist/romper.js"></script>
     <script>
+
+        // load demo stories
+        const stories = ['demo1.json', 'demo2.json', 'demo3.json'];
+        stories.forEach(storyFilename => fetchStoryOption(storyFilename));
+
+        // get the story data for an option, and call a function to render it for selection
+        function fetchStoryOption(filename){
+            fetch(filename)
+            .then((response) => {
+                    if (response.ok) {
+                        return Promise.resolve(response.text());
+                    }
+                    return Promise.reject(response);
+                })
+                .then((text) => {
+                    const storyjson = JSON.parse(text);
+                    const name = storyjson.stories[0].name;
+                    const description = storyjson.stories[0].description;
+                    addStoryOption(filename, name, description);
+                })
+                .catch((rejection) => {
+                    showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
+                });
+        }
+
+        // render a story for user selection
+        function addStoryOption(filename, storyName, storyDescription) {
+            const storyDiv = document.createElement('div');
+            const title = document.createElement('h3');
+            title.textContent = storyName;
+            const desc = document.createElement('p');
+            desc.textContent = storyDescription;
+            const selectPar = document.createElement('p');
+            const selectButton = document.createElement('button');
+            selectButton.onclick = () => loadStory(filename);
+            selectButton.textContent = "Select";
+
+            selectPar.appendChild(selectButton);
+            storyDiv.appendChild(title);
+            storyDiv.appendChild(desc);
+            storyDiv.appendChild(selectPar);
+
+            document.getElementById('choices').appendChild(storyDiv);
+        }
+
+        // get a GET query parameter
         function getParameterByName(name, url) {
             if (!url) url = window.location.href;
             name = name.replace(/[\[\]]/g, "\\$&");
@@ -79,6 +125,14 @@ Select a demo story and the story json will be shown here.
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
 
+        // load a story from file whose path supplied in query
+        const getFilename = getParameterByName('storyjson');
+        if (getFilename) {
+            fetchStoryOption(getFilename);
+            loadStory(getFilename);
+        }
+
+        // display a message to the user
         function showMessage(messageText, error=false) {
             const messageDiv = document.getElementById('feedback');
             messageDiv.textContent = messageText;
@@ -89,11 +143,7 @@ Select a demo story and the story json will be shown here.
             }
         }
 
-        const getFilename = getParameterByName('storyjson');
-        if (getFilename) {
-            loadStory(getFilename);
-        }
-
+        // jsoneditor
         const options = {
             mode: 'tree',
         };
@@ -195,9 +245,9 @@ Select a demo story and the story json will be shown here.
                     showMessage('Story loaded');
                     run(JSON.parse(text));
                 })
-                // .catch((rejection) => {
-                //     showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
-                // });
+                .catch((rejection) => {
+                    showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
+                });
         };
 
         function addVariableControls(variableDeclaration, romperInstance) {
@@ -208,6 +258,7 @@ Select a demo story and the story json will be shown here.
             });
         }
 
+        // render a panel enabling the user to modify the value of a variable
         function addVariableSetter(varName, variableDecl, romperInstance){
             const varType = variableDecl.variable_type;
             const varDesc = variableDecl.description;
@@ -241,6 +292,7 @@ Select a demo story and the story json will be shown here.
             varPanel.appendChild(parEl);
         }
 
+        // an input for changing integer variables
         function getIntegerVariableSetter(varName, variableDecl, romperInstance){
             const varInput = document.createElement('input');
             varInput.type = 'number';
@@ -251,6 +303,7 @@ Select a demo story and the story json will be shown here.
             return varInput;                
         }
 
+        // an input for changing string variables
         function getStringVariableSetter(varName, variableDecl, romperInstance){
             const varInput = document.createElement('input');
             varInput.type = 'text';
@@ -261,6 +314,7 @@ Select a demo story and the story json will be shown here.
             return varInput;                
         }
 
+        // an input for changing boolean variables
         function getBooleanVariableSwitch(varName, variableDecl, romperInstance){
             const varInput = document.createElement('input');
             varInput.type = 'checkbox';
