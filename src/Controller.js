@@ -44,7 +44,7 @@ export default class Controller extends EventEmitter {
         this._createRenderManager();
     }
 
-    start(storyId: string) {
+    start(storyId: string, variableState?: Object = {}) {
         this._storyId = storyId;
 
         // event handling functions for StoryReasoner
@@ -81,7 +81,7 @@ export default class Controller extends EventEmitter {
             reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
             this._reasoner = reasoner;
-            this._reasoner.start();
+            this._reasoner.start(variableState);
 
             this._addListenersToRenderManager();
             this.emit('ControllerReady');

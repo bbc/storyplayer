@@ -89,18 +89,21 @@ export default class StoryReasoner extends EventEmitter {
      * Start this particular story. This initially causes a narrativeElementChanged
      * event to fire to indicate which narrative element is the first in this story.
      *
+     * @param {initialState} Object - Key value pair of starting values for story variables
+     *
      * @throws when the story has already started
      * @fires StoryReasoner#error
      * @fires StoryReasoner#narrativeElementChanged
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start() {
+    start(initialState?: Object = {}) {
         if (this._storyStarted) {
             throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
         this._fetchVariablesFromStory();
+        this._applyInitialState(initialState);
         this._chooseBeginning();
     }
 
@@ -115,6 +118,12 @@ export default class StoryReasoner extends EventEmitter {
         } else {
             logger.info('No variables in story');
         }
+    }
+
+    _applyInitialState(initialState: Object) {
+        Object.keys(initialState).forEach((varName) => {
+            this.setVariableValue(varName, initialState[varName]);
+        });
     }
 
     /**

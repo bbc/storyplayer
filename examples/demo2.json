@@ -3,7 +3,8 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "name": "Demo Branching Story",
+            "name": "A Simple Branching Story",
+            "description": "A story with one start and a variable-determined choice of either a one node or a two node finish",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -23,11 +24,6 @@
                 "in_depth": {
                     "default_value": true,
                     "description": "does the user get an in-depth version",
-                    "variable_type": "boolean"
-                },
-                "user_choice": {
-                    "default_value": false,
-                    "description": "does the user want explicit branch choice",
                     "variable_type": "boolean"
                 }
             }
@@ -55,9 +51,9 @@
             "links": [
                 {
                     "condition": {
-                        "or": [
-                            {"==": [{"var": "in_depth" }, true ]},
-                            {"==": [{"var": "user_choice" }, true ]}
+                        "==": [
+                            { "var": "in_depth" },
+                            true
                         ]
                     },
                     "link_type": "NARRATIVE_ELEMENT",
@@ -65,9 +61,9 @@
                 },
                 {
                     "condition": {
-                        "or": [
-                            {"==": [{"var": "in_depth" }, false ]},
-                            {"==": [{"var": "user_choice" }, true ]}
+                        "==": [
+                            { "var": "in_depth" },
+                            false
                         ]
                     },
                     "link_type": "NARRATIVE_ELEMENT",

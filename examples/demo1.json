@@ -3,7 +3,8 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "name": "Demo Linear Story",
+            "name": "A Simple Linear Story",
+            "description": "A story with a beginning, a middle and an end",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
