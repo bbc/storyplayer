@@ -182,6 +182,7 @@
             document.getElementById('runjson').removeAttribute('disabled');
             document.getElementById('runjson').classList.add('active');
             document.getElementById('restart-button').classList.add('active');
+            document.getElementById('restart-button').removeAttribute('disabled');
             document.getElementById('story-title').textContent = config.stories[0].name;
             jsonEditor.set(config);
             romperInstance = window.Romper.init({
@@ -215,6 +216,7 @@
         }
 
         function restart() {
+            showMessage('Story reloaded');
             run(loadedStoryJson);
         }
 
@@ -235,9 +237,9 @@
                     run(storyJson);
                     addVariableControls(storyJson.stories[0]);
                 })
-                // .catch((rejection) => {
-                //     showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
-                // });
+                .catch((rejection) => {
+                    showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
+                });
         };
 
         function addVariableControls(storyObject) {
