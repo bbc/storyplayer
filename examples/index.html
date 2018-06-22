@@ -33,10 +33,16 @@
             <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
         </div>
 
+        <div><!-- restart button -->
+            <p>
+                <button id="restart-button" class="restart-button" onclick="restart()" disabled>Restart story</button>
+            </p>
+        </div>
+
         <!-- Allow user to modify variables -->
         <div id='variable-pane'class='variable-setter active'>
             <h3>Modify variable values here</h3>
-            <p>The first Narrative Element is already loaded, so will not be immediately affected by changes.</p>
+            <p>The first Narrative Element is already loaded, so the story will need to be restarted to apply changes.</p>
             <div id='variables-generic'>Load a story to see its variables.</div>
         </div>
     </div>
@@ -54,6 +60,8 @@
 
     <script src="../dist/romper.js"></script>
     <script>
+        let romperInstance;
+        let loadedStoryJson;
 
         // load demo stories
         const stories = ['demo1.json', 'demo2.json', 'demo3.json'];
@@ -156,12 +164,11 @@
 
         // run edited json
         function runEditedJson() {
-            document.getElementById('romper-target').innerHTML = '';
             const storyJson = jsonEditor.get();
             try {
                 run(storyJson);
+                addVariableControls(storyJson.stories[0]);
                 showMessage('Story loaded - view the renderer.');
-
             } catch (e) {
                 showMessage('Could not run your json - see the console!');
                 console.log(e);
@@ -170,11 +177,14 @@
 
         // run some json through romper
         function run(config) {
+            document.getElementById('romper-target').innerHTML = '';
+            loadedStoryJson = config;
             document.getElementById('runjson').removeAttribute('disabled');
             document.getElementById('runjson').classList.add('active');
+            document.getElementById('restart-button').classList.add('active');
             document.getElementById('story-title').textContent = config.stories[0].name;
             jsonEditor.set(config);
-            let romper = window.Romper.init({
+            romperInstance = window.Romper.init({
                 target: document.getElementById('romper-target'),
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
@@ -201,17 +211,11 @@
                 ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
             });
 
-            if (config.stories[0].variables) {
-                addVariableControls(config.stories[0].variables, romper);
-            } else {
-                const varPanel = document.getElementById('variables-generic');
-                varPanel.innerHTML = 'There are no variables in this story';
-            }
+            romperInstance.start(config.stories[0].id, getVariablesState());
+        }
 
-            romper.start(config.stories[0].id);
-            romper.on('ControllerReady', () => {
-                // can set variable values now
-            });
+        function restart() {
+            run(loadedStoryJson);
         }
 
         // fetch a story, load and run it
@@ -227,23 +231,31 @@
                 })
                 .then((text) => {
                     showMessage('Story loaded');
-                    run(JSON.parse(text));
+                    const storyJson = JSON.parse(text);
+                    run(storyJson);
+                    addVariableControls(storyJson.stories[0]);
                 })
-                .catch((rejection) => {
-                    showMessage(`could not fetch story content: ${rejection.status} ${rejection.statusText}`, true);
-                });
+                // .catch((rejection) => {
+                //     showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
+                // });
         };
 
-        function addVariableControls(variableDeclaration, romperInstance) {
+        function addVariableControls(storyObject) {
             const varPanel = document.getElementById('variables-generic');
+            const variableDeclaration = storyObject.variables;
+            if (variableDeclaration === undefined || variableDeclaration === {}) {
+                varPanel.innerHTML = 'There are no variables in this story';
+                return;
+            }
+
             varPanel.innerHTML = '';
             Object.keys(variableDeclaration).forEach((varName) => {
-                addVariableSetter(varName, variableDeclaration[varName], romperInstance);
+                addVariableSetter(varName, variableDeclaration[varName]);
             });
         }
 
         // render a panel enabling the user to modify the value of a variable
-        function addVariableSetter(varName, variableDecl, romperInstance){
+        function addVariableSetter(varName, variableDecl){
             const varType = variableDecl.variable_type;
             const varDesc = variableDecl.description;
             const parEl = document.createElement('p');
@@ -261,15 +273,17 @@
 
             let varInput;
             if (varType === 'boolean') {
-                varInput = getBooleanVariableSwitch(varName, variableDecl, romperInstance);
+                varInput = getBooleanVariableSwitch(varName, variableDecl);
             } else if (varType === 'integer') {
-                varInput = getIntegerVariableSetter(varName, variableDecl, romperInstance);
+                varInput = getIntegerVariableSetter(varName, variableDecl);
             } else if (varType === 'string') {
-                varInput = getStringVariableSetter(varName, variableDecl, romperInstance);
+                varInput = getStringVariableSetter(varName, variableDecl);
             } else {
                 console.warn(`Cannot adjust variable of type ${varType}`);
                 return;
             }
+            varInput.id = varName;
+            varInput.classList.add('variable-input');
 
             label.appendChild(varInput);
             label.appendChild(sliderSpan);
@@ -282,7 +296,7 @@
         }
 
         // an input for changing integer variables
-        function getIntegerVariableSetter(varName, variableDecl, romperInstance){
+        function getIntegerVariableSetter(varName, variableDecl){
             const varInput = document.createElement('input');
             varInput.type = 'number';
 
@@ -293,7 +307,7 @@
         }
 
         // an input for changing string variables
-        function getStringVariableSetter(varName, variableDecl, romperInstance){
+        function getStringVariableSetter(varName, variableDecl){
             const varInput = document.createElement('input');
             varInput.type = 'text';
 
@@ -304,7 +318,7 @@
         }
 
         // an input for changing boolean variables
-        function getBooleanVariableSwitch(varName, variableDecl, romperInstance){
+        function getBooleanVariableSwitch(varName, variableDecl){
             const varInput = document.createElement('input');
             varInput.type = 'checkbox';
 
@@ -312,6 +326,23 @@
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.checked);
 
             return varInput;                
+        }
+
+        // get a key->value object for each variable name->value
+        function getVariablesState() {
+            const varInputs = document.getElementsByClassName('variable-input');
+            const variableState = {};
+            for(var i = 0; i < varInputs.length; i++){
+                const varInputEl = varInputs[i];
+                if (varInputEl.getAttribute('type') === 'checkbox') {
+                    variableState[varInputEl.id] = varInputEl.checked;
+                } else if (varInputEl.getAttribute('type') === 'number') {
+                    variableState[varInputEl.id] = parseInt(varInputEl.value, 10);
+                } else {
+                    variableState[varInputEl.id] = varInputEl.value;
+                }
+            }
+            return variableState;
         }
 
     </script>

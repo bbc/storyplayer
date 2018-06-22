@@ -54,7 +54,7 @@ h1 {
   width: 800px;
 }
 
-.jsoncontent button, .selection button {
+.jsoncontent button, .selection button, .restart-button {
   background-color: lightgray;
   border: none;
   color: white;
@@ -65,7 +65,7 @@ h1 {
   font-size: 16px;
 }
 
-.selection button, .jsoncontent button.active {
+.selection button, .jsoncontent button.active, .restart-button.active {
   background-color: rgb(190, 46, 2);
 }
 
