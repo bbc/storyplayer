@@ -4,7 +4,7 @@
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
             "name": "A Simple Branching Story",
-            "description": "A story with one start and a variable-determined choice of either a one node or a two node finish",
+            "description": "A story with one start and a user-selected choice of either a one node or a two node finish",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -19,14 +19,7 @@
                 "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
                 "3c2a2442-b9b8-4cca-b934-d067c8967a20",
                 "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
-            ],
-            "variables": {
-                "in_depth": {
-                    "default_value": true,
-                    "description": "does the user get an in-depth version",
-                    "variable_type": "boolean"
-                }
-            }
+            ]
         }
     ],
     "narrative_elements": [
@@ -50,22 +43,12 @@
             },
             "links": [
                 {
-                    "condition": {
-                        "==": [
-                            { "var": "in_depth" },
-                            true
-                        ]
-                    },
+                    "condition": { "==": [1, 1] },
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
                 },
                 {
-                    "condition": {
-                        "==": [
-                            { "var": "in_depth" },
-                            false
-                        ]
-                    },
+                    "condition": { "==": [1, 1] },
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
                 }
