@@ -30,6 +30,7 @@ export default class BehaviourRunner {
     // Run behaviours for a specific event type. Returns true if there's a behaviour,
     // false if none found
     runBehaviours(event: BehaviourTiming, completionEvent: RendererEvent) {
+        this.behaviours = [];
         if (this.behaviourDefinitions[event] === undefined ||
             this.behaviourDefinitions[event].length === 0
         ) {
