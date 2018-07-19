@@ -280,6 +280,8 @@
                 varInput = getIntegerVariableSetter(varName, variableDecl);
             } else if (varType === 'string') {
                 varInput = getStringVariableSetter(varName, variableDecl);
+            } else if (varType === 'list') {
+                varInput = getListVariableSetter(varName, variableDecl);
             } else {
                 console.warn(`Cannot adjust variable of type ${varType}`);
                 return;
@@ -312,6 +314,23 @@
         function getStringVariableSetter(varName, variableDecl){
             const varInput = document.createElement('input');
             varInput.type = 'text';
+
+            if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
+            varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
+
+            return varInput;                
+        }
+
+        // an input for changing enumerated string variables
+        function getListVariableSetter(varName, variableDecl){
+            const options = variableDecl.values;
+            const varInput = document.createElement('select');
+            options.forEach((optionValue) => {
+                const optionElement = document.createElement('option');
+                optionElement.setAttribute('value', optionValue);
+                optionElement.textContent = optionValue;
+                varInput.appendChild(optionElement);
+            });
 
             if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
