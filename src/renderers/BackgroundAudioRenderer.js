@@ -35,8 +35,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._player.addVolumeControl(this._assetCollection.id, 'Background');
         this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
 
-        if (this._assetCollection && this._assetCollection
-            .type === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
+        if (this._assetCollection && this._assetCollection.asset_collection_type
+                === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
             const audioElement = this._mediaInstance.getMediaElement();
             audioElement.setAttribute('loop', 'true');
         }

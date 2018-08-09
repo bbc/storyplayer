@@ -277,10 +277,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked(): void {
         const audioElement = this._mediaInstance.getMediaElement();
         if (audioElement.paused === true) {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE, 'paused', 'playing');
+            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
             this._mediaInstance.play();
         } else {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE, 'playing', 'paused');
+            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             this._mediaInstance.pause();
         }
     }

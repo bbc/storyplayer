@@ -2,12 +2,11 @@
 import PauseBehaviour from './PauseBehaviour';
 import BaseBehaviour from './BaseBehaviour';
 import ExitFullscreenBehaviour from './ExitFullscreenBehaviour';
-import type { RendererEvent } from '../renderers/RendererEvents';
 import logger from '../logger';
 
 export default function BehaviourFactory(
     behaviourDefinition: Object,
-    onComplete: (event: RendererEvent, completionEvent: RendererEvent) => void,
+    onComplete: () => void,
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
