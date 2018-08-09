@@ -11,7 +11,7 @@ export default class BehaviourRunner {
     baseRenderer: BaseRenderer;
     eventNames: Array<string>;
     behaviours: Array<Object>;
-    handleCompletion: () => void;
+    handleCompletion: (event: BehaviourTiming, completionEvent: RendererEvent) => void;
 
     constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {
         this.behaviourDefinitions = behaviourDefinitions;
@@ -41,7 +41,9 @@ export default class BehaviourRunner {
         this.behaviourDefinitions[event].forEach((behaviourDefinition) => {
             const behaviour = BehaviourFactory(
                 behaviourDefinition,
-                this.handleCompletion.bind(this, event, completionEvent),
+                // (Can't for the life of me figure out why flow hates this)
+                // @flowignore
+                () => { this.handleCompletion(event, completionEvent); },
             );
             if (behaviour) {
                 this.behaviours.push(behaviour);

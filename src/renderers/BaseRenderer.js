@@ -17,7 +17,7 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
-    _behaviourRendererMap: { [key: string]: () => void };
+    _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _applyWaitForButtonBehaviour: Function;
@@ -173,7 +173,7 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
-    getBehaviourRenderer(behaviourUrn: string): () => void {
+    getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
         return this._behaviourRendererMap[behaviourUrn];
     }
 
