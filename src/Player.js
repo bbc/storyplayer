@@ -774,7 +774,12 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-representation-icon-container');
 
         const representationIcon = document.createElement('img');
-        representationIcon.src = src;
+        if (src !== '') {
+            representationIcon.src = src;
+        } else {
+            representationIcon.src = '';
+            iconContainer.classList.add('romper-no-icon');
+        }
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
         const representationIconClick = () => {
@@ -785,8 +790,8 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
-        representationIcon.onclick = representationIconClick;
-        representationIcon.addEventListener(
+        representationControl.onclick = representationIconClick;
+        representationControl.addEventListener(
             'touchend',
             handleButtonTouchEvent(representationIconClick),
         );
@@ -808,7 +813,14 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-link-choice-icon-container');
 
         const linkChoiceIcon = document.createElement('img');
-        linkChoiceIcon.src = src;
+
+        if (src !== '') {
+            linkChoiceIcon.src = src;
+        } else {
+            linkChoiceIcon.src = '';
+            iconContainer.classList.add('romper-no-icon');
+        }
+
         linkChoiceIcon.classList.add('romper-link-icon');
         linkChoiceIcon.setAttribute('draggable', 'false');
         const linkChoiceIconClick = () => {
@@ -852,7 +864,13 @@ class Player extends EventEmitter {
         iconControl.classList.add('romper-icon-control');
 
         const icon = document.createElement('img');
-        icon.src = src;
+        if (src !== '') {
+            icon.src = src;
+        } else {
+            icon.src = '';
+            iconControl.classList.add('romper-no-icon');
+        }
+
         icon.classList.add('romper-icon');
         if (labelString) {
             icon.classList.add(`romper-icon-choice-${labelString}`);
@@ -870,8 +888,8 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
-        icon.onclick = iconClick;
-        icon.addEventListener(
+        iconControl.onclick = iconClick;
+        iconControl.addEventListener(
             'touchend',
             handleButtonTouchEvent(iconClick),
         );
@@ -901,7 +919,13 @@ class Player extends EventEmitter {
                 iconControl.classList.remove('romper-control-selected');
             }
             const icon = iconControl.children[0];
-            icon.src = src;
+            if (src !== '') {
+                icon.src = src;
+                iconControl.classList.remove('romper-no-icon');
+            } else {
+                icon.src = '';
+                iconControl.classList.add('romper-no-icon');
+            }
         }
     }
 

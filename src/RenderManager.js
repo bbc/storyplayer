@@ -148,19 +148,28 @@ export default class RenderManager extends EventEmitter {
         narrativeElementId: string,
     ) {
         // fetch icon
-        if (representation.asset_collections.icon) {
+        const setLinkChoiceControl = (mediaUrl) => {
+            // tell Player to render icon
+            this._player.addLinkChoiceControl(
+                narrativeElementId,
+                mediaUrl,
+                `Option ${(choiceId + 1)}`,
+            );
+        };
+
+        if (
+            representation.asset_collections.icon &&
+            representation.asset_collections.icon.default_id
+        ) {
             const iconAssetCollectionId = representation.asset_collections.icon.default_id;
             this._fetchAssetCollection(iconAssetCollectionId)
                 .then((iconAssetCollection) => {
                     if (iconAssetCollection.assets.image_src) {
-                        // tell Player to render icon
-                        this._player.addLinkChoiceControl(
-                            narrativeElementId,
-                            iconAssetCollection.assets.image_src,
-                            `Option ${(choiceId + 1)}`,
-                        );
+                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
                     }
                 });
+        } else {
+            setLinkChoiceControl('');
         }
         // make overlay visible
         this._player.enableLinkChoiceControl();

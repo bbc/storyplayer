@@ -14,7 +14,6 @@ import logger from './logger';
 // @flowignore
 import './assets/styles/player.scss';
 
-
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
     analyticsLogger: (logdata) => {

@@ -189,6 +189,14 @@ $romper-hover-text-size: 25px;
     background-color: $highlight;
   }
 
+  .romper-no-icon {
+    background-color: $transparent;
+    background-image: url('../images/no-asset.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
   .romper-play-button {
     @include button;
     margin-right: 20px;
