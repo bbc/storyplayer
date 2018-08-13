@@ -100,7 +100,9 @@ const assetCollectionFetcher = id =>
 const mediaFetcher = uri =>
     Promise.resolve(uri).then(() => 'http://localhost/~andybr/obm/nothingtosee.mp4');
 
-const player = new Player(document.createElement('div'), logger);
+const player = new Player(document.createElement('div'), logger, {
+    noAssetIconUrl: '/images/no-asset.svg',
+});
 
 describe('SwitchableRenderer', () => {
     it('can create an instance of SwitchableRenderer', (done) => {
