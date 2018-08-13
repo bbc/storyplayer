@@ -6,7 +6,7 @@ import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
 import type {
     StoryFetcher, NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher,
-    MediaFetcher,
+    MediaFetcher, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
@@ -28,6 +28,7 @@ export default class Controller extends EventEmitter {
         fetchMedia: MediaFetcher,
         fetchStory: StoryFetcher,
         analytics: AnalyticsLogger,
+        assetUrls: AssetUrls,
     ) {
         super();
         this._storyId = null;
@@ -40,6 +41,7 @@ export default class Controller extends EventEmitter {
         this._fetchMedia = fetchMedia;
         this._fetchStory = fetchStory;
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
         this._linearStoryPath = [];
         this._createRenderManager();
     }
@@ -151,6 +153,7 @@ export default class Controller extends EventEmitter {
             this._representationReasoner,
             this._fetchMedia,
             this._analytics,
+            this._assetUrls,
         );
     }
 
@@ -490,6 +493,7 @@ export default class Controller extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _fetchStory: StoryFetcher;
     _analytics: AnalyticsLogger;
+    _assetUrls: AssetUrls;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;

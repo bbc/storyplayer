@@ -156,7 +156,6 @@ export type Settings = {
     mediaFetcher: MediaFetcher,
 };
 
-export type HTMLElementExtended = {
-    ...HTMLElement,
-    webkitRequestFullscreen: () => bool,
+export type AssetUrls = {
+    noAssetIconUrl: string,
 }

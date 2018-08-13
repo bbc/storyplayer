@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
-
+import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
 
@@ -246,6 +246,7 @@ class Player extends EventEmitter {
     _currentTime: HTMLSpanElement;
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
+    _assetUrls: AssetUrls;
     _logUserInteraction: Function;
     _foregroundMediaElement: HTMLVideoElement;
     _backgroundMediaElement: HTMLAudioElement;
@@ -255,8 +256,9 @@ class Player extends EventEmitter {
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger) {
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
+
 
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
@@ -284,6 +286,8 @@ class Player extends EventEmitter {
         this.showingSubtitles = false;
 
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
+
         this._logUserInteraction = this._logUserInteraction.bind(this);
 
         this._player = document.createElement('div');
@@ -777,8 +781,7 @@ class Player extends EventEmitter {
         if (src !== '') {
             representationIcon.src = src;
         } else {
-            representationIcon.src = '';
-            iconContainer.classList.add('romper-no-icon');
+            representationIcon.src = this._assetUrls.noAssetIconUrl;
         }
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
@@ -790,8 +793,8 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
-        representationControl.onclick = representationIconClick;
-        representationControl.addEventListener(
+        representationIcon.onclick = representationIconClick;
+        representationIcon.addEventListener(
             'touchend',
             handleButtonTouchEvent(representationIconClick),
         );
@@ -817,8 +820,7 @@ class Player extends EventEmitter {
         if (src !== '') {
             linkChoiceIcon.src = src;
         } else {
-            linkChoiceIcon.src = '';
-            iconContainer.classList.add('romper-no-icon');
+            linkChoiceIcon.src = this._assetUrls.noAssetIconUrl;
         }
 
         linkChoiceIcon.classList.add('romper-link-icon');
@@ -867,8 +869,7 @@ class Player extends EventEmitter {
         if (src !== '') {
             icon.src = src;
         } else {
-            icon.src = '';
-            iconControl.classList.add('romper-no-icon');
+            icon.src = this._assetUrls.noAssetIconUrl;
         }
 
         icon.classList.add('romper-icon');
@@ -888,8 +889,8 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
-        iconControl.onclick = iconClick;
-        iconControl.addEventListener(
+        icon.onclick = iconClick;
+        icon.addEventListener(
             'touchend',
             handleButtonTouchEvent(iconClick),
         );
@@ -921,10 +922,8 @@ class Player extends EventEmitter {
             const icon = iconControl.children[0];
             if (src !== '') {
                 icon.src = src;
-                iconControl.classList.remove('romper-no-icon');
             } else {
-                icon.src = '';
-                iconControl.classList.add('romper-no-icon');
+                icon.src = this._assetUrls.noAssetIconUrl;
             }
         }
     }
