@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher, Representation,
-    MediaFetcher, RepresentationChoice,
+    MediaFetcher, RepresentationChoice, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -44,6 +44,7 @@ export default class RenderManager extends EventEmitter {
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
+    _assetUrls: AssetUrls;
 
     constructor(
         controller: Controller,
@@ -53,6 +54,7 @@ export default class RenderManager extends EventEmitter {
         representationReasoner: RepresentationReasoner,
         fetchMedia: MediaFetcher,
         analytics: AnalyticsLogger,
+        assetUrls: AssetUrls,
     ) {
         super();
 
@@ -63,8 +65,9 @@ export default class RenderManager extends EventEmitter {
         this._fetchAssetCollection = fetchAssetCollection;
         this._fetchMedia = fetchMedia;
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
 
-        this._player = new Player(this._target, this._analytics);
+        this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
@@ -148,19 +151,28 @@ export default class RenderManager extends EventEmitter {
         narrativeElementId: string,
     ) {
         // fetch icon
-        if (representation.asset_collections.icon) {
+        const setLinkChoiceControl = (mediaUrl) => {
+            // tell Player to render icon
+            this._player.addLinkChoiceControl(
+                narrativeElementId,
+                mediaUrl,
+                `Option ${(choiceId + 1)}`,
+            );
+        };
+
+        if (
+            representation.asset_collections.icon &&
+            representation.asset_collections.icon.default_id
+        ) {
             const iconAssetCollectionId = representation.asset_collections.icon.default_id;
             this._fetchAssetCollection(iconAssetCollectionId)
                 .then((iconAssetCollection) => {
                     if (iconAssetCollection.assets.image_src) {
-                        // tell Player to render icon
-                        this._player.addLinkChoiceControl(
-                            narrativeElementId,
-                            iconAssetCollection.assets.image_src,
-                            `Option ${(choiceId + 1)}`,
-                        );
+                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
                     }
                 });
+        } else {
+            setLinkChoiceControl('');
         }
         // make overlay visible
         this._player.enableLinkChoiceControl();

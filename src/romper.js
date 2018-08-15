@@ -8,12 +8,10 @@ import Controller from './Controller';
 import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
-// import MediaManager from './MediaManager';
 import logger from './logger';
 
 // @flowignore
 import './assets/styles/player.scss';
-
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
@@ -25,8 +23,8 @@ const DEFAULT_SETTINGS = {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
         }
     },
+    staticImageBaseUrl: '/images',
 };
-
 
 module.exports = {
     RESOLVERS: {
@@ -35,6 +33,10 @@ module.exports = {
 
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+
+        // Set static base url onto window so it's available throughout the entire code
+        // window.Romper = {};
+        // window.Romper.noAssetIconUrl = `${mergedSettings.staticImageBaseUrl}/no-asset.svg`;
 
         if (!mergedSettings.dataResolver) {
             logger.info('No data resolver passed to romper - creating one');
@@ -51,6 +53,11 @@ module.exports = {
             mergedSettings.representationFetcher,
             mergedSettings.dataResolver,
         );
+
+        const assetUrls = {
+            noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+        };
+
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
@@ -60,6 +67,7 @@ module.exports = {
             mergedSettings.mediaFetcher,
             mergedSettings.storyFetcher,
             mergedSettings.analyticsLogger,
+            assetUrls,
         );
     },
 };

@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
-
+import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
 
@@ -246,6 +246,7 @@ class Player extends EventEmitter {
     _currentTime: HTMLSpanElement;
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
+    _assetUrls: AssetUrls;
     _logUserInteraction: Function;
     _foregroundMediaElement: HTMLVideoElement;
     _backgroundMediaElement: HTMLAudioElement;
@@ -255,8 +256,9 @@ class Player extends EventEmitter {
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger) {
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
+
 
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
@@ -284,6 +286,8 @@ class Player extends EventEmitter {
         this.showingSubtitles = false;
 
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
+
         this._logUserInteraction = this._logUserInteraction.bind(this);
 
         this._player = document.createElement('div');
@@ -774,7 +778,11 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-representation-icon-container');
 
         const representationIcon = document.createElement('img');
-        representationIcon.src = src;
+        if (src !== '') {
+            representationIcon.src = src;
+        } else {
+            representationIcon.src = this._assetUrls.noAssetIconUrl;
+        }
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
         const representationIconClick = () => {
@@ -808,7 +816,13 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-link-choice-icon-container');
 
         const linkChoiceIcon = document.createElement('img');
-        linkChoiceIcon.src = src;
+
+        if (src !== '') {
+            linkChoiceIcon.src = src;
+        } else {
+            linkChoiceIcon.src = this._assetUrls.noAssetIconUrl;
+        }
+
         linkChoiceIcon.classList.add('romper-link-icon');
         linkChoiceIcon.setAttribute('draggable', 'false');
         const linkChoiceIconClick = () => {
@@ -852,7 +866,12 @@ class Player extends EventEmitter {
         iconControl.classList.add('romper-icon-control');
 
         const icon = document.createElement('img');
-        icon.src = src;
+        if (src !== '') {
+            icon.src = src;
+        } else {
+            icon.src = this._assetUrls.noAssetIconUrl;
+        }
+
         icon.classList.add('romper-icon');
         if (labelString) {
             icon.classList.add(`romper-icon-choice-${labelString}`);
@@ -901,7 +920,11 @@ class Player extends EventEmitter {
                 iconControl.classList.remove('romper-control-selected');
             }
             const icon = iconControl.children[0];
-            icon.src = src;
+            if (src !== '') {
+                icon.src = src;
+            } else {
+                icon.src = this._assetUrls.noAssetIconUrl;
+            }
         }
     }
 
