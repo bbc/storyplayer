@@ -2,8 +2,8 @@
 
 import EventEmitter from 'events';
 import type {
-    NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher, Representation,
-    MediaFetcher, RepresentationChoice, AssetUrls,
+    NarrativeElement, ExperienceFetchers, Representation,
+    RepresentationChoice, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -26,10 +26,8 @@ export default class RenderManager extends EventEmitter {
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
     _target: HTMLElement;
     _backgroundTarget: HTMLElement;
-    _fetchRepresentationCollection: RepresentationCollectionFetcher;
-    _fetchAssetCollection: AssetCollectionFetcher;
     _representationReasoner: RepresentationReasoner;
-    _fetchMedia: MediaFetcher;
+    _fetchers: ExperienceFetchers;
     _analytics: AnalyticsLogger;
     _renderStory: StoryIconRenderer;
     _neTarget: HTMLDivElement;
@@ -49,10 +47,8 @@ export default class RenderManager extends EventEmitter {
     constructor(
         controller: Controller,
         target: HTMLElement,
-        fetchRepresentationCollection: RepresentationCollectionFetcher,
-        fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
-        fetchMedia: MediaFetcher,
+        fetchers: ExperienceFetcher,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
     ) {
@@ -60,10 +56,8 @@ export default class RenderManager extends EventEmitter {
 
         this._controller = controller;
         this._target = target;
-        this._fetchRepresentationCollection = fetchRepresentationCollection;
         this._representationReasoner = representationReasoner;
-        this._fetchAssetCollection = fetchAssetCollection;
-        this._fetchMedia = fetchMedia;
+        this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
 
@@ -91,13 +85,40 @@ export default class RenderManager extends EventEmitter {
             this._followLink(event.id);
         });
 
+        this._fetchers.assetCollectionFetcher('528cc033-0cdb-49dc-b9fd-97e55ea7e0be')
+            .then((fg) => {
+                if (fg.assets.image_src) {
+                    return this._fetchers.mediaFetcher(fg.assets.image_src);
+                }
+                return Promise.reject(new Error('No image_src'));
+            })
+            .then((mediaUrl) => {
+                logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                this._player.addExperienceStartButtonAndImage({
+                    background_art: mediaUrl,
+                    button_class: 'romper-start-button',
+                    text: 'Start',
+                    hide_narrative_buttons: true,
+                });
+            })
+            .catch((err) => {
+                logger.error(err, 'Could not get url from asset collection uuid');
+                this._player.addExperienceStartButtonAndImage({
+                    background_art: '',
+                    button_class: 'romper-start-button',
+                    text: 'Start',
+                    hide_narrative_buttons: true,
+                });
+            });
+
+
         this._initialise();
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
-            this._fetchRepresentationCollection(narrativeElement.body.representation_collection_target_id)
+            this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
@@ -135,7 +156,7 @@ export default class RenderManager extends EventEmitter {
             // fetch representation
             if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
-                this._fetchRepresentationCollection(choiceNarrativeElement.body.representation_collection_target_id)
+                this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
                         this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
@@ -165,7 +186,7 @@ export default class RenderManager extends EventEmitter {
             representation.asset_collections.icon.default_id
         ) {
             const iconAssetCollectionId = representation.asset_collections.icon.default_id;
-            this._fetchAssetCollection(iconAssetCollectionId)
+            this._fetchers.assetCollectionFetcher(iconAssetCollectionId)
                 .then((iconAssetCollection) => {
                     if (iconAssetCollection.assets.image_src) {
                         setLinkChoiceControl(iconAssetCollection.assets.image_src);
@@ -188,8 +209,8 @@ export default class RenderManager extends EventEmitter {
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
         this._renderStory = new StoryIconRenderer(
             storyItemPath,
-            this._fetchAssetCollection,
-            this._fetchMedia,
+            this._fetchers.assetCollectionFetcher,
+            this._fetchers.mediaFetcher,
             this._player,
         );
 
@@ -224,12 +245,12 @@ export default class RenderManager extends EventEmitter {
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
             if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-                this._fetchAssetCollection(backgroundAssetCollectionId)
+                this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
                             bgAssetCollection.asset_collection_type,
                             bgAssetCollection,
-                            this._fetchMedia,
+                            this._fetchers.mediaFetcher,
                             this._player,
                         );
                         if (backgroundRenderer) {
@@ -254,8 +275,8 @@ export default class RenderManager extends EventEmitter {
     _createNewRenderer(representation: Representation): ?BaseRenderer {
         const newRenderer = RendererFactory(
             representation,
-            this._fetchAssetCollection,
-            this._fetchMedia,
+            this._fetchers.assetCollectionFetcher,
+            this._fetchers.mediaFetcher,
             this._player,
             this._analytics,
         );
@@ -380,7 +401,8 @@ export default class RenderManager extends EventEmitter {
             // get the actual NarrativeElement object
             const neObj = this._controller._getNarrativeElement(neid);
             if (neObj && neObj.body.representation_collection_target_id) {
-                this._fetchRepresentationCollection(neObj.body.representation_collection_target_id)
+                this._fetchers
+                    .representationCollectionFetcher(neObj.body.representation_collection_target_id)
                     .then(presentation => this._representationReasoner(presentation))
                     .then((representation) => {
                         // create the new Renderer

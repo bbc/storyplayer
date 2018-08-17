@@ -231,6 +231,8 @@ class Player extends EventEmitter {
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
     _mediaTransport: HTMLDivElement;
+    _startExperienceButton: HTMLButtonElement;
+    _startExperienceImage: HTMLImageElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -589,6 +591,44 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('show');
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
+    }
+
+    addExperienceStartButtonAndImage(options: Object) {
+        this._startExperienceButton = document.createElement('button');
+        this._startExperienceButton.classList.add(options.button_class);
+        this._startExperienceButton.setAttribute('title', 'Continue Button');
+        this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconDiv = document.createElement('div');
+        continueButtonIconDiv.classList.add('romper-button-icon-div');
+        continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+        this._startExperienceButton.appendChild(continueButtonIconDiv);
+        const continueButtonTextDiv = document.createElement('div');
+        continueButtonTextDiv.innerHTML = options.text;
+        continueButtonTextDiv.classList.add('romper-button-text-div');
+        continueButtonTextDiv.classList.add(`${options.button_class}-text-div`);
+        this._startExperienceButton.appendChild(continueButtonTextDiv);
+
+        this._startExperienceImage = document.createElement('img');
+        this._startExperienceImage.className = 'romper-render-image';
+        this._startExperienceImage.src = options.background_art;
+
+        this._guiLayer.appendChild(this._startExperienceButton);
+        this._mediaLayer.appendChild(this._startExperienceImage);
+
+        const buttonClickHandler = () => {
+            this._guiLayer.removeChild(this._startExperienceButton);
+            this._mediaLayer.removeChild(this._startExperienceImage);
+            this._enableUserInteraction();
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+        };
+        this._startExperienceButton.onclick = buttonClickHandler;
+
+        if (options.hide_narrative_buttons) {
+            // can't use player.setNextAvailable
+            // as this may get reset after this by NE change handling
+            this._narrativeElementTransport.classList.add('romper-inactive');
+        }
     }
 
     _enableUserInteraction() {

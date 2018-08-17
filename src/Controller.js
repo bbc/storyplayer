@@ -142,10 +142,8 @@ export default class Controller extends EventEmitter {
         this._renderManager = new RenderManager(
             this,
             this._target,
-            this._fetchers.representationCollectionFetcher,
-            this._fetchers.assetCollectionFetcher,
             this._representationReasoner,
-            this._fetchers.mediaFetcher,
+            this._fetchers,
             this._analytics,
             this._assetUrls,
         );
