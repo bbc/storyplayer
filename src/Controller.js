@@ -5,8 +5,7 @@ import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
 import type {
-    StoryFetcher, NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher,
-    MediaFetcher, AssetUrls,
+    ExperienceFetchers, NarrativeElement, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
@@ -22,11 +21,8 @@ export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
         storyReasonerFactory: StoryReasonerFactory,
-        fetchRepresentationCollection: RepresentationCollectionFetcher,
-        fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
-        fetchMedia: MediaFetcher,
-        fetchStory: StoryFetcher,
+        fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
     ) {
@@ -35,11 +31,9 @@ export default class Controller extends EventEmitter {
         this._reasoner = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
-        this._fetchRepresentationCollection = fetchRepresentationCollection;
         this._representationReasoner = representationReasoner;
-        this._fetchAssetCollection = fetchAssetCollection;
-        this._fetchMedia = fetchMedia;
-        this._fetchStory = fetchStory;
+
+        this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._linearStoryPath = [];
@@ -148,10 +142,10 @@ export default class Controller extends EventEmitter {
         this._renderManager = new RenderManager(
             this,
             this._target,
-            this._fetchRepresentationCollection,
-            this._fetchAssetCollection,
+            this._fetchers.representationCollectionFetcher,
+            this._fetchers.assetCollectionFetcher,
             this._representationReasoner,
-            this._fetchMedia,
+            this._fetchers.mediaFetcher,
             this._analytics,
             this._assetUrls,
         );
@@ -175,8 +169,8 @@ export default class Controller extends EventEmitter {
     _testForLinearityAndBuildStoryRenderer(storyId: string) {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
-            this._fetchStory,
-            this._fetchRepresentationCollection,
+            this._fetchers.storyFetcher,
+            this._fetchers.representationCollectionFetcher,
             this._storyReasonerFactory,
         );
 
@@ -487,11 +481,8 @@ export default class Controller extends EventEmitter {
     _reasoner: ?StoryReasoner;
     _target: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
-    _fetchRepresentationCollection: RepresentationCollectionFetcher;
-    _fetchAssetCollection: AssetCollectionFetcher;
+    _fetchers: ExperienceFetchers;
     _representationReasoner: RepresentationReasoner;
-    _fetchMedia: MediaFetcher;
-    _fetchStory: StoryFetcher;
     _analytics: AnalyticsLogger;
     _assetUrls: AssetUrls;
     _handleError: ?Function;
