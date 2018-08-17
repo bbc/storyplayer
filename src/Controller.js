@@ -81,6 +81,8 @@ export default class Controller extends EventEmitter {
 
             this._addListenersToRenderManager();
             this.emit('ControllerReady');
+
+            this._renderManager.handleStoryStart(storyId);
         });
     }
 

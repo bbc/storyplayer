@@ -85,34 +85,51 @@ export default class RenderManager extends EventEmitter {
             this._followLink(event.id);
         });
 
-        this._fetchers.assetCollectionFetcher('528cc033-0cdb-49dc-b9fd-97e55ea7e0be')
+        this._initialise();
+    }
+
+    handleStoryStart(storyId) {
+        let onLaunchConfig = {
+            background_art_asset_collection_id: '',
+            button_class: 'romper-start-button',
+            text: 'Start',
+            hide_narrative_buttons: true,
+        };
+        this._fetchers.storyFetcher(storyId)
+            .then((story) => {
+                if (
+                    'meta' in story &&
+                    'romper' in story.meta &&
+                    'onLaunch' in story.meta.romper
+                ) {
+                    onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
+                    return this._fetchers
+                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
+                }
+                return Promise.reject(new Error('No onLaunch options in Story'));
+            })
             .then((fg) => {
                 if (fg.assets.image_src) {
                     return this._fetchers.mediaFetcher(fg.assets.image_src);
                 }
-                return Promise.reject(new Error('No image_src'));
+                return Promise.reject(new Error('Could not find Asset Collection'));
             })
             .then((mediaUrl) => {
                 logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                this._player.addExperienceStartButtonAndImage({
-                    background_art: mediaUrl,
-                    button_class: 'romper-start-button',
-                    text: 'Start',
-                    hide_narrative_buttons: true,
-                });
+                this._player.addExperienceStartButtonAndImage(Object.assign(
+                    onLaunchConfig,
+                    { background_art: mediaUrl },
+                ));
             })
             .catch((err) => {
                 logger.error(err, 'Could not get url from asset collection uuid');
-                this._player.addExperienceStartButtonAndImage({
-                    background_art: '',
-                    button_class: 'romper-start-button',
-                    text: 'Start',
-                    hide_narrative_buttons: true,
-                });
+                this._player.addExperienceStartButtonAndImage(Object.assign(
+                    onLaunchConfig,
+                    { background_art: `${this._assetUrls.noBackgroundAssetUrl}` },
+                ));
             });
 
-
-        this._initialise();
+        this._fetchers.assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
