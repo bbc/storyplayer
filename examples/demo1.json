@@ -225,6 +225,10 @@
             "description": "",
             "version": "0:0",
             "tags": {},
+            "meta": {
+                "in": "2.0",
+                "out": "3.0"
+            },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
                 "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"

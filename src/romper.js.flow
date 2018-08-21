@@ -109,6 +109,7 @@ export type AssetCollection = {
     name: string,
     tags: Tags,
     asset_collection_type: string,
+    meta?: Object,
     assets: {
         audio_src?: string,
         image_src?: string,
