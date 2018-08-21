@@ -48,7 +48,7 @@ export default class RenderManager extends EventEmitter {
         controller: Controller,
         target: HTMLElement,
         representationReasoner: RepresentationReasoner,
-        fetchers: ExperienceFetcher,
+        fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
     ) {
@@ -88,20 +88,17 @@ export default class RenderManager extends EventEmitter {
         this._initialise();
     }
 
-    handleStoryStart(storyId) {
+    handleStoryStart(storyId: string) {
         let onLaunchConfig = {
             background_art_asset_collection_id: '',
             button_class: 'romper-start-button',
             text: 'Start',
             hide_narrative_buttons: true,
+            background_art: this._assetUrls.noBackgroundAssetUrl,
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
-                if (
-                    'meta' in story &&
-                    'romper' in story.meta &&
-                    'onLaunch' in story.meta.romper
-                ) {
+                if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
                     return this._fetchers
                         .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
@@ -125,7 +122,7 @@ export default class RenderManager extends EventEmitter {
                 logger.error(err, 'Could not get url from asset collection uuid');
                 this._player.addExperienceStartButtonAndImage(Object.assign(
                     onLaunchConfig,
-                    { background_art: `${this._assetUrls.noBackgroundAssetUrl}` },
+                    { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
             });
 

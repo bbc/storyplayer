@@ -31,7 +31,7 @@ export type Story = {
     tags?: Tags,
     beginnings: Array<Beginning>,
     narrative_element_ids: Array<string>,
-    meta?: any,
+    meta?: Object,
     variables?: Object,
 };
 
@@ -163,4 +163,5 @@ export type Settings = {
 
 export type AssetUrls = {
     noAssetIconUrl: string,
+    noBackgroundAssetUrl?: string,
 }
