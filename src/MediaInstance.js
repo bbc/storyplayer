@@ -317,7 +317,7 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.OTHER:
-                if (this._mountedMediaElement){
+                if (this._mountedMediaElement) {
                     this._mountedMediaElement.src = '';
                 }
                 break;
