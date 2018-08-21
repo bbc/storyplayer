@@ -12,7 +12,13 @@
                 }
             ],
             "tags": {},
-            "meta": {},
+            "meta": {
+                "romper": {
+                    "onLaunch": {
+                        "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                    }
+                }
+            },
             "object_class": "STORY",
             "narrative_element_ids": [
                 "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -220,26 +226,10 @@
             "asset_collections": {
                 "foreground_id": "9b78100b-9cfe-4c21-9eac-7763a5f8188c",
                 "background_ids": [],
-                "behaviours": [
-                    {
-                        "behaviour_asset_collection_mapping_id": "5022f062-41b6-4404-87ee-199706e15038",
-                        "asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
-                    }
-                ]
+                "behaviours": []
             },
             "behaviours": {
-                "started": [
-                    {
-                        "type": "urn:x-object-based-media:representation-behaviour:showimage/v1.0",
-                        "image": "5022f062-41b6-4404-87ee-199706e15038"
-                    },
-                    {
-                        "type": "urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0",
-                        "button_class": "romper-start-button",
-                        "text": "Start",
-                        "hide_narrative_buttons": true
-                    }
-                ],
+                "started": [],
                 "completed": []
             }
         },

@@ -187,6 +187,7 @@
             jsonEditor.set(config);
             romperInstance = window.Romper.init({
                 target: document.getElementById('romper-target'),
+                staticImageBaseUrl: '../src/assets/images/',
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
                 },
