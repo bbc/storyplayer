@@ -13,7 +13,7 @@
 
 <body>
     <h1>OBM Toolkit Experience Demos</h1>
-    
+
     <!-- tab switcher -->
     <div class="tab">
         <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
@@ -52,7 +52,7 @@
         <div id='json-view'>
             <p>Select a demo story and the story json will be shown here.</p>
         </div>
-        <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>    
+        <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>
     </div>
 
     <!-- information for users -->
@@ -144,23 +144,23 @@
 
         // handle changing tabs
         function openTab(evt, demoName) {
-            
+
             // Get all elements with class="tabcontent" and hide them
             var tabcontent = document.getElementsByClassName("tabcontent");
             for (var i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "none";
             }
-        
+
             // Get all elements with class="tablinks" and remove the class "active"
             var tablinks = document.getElementsByClassName("tablinks");
             for (var i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-        
+
             // Show the current tab, and add an "active" class to the button that opened the tab
             document.getElementById(demoName).style.display = "block";
             evt.currentTarget.className += " active";
-        } 
+        }
 
         // run edited json
         function runEditedJson() {
@@ -187,7 +187,7 @@
             jsonEditor.set(config);
             romperInstance = window.Romper.init({
                 target: document.getElementById('romper-target'),
-                staticImageBaseUrl: '../src/assets/images/',
+                staticImageBaseUrl: '/src/assets/images/',
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
                 },
@@ -308,7 +308,7 @@
             if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
 
-            return varInput;                
+            return varInput;
         }
 
         // an input for changing string variables
@@ -319,7 +319,7 @@
             if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
 
-            return varInput;                
+            return varInput;
         }
 
         // an input for changing enumerated string variables
@@ -336,7 +336,7 @@
             if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.value);
 
-            return varInput;                
+            return varInput;
         }
 
         // an input for changing boolean variables
@@ -347,7 +347,7 @@
             if (variableDecl.default_value) { varInput.setAttribute('checked', true); }
             varInput.onchange = () => romperInstance.setVariableValue(varName, varInput.checked);
 
-            return varInput;                
+            return varInput;
         }
 
         // get a key->value object for each variable name->value

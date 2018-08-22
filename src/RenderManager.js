@@ -125,8 +125,6 @@ export default class RenderManager extends EventEmitter {
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
             });
-
-        this._fetchers.assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
