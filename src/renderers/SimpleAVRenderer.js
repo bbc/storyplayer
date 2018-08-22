@@ -205,11 +205,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
                             });
-                        if (fg.meta && fg.meta.in) {
-                            this.setCurrentTime(parseFloat(fg.meta.in));
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                            this.setCurrentTime(parseFloat(fg.meta.romper.in));
                         }
-                        if (fg.meta && fg.meta.out) {
-                            this.setOutTime(parseFloat(fg.meta.out));
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                            this.setOutTime(parseFloat(fg.meta.romper.out));
                         }
                     }
                     if (fg.assets.sub_src) {
