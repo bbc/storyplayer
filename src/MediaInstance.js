@@ -317,6 +317,9 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.OTHER:
+                if (this._mountedMediaElement) {
+                    this._mountedMediaElement.src = '';
+                }
                 break;
             default:
                 logger.error('Cannot handle this mediaType (attachMedia)');
