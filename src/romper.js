@@ -1,7 +1,7 @@
 // @flow
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
-import type { Settings } from './romper';
+import type { Settings, ExperienceFetchers, AssetUrls } from './romper';
 import Controller from './Controller';
 
 // eslint-disable-next-line import/no-named-as-default
@@ -34,10 +34,6 @@ module.exports = {
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
-        // Set static base url onto window so it's available throughout the entire code
-        // window.Romper = {};
-        // window.Romper.noAssetIconUrl = `${mergedSettings.staticImageBaseUrl}/no-asset.svg`;
-
         if (!mergedSettings.dataResolver) {
             logger.info('No data resolver passed to romper - creating one');
             mergedSettings.dataResolver = ObjectDataResolver({});
@@ -49,23 +45,30 @@ module.exports = {
             mergedSettings.dataResolver,
         );
 
-        const representationReasoner = RepresentationReasonerFactory(
+        const representationReasonerFactory = RepresentationReasonerFactory(
             mergedSettings.representationFetcher,
             mergedSettings.dataResolver,
         );
 
-        const assetUrls = {
+        const assetUrls:AssetUrls = {
             noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+        };
+
+        const fetchers:ExperienceFetchers = {
+            storyFetcher: mergedSettings.storyFetcher,
+            narrativeElementFetcher: mergedSettings.narrativeElementFetcher,
+            representationCollectionFetcher: mergedSettings.representationCollectionFetcher,
+            representationFetcher: mergedSettings.representationFetcher,
+            assetCollectionFetcher: mergedSettings.assetCollectionFetcher,
+            mediaFetcher: mergedSettings.mediaFetcher,
         };
 
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
-            mergedSettings.representationCollectionFetcher,
-            mergedSettings.assetCollectionFetcher,
-            representationReasoner,
-            mergedSettings.mediaFetcher,
-            mergedSettings.storyFetcher,
+            representationReasonerFactory,
+            fetchers,
             mergedSettings.analyticsLogger,
             assetUrls,
         );

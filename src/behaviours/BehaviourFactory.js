@@ -15,7 +15,6 @@ export default function BehaviourFactory(
         'urn:x-object-based-media:representation-behaviour:blur/v1.0': BaseBehaviour,
         'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': BaseBehaviour,
         'urn:x-object-based-media:representation-behaviour:showimage/v1.0': BaseBehaviour,
-        'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': BaseBehaviour,
     };
 
     let currentBehaviour;
