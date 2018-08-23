@@ -10,6 +10,8 @@ import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
+import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
+
 // @flowignore
 import './assets/styles/player.scss';
 
@@ -30,6 +32,9 @@ module.exports = {
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
     },
+
+    BrowserUserAgent,
+    BrowserCapabilities,
 
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
