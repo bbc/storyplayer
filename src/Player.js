@@ -622,6 +622,7 @@ class Player extends EventEmitter {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         };
+
         this._startExperienceButton.onclick = buttonClickHandler;
 
         if (options.hide_narrative_buttons) {
@@ -650,7 +651,7 @@ class Player extends EventEmitter {
         this._foregroundMediaElement.pause();
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
-
+        this._backgroundMediaElement.play();
         this._playPauseButtonClicked();
     }
 
