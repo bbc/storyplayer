@@ -34,7 +34,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _subtitlesShowing: boolean;
     _subtitlesSrc: string;
 
-    _lastSetTime: number
+    _lastSetTime: number;
 
     _endedEventListener: Function;
     _playEventListener: Function;
@@ -205,6 +205,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
                             });
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                            this.setCurrentTime(parseFloat(fg.meta.romper.in));
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                            this.setOutTime(parseFloat(fg.meta.romper.out));
+                        }
                     }
                     if (fg.assets.sub_src) {
                         this._fetchMedia(fg.assets.sub_src)
@@ -338,6 +344,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 videoElement.currentTime = time;
             });
         }
+    }
+
+    setOutTime(time: number) {
+        const videoElement = this._mediaInstance.getMediaElement();
+        videoElement.addEventListener('timeupdate', () => {
+            if (videoElement.currentTime >= time) {
+                this._endedEventListener();
+            }
+        });
     }
 
     switchFrom() {
