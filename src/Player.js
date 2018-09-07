@@ -621,7 +621,6 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._startExperienceImage);
 
         const buttonClickHandler = () => {
-            console.log('andy: start button handling');
             this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
             this._narrativeElementTransport.classList.remove('romper-inactive');
