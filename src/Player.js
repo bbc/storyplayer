@@ -621,6 +621,7 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._startExperienceImage);
 
         const buttonClickHandler = () => {
+            console.log('andy: start button handling');
             this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
             this._narrativeElementTransport.classList.remove('romper-inactive');
@@ -637,7 +638,6 @@ class Player extends EventEmitter {
     }
 
     _clearOverlays() {
-        logger.info('romper player clearing overlays');
         this._icon.clearAll();
         this._volume.clearAll();
         this._linkChoice.clearAll();
@@ -647,11 +647,12 @@ class Player extends EventEmitter {
         if (this._startExperienceButton || this._startExperienceImage) {
             this.removeExperienceStartButtonAndImage();
         }
+        this._foregroundMediaElement.pause();
+        this._backgroundMediaElement.pause();
         this._clearOverlays();
         this._userInteractionStarted = false;
-        logger.info('disabling experience');
+        logger.info('disabling experience before restart');
         this._mediaManager.setPermissionToPlay(false);
-        this._backgroundMediaElement.pause();
     }
 
     removeExperienceStartButtonAndImage() {
