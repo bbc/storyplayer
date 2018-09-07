@@ -599,9 +599,6 @@ class Player extends EventEmitter {
     }
 
     addExperienceStartButtonAndImage(options: Object) {
-        if (this._startExperienceButton || this._startExperienceImage) {
-            this.removeExperienceStartButtonAndImage();
-        }
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Continue Button');
@@ -639,6 +636,24 @@ class Player extends EventEmitter {
         }
     }
 
+    _clearOverlays() {
+        logger.info('romper player clearing overlays');
+        this._icon.clearAll();
+        this._volume.clearAll();
+        this._linkChoice.clearAll();
+    }
+
+    prepareForRestart() {
+        if (this._startExperienceButton || this._startExperienceImage) {
+            this.removeExperienceStartButtonAndImage();
+        }
+        this._clearOverlays();
+        this._userInteractionStarted = false;
+        logger.info('disabling experience');
+        this._mediaManager.setPermissionToPlay(false);
+        this._backgroundMediaElement.pause();
+    }
+
     removeExperienceStartButtonAndImage() {
         try {
             this._guiLayer.removeChild(this._startExperienceButton);
@@ -646,11 +661,6 @@ class Player extends EventEmitter {
         } catch (e) {
             logger.warn('could not remove start button and/or image');
         }
-
-        logger.info('disabling experience');
-        this._userInteractionStarted = false;
-        this._mediaManager.setPermissionToPlay(false);
-        this._backgroundMediaElement.pause();
     }
 
     _enableUserInteraction() {
