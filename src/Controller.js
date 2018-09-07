@@ -40,6 +40,13 @@ export default class Controller extends EventEmitter {
         this._createRenderManager();
     }
 
+    restart(storyId: string, variableState?: Object = {}) {
+        this._reasoner = null;
+        // get render manager to tidy up
+        this._renderManager.prepareForRestart();
+        this.start(storyId, variableState);
+    }
+
     start(storyId: string, variableState?: Object = {}) {
         this._storyId = storyId;
 

@@ -88,6 +88,10 @@ export default class RenderManager extends EventEmitter {
         this._initialise();
     }
 
+    prepareForRestart() {
+        this._player.prepareForRestart();
+    }
+
     handleStoryStart(storyId: string) {
         let onLaunchConfig = {
             background_art_asset_collection_id: '',

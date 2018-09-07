@@ -6,6 +6,7 @@ import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
+import logger from './logger';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -257,6 +258,7 @@ class Player extends EventEmitter {
     _showRomperButtonsTimeout: TimeoutID;
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
+    removeExperienceStartButtonAndImage: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
@@ -521,6 +523,9 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
+
+        this.removeExperienceStartButtonAndImage =
+            this.removeExperienceStartButtonAndImage.bind(this);
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -616,8 +621,7 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._startExperienceImage);
 
         const buttonClickHandler = () => {
-            this._guiLayer.removeChild(this._startExperienceButton);
-            this._mediaLayer.removeChild(this._startExperienceImage);
+            this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
@@ -629,6 +633,33 @@ class Player extends EventEmitter {
             // can't use player.setNextAvailable
             // as this may get reset after this by NE change handling
             this._narrativeElementTransport.classList.add('romper-inactive');
+        }
+    }
+
+    _clearOverlays() {
+        this._icon.clearAll();
+        this._volume.clearAll();
+        this._linkChoice.clearAll();
+    }
+
+    prepareForRestart() {
+        if (this._startExperienceButton || this._startExperienceImage) {
+            this.removeExperienceStartButtonAndImage();
+        }
+        this._foregroundMediaElement.pause();
+        this._backgroundMediaElement.pause();
+        this._clearOverlays();
+        this._userInteractionStarted = false;
+        logger.info('disabling experience before restart');
+        this._mediaManager.setPermissionToPlay(false);
+    }
+
+    removeExperienceStartButtonAndImage() {
+        try {
+            this._guiLayer.removeChild(this._startExperienceButton);
+            this._mediaLayer.removeChild(this._startExperienceImage);
+        } catch (e) {
+            logger.warn('could not remove start button and/or image');
         }
     }
 
