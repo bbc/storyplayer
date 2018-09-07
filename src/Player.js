@@ -6,6 +6,7 @@ import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
+import logger from './logger';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -257,6 +258,7 @@ class Player extends EventEmitter {
     _showRomperButtonsTimeout: TimeoutID;
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
+    removeExperienceStartButtonAndImage: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
@@ -521,6 +523,9 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
+
+        this.removeExperienceStartButtonAndImage =
+            this.removeExperienceStartButtonAndImage.bind(this);
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -594,6 +599,9 @@ class Player extends EventEmitter {
     }
 
     addExperienceStartButtonAndImage(options: Object) {
+        if (this._startExperienceButton || this._startExperienceImage) {
+            this.removeExperienceStartButtonAndImage();
+        }
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Continue Button');
@@ -616,8 +624,7 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._startExperienceImage);
 
         const buttonClickHandler = () => {
-            this._guiLayer.removeChild(this._startExperienceButton);
-            this._mediaLayer.removeChild(this._startExperienceImage);
+            this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
@@ -630,6 +637,20 @@ class Player extends EventEmitter {
             // as this may get reset after this by NE change handling
             this._narrativeElementTransport.classList.add('romper-inactive');
         }
+    }
+
+    removeExperienceStartButtonAndImage() {
+        try {
+            this._guiLayer.removeChild(this._startExperienceButton);
+            this._mediaLayer.removeChild(this._startExperienceImage);
+        } catch (e) {
+            logger.warn('could not remove start button and/or image');
+        }
+
+        logger.info('disabling experience');
+        this._userInteractionStarted = false;
+        this._mediaManager.setPermissionToPlay(false);
+        this._backgroundMediaElement.pause();
     }
 
     _enableUserInteraction() {

@@ -42,6 +42,7 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, variableState?: Object = {}) {
         this._storyId = storyId;
+        this._reasoner = null;
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
