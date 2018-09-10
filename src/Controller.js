@@ -360,6 +360,21 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Set a bunch of variables without doing renderer lookahead refresh in between
+     * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
+     */
+    setVariables(variables: Object) {
+        Object.keys(variables).forEach((varName) => {
+            if (this._reasoner) {
+                this._reasoner.setVariableValue(varName, variables[varName]);
+            } else {
+                logger.warn(`Controller cannot set variable '${varName}' - no reasoner`);
+            }
+        });
+        this._renderManager.refreshLookahead();
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to
