@@ -174,7 +174,10 @@ export default class StoryReasoner extends EventEmitter {
 
     _chooseNextNode() {
         this._resolving = true;
-        if (this._currentNarrativeElement.links.length > 1) {
+        if (this._currentNarrativeElement.links.length === 0) {
+            logger.info('Reasoner has found NE with no links - story end');
+            this.emit('storyEnd');
+        } else if (this._currentNarrativeElement.links.length > 1) {
             this.emit('choiceOfLinks');
         }
         evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
