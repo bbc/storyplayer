@@ -35,10 +35,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _subtitlesSrc: string;
 
     _lastSetTime: number;
+    _inTime: number;
+    _outTime: number;
 
     _endedEventListener: Function;
     _playEventListener: Function;
     _pauseEventListener: Function;
+    _outTimeEventListener: Function;
+    _setOutTime: Function;
+    _setInTime: Function;
 
     _enableSubtitlesButton: Function;
     _disableSubtitlesButton: Function;
@@ -58,9 +63,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._playEventListener = this._playEventListener.bind(this);
         this._pauseEventListener = this._pauseEventListener.bind(this);
+        this._outTimeEventListener = this._outTimeEventListener.bind(this);
+        this._setInTime = this._setInTime.bind(this);
+        this._setOutTime = this._setOutTime.bind(this);
 
         this._mediaManager = player._mediaManager;
         this._mediaInstance = this._mediaManager.getMediaInstance('foreground');
+
+        this._inTime = 0;
+        this._outTime = -1;
 
         this.renderVideoElement();
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -91,6 +102,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        const videoElement = this._mediaInstance.getMediaElement();
+        videoElement.pause();
         this._player.setPlaying(false);
         super.complete();
     }
@@ -103,18 +116,28 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._player.setPlaying(false);
     }
 
+    _outTimeEventListener() {
+        const videoElement = this._mediaInstance.getMediaElement();
+        if (videoElement.currentTime >= this._outTime) {
+            this._endedEventListener();
+        }
+    }
+
     start() {
         super.start();
         this._mediaInstance.start();
         const videoElement = this._mediaInstance.getMediaElement();
         logger.info(`Started: ${this._representation.id}`);
 
-        this.setCurrentTime(0);
+        this.setCurrentTime(this._inTime);
 
         // automatically move on at video end
         videoElement.addEventListener('ended', this._endedEventListener);
         videoElement.addEventListener('play', this._playEventListener);
         videoElement.addEventListener('pause', this._pauseEventListener);
+        if (this._outTime > 0) {
+            videoElement.addEventListener('timeupdate', this._outTimeEventListener);
+        }
 
         const player = this._player;
 
@@ -162,6 +185,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         videoElement.removeEventListener('ended', this._endedEventListener);
         videoElement.removeEventListener('play', this._playEventListener);
         videoElement.removeEventListener('pause', this._pauseEventListener);
+        if (this._outTime > 0) {
+            videoElement.removeEventListener('timeupdate', this._outTimeEventListener);
+        }
 
         try {
             this._clearBehaviourElements();
@@ -198,6 +224,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.av_src) {
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                            this._setInTime(parseFloat(fg.meta.romper.in));
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                            this._setOutTime(parseFloat(fg.meta.romper.out));
+                        }
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
                                 this.populateVideoElement(mediaUrl);
@@ -205,12 +237,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
                             });
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                            this.setCurrentTime(parseFloat(fg.meta.romper.in));
-                        }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                            this.setOutTime(parseFloat(fg.meta.romper.out));
-                        }
                     }
                     if (fg.assets.sub_src) {
                         this._fetchMedia(fg.assets.sub_src)
@@ -346,13 +372,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    setOutTime(time: number) {
+    _setInTime(time: number) {
+        this._inTime = time;
+        this.setCurrentTime(time);
+    }
+
+    _setOutTime(time: number) {
+        this._outTime = time;
         const videoElement = this._mediaInstance.getMediaElement();
-        videoElement.addEventListener('timeupdate', () => {
-            if (videoElement.currentTime >= time) {
-                this._endedEventListener();
-            }
-        });
+        videoElement.addEventListener('timeupdate', this._outTimeEventListener);
     }
 
     switchFrom() {
