@@ -57,13 +57,14 @@ export default class StoryIconRenderer extends EventEmitter {
             this._pathItemList.forEach((pathItem, index) => {
                 const representationId = pathItem.representation.id;
                 const iconUrls = this._iconUrlMap[representationId];
-
+                const iconName = pathItem.representation.name ?
+                    `${pathItem.representation.name}` : `Chapter ${index + 1}`;
                 if (iconUrls) {
                     this._player.addIconControl(
                         representationId,
                         iconUrls.default ? iconUrls.default : '',
                         false,
-                        `Chapter ${index}`,
+                        iconName,
                         `${index}`,
                     );
                 }
