@@ -181,6 +181,11 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
+    // get the current narrative element object
+    getCurrentNarrativeElement(): NarrativeElement {
+        return this._currentNarrativeElement;
+    }
+
     // display an icon for a choice of links (at a branch in the story)
     _renderLinkChoiceIcon(
         choiceId: number,
