@@ -95,7 +95,7 @@ export default class Controller extends EventEmitter {
 
     // get the current and next narrative elements
     getStatus(): Object {
-        const currentNarrativeElement = this._renderManager._currentNarrativeElement;
+        const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
         if (currentNarrativeElement) {
             const upcomingIds = this._getIdsOfNextNodes(currentNarrativeElement);
