@@ -233,9 +233,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
                                 let appendedUrl = mediaUrl;
-                                if (this._inTime > 0 || this._outTime >= 0) {
+                                if (this._inTime > 0 || this._outTime > 0) {
                                     let mediaFragment = `#t=${this._inTime}`;
-                                    if (this._outTime >= 0) {
+                                    if (this._outTime > 0) {
                                         mediaFragment = `${mediaFragment},${this._outTime}`;
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
