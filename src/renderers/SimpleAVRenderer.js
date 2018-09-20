@@ -308,7 +308,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._videoTrack.default = false;
             videoElement.appendChild(this._videoTrack);
 
-            // Show Subtitles
+            // Show Subtitles.
             this._videoTrack.mode = 'showing';
 
             if (videoElement.textTracks[0]) {
