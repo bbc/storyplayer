@@ -93,6 +93,22 @@ export default class Controller extends EventEmitter {
         });
     }
 
+    // get the current and next narrative elements
+    getStatus(): Object {
+        const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
+        let nextNarrativeElement = null;
+        if (currentNarrativeElement) {
+            const upcomingIds = this._getIdsOfNextNodes(currentNarrativeElement);
+            if (upcomingIds.length === 1) {
+                nextNarrativeElement = this._getNarrativeElement(upcomingIds[0]);
+            }
+        }
+        return {
+            currentNarrativeElement,
+            nextNarrativeElement,
+        };
+    }
+
     /*
     requirements:[
         // First Requirement
