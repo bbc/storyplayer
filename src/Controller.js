@@ -94,19 +94,20 @@ export default class Controller extends EventEmitter {
     }
 
     // get the current and next narrative elements
-    getStatus(): Object {
+    getStatus(): Promise<Object> {
         const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
-        if (currentNarrativeElement) {
-            const upcomingIds = this._getIdsOfNextNodes(currentNarrativeElement);
-            if (upcomingIds.length === 1) {
-                nextNarrativeElement = this._getNarrativeElement(upcomingIds[0]);
-            }
-        }
-        return {
-            currentNarrativeElement,
-            nextNarrativeElement,
-        };
+        return this.getValidNextSteps()
+            .then((nextNarrativeElements) => {
+                if (nextNarrativeElements.length === 1) {
+                    // eslint-disable-next-line prefer-destructuring
+                    nextNarrativeElement = nextNarrativeElements[0];
+                }
+                return {
+                    currentNarrativeElement,
+                    nextNarrativeElement,
+                };
+            });
     }
 
     /*
