@@ -649,9 +649,8 @@ class Player extends EventEmitter {
         this._foregroundMediaElement.pause();
         this._backgroundMediaElement.pause();
         this._clearOverlays();
-        this._userInteractionStarted = false;
+        this._disableUserInteraction();
         logger.info('disabling experience before restart');
-        this._mediaManager.setPermissionToPlay(false);
     }
 
     removeExperienceStartButtonAndImage() {
@@ -661,6 +660,15 @@ class Player extends EventEmitter {
         } catch (e) {
             logger.warn('could not remove start button and/or image');
         }
+    }
+
+    _disableUserInteraction() {
+        this._userInteractionStarted = false;
+        this._overlays.classList.add('romper-inactive');
+        this._buttons.classList.add('romper-inactive');
+        this._buttonsActivateArea.classList.add('romper-inactive');
+        this._overlayToggleButtons.classList.add('romper-inactive');
+        this._mediaManager.setPermissionToPlay(false);
     }
 
     _enableUserInteraction() {
