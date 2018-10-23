@@ -4,6 +4,8 @@ import Player from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
+
 import MediaManager from '../MediaManager';
 import MediaInstance from '../MediaInstance';
 
@@ -24,7 +26,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._target = this._player.backgroundTarget;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
-            type: 'background_av',
+            type: MEDIA_TYPES.BACKGROUND_A,
         });
         this._renderBackgroundAudio();
     }

@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
-import BasePlayoutEngine from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
@@ -95,7 +95,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaElement) {
-            if (rendererPlayoutObj.media.type === 'foreground_av') {
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                 const videoElement = document.createElement('video');
                 videoElement.className = 'romper-video-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
@@ -170,7 +170,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
             }
         }
-        if (rendererPlayoutObj.media.type === 'foreground_av') {
+        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
             this._player.mediaTarget.removeChild(rendererPlayoutObj.mediaElement);
         } else {
             this._player.backgroundTarget.removeChild(rendererPlayoutObj.mediaElement);
@@ -212,7 +212,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             this._player.enableSubtitlesControl();
         }
         if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
-            if (rendererPlayoutObj.media.type === 'foreground_av') {
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                 this._player.addVolumeControl(rendererId, 'Foreground');
                 if (rendererPlayoutObj.mediaElement) {
                     const videoElement = rendererPlayoutObj.mediaElement;
@@ -253,7 +253,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         super.setPlayoutInactive(rendererId);
 
         this._player.removeVolumeControl(rendererId);
-        if (rendererPlayoutObj.media.type === 'foreground_av') {
+        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
             this._player.disconnectScrubBar();
         }
     }
@@ -300,7 +300,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
-            .filter(key => this._media[key].media.type === 'foreground_av')
+            .filter(key => this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
             .forEach((key) => {
                 this._media[key].mediaElement.pause();
             });

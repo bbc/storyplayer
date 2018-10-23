@@ -6,6 +6,8 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
+
 import logger from '../logger';
 
 export type HTMLTrackElement = HTMLElement & {
@@ -60,7 +62,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._lastSetTime = 0;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
-            type: 'foreground_av',
+            type: MEDIA_TYPES.FOREGROUND_AV,
         });
     }
 

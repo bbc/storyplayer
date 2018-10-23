@@ -1,6 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
-import BasePlayoutEngine from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import { BrowserUserAgent } from '../browserCapabilities';
@@ -85,7 +85,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaInstance) {
-            if (rendererPlayoutObj.media.type === 'foreground_av') {
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                 rendererPlayoutObj.mediaInstance =
                     this._mediaManager.getMediaInstance('foreground');
                 const videoElement = document.createElement('video');
@@ -130,7 +130,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this._player.enableSubtitlesControl();
         }
         if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
-            if (rendererPlayoutObj.media.type === 'foreground_av') {
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                 this._player.addVolumeControl(rendererId, 'Foreground');
                 if (rendererPlayoutObj.mediaInstance) {
                     const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
@@ -150,7 +150,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         rendererPlayoutObj.mediaInstance.end();
         super.setPlayoutInactive(rendererId);
         this._player.removeVolumeControl(rendererId);
-        if (rendererPlayoutObj.media.type === 'foreground_av') {
+        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
             this._player.disconnectScrubBar();
         }
     }
@@ -169,7 +169,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
-            .filter(key => this._media[key].media.type === 'foreground_av')
+            .filter(key => this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
             .forEach((key) => {
                 this._media[key].mediaInstance.pause();
             });

@@ -4,6 +4,11 @@
 
 import Player from '../Player';
 
+export const MEDIA_TYPES = {
+    FOREGROUND_AV: 'foreground_av',
+    BACKGROUND_A: 'background_a',
+};
+
 export default class BasePlayoutEngine {
     _player: Player
     _media: Object
