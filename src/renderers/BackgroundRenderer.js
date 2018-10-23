@@ -2,13 +2,16 @@
 
 
 import EventEmitter from 'events';
+import uuid from 'uuid/v4';
 import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../Player';
 
 export default class BackgroundRenderer extends EventEmitter {
+    _rendererId: string;
     _assetCollection: AssetCollection;
     _fetchMedia: MediaFetcher;
     _player: Player;
+    _playoutEngine: PlayoutEngine;
     _disabled: boolean;
 
     constructor(
@@ -18,7 +21,9 @@ export default class BackgroundRenderer extends EventEmitter {
     ) {
         super();
         this._fetchMedia = mediaFetcher;
+        this._rendererId = uuid();
         this._player = player;
+        this._playoutEngine = player.playoutEngine;
         this._assetCollection = assetCollection;
         this._disabled = false;
     }

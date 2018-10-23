@@ -3,11 +3,15 @@
 import BasePlayoutEngine from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
+import { BrowserUserAgent } from '../browserCapabilities';
 
 // NOTE: This playout engine uses MediaManager and MediaInstance classes which are not very well
 //       written and a bit messy.
 
-import { BrowserUserAgent } from '../browserCapabilities';
+let queued = 0;
+
+window.queued = queued;
+
 
 export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLMediaElement
@@ -83,6 +87,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     //    sub_url: [URL],
     // }
     queuePlayout(rendererId, mediaObj) {
+        if (!this._media[rendererId]) {
+            queued += 1;
+            console.log('QUEUENUM: ', queued);
+        }
+        console.log('Queue', rendererId, mediaObj);
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaInstance) {
@@ -111,12 +120,16 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     unqueuePlayout(rendererId) {
+        queued -= 1;
+        console.log('QUEUENUM: ', queued);
+        console.log('UNQueue', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         this._mediaManager.returnMediaInstance(rendererPlayoutObj.mediaInstance);
         super.unqueuePlayout(rendererId);
     }
 
     setPlayoutActive(rendererId) {
+        console.log('QUEUENUM Active', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         rendererPlayoutObj.mediaInstance.start();
         super.setPlayoutActive(rendererId);
@@ -140,6 +153,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutInactive(rendererId) {
+        console.log('INActive', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         this._cleanUpSubtitles(rendererId);
         this._player.disableSubtitlesControl();
@@ -153,6 +167,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     play() {
+        console.log('Play');
         this._playing = true;
         this._player.setPlaying(true);
         Object.keys(this._media)
@@ -163,11 +178,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     pause() {
+        console.log('Stop');
         this._playing = false;
         this._player.setPlaying(false);
-        Object.keys(this._media).forEach((key) => {
-            this._media[key].mediaInstance.pause();
-        });
+        Object.keys(this._media)
+            .filter(key => this._media[key].media.type === 'foreground_av')
+            .forEach((key) => {
+                this._media[key].mediaInstance.pause();
+            });
     }
 
     getCurrentTime(rendererId: string) {
