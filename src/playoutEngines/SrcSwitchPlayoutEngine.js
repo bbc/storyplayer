@@ -66,14 +66,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         );
     }
 
-    setPermissionToPlay() {
+    setPermissionToPlay(value) {
         this._backgroundMediaElement.play();
         this._foregroundMediaElement.play();
         this._backgroundMediaElement.pause();
         this._foregroundMediaElement.pause();
 
-        this._mediaManager.setPermissionToPlay(true);
-        super.setPermissionToPlay();
+        this._mediaManager.setPermissionToPlay(value);
+        super.setPermissionToPlay(value);
     }
 
     // mediaObj = {

@@ -20,8 +20,8 @@ export default class BasePlayoutEngine {
         this._permissionToPlay = false;
     }
 
-    setPermissionToPlay() {
-        this._permissionToPlay = true;
+    setPermissionToPlay(value) {
+        this._permissionToPlay = value;
     }
 
     queuePlayout(rendererId, mediaObj) {
