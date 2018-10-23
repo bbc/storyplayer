@@ -6,16 +6,11 @@ import type { MediaFetcher, AssetCollection } from '../romper';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
-import MediaManager from '../MediaManager';
-import MediaInstance from '../MediaInstance';
-
 import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
-    _mediaInstance: MediaInstance;
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
-    _mediaManager: MediaManager;
 
     constructor(
         assetCollection: AssetCollection,
