@@ -6,7 +6,7 @@ import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
-import PlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
+import PlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import logger from './logger';
 
 const PlayerEvents = [

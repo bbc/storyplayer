@@ -65,7 +65,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
-        this._playoutEngine.pause();
         super.complete();
     }
 

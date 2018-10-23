@@ -1,48 +1,68 @@
 // @flow
 /* eslint-disable class-methods-use-this */
+import Hls from 'hls.js';
+import dashjs from 'dashjs';
 import BasePlayoutEngine from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
-import { BrowserUserAgent } from '../browserCapabilities';
+import logger from '../logger';
 
-// NOTE: This playout engine uses MediaManager and MediaInstance classes which are not very well
-//       written and a bit messy.
+const MediaTypesArray = [
+    'HLS',
+    'DASH',
+    'OTHER',
+];
 
-export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
-    _foregroundMediaElement: HTMLMediaElement
-    _backgroundMediaElement: HTMLMediaElement
+const MediaTypes = {};
+MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 
-    _mediaManager: MediaManager
+const getMediaType = (src: string) => {
+    if (src.indexOf('.m3u8') !== -1) {
+        return MediaTypes.HLS;
+    } else if (src.indexOf('.mpd') !== -1) {
+        return MediaTypes.DASH;
+    }
+    return MediaTypes.OTHER;
+};
 
+export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
     _subtitlesShowing: boolean;
+    _useHlsJs: boolean;
+    _activeConfig: Object;
+    _inactiveConfig: Object;
 
     constructor(player: Player) {
         super(player);
-        this._foregroundMediaElement = document.createElement('video');
-        this._foregroundMediaElement.className = 'romper-video-element';
-        this._foregroundMediaElement.crossOrigin = 'anonymous';
 
-        this._backgroundMediaElement = document.createElement('audio');
-        this._backgroundMediaElement.className = 'romper-audio-element';
-        this._backgroundMediaElement.crossOrigin = 'anonymous';
-
-        // Permission to play not granted on iOS without the autplay tag
-        if (BrowserUserAgent.iOS()) {
-            this._foregroundMediaElement.autoplay = true;
-            this._backgroundMediaElement.autoplay = true;
+        if (Hls.isSupported()) {
+            logger.info('HLS.js being used');
+            this._useHlsJs = true;
+        } else {
+            this._useHlsJs = false;
         }
 
-        this._player.mediaTarget.appendChild(this._foregroundMediaElement);
-        this._player.backgroundTarget.appendChild(this._backgroundMediaElement);
+        this._activeConfig = {
+            hls: {
+                maxBufferLength: 30,
+                maxMaxBufferLength: 600,
+                startFragPrefetch: true,
+                startLevel: 3,
+                debug: false,
+            },
+        };
+        this._inactiveConfig = {
+            hls: {
+                maxBufferLength: 2,
+                maxMaxBufferLength: 4,
+                startFragPrefetch: true,
+                startLevel: 3,
+                debug: false,
+            },
+        };
 
         this._playing = false;
         this._subtitlesShowing = false;
-
-        this._mediaManager = new MediaManager(
-            this._foregroundMediaElement,
-            this._backgroundMediaElement,
-        );
 
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
@@ -66,43 +86,31 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         );
     }
 
-    setPermissionToPlay() {
-        this._backgroundMediaElement.play();
-        this._foregroundMediaElement.play();
-        this._backgroundMediaElement.pause();
-        this._foregroundMediaElement.pause();
-
-        this._mediaManager.setPermissionToPlay(true);
-        super.setPermissionToPlay();
-    }
-
     // mediaObj = {
     //    type: "foreground_av" || "background_av" ,
     //    url: [URL],
-    //    subs_url: [URL],
+    //    sub_url: [URL],
     // }
     queuePlayout(rendererId, mediaObj) {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
-        if (!rendererPlayoutObj.mediaInstance) {
+        if (!rendererPlayoutObj.mediaElement) {
             if (rendererPlayoutObj.media.type === 'foreground_av') {
-                rendererPlayoutObj.mediaInstance =
-                    this._mediaManager.getMediaInstance('foreground');
                 const videoElement = document.createElement('video');
                 videoElement.className = 'romper-video-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
-                rendererPlayoutObj.mediaInstance.attachMedia(videoElement);
+                rendererPlayoutObj.mediaElement = videoElement;
+                this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else {
-                rendererPlayoutObj.mediaInstance =
-                    this._mediaManager.getMediaInstance('background');
                 const audioElement = document.createElement('audio');
                 audioElement.className = 'romper-audio-element romper-media-element-queued';
                 audioElement.crossOrigin = 'anonymous';
-                rendererPlayoutObj.mediaInstance.attachMedia(audioElement);
+                rendererPlayoutObj.mediaElement = audioElement;
+                this._player.backgroundTarget.appendChild(rendererPlayoutObj.mediaElement);
             }
         }
         if (mediaObj.url) {
-            rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
+            this._loadMedia(rendererId);
         }
         if (mediaObj.subs_url) {
             this._queueSubtitleAttach(rendererId);
@@ -113,27 +121,101 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    _loadMedia(rendererId) {
+        const rendererPlayoutObj = this._media[rendererId];
+
+        const { url } = rendererPlayoutObj.media;
+        rendererPlayoutObj.mediaType = getMediaType(url);
+
+        switch (rendererPlayoutObj.mediaType) {
+        case MediaTypes.HLS:
+            if (this._useHlsJs) {
+                // Using HLS.js
+                rendererPlayoutObj._hls = new Hls(this._inactiveConfig.hls);
+                rendererPlayoutObj._hls.loadSource(url);
+                rendererPlayoutObj._hls.attachMedia(rendererPlayoutObj.mediaElement);
+            } else {
+                // Using Video Element
+                rendererPlayoutObj.mediaElement.src = url;
+            }
+            break;
+        case MediaTypes.DASH:
+            rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
+            rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
+            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
+            break;
+        case MediaTypes.OTHER:
+            rendererPlayoutObj.mediaElement.src = url;
+            break;
+        default:
+            logger.error('Cannot handle this mediaType (loadSource)');
+        }
+    }
+
     unqueuePlayout(rendererId) {
         const rendererPlayoutObj = this._media[rendererId];
-        this._mediaManager.returnMediaInstance(rendererPlayoutObj.mediaInstance);
+        if (rendererPlayoutObj.mediaType) {
+            switch (rendererPlayoutObj.mediaType) {
+            case MediaTypes.HLS:
+                if (this._useHlsJs) {
+                    rendererPlayoutObj._hls.destroy();
+                }
+                break;
+            case MediaTypes.OTHER:
+                break;
+            case MediaTypes.DASH:
+                rendererPlayoutObj._dashjs.reset();
+                break;
+            default:
+                logger.error('Cannot handle this mediaType (unqueuePlayout)');
+            }
+        }
+        if (rendererPlayoutObj.media.type === 'foreground_av') {
+            this._player.mediaTarget.removeChild(rendererPlayoutObj.mediaElement);
+        } else {
+            this._player.backgroundTarget.removeChild(rendererPlayoutObj.mediaElement);
+        }
         super.unqueuePlayout(rendererId);
     }
 
     setPlayoutActive(rendererId) {
         const rendererPlayoutObj = this._media[rendererId];
-        rendererPlayoutObj.mediaInstance.start();
+
+        if (rendererPlayoutObj.mediaType) {
+            switch (rendererPlayoutObj.mediaType) {
+            case MediaTypes.HLS:
+                if (this._useHlsJs) {
+                    // Using HLS.js
+                    rendererPlayoutObj._hls.config = Object.assign(
+                        {},
+                        rendererPlayoutObj._hls.config,
+                        this._activeConfig.hls,
+                    );
+                }
+                break;
+            case MediaTypes.DASH:
+                break;
+            case MediaTypes.OTHER:
+                break;
+            default:
+                logger.error('Cannot handle this mediaType (loadSource)');
+            }
+        }
+
         super.setPlayoutActive(rendererId);
+        rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+
         if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
             this.play();
         }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_url) {
+        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_src) {
             this._player.enableSubtitlesControl();
         }
         if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
             if (rendererPlayoutObj.media.type === 'foreground_av') {
                 this._player.addVolumeControl(rendererId, 'Foreground');
-                if (rendererPlayoutObj.mediaInstance) {
-                    const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                if (rendererPlayoutObj.mediaElement) {
+                    const videoElement = rendererPlayoutObj.mediaElement;
                     this._player.connectScrubBar(videoElement);
                 }
             } else {
@@ -144,14 +226,46 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutInactive(rendererId) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (rendererPlayoutObj.mediaType) {
+            switch (rendererPlayoutObj.mediaType) {
+            case MediaTypes.HLS:
+                if (this._useHlsJs) {
+                    // Using HLS.js
+                    rendererPlayoutObj._hls.config = Object.assign(
+                        {},
+                        rendererPlayoutObj._hls.config,
+                        this._inactiveConfig.hls,
+                    );
+                }
+                break;
+            case MediaTypes.DASH:
+                break;
+            case MediaTypes.OTHER:
+                break;
+            default:
+                logger.error('Cannot handle this mediaType (setPlayoutInactive)');
+            }
+        }
         this._cleanUpSubtitles(rendererId);
         this._player.disableSubtitlesControl();
-        rendererPlayoutObj.mediaInstance.pause();
-        rendererPlayoutObj.mediaInstance.end();
+        rendererPlayoutObj.mediaElement.pause();
+        rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
         super.setPlayoutInactive(rendererId);
+
         this._player.removeVolumeControl(rendererId);
         if (rendererPlayoutObj.media.type === 'foreground_av') {
             this._player.disconnectScrubBar();
+        }
+    }
+
+    _play(rendererId) {
+        const { mediaElement } = this._media[rendererId];
+        const promise = mediaElement.play();
+        if (promise !== undefined) {
+            promise.then(() => {}).catch((error) => {
+                logger.warn(error, 'Not got permission to play');
+                // Auto-play was prevented
+            });
         }
     }
 
@@ -161,7 +275,24 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         Object.keys(this._media)
             .filter(key => this._media[key].active)
             .forEach((key) => {
-                this._media[key].mediaInstance.play();
+                const { mediaElement } = this._media[key];
+                const playCallback = () => {
+                    mediaElement.removeEventListener(
+                        'loadeddata',
+                        playCallback,
+                    );
+                    this._play(key);
+                };
+                if (!mediaElement) {
+                    setTimeout(() => { this._play(key); }, 500);
+                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
+                    this._play(key);
+                } else {
+                    mediaElement.addEventListener(
+                        'loadeddata',
+                        playCallback,
+                    );
+                }
             });
     }
 
@@ -171,16 +302,16 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         Object.keys(this._media)
             .filter(key => this._media[key].media.type === 'foreground_av')
             .forEach((key) => {
-                this._media[key].mediaInstance.pause();
+                this._media[key].mediaElement.pause();
             });
     }
 
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return undefined;
         }
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        const videoElement = rendererPlayoutObj.mediaElement;
         if (
             !videoElement ||
             videoElement.readyState < videoElement.HAVE_CURRENT_DATA
@@ -192,10 +323,10 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setCurrentTime(rendererId: string, time: number) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return false;
         }
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        const videoElement = rendererPlayoutObj.mediaElement;
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
@@ -212,26 +343,26 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     on(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
-            const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
+            const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.addEventListener(event, callback);
         }
     }
 
     off(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
-            const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
+            const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.removeEventListener(event, callback);
         }
     }
 
     getMediaElement(rendererId) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return undefined;
         }
-        return rendererPlayoutObj.mediaInstance.getMediaElement();
+        return rendererPlayoutObj.mediaElement;
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -253,8 +384,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _handleVolumeClicked(event: Object): void {
         const rendererPlayoutObj = this._media[event.id];
-        if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
-            rendererPlayoutObj.mediaInstance.setVolume(event.value);
+        if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
+            rendererPlayoutObj.mediaElement.volume = event.value;
         }
     }
 
@@ -264,7 +395,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        const videoElement = rendererPlayoutObj.mediaElement;
         if (videoElement) {
             videoElement.addEventListener('loadedmetadata', () => {
                 this._showHideSubtitles(rendererId);
@@ -280,7 +411,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        const videoElement = rendererPlayoutObj.mediaElement;
         if (rendererPlayoutObj.mediaSubsTrack) {
             rendererPlayoutObj.mediaSubsTrack.mode = 'hidden';
             if (videoElement.textTracks[0]) {
@@ -300,7 +431,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
 
         this._cleanUpSubtitles(rendererId);
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        const videoElement = rendererPlayoutObj.mediaElement;
         if (rendererPlayoutObj.media.subs_url && this._subtitlesShowing) {
             rendererPlayoutObj.mediaSubsTrack =
                 ((document.createElement('track'): any): HTMLTrackElement);
