@@ -1,5 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
+
 import Player from '../Player';
 
 export default class BasePlayoutEngine {
@@ -60,16 +62,18 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
+
     setCurrentTime(rendererId, time) {
         return false;
     }
 
-    on(rendererId: string, event: string, callback: Function) {
 
+    on(rendererId: string, event: string, callback: Function) {
+        return undefined;
     }
 
     off(rendererId: string, event: string, callback: Function) {
-
+        return undefined;
     }
 
     getMediaElement(rendererId) {

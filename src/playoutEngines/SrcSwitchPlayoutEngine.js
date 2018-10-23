@@ -3,22 +3,13 @@
 import BasePlayoutEngine from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
-// import AnalyticEvents from '../AnalyticEvents';
+
+// NOTE: This playout engine uses MediaManager and MediaInstance classes which are not very well
+//       written and a bit messy.
 
 import { BrowserUserAgent } from '../browserCapabilities';
 
 export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
-    // mediaObj = {
-    //    type: "foreground_av",
-    //    url: [URL],
-    //    subs: [URL],
-    // }
-
-    // mediaObj = {
-    //    type: "background_av",
-    //    url: [URL],
-    //    subs: [URL],
-    // }
     _foregroundMediaElement: HTMLMediaElement
     _backgroundMediaElement: HTMLMediaElement
 
@@ -86,6 +77,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         super.setPermissionToPlay();
     }
 
+    // mediaObj = {
+    //    type: "foreground_av" || "background_av" ,
+    //    url: [URL],
+    //    sub_url: [URL],
+    // }
     queuePlayout(rendererId, mediaObj) {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
@@ -157,7 +153,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     play() {
-        console.log('PLAY');
         this._playing = true;
         this._player.setPlaying(true);
         Object.keys(this._media)
@@ -168,14 +163,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     pause() {
-        console.log('PAUSE');
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media).forEach((key) => {
             this._media[key].mediaInstance.pause();
         });
-        // this._foregroundMediaElement.pause();
-        // this._backgroundMediaElement.pause();
     }
 
     getCurrentTime(rendererId: string) {
@@ -239,10 +231,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _handlePlayPauseButtonClicked(): void {
         if (this._playing === false) {
-            // this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
             this.play();
         } else {
-            // this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             this.pause();
         }
     }
