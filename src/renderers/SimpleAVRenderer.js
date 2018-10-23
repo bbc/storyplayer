@@ -7,8 +7,8 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 // import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
-import MediaManager from '../MediaManager';
-import MediaInstance from '../MediaInstance';
+// import MediaManager from '../MediaManager';
+// import MediaInstance from '../MediaInstance';
 
 import logger from '../logger';
 
@@ -108,8 +108,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _endedEventListener() {
         // const videoElement = this._mediaInstance.getMediaElement();
         // videoElement.pause();
-        console.log('ENDED');
-        this._player.setPlaying(false);
+        // this._player.setPlaying(false);
+        this._playoutEngine.pause();
         super.complete();
     }
 
@@ -145,6 +145,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // videoElement.addEventListener('play', this._playEventListener);
         // videoElement.addEventListener('pause', this._pauseEventListener);
         if (this._outTime > 0) {
+            // videoElement.addEventListener('timeupdate', this._outTimeEventListener);
             this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         }
 
@@ -198,6 +199,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // videoElement.removeEventListener('play', this._playEventListener);
         // videoElement.removeEventListener('pause', this._pauseEventListener);
         if (this._outTime > 0) {
+            // videoElement.removeEventListener('timeupdate', this._outTimeEventListener);
             this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
         }
 
@@ -371,7 +373,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (videoTime === undefined) {
             videoTime = this._lastSetTime;
         }
-
         // const videoElement = this._mediaInstance.getMediaElement();
         // let videoTime;
         // if (
@@ -391,8 +392,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     setCurrentTime(time: number) {
         this._lastSetTime = time;
-        return this._playoutEngine.setCurrentTime(this._rendererId, time);
-
+        this._playoutEngine.setCurrentTime(this._rendererId, time);
         // const videoElement = this._mediaInstance.getMediaElement();
         // if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
         //     videoElement.currentTime = time;
@@ -441,7 +441,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
 
-        this._mediaManager.returnMediaInstance(this._mediaInstance);
+        // this._mediaManager.returnMediaInstance(this._mediaInstance);
 
         super.destroy();
     }
