@@ -15,6 +15,10 @@ $romper-button-width: 50px;
 $romper-buttons-max-height: 60px;
 $romper-hover-text-size: 25px;
 
+.hidden {
+    display: none;
+}
+
 @mixin button {
   background-color: $backing-colour;
   border: 0;

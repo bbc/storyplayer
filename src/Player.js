@@ -6,6 +6,7 @@ import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
+import PlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 
 const PlayerEvents = [
@@ -216,6 +217,7 @@ function createOverlay(name: string, logFunction: Function) {
 }
 
 class Player extends EventEmitter {
+    playoutEngine: PlayoutEngine
     _player: HTMLDivElement;
     _playerParent: HTMLElement;
     _mediaManager: MediaManager;
@@ -268,11 +270,11 @@ class Player extends EventEmitter {
         this._RomperButtonsShowing = false;
 
         this._foregroundMediaElement = document.createElement('video');
-        this._foregroundMediaElement.className = 'romper-video-element';
+        this._foregroundMediaElement.className = 'romper-video-element hidden';
         this._foregroundMediaElement.crossOrigin = 'anonymous';
 
         this._backgroundMediaElement = document.createElement('audio');
-        this._backgroundMediaElement.className = 'romper-audio-element';
+        this._backgroundMediaElement.className = 'romper-audio-element hidden';
         this._backgroundMediaElement.crossOrigin = 'anonymous';
 
         // Permission to play not granted on iOS without the autplay tag
@@ -526,6 +528,8 @@ class Player extends EventEmitter {
 
         this.removeExperienceStartButtonAndImage =
             this.removeExperienceStartButtonAndImage.bind(this);
+
+        this.playoutEngine = new PlayoutEngine(this);
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -682,6 +686,8 @@ class Player extends EventEmitter {
         this._overlayToggleButtons.classList.remove('romper-inactive');
 
         this._mediaManager.setPermissionToPlay(true);
+
+        this.playoutEngine.setPermissionToPlay();
 
         // Give permission to elements to play
         this._backgroundMediaElement.play();
