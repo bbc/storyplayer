@@ -4,8 +4,11 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
-import PlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
+import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
+import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
+import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
+import { BrowserUserAgent } from './browserCapabilities';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -215,7 +218,7 @@ function createOverlay(name: string, logFunction: Function) {
 }
 
 class Player extends EventEmitter {
-    playoutEngine: PlayoutEngine
+    playoutEngine: BasePlayoutEngine
     _player: HTMLDivElement;
     _playerParent: HTMLElement;
     _backgroundLayer: HTMLDivElement;
@@ -260,12 +263,10 @@ class Player extends EventEmitter {
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
-
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
         this._userInteractionStarted = false;
-
 
         this.showingSubtitles = false;
 
@@ -504,7 +505,13 @@ class Player extends EventEmitter {
         this.removeExperienceStartButtonAndImage =
             this.removeExperienceStartButtonAndImage.bind(this);
 
-        this.playoutEngine = new PlayoutEngine(this);
+        if (BrowserUserAgent.iOS()) {
+            // Use craptastic iOS playout engine
+            this.playoutEngine = new SrcSwitchPlayoutEngine(this);
+        } else {
+            // Use shiny source switching engine.... smooth.
+            this.playoutEngine = new DOMSwitchPlayoutEngine(this);
+        }
     }
 
     _handleTouchEndEvent(event: Object) {
