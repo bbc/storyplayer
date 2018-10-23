@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
-import uuid from 'uuid/v4';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
