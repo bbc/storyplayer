@@ -14,6 +14,10 @@ export default class AFrameRenderer extends BaseRenderer {
     _endedEventListener: Function;
     _playEventListener: Function;
 
+    _aFrameSceneElement: HTMLElement;
+    _aFrameScriptElement: HTMLScriptElement;
+    _videoAssetElement: HTMLElement;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -22,16 +26,14 @@ export default class AFrameRenderer extends BaseRenderer {
         analytics: AnalyticsLogger,
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
-        // this._endedEventListener = this._endedEventListener.bind(this);
+        this._endedEventListener = this._endedEventListener.bind(this);
         // this._playEventListener = this._playEventListener.bind(this);
     }
 
-    // _endedEventListener() {
-    //     const videoElement = this._mediaInstance.getMediaElement();
-    //     videoElement.pause();
-    //     this._player.setPlaying(false);
-    //     super.complete();
-    // }
+    _endedEventListener() {
+        console.log('360 video ended');
+        super.complete();
+    }
 
     // _playEventListener() {
     //     this._player.setPlaying(true);
@@ -47,17 +49,18 @@ export default class AFrameRenderer extends BaseRenderer {
         this.renderVideoElement();
 
         // automatically move on at video end
-        // videoElement.addEventListener('ended', this._endedEventListener);
         // videoElement.addEventListener('play', this._playEventListener);
         // videoElement.addEventListener('pause', this._pauseEventListener);
     }
 
     end() {
-        // videoElement.removeEventListener('ended', this._endedEventListener);
+        this._videoAssetElement.removeEventListener('ended', this._endedEventListener);
         // videoElement.removeEventListener('play', this._playEventListener);
         // videoElement.removeEventListener('pause', this._pauseEventListener);
 
-        const player = this._player;
+        // const player = this._player;
+        this._target.removeChild(this._aFrameSceneElement);
+        this._target.removeChild(this._aFrameScriptElement);
         // player.removeVolumeControl(this._representation.id);
         // player.disconnectScrubBar();
         // player.removeListener(
@@ -99,33 +102,35 @@ export default class AFrameRenderer extends BaseRenderer {
         }
         // create AFrame entities in here to display 360 video
         this._addAFrameScripts();
-        const aFrameSceneElement = document.createElement('a-scene');
-        aFrameSceneElement.setAttribute('embedded', '');
-        aFrameSceneElement.classList.add('romper-aframe-scene');
-        this._target.appendChild(aFrameSceneElement);
+        this._aFrameSceneElement = document.createElement('a-scene');
+        this._aFrameSceneElement.setAttribute('embedded', '');
+        this._aFrameSceneElement.classList.add('romper-aframe-scene');
+        this._target.appendChild(this._aFrameSceneElement);
 
         const aFrameVideoSphere = document.createElement('a-videosphere');
         aFrameVideoSphere.setAttribute('src', '#video');
-        aFrameSceneElement.appendChild(aFrameVideoSphere);
+        this._aFrameSceneElement.appendChild(aFrameVideoSphere);
 
         const aFrameAssetsElement = document.createElement('a-assets');
-        aFrameSceneElement.appendChild(aFrameAssetsElement);
+        this._aFrameSceneElement.appendChild(aFrameAssetsElement);
 
-        const videoAssetElement = document.createElement('video');
-        videoAssetElement.id = 'video';
-        videoAssetElement.className = 'romper-video-element';
+        this._videoAssetElement = document.createElement('video');
+        this._videoAssetElement.id = 'video';
+        this._videoAssetElement.className = 'romper-video-element';
+        this._videoAssetElement.setAttribute('autoplay', '');
+        this._videoAssetElement.addEventListener('ended', this._endedEventListener);
 
         const videoAssetSource = document.createElement('source');
         videoAssetSource.setAttribute('type', 'video/mp4');
         videoAssetSource.setAttribute('src', mediaUrl);
-        videoAssetElement.appendChild(videoAssetSource);
-        aFrameAssetsElement.appendChild(videoAssetElement);
+        this._videoAssetElement.appendChild(videoAssetSource);
+        aFrameAssetsElement.appendChild(this._videoAssetElement);
     }
 
     _addAFrameScripts(): void {
-        const aFrameScript = document.createElement('script');
-        aFrameScript.setAttribute('src', 'https://aframe.io/releases/0.7.1/aframe.min.js');
-        this._target.appendChild(aFrameScript);
+        this._aFrameScriptElement = document.createElement('script');
+        this._aFrameScriptElement.setAttribute('src', 'https://aframe.io/releases/0.7.1/aframe.min.js');
+        this._target.appendChild(this._aFrameScriptElement);
     }
     
     _handlePlayPauseButtonClicked(): void {
