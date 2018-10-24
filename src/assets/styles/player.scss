@@ -156,6 +156,10 @@ $romper-hover-text-size: 25px;
     width: 100%;
   }
 
+  .romper-aframe-scene {
+    z-index: 29;
+  }
+
   .romper-audio-element {
     background: $romper-background-color;
     background-image: url('../images/volume-high.svg');

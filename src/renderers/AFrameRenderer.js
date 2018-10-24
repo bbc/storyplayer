@@ -100,6 +100,8 @@ export default class AFrameRenderer extends BaseRenderer {
         // create AFrame entities in here to display 360 video
         this._addAFrameScripts();
         const aFrameSceneElement = document.createElement('a-scene');
+        aFrameSceneElement.setAttribute('embedded', '');
+        aFrameSceneElement.classList.add('romper-aframe-scene');
         this._target.appendChild(aFrameSceneElement);
 
         const aFrameVideoSphere = document.createElement('a-videosphere');
@@ -111,6 +113,8 @@ export default class AFrameRenderer extends BaseRenderer {
 
         const videoAssetElement = document.createElement('video');
         videoAssetElement.id = 'video';
+        videoAssetElement.className = 'romper-video-element';
+
         const videoAssetSource = document.createElement('source');
         videoAssetSource.setAttribute('type', 'video/mp4');
         videoAssetSource.setAttribute('src', mediaUrl);
