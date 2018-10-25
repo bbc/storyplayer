@@ -159,7 +159,7 @@
             "name": "Step 1 video",
             "meta": {},
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
             "asset_collections": {
                 "foreground_id": "9b78100b-9cfe-4c21-9eac-7763a5f8188c",
                 "background_ids": [],
@@ -177,7 +177,7 @@
             "name": "Video 2",
             "meta": {},
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
@@ -231,9 +231,9 @@
                     "out": "3.0"
                 }
             },
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
             }
         },
         {
@@ -243,9 +243,9 @@
             "description": "",
             "version": "0:0",
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://rdux.files.bbci.co.uk/romper/step2.m4v"
+                "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0"
             }
         },
         {
