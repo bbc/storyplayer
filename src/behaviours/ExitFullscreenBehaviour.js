@@ -4,9 +4,9 @@ import BaseBehaviour from './BaseBehaviour';
 
 
 export default class PauseBehaviour extends BaseBehaviour {
-    timerHandle: ?number;
+    timerHandle: ?TimeoutID;
 
-    constructor(behaviourDefinition: Object, onComplete: () => mixed) {
+    constructor(behaviourDefinition: Object, onComplete: () => void) {
         super(behaviourDefinition, onComplete);
         this.timerHandle = null;
     }

@@ -17,10 +17,9 @@ export default class BaseRenderer extends EventEmitter {
     _fetchMedia: MediaFetcher;
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
-    _behaviourRendererMap: { [key: string]: () => void };
+    _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
-    _applyWaitForButtonBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
@@ -51,7 +50,6 @@ export default class BaseRenderer extends EventEmitter {
 
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
-        this._applyWaitForButtonBehaviour = this._applyWaitForButtonBehaviour.bind(this);
 
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -61,8 +59,6 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
-            // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showwaitbutton/v1.0': this._applyWaitForButtonBehaviour,
         };
         this._behaviourElements = [];
 
@@ -173,7 +169,7 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
-    getBehaviourRenderer(behaviourUrn: string): () => void {
+    getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
         return this._behaviourRendererMap[behaviourUrn];
     }
 
@@ -198,39 +194,6 @@ export default class BaseRenderer extends EventEmitter {
                     callback();
                 }
             });
-        }
-    }
-
-    _applyWaitForButtonBehaviour(behaviour: Object, callback: () => mixed) {
-        const continueButton = document.createElement('button');
-        continueButton.classList.add(behaviour.button_class);
-        continueButton.setAttribute('title', 'Continue Button');
-        continueButton.setAttribute('aria-label', 'Continue Button');
-        const continueButtonIconDiv = document.createElement('div');
-        continueButtonIconDiv.classList.add('romper-button-icon-div');
-        continueButtonIconDiv.classList.add(`${behaviour.button_class}-icon-div`);
-        continueButton.appendChild(continueButtonIconDiv);
-        const continueButtonTextDiv = document.createElement('div');
-        continueButtonTextDiv.innerHTML = behaviour.text;
-        continueButtonTextDiv.classList.add('romper-button-text-div');
-        continueButtonTextDiv.classList.add(`${behaviour.button_class}-text-div`);
-        continueButton.appendChild(continueButtonTextDiv);
-
-        this._target.appendChild(continueButton);
-        this._behaviourElements.push(continueButton);
-
-        const buttonClickHandler = () => {
-            this._player._enableUserInteraction();
-            this._player._narrativeElementTransport.classList.remove('romper-inactive');
-            this.logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            callback();
-        };
-        continueButton.onclick = buttonClickHandler;
-
-        if (behaviour.hide_narrative_buttons) {
-            // can't use player.setNextAvailable
-            // as this may get reset after this by NE change handling
-            this._player._narrativeElementTransport.classList.add('romper-inactive');
         }
     }
 

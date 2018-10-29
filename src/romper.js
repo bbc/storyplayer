@@ -1,19 +1,19 @@
 // @flow
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
-import type { Settings } from './romper';
+import type { Settings, ExperienceFetchers, AssetUrls } from './romper';
 import Controller from './Controller';
 
 // eslint-disable-next-line import/no-named-as-default
 import StoryReasonerFactory from './StoryReasonerFactory';
 import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
-// import MediaManager from './MediaManager';
 import logger from './logger';
+
+import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 
 // @flowignore
 import './assets/styles/player.scss';
-
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
@@ -25,13 +25,16 @@ const DEFAULT_SETTINGS = {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
         }
     },
+    staticImageBaseUrl: '/images',
 };
-
 
 module.exports = {
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
     },
+
+    BrowserUserAgent,
+    BrowserCapabilities,
 
     init: (settings: Settings): ?Controller => {
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
@@ -47,19 +50,32 @@ module.exports = {
             mergedSettings.dataResolver,
         );
 
-        const representationReasoner = RepresentationReasonerFactory(
+        const representationReasonerFactory = RepresentationReasonerFactory(
             mergedSettings.representationFetcher,
             mergedSettings.dataResolver,
         );
+
+        const assetUrls:AssetUrls = {
+            noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+        };
+
+        const fetchers:ExperienceFetchers = {
+            storyFetcher: mergedSettings.storyFetcher,
+            narrativeElementFetcher: mergedSettings.narrativeElementFetcher,
+            representationCollectionFetcher: mergedSettings.representationCollectionFetcher,
+            representationFetcher: mergedSettings.representationFetcher,
+            assetCollectionFetcher: mergedSettings.assetCollectionFetcher,
+            mediaFetcher: mergedSettings.mediaFetcher,
+        };
+
         return new Controller(
             mergedSettings.target,
             storyReasonerFactory,
-            mergedSettings.representationCollectionFetcher,
-            mergedSettings.assetCollectionFetcher,
-            representationReasoner,
-            mergedSettings.mediaFetcher,
-            mergedSettings.storyFetcher,
+            representationReasonerFactory,
+            fetchers,
             mergedSettings.analyticsLogger,
+            assetUrls,
         );
     },
 };

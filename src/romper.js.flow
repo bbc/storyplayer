@@ -24,6 +24,17 @@ export type Link = {
     target_narrative_element_id?: string,
 };
 
+export type Story = {
+    id: string,
+    version: string,
+    name: string,
+    tags?: Tags,
+    beginnings: Array<Beginning>,
+    narrative_element_ids: Array<string>,
+    meta?: Object,
+    variables?: Object,
+};
+
 export type NarrativeElement = {
     id: string,
     version: string,
@@ -38,25 +49,16 @@ export type NarrativeElement = {
     links: Array<Link>,
 };
 
-export type Story = {
+export type RepresentationCollection = {
     id: string,
     version: string,
     name: string,
-    tags?: Tags,
-    beginnings: Array<Beginning>,
-    narrative_element_ids: Array<string>,
-    meta?: any,
-    variables?: Object,
+    tags: Tags,
+    representations: Array<{
+        representation_id: string,
+        condition: any,
+    }>,
 };
-
-export type DataResolver = {
-    get: (name: string) => Promise<any>,
-    set: (name: string, value: any) => any,
-}
-
-export type StoryFetcher = (id: string) => Promise<Story>;
-
-export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
 
 export type RepresentationChoice = {
     label: string,
@@ -101,14 +103,13 @@ export type Representation = {
     },
 };
 
-export type RepresentationFetcher = (id: string) => Promise<Representation>;
-
 export type AssetCollection = {
     id: string,
     version: string,
     name: string,
     tags: Tags,
     asset_collection_type: string,
+    meta?: Object,
     assets: {
         audio_src?: string,
         image_src?: string,
@@ -119,22 +120,22 @@ export type AssetCollection = {
     },
 };
 
-export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
-
-export type RepresentationCollection = {
-    id: string,
-    version: string,
-    name: string,
-    tags: Tags,
-    representations: Array<{
-        representation_id: string,
-        condition: any,
-    }>,
-};
-
+export type StoryFetcher = (id: string) => Promise<Story>;
+export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
 export type RepresentationCollectionFetcher = (id: string) => Promise<RepresentationCollection>;
+export type RepresentationFetcher = (id: string) => Promise<Representation>;
+export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
+export type MediaFetcher = (uri: string, mediaType?:string) => Promise<string>;
 
-export type MediaFetcher = (uri: string) => Promise<string>;
+export type ExperienceFetchers = {
+    storyFetcher: StoryFetcher,
+    narrativeElementFetcher: NarrativeElementFetcher,
+    representationCollectionFetcher: RepresentationCollectionFetcher,
+    representationFetcher: RepresentationFetcher,
+    assetCollectionFetcher: AssetCollectionFetcher,
+    mediaFetcher: MediaFetcher
+}
+
 
 export type BaseRenderer = {
     representation: Representation,
@@ -144,6 +145,11 @@ export type BaseRenderer = {
 };
 
 export type Renderers = { [type: string]: Class<BaseRenderer> };
+
+export type DataResolver = {
+    get: (name: string) => Promise<any>,
+    set: (name: string, value: any) => any,
+}
 
 export type Settings = {
     target: HTMLElement,
@@ -155,3 +161,8 @@ export type Settings = {
     representationFetcher: RepresentationFetcher,
     mediaFetcher: MediaFetcher,
 };
+
+export type AssetUrls = {
+    noAssetIconUrl: string,
+    noBackgroundAssetUrl?: string,
+}

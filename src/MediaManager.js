@@ -15,7 +15,7 @@ export default class MediaManager {
     _debug: boolean
     _getPermissionToPlay: Function
     _permissionToPlay: boolean
-    _hlsjsSupported: boolean
+    static _hlsjsSupported: boolean
 
     constructor(
         foregroundMediaElement: HTMLVideoElement,
@@ -51,9 +51,9 @@ export default class MediaManager {
 
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
-            this._hlsjsSupported = true;
+            MediaManager._hlsjsSupported = true;
         } else {
-            this._hlsjsSupported = false;
+            MediaManager._hlsjsSupported = false;
         }
     }
 
@@ -69,7 +69,7 @@ export default class MediaManager {
                 this._activeConfig,
                 this._inactiveConfig,
                 this._idTotal,
-                this._hlsjsSupported,
+                MediaManager._hlsjsSupported,
                 this._foregroundMediaElement,
                 this._debug,
             );
@@ -79,7 +79,7 @@ export default class MediaManager {
                 this._activeConfig,
                 this._inactiveConfig,
                 this._idTotal,
-                this._hlsjsSupported,
+                MediaManager._hlsjsSupported,
                 this._backgroundMediaElement,
                 this._debug,
             );

@@ -1,6 +1,6 @@
 {
-  "name": "@bbc/romper",
-  "version": "0.2.4",
+  "name": "@bbc/romper", 
+  "version": "0.2.15",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "test:flow": "flow check",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
-    "demo": "rm -f ./tmp/*.json && node demos.js",
+    "demo": "yarn build && rm -f ./tmp/*.json && node demos.js",
     "watch": "concurrently \"webpack --watch --watch-poll 500 --progress --profile --bail\" \"jest --watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\"",
     "dev": "webpack --watch --watch-poll 500 --progress --profile --bail"
   },
@@ -50,8 +50,8 @@
     "express": "^4.16.3",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.6",
-    "flow-bin": "^0.41.0",
-    "flow-typed": "^2.4.0",
+    "flow-bin": "^0.78.0",
+    "flow-typed": "^2.5.1",
     "jest": "^22.0.5",
     "jsoneditor": "^5.17.1",
     "node-sass": "^4.7.2",

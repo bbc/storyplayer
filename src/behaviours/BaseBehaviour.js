@@ -5,9 +5,9 @@ import logger from '../logger';
 export default class BaseBehaviour {
     _behaviourDefinition: Object;
     _handleDone: Function;
-    _onComplete: () => mixed;
+    _onComplete: () => void;
 
-    constructor(behaviourDefinition: Object, onComplete: () => mixed) {
+    constructor(behaviourDefinition: Object, onComplete: () => void) {
         this._behaviourDefinition = behaviourDefinition;
         this._onComplete = onComplete;
         this._handleDone = this._handleDone.bind(this);

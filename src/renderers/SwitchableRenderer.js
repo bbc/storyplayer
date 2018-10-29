@@ -77,24 +77,35 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
                 if (choice.choice_representation &&
-                    choice.choice_representation.asset_collections.icon
+                    choice.choice_representation.asset_collections
                 ) {
                     const choiceName = choice.choice_representation.name;
-                    // eslint-disable-next-line max-len
-                    this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
-                        .then((icon) => {
-                            if (icon.assets.image_src) {
-                                this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                                    this._player.addRepresentationControl(
-                                        `${idx}`,
-                                        mediaUrl,
-                                        choiceName,
-                                    );
-                                    const currentSelection = this._currentRendererIndex.toString();
-                                    this._player.setActiveRepresentationControl(currentSelection);
-                                }).catch((err) => { logger.error(err, 'Notfound'); });
-                            }
-                        });
+                    const setRepresentationControl = (mediaUrl) => {
+                        this._player.addRepresentationControl(
+                            `${idx}`,
+                            mediaUrl,
+                            choiceName,
+                        );
+                        const currentSelection = this._currentRendererIndex.toString();
+                        this._player.setActiveRepresentationControl(currentSelection);
+                    };
+
+                    if (
+                        choice.choice_representation.asset_collections.icon &&
+                        choice.choice_representation.asset_collections.icon.default_id
+                    ) {
+                        // eslint-disable-next-line max-len
+                        this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
+                            .then((icon) => {
+                                if (icon.assets.image_src) {
+                                    this._fetchMedia(icon.assets.image_src)
+                                        .then(setRepresentationControl)
+                                        .catch((err) => { logger.error(err, 'Notfound'); });
+                                }
+                            });
+                    } else {
+                        setRepresentationControl('');
+                    }
                 }
             });
         }
@@ -211,21 +222,6 @@ export default class SwitchableRenderer extends BaseRenderer {
             }
         }
         return this._representation;
-    }
-
-    // fetch the icon asset for the given representation and set
-    // the source of the IMG element
-    _setIcon(element: HTMLImageElement, choiceRepresentation: Representation) {
-        if (choiceRepresentation.asset_collections.icon) {
-            this._fetchAssetCollection(choiceRepresentation.asset_collections.icon.default_id)
-                .then((icon) => {
-                    if (icon.assets.image_src) {
-                        this._fetchMedia(icon.assets.image_src).then((mediaUrl) => {
-                            element.setAttribute('src', mediaUrl);
-                        }).catch((err) => { logger.error(err, 'Notfound'); });
-                    }
-                });
-        }
     }
 
     destroy() {

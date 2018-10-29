@@ -2,9 +2,9 @@ $background-colour: rgba(0, 0, 0, 0.3);
 $transparent: rgba(0, 0, 0, 0);
 $highlight: #ff7f11;
 $accent-colour: #fff;
-$backing-colour: #50e3c2;
+$backing-colour: rgba(170, 170, 170, 0.6);
 $white: #fff;
-$backing-colour-dark: #189a7e;
+$backing-colour-dark: rgba(150, 150, 150, 0.6);
 $romper-background-color: #ccc;
 $start-button-colour: #e83d42;
 $start-button-colour-dark: #b7151b;
@@ -187,6 +187,14 @@ $romper-hover-text-size: 25px;
 
   .romper-control-selected > .romper-icon {
     background-color: $highlight;
+  }
+
+  .romper-no-icon {
+    background-color: $transparent;
+    background-image: url('../images/no-asset.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
   }
 
   .romper-play-button {
@@ -384,7 +392,7 @@ $romper-hover-text-size: 25px;
 }
 
 
-.romper-player > .romper-media {
+.romper-player > .romper-gui {
 
   >.romper-start-button {
     background-color: $start-button-colour;
@@ -422,9 +430,6 @@ $romper-hover-text-size: 25px;
       background-color: $start-button-colour-dark;
     }
   }
-}
-
-.romper-player > .romper-gui {
 
   >.romper-buttons {
 

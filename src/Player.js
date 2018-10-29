@@ -3,9 +3,10 @@
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
-
+import type { AssetUrls } from './romper';
 import { BrowserUserAgent } from './browserCapabilities';
 import MediaManager from './MediaManager';
+import logger from './logger';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -231,6 +232,8 @@ class Player extends EventEmitter {
     _buttonsActivateArea: HTMLDivElement;
     _narrativeElementTransport: HTMLDivElement;
     _mediaTransport: HTMLDivElement;
+    _startExperienceButton: HTMLButtonElement;
+    _startExperienceImage: HTMLImageElement;
     _repeatButton: HTMLButtonElement;
     _playPauseButton: HTMLButtonElement;
     _backButton: HTMLButtonElement;
@@ -246,17 +249,20 @@ class Player extends EventEmitter {
     _currentTime: HTMLSpanElement;
     _totalTime: HTMLSpanElement;
     _analytics: AnalyticsLogger;
+    _assetUrls: AssetUrls;
     _logUserInteraction: Function;
     _foregroundMediaElement: HTMLVideoElement;
     _backgroundMediaElement: HTMLAudioElement;
     _volumeEventTimeouts: Object;
-    _scrubbedEventTimeout: number;
-    _showRomperButtonsTimeout: number;
+    _scrubbedEventTimeout: TimeoutID;
+    _showRomperButtonsTimeout: TimeoutID;
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
+    removeExperienceStartButtonAndImage: Function;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger) {
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
+
 
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
@@ -284,6 +290,8 @@ class Player extends EventEmitter {
         this.showingSubtitles = false;
 
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
+
         this._logUserInteraction = this._logUserInteraction.bind(this);
 
         this._player = document.createElement('div');
@@ -515,6 +523,9 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
+
+        this.removeExperienceStartButtonAndImage =
+            this.removeExperienceStartButtonAndImage.bind(this);
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -587,6 +598,79 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.classList.remove('hide');
     }
 
+    addExperienceStartButtonAndImage(options: Object) {
+        this._startExperienceButton = document.createElement('button');
+        this._startExperienceButton.classList.add(options.button_class);
+        this._startExperienceButton.setAttribute('title', 'Continue Button');
+        this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconDiv = document.createElement('div');
+        continueButtonIconDiv.classList.add('romper-button-icon-div');
+        continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+        this._startExperienceButton.appendChild(continueButtonIconDiv);
+        const continueButtonTextDiv = document.createElement('div');
+        continueButtonTextDiv.innerHTML = options.text;
+        continueButtonTextDiv.classList.add('romper-button-text-div');
+        continueButtonTextDiv.classList.add(`${options.button_class}-text-div`);
+        this._startExperienceButton.appendChild(continueButtonTextDiv);
+
+        this._startExperienceImage = document.createElement('img');
+        this._startExperienceImage.className = 'romper-render-image';
+        this._startExperienceImage.src = options.background_art;
+
+        this._guiLayer.appendChild(this._startExperienceButton);
+        this._mediaLayer.appendChild(this._startExperienceImage);
+
+        const buttonClickHandler = () => {
+            this.removeExperienceStartButtonAndImage();
+            this._enableUserInteraction();
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+        };
+
+        this._startExperienceButton.onclick = buttonClickHandler;
+
+        if (options.hide_narrative_buttons) {
+            // can't use player.setNextAvailable
+            // as this may get reset after this by NE change handling
+            this._narrativeElementTransport.classList.add('romper-inactive');
+        }
+    }
+
+    _clearOverlays() {
+        this._icon.clearAll();
+        this._volume.clearAll();
+        this._linkChoice.clearAll();
+    }
+
+    prepareForRestart() {
+        if (this._startExperienceButton || this._startExperienceImage) {
+            this.removeExperienceStartButtonAndImage();
+        }
+        this._foregroundMediaElement.pause();
+        this._backgroundMediaElement.pause();
+        this._clearOverlays();
+        this._disableUserInteraction();
+        logger.info('disabling experience before restart');
+    }
+
+    removeExperienceStartButtonAndImage() {
+        try {
+            this._guiLayer.removeChild(this._startExperienceButton);
+            this._mediaLayer.removeChild(this._startExperienceImage);
+        } catch (e) {
+            logger.warn('could not remove start button and/or image');
+        }
+    }
+
+    _disableUserInteraction() {
+        this._userInteractionStarted = false;
+        this._overlays.classList.add('romper-inactive');
+        this._buttons.classList.add('romper-inactive');
+        this._buttonsActivateArea.classList.add('romper-inactive');
+        this._overlayToggleButtons.classList.add('romper-inactive');
+        this._mediaManager.setPermissionToPlay(false);
+    }
+
     _enableUserInteraction() {
         if (this._userInteractionStarted) {
             return;
@@ -606,7 +690,7 @@ class Player extends EventEmitter {
         this._foregroundMediaElement.pause();
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
-
+        this._backgroundMediaElement.play();
         this._playPauseButtonClicked();
     }
 
@@ -774,7 +858,11 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-representation-icon-container');
 
         const representationIcon = document.createElement('img');
-        representationIcon.src = src;
+        if (src !== '') {
+            representationIcon.src = src;
+        } else {
+            representationIcon.src = this._assetUrls.noAssetIconUrl;
+        }
         representationIcon.classList.add('romper-representation-icon');
         representationIcon.setAttribute('draggable', 'false');
         const representationIconClick = () => {
@@ -808,7 +896,13 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-link-choice-icon-container');
 
         const linkChoiceIcon = document.createElement('img');
-        linkChoiceIcon.src = src;
+
+        if (src !== '') {
+            linkChoiceIcon.src = src;
+        } else {
+            linkChoiceIcon.src = this._assetUrls.noAssetIconUrl;
+        }
+
         linkChoiceIcon.classList.add('romper-link-icon');
         linkChoiceIcon.setAttribute('draggable', 'false');
         const linkChoiceIconClick = () => {
@@ -852,7 +946,12 @@ class Player extends EventEmitter {
         iconControl.classList.add('romper-icon-control');
 
         const icon = document.createElement('img');
-        icon.src = src;
+        if (src !== '') {
+            icon.src = src;
+        } else {
+            icon.src = this._assetUrls.noAssetIconUrl;
+        }
+
         icon.classList.add('romper-icon');
         if (labelString) {
             icon.classList.add(`romper-icon-choice-${labelString}`);
@@ -901,7 +1000,11 @@ class Player extends EventEmitter {
                 iconControl.classList.remove('romper-control-selected');
             }
             const icon = iconControl.children[0];
-            icon.src = src;
+            if (src !== '') {
+                icon.src = src;
+            } else {
+                icon.src = this._assetUrls.noAssetIconUrl;
+            }
         }
     }
 
@@ -1116,17 +1219,17 @@ class Player extends EventEmitter {
 
     static _isFullScreen() {
         let isFullScreen = false;
-        if (document.fullscreenElement) {
-            isFullScreen = (document.fullscreenElement != null);
+        if ((document: any).fullscreenElement) {
+            isFullScreen = ((document: any).fullscreenElement != null);
         }
-        if (document.webkitFullscreenElement) {
-            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
+        if ((document: any).webkitFullscreenElement) {
+            isFullScreen = isFullScreen || ((document: any).webkitFullscreenElement != null);
         }
-        if (document.mozFullScreenElement) {
-            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
+        if ((document: any).mozFullScreenElement) {
+            isFullScreen = isFullScreen || ((document: any).mozFullScreenElement != null);
         }
-        if (document.msFullscreenElement) {
-            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
+        if ((document: any).msFullscreenElement) {
+            isFullScreen = isFullScreen || ((document: any).msFullscreenElement != null);
         }
         if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
             isFullScreen = true;
@@ -1137,13 +1240,14 @@ class Player extends EventEmitter {
     _enterFullScreen() {
         this._buttons.classList.add('romper-buttons-fullscreen');
         this._player.classList.add('romper-player-fullscreen');
+
         if (this._playerParent.requestFullscreen) {
             // @flowignore
             this._playerParent.requestFullscreen();
-        } else if (this._playerParent.mozRequestFullScreen) {
+        } else if ((this._playerParent: any).mozRequestFullScreen) {
             // @flowignore
             this._playerParent.mozRequestFullScreen(); // Firefox
-        } else if (this._playerParent.webkitRequestFullscreen) {
+        } else if ((this._playerParent: any).webkitRequestFullscreen) {
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
@@ -1156,16 +1260,16 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('romper-buttons-fullscreen');
         this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
-        if (document.exitFullscreen) {
+        if ((document: any).exitFullscreen) {
             // @flowignore
             document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
+        } else if ((document: any).mozCancelFullScreen) {
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
-        } else if (document.webkitExitFullscreen) {
+        } else if ((document: any).webkitExitFullscreen) {
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
-        } else if (document.msExitFullscreen) {
+        } else if ((document: any).msExitFullscreen) {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
         } else {

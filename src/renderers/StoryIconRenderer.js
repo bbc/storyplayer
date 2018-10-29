@@ -57,13 +57,14 @@ export default class StoryIconRenderer extends EventEmitter {
             this._pathItemList.forEach((pathItem, index) => {
                 const representationId = pathItem.representation.id;
                 const iconUrls = this._iconUrlMap[representationId];
-
-                if (iconUrls && iconUrls.default) {
+                const iconName = pathItem.representation.name ?
+                    `${pathItem.representation.name}` : `Chapter ${index + 1}`;
+                if (iconUrls) {
                     this._player.addIconControl(
                         representationId,
-                        iconUrls.default,
+                        iconUrls.default ? iconUrls.default : '',
                         false,
-                        `Chapter ${index}`,
+                        iconName,
                         `${index}`,
                     );
                 }
@@ -91,8 +92,11 @@ export default class StoryIconRenderer extends EventEmitter {
             if (pathItem.representation.asset_collections.icon) {
                 // eslint-disable-next-line prefer-destructuring
                 const icon = pathItem.representation.asset_collections.icon;
-                const defaultAssetCollectionId = icon.default_id;
-                promises.push(this._fetchAssetCollection(defaultAssetCollectionId));
+                if (icon.default_id) {
+                    promises.push(this._fetchAssetCollection(icon.default_id));
+                } else {
+                    promises.push(Promise.resolve(null));
+                }
                 if (icon.active_id) {
                     promises.push(this._fetchAssetCollection(icon.active_id));
                 } else {
@@ -152,12 +156,24 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconUrlMap).forEach((mapKey) => {
             const iconUrls = this._iconUrlMap[mapKey];
 
-            if (mapKey === representationId && iconUrls && iconUrls.active) {
-                this._player.setIconControl(mapKey, iconUrls.active, true);
-            } else if (mapKey === representationId && iconUrls && iconUrls.default) {
-                this._player.setIconControl(mapKey, iconUrls.default, true);
-            } else if (iconUrls && iconUrls.default) {
-                this._player.setIconControl(mapKey, iconUrls.default, false);
+            if (mapKey === representationId && iconUrls) {
+                this._player.setIconControl(
+                    mapKey,
+                    iconUrls.active ? iconUrls.active : '',
+                    true,
+                );
+            } else if (mapKey === representationId && iconUrls) {
+                this._player.setIconControl(
+                    mapKey,
+                    iconUrls.default ? iconUrls.default : '',
+                    true,
+                );
+            } else if (iconUrls) {
+                this._player.setIconControl(
+                    mapKey,
+                    iconUrls.default ? iconUrls.default : '',
+                    false,
+                );
             }
             const className = `chapter${this._getRepresentationIndex(representationId)}`;
             this._player._icon.setButtonClass(className);

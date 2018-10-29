@@ -5,8 +5,7 @@ import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
 import type {
-    StoryFetcher, NarrativeElement, RepresentationCollectionFetcher, AssetCollectionFetcher,
-    MediaFetcher,
+    ExperienceFetchers, NarrativeElement, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
@@ -22,26 +21,30 @@ export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
         storyReasonerFactory: StoryReasonerFactory,
-        fetchRepresentationCollection: RepresentationCollectionFetcher,
-        fetchAssetCollection: AssetCollectionFetcher,
         representationReasoner: RepresentationReasoner,
-        fetchMedia: MediaFetcher,
-        fetchStory: StoryFetcher,
+        fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
+        assetUrls: AssetUrls,
     ) {
         super();
         this._storyId = null;
         this._reasoner = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
-        this._fetchRepresentationCollection = fetchRepresentationCollection;
         this._representationReasoner = representationReasoner;
-        this._fetchAssetCollection = fetchAssetCollection;
-        this._fetchMedia = fetchMedia;
-        this._fetchStory = fetchStory;
+
+        this._fetchers = fetchers;
         this._analytics = analytics;
+        this._assetUrls = assetUrls;
         this._linearStoryPath = [];
         this._createRenderManager();
+    }
+
+    restart(storyId: string, variableState?: Object = {}) {
+        this._reasoner = null;
+        // get render manager to tidy up
+        this._renderManager.prepareForRestart();
+        this.start(storyId, variableState);
     }
 
     start(storyId: string, variableState?: Object = {}) {
@@ -85,7 +88,26 @@ export default class Controller extends EventEmitter {
 
             this._addListenersToRenderManager();
             this.emit('ControllerReady');
+
+            this._renderManager.handleStoryStart(storyId);
         });
+    }
+
+    // get the current and next narrative elements
+    getStatus(): Promise<Object> {
+        const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
+        let nextNarrativeElement = null;
+        return this.getValidNextSteps()
+            .then((nextNarrativeElements) => {
+                if (nextNarrativeElements.length === 1) {
+                    // eslint-disable-next-line prefer-destructuring
+                    nextNarrativeElement = nextNarrativeElements[0];
+                }
+                return {
+                    currentNarrativeElement,
+                    nextNarrativeElement,
+                };
+            });
     }
 
     /*
@@ -146,11 +168,10 @@ export default class Controller extends EventEmitter {
         this._renderManager = new RenderManager(
             this,
             this._target,
-            this._fetchRepresentationCollection,
-            this._fetchAssetCollection,
             this._representationReasoner,
-            this._fetchMedia,
+            this._fetchers,
             this._analytics,
+            this._assetUrls,
         );
     }
 
@@ -172,8 +193,8 @@ export default class Controller extends EventEmitter {
     _testForLinearityAndBuildStoryRenderer(storyId: string) {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
-            this._fetchStory,
-            this._fetchRepresentationCollection,
+            this._fetchers.storyFetcher,
+            this._fetchers.representationCollectionFetcher,
             this._storyReasonerFactory,
         );
 
@@ -356,6 +377,21 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Set a bunch of variables without doing renderer lookahead refresh in between
+     * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
+     */
+    setVariables(variables: Object) {
+        Object.keys(variables).forEach((varName) => {
+            if (this._reasoner) {
+                this._reasoner.setVariableValue(varName, variables[varName]);
+            } else {
+                logger.warn(`Controller cannot set variable '${varName}' - no reasoner`);
+            }
+        });
+        this._renderManager.refreshLookahead();
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to
@@ -484,12 +520,10 @@ export default class Controller extends EventEmitter {
     _reasoner: ?StoryReasoner;
     _target: HTMLElement;
     _storyReasonerFactory: StoryReasonerFactory;
-    _fetchRepresentationCollection: RepresentationCollectionFetcher;
-    _fetchAssetCollection: AssetCollectionFetcher;
+    _fetchers: ExperienceFetchers;
     _representationReasoner: RepresentationReasoner;
-    _fetchMedia: MediaFetcher;
-    _fetchStory: StoryFetcher;
     _analytics: AnalyticsLogger;
+    _assetUrls: AssetUrls;
     _handleError: ?Function;
     _handleStoryEnd: ?Function;
     _handleNarrativeElementChanged: ?Function;
