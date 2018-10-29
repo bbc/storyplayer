@@ -13,10 +13,12 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _endedEventListener: Function;
     _playEventListener: Function;
+    _pauseEventListener: Function;
+    _handlePlayPauseButtonClicked: Function;
 
     _aFrameSceneElement: HTMLElement;
     _aFrameScriptElement: HTMLScriptElement;
-    _videoAssetElement: HTMLElement;
+    _videoAssetElement: HTMLVideoElement;
 
     constructor(
         representation: Representation,
@@ -27,46 +29,44 @@ export default class AFrameRenderer extends BaseRenderer {
     ) {
         super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
         this._endedEventListener = this._endedEventListener.bind(this);
-        // this._playEventListener = this._playEventListener.bind(this);
+        this._playEventListener = this._playEventListener.bind(this);
+        this._pauseEventListener = this._pauseEventListener.bind(this);
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
     }
 
     _endedEventListener() {
-        console.log('360 video ended');
+        logger.info('360 video ended');
         super.complete();
     }
 
-    // _playEventListener() {
-    //     this._player.setPlaying(true);
-    // }
+    _playEventListener() {
+        this._player.setPlaying(true);
+    }
 
-    // _pauseEventListener() {
-    //     this._player.setPlaying(false);
-    // }
+    _pauseEventListener() {
+        this._player.setPlaying(false);
+    }
 
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
         this.renderVideoElement();
-
-        // automatically move on at video end
-        // videoElement.addEventListener('play', this._playEventListener);
-        // videoElement.addEventListener('pause', this._pauseEventListener);
     }
 
     end() {
         this._videoAssetElement.removeEventListener('ended', this._endedEventListener);
-        // videoElement.removeEventListener('play', this._playEventListener);
-        // videoElement.removeEventListener('pause', this._pauseEventListener);
+        this._videoAssetElement.removeEventListener('play', this._playEventListener);
+        this._videoAssetElement.removeEventListener('pause', this._pauseEventListener);
 
         // const player = this._player;
         this._target.removeChild(this._aFrameSceneElement);
         this._target.removeChild(this._aFrameScriptElement);
         // player.removeVolumeControl(this._representation.id);
-        // player.disconnectScrubBar();
-        // player.removeListener(
-        //     PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-        //     this._handlePlayPauseButtonClicked,
-        // );
+        this._player.disconnectScrubBar();
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
         // player.removeListener(
         //     PlayerEvents.VOLUME_CHANGED,
         //     this._handleVolumeClicked,
@@ -108,16 +108,16 @@ export default class AFrameRenderer extends BaseRenderer {
         this._target.appendChild(this._aFrameSceneElement);
 
         const aFrameVideoSphere = document.createElement('a-videosphere');
-        aFrameVideoSphere.setAttribute('src', '#video');
+        aFrameVideoSphere.setAttribute('src', '#threesixtyvideo');
         this._aFrameSceneElement.appendChild(aFrameVideoSphere);
 
         const aFrameAssetsElement = document.createElement('a-assets');
         this._aFrameSceneElement.appendChild(aFrameAssetsElement);
 
         this._videoAssetElement = document.createElement('video');
-        this._videoAssetElement.id = 'video';
+        this._videoAssetElement.id = 'threesixtyvideo';
         this._videoAssetElement.className = 'romper-video-element';
-        this._videoAssetElement.setAttribute('autoplay', '');
+        this._videoAssetElement.setAttribute('crossorigin', '');
         this._videoAssetElement.addEventListener('ended', this._endedEventListener);
 
         const videoAssetSource = document.createElement('source');
@@ -125,6 +125,21 @@ export default class AFrameRenderer extends BaseRenderer {
         videoAssetSource.setAttribute('src', mediaUrl);
         this._videoAssetElement.appendChild(videoAssetSource);
         aFrameAssetsElement.appendChild(this._videoAssetElement);
+        this.startThreeSixtyVideo();
+    }
+
+    startThreeSixtyVideo() {
+        this._player.connectScrubBar(this._videoAssetElement);
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+        // automatically move on at video end
+        this._videoAssetElement.addEventListener('play', this._playEventListener);
+        this._videoAssetElement.addEventListener('pause', this._pauseEventListener);
+        this._videoAssetElement.addEventListener('ended', this._endedEventListener);
+        logger.info('360 video playing');
+        this._videoAssetElement.play();
     }
 
     _addAFrameScripts(): void {
@@ -132,23 +147,22 @@ export default class AFrameRenderer extends BaseRenderer {
         this._aFrameScriptElement.setAttribute('src', 'https://aframe.io/releases/0.7.1/aframe.min.js');
         this._target.appendChild(this._aFrameScriptElement);
     }
-    
+
     _handlePlayPauseButtonClicked(): void {
-        const videoElement = this._mediaInstance.getMediaElement();
-        if (videoElement.paused === true) {
+        if (this._videoAssetElement.paused === true) {
             this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            this._mediaInstance.play();
+            this._videoAssetElement.play();
         } else {
             this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            this._mediaInstance.pause();
+            this._videoAssetElement.pause();
         }
     }
 
-    _handleVolumeClicked(event: Object): void {
-        if (event.id === this._representation.id) {
-            this._mediaInstance.setVolume(event.value);
-        }
-    }
+    // _handleVolumeClicked(event: Object): void {
+    //     if (event.id === this._representation.id) {
+    //         this._mediaInstance.setVolume(event.value);
+    //     }
+    // }
 
     switchFrom() {
         this.end();
