@@ -189,7 +189,7 @@
                 target: document.getElementById('romper-target'),
                 staticImageBaseUrl: '/src/assets/images/',
                 analyticsLogger: dataObj => {
-                    // console.log('ANALYTICS:', dataObj);
+                    console.log('ANALYTICS:', dataObj);
                 },
                 storyFetcher: id => Promise.resolve().then(
                     () => config.stories.filter(storyObject => storyObject.id === id)[0]
@@ -279,10 +279,9 @@
                 varInput = getBooleanVariableSwitch(varName, variableDecl);
             } else if (varType === 'integer') {
                 varInput = getIntegerVariableSetter(varName, variableDecl);
-            }
-            else if (varType === 'number') {
+            } else if (varType === 'number') {
                 varInput = getIntegerVariableSetter(varName, variableDecl);
-            }else if (varType === 'string') {
+            } else if (varType === 'string') {
                 varInput = getStringVariableSetter(varName, variableDecl);
             } else if (varType === 'list') {
                 varInput = getListVariableSetter(varName, variableDecl);

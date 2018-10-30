@@ -4,7 +4,7 @@ import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, StoryFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
@@ -15,7 +15,6 @@ export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
-    _fetchStory: StoryFetcher;
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
