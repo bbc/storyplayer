@@ -74,7 +74,7 @@ export default class BaseRenderer extends EventEmitter {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
             // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showvarpanel/v1.0': this._applyShowVariablePanelBehaviour,
+            'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
         };
         this._behaviourElements = [];
 
