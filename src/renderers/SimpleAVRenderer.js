@@ -72,7 +72,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement.currentTime >= this._outTime) {
+        if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
             this._endedEventListener();
         }
     }
@@ -87,10 +87,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-
-        if (this._outTime > 0) {
-            this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        }
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
         const player = this._player;
 
@@ -106,10 +103,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         logger.info(`Ended: ${this._representation.id}`);
 
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-
-        if (this._outTime > 0) {
-            this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        }
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
         try {
             this._clearBehaviourElements();
@@ -186,7 +180,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        // const videoElement = this._mediaInstance.getMediaElement();
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const { blur } = behaviour;
         videoElement.style.filter = `blur(${blur}px)`;
