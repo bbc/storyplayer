@@ -32,7 +32,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
             const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-            audioElement.setAttribute('loop', 'true');
+            if (audioElement) {
+                audioElement.setAttribute('loop', 'true');
+            }
         }
     }
 

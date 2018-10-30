@@ -293,12 +293,14 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked(): void {
         const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
         // const audioElement = this._mediaInstance.getMediaElement();
-        if (audioElement.paused === true) {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            // this._mediaInstance.play();
-        } else {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            // this._mediaInstance.pause();
+        if (audioElement) {
+            if (audioElement.paused === true) {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
+                // this._mediaInstance.play();
+            } else {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+                // this._mediaInstance.pause();
+            }
         }
     }
 

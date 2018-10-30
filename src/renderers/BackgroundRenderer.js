@@ -5,6 +5,7 @@ import EventEmitter from 'events';
 import uuid from 'uuid/v4';
 import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../Player';
+import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 
 export default class BackgroundRenderer extends EventEmitter {
     _rendererId: string;

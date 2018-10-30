@@ -20,11 +20,11 @@ export default class BasePlayoutEngine {
         this._permissionToPlay = false;
     }
 
-    setPermissionToPlay(value) {
+    setPermissionToPlay(value: boolean) {
         this._permissionToPlay = value;
     }
 
-    queuePlayout(rendererId, mediaObj) {
+    queuePlayout(rendererId: string, mediaObj: Object) {
         if (!this._media[rendererId]) {
             this._media[rendererId] = {
                 active: false,
@@ -37,19 +37,19 @@ export default class BasePlayoutEngine {
         }
     }
 
-    unqueuePlayout(rendererId) {
+    unqueuePlayout(rendererId: string) {
         if (this._media[rendererId]) {
             delete this._media[rendererId];
         }
     }
 
-    setPlayoutActive(rendererId) {
+    setPlayoutActive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = true;
         }
     }
 
-    setPlayoutInactive(rendererId) {
+    setPlayoutInactive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = false;
         }
@@ -63,12 +63,12 @@ export default class BasePlayoutEngine {
 
     }
 
-    getCurrentTime(rendererId) {
+    getCurrentTime(rendererId: string) {
         return undefined;
     }
 
 
-    setCurrentTime(rendererId, time) {
+    setCurrentTime(rendererId: string, time: number) {
         return false;
     }
 
@@ -81,7 +81,7 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    getMediaElement(rendererId) {
+    getMediaElement(rendererId: string) {
         return undefined;
     }
 }

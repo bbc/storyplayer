@@ -3,7 +3,6 @@
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
-import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -31,6 +30,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _useHlsJs: boolean;
     _activeConfig: Object;
     _inactiveConfig: Object;
+
+    _handlePlayPauseButtonClicked: Function
+    _handleSubtitlesClicked: Function
+    _handleVolumeClicked: Function
+    _showHideSubtitles: Function
+    _queueSubtitleAttach: Function
 
     constructor(player: Player) {
         super(player);
@@ -91,7 +96,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     //    url: [URL],
     //    sub_url: [URL],
     // }
-    queuePlayout(rendererId, mediaObj) {
+    queuePlayout(rendererId: string, mediaObj: Object) {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaElement) {
@@ -121,7 +126,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _loadMedia(rendererId) {
+    _loadMedia(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
 
         const { url } = rendererPlayoutObj.media;
@@ -152,7 +157,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    unqueuePlayout(rendererId) {
+    unqueuePlayout(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj.mediaType) {
             switch (rendererPlayoutObj.mediaType) {
@@ -178,7 +183,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         super.unqueuePlayout(rendererId);
     }
 
-    setPlayoutActive(rendererId) {
+    setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
 
         if (rendererPlayoutObj.mediaType) {
@@ -224,7 +229,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    setPlayoutInactive(rendererId) {
+    setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj.mediaType) {
             switch (rendererPlayoutObj.mediaType) {
@@ -258,7 +263,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _play(rendererId) {
+    _play(rendererId: string) {
         const { mediaElement } = this._media[rendererId];
         const promise = mediaElement.play();
         if (promise !== undefined) {
@@ -329,10 +334,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         const videoElement = rendererPlayoutObj.mediaElement;
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
-        } else if (videoElement.src.indexOf('m3u8') !== -1) {
-            this._mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
-                videoElement.currentTime = time;
-            });
         } else {
             videoElement.addEventListener('loadeddata', () => {
                 videoElement.currentTime = time;
@@ -357,7 +358,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId) {
+    getMediaElement(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return undefined;
@@ -389,7 +390,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _queueSubtitleAttach(rendererId) {
+    _queueSubtitleAttach(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -405,7 +406,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _cleanUpSubtitles(rendererId) {
+    _cleanUpSubtitles(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -424,7 +425,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _showHideSubtitles(rendererId) {
+    _showHideSubtitles(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;

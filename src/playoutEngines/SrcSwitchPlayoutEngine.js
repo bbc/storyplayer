@@ -9,13 +9,19 @@ import { BrowserUserAgent } from '../browserCapabilities';
 //       written and a bit messy.
 
 export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
-    _foregroundMediaElement: HTMLMediaElement
-    _backgroundMediaElement: HTMLMediaElement
+    _foregroundMediaElement: HTMLVideoElement
+    _backgroundMediaElement: HTMLAudioElement
 
     _mediaManager: MediaManager
 
     _playing: boolean;
     _subtitlesShowing: boolean;
+
+    _handlePlayPauseButtonClicked: Function
+    _handleSubtitlesClicked: Function
+    _handleVolumeClicked: Function
+    _showHideSubtitles: Function
+    _queueSubtitleAttach: Function
 
     constructor(player: Player) {
         super(player);
@@ -66,7 +72,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         );
     }
 
-    setPermissionToPlay(value) {
+    setPermissionToPlay(value: boolean) {
         this._backgroundMediaElement.play();
         this._foregroundMediaElement.play();
         this._backgroundMediaElement.pause();
@@ -81,7 +87,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     //    url: [URL],
     //    subs_url: [URL],
     // }
-    queuePlayout(rendererId, mediaObj) {
+    queuePlayout(rendererId: string, mediaObj: Object) {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaInstance) {
@@ -113,13 +119,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    unqueuePlayout(rendererId) {
+    unqueuePlayout(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         this._mediaManager.returnMediaInstance(rendererPlayoutObj.mediaInstance);
         super.unqueuePlayout(rendererId);
     }
 
-    setPlayoutActive(rendererId) {
+    setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         rendererPlayoutObj.mediaInstance.start();
         super.setPlayoutActive(rendererId);
@@ -142,7 +148,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    setPlayoutInactive(rendererId) {
+    setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         this._cleanUpSubtitles(rendererId);
         this._player.disableSubtitlesControl();
@@ -199,7 +205,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
-            this._mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
+            rendererPlayoutObj.mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
                 videoElement.currentTime = time;
             });
         } else {
@@ -226,7 +232,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId) {
+    getMediaElement(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {
             return undefined;
@@ -258,7 +264,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _queueSubtitleAttach(rendererId) {
+    _queueSubtitleAttach(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -274,7 +280,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _cleanUpSubtitles(rendererId) {
+    _cleanUpSubtitles(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -293,7 +299,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _showHideSubtitles(rendererId) {
+    _showHideSubtitles(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;

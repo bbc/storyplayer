@@ -72,8 +72,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
-            this._endedEventListener();
+        if (videoElement) {
+            if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
+                this._endedEventListener();
+            }
         }
     }
 
@@ -181,17 +183,21 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        const { blur } = behaviour;
-        videoElement.style.filter = `blur(${blur}px)`;
+        if (videoElement) {
+            const { blur } = behaviour;
+            videoElement.style.filter = `blur(${blur}px)`;
+        }
         callback();
     }
 
     _handlePlayPauseButtonClicked(): void {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement.paused === true) {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-        } else {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+        if (videoElement) {
+            if (videoElement.paused === true) {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
+            } else {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+            }
         }
     }
 
