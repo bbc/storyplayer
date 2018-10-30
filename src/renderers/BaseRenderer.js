@@ -27,6 +27,9 @@ export default class BaseRenderer extends EventEmitter {
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
     _controller: Controller;
+    _getListVariableSetter: Function;
+    _getBooleanVariableSetter: Function;
+    _getIntegerVariableSetter: Function;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -36,7 +39,7 @@ export default class BaseRenderer extends EventEmitter {
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {MediaFetcher} MediaFetcher a fetcher for media
      * @param {Player} player the Player used to manage DOM changes
-     * @param {StoryFetcher} a fetcher for stories, to get the variable values
+     *
      */
     constructor(
         representation: Representation,
@@ -44,13 +47,11 @@ export default class BaseRenderer extends EventEmitter {
         mediaFetcher: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
-        storyFetcher: StoryFetcher,
         controller: Controller,
     ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
-        this._fetchStory = storyFetcher;
         this._fetchMedia = mediaFetcher;
         this._player = player;
         this._target = player.mediaTarget;
@@ -60,9 +61,9 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
 
-        this.getListVariableSetter = this.getListVariableSetter.bind(this);
-        this.getBooleanVariableSetter = this.getBooleanVariableSetter.bind(this);
-        this.getIntegerVariableSetter = this.getIntegerVariableSetter.bind(this);
+        this._getListVariableSetter = this._getListVariableSetter.bind(this);
+        this._getBooleanVariableSetter = this._getBooleanVariableSetter.bind(this);
+        this._getIntegerVariableSetter = this._getIntegerVariableSetter.bind(this);
 
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -220,10 +221,11 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourElements.push(overlayImageElement);
     }
 
-    getBooleanVariableSetter(varName: string, variableDecl: Object) {
+    // an input for selecting the value for a boolean variable
+    _getBooleanVariableSetter(varName: string, variableDecl: Object) {
         const varInput = document.createElement('div');
 
-        // yes button & panel_label
+        // yes button & label
         const radioYesDiv = document.createElement('div');
         radioYesDiv.className = 'romper-var-form-radio-div';
         const radioYes = document.createElement('input');
@@ -236,7 +238,7 @@ export default class BaseRenderer extends EventEmitter {
         radioYesDiv.appendChild(radioYes);
         radioYesDiv.appendChild(yesLabel);
 
-        // no button
+        // no button & label
         const radioNoDiv = document.createElement('div');
         radioNoDiv.className = 'romper-var-form-radio-div';
         const radioNo = document.createElement('input');
@@ -255,7 +257,8 @@ export default class BaseRenderer extends EventEmitter {
         return varInput;
     }
 
-    getListVariableSetter(varName: string, variableDecl: Object) {
+    // an input for selecting the value for a list variable
+    _getListVariableSetter(varName: string, variableDecl: Object) {
         const options = variableDecl.values;
         const varInput = document.createElement('select');
         options.forEach((optionValue) => {
@@ -273,8 +276,8 @@ export default class BaseRenderer extends EventEmitter {
         return varInput;
     }
 
-    // an input for changing integer variables
-    getIntegerVariableSetter(varName: string, variableDecl: Object) {
+    // an input for changing the value for an integer number variables
+    _getIntegerVariableSetter(varName: string, variableDecl: Object) {
         const varInput = document.createElement('input');
         varInput.type = 'number';
 
@@ -286,22 +289,12 @@ export default class BaseRenderer extends EventEmitter {
 
 
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        this._player.setNextAvailable(false);
+
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
-        const overlayImageElement = document.createElement('form');
-        overlayImageElement.setAttribute('method', '#');// TODO change
-        // overlayImageElement.setAttribute('action', console.log('SUBMITTED!')); // TODO change
-        // overlayImageElement.setAttribute('onsubmit', console.log('Submitted'));
-
-        overlayImageElement.className = 'romper-image-overlay';
-
-        overlayImageElement.style.backgroundColor = '#ffb347';
-        overlayImageElement.style.textAlign = 'center';
-        overlayImageElement.style.width = '80%';
-        overlayImageElement.style.height = '90%';
-        overlayImageElement.style.top = '5%';
-        overlayImageElement.style.left = '10%';
-
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.className = 'romper-variable-panel';
 
         const titleDiv = document.createElement('div');
         titleDiv.innerHTML = formTitle;
@@ -326,14 +319,23 @@ export default class BaseRenderer extends EventEmitter {
                     variableDiv.appendChild(labelDiv);
 
                     if (storyVariable.variable_type === 'boolean') {
-                        const boolDiv = this.getBooleanVariableSetter(behaviourVar.variable_name, storyVariable);
+                        const boolDiv = this._getBooleanVariableSetter(
+                            behaviourVar.variable_name,
+                            storyVariable,
+                        );
                         variableDiv.append(boolDiv);
                     } else if (storyVariable.variable_type === 'list') {
-                        const listDiv = this.getListVariableSetter(behaviourVar.variable_name, storyVariable);
+                        const listDiv = this._getListVariableSetter(
+                            behaviourVar.variable_name,
+                            storyVariable,
+                        );
                         listDiv.className = 'romper-var-form-list-input';
                         variableDiv.append(listDiv);
                     } else if (storyVariable.variable_type === 'number') {
-                        const numDiv = this.getIntegerVariableSetter(behaviourVar.variable_name, storyVariable);
+                        const numDiv = this._getIntegerVariableSetter(
+                            behaviourVar.variable_name,
+                            storyVariable,
+                        );
                         numDiv.className = 'romper-var-form-number-input';
                         variableDiv.append(numDiv);
                     }
@@ -343,15 +345,19 @@ export default class BaseRenderer extends EventEmitter {
 
                 overlayImageElement.appendChild(variablesFormContainer);
 
-                const s = document.createElement('input');
-                // s.type = 'submit';
-                // s.value = 'Submit';
-                s.type = 'button';
-                s.value = 'Ok!';
-                s.onclick = (() => callback());
+                const okButtonContainer = document.createElement('div');
+                okButtonContainer.className = 'romper-var-form-button-container';
+                const okButton = document.createElement('input');
+                okButton.type = 'button';
+                okButton.value = 'Ok!';
+                okButton.onclick = (() => {
+                    this._player.setNextAvailable(true);
+                    return callback();
+                });
                 // s.onsubmit = this._submitButton;
-                s.className = 'romper-submit-button';
-                overlayImageElement.appendChild(s);
+                okButton.className = 'romper-var-form-button';
+                okButtonContainer.appendChild(okButton);
+                overlayImageElement.appendChild(okButtonContainer);
 
                 this._target.appendChild(overlayImageElement);
                 this._behaviourElements.push(overlayImageElement);

@@ -1,7 +1,7 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher, StoryFetcher } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
 import ImageRenderer from './ImageRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SimpleAudioRenderer from './SimpleAudioRenderer';
@@ -18,7 +18,6 @@ export default function RendererFactory(
     mediaFetcher: MediaFetcher,
     player: Player,
     analytics: AnalyticsLogger,
-    storyFetcher: StoryFetcher,
     controller: Controller,
 ): ?BaseRenderer {
     const RENDERERS = {
@@ -38,7 +37,6 @@ export default function RendererFactory(
             mediaFetcher,
             player,
             analytics,
-            storyFetcher,
             controller,
         );
     } else {

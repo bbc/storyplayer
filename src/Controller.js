@@ -380,7 +380,7 @@ export default class Controller extends EventEmitter {
      * Get the variables present in the story
      * @param {*} No parameters, it uses the story Id
      */
-    getVariables() {
+    getVariables(): Promise<Object> {
         const storyId = this._storyId;
         if (storyId) {
             return this._fetchers.storyFetcher(storyId)

@@ -587,6 +587,18 @@ $romper-hover-text-size: 25px;
   z-index: 2;
 }
 
+.romper-variable-panel {
+  background-color: $pastel-orange;
+  height: 90%;
+  left: 10%;
+  overflow-y: scroll;
+  position: absolute;
+  text-align: center;
+  top: 5%;
+  width: 80%;
+  z-index: 2;
+}
+
 .romper-var-form-title {
   font-size: 26px;
   font-weight: bold;
@@ -629,7 +641,12 @@ $romper-hover-text-size: 25px;
   width: 50px;
 }
 
-.romper-submit-button {
+.romper-var-form-button-container {
+  margin: 20px 10px 50px;
+  text-align: right;
+}
+
+.romper-var-form-button {
   background-color: $blue;
   border: 0;
   border-radius: 3px;

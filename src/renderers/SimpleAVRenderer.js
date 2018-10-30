@@ -2,7 +2,7 @@
 
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher, StoryFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
@@ -55,10 +55,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
-        storyFetcher: StoryFetcher,
         controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics, storyFetcher, controller);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);

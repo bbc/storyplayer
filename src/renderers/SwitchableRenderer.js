@@ -7,6 +7,7 @@ import RendererEvents from './RendererEvents';
 import logger from '../logger';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import Controller from '../Controller';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
@@ -23,14 +24,23 @@ export default class SwitchableRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
         this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
         this._choiceRenderers = this._getChoiceRenderers();
         this._currentRendererIndex = 0;
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
         this._inCompleteBehaviours = false;
+        this._controller = controller;
     }
 
     // create a renderer for each choice
@@ -44,6 +54,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     this._fetchMedia,
                     this._player,
                     this._analytics,
+                    this._controller,
                 ) : null));
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
