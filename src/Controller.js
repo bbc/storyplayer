@@ -4,9 +4,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type {
-    ExperienceFetchers, NarrativeElement, AssetUrls,
-} from './romper';
+import type { ExperienceFetchers, NarrativeElement, AssetUrls } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
@@ -385,11 +383,13 @@ export default class Controller extends EventEmitter {
         if (storyId) {
             return this._fetchers.storyFetcher(storyId)
                 .then((story) => {
-                    const storyVariables = story.variables;
-                    return storyVariables;
+                    if (story.variables) {
+                        return story.variables;
+                    }
+                    return {};
                 });
         }
-        return {};
+        return Promise.resolve({});
     }
 
     /**
