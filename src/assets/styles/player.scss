@@ -1,3 +1,5 @@
+@import './colours';
+
 $background-colour: rgba(0, 0, 0, 0.3);
 $transparent: rgba(0, 0, 0, 0);
 $highlight: #ff7f11;
@@ -583,4 +585,56 @@ $romper-hover-text-size: 25px;
   top: 0;
   width: 100%;
   z-index: 2;
+}
+
+.romper-var-form-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 25px;
+}
+
+.romper-var-form-var-containers {
+  height: 50%;
+  min-height: 150px;
+}
+
+.romper-variable-form-item {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+}
+
+.romper-var-form-label-div {
+  padding: 10px;
+}
+
+.romper-var-form-radio-div {
+  display: flex;
+}
+
+.romper-var-form-list-input {
+  border: 0;
+  color: $dark-grey-blue;
+  font-size: 14px;
+  height: 35px;
+}
+
+.romper-var-form-number-input {
+  border: 0;
+  border-radius: 5px;
+  color: $dark-grey-blue;
+  font-size: 14px;
+  height: 35px;
+  text-align: center;
+  width: 50px;
+}
+
+.romper-submit-button {
+  background-color: $blue;
+  border: 0;
+  border-radius: 3px;
+  color: $dark-grey-blue;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px;
 }

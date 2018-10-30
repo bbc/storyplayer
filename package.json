@@ -1,5 +1,5 @@
 {
-  "name": "@bbc/romper", 
+  "name": "@bbc/romper",
   "version": "0.2.15",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
@@ -69,6 +69,7 @@
     "browser-bunyan": "^1.2.2",
     "dashjs": "^2.6.7",
     "hls.js": "^0.8.9",
+    "http-server": "^0.11.1",
     "json-logic-js": "^1.0.11",
     "uuid": "^3.2.1"
   }

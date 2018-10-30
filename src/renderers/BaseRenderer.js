@@ -4,26 +4,29 @@ import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher, StoryFetcher } from '../romper';
 import Player from '../Player';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
+import Controller from '../Controller';
 import logger from '../logger';
-
 
 export default class BaseRenderer extends EventEmitter {
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
+    _fetchStory: StoryFetcher;
     _player: Player;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
+    _applyShowVariablePanelBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
+    _controller: Controller;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -33,6 +36,7 @@ export default class BaseRenderer extends EventEmitter {
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {MediaFetcher} MediaFetcher a fetcher for media
      * @param {Player} player the Player used to manage DOM changes
+     * @param {StoryFetcher} a fetcher for stories, to get the variable values
      */
     constructor(
         representation: Representation,
@@ -40,16 +44,25 @@ export default class BaseRenderer extends EventEmitter {
         mediaFetcher: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        storyFetcher: StoryFetcher,
+        controller: Controller,
     ) {
         super();
         this._representation = representation;
         this._fetchAssetCollection = assetCollectionFetcher;
+        this._fetchStory = storyFetcher;
         this._fetchMedia = mediaFetcher;
         this._player = player;
         this._target = player.mediaTarget;
+        this._controller = controller;
 
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
+
+        this.getListVariableSetter = this.getListVariableSetter.bind(this);
+        this.getBooleanVariableSetter = this.getBooleanVariableSetter.bind(this);
+        this.getIntegerVariableSetter = this.getIntegerVariableSetter.bind(this);
 
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -59,6 +72,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showvarpanel/v1.0': this._applyShowVariablePanelBehaviour,
         };
         this._behaviourElements = [];
 
@@ -203,6 +218,146 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+    }
+
+    getBooleanVariableSetter(varName: string, variableDecl: Object) {
+        const varInput = document.createElement('div');
+
+        // yes button & panel_label
+        const radioYesDiv = document.createElement('div');
+        radioYesDiv.className = 'romper-var-form-radio-div';
+        const radioYes = document.createElement('input');
+        radioYes.onclick = (() => this._controller.setVariableValue(varName, true));
+        radioYes.type = 'radio';
+        radioYes.name = 'bool-option';
+        radioYes.checked = variableDecl.default_value;
+        const yesLabel = document.createElement('div');
+        yesLabel.innerHTML = 'Yes';
+        radioYesDiv.appendChild(radioYes);
+        radioYesDiv.appendChild(yesLabel);
+
+        // no button
+        const radioNoDiv = document.createElement('div');
+        radioNoDiv.className = 'romper-var-form-radio-div';
+        const radioNo = document.createElement('input');
+        radioNo.onclick = (() => this._controller.setVariableValue(varName, false));
+        radioNo.type = 'radio';
+        radioNo.name = 'bool-option';
+        radioNo.checked = !variableDecl.default_value;
+        const noLabel = document.createElement('div');
+        noLabel.innerHTML = 'No';
+        radioNoDiv.appendChild(radioNo);
+        radioNoDiv.appendChild(noLabel);
+
+        varInput.appendChild(radioYesDiv);
+        varInput.appendChild(radioNoDiv);
+
+        return varInput;
+    }
+
+    getListVariableSetter(varName: string, variableDecl: Object) {
+        const options = variableDecl.values;
+        const varInput = document.createElement('select');
+        options.forEach((optionValue) => {
+            const optionElement = document.createElement('option');
+            optionElement.setAttribute('value', optionValue);
+            optionElement.textContent = optionValue;
+            varInput.appendChild(optionElement);
+        });
+
+        if (variableDecl.default_value) {
+            varInput.value = variableDecl.default_value;
+        }
+        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+
+        return varInput;
+    }
+
+    // an input for changing integer variables
+    getIntegerVariableSetter(varName: string, variableDecl: Object) {
+        const varInput = document.createElement('input');
+        varInput.type = 'number';
+
+        if (variableDecl.default_value) { varInput.value = variableDecl.default_value; }
+        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+
+        return varInput;
+    }
+
+
+    _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        const behaviourVariables = behaviour.variables;
+        const formTitle = behaviour.panel_label;
+        const overlayImageElement = document.createElement('form');
+        overlayImageElement.setAttribute('method', '#');// TODO change
+        // overlayImageElement.setAttribute('action', console.log('SUBMITTED!')); // TODO change
+        // overlayImageElement.setAttribute('onsubmit', console.log('Submitted'));
+
+        overlayImageElement.className = 'romper-image-overlay';
+
+        overlayImageElement.style.backgroundColor = '#ffb347';
+        overlayImageElement.style.textAlign = 'center';
+        overlayImageElement.style.width = '80%';
+        overlayImageElement.style.height = '90%';
+        overlayImageElement.style.top = '5%';
+        overlayImageElement.style.left = '10%';
+
+
+        const titleDiv = document.createElement('div');
+        titleDiv.innerHTML = formTitle;
+        titleDiv.className = 'romper-var-form-title';
+        overlayImageElement.appendChild(titleDiv);
+
+
+        this._controller.getVariables()
+            .then((storyVariables) => {
+                const variablesFormContainer = document.createElement('div');
+                variablesFormContainer.className = 'romper-var-form-var-containers';
+                behaviourVariables.forEach((behaviourVar) => {
+                    const storyVariable = storyVariables[behaviourVar.variable_name];
+
+                    // div for each variable Element
+                    const variableDiv = document.createElement('div');
+                    variableDiv.className = 'romper-variable-form-item';
+
+                    const labelDiv = document.createElement('div');
+                    labelDiv.innerHTML = behaviourVar.label;
+                    labelDiv.className = 'romper-var-form-label-div';
+                    variableDiv.appendChild(labelDiv);
+
+                    if (storyVariable.variable_type === 'boolean') {
+                        const boolDiv = this.getBooleanVariableSetter(behaviourVar.variable_name, storyVariable);
+                        variableDiv.append(boolDiv);
+                    } else if (storyVariable.variable_type === 'list') {
+                        const listDiv = this.getListVariableSetter(behaviourVar.variable_name, storyVariable);
+                        listDiv.className = 'romper-var-form-list-input';
+                        variableDiv.append(listDiv);
+                    } else if (storyVariable.variable_type === 'number') {
+                        const numDiv = this.getIntegerVariableSetter(behaviourVar.variable_name, storyVariable);
+                        numDiv.className = 'romper-var-form-number-input';
+                        variableDiv.append(numDiv);
+                    }
+
+                    variablesFormContainer.appendChild(variableDiv);
+                });
+
+                overlayImageElement.appendChild(variablesFormContainer);
+
+                const s = document.createElement('input');
+                // s.type = 'submit';
+                // s.value = 'Submit';
+                s.type = 'button';
+                s.value = 'Ok!';
+                s.onclick = (() => callback());
+                // s.onsubmit = this._submitButton;
+                s.className = 'romper-submit-button';
+                overlayImageElement.appendChild(s);
+
+                this._target.appendChild(overlayImageElement);
+                this._behaviourElements.push(overlayImageElement);
+            });
+
+        // callback();
     }
 
     _clearBehaviourElements() {

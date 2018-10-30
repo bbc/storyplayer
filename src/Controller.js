@@ -109,7 +109,6 @@ export default class Controller extends EventEmitter {
                 };
             });
     }
-
     /*
     requirements:[
         // First Requirement
@@ -375,6 +374,22 @@ export default class Controller extends EventEmitter {
         } else {
             logger.warn(`Controller cannot set variable '${name}' - no reasoner`);
         }
+    }
+
+    /**
+     * Get the variables present in the story
+     * @param {*} No parameters, it uses the story Id
+     */
+    getVariables() {
+        const storyId = this._storyId;
+        if (storyId) {
+            return this._fetchers.storyFetcher(storyId)
+                .then((story) => {
+                    const storyVariables = story.variables;
+                    return storyVariables;
+                });
+        }
+        return {};
     }
 
     /**

@@ -1,0 +1,414 @@
+{
+    "stories": [
+        {
+            "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
+            "version": "0:0",
+            "name": "Simple Branching Story - with variable form",
+            "description": "A form pops up to collect the variable value from the user",
+            "beginnings": [
+                {
+                    "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
+                    "condition": {"==": [1,1]}
+                }
+            ],
+            "tags": {},
+            "meta": {
+                "romper": {
+                    "onLaunch": {
+                        "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                    }
+                }
+            },
+            "object_class": "STORY",
+            "narrative_element_ids": [
+                "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
+                "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
+                "3c2a2442-b9b8-4cca-b934-d067c8967a20",
+                "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
+            ],
+            "variables": {
+                "in_depth": {
+                    "default_value": false,
+                    "description": "does the user get an in-depth version",
+                    "variable_type": "boolean"
+                },
+                "Character": {
+                    "default_value": "Pluto",
+                    "description": "Which character",
+                    "variable_type": "list",
+                    "values" : ["Mickey", "Pluto"]
+                },
+                "Age": {
+                    "default_value": 25,
+                    "description": "Age of the user",
+                    "variable_type": "number",
+                    "range" : {
+                      "min_val" : 0,
+                      "max_val" : 99
+                    }
+                }
+            }
+        }
+    ],
+    "narrative_elements": [
+        {
+            "id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
+            "name": "Narrative Element 1",
+            "description": "The first part of the story",
+            "version": "0:0",
+            "tags": {},
+            "meta": {
+                "storygraph": {
+                    "colour": "rgb(252, 203, 0)",
+                    "xPos": 222,
+                    "yPos": 180
+                }
+            },
+            "object_class": "NARRATIVE_ELEMENT",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "60760bb7-aae5-4f21-9298-e35f6a4f6248"
+            },
+            "links": [
+                {
+                    "condition": {
+                        "==": [
+                            { "var": "in_depth" },
+                            true
+                        ]
+                    },
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
+                },
+                {
+                    "condition": {
+                        "==": [
+                            { "var": "in_depth" },
+                            false
+                        ]
+                    },
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "target_narrative_element_id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
+                }
+            ]
+        },
+        {
+            "id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
+            "name": "Narrative Element 2",
+            "description": "The middle of the story",
+            "version": "0:0",
+            "tags": {},
+            "meta": {
+                "storygraph": {
+                    "colour": "#DB3E00",
+                    "xPos": 517.8712064019327,
+                    "yPos": 178.28219839951683
+                }
+            },
+            "object_class": "NARRATIVE_ELEMENT",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "d9d8b449-da99-4936-a803-7a1bdf91bbe8"
+            },
+            "links": [
+                {
+                    "condition": {"==": [1,1]},
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
+                }
+            ]
+        },
+        {
+            "id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A",
+            "name": "Narrative Element 2a",
+            "description": "The shorter middle and end of the story",
+            "version": "0:0",
+            "tags": {},
+            "meta": {
+                "storygraph": {
+                    "colour": "#DB3E00",
+                    "xPos": 517.8712064019327,
+                    "yPos": 178.28219839951683
+                }
+            },
+            "object_class": "NARRATIVE_ELEMENT",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "E2B4DBEE-02C9-4A65-B1F9-DEB3B393BF8F"
+            },
+            "links": [
+                {
+                    "condition": {"==": [1,1]},
+                    "link_type": "END_STORY",
+                    "target_narrative_element_id": ""
+                }
+            ]
+        },
+        {
+            "id": "3c2a2442-b9b8-4cca-b934-d067c8967a20",
+            "name": "Narrative Element 3",
+            "description": "The End of the Story",
+            "version": "0:0",
+            "tags": {},
+            "meta": {
+                "storygraph": {
+                    "colour": "#DB3E00",
+                    "xPos": 825.2036117900344,
+                    "yPos": 178.0519976175977
+                }
+            },
+            "object_class": "NARRATIVE_ELEMENT",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "421045d3-19bd-4552-8ef8-69f2a9c95c69"
+            },
+            "links": [
+                {
+                    "condition": {"==": [1,1]},
+                    "link_type": "END_STORY",
+                    "target_narrative_element_id": ""
+                }
+            ]
+        }
+    ],
+    "representation_collections": [
+        {
+            "id": "60760bb7-aae5-4f21-9298-e35f6a4f6248",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "tags": {},
+            "meta": {},
+            "version": "0:0",
+            "name": "Narrative Element ",
+            "representations": [
+                {
+                    "representation_id": "3ab4c455-5165-4ffc-9152-05755282dad0",
+                    "condition": {"==": [1,1]}
+                }
+            ]
+        },
+        {
+            "id": "d9d8b449-da99-4936-a803-7a1bdf91bbe8",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "tags": {},
+            "meta": {},
+            "version": "0:0",
+            "name": "Narrative Element ",
+            "representations": [
+                {
+                    "representation_id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
+                    "condition": {"==": [1,1]}
+                }
+            ]
+        },
+        {
+            "id": "E2B4DBEE-02C9-4A65-B1F9-DEB3B393BF8F",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "tags": {},
+            "meta": {},
+            "version": "0:0",
+            "name": "Narrative Element ",
+            "representations": [
+                {
+                    "representation_id": "C92E36D7-5BB6-4442-9CC1-DDEA56A230CD",
+                    "condition": {"==": [1,1]}
+                }
+            ]
+        },
+        {
+            "id": "421045d3-19bd-4552-8ef8-69f2a9c95c69",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "tags": {},
+            "meta": {},
+            "version": "0:0",
+            "name": "Narrative Element ",
+            "representations": [
+                {
+                    "representation_id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
+                    "condition": {"==": [1,1]}
+                }
+            ]
+        }
+    ],
+    "representations": [
+        {
+            "id": "3ab4c455-5165-4ffc-9152-05755282dad0",
+            "object_class": "REPRESENTATION",
+            "version": "0:0",
+            "name": "Step 1 video",
+            "meta": {},
+            "tags": {},
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "asset_collections": {
+                "foreground_id": "9b78100b-9cfe-4c21-9eac-7763a5f8188c",
+                "background_ids": [],
+                "behaviours": []
+            },
+            "behaviours": {
+                "started": [],
+                "completed": [
+                    {
+                       "type": "urn:x-object-based-media:representation-behaviour:showvarpanel/v1.0",
+                       "variables": [
+                         {
+                          "variable_name": "in_depth",
+                          "label" : "Would like like the story to go in depth?"
+                        },
+                        {
+                         "variable_name": "Character",
+                         "label" : "Choose you favourite Disney Character"
+                       },
+                       {
+                        "variable_name": "Age",
+                        "label" : "How old are you?"
+                       }
+                       ],
+                        "panel_label" : "Please answer the following questions:"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
+            "object_class": "REPRESENTATION",
+            "version": "0:0",
+            "name": "Video 2",
+            "meta": {},
+            "tags": {},
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "asset_collections": {
+                "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
+                "background_ids": [],
+                "icon": {
+                    "default_id": "97106527-4204-42B2-91F7-FD0EED9D2032"
+                }
+            },
+            "behaviours": {
+                "started": [],
+                "completed": []
+            }
+        },
+        {
+            "id": "C92E36D7-5BB6-4442-9CC1-DDEA56A230CD",
+            "object_class": "REPRESENTATION",
+            "version": "0:0",
+            "name": "Video 2 alt",
+            "meta": {},
+            "tags": {},
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "asset_collections": {
+                "foreground_id": "4DBF46DE-F2F3-492C-9620-9D8D42377675",
+                "background_ids": [],
+                "icon": {
+                    "default_id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725"
+                }
+            },
+            "behaviours": {
+                "started": [],
+                "completed": []
+            }
+        },
+        {
+            "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
+            "object_class": "REPRESENTATION",
+            "version": "0:0",
+            "name": "Video 3",
+            "meta": {},
+            "tags": {},
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "asset_collections": {
+                "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
+                "background_ids": []
+            },
+            "behaviours": {
+                "started": [],
+                "completed": []
+            }
+        }
+    ],
+    "asset_collections": [
+        {
+            "id": "97106527-4204-42B2-91F7-FD0EED9D2032",
+            "object_class": "ASSET_COLLECTION",
+            "description": "In-depth icon",
+            "version": "",
+            "name": "",
+            "tags": {},
+            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "assets": {
+                "image_src": "timer-long.svg"
+            }
+        },
+        {
+            "id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725",
+            "object_class": "ASSET_COLLECTION",
+            "description": "Brief icon",
+            "version": "",
+            "name": "",
+            "tags": {},
+            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "assets": {
+                "image_src": "timer-short.svg"
+            }
+        },
+        {
+            "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
+            "object_class": "ASSET_COLLECTION",
+            "description": "Start image",
+            "version": "",
+            "name": "",
+            "tags": {},
+            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "assets": {
+                "image_src": "https://rdux.files.bbci.co.uk/romper/startimage.jpg"
+            }
+        },
+        {
+            "id": "9b78100b-9cfe-4c21-9eac-7763a5f8188c",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Demo video 1",
+            "description": "",
+            "version": "0:0",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "assets": {
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
+            }
+        },
+        {
+            "id": "32184381-85ce-4d71-8a42-895cf5d485c9",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Video 2",
+            "description": "",
+            "version": "0:0",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "assets": {
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step2.m4v"
+            }
+        },
+        {
+            "id": "4DBF46DE-F2F3-492C-9620-9D8D42377675",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Video 2 alt",
+            "description": "",
+            "version": "0:0",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "assets": {
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step2a.m4v"
+            }
+        },
+        {
+            "id": "974568d1-7dce-48f1-8c18-396553a9afbd",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Step 3 video",
+            "description": "",
+            "version": "0:0",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "assets": {
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
+            }
+        }
+    ]
+}
