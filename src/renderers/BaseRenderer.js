@@ -229,7 +229,7 @@ export default class BaseRenderer extends EventEmitter {
         yesLabel.innerHTML = 'Yes';
         radioYesDiv.appendChild(radioYes);
         radioYesDiv.appendChild(yesLabel);
-        
+
         // no button & label
         const radioNoDiv = document.createElement('div');
         radioNoDiv.className = 'romper-var-form-radio-div';
@@ -241,15 +241,15 @@ export default class BaseRenderer extends EventEmitter {
         noLabel.innerHTML = 'No';
         radioNoDiv.appendChild(radioNo);
         radioNoDiv.appendChild(noLabel);
-        
+
         varInput.appendChild(radioYesDiv);
         varInput.appendChild(radioNoDiv);
-        
+
         this._controller.getVariableValue(varName)
-        .then((varValue) => {
-            radioYes.checked = varValue;
-            radioNo.checked = !varValue;
-        });
+            .then((varValue) => {
+                radioYes.checked = varValue;
+                radioNo.checked = !varValue;
+            });
 
         return varInput;
     }
@@ -266,9 +266,9 @@ export default class BaseRenderer extends EventEmitter {
         });
 
         this._controller.getVariableValue(varName)
-        .then((varValue) => {
-            varInput.value = varValue;
-        });
+            .then((varValue) => {
+                varInput.value = varValue;
+            });
 
         varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
 
@@ -276,47 +276,45 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // an input for changing the value for an integer number variables
-    _getIntegerVariableSetter(varName: string, variableDecl: Object) {
+    _getIntegerVariableSetter(varName: string) {
         const varInput = document.createElement('input');
         varInput.type = 'number';
 
         this._controller.getVariableValue(varName)
-        .then((varValue) => {
-            varInput.value = varValue;
-        });
+            .then((varValue) => {
+                varInput.value = varValue;
+            });
 
         varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
 
         return varInput;
     }
 
-    // create an input div for setting a variable
+    // create an input element for setting a variable
     _getVariableSetter(variableDecl: Object, behaviourVar: Object): HTMLDivElement {
         const variableDiv = document.createElement('div');
         variableDiv.className = 'romper-variable-form-item';
+
+        const variableType = variableDecl.variable_type;
+        const variableName = behaviourVar.variable_name;
 
         const labelDiv = document.createElement('div');
         labelDiv.innerHTML = behaviourVar.label;
         labelDiv.className = 'romper-var-form-label-div';
         variableDiv.appendChild(labelDiv);
 
-        if (variableDecl.variable_type === 'boolean') {
-            const boolDiv = this._getBooleanVariableSetter(
-                behaviourVar.variable_name,
-            );
+        if (variableType === 'boolean') {
+            const boolDiv = this._getBooleanVariableSetter(variableName);
             variableDiv.append(boolDiv);
-        } else if (variableDecl.variable_type === 'list') {
+        } else if (variableType === 'list') {
             const listDiv = this._getListVariableSetter(
                 behaviourVar.variable_name,
                 variableDecl,
             );
             listDiv.className = 'romper-var-form-list-input';
             variableDiv.append(listDiv);
-        } else if (variableDecl.variable_type === 'number') {
-            const numDiv = this._getIntegerVariableSetter(
-                behaviourVar.variable_name,
-                variableDecl,
-            );
+        } else if (variableType === 'number') {
+            const numDiv = this._getIntegerVariableSetter(variableName);
             numDiv.className = 'romper-var-form-number-input';
             variableDiv.append(numDiv);
         }

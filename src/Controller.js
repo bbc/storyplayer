@@ -382,12 +382,10 @@ export default class Controller extends EventEmitter {
      */
     getVariableValue(name: string): Promise<any> {
         if (this._reasoner) {
-            // logger.info(`Controller getting variable '${name}' - no reasoner`);
             return this._reasoner.getVariableValue(name);
-        } else {
-            logger.warn(`Controller cannot get variable '${name}' - no reasoner`);
-            return Promise.resolve(null);
         }
+        logger.warn(`Controller cannot get variable '${name}' - no reasoner`);
+        return Promise.resolve(null);
     }
 
     /**
