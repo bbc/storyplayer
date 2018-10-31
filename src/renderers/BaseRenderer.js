@@ -6,16 +6,19 @@ import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
+import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 
 export default class BaseRenderer extends EventEmitter {
+    _rendererId: string;
     _representation: Representation;
     _fetchAssetCollection: AssetCollectionFetcher;
     _fetchMedia: MediaFetcher;
     _player: Player;
+    _playoutEngine: PlayoutEngine;
     _behaviourRunner: ?BehaviourRunner;
     _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
     _applyColourOverlayBehaviour: Function;
@@ -47,9 +50,11 @@ export default class BaseRenderer extends EventEmitter {
     ) {
         super();
         this._representation = representation;
+        this._rendererId = this._representation.id;
         this._fetchAssetCollection = assetCollectionFetcher;
         this._fetchMedia = mediaFetcher;
         this._player = player;
+        this._playoutEngine = player.playoutEngine;
         this._target = player.mediaTarget;
         this._controller = controller;
 

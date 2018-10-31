@@ -2,7 +2,7 @@
 
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
-import logger from './logger';
+import logger from '../../logger';
 
 const MediaTypesArray = [
     'HLS',

@@ -11,7 +11,7 @@ export default class BehaviourRunner {
     baseRenderer: BaseRenderer;
     eventNames: Array<string>;
     behaviours: Array<Object>;
-    handleCompletion: (event: BehaviourTiming, completionEvent: RendererEvent) => void;
+    handleCompletion: Function;
 
     constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {
         this.behaviourDefinitions = behaviourDefinitions;

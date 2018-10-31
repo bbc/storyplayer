@@ -365,6 +365,7 @@ export default class RenderManager extends EventEmitter {
 
     // show next button, or icons if choice
     _showOnwardIcons() {
+        this._player.clearLinkChoices();
         const next = this._controller.getValidNextSteps();
         if (next) {
             next.then((nextNarrativeElements) => {
@@ -434,6 +435,7 @@ export default class RenderManager extends EventEmitter {
             }
         });
         this._upcomingRenderers.push(upcomingRenderers);
+        this._showOnwardIcons();
     }
 
     _initialise() {
