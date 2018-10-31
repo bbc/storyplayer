@@ -1,7 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
-import logger from './logger';
+import logger from '../../logger';
 import MediaInstance from './MediaInstance';
 
 export default class MediaManager {
