@@ -164,7 +164,6 @@ export default class RenderManager extends EventEmitter {
 
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
-    // eslint-disable-next-line class-methods-use-this
     handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
@@ -200,16 +199,13 @@ export default class RenderManager extends EventEmitter {
             .then((urls) => {
                 this._player.clearLinkChoices();
                 urls.forEach((iconAssetCollection, choiceId) => {
-                    const setLinkChoiceControl = (mediaUrl) => {
+                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
                         // tell Player to render icon
                         this._player.addLinkChoiceControl(
                             narrativeElements[choiceId].id,
-                            mediaUrl,
+                            iconAssetCollection.assets.image_src,
                             `Option ${(choiceId + 1)}`,
                         );
-                    };
-                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
-                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
                     }
                 });
                 this._player.enableLinkChoiceControl();
