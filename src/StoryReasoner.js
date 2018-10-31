@@ -247,6 +247,15 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     /**
+     * Get the current value of a variable for the reasoner to use while reasoning
+     *
+     * @param {String} name The name of the variable to get
+     */
+    getVariableValue(name: string): Promise<any> {
+        return this._dataResolver.get(name);
+    }
+
+    /**
      * Record the fact that a given Narrative Element has been visited
      * A special case of storing a variable
      *

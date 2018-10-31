@@ -375,6 +375,22 @@ export default class Controller extends EventEmitter {
     }
 
     /**
+     * Get the current value of a variable
+     *
+     * @param {String} name The name of the variable to get
+     * returns null if no reasoner
+     */
+    getVariableValue(name: string): Promise<any> {
+        if (this._reasoner) {
+            // logger.info(`Controller getting variable '${name}' - no reasoner`);
+            return this._reasoner.getVariableValue(name);
+        } else {
+            logger.warn(`Controller cannot get variable '${name}' - no reasoner`);
+            return Promise.resolve(null);
+        }
+    }
+
+    /**
      * Get the variables present in the story
      * @param {*} No parameters, it uses the story Id
      */
