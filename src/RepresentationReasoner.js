@@ -1,5 +1,5 @@
 // @flow
-// eslint-disable-next-line max-len, no-console
+// eslint-disable-next-line max-len
 import type { DataResolver, RepresentationFetcher, Representation, RepresentationCollection } from './romper';
 import evaluateConditions from './logic';
 
