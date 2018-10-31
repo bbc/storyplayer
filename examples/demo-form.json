@@ -247,7 +247,7 @@
                 "started": [],
                 "completed": [
                     {
-                       "type": "urn:x-object-based-media:representation-behaviour:showvarpanel/v1.0",
+                       "type": "urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0",
                        "variables": [
                          {
                           "variable_name": "in_depth",
