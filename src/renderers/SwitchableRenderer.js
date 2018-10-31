@@ -34,7 +34,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     // create a renderer for each choice
-    _getChoiceRenderers() {
+    _getChoiceRenderers(): Array<?BaseRenderer> {
         let choices = [];
         if (this._representation.choices) {
             choices = this._representation.choices.map(choice =>
