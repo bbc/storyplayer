@@ -11,6 +11,8 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 // import MediaManager from '../MediaManager';
 // import MediaInstance from '../MediaInstance';
 
+import Controller from '../Controller';
+
 import logger from '../logger';
 
 export type HTMLTrackElement = HTMLElement & {
@@ -37,8 +39,16 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
         this._endedEventListener = this._endedEventListener.bind(this);

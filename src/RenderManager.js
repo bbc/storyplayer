@@ -300,6 +300,7 @@ export default class RenderManager extends EventEmitter {
             this._fetchers.mediaFetcher,
             this._player,
             this._analytics,
+            this._controller,
         );
 
         if (newRenderer) {

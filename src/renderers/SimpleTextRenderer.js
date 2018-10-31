@@ -4,6 +4,7 @@ import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import Controller from '../Controller';
 
 import logger from '../logger';
 
@@ -30,8 +31,16 @@ export default class SimpleTextRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
 
         this._target = player.mediaTarget;
 

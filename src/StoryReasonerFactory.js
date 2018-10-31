@@ -1,8 +1,6 @@
 // @flow
-
-import type {
-    DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement,
-} from './romper';
+// eslint-disable-next-line max-len
+import type { DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement } from './romper';
 import StoryReasoner from './StoryReasoner';
 
 export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;

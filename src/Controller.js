@@ -4,9 +4,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type {
-    ExperienceFetchers, NarrativeElement, AssetUrls,
-} from './romper';
+import type { ExperienceFetchers, NarrativeElement, AssetUrls } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
@@ -109,7 +107,6 @@ export default class Controller extends EventEmitter {
                 };
             });
     }
-
     /*
     requirements:[
         // First Requirement
@@ -375,6 +372,38 @@ export default class Controller extends EventEmitter {
         } else {
             logger.warn(`Controller cannot set variable '${name}' - no reasoner`);
         }
+    }
+
+    /**
+     * Get the current value of a variable
+     *
+     * @param {String} name The name of the variable to get
+     * returns null if no reasoner
+     */
+    getVariableValue(name: string): Promise<any> {
+        if (this._reasoner) {
+            return this._reasoner.getVariableValue(name);
+        }
+        logger.warn(`Controller cannot get variable '${name}' - no reasoner`);
+        return Promise.resolve(null);
+    }
+
+    /**
+     * Get the variables present in the story
+     * @param {*} No parameters, it uses the story Id
+     */
+    getVariables(): Promise<Object> {
+        const storyId = this._storyId;
+        if (storyId) {
+            return this._fetchers.storyFetcher(storyId)
+                .then((story) => {
+                    if (story.variables) {
+                        return story.variables;
+                    }
+                    return {};
+                });
+        }
+        return Promise.resolve({});
     }
 
     /**

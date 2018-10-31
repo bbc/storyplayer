@@ -9,6 +9,7 @@ import Player from '../Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
+import Controller from '../Controller';
 import logger from '../logger';
 
 export default class BaseRenderer extends EventEmitter {
@@ -22,10 +23,12 @@ export default class BaseRenderer extends EventEmitter {
     _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
+    _applyShowVariablePanelBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
+    _controller: Controller;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -35,6 +38,7 @@ export default class BaseRenderer extends EventEmitter {
      * @param {AssetCollectionFetcher} assetCollectionFetcher a fetcher for asset collections
      * @param {MediaFetcher} MediaFetcher a fetcher for media
      * @param {Player} player the Player used to manage DOM changes
+     *
      */
     constructor(
         representation: Representation,
@@ -42,6 +46,7 @@ export default class BaseRenderer extends EventEmitter {
         mediaFetcher: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
         super();
         this._representation = representation;
@@ -51,9 +56,11 @@ export default class BaseRenderer extends EventEmitter {
         this._player = player;
         this._playoutEngine = player.playoutEngine;
         this._target = player.mediaTarget;
+        this._controller = controller;
 
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
+        this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
 
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -63,12 +70,15 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
         };
         this._behaviourElements = [];
 
         this._destroyed = false;
         this._analytics = analytics;
     }
+
     /**
      * An event which fires when this renderer has completed it's part of the experience
      * (e.g., video finished, or the user has clicked 'skip', etc)
@@ -207,6 +217,163 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+    }
+
+    // an input for selecting the value for a boolean variable
+    _getBooleanVariableSetter(varName: string) {
+        const varInput = document.createElement('div');
+
+        // yes button & label
+        const radioYesDiv = document.createElement('div');
+        radioYesDiv.className = 'romper-var-form-radio-div';
+        const radioYes = document.createElement('input');
+        radioYes.onclick = (() => this._controller.setVariableValue(varName, true));
+        radioYes.type = 'radio';
+        radioYes.name = 'bool-option';
+        const yesLabel = document.createElement('div');
+        yesLabel.innerHTML = 'Yes';
+        radioYesDiv.appendChild(radioYes);
+        radioYesDiv.appendChild(yesLabel);
+
+        // no button & label
+        const radioNoDiv = document.createElement('div');
+        radioNoDiv.className = 'romper-var-form-radio-div';
+        const radioNo = document.createElement('input');
+        radioNo.onclick = (() => this._controller.setVariableValue(varName, false));
+        radioNo.type = 'radio';
+        radioNo.name = 'bool-option';
+        const noLabel = document.createElement('div');
+        noLabel.innerHTML = 'No';
+        radioNoDiv.appendChild(radioNo);
+        radioNoDiv.appendChild(noLabel);
+
+        varInput.appendChild(radioYesDiv);
+        varInput.appendChild(radioNoDiv);
+
+        this._controller.getVariableValue(varName)
+            .then((varValue) => {
+                radioYes.checked = varValue;
+                radioNo.checked = !varValue;
+            });
+
+        return varInput;
+    }
+
+    // an input for selecting the value for a list variable
+    _getListVariableSetter(varName: string, variableDecl: Object) {
+        const options = variableDecl.values;
+        const varInput = document.createElement('select');
+        options.forEach((optionValue) => {
+            const optionElement = document.createElement('option');
+            optionElement.setAttribute('value', optionValue);
+            optionElement.textContent = optionValue;
+            varInput.appendChild(optionElement);
+        });
+
+        this._controller.getVariableValue(varName)
+            .then((varValue) => {
+                varInput.value = varValue;
+            });
+
+        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+
+        return varInput;
+    }
+
+    // an input for changing the value for an integer number variables
+    _getIntegerVariableSetter(varName: string) {
+        const varInput = document.createElement('input');
+        varInput.type = 'number';
+
+        this._controller.getVariableValue(varName)
+            .then((varValue) => {
+                varInput.value = varValue;
+            });
+
+        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+
+        return varInput;
+    }
+
+    // create an input element for setting a variable
+    _getVariableSetter(variableDecl: Object, behaviourVar: Object): HTMLDivElement {
+        const variableDiv = document.createElement('div');
+        variableDiv.className = 'romper-variable-form-item';
+
+        const variableType = variableDecl.variable_type;
+        const variableName = behaviourVar.variable_name;
+
+        const labelDiv = document.createElement('div');
+        labelDiv.innerHTML = behaviourVar.label;
+        labelDiv.className = 'romper-var-form-label-div';
+        variableDiv.appendChild(labelDiv);
+
+        if (variableType === 'boolean') {
+            const boolDiv = this._getBooleanVariableSetter(variableName);
+            variableDiv.append(boolDiv);
+        } else if (variableType === 'list') {
+            const listDiv = this._getListVariableSetter(
+                behaviourVar.variable_name,
+                variableDecl,
+            );
+            listDiv.className = 'romper-var-form-list-input';
+            variableDiv.append(listDiv);
+        } else if (variableType === 'number') {
+            const numDiv = this._getIntegerVariableSetter(variableName);
+            numDiv.className = 'romper-var-form-number-input';
+            variableDiv.append(numDiv);
+        }
+
+        return variableDiv;
+    }
+
+    _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        this._player.setNextAvailable(false);
+
+        const behaviourVariables = behaviour.variables;
+        const formTitle = behaviour.panel_label;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.className = 'romper-variable-panel';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.innerHTML = formTitle;
+        titleDiv.className = 'romper-var-form-title';
+        overlayImageElement.appendChild(titleDiv);
+
+
+        this._controller.getVariables()
+            .then((storyVariables) => {
+                const variablesFormContainer = document.createElement('div');
+                variablesFormContainer.className = 'romper-var-form-var-containers';
+
+                // div for each variable Element
+                behaviourVariables.forEach((behaviourVar) => {
+                    const storyVariable = storyVariables[behaviourVar.variable_name];
+                    const variableDiv = this._getVariableSetter(storyVariable, behaviourVar);
+                    variablesFormContainer.appendChild(variableDiv);
+                });
+
+                overlayImageElement.appendChild(variablesFormContainer);
+
+                // submit button
+                const okButtonContainer = document.createElement('div');
+                okButtonContainer.className = 'romper-var-form-button-container';
+                const okButton = document.createElement('input');
+                okButton.type = 'button';
+                okButton.value = 'Ok!';
+                okButton.onclick = (() => {
+                    this._player.setNextAvailable(true);
+                    return callback();
+                });
+                okButton.className = 'romper-var-form-button';
+                okButtonContainer.appendChild(okButton);
+                overlayImageElement.appendChild(okButtonContainer);
+
+                this._target.appendChild(overlayImageElement);
+                this._behaviourElements.push(overlayImageElement);
+            });
+
+        // callback();
     }
 
     _clearBehaviourElements() {

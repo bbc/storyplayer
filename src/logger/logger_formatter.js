@@ -1,8 +1,6 @@
 // @flow
 
-import {
-    TRACE, DEBUG, INFO, WARN, ERROR, FATAL, nameFromLevel,
-} from 'browser-bunyan';
+import { TRACE, DEBUG, INFO, WARN, ERROR, FATAL, nameFromLevel } from 'browser-bunyan';
 
 const DEFAULT_CSS = {
     levels: {

@@ -10,6 +10,7 @@ import SwitchableRenderer from './SwitchableRenderer';
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import Controller from '../Controller';
 
 export default function RendererFactory(
     representation: Representation,
@@ -17,6 +18,7 @@ export default function RendererFactory(
     mediaFetcher: MediaFetcher,
     player: Player,
     analytics: AnalyticsLogger,
+    controller: Controller,
 ): ?BaseRenderer {
     const RENDERERS = {
         'urn:x-object-based-media:representation-types:image/v1.0': ImageRenderer,
@@ -35,6 +37,7 @@ export default function RendererFactory(
             mediaFetcher,
             player,
             analytics,
+            controller,
         );
     } else {
         logger.error(`Do not know how to render ${representation.representation_type}`);
