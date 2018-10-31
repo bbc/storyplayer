@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls,
+    RepresentationChoice, AssetUrls, AssetCollection,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -167,57 +167,58 @@ export default class RenderManager extends EventEmitter {
     // eslint-disable-next-line class-methods-use-this
     handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
         logger.warn('RenderManager choice of links - inform player');
+        // go through promise chain to get asset collections
+        const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
-            // fetch representation
+            // fetch icon representation
             if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
-                this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
+                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
+                    // presentation
                     .then(presentation => this._representationReasoner(presentation))
+                    // representation
                     .then((representation) => {
-                        this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
-                    });
+                        if (
+                            representation.asset_collections.icon &&
+                            representation.asset_collections.icon.default_id
+                        ) {
+                            // eslint-disable-next-line max-len
+                            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
+                            // asset collection
+                            return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
+                        }
+                        return Promise.resolve(null);
+                    }));
+            } else {
+                assetCollectionPromises.push(Promise.resolve(null));
             }
         });
+
+        // go through asset collections and render icons
+        Promise.all(assetCollectionPromises)
+            .then((urls) => {
+                this._player.clearLinkChoices();
+                urls.forEach((iconAssetCollection, choiceId) => {
+                    const setLinkChoiceControl = (mediaUrl) => {
+                        // tell Player to render icon
+                        this._player.addLinkChoiceControl(
+                            narrativeElements[choiceId].id,
+                            mediaUrl,
+                            `Option ${(choiceId + 1)}`,
+                        );
+                    };
+                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
+                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
+                    }
+                });
+                this._player.enableLinkChoiceControl();
+            });
     }
 
     // get the current narrative element object
     getCurrentNarrativeElement(): NarrativeElement {
         return this._currentNarrativeElement;
-    }
-
-    // display an icon for a choice of links (at a branch in the story)
-    _renderLinkChoiceIcon(
-        choiceId: number,
-        representation: Representation,
-        narrativeElementId: string,
-    ) {
-        // fetch icon
-        const setLinkChoiceControl = (mediaUrl) => {
-            // tell Player to render icon
-            this._player.addLinkChoiceControl(
-                narrativeElementId,
-                mediaUrl,
-                `Option ${(choiceId + 1)}`,
-            );
-        };
-
-        if (
-            representation.asset_collections.icon &&
-            representation.asset_collections.icon.default_id
-        ) {
-            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
-            this._fetchers.assetCollectionFetcher(iconAssetCollectionId)
-                .then((iconAssetCollection) => {
-                    if (iconAssetCollection.assets.image_src) {
-                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
-                    }
-                });
-        } else {
-            setLinkChoiceControl('');
-        }
-        // make overlay visible
-        this._player.enableLinkChoiceControl();
     }
 
     // user has made a choice of link to follow - do it
@@ -365,7 +366,6 @@ export default class RenderManager extends EventEmitter {
 
     // show next button, or icons if choice
     _showOnwardIcons() {
-        this._player.clearLinkChoices();
         const next = this._controller.getValidNextSteps();
         if (next) {
             next.then((nextNarrativeElements) => {
