@@ -882,6 +882,7 @@ class Player extends EventEmitter {
             iconContainer.style.width = position.width;
             linkChoiceIcon.style.width = '100%';
             linkChoiceIcon.style.height = '100%';
+            linkChoiceIcon.style.padding = '0';
             iconContainer.style.height = position.height;
         } else {
             console.log(`place icon ${id} in default position`);
