@@ -78,6 +78,7 @@ export type Representation = {
         icon?: {
             default_id: string,
             active_id?: string,
+            position?: Object,
         },
         behaviours?: Array<{
             behaviour_asset_collection_mapping_id: string,
