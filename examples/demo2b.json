@@ -16,6 +16,18 @@
                 "romper": {
                     "onLaunch": {
                         "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                    },
+                    "css": {
+                        "icons": [
+                            {
+                                "narrative_element_id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A",
+                                "style": "bottom: 60px; background-color: #50e3c2; position: absolute; right: 0;"
+                            },
+                            {
+                                "narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
+                                "style": "bottom: 60px; background-color: #50e3c2; position: absolute; right: 80px;"
+                            }
+                        ]
                     }
                 }
             },
@@ -228,13 +240,7 @@
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": [],
                 "icon": {
-                    "default_id": "97106527-4204-42B2-91F7-FD0EED9D2032",
-                    "position": {
-                        "top": "10%",
-                        "left": "10%",
-                        "width": "20%",
-                        "height": "35%"
-                    }
+                    "default_id": "97106527-4204-42B2-91F7-FD0EED9D2032"
                 }
             },
             "behaviours": {
@@ -254,13 +260,7 @@
                 "foreground_id": "4DBF46DE-F2F3-492C-9620-9D8D42377675",
                 "background_ids": [],
                 "icon": {
-                    "default_id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725",
-                    "position": {
-                        "top": "30%",
-                        "left": "50%",
-                        "width": "20%",
-                        "height": "35%"
-                    }
+                    "default_id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725"
                 }
             },
             "behaviours": {

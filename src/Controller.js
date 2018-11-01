@@ -407,6 +407,26 @@ export default class Controller extends EventEmitter {
     }
 
     /**
+     * Get the variables present in the story
+     * @param {*} No parameters, it uses the story Id
+     */
+    getIconStyles(): Promise<Object> {
+        const storyId = this._storyId;
+        if (storyId) {
+            return this._fetchers.storyFetcher(storyId)
+                .then((story) => {
+                    if (story.meta &&
+                    story.meta.romper &&
+                    story.meta.romper.css &&
+                    story.meta.romper.css.icons) {
+                        return story.meta.romper.css.icons;
+                    }
+                    return {};
+                });
+        }
+        return Promise.resolve({});
+    }
+    /**
      * Set a bunch of variables without doing renderer lookahead refresh in between
      * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
      */
