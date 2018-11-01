@@ -864,7 +864,7 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addLinkChoiceControl(id: string, src: string, label: string) {
+    addLinkChoiceControl(id: string, src: string, label: string, position: ?Object) {
         const linkChoiceControl = document.createElement('div');
         linkChoiceControl.classList.add('romper-link-control');
         linkChoiceControl.classList.add(`romper-link-choice-${id}`);
@@ -875,6 +875,17 @@ class Player extends EventEmitter {
         iconContainer.classList.add('romper-link-choice-icon-container');
 
         const linkChoiceIcon = document.createElement('img');
+        
+        if (position != null) {
+            iconContainer.style.top = position.top;
+            iconContainer.style.left = position.left;
+            iconContainer.style.width = position.width;
+            linkChoiceIcon.style.width = '100%';
+            linkChoiceIcon.style.height = '100%';
+            iconContainer.style.height = position.height;
+        } else {
+            console.log(`place icon ${id} in default position`);
+        }
 
         if (src !== '') {
             linkChoiceIcon.src = src;

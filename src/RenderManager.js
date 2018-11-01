@@ -168,6 +168,7 @@ export default class RenderManager extends EventEmitter {
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
         const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
+        const iconPositions: Array<?Object> = [];
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
             // fetch icon representation
@@ -182,11 +183,17 @@ export default class RenderManager extends EventEmitter {
                             representation.asset_collections.icon &&
                             representation.asset_collections.icon.default_id
                         ) {
+                            if (representation.asset_collections.icon.position) {
+                                iconPositions.push(representation.asset_collections.icon.position);
+                            } else {
+                                iconPositions.push(null);
+                            }
                             // eslint-disable-next-line max-len
                             const iconAssetCollectionId = representation.asset_collections.icon.default_id;
                             // asset collection
                             return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
                         }
+                        iconPositions.push(null);
                         return Promise.resolve(null);
                     }));
             } else {
@@ -205,6 +212,7 @@ export default class RenderManager extends EventEmitter {
                             narrativeElements[choiceId].id,
                             iconAssetCollection.assets.image_src,
                             `Option ${(choiceId + 1)}`,
+                            iconPositions[choiceId],
                         );
                     }
                 });
