@@ -79,6 +79,18 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
     }
 
+    willStart() {
+        this._player.enterStartBehaviourPhase();
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours(
+                BehaviourTimings.started,
+                RendererEvents.COMPLETE_START_BEHAVIOURS,
+            )
+        ) {
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        }
+    }
+
     /**
      * An event which fires when this renderer has completed it's part of the experience
      * (e.g., video finished, or the user has clicked 'skip', etc)
@@ -92,18 +104,6 @@ export default class BaseRenderer extends EventEmitter {
      * @fires BaseRenderer#complete
      * @return {void}
      */
-
-    willStart() {
-        this._player.enterStartBehaviourPhase();
-        if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(
-                BehaviourTimings.started,
-                RendererEvents.COMPLETE_START_BEHAVIOURS,
-            )
-        ) {
-            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-    }
 
     start() {
         this.emit(RendererEvents.STARTED);
