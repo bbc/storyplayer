@@ -53,6 +53,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             controller,
         );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+        console.log('[REN] +1 ', this._rendererId);
 
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
@@ -90,6 +91,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
+        console.log('[REN] +S ', this._rendererId);
         super.start();
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
@@ -110,6 +112,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     end() {
+        console.log('[REN] +1 ', this._rendererId);
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
@@ -254,6 +257,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
+        console.log('[REN] -1 ', this._rendererId);
         this.end();
 
         this._playoutEngine.unqueuePlayout(this._rendererId);

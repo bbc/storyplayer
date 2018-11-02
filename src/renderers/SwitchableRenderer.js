@@ -38,6 +38,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
         this._switchableIsQueuedNotPlaying = true;
         this._currentRendererIndex = 0;
+        console.log('[REN] ', this._rendererId, 'switch');
         this._updateChoiceRenderers();
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
@@ -229,6 +230,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                 currentChoice.switchFrom();
             }
             if (this._currentRendererIndex !== choiceIndex) {
+                console.log('[REN] ', this._rendererId, ' switch index ', choiceIndex);
                 this._currentRendererIndex = choiceIndex;
                 this._updateChoiceRenderers();
             }
@@ -275,6 +277,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             this._representation.choices.forEach((choice, index) => {
                 if (choiceLabel === choice.label) {
                     if (this._currentRendererIndex !== index) {
+                        console.log('[REN] ', this._rendererId, ' switch index ', index);
                         this._currentRendererIndex = index;
                         this._updateChoiceRenderers();
                     }
@@ -287,6 +290,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     start() {
         this._switchableIsQueuedNotPlaying = false;
         this._updateChoiceRenderers();
+        console.log('[REN] ', this._rendererId, ' switch active');
         this._previousRendererPlayheadTime = 0;
         this._renderSwitchButtons();
         this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
@@ -334,6 +338,8 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
+        console.log('[REN] ', this._rendererId, 'deswitch');
+
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });

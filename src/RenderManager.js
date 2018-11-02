@@ -360,6 +360,7 @@ export default class RenderManager extends EventEmitter {
         this._showOnwardIcons();
 
         if (newRenderer instanceof SwitchableRenderer) {
+            console.log('[REN] REN SWITCH ', newRenderer._rendererId);
             if (this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
                 newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
