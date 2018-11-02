@@ -40,6 +40,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     constructor(player: Player) {
         super(player);
 
+
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
             this._useHlsJs = true;

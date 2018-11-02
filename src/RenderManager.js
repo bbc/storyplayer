@@ -332,6 +332,11 @@ export default class RenderManager extends EventEmitter {
                     }
                 },
             );
+
+            if (newRenderer instanceof SwitchableRenderer) {
+                // eslint-disable-next-line max-len
+                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+            }
         } else {
             logger.error(`Do not know how to render ${representation.representation_type}`);
         }
@@ -353,7 +358,6 @@ export default class RenderManager extends EventEmitter {
         // Update availability of back and next buttons.
         this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
-
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {

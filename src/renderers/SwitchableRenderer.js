@@ -51,13 +51,22 @@ export default class SwitchableRenderer extends BaseRenderer {
         // debugger;
         if (this._switchableIsQueuedNotPlaying) {
             // Switchable is queued so only create renderer for choice at
-            // index _currentRendererIndex
-            if (this._choiceRenderers) {
-                this._choiceRenderers.forEach((choice) => {
-                    if (choice) choice.destroy();
-                });
+            // index _currentRendererIndex (assuming it's not already created)
+            if (this._choiceRenderers && this._choiceRenderers.length !== 0) {
+                // Renderers have been created by this switchable before so check if we already
+                // have a renderer for choice at index _currentRendererIndex
+                if (this._choiceRenderers[this._currentRendererIndex] === null) {
+                    // Have a renderer for a choice that isn't choice at index _currentRendererIndex
+                    // so destroy it and create another renderer
+                    this._choiceRenderers.forEach((choice) => {
+                        if (choice) choice.destroy();
+                    });
+                    choiceRenderers = this._getQueuedChoiceRenderer();
+                }
+            } else {
+                // No renderers yet created by this switchable so create the one we need.
+                choiceRenderers = this._getQueuedChoiceRenderer();
             }
-            choiceRenderers = this._getQueuedChoiceRenderer();
         } else {
             // Switchable is playing so create all renderers for choices
             choiceRenderers = this._choiceRenderers;
@@ -219,8 +228,10 @@ export default class SwitchableRenderer extends BaseRenderer {
                 }
                 currentChoice.switchFrom();
             }
-            this._currentRendererIndex = choiceIndex;
-            this._updateChoiceRenderers();
+            if (this._currentRendererIndex !== choiceIndex) {
+                this._currentRendererIndex = choiceIndex;
+                this._updateChoiceRenderers();
+            }
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
                 this._logSwitch();
@@ -263,8 +274,10 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, index) => {
                 if (choiceLabel === choice.label) {
-                    this._currentRendererIndex = index;
-                    this._updateChoiceRenderers();
+                    if (this._currentRendererIndex !== index) {
+                        this._currentRendererIndex = index;
+                        this._updateChoiceRenderers();
+                    }
                 }
             });
         }
