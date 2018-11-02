@@ -127,37 +127,41 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        rendererPlayoutObj.mediaInstance.start();
-        super.setPlayoutActive(rendererId);
-        if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
-            this.play();
-        }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_url) {
-            this._player.enableSubtitlesControl();
-        }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
-            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-                this._player.addVolumeControl(rendererId, 'Foreground');
-                if (rendererPlayoutObj.mediaInstance) {
-                    const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-                    this._player.connectScrubBar(videoElement);
+        if (!rendererPlayoutObj.active) {
+            rendererPlayoutObj.mediaInstance.start();
+            super.setPlayoutActive(rendererId);
+            if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
+                this.play();
+            }
+            if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_url) {
+                this._player.enableSubtitlesControl();
+            }
+            if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
+                if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+                    this._player.addVolumeControl(rendererId, 'Foreground');
+                    if (rendererPlayoutObj.mediaInstance) {
+                        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                        this._player.connectScrubBar(videoElement);
+                    }
+                } else {
+                    this._player.addVolumeControl(rendererId, 'Background');
                 }
-            } else {
-                this._player.addVolumeControl(rendererId, 'Background');
             }
         }
     }
 
     setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        this._cleanUpSubtitles(rendererId);
-        this._player.disableSubtitlesControl();
-        rendererPlayoutObj.mediaInstance.pause();
-        rendererPlayoutObj.mediaInstance.end();
-        super.setPlayoutInactive(rendererId);
-        this._player.removeVolumeControl(rendererId);
-        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-            this._player.disconnectScrubBar();
+        if (rendererPlayoutObj.active) {
+            this._cleanUpSubtitles(rendererId);
+            this._player.disableSubtitlesControl();
+            rendererPlayoutObj.mediaInstance.pause();
+            rendererPlayoutObj.mediaInstance.end();
+            super.setPlayoutInactive(rendererId);
+            this._player.removeVolumeControl(rendererId);
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+                this._player.disconnectScrubBar();
+            }
         }
     }
 
