@@ -86,7 +86,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // create a renderer for each choice that isn't the _currentRendererIndex choice
     _getRemainingChoiceRenderers() {
-        let choices = [];
+        let choices: Array<any> = [];
         if (this._representation.choices) {
             choices = this._representation.choices.map((choice, index) => {
                 if (choice.choice_representation && index !== this._currentRendererIndex) {
@@ -130,7 +130,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // create a renderer for the _currentRendererIndex choice
     _getQueuedChoiceRenderer() {
-        let choices = [];
+        let choices: Array<any> = [];
         if (this._representation.choices) {
             choices = this._representation.choices.map((choice, index) => {
                 if (choice.choice_representation && index === this._currentRendererIndex) {
