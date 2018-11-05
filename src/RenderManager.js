@@ -38,7 +38,7 @@ export default class RenderManager extends EventEmitter {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
     };
-    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+    _upcomingRenderers: { [key: string]: BaseRenderer };
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
@@ -326,15 +326,13 @@ export default class RenderManager extends EventEmitter {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
                     // Set index of each queued switchable
-                    if (this._upcomingRenderers.length === 1) {
-                        Object.keys(this._upcomingRenderers[0]).forEach((rendererNEId) => {
-                            const renderer = this._upcomingRenderers[0][rendererNEId];
-                            if (renderer instanceof SwitchableRenderer) {
-                                // eslint-disable-next-line max-len
-                                renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
-                            }
-                        });
-                    }
+                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+                        const renderer = this._upcomingRenderers[rendererNEId];
+                        if (renderer instanceof SwitchableRenderer) {
+                            // eslint-disable-next-line max-len
+                            renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+                        }
+                    });
                 },
             );
 
@@ -414,18 +412,17 @@ export default class RenderManager extends EventEmitter {
     ): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
-        if (this._upcomingRenderers.length === 1) {
-            const newRenderersList = this._upcomingRenderers.shift();
-            Object.keys(newRenderersList).forEach((rendererNEId) => {
-                if (rendererNEId === narrativeElement.id) {
-                    // this is the correct one - use it
-                    newRenderer = newRenderersList[rendererNEId];
-                } else {
-                    // only using one - destroy any others
-                    newRenderersList[rendererNEId].destroy();
-                }
-            });
-        }
+        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+            if (rendererNEId === narrativeElement.id) {
+                // this is the correct one - use it
+                newRenderer = this._upcomingRenderers[rendererNEId];
+            } else {
+                // only using one - destroy any others
+                this._upcomingRenderers[rendererNEId].destroy();
+            }
+        });
+        this._upcomingRenderers = {};
+
         // create the new Renderer if we need to
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
@@ -434,7 +431,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     refreshLookahead() {
-        this._upcomingRenderers = [];
+        this._upcomingRenderers = {};
         if (this._currentNarrativeElement) {
             this._rendererLookahead(this._currentNarrativeElement);
         }
@@ -455,17 +452,20 @@ export default class RenderManager extends EventEmitter {
                         // create the new Renderer
                         const newRenderer = this._createNewRenderer(representation);
                         upcomingRenderers[neid] = newRenderer;
+                        this._upcomingRenderers = Object.assign(
+                            this._upcomingRenderers,
+                            upcomingRenderers,
+                        );
                     });
             }
         });
-        this._upcomingRenderers.push(upcomingRenderers);
         this._showOnwardIcons();
     }
 
     _initialise() {
         this._currentRenderer = null;
         // [TODO]: Change this from an array of one object to just be an object
-        this._upcomingRenderers = [];
+        this._upcomingRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
