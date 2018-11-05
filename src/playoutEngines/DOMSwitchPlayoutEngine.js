@@ -40,6 +40,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     constructor(player: Player) {
         super(player);
 
+
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
             this._useHlsJs = true;
@@ -89,8 +90,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
-
-        window.media = this._media;
     }
 
     // mediaObj = {
@@ -130,6 +129,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _loadMedia(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
 
         const { url } = rendererPlayoutObj.media;
         rendererPlayoutObj.mediaType = getMediaType(url);
@@ -161,6 +163,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     unqueuePlayout(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (rendererPlayoutObj.mediaType) {
             switch (rendererPlayoutObj.mediaType) {
             case MediaTypes.HLS:
@@ -187,81 +192,90 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-
-        if (rendererPlayoutObj.mediaType) {
-            switch (rendererPlayoutObj.mediaType) {
-            case MediaTypes.HLS:
-                if (this._useHlsJs) {
-                    // Using HLS.js
-                    rendererPlayoutObj._hls.config = Object.assign(
-                        {},
-                        rendererPlayoutObj._hls.config,
-                        this._activeConfig.hls,
-                    );
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        if (!rendererPlayoutObj.active) {
+            if (rendererPlayoutObj.mediaType) {
+                switch (rendererPlayoutObj.mediaType) {
+                case MediaTypes.HLS:
+                    if (this._useHlsJs) {
+                        // Using HLS.js
+                        rendererPlayoutObj._hls.config = Object.assign(
+                            {},
+                            rendererPlayoutObj._hls.config,
+                            this._activeConfig.hls,
+                        );
+                    }
+                    break;
+                case MediaTypes.DASH:
+                    break;
+                case MediaTypes.OTHER:
+                    break;
+                default:
+                    logger.error('Cannot handle this mediaType (loadSource)');
                 }
-                break;
-            case MediaTypes.DASH:
-                break;
-            case MediaTypes.OTHER:
-                break;
-            default:
-                logger.error('Cannot handle this mediaType (loadSource)');
             }
-        }
 
-        super.setPlayoutActive(rendererId);
-        rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+            super.setPlayoutActive(rendererId);
+            rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
 
-        if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
-            this.play();
-        }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_src) {
-            this._player.enableSubtitlesControl();
-        }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
-            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-                this._player.addVolumeControl(rendererId, 'Foreground');
-                if (rendererPlayoutObj.mediaElement) {
-                    const videoElement = rendererPlayoutObj.mediaElement;
-                    this._player.connectScrubBar(videoElement);
+            if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
+                this.play();
+            }
+            if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_src) {
+                this._player.enableSubtitlesControl();
+            }
+            if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
+                if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+                    this._player.addVolumeControl(rendererId, 'Foreground');
+                    if (rendererPlayoutObj.mediaElement) {
+                        const videoElement = rendererPlayoutObj.mediaElement;
+                        this._player.connectScrubBar(videoElement);
+                    }
+                } else {
+                    this._player.addVolumeControl(rendererId, 'Background');
                 }
-            } else {
-                this._player.addVolumeControl(rendererId, 'Background');
             }
         }
     }
 
     setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (rendererPlayoutObj.mediaType) {
-            switch (rendererPlayoutObj.mediaType) {
-            case MediaTypes.HLS:
-                if (this._useHlsJs) {
-                    // Using HLS.js
-                    rendererPlayoutObj._hls.config = Object.assign(
-                        {},
-                        rendererPlayoutObj._hls.config,
-                        this._inactiveConfig.hls,
-                    );
-                }
-                break;
-            case MediaTypes.DASH:
-                break;
-            case MediaTypes.OTHER:
-                break;
-            default:
-                logger.error('Cannot handle this mediaType (setPlayoutInactive)');
-            }
+        if (!rendererPlayoutObj) {
+            return;
         }
-        this._cleanUpSubtitles(rendererId);
-        this._player.disableSubtitlesControl();
-        rendererPlayoutObj.mediaElement.pause();
-        rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
-        super.setPlayoutInactive(rendererId);
+        if (rendererPlayoutObj.active) {
+            if (rendererPlayoutObj.mediaType) {
+                switch (rendererPlayoutObj.mediaType) {
+                case MediaTypes.HLS:
+                    if (this._useHlsJs) {
+                        // Using HLS.js
+                        rendererPlayoutObj._hls.config = Object.assign(
+                            {},
+                            rendererPlayoutObj._hls.config,
+                            this._inactiveConfig.hls,
+                        );
+                    }
+                    break;
+                case MediaTypes.DASH:
+                    break;
+                case MediaTypes.OTHER:
+                    break;
+                default:
+                    logger.error('Cannot handle this mediaType (setPlayoutInactive)');
+                }
+            }
+            this._cleanUpSubtitles(rendererId);
+            this._player.disableSubtitlesControl();
+            rendererPlayoutObj.mediaElement.pause();
+            rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
+            super.setPlayoutInactive(rendererId);
 
-        this._player.removeVolumeControl(rendererId);
-        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-            this._player.disconnectScrubBar();
+            this._player.removeVolumeControl(rendererId);
+            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+                this._player.disconnectScrubBar();
+            }
         }
     }
 
