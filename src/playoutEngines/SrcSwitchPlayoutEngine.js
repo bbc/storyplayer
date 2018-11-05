@@ -121,12 +121,18 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     unqueuePlayout(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         this._mediaManager.returnMediaInstance(rendererPlayoutObj.mediaInstance);
         super.unqueuePlayout(rendererId);
     }
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (!rendererPlayoutObj.active) {
             rendererPlayoutObj.mediaInstance.start();
             super.setPlayoutActive(rendererId);
@@ -152,6 +158,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (rendererPlayoutObj.active) {
             this._cleanUpSubtitles(rendererId);
             this._player.disableSubtitlesControl();

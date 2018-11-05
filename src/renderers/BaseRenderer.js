@@ -12,6 +12,7 @@ import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
     _representation: Representation;
@@ -111,6 +112,9 @@ export default class BaseRenderer extends EventEmitter {
         this._clearBehaviourElements();
     }
 
+    end() {
+    }
+
     /* record some analytics for the renderer - not user actions though */
     logRendererAction(userEventName: AnalyticEventName) {
         const logData = {
@@ -173,7 +177,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     switchFrom() {
-        this.destroy();
+        this.end();
     }
 
     // prepare rendere so it can be switched to quickly and in sync
@@ -411,6 +415,7 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
+        this.end();
         this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();

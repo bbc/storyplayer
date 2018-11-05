@@ -138,25 +138,30 @@ export default class RenderManager extends EventEmitter {
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
-                    // get a Renderer for this new NE
-                    const newRenderer = this._getRenderer(narrativeElement, representation);
+                    if (this._currentNarrativeElement === narrativeElement) {
+                        // Restarting Current NE
+                        this._restartCurrentRenderer();
+                    } else {
+                        // get a Renderer for this new NE
+                        const newRenderer = this._getRenderer(narrativeElement, representation);
 
-                    // look ahead and create new renderers for the next step
-                    this._rendererLookahead(narrativeElement);
+                        // look ahead and create new renderers for the next step
+                        this._rendererLookahead(narrativeElement);
 
-                    // TODO: need to clean up upcomingRenderers here too
+                        // TODO: need to clean up upcomingRenderers here too
 
-                    if (newRenderer) {
-                        this._currentNarrativeElement = narrativeElement;
-                        // swap renderers
-                        this._swapRenderers(newRenderer);
-                        // handle backgrounds
-                        this._handleBackgroundRendering(newRenderer.getRepresentation());
-                    }
+                        if (newRenderer) {
+                            this._currentNarrativeElement = narrativeElement;
+                            // swap renderers
+                            this._swapRenderers(newRenderer);
+                            // handle backgrounds
+                            this._handleBackgroundRendering(newRenderer.getRepresentation());
+                        }
 
-                    // tell story renderer that we've changed
-                    if (this._renderStory) {
-                        this._renderStory.handleNarrativeElementChanged(representation.id);
+                        // tell story renderer that we've changed
+                        if (this._renderStory) {
+                            this._renderStory.handleNarrativeElementChanged(representation.id);
+                        }
                     }
                 });
         }
@@ -341,6 +346,14 @@ export default class RenderManager extends EventEmitter {
             logger.error(`Do not know how to render ${representation.representation_type}`);
         }
         return newRenderer;
+    }
+
+    _restartCurrentRenderer() {
+        if (this._currentRenderer) {
+            const currentRenderer = this._currentRenderer;
+            currentRenderer.end();
+            currentRenderer.willStart();
+        }
     }
 
     // swap the renderers over

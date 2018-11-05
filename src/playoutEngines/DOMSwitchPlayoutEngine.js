@@ -129,6 +129,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _loadMedia(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
 
         const { url } = rendererPlayoutObj.media;
         rendererPlayoutObj.mediaType = getMediaType(url);
@@ -160,6 +163,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     unqueuePlayout(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (rendererPlayoutObj.mediaType) {
             switch (rendererPlayoutObj.mediaType) {
             case MediaTypes.HLS:
@@ -186,6 +192,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (!rendererPlayoutObj.active) {
             if (rendererPlayoutObj.mediaType) {
                 switch (rendererPlayoutObj.mediaType) {
@@ -233,6 +242,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutInactive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
         if (rendererPlayoutObj.active) {
             if (rendererPlayoutObj.mediaType) {
                 switch (rendererPlayoutObj.mediaType) {
