@@ -163,8 +163,20 @@ $romper-hover-text-size: 25px;
   }
 
   .romper-aframe-scene {
-    // z-index: 29;
+    z-index: 3;
   }
+
+ .a-enter-vr.embedded {
+   height: $romper-button-width;
+   top: 0;
+   width: $romper-button-height;
+ } 
+
+ .a-enter-vr-button {
+   bottom: inherit;
+   height: $romper-button-height;
+   top: 5px;
+ }
 
   .romper-audio-element {
     background: $romper-background-color;
