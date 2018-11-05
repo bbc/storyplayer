@@ -303,6 +303,21 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
     }
 
+    end() {
+        this._choiceRenderers.forEach((choice) => {
+            if (choice) choice.end();
+        });
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice, idx) => {
+                this._player.removeRepresentationControl(`${idx}`);
+            });
+        }
+        this._player.removeListener(
+            PlayerEvents.REPRESENTATION_CLICKED,
+            this._handleChoiceClicked,
+        );
+    }
+
     _handleChoiceClicked(event: Object): void {
         if (!this._inCompleteBehaviours) {
             // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
@@ -338,15 +353,6 @@ export default class SwitchableRenderer extends BaseRenderer {
             if (choice) choice.destroy();
         });
 
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice, idx) => {
-                this._player.removeRepresentationControl(`${idx}`);
-            });
-        }
-        this._player.removeListener(
-            PlayerEvents.REPRESENTATION_CLICKED,
-            this._handleChoiceClicked,
-        );
         super.destroy();
     }
 }
