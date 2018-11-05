@@ -320,8 +320,23 @@ export default class RenderManager extends EventEmitter {
                     if (choice.choice_representation) {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
+                    // Set index of each queued switchable
+                    if (this._upcomingRenderers.length === 1) {
+                        Object.keys(this._upcomingRenderers[0]).forEach((rendererNEId) => {
+                            const renderer = this._upcomingRenderers[0][rendererNEId];
+                            if (renderer instanceof SwitchableRenderer) {
+                                // eslint-disable-next-line max-len
+                                renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+                            }
+                        });
+                    }
                 },
             );
+
+            if (newRenderer instanceof SwitchableRenderer) {
+                // eslint-disable-next-line max-len
+                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+            }
         } else {
             logger.error(`Do not know how to render ${representation.representation_type}`);
         }
@@ -436,6 +451,7 @@ export default class RenderManager extends EventEmitter {
 
     _initialise() {
         this._currentRenderer = null;
+        // [TODO]: Change this from an array of one object to just be an object
         this._upcomingRenderers = [];
         this._backgroundRenderers = {};
         this._rendererState = {

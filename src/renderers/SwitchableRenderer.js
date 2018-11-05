@@ -17,6 +17,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _nodeCompleted: boolean;
     _inCompleteBehaviours: boolean;
     _handleChoiceClicked: Function;
+    _switchableIsQueuedNotPlaying: boolean;
 
     constructor(
         representation: Representation,
@@ -35,27 +36,115 @@ export default class SwitchableRenderer extends BaseRenderer {
             controller,
         );
         this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
-        this._choiceRenderers = this._getChoiceRenderers();
+        this._switchableIsQueuedNotPlaying = true;
         this._currentRendererIndex = 0;
+        this._updateChoiceRenderers();
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
         this._inCompleteBehaviours = false;
         this._controller = controller;
     }
 
-    // create a renderer for each choice
-    _getChoiceRenderers(): Array<?BaseRenderer> {
-        let choices = [];
+    _updateChoiceRenderers() {
+        let choiceRenderers = [];
+        // // eslint-disable-next-line
+        // debugger;
+        if (this._switchableIsQueuedNotPlaying) {
+            // Switchable is queued so only create renderer for choice at
+            // index _currentRendererIndex (assuming it's not already created)
+            if (this._choiceRenderers && this._choiceRenderers.length !== 0) {
+                // Renderers have been created by this switchable before so check if we already
+                // have a renderer for choice at index _currentRendererIndex
+                if (this._choiceRenderers[this._currentRendererIndex] === null) {
+                    // Have a renderer for a choice that isn't choice at index _currentRendererIndex
+                    // so destroy it and create another renderer
+                    this._choiceRenderers.forEach((choice) => {
+                        if (choice) choice.destroy();
+                    });
+                    choiceRenderers = this._getQueuedChoiceRenderer();
+                }
+            } else {
+                // No renderers yet created by this switchable so create the one we need.
+                choiceRenderers = this._getQueuedChoiceRenderer();
+            }
+        } else {
+            // Switchable is playing so create all renderers for choices
+            choiceRenderers = this._choiceRenderers;
+            // eslint-disable-next-line max-len
+            const missingRenderers = choiceRenderers.some(choiceRenderer => choiceRenderer === null);
+            if (choiceRenderers.length === 0 || missingRenderers) {
+                const newChoiceRenderers = this._getRemainingChoiceRenderers();
+                newChoiceRenderers.forEach((newChoiceRenderer, index) => {
+                    if (newChoiceRenderer !== null && choiceRenderers[index] === null) {
+                        choiceRenderers[index] = newChoiceRenderer;
+                    }
+                });
+            }
+        }
+        this._choiceRenderers = choiceRenderers;
+    }
+
+    // create a renderer for each choice that isn't the _currentRendererIndex choice
+    _getRemainingChoiceRenderers() {
+        let choices: Array<any> = [];
         if (this._representation.choices) {
-            choices = this._representation.choices.map(choice =>
-                (choice.choice_representation ? RendererFactory(
-                    choice.choice_representation,
-                    this._fetchAssetCollection,
-                    this._fetchMedia,
-                    this._player,
-                    this._analytics,
-                    this._controller,
-                ) : null));
+            choices = this._representation.choices.map((choice, index) => {
+                if (choice.choice_representation && index !== this._currentRendererIndex) {
+                    return RendererFactory(
+                        choice.choice_representation,
+                        this._fetchAssetCollection,
+                        this._fetchMedia,
+                        this._player,
+                        this._analytics,
+                        this._controller,
+                    );
+                }
+                return null;
+            });
+            choices.forEach((choiceRenderer) => {
+                if (choiceRenderer) {
+                    const cr = choiceRenderer;
+                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
+                        cr.start();
+                    });
+                }
+            });
+            choices.forEach((choiceRenderer) => {
+                if (choiceRenderer) {
+                    const cr = choiceRenderer;
+                    cr.on(RendererEvents.COMPLETED, () => {
+                        if (!this._nodeCompleted) {
+                            this.complete();
+                        }
+                        this._nodeCompleted = true;
+                    });
+                    cr.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                        this._inCompleteBehaviours = true;
+                        this._disableSwitchButtons();
+                    });
+                }
+            });
+        }
+        return choices;
+    }
+
+    // create a renderer for the _currentRendererIndex choice
+    _getQueuedChoiceRenderer() {
+        let choices: Array<any> = [];
+        if (this._representation.choices) {
+            choices = this._representation.choices.map((choice, index) => {
+                if (choice.choice_representation && index === this._currentRendererIndex) {
+                    return RendererFactory(
+                        choice.choice_representation,
+                        this._fetchAssetCollection,
+                        this._fetchMedia,
+                        this._player,
+                        this._analytics,
+                        this._controller,
+                    );
+                }
+                return null;
+            });
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
@@ -139,7 +228,10 @@ export default class SwitchableRenderer extends BaseRenderer {
                 }
                 currentChoice.switchFrom();
             }
-            this._currentRendererIndex = choiceIndex;
+            if (this._currentRendererIndex !== choiceIndex) {
+                this._currentRendererIndex = choiceIndex;
+                this._updateChoiceRenderers();
+            }
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
                 this._logSwitch();
@@ -182,7 +274,10 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, index) => {
                 if (choiceLabel === choice.label) {
-                    this._currentRendererIndex = index;
+                    if (this._currentRendererIndex !== index) {
+                        this._currentRendererIndex = index;
+                        this._updateChoiceRenderers();
+                    }
                 }
             });
         }
@@ -190,13 +285,16 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
+        this._switchableIsQueuedNotPlaying = false;
+        this._updateChoiceRenderers();
         this._previousRendererPlayheadTime = 0;
         this._renderSwitchButtons();
         this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
 
-        this._choiceRenderers.forEach((choice) => {
-            if (choice) choice.cueUp();
-        });
+        // This code path calls an empty function in each renderer
+        // this._choiceRenderers.forEach((choice) => {
+        //     if (choice) choice.cueUp();
+        // });
 
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
