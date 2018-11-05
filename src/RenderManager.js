@@ -369,7 +369,7 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
 
         // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
+        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -442,7 +442,7 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
-        const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
+        const upcomingIds = this._controller.getIdsOfNextNodes(narrativeElement);
         const upcomingRenderers = {};
         upcomingIds.forEach((neid) => {
             // get the actual NarrativeElement object
