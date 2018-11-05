@@ -5,6 +5,7 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import Controller from '../Controller';
 import logger from '../logger';
 
 // @flowignore
@@ -27,8 +28,16 @@ export default class AFrameRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
         this._endedEventListener = this._endedEventListener.bind(this);
         this._playEventListener = this._playEventListener.bind(this);
         this._pauseEventListener = this._pauseEventListener.bind(this);
@@ -59,8 +68,10 @@ export default class AFrameRenderer extends BaseRenderer {
         this._videoAssetElement.removeEventListener('play', this._playEventListener);
         this._videoAssetElement.removeEventListener('pause', this._pauseEventListener);
 
-        // const player = this._player;
-        this._target.removeChild(this._aFrameSceneElement);
+        if (this._aFrameSceneElement.parentNode !== null) {
+            this._target.removeChild(this._aFrameSceneElement);
+        }
+
         // player.removeVolumeControl(this._representation.id);
         this._player.disconnectScrubBar();
         this._player.removeListener(
