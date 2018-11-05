@@ -38,7 +38,7 @@ export default class RenderManager extends EventEmitter {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
     };
-    _upcomingRenderers: { [key: string]: BaseRenderer };
+    _nextRenderers: { [key: string]: BaseRenderer };
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
@@ -326,8 +326,8 @@ export default class RenderManager extends EventEmitter {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
                     // Set index of each queued switchable
-                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
-                        const renderer = this._upcomingRenderers[rendererNEId];
+                    Object.keys(this._nextRenderers).forEach((rendererNEId) => {
+                        const renderer = this._nextRenderers[rendererNEId];
                         if (renderer instanceof SwitchableRenderer) {
                             // eslint-disable-next-line max-len
                             renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
@@ -412,16 +412,16 @@ export default class RenderManager extends EventEmitter {
     ): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
-        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+        Object.keys(this._nextRenderers).forEach((rendererNEId) => {
             if (rendererNEId === narrativeElement.id) {
                 // this is the correct one - use it
-                newRenderer = this._upcomingRenderers[rendererNEId];
+                newRenderer = this._nextRenderers[rendererNEId];
             } else {
                 // only using one - destroy any others
-                this._upcomingRenderers[rendererNEId].destroy();
+                this._nextRenderers[rendererNEId].destroy();
             }
         });
-        this._upcomingRenderers = {};
+        this._nextRenderers = {};
 
         // create the new Renderer if we need to
         if (!newRenderer) {
@@ -431,7 +431,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     refreshLookahead() {
-        this._upcomingRenderers = {};
+        this._nextRenderers = {};
         if (this._currentNarrativeElement) {
             this._rendererLookahead(this._currentNarrativeElement);
         }
@@ -452,8 +452,8 @@ export default class RenderManager extends EventEmitter {
                         // create the new Renderer
                         const newRenderer = this._createNewRenderer(representation);
                         upcomingRenderers[neid] = newRenderer;
-                        this._upcomingRenderers = Object.assign(
-                            this._upcomingRenderers,
+                        this._nextRenderers = Object.assign(
+                            this._nextRenderers,
                             upcomingRenderers,
                         );
                     });
@@ -465,7 +465,7 @@ export default class RenderManager extends EventEmitter {
     _initialise() {
         this._currentRenderer = null;
         // [TODO]: Change this from an array of one object to just be an object
-        this._upcomingRenderers = {};
+        this._nextRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
