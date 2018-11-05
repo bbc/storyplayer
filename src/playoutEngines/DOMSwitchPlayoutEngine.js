@@ -213,7 +213,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
             this.play();
         }
-        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_src) {
+        if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_url) {
             this._player.enableSubtitlesControl();
         }
         if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
