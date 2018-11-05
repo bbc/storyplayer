@@ -1,19 +1,16 @@
 // @flow
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
-import MediaManager from '../MediaManager';
-import MediaInstance from '../MediaInstance';
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
-    _mediaInstance: MediaInstance;
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
-    _mediaManager: MediaManager;
 
     constructor(
         assetCollection: AssetCollection,
@@ -21,49 +18,31 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         player: Player,
     ) {
         super(assetCollection, mediaFetcher, player);
-        this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._target = this._player.backgroundTarget;
 
-        this._mediaManager = player._mediaManager;
-        this._mediaInstance = this._mediaManager.getMediaInstance('background');
-
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            type: MEDIA_TYPES.BACKGROUND_A,
+        });
         this._renderBackgroundAudio();
     }
 
     start() {
-        this._mediaInstance.start();
-        this._player.addVolumeControl(this._assetCollection.id, 'Background');
-        this._player.on(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
+        this._playoutEngine.setPlayoutActive(this._rendererId);
 
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-            const audioElement = this._mediaInstance.getMediaElement();
-            audioElement.setAttribute('loop', 'true');
+            const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
+            if (audioElement) {
+                audioElement.setAttribute('loop', 'true');
+            }
         }
-
-        this._mediaInstance.play();
     }
 
     end() {
-        try {
-            this._mediaInstance.end();
-        } catch (e) {
-            //
-        }
-
-        this._player.removeVolumeControl(this._assetCollection.id);
-        this._player.removeListener(PlayerEvents.VOLUME_CHANGED, this._handleVolumeClicked);
-    }
-
-    _handleVolumeClicked(event: Object): void {
-        if (event.id === this._assetCollection.id) {
-            this._mediaInstance.setVolume(event.value);
-        }
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
     }
 
     _renderBackgroundAudio() {
-        const audioElement = document.createElement('audio');
-        this._mediaInstance.attachMedia(audioElement);
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, 'audio').then((mediaUrl) => {
                 this._populateAudioElement(mediaUrl);
@@ -75,7 +54,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (this._disabled) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
-            this._mediaInstance.loadSource(mediaUrl);
+            this._playoutEngine.queuePlayout(this._rendererId, {
+                url: mediaUrl,
+            });
         }
     }
 
@@ -96,7 +77,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     destroy() {
         this.end();
 
-        this._mediaManager.returnMediaInstance(this._mediaInstance);
+        this._playoutEngine.unqueuePlayout(this._rendererId);
+
         super.destroy();
     }
 }

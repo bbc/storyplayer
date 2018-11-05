@@ -5,6 +5,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import Controller from '../Controller';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
@@ -20,8 +21,16 @@ export default class ImageRenderer extends BaseRenderer {
         fetchMedia: MediaFetcher,
         player: Player,
         analytics: AnalyticsLogger,
+        controller: Controller,
     ) {
-        super(representation, assetCollectionFetcher, fetchMedia, player, analytics);
+        super(
+            representation,
+            assetCollectionFetcher,
+            fetchMedia,
+            player,
+            analytics,
+            controller,
+        );
         this.renderImageElement();
         this._disablePlayButton = () => { this._player.disablePlayButton(); };
         this._enablePlayButton = () => { this._player.enablePlayButton(); };

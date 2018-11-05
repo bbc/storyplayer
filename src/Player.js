@@ -4,9 +4,16 @@ import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
-import { BrowserUserAgent } from './browserCapabilities';
-import MediaManager from './MediaManager';
+import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
+import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
+import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
+import { BrowserUserAgent } from './browserCapabilities';
+
+const PLAYOUT_ENGINES = {
+    SRC_SWITCH_PLAYOUT: 'src',
+    DOM_SWITCH_PLAYOUT: 'dom',
+};
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -216,9 +223,9 @@ function createOverlay(name: string, logFunction: Function) {
 }
 
 class Player extends EventEmitter {
+    playoutEngine: BasePlayoutEngine
     _player: HTMLDivElement;
     _playerParent: HTMLElement;
-    _mediaManager: MediaManager;
     _backgroundLayer: HTMLDivElement;
     _mediaLayer: HTMLDivElement;
     _guiLayer: HTMLDivElement;
@@ -251,8 +258,6 @@ class Player extends EventEmitter {
     _analytics: AnalyticsLogger;
     _assetUrls: AssetUrls;
     _logUserInteraction: Function;
-    _foregroundMediaElement: HTMLVideoElement;
-    _backgroundMediaElement: HTMLAudioElement;
     _volumeEventTimeouts: Object;
     _scrubbedEventTimeout: TimeoutID;
     _showRomperButtonsTimeout: TimeoutID;
@@ -263,29 +268,10 @@ class Player extends EventEmitter {
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
-
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
-        this._foregroundMediaElement = document.createElement('video');
-        this._foregroundMediaElement.className = 'romper-video-element';
-        this._foregroundMediaElement.crossOrigin = 'anonymous';
-
-        this._backgroundMediaElement = document.createElement('audio');
-        this._backgroundMediaElement.className = 'romper-audio-element';
-        this._backgroundMediaElement.crossOrigin = 'anonymous';
-
-        // Permission to play not granted on iOS without the autplay tag
-        if (BrowserUserAgent.iOS()) {
-            this._foregroundMediaElement.autoplay = true;
-            this._backgroundMediaElement.autoplay = true;
-        }
         this._userInteractionStarted = false;
-
-        this._mediaManager = new MediaManager(
-            this._foregroundMediaElement,
-            this._backgroundMediaElement,
-        );
 
         this.showingSubtitles = false;
 
@@ -475,9 +461,6 @@ class Player extends EventEmitter {
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
 
-        this.mediaTarget.appendChild(this._foregroundMediaElement);
-        this.backgroundTarget.appendChild(this._backgroundMediaElement);
-
         // Event Listeners
         this._overlays.onclick = this._hideAllOverlays.bind(this);
 
@@ -526,6 +509,33 @@ class Player extends EventEmitter {
 
         this.removeExperienceStartButtonAndImage =
             this.removeExperienceStartButtonAndImage.bind(this);
+
+        let playoutToUse = 'dom';
+
+        if (BrowserUserAgent.iOS()) {
+            playoutToUse = 'src';
+        }
+
+        const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
+        if (overridePlayout) {
+            playoutToUse = overridePlayout;
+        }
+
+        logger.info('Using playout engine: ', playoutToUse);
+
+        switch (playoutToUse) {
+        case PLAYOUT_ENGINES.SRC_SWITCH_PLAYOUT:
+            // Use craptastic iOS playout engine
+            this.playoutEngine = new SrcSwitchPlayoutEngine(this);
+            break;
+        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
+            // Use shiny source switching engine.... smooth.
+            this.playoutEngine = new DOMSwitchPlayoutEngine(this);
+            break;
+        default:
+            logger.fatal('Invalid Playout Engine');
+            throw new Error('Invalid Playout Engine');
+        }
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -646,8 +656,7 @@ class Player extends EventEmitter {
         if (this._startExperienceButton || this._startExperienceImage) {
             this.removeExperienceStartButtonAndImage();
         }
-        this._foregroundMediaElement.pause();
-        this._backgroundMediaElement.pause();
+        this.playoutEngine.pause();
         this._clearOverlays();
         this._disableUserInteraction();
         logger.info('disabling experience before restart');
@@ -668,7 +677,8 @@ class Player extends EventEmitter {
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
         this._overlayToggleButtons.classList.add('romper-inactive');
-        this._mediaManager.setPermissionToPlay(false);
+
+        this.playoutEngine.setPermissionToPlay(false);
     }
 
     _enableUserInteraction() {
@@ -681,16 +691,9 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._overlayToggleButtons.classList.remove('romper-inactive');
 
-        this._mediaManager.setPermissionToPlay(true);
-
-        // Give permission to elements to play
-        this._backgroundMediaElement.play();
-        this._foregroundMediaElement.play();
-        this._backgroundMediaElement.pause();
-        this._foregroundMediaElement.pause();
+        this.playoutEngine.setPermissionToPlay(true);
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
-        this._backgroundMediaElement.play();
         this._playPauseButtonClicked();
     }
 
