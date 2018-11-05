@@ -172,17 +172,19 @@ $romper-hover-text-size: 25px;
     z-index: 3;
   }
 
- .a-enter-vr.embedded {
-   height: $romper-button-width;
-   top: 0;
-   width: $romper-button-height;
- } 
+  .a-enter-vr {
+    &.embedded {
+      height: $romper-button-width;
+      top: 0;
+      width: $romper-button-height;
+    }
+  }
 
- .a-enter-vr-button {
-   bottom: inherit;
-   height: $romper-button-height;
-   top: 5px;
- }
+  .a-enter-vr-button {
+    bottom: inherit;
+    height: $romper-button-height;
+    top: 5px;
+  }
 
   .romper-audio-element {
     background: $romper-background-color;
