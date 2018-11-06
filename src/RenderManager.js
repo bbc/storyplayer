@@ -499,7 +499,6 @@ export default class RenderManager extends EventEmitter {
 
     _initialise() {
         this._currentRenderer = null;
-        // [TODO]: Change this from an array of one object to just be an object
         this._upcomingRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {

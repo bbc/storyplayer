@@ -58,8 +58,6 @@ export default class SwitchableRenderer extends BaseRenderer {
                     // so destroy it and create another renderer
                     choiceRenderers = this._getQueuedChoiceRenderer();
                 } else {
-                    // eslint-disable-next-line
-                    debugger;
                     choiceRenderers = this._choiceRenderers.map((choice, index) => {
                         if (index === this._currentRendererIndex) {
                             return choice;
