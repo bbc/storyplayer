@@ -58,11 +58,23 @@ export default class SwitchableRenderer extends BaseRenderer {
                 if (this._choiceRenderers[this._currentRendererIndex] === null) {
                     // Have a renderer for a choice that isn't choice at index _currentRendererIndex
                     // so destroy it and create another renderer
-                    this._choiceRenderers.forEach((choice) => {
-                        if (choice) choice.destroy();
-                    });
                     choiceRenderers = this._getQueuedChoiceRenderer();
+                } else {
+                    choiceRenderers = this._choiceRenderers.map((choice, index) => {
+                        if (index === this._currentRendererIndex) {
+                            return choice;
+                        }
+                        return null;
+                    });
                 }
+                // Clean up any renderers that are not needed
+                this._choiceRenderers
+                    .filter((choice, index) => index !== this._currentRendererIndex)
+                    .forEach((choice) => {
+                        if (choice) {
+                            choice.destroy();
+                        }
+                    });
             } else {
                 // No renderers yet created by this switchable so create the one we need.
                 choiceRenderers = this._getQueuedChoiceRenderer();
@@ -305,12 +317,13 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     end() {
-        this._choiceRenderers.forEach((choice) => {
-            if (choice) choice.end();
-        });
         if (this._switchableIsQueuedNotPlaying === false) {
             console.log('[SR]', this._rendererId, 'RENDER SWITCH BUTTONS DELETED');
             this._switchableIsQueuedNotPlaying = true;
+            this._updateChoiceRenderers();
+            console.log('[SR] ', this._choiceRenderers);
+            const activeChoice = this._choiceRenderers[this._currentRendererIndex];
+            if (activeChoice) activeChoice.end();
             if (this._representation.choices) {
                 this._representation.choices.forEach((choice, idx) => {
                     this._player.removeRepresentationControl(`${idx}`);

@@ -149,9 +149,11 @@ export default class RenderManager extends EventEmitter {
                         const newRenderer = this._getRenderer(narrativeElement, representation);
 
                         // look ahead and create new renderers for the next/previous step
+                        console.log('[RM] HANDLE NE CHANGE - REFRESH LOOKAHEAD CALL');
                         this._rendererLookahead(narrativeElement);
 
                         if (newRenderer) {
+                            console.log('[RM] Loading renderer ', narrativeElement.id);
                             // swap renderers
                             this._swapRenderers(newRenderer, narrativeElement);
                             // handle backgrounds
@@ -432,15 +434,16 @@ export default class RenderManager extends EventEmitter {
         // create the new Renderer if we need to
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
-            console.log('NEW RENDERER');
+            console.log('[RM] NEW RENDERER');
         } else {
-            console.log('EXISTING RENDERER');
+            console.log('[RM] EXISTING RENDERER');
         }
         return newRenderer;
     }
 
     refreshLookahead() {
         if (this._currentNarrativeElement) {
+            console.log('[RM] REFRESH LOOKAHEAD CALL');
             this._rendererLookahead(this._currentNarrativeElement);
         }
     }
@@ -498,7 +501,7 @@ export default class RenderManager extends EventEmitter {
                         }
                         delete this._upcomingRenderers[neid];
                     });
-                console.log('UP Renderers', this._upcomingRenderers);
+                console.log('[RM] UP Renderers', this._upcomingRenderers);
             });
 
         this._showOnwardIcons();
