@@ -150,13 +150,11 @@ export default class RenderManager extends EventEmitter {
 
                         // look ahead and create new renderers for the next/previous step
                         console.log('[RM] HANDLE NE CHANGE - REFRESH LOOKAHEAD CALL');
-                        // this._rendererLookahead(narrativeElement);
+                        this._rendererLookahead(narrativeElement);
 
                         if (newRenderer) {
                             console.log('[RM] Loading renderer ', narrativeElement.id);
                             // swap renderers
-                            // eslint-disable-next-line
-                            debugger;
                             this._swapRenderers(newRenderer, narrativeElement);
                             // handle backgrounds
                             this._handleBackgroundRendering(newRenderer.getRepresentation());

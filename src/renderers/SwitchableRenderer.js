@@ -334,9 +334,12 @@ export default class SwitchableRenderer extends BaseRenderer {
             PlayerEvents.REPRESENTATION_CLICKED,
             this._handleChoiceClicked,
         );
+        this._inCompleteBehaviours = false;
+        this._nodeCompleted = false;
     }
 
     _handleChoiceClicked(event: Object): void {
+        console.log('HANDLE CHOICE CLICKED!');
         if (!this._inCompleteBehaviours) {
             // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
             this.switchToRepresentationAtIndex(event.id);
