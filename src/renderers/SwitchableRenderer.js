@@ -174,6 +174,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
+        console.log('[SR]', this._rendererId, 'RENDER SWITCH BUTTONS');
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
                 if (choice.choice_representation &&
@@ -304,14 +305,17 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     end() {
-        this._switchableIsQueuedNotPlaying = true;
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.end();
         });
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice, idx) => {
-                this._player.removeRepresentationControl(`${idx}`);
-            });
+        if (this._switchableIsQueuedNotPlaying === false) {
+            console.log('[SR]', this._rendererId, 'RENDER SWITCH BUTTONS DELETED');
+            this._switchableIsQueuedNotPlaying = true;
+            if (this._representation.choices) {
+                this._representation.choices.forEach((choice, idx) => {
+                    this._player.removeRepresentationControl(`${idx}`);
+                });
+            }
         }
         this._player.removeListener(
             PlayerEvents.REPRESENTATION_CLICKED,
