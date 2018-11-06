@@ -38,6 +38,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._handleChoiceClicked = this._handleChoiceClicked.bind(this);
         this._switchableIsQueuedNotPlaying = true;
         this._currentRendererIndex = 0;
+        console.log('[SW] ', this._rendererId, ' CREATE');
         this._updateChoiceRenderers();
         this._previousRendererPlayheadTime = 0;
         this._nodeCompleted = false;
@@ -46,10 +47,19 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     _updateChoiceRenderers() {
+        console.log('[SW]', this._rendererId, ' UPDATE CHOICE ================');
+        console.log('[SW]', this._rendererId, ' INDEX ', this._currentRendererIndex);
+        if (this._choiceRenderers) {
+            console.log('[SW]', this._rendererId, 'CHOICES', this._choiceRenderers.map((choice) => {
+                if (choice) return choice._rendererId;
+                return null;
+            }));
+        }
         let choiceRenderers = [];
         // // eslint-disable-next-line
         // debugger;
         if (this._switchableIsQueuedNotPlaying) {
+            console.log('[SW]', this._rendererId, ' QUEUED');
             // Switchable is queued so only create renderer for choice at
             // index _currentRendererIndex (assuming it's not already created)
             if (this._choiceRenderers && this._choiceRenderers.length !== 0) {
@@ -60,6 +70,8 @@ export default class SwitchableRenderer extends BaseRenderer {
                     // so destroy it and create another renderer
                     choiceRenderers = this._getQueuedChoiceRenderer();
                 } else {
+                    // eslint-disable-next-line
+                    debugger;
                     choiceRenderers = this._choiceRenderers.map((choice, index) => {
                         if (index === this._currentRendererIndex) {
                             return choice;
@@ -80,6 +92,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                 choiceRenderers = this._getQueuedChoiceRenderer();
             }
         } else {
+            console.log('[SW]', this._rendererId, ' ACTIVE');
             // Switchable is playing so create all renderers for choices
             choiceRenderers = this._choiceRenderers;
             // eslint-disable-next-line max-len
@@ -94,6 +107,13 @@ export default class SwitchableRenderer extends BaseRenderer {
             }
         }
         this._choiceRenderers = choiceRenderers;
+        if (this._choiceRenderers) {
+            console.log('[SW]', this._rendererId, 'CHOICES', this._choiceRenderers.map((choice) => {
+                if (choice) return choice._rendererId;
+                return null;
+            }));
+        }
+        console.log('[SW]', this._rendererId, ' END UPDATE CHOICE ================');
     }
 
     // create a renderer for each choice that isn't the _currentRendererIndex choice
@@ -243,6 +263,9 @@ export default class SwitchableRenderer extends BaseRenderer {
             }
             if (this._currentRendererIndex !== choiceIndex) {
                 this._currentRendererIndex = choiceIndex;
+                console.log('[SW]', this._rendererId, ' CI: ', this._currentRendererIndex);
+                console.log('[SW]', this._rendererId, 'TYPE ', typeof this._currentRendererIndex);
+                console.trace();
                 this._updateChoiceRenderers();
             }
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
@@ -289,6 +312,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                 if (choiceLabel === choice.label) {
                     if (this._currentRendererIndex !== index) {
                         this._currentRendererIndex = index;
+                        console.log('[SW]', this._rendererId, ' CI: ', this._currentRendererIndex);
                         this._updateChoiceRenderers();
                     }
                 }
@@ -321,7 +345,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             console.log('[SR]', this._rendererId, 'RENDER SWITCH BUTTONS DELETED');
             this._switchableIsQueuedNotPlaying = true;
             this._updateChoiceRenderers();
-            console.log('[SR] ', this._choiceRenderers);
+            console.log('[SR]', this._choiceRenderers);
             const activeChoice = this._choiceRenderers[this._currentRendererIndex];
             if (activeChoice) activeChoice.end();
             if (this._representation.choices) {
@@ -340,9 +364,9 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     _handleChoiceClicked(event: Object): void {
         console.log('HANDLE CHOICE CLICKED!');
-        if (!this._inCompleteBehaviours) {
-            // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
-            this.switchToRepresentationAtIndex(event.id);
+        const index = parseInt(event.id, 10);
+        if (!this._inCompleteBehaviours && !Number.isNaN(index)) {
+            this.switchToRepresentationAtIndex(index);
         }
         // TODO: else show buttons are disabled
     }
@@ -370,6 +394,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
+        console.log('[SW] ', this._rendererId, ' DESTROY CALLED');
         super.destroy();
 
         this._choiceRenderers.forEach((choice) => {
