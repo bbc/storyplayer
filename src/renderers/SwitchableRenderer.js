@@ -367,10 +367,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
+        super.destroy();
+
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
-
-        super.destroy();
+        this._choiceRenderers = [];
     }
 }
