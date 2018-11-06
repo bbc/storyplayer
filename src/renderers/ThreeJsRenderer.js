@@ -1,5 +1,7 @@
 // @flow
 
+// @flowignore
+import * as THREE from 'three';
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
@@ -7,8 +9,6 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
-// @flowignore
-import * as THREE from 'three';
 
 const scene = new THREE.Scene();
 
@@ -116,143 +116,104 @@ export default class ThreeJsRenderer extends BaseRenderer {
     }
 
     populateVideoElement(mediaUrl: string) {
-        this.init(mediaUrl);//MaryOculus.webm');
-        this.startThreeSixtyVideo();
-
-        /*
-        const scene = new THREE.Scene();
-        this._threeJsDiv = document.createElement('div');
-        this._threeJsDiv.className = 'romper-video-element';
-        this._target.appendChild(this._threeJsDiv);
-        var camera = new THREE.PerspectiveCamera( 75, this._target.offsetWidth/this._target.offsetHeight, 0.1, 1000 );
-
-        var renderer = new THREE.WebGLRenderer();
-        renderer.setSize( this._target.offsetWidth, this._target.offsetHeight );
-        this._threeJsDiv.appendChild( renderer.domElement );
-
-        var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-        var cube = new THREE.Mesh( geometry, material );
-        scene.add( cube );
-
-        camera.position.z = 5;
-
-        var animate = function () {
-            requestAnimationFrame( animate );
-
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-
-            renderer.render( scene, camera );
-        };
-        */
-        this.animate();
-
-        // this.startThreeSixtyVideo();
-    }
-
-    init(videoUrl: string) {
-
         this._threeJsDiv = document.createElement('div');
         this._threeJsDiv.className = 'romper-video-element';
         this._target.appendChild(this._threeJsDiv);
 
-        var container = this._threeJsDiv;
-    
-        this._camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 2000 );
-        this._camera.layers.enable( 1 ); // render left view when no stereo available
+        this._camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            1,
+            2000,
+        );
+        this._camera.layers.enable(1); // render left view when no stereo available
 
         // video
-
-        this._videoElement = document.createElement( 'video' );
+        this._videoElement = document.createElement('video');
         this._videoElement.crossOrigin = 'anonymous';
-        // this._videoElement.loop = true;
-        // this._videoElement.muted = true;
-        this._videoElement.src = videoUrl;
-        this._videoElement.setAttribute( 'webkit-playsinline', 'webkit-playsinline' );
+        this._videoElement.src = mediaUrl;
+        this._videoElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
         this._videoElement.play();
 
-        this._texture = new THREE.Texture( this._videoElement );
+        this._texture = new THREE.Texture(this._videoElement);
         this._texture.generateMipmaps = false;
         this._texture.minFilter = THREE.NearestFilter;
         this._texture.maxFilter = THREE.NearestFilter;
         this._texture.format = THREE.RGBFormat;
 
-        setInterval( () => {
-            if ( this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA ) {
+        setInterval(() => {
+            if (this._videoElement.readyState >= this._videoElement.HAVE_CURRENT_DATA) {
                 this._texture.needsUpdate = true;
             }
-        }, 1000 / 24 );
+        }, 1000 / 24);
         this._scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0x101010 );
+        scene.background = new THREE.Color(0x101010);
 
         // left
 
-        var geometry = new THREE.SphereBufferGeometry( 500, 60, 40 );
+        let geometry = new THREE.SphereBufferGeometry(500, 60, 40);
         // invert the geometry on the x-axis so that all of the faces point inward
-        geometry.scale( - 1, 1, 1 );
+        geometry.scale(-1, 1, 1);
 
-        var uvs = geometry.attributes.uv.array;
-
-        for ( var i = 0; i < uvs.length; i += 2 ) {
-
-            uvs[ i ] *= 0.5;
-
+        let uvs = geometry.attributes.uv.array;
+        for (let i = 0; i < uvs.length; i += 2) {
+            uvs[i] *= 0.5;
         }
 
-        var material = new THREE.MeshBasicMaterial( { map: this._texture } );
+        let material = new THREE.MeshBasicMaterial({ map: this._texture });
 
-        var mesh = new THREE.Mesh( geometry, material );
-        mesh.rotation.y = - Math.PI / 2;
-        mesh.layers.set( 1 ); // display in left eye only
-        scene.add( mesh );
+        let mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.y = -(Math.PI / 2);
+        mesh.layers.set(1); // display in left eye only
+        scene.add(mesh);
 
         // right
 
-        var geometry = new THREE.SphereBufferGeometry( 500, 60, 40 );
-        geometry.scale( - 1, 1, 1 );
+        geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        geometry.scale(-1, 1, 1);
 
-        var uvs = geometry.attributes.uv.array;
-
-        for ( var i = 0; i < uvs.length; i += 2 ) {
-
-            uvs[ i ] *= 0.5;
-            uvs[ i ] += 0.5;
-
+        uvs = geometry.attributes.uv.array;
+        for (let i = 0; i < uvs.length; i += 2) {
+            uvs[i] *= 0.5;
+            uvs[i] += 0.5;
         }
 
-        var material = new THREE.MeshBasicMaterial( { map: this._texture } );
+        material = new THREE.MeshBasicMaterial({ map: this._texture });
 
-        var mesh = new THREE.Mesh( geometry, material );
-        mesh.rotation.y = - Math.PI / 2;
-        mesh.layers.set( 2 ); // display in right eye only
-        scene.add( mesh );
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.y = -(Math.PI / 2);
+        mesh.layers.set(2); // display in right eye only
+        scene.add(mesh);
 
         //
 
         this._threeRenderer = new THREE.WebGLRenderer();
-        this._threeRenderer.setPixelRatio( this._target.offsetWidth/this._target.offsetHeight );
-        this._threeRenderer.setSize( this._target.offsetWidth, this._target.offsetHeight );
+        this._threeRenderer.setPixelRatio(this._target.offsetWidth / this._target.offsetHeight);
+        this._threeRenderer.setSize(this._target.offsetWidth, this._target.offsetHeight);
         this._threeRenderer.vr.enabled = true;
-        container.appendChild( this._threeRenderer.domElement );
+        this._threeJsDiv.appendChild(this._threeRenderer.domElement);
 
-        // container.appendChild( WEBVR.createButton( this._threeRenderer, { frameOfReferenceType: 'head-model' } ) );
+        // this._threeJsDiv.appendChild(WEBVR.createButton(
+        //     this._threeRenderer,
+        //     { frameOfReferenceType: 'head-model' },
+        // ));
 
-        window.addEventListener( 'resize', () => {
-            this._camera.aspect = this._target.offsetWidth/this._target.offsetHeight;
-            console.log('resize', this._target.offsetWidth, this._target.offsetHeight);
+        window.addEventListener('resize', () => {
+            this._camera.aspect = this._target.offsetWidth / this._target.offsetHeight;
             this._camera.updateProjectionMatrix();
-            this._threeRenderer.setSize( this._target.offsetWidth, this._target.offsetHeight );
-        }, false );
+            this._threeRenderer.setSize(this._target.offsetWidth, this._target.offsetHeight);
+        }, false);
 
+        this.startThreeSixtyVideo();
+        this.animate();
     }
 
     animate() {
-        this._threeRenderer.setAnimationLoop( this.render );
+        this._threeRenderer.setAnimationLoop(this.render);
     }
 
     render() {
-        this._threeRenderer.render( scene, this._camera );
+        this._threeRenderer.render(scene, this._camera);
     }
 
     startThreeSixtyVideo() {
@@ -261,13 +222,14 @@ export default class ThreeJsRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
         // automatically move on at video end
         this._videoElement.addEventListener('play', this._playEventListener);
         this._videoElement.addEventListener('pause', this._pauseEventListener);
         this._videoElement.addEventListener('ended', this._endedEventListener);
         logger.info('360 video playing');
         this._videoElement.play();
-     }
+    }
 
     _handlePlayPauseButtonClicked(): void {
         if (this._videoElement.paused === true) {
