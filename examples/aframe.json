@@ -194,7 +194,7 @@
             "name": "Video 3",
             "meta": {},
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:360-stereo/v1.0",
             "asset_collections": {
                 "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
@@ -255,9 +255,9 @@
             "description": "",
             "version": "0:0",
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
+                "av_src": "https://dl.dropboxusercontent.com/s/nidqscjr1dw3vsb/MaryOculus.webm?dl=0"
             }
         }
     ]
