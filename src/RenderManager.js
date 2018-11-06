@@ -88,7 +88,7 @@ export default class RenderManager extends EventEmitter {
         this._initialise();
 
         window.renderers = this._upcomingRenderers;
-        window.current = this._currentRenderer;
+        window.rm = this;
     }
 
     prepareForRestart() {
@@ -493,7 +493,9 @@ export default class RenderManager extends EventEmitter {
                 Object.keys(this._upcomingRenderers)
                     .filter(neid => allIds.indexOf(neid) === -1)
                     .forEach((neid) => {
-                        this._upcomingRenderers[neid].destroy();
+                        if (narrativeElement.id !== neid) {
+                            this._upcomingRenderers[neid].destroy();
+                        }
                         delete this._upcomingRenderers[neid];
                     });
                 console.log('UP Renderers', this._upcomingRenderers);

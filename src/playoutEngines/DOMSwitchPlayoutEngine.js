@@ -90,6 +90,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+
+        window.media = this._media;
     }
 
     // mediaObj = {
