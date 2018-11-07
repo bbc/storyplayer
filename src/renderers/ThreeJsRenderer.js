@@ -8,18 +8,20 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
 export default class ThreeJsRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
-    _playEventListener: Function;
-    _pauseEventListener: Function;
+    _mouseDownListener: Function;
+    _mouseUpListener: Function;
+    _mouseMoveListener: Function;
     _handlePlayPauseButtonClicked: Function;
 
     _threeJsDiv: HTMLDivElement;
-    _videoElement: HTMLVideoElement;
+    _videoElement: HTMLMediaElement;
     _scene: any;
     _camera: any;
     _texture: any;
@@ -52,14 +54,20 @@ export default class ThreeJsRenderer extends BaseRenderer {
             controller,
         );
         this._endedEventListener = this._endedEventListener.bind(this);
-        this._playEventListener = this._playEventListener.bind(this);
-        this._pauseEventListener = this._pauseEventListener.bind(this);
+        this._mouseDownListener = this._mouseDownListener.bind(this);
+        this._mouseMoveListener = this._mouseMoveListener.bind(this);
+        this._mouseUpListener = this._mouseUpListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this._manualControl = false;
         this._longitude = 0;
         this._latitude = 0;
+
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            type: MEDIA_TYPES.FOREGROUND_AV,
+        });
+        this.renderVideoElement();
     }
 
     _endedEventListener() {
@@ -67,43 +75,47 @@ export default class ThreeJsRenderer extends BaseRenderer {
         super.complete();
     }
 
-    _playEventListener() {
-        this._player.setPlaying(true);
-    }
-
-    _pauseEventListener() {
-        this._player.setPlaying(false);
-    }
-
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
-        this.renderVideoElement();
+
+        this._target.appendChild(this._threeJsDiv);
+
+        this._player.connectScrubBar(this._videoElement);
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+
+        logger.info('360 stereo video playing');
+        this._playoutEngine.setPlayoutActive(this._rendererId);
+        this._addDragControl();
+        this.animate();
     }
 
     end() {
-        this._videoElement.removeEventListener('ended', this._endedEventListener);
-        this._videoElement.removeEventListener('play', this._playEventListener);
-        this._videoElement.removeEventListener('pause', this._pauseEventListener);
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
+
+        // this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
 
         if (this._threeJsDiv.parentNode !== null) {
             this._target.removeChild(this._threeJsDiv);
         }
 
-        // player.removeVolumeControl(this._representation.id);
+        // remove drag listeners
+        this._target.removeEventListener('mousedown', this._mouseDownListener);
+        this._target.removeEventListener('mousemove', this._mouseMoveListener);
+        this._target.removeEventListener('mouseup', this._mouseUpListener);
+
         this._player.disconnectScrubBar();
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
-        // player.removeListener(
-        //     PlayerEvents.VOLUME_CHANGED,
-        //     this._handleVolumeClicked,
-        // );
-        // player.removeListener(
-        //     PlayerEvents.SUBTITLES_BUTTON_CLICKED,
-        //     this._handleSubtitlesClicked,
-        // );
     }
 
     renderVideoElement() {
@@ -114,7 +126,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
-                                this.populateVideoElement(mediaUrl);
+                                this._buildThreeScene(mediaUrl);
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -124,10 +136,13 @@ export default class ThreeJsRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string) {
+    _buildThreeScene(mediaUrl: string) {
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            url: mediaUrl,
+        });
+
         this._threeJsDiv = document.createElement('div');
         this._threeJsDiv.className = 'romper-aframe-scene romper-video-element';
-        this._target.appendChild(this._threeJsDiv);
 
         this._camera = new THREE.PerspectiveCamera(
             75,
@@ -139,12 +154,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
         this._camera.target = new THREE.Vector3(0, 0, 0);
 
         // video
-        this._videoElement = document.createElement('video');
-        this._videoElement.className = 'romper-video-element';
-        this._videoElement.crossOrigin = 'anonymous';
-        this._videoElement.src = mediaUrl;
-        this._videoElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
-        this._videoElement.play();
+        this._videoElement = this._playoutEngine.getMediaElement(this._rendererId);
 
         this._texture = new THREE.Texture(this._videoElement);
         this._texture.generateMipmaps = false;
@@ -211,10 +221,6 @@ export default class ThreeJsRenderer extends BaseRenderer {
             this._camera.updateProjectionMatrix();
             this._threeRenderer.setSize(this._target.offsetWidth, this._target.offsetHeight);
         }, false);
-
-        this.startThreeSixtyVideo();
-        this._addDragControl();
-        this.animate();
     }
 
     animate() {
@@ -237,50 +243,37 @@ export default class ThreeJsRenderer extends BaseRenderer {
 
     // allow the user to drag the scene around with the mouse
     _addDragControl() {
-        this._target.addEventListener('mousedown', (event: MouseEvent) => {
-            event.preventDefault();
-            this._manualControl = true;
-            this._savedX = event.clientX;
-            this._savedY = event.clientY;
-
-            this._savedLongitude = this._longitude;
-            this._savedLatitude = this._latitude;
-        }, false);
-
-        this._target.addEventListener('mousemove', (event: MouseEvent) => {
-            if (this._manualControl) {
-                this._longitude = ((this._savedX - event.clientX) * 0.1) + this._savedLongitude;
-                this._latitude = ((event.clientY - this._savedY) * 0.1) + this._savedLatitude;
-            }
-        }, false);
-
-        this._target.addEventListener('mouseup', () => {
-            this._manualControl = false;
-        }, false);
+        this._target.addEventListener('mousedown', this._mouseDownListener, false);
+        this._target.addEventListener('mousemove', this._mouseMoveListener, false);
+        this._target.addEventListener('mouseup', this._mouseUpListener, false);
     }
 
-    startThreeSixtyVideo() {
-        this._player.connectScrubBar(this._videoElement);
-        this._player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
+    _mouseDownListener(event: MouseEvent) {
+        event.preventDefault();
+        this._manualControl = true;
+        this._savedX = event.clientX;
+        this._savedY = event.clientY;
 
-        // automatically move on at video end
-        this._videoElement.addEventListener('play', this._playEventListener);
-        this._videoElement.addEventListener('pause', this._pauseEventListener);
-        this._videoElement.addEventListener('ended', this._endedEventListener);
-        logger.info('360 stereo video playing');
-        this._videoElement.play();
+        this._savedLongitude = this._longitude;
+        this._savedLatitude = this._latitude;
+    }
+
+    _mouseMoveListener(event: MouseEvent) {
+        if (this._manualControl) {
+            this._longitude = ((this._savedX - event.clientX) * 0.1) + this._savedLongitude;
+            this._latitude = ((event.clientY - this._savedY) * 0.1) + this._savedLatitude;
+        }
+    }
+
+    _mouseUpListener() {
+        this._manualControl = false;
     }
 
     _handlePlayPauseButtonClicked(): void {
         if (this._videoElement.paused === true) {
             this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            this._videoElement.play();
         } else {
             this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            this._videoElement.pause();
         }
     }
 
@@ -300,6 +293,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
 
     destroy() {
         this.end();
+        this._playoutEngine.unqueuePlayout(this._rendererId);
         super.destroy();
     }
 }
