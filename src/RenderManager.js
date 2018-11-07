@@ -358,20 +358,6 @@ export default class RenderManager extends EventEmitter {
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
-        if (oldRenderer) {
-            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
-                .some((renderer) => {
-                    if (renderer === oldRenderer) {
-                        return true;
-                    }
-                    return false;
-                });
-            if (!currentRendererInUpcoming) {
-                oldRenderer.destroy();
-            } else {
-                oldRenderer.end();
-            }
-        }
 
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
@@ -394,6 +380,21 @@ export default class RenderManager extends EventEmitter {
             const value = this._rendererState.volumes[label];
             this._player.setVolumeControlLevel(label, value);
         });
+
+        if (oldRenderer) {
+            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
+                .some((renderer) => {
+                    if (renderer === oldRenderer) {
+                        return true;
+                    }
+                    return false;
+                });
+            if (!currentRendererInUpcoming) {
+                oldRenderer.destroy();
+            } else {
+                oldRenderer.end();
+            }
+        }
     }
 
     // show next button, or icons if choice

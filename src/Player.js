@@ -1,5 +1,4 @@
 // @flow
-
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';

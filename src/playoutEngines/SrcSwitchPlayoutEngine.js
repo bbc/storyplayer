@@ -151,6 +151,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._player.addVolumeControl(rendererId, 'Foreground');
                     if (rendererPlayoutObj.mediaInstance) {
                         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                        this._player.disconnectScrubBar();
                         this._player.connectScrubBar(videoElement);
                     }
                 } else {
@@ -172,9 +173,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaInstance.end();
             super.setPlayoutInactive(rendererId);
             this._player.removeVolumeControl(rendererId);
-            if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-                this._player.disconnectScrubBar();
-            }
         }
     }
 
