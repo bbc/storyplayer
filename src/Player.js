@@ -258,11 +258,13 @@ class Player extends EventEmitter {
     _showRomperButtonsTimeout: TimeoutID;
     _RomperButtonsShowing: boolean;
     _userInteractionStarted: boolean;
+    _numChoices: number;
     removeExperienceStartButtonAndImage: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
+        this._numChoices = 0;
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
@@ -661,6 +663,7 @@ class Player extends EventEmitter {
         if (this._userInteractionStarted) {
             return;
         }
+
         this._userInteractionStarted = true;
         this._overlays.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
@@ -865,6 +868,8 @@ class Player extends EventEmitter {
     }
 
     addLinkChoiceControl(id: string, src: string, label: string) {
+        this._numChoices += 1;
+
         const linkChoiceControl = document.createElement('div');
         linkChoiceControl.classList.add('romper-link-control');
         linkChoiceControl.classList.add(`romper-link-choice-${id}`);
@@ -872,33 +877,28 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-        iconContainer.classList.add('romper-link-choice-icon-container');
-
-        const linkChoiceIcon = document.createElement('img');
-
-        if (src !== '') {
-            linkChoiceIcon.src = src;
+        const { classList } = this._linkChoice.overlay;
+        classList.add('romper-link-choice-grid-cell');
+        if (this._numChoices > 3) {
+            classList.add('tworow');
         } else {
-            linkChoiceIcon.src = this._assetUrls.noAssetIconUrl;
+            classList.remove('tworow');
         }
 
-        linkChoiceIcon.classList.add('romper-link-icon');
-        linkChoiceIcon.setAttribute('draggable', 'false');
-        const linkChoiceIconClick = () => {
+        const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+        const { style } = iconContainer;
+        style.backgroundImage = `url(${linkChoiceIconSrc})`;
+        style.backgroundSize = 'contain';
+        style.backgroundRepeat = 'no-repeat';
+        style.backgroundPosition = 'center';
+        style.height = '100%';
+        iconContainer.onclick = () => {
             this.emit(PlayerEvents.LINK_CHOSEN, { id });
             this._linkChoice.deactivateOverlay();
             this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
         };
 
-        linkChoiceIcon.onclick = linkChoiceIconClick;
-        linkChoiceIcon.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(linkChoiceIconClick),
-        );
-
-        iconContainer.appendChild(linkChoiceIcon);
         linkChoiceControl.appendChild(iconContainer);
-
         this._linkChoice.add(id, linkChoiceControl);
     }
 
@@ -1020,6 +1020,7 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
+        this._numChoices = 0;
         this._linkChoice.clearAll();
     }
 
