@@ -10,8 +10,6 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 
-const scene = new THREE.Scene();
-
 export default class ThreeJsRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
@@ -122,7 +120,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
 
         this._camera = new THREE.PerspectiveCamera(
             75,
-            window.innerWidth / window.innerHeight,
+            this._target.offsetWidth / this._target.offsetHeight,
             1,
             2000,
         );
@@ -146,44 +144,41 @@ export default class ThreeJsRenderer extends BaseRenderer {
                 this._texture.needsUpdate = true;
             }
         }, 1000 / 24);
+
         this._scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x101010);
+        this._scene.background = new THREE.Color(0x101010);
 
         // left
-
-        let geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        const geometryLeft = new THREE.SphereBufferGeometry(500, 60, 40);
         // invert the geometry on the x-axis so that all of the faces point inward
-        geometry.scale(-1, 1, 1);
+        geometryLeft.scale(-1, 1, 1);
 
-        let uvs = geometry.attributes.uv.array;
-        for (let i = 0; i < uvs.length; i += 2) {
-            uvs[i] *= 0.5;
+        const uvsLeft = geometryLeft.attributes.uv.array;
+        for (let i = 0; i < uvsLeft.length; i += 2) {
+            uvsLeft[i] *= 0.5;
         }
 
-        let material = new THREE.MeshBasicMaterial({ map: this._texture });
-
-        let mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.y = -(Math.PI / 2);
-        mesh.layers.set(1); // display in left eye only
-        scene.add(mesh);
+        const materialLeft = new THREE.MeshBasicMaterial({ map: this._texture });
+        const meshLeft = new THREE.Mesh(geometryLeft, materialLeft);
+        meshLeft.rotation.y = -(Math.PI / 2);
+        meshLeft.layers.set(1); // display in left eye only
+        this._scene.add(meshLeft);
 
         // right
+        const geometryRight = new THREE.SphereBufferGeometry(500, 60, 40);
+        geometryRight.scale(-1, 1, 1);
 
-        geometry = new THREE.SphereBufferGeometry(500, 60, 40);
-        geometry.scale(-1, 1, 1);
-
-        uvs = geometry.attributes.uv.array;
-        for (let i = 0; i < uvs.length; i += 2) {
-            uvs[i] *= 0.5;
-            uvs[i] += 0.5;
+        const uvsRight = geometryRight.attributes.uv.array;
+        for (let i = 0; i < uvsRight.length; i += 2) {
+            uvsRight[i] *= 0.5;
+            uvsRight[i] += 0.5;
         }
 
-        material = new THREE.MeshBasicMaterial({ map: this._texture });
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.y = -(Math.PI / 2);
-        mesh.layers.set(2); // display in right eye only
-        scene.add(mesh);
+        const materialRight = new THREE.MeshBasicMaterial({ map: this._texture });
+        const meshRight = new THREE.Mesh(geometryRight, materialRight);
+        meshRight.rotation.y = -(Math.PI / 2);
+        meshRight.layers.set(2); // display in right eye only
+        this._scene.add(meshRight);
 
         //
 
@@ -213,7 +208,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
     }
 
     render() {
-        this._threeRenderer.render(scene, this._camera);
+        this._threeRenderer.render(this._scene, this._camera);
     }
 
     startThreeSixtyVideo() {
@@ -227,7 +222,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
         this._videoElement.addEventListener('play', this._playEventListener);
         this._videoElement.addEventListener('pause', this._pauseEventListener);
         this._videoElement.addEventListener('ended', this._endedEventListener);
-        logger.info('360 video playing');
+        logger.info('360 stereo video playing');
         this._videoElement.play();
     }
 
