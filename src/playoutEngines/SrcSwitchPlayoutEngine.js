@@ -248,7 +248,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     getMediaElement(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {
-            return undefined;
+            return document.createElement('video');
         }
         return rendererPlayoutObj.mediaInstance.getMediaElement();
     }

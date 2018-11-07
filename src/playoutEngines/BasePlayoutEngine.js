@@ -81,7 +81,7 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    getMediaElement(rendererId: string) {
-        return undefined;
+    getMediaElement(rendererId: string): HTMLMediaElement {
+        return document.createElement('video');
     }
 }
