@@ -227,8 +227,8 @@
             "tags": {},
             "meta": {
                 "romper": {
-                    "in": "2.0",
-                    "out": "3.0"
+                    "in": "1.0",
+                    "out": "4.0"
                 }
             },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
