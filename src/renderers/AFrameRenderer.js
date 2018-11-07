@@ -6,6 +6,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
 // @flowignore
@@ -39,9 +40,12 @@ export default class AFrameRenderer extends BaseRenderer {
             controller,
         );
         this._endedEventListener = this._endedEventListener.bind(this);
-        this._playEventListener = this._playEventListener.bind(this);
-        this._pauseEventListener = this._pauseEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            type: MEDIA_TYPES.FOREGROUND_AV,
+        });
+        this.renderVideoElement();
     }
 
     _endedEventListener() {
@@ -49,43 +53,34 @@ export default class AFrameRenderer extends BaseRenderer {
         super.complete();
     }
 
-    _playEventListener() {
-        this._player.setPlaying(true);
-    }
-
-    _pauseEventListener() {
-        this._player.setPlaying(false);
-    }
-
     start() {
         super.start();
+        this._target.appendChild(this._aFrameSceneElement);
         logger.info(`Started: ${this._representation.id}`);
-        this.renderVideoElement();
+
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.setPlayoutActive(this._rendererId);
     }
 
     end() {
-        this._videoAssetElement.removeEventListener('ended', this._endedEventListener);
-        this._videoAssetElement.removeEventListener('play', this._playEventListener);
-        this._videoAssetElement.removeEventListener('pause', this._pauseEventListener);
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
+
+        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
 
         if (this._aFrameSceneElement.parentNode !== null) {
             this._target.removeChild(this._aFrameSceneElement);
         }
 
-        // player.removeVolumeControl(this._representation.id);
-        this._player.disconnectScrubBar();
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
-        // player.removeListener(
-        //     PlayerEvents.VOLUME_CHANGED,
-        //     this._handleVolumeClicked,
-        // );
-        // player.removeListener(
-        //     PlayerEvents.SUBTITLES_BUTTON_CLICKED,
-        //     this._handleSubtitlesClicked,
-        // );
     }
 
     renderVideoElement() {
@@ -111,11 +106,15 @@ export default class AFrameRenderer extends BaseRenderer {
             logger.warn('trying to populate video element that has been destroyed');
             return;
         }
+
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            url: mediaUrl,
+        });
+
         // create AFrame entities in here to display 360 video
         this._aFrameSceneElement = document.createElement('a-scene');
         this._aFrameSceneElement.setAttribute('embedded', '');
         this._aFrameSceneElement.classList.add('romper-aframe-scene');
-        this._target.appendChild(this._aFrameSceneElement);
 
         const aFrameVideoSphere = document.createElement('a-videosphere');
         aFrameVideoSphere.setAttribute('src', '#threesixtyvideo');
@@ -124,49 +123,21 @@ export default class AFrameRenderer extends BaseRenderer {
         const aFrameAssetsElement = document.createElement('a-assets');
         this._aFrameSceneElement.appendChild(aFrameAssetsElement);
 
-        this._videoAssetElement = document.createElement('video');
-        this._videoAssetElement.id = 'threesixtyvideo';
-        this._videoAssetElement.className = 'romper-video-element';
-        this._videoAssetElement.setAttribute('crossorigin', '');
-        this._videoAssetElement.addEventListener('ended', this._endedEventListener);
-
-        const videoAssetSource = document.createElement('source');
-        videoAssetSource.setAttribute('type', 'video/mp4');
-        videoAssetSource.setAttribute('src', mediaUrl);
-        this._videoAssetElement.appendChild(videoAssetSource);
-        aFrameAssetsElement.appendChild(this._videoAssetElement);
-        this.startThreeSixtyVideo();
-    }
-
-    startThreeSixtyVideo() {
-        this._player.connectScrubBar(this._videoAssetElement);
-        this._player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-        // automatically move on at video end
-        this._videoAssetElement.addEventListener('play', this._playEventListener);
-        this._videoAssetElement.addEventListener('pause', this._pauseEventListener);
-        this._videoAssetElement.addEventListener('ended', this._endedEventListener);
-        logger.info('360 video playing');
-        this._videoAssetElement.play();
+        this._playoutEngine.getMediaElement(this._rendererId).id = 'threesixtyvideo';
+        // this may break stuff!!!
+        aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
     }
 
     _handlePlayPauseButtonClicked(): void {
-        if (this._videoAssetElement.paused === true) {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            this._videoAssetElement.play();
-        } else {
-            this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            this._videoAssetElement.pause();
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (videoElement) {
+            if (videoElement.paused === true) {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
+            } else {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+            }
         }
     }
-
-    // _handleVolumeClicked(event: Object): void {
-    //     if (event.id === this._representation.id) {
-    //         this._mediaInstance.setVolume(event.value);
-    //     }
-    // }
 
     switchFrom() {
         this.end();
