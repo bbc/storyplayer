@@ -611,7 +611,7 @@ $romper-hover-text-size: 25px;
 
 .romper-variable-panel {
   background-color: $pastel-orange;
-  height: 90%;
+  height: 65%;
   left: 10%;
   overflow-y: scroll;
   position: absolute;
@@ -625,11 +625,6 @@ $romper-hover-text-size: 25px;
   font-size: 26px;
   font-weight: bold;
   margin: 25px;
-}
-
-.romper-var-form-var-containers {
-  height: 50%;
-  min-height: 150px;
 }
 
 .romper-variable-form-item {
@@ -664,7 +659,10 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-button-container {
-  margin: 20px 10px 50px;
+  bottom: 0;
+  margin: 20px 10px 10px;
+  position: absolute;
+  right: 0;
   text-align: right;
 }
 
