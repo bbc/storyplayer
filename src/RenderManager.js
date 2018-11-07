@@ -134,7 +134,7 @@ export default class RenderManager extends EventEmitter {
     handleNEChange(narrativeElement: NarrativeElement) {
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
-            this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
+            return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
@@ -162,6 +162,7 @@ export default class RenderManager extends EventEmitter {
                     }
                 });
         }
+        return Promise.reject(new Error('No representation_collection_target_id on NE'));
     }
 
     // Reasoner has told us that there are multiple valid paths:
@@ -237,6 +238,7 @@ export default class RenderManager extends EventEmitter {
         this._renderStory.on('jumpToNarrativeElement', (neid) => {
             this._controller._jumpToNarrativeElement(neid);
         });
+
         if (this._currentRenderer) {
             this._renderStory.start(this._currentRenderer.getRepresentation().id);
         }
