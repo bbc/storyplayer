@@ -21,7 +21,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _iconUrlMap: { [key: string]: { default: ?string, active: ?string } };
     _player: Player;
     _handleIconClicked: Function;
-    _preloadedIcons: Array<any>
+    _preloadedIcons: Array<Image>
 
     /**
      * Create a new instance of a StoryIconRenderer
