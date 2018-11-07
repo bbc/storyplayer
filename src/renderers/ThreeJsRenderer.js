@@ -81,7 +81,6 @@ export default class ThreeJsRenderer extends BaseRenderer {
 
         this._target.appendChild(this._threeJsDiv);
 
-        this._player.connectScrubBar(this._videoElement);
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
@@ -111,7 +110,6 @@ export default class ThreeJsRenderer extends BaseRenderer {
         this._target.removeEventListener('mousemove', this._mouseMoveListener);
         this._target.removeEventListener('mouseup', this._mouseUpListener);
 
-        this._player.disconnectScrubBar();
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
