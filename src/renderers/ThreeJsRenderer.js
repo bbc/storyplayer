@@ -26,6 +26,14 @@ export default class ThreeJsRenderer extends BaseRenderer {
     _threeRenderer: THREE.WebGLRenderer;
     render: Function;
     animate: Function;
+    _manualControl: boolean;
+    _longitude: number;
+    _latitude: number;
+    _savedX: number;
+    _savedY: number;
+    _savedLongitude: number;
+    _savedLatitude: number;
+
 
     constructor(
         representation: Representation,
@@ -49,6 +57,9 @@ export default class ThreeJsRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
+        this._manualControl = false;
+        this._longitude = 0;
+        this._latitude = 0;
     }
 
     _endedEventListener() {
@@ -115,7 +126,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
 
     populateVideoElement(mediaUrl: string) {
         this._threeJsDiv = document.createElement('div');
-        this._threeJsDiv.className = 'romper-video-element';
+        this._threeJsDiv.className = 'romper-aframe-scene romper-video-element';
         this._target.appendChild(this._threeJsDiv);
 
         this._camera = new THREE.PerspectiveCamera(
@@ -125,9 +136,11 @@ export default class ThreeJsRenderer extends BaseRenderer {
             2000,
         );
         this._camera.layers.enable(1); // render left view when no stereo available
+        this._camera.target = new THREE.Vector3(0, 0, 0);
 
         // video
         this._videoElement = document.createElement('video');
+        this._videoElement.className = 'romper-video-element';
         this._videoElement.crossOrigin = 'anonymous';
         this._videoElement.src = mediaUrl;
         this._videoElement.setAttribute('webkit-playsinline', 'webkit-playsinline');
@@ -200,6 +213,7 @@ export default class ThreeJsRenderer extends BaseRenderer {
         }, false);
 
         this.startThreeSixtyVideo();
+        this._addDragControl();
         this.animate();
     }
 
@@ -208,7 +222,41 @@ export default class ThreeJsRenderer extends BaseRenderer {
     }
 
     render() {
+        // moving the camera according to current latitude and longitude
+        this._latitude = Math.max(-85, Math.min(85, this._latitude)); // limit up/down
+        this._camera.target.y = 500 * Math.cos(THREE.Math.degToRad(90 - this._latitude));
+        this._camera.target.x = 500 *
+                Math.sin(THREE.Math.degToRad(90 - this._latitude)) *
+                Math.cos(THREE.Math.degToRad(this._longitude));
+        this._camera.target.z = 500 *
+            Math.sin(THREE.Math.degToRad(90 - this._latitude)) *
+            Math.sin(THREE.Math.degToRad(this._longitude));
+        this._camera.lookAt(this._camera.target);
         this._threeRenderer.render(this._scene, this._camera);
+    }
+
+    // allow the user to drag the scene around with the mouse
+    _addDragControl() {
+        this._target.addEventListener('mousedown', (event: MouseEvent) => {
+            event.preventDefault();
+            this._manualControl = true;
+            this._savedX = event.clientX;
+            this._savedY = event.clientY;
+
+            this._savedLongitude = this._longitude;
+            this._savedLatitude = this._latitude;
+        }, false);
+
+        this._target.addEventListener('mousemove', (event: MouseEvent) => {
+            if (this._manualControl) {
+                this._longitude = ((this._savedX - event.clientX) * 0.1) + this._savedLongitude;
+                this._latitude = ((event.clientY - this._savedY) * 0.1) + this._savedLatitude;
+            }
+        }, false);
+
+        this._target.addEventListener('mouseup', () => {
+            this._manualControl = false;
+        }, false);
     }
 
     startThreeSixtyVideo() {
