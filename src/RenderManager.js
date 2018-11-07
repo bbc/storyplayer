@@ -38,7 +38,7 @@ export default class RenderManager extends EventEmitter {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
     };
-    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+    _upcomingRenderers: { [key: string]: BaseRenderer };
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
@@ -145,15 +145,12 @@ export default class RenderManager extends EventEmitter {
                         // get a Renderer for this new NE
                         const newRenderer = this._getRenderer(narrativeElement, representation);
 
-                        // look ahead and create new renderers for the next step
+                        // look ahead and create new renderers for the next/previous step
                         this._rendererLookahead(narrativeElement);
 
-                        // TODO: need to clean up upcomingRenderers here too
-
                         if (newRenderer) {
-                            this._currentNarrativeElement = narrativeElement;
                             // swap renderers
-                            this._swapRenderers(newRenderer);
+                            this._swapRenderers(newRenderer, narrativeElement);
                             // handle backgrounds
                             this._handleBackgroundRendering(newRenderer.getRepresentation());
                         }
@@ -326,15 +323,13 @@ export default class RenderManager extends EventEmitter {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
                     // Set index of each queued switchable
-                    if (this._upcomingRenderers.length === 1) {
-                        Object.keys(this._upcomingRenderers[0]).forEach((rendererNEId) => {
-                            const renderer = this._upcomingRenderers[0][rendererNEId];
-                            if (renderer instanceof SwitchableRenderer) {
-                                // eslint-disable-next-line max-len
-                                renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
-                            }
-                        });
-                    }
+                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+                        const renderer = this._upcomingRenderers[rendererNEId];
+                        if (renderer instanceof SwitchableRenderer) {
+                            // eslint-disable-next-line max-len
+                            renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+                        }
+                    });
                 },
             );
 
@@ -359,17 +354,27 @@ export default class RenderManager extends EventEmitter {
     // swap the renderers over
     // it's here we might want to be clever with retaining elements if
     // Renderers are of the same type
-    _swapRenderers(newRenderer: BaseRenderer) {
-        // if both same type, just update current
-        //   else
-        // destroy old renderer
+    _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         if (this._currentRenderer) {
-            this._currentRenderer.destroy();
+            const currentRenderer = this._currentRenderer;
+            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
+                .some((renderer) => {
+                    if (renderer === currentRenderer) {
+                        return true;
+                    }
+                    return false;
+                });
+            if (!currentRendererInUpcoming) {
+                currentRenderer.destroy();
+            } else {
+                currentRenderer.end();
+            }
         }
         this._currentRenderer = newRenderer;
+        this._currentNarrativeElement = newNarrativeElement;
 
         // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
+        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -414,18 +419,13 @@ export default class RenderManager extends EventEmitter {
     ): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
-        if (this._upcomingRenderers.length === 1) {
-            const newRenderersList = this._upcomingRenderers.shift();
-            Object.keys(newRenderersList).forEach((rendererNEId) => {
-                if (rendererNEId === narrativeElement.id) {
-                    // this is the correct one - use it
-                    newRenderer = newRenderersList[rendererNEId];
-                } else {
-                    // only using one - destroy any others
-                    newRenderersList[rendererNEId].destroy();
-                }
-            });
-        }
+        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+            if (rendererNEId === narrativeElement.id) {
+                // this is the correct one - use it
+                newRenderer = this._upcomingRenderers[rendererNEId];
+            }
+        });
+
         // create the new Renderer if we need to
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
@@ -434,7 +434,6 @@ export default class RenderManager extends EventEmitter {
     }
 
     refreshLookahead() {
-        this._upcomingRenderers = [];
         if (this._currentNarrativeElement) {
             this._rendererLookahead(this._currentNarrativeElement);
         }
@@ -442,30 +441,65 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
-        const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
-        const upcomingRenderers = {};
-        upcomingIds.forEach((neid) => {
-            // get the actual NarrativeElement object
-            const neObj = this._controller._getNarrativeElement(neid);
-            if (neObj && neObj.body.representation_collection_target_id) {
-                this._fetchers
-                    .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                    .then(presentation => this._representationReasoner(presentation))
-                    .then((representation) => {
-                        // create the new Renderer
-                        const newRenderer = this._createNewRenderer(representation);
-                        upcomingRenderers[neid] = newRenderer;
+        let allIds = [];
+        const nextIds = this._controller.getIdsOfNextNodes(narrativeElement);
+        const previousId = this._controller.getIdOfPreviousNode();
+        if (previousId) {
+            allIds = nextIds.concat([previousId]);
+        } else {
+            allIds = nextIds;
+        }
+
+        // Generate new renderers for any that are missing
+        const renderPromises = allIds
+            .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
+            .map((neid) => {
+                // Check to see if required NE renderer is the one currently being shown
+                if (
+                    this._currentRenderer &&
+                    this._currentNarrativeElement &&
+                    this._currentNarrativeElement.id === neid
+                ) {
+                    this._upcomingRenderers[neid] = this._currentRenderer;
+                } else {
+                    // get the actual NarrativeElement object
+                    const neObj = this._controller._getNarrativeElement(neid);
+                    if (neObj && neObj.body.representation_collection_target_id) {
+                        return this._fetchers
+                            // eslint-disable-next-line max-len
+                            .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                            .then(presentation => this._representationReasoner(presentation))
+                            .then((representation) => {
+                                // create the new Renderer
+                                const newRenderer = this._createNewRenderer(representation);
+                                if (newRenderer) {
+                                    this._upcomingRenderers[neid] = newRenderer;
+                                }
+                            });
+                    }
+                }
+                return Promise.resolve();
+            });
+
+        Promise.all(renderPromises)
+            // Clean up any renderers that are not needed any longer
+            .then(() => {
+                Object.keys(this._upcomingRenderers)
+                    .filter(neid => allIds.indexOf(neid) === -1)
+                    .forEach((neid) => {
+                        if (narrativeElement.id !== neid) {
+                            this._upcomingRenderers[neid].destroy();
+                        }
+                        delete this._upcomingRenderers[neid];
                     });
-            }
-        });
-        this._upcomingRenderers.push(upcomingRenderers);
+            });
+
         this._showOnwardIcons();
     }
 
     _initialise() {
         this._currentRenderer = null;
-        // [TODO]: Change this from an array of one object to just be an object
-        this._upcomingRenderers = [];
+        this._upcomingRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice

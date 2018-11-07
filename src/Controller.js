@@ -213,7 +213,7 @@ export default class Controller extends EventEmitter {
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
-        const previous = this._getIdOfPreviousNode();
+        const previous = this.getIdOfPreviousNode();
         if (previous) {
             this._jumpToNarrativeElement(previous);
         } else {
@@ -478,7 +478,7 @@ export default class Controller extends EventEmitter {
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory
     // otherwise, returns null.
-    _getIdOfPreviousNode(): ?string {
+    getIdOfPreviousNode(): ?string {
         let matchingId = null;
         if (this._linearStoryPath) {
             // find current
@@ -499,7 +499,7 @@ export default class Controller extends EventEmitter {
     // get an array of ids of the NarrativeElements that follow narrativeElement
     // finds next NARRATIVE_ELEMENTs, but does not look out of the current subStory,
     // except in case of linear story
-    _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
+    getIdsOfNextNodes(narrativeElement: NarrativeElement) {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
         nextNodes.forEach((link) => {

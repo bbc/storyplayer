@@ -47,8 +47,6 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     _updateChoiceRenderers() {
         let choiceRenderers = [];
-        // // eslint-disable-next-line
-        // debugger;
         if (this._switchableIsQueuedNotPlaying) {
             // Switchable is queued so only create renderer for choice at
             // index _currentRendererIndex (assuming it's not already created)
@@ -58,11 +56,23 @@ export default class SwitchableRenderer extends BaseRenderer {
                 if (this._choiceRenderers[this._currentRendererIndex] === null) {
                     // Have a renderer for a choice that isn't choice at index _currentRendererIndex
                     // so destroy it and create another renderer
-                    this._choiceRenderers.forEach((choice) => {
-                        if (choice) choice.destroy();
-                    });
                     choiceRenderers = this._getQueuedChoiceRenderer();
+                } else {
+                    choiceRenderers = this._choiceRenderers.map((choice, index) => {
+                        if (index === this._currentRendererIndex) {
+                            return choice;
+                        }
+                        return null;
+                    });
                 }
+                // Clean up any renderers that are not needed
+                this._choiceRenderers
+                    .filter((choice, index) => index !== this._currentRendererIndex)
+                    .forEach((choice) => {
+                        if (choice) {
+                            choice.destroy();
+                        }
+                    });
             } else {
                 // No renderers yet created by this switchable so create the one we need.
                 choiceRenderers = this._getQueuedChoiceRenderer();
@@ -291,11 +301,6 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._renderSwitchButtons();
         this._player.on(PlayerEvents.REPRESENTATION_CLICKED, this._handleChoiceClicked);
 
-        // This code path calls an empty function in each renderer
-        // this._choiceRenderers.forEach((choice) => {
-        //     if (choice) choice.cueUp();
-        // });
-
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
         if (firstChoice) {
@@ -303,12 +308,31 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
     }
 
-    _handleChoiceClicked(event: Object): void {
-        if (!this._inCompleteBehaviours) {
-            // this.switchToRepresentationAtIndex(parseInt(event.id, 10));
-            this.switchToRepresentationAtIndex(event.id);
+    end() {
+        if (this._switchableIsQueuedNotPlaying === false) {
+            this._switchableIsQueuedNotPlaying = true;
+            this._updateChoiceRenderers();
+            const activeChoice = this._choiceRenderers[this._currentRendererIndex];
+            if (activeChoice) activeChoice.end();
+            if (this._representation.choices) {
+                this._representation.choices.forEach((choice, idx) => {
+                    this._player.removeRepresentationControl(`${idx}`);
+                });
+            }
         }
-        // TODO: else show buttons are disabled
+        this._player.removeListener(
+            PlayerEvents.REPRESENTATION_CLICKED,
+            this._handleChoiceClicked,
+        );
+        this._inCompleteBehaviours = false;
+        this._nodeCompleted = false;
+    }
+
+    _handleChoiceClicked(event: Object): void {
+        const index = parseInt(event.id, 10);
+        if (!this._inCompleteBehaviours && !Number.isNaN(index)) {
+            this.switchToRepresentationAtIndex(index);
+        }
     }
 
     _disableSwitchButtons() {
@@ -334,19 +358,11 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
+        super.destroy();
+
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
-
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice, idx) => {
-                this._player.removeRepresentationControl(`${idx}`);
-            });
-        }
-        this._player.removeListener(
-            PlayerEvents.REPRESENTATION_CLICKED,
-            this._handleChoiceClicked,
-        );
-        super.destroy();
+        this._choiceRenderers = [];
     }
 }
