@@ -36,6 +36,8 @@ export default class ThreeJsRenderer extends BaseRenderer {
     _savedLongitude: number;
     _savedLatitude: number;
 
+    _started: boolean;
+    _rendered: boolean;
 
     constructor(
         representation: Representation,
@@ -53,6 +55,10 @@ export default class ThreeJsRenderer extends BaseRenderer {
             analytics,
             controller,
         );
+
+        this._started = false;
+        this._rendered = false;
+
         this._endedEventListener = this._endedEventListener.bind(this);
         this._mouseDownListener = this._mouseDownListener.bind(this);
         this._mouseMoveListener = this._mouseMoveListener.bind(this);
@@ -78,21 +84,10 @@ export default class ThreeJsRenderer extends BaseRenderer {
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
-
-        this._target.appendChild(this._threeJsDiv);
-
-        this._player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-
-        // automatically move on at video end
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-
-        logger.info('360 stereo video playing');
-        this._playoutEngine.setPlayoutActive(this._rendererId);
-        this._addDragControl();
-        this.animate();
+        if (this._rendered) {
+            this.startThreeSixtyVideo();
+        }
+        this._started = true;
     }
 
     end() {
@@ -219,10 +214,38 @@ export default class ThreeJsRenderer extends BaseRenderer {
             this._camera.updateProjectionMatrix();
             this._threeRenderer.setSize(this._target.offsetWidth, this._target.offsetHeight);
         }, false);
+        this._rendered = true;
+        if (this._started) {
+            this.startThreeSixtyVideo();
+        }
     }
 
     animate() {
         this._threeRenderer.setAnimationLoop(this.render);
+    }
+
+    startThreeSixtyVideo() {
+        this._target.appendChild(this._threeJsDiv);
+
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+
+        logger.info('360 stereo video playing');
+        this._playoutEngine.setPlayoutActive(this._rendererId);
+        this._addDragControl();
+        this.animate();
+        ThreeJsRenderer.checkVRAvailability()
+            .then((display) => {
+                this._threeRenderer.vr.setDevice(display);
+            })
+            .catch((error) => {
+                logger.warn(error);
+            });
     }
 
     render() {
@@ -237,6 +260,23 @@ export default class ThreeJsRenderer extends BaseRenderer {
             Math.sin(THREE.Math.degToRad(this._longitude));
         this._camera.lookAt(this._camera.target);
         this._threeRenderer.render(this._scene, this._camera);
+    }
+
+    static checkVRAvailability(): Promise<VRDisplay> {
+        return new Promise((resolve, reject) => {
+            if (navigator.getVRDisplays !== undefined) {
+                navigator.getVRDisplays()
+                    .then((displays) => {
+                        if (displays.length === 0) {
+                            reject(new Error('no vr display found'));
+                        } else {
+                            resolve(displays[0]);
+                        }
+                    });
+            } else {
+                reject(new Error('no vr checking possible'));
+            }
+        });
     }
 
     // allow the user to drag the scene around with the mouse

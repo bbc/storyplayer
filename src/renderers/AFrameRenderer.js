@@ -23,6 +23,9 @@ export default class AFrameRenderer extends BaseRenderer {
     _aFrameSceneElement: HTMLElement;
     _videoAssetElement: HTMLVideoElement;
 
+    _started: boolean;
+    _rendered: boolean;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -45,6 +48,7 @@ export default class AFrameRenderer extends BaseRenderer {
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
+        this._aFrameSceneElement = document.createElement('a-scene');
         this.renderVideoElement();
     }
 
@@ -55,17 +59,11 @@ export default class AFrameRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._target.appendChild(this._aFrameSceneElement);
         logger.info(`Started: ${this._representation.id}`);
-
-        this._player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-
-        // automatically move on at video end
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.setPlayoutActive(this._rendererId);
+        if (this._rendered) {
+            this.startThreeSixtyVideo();
+        }
+        this._started = true;
     }
 
     end() {
@@ -112,7 +110,6 @@ export default class AFrameRenderer extends BaseRenderer {
         });
 
         // create AFrame entities in here to display 360 video
-        this._aFrameSceneElement = document.createElement('a-scene');
         this._aFrameSceneElement.setAttribute('embedded', '');
         this._aFrameSceneElement.classList.add('romper-aframe-scene');
 
@@ -126,6 +123,22 @@ export default class AFrameRenderer extends BaseRenderer {
         this._playoutEngine.getMediaElement(this._rendererId).id = 'threesixtyvideo';
         // this may break stuff!!!
         aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+        this._rendered = true;
+        if (this._started) {
+            this.startThreeSixtyVideo();
+        }
+    }
+
+    startThreeSixtyVideo() {
+        this._target.appendChild(this._aFrameSceneElement);
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.setPlayoutActive(this._rendererId);
     }
 
     _handlePlayPauseButtonClicked(): void {
