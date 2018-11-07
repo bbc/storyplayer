@@ -21,6 +21,7 @@ export default class StoryIconRenderer extends EventEmitter {
     _iconUrlMap: { [key: string]: { default: ?string, active: ?string } };
     _player: Player;
     _handleIconClicked: Function;
+    _preloadedIcons: Array<any>
 
     /**
      * Create a new instance of a StoryIconRenderer
@@ -46,6 +47,7 @@ export default class StoryIconRenderer extends EventEmitter {
         this._fetchMedia = fetchMedia;
         this._player = player;
         this._iconUrlMap = {};
+        this._preloadedIcons = [];
     }
 
     start(startingRepresentationId: string) {
@@ -53,6 +55,7 @@ export default class StoryIconRenderer extends EventEmitter {
         this._currentRepresentationId = this._pathItemList[0].representation.id;
         this._getIconAssets().then((iconAssets) => {
             this._iconUrlMap = StoryIconRenderer._buildUrlMap(this._pathItemList, iconAssets);
+            this.preloadIcons();
             this._deepestCommonSubstory = this._findSubStories();
             this._pathItemList.forEach((pathItem, index) => {
                 const representationId = pathItem.representation.id;
@@ -74,6 +77,26 @@ export default class StoryIconRenderer extends EventEmitter {
         });
 
         this._player.on(PlayerEvents.ICON_CLICKED, this._handleIconClicked);
+    }
+
+
+    preloadIcons() {
+        this._preloadedIcons = [];
+        Object.keys(this._iconUrlMap).forEach((iconUrlMapKey) => {
+            const defaultIconUrl = this._iconUrlMap[iconUrlMapKey].default;
+            const activeIconUrl = this._iconUrlMap[iconUrlMapKey].active;
+
+            if (defaultIconUrl) {
+                const image = new Image();
+                image.src = defaultIconUrl;
+                this._preloadedIcons.push(image);
+            }
+            if (activeIconUrl) {
+                const image = new Image();
+                image.src = activeIconUrl;
+                this._preloadedIcons.push(image);
+            }
+        });
     }
 
     _handleIconClicked(event: Object) {
