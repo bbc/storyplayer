@@ -224,6 +224,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 this.play();
             }
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_src) {
+                this._showHideSubtitles(rendererId);
                 this._player.enableSubtitlesControl();
             }
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
@@ -266,7 +267,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     logger.error('Cannot handle this mediaType (setPlayoutInactive)');
                 }
             }
-            this._cleanUpSubtitles(rendererId);
             this._player.disableSubtitlesControl();
             rendererPlayoutObj.mediaElement.pause();
             rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');

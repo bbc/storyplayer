@@ -111,8 +111,10 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
         }
         if (mediaObj.subs_url) {
-            this._queueSubtitleAttach(rendererId);
             this._player.enableSubtitlesControl();
+            if (rendererPlayoutObj.active) {
+                this._queueSubtitleAttach(rendererId);
+            }
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
@@ -124,6 +126,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
+        this._cleanUpSubtitles(rendererId);
         this._mediaManager.returnMediaInstance(rendererPlayoutObj.mediaInstance);
         super.unqueuePlayout(rendererId);
     }
@@ -140,6 +143,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 this.play();
             }
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.subs_url) {
+                this._queueSubtitleAttach(rendererId);
                 this._player.enableSubtitlesControl();
             }
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
@@ -298,7 +302,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
-
         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
         if (rendererPlayoutObj.mediaSubsTrack) {
             rendererPlayoutObj.mediaSubsTrack.mode = 'hidden';
@@ -319,22 +322,24 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
 
         this._cleanUpSubtitles(rendererId);
-        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-        if (rendererPlayoutObj.media.subs_url && this._subtitlesShowing) {
-            rendererPlayoutObj.mediaSubsTrack =
-                ((document.createElement('track'): any): HTMLTrackElement);
-            rendererPlayoutObj.mediaSubsTrack.kind = 'captions';
-            rendererPlayoutObj.mediaSubsTrack.label = 'English';
-            rendererPlayoutObj.mediaSubsTrack.srclang = 'en';
-            rendererPlayoutObj.mediaSubsTrack.src = rendererPlayoutObj.media.subs_url;
-            rendererPlayoutObj.mediaSubsTrack.default = false;
-            videoElement.appendChild(rendererPlayoutObj.mediaSubsTrack);
+        if (rendererPlayoutObj.active) {
+            const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+            if (rendererPlayoutObj.media.subs_url && this._subtitlesShowing) {
+                rendererPlayoutObj.mediaSubsTrack =
+                    ((document.createElement('track'): any): HTMLTrackElement);
+                rendererPlayoutObj.mediaSubsTrack.kind = 'captions';
+                rendererPlayoutObj.mediaSubsTrack.label = 'English';
+                rendererPlayoutObj.mediaSubsTrack.srclang = 'en';
+                rendererPlayoutObj.mediaSubsTrack.src = rendererPlayoutObj.media.subs_url;
+                rendererPlayoutObj.mediaSubsTrack.default = false;
+                videoElement.appendChild(rendererPlayoutObj.mediaSubsTrack);
 
-            // Show Subtitles.
-            rendererPlayoutObj.mediaSubsTrack.mode = 'showing';
+                // Show Subtitles.
+                rendererPlayoutObj.mediaSubsTrack.mode = 'showing';
 
-            if (videoElement.textTracks[0]) {
-                videoElement.textTracks[0].mode = 'showing';
+                if (videoElement.textTracks[0]) {
+                    videoElement.textTracks[0].mode = 'showing';
+                }
             }
         }
     }
