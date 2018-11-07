@@ -10,6 +10,11 @@ import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 
+const PLAYOUT_ENGINES = {
+    SRC_SWITCH_PLAYOUT: 'src',
+    DOM_SWITCH_PLAYOUT: 'dom',
+};
+
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'ICON_CLICKED',
@@ -505,12 +510,31 @@ class Player extends EventEmitter {
         this.removeExperienceStartButtonAndImage =
             this.removeExperienceStartButtonAndImage.bind(this);
 
+        let playoutToUse = 'dom';
+
         if (BrowserUserAgent.iOS()) {
+            playoutToUse = 'src';
+        }
+
+        const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
+        if (overridePlayout) {
+            playoutToUse = overridePlayout;
+        }
+
+        logger.info('Using playout engine: ', playoutToUse);
+
+        switch (playoutToUse) {
+        case PLAYOUT_ENGINES.SRC_SWITCH_PLAYOUT:
             // Use craptastic iOS playout engine
             this.playoutEngine = new SrcSwitchPlayoutEngine(this);
-        } else {
+            break;
+        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
             this.playoutEngine = new DOMSwitchPlayoutEngine(this);
+            break;
+        default:
+            logger.fatal('Invalid Playout Engine');
+            throw new Error('Invalid Playout Engine');
         }
     }
 

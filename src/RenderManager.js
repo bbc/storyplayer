@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls,
+    RepresentationChoice, AssetUrls, AssetCollection,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -38,7 +38,7 @@ export default class RenderManager extends EventEmitter {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
     };
-    _upcomingRenderers: Array<{ [key: string]: BaseRenderer }>;
+    _upcomingRenderers: { [key: string]: BaseRenderer };
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
@@ -134,90 +134,90 @@ export default class RenderManager extends EventEmitter {
     handleNEChange(narrativeElement: NarrativeElement) {
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
-            this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
+            return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
-                    // get a Renderer for this new NE
-                    const newRenderer = this._getRenderer(narrativeElement, representation);
+                    if (this._currentNarrativeElement === narrativeElement) {
+                        // Restarting Current NE
+                        this._restartCurrentRenderer();
+                    } else {
+                        // get a Renderer for this new NE
+                        const newRenderer = this._getRenderer(narrativeElement, representation);
 
-                    // look ahead and create new renderers for the next step
-                    this._rendererLookahead(narrativeElement);
+                        // look ahead and create new renderers for the next/previous step
+                        this._rendererLookahead(narrativeElement);
 
-                    // TODO: need to clean up upcomingRenderers here too
+                        if (newRenderer) {
+                            // swap renderers
+                            this._swapRenderers(newRenderer, narrativeElement);
+                            // handle backgrounds
+                            this._handleBackgroundRendering(newRenderer.getRepresentation());
+                        }
 
-                    if (newRenderer) {
-                        this._currentNarrativeElement = narrativeElement;
-                        // swap renderers
-                        this._swapRenderers(newRenderer);
-                        // handle backgrounds
-                        this._handleBackgroundRendering(newRenderer.getRepresentation());
-                    }
-
-                    // tell story renderer that we've changed
-                    if (this._renderStory) {
-                        this._renderStory.handleNarrativeElementChanged(representation.id);
+                        // tell story renderer that we've changed
+                        if (this._renderStory) {
+                            this._renderStory.handleNarrativeElementChanged(representation.id);
+                        }
                     }
                 });
         }
+        return Promise.reject(new Error('No representation_collection_target_id on NE'));
     }
 
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
-    // eslint-disable-next-line class-methods-use-this
     handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
         logger.warn('RenderManager choice of links - inform player');
+        // go through promise chain to get asset collections
+        const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
         narrativeElements.forEach((choiceNarrativeElement, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
-            // fetch representation
+            // fetch icon representation
             if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
-                this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
+                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
+                    // presentation
                     .then(presentation => this._representationReasoner(presentation))
+                    // representation
                     .then((representation) => {
-                        this._renderLinkChoiceIcon(i, representation, choiceNarrativeElement.id);
-                    });
+                        if (
+                            representation.asset_collections.icon &&
+                            representation.asset_collections.icon.default_id
+                        ) {
+                            // eslint-disable-next-line max-len
+                            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
+                            // asset collection
+                            return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
+                        }
+                        return Promise.resolve(null);
+                    }));
+            } else {
+                assetCollectionPromises.push(Promise.resolve(null));
             }
         });
+
+        // go through asset collections and render icons
+        Promise.all(assetCollectionPromises)
+            .then((urls) => {
+                this._player.clearLinkChoices();
+                urls.forEach((iconAssetCollection, choiceId) => {
+                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
+                        // tell Player to render icon
+                        this._player.addLinkChoiceControl(
+                            narrativeElements[choiceId].id,
+                            iconAssetCollection.assets.image_src,
+                            `Option ${(choiceId + 1)}`,
+                        );
+                    }
+                });
+                this._player.enableLinkChoiceControl();
+            });
     }
 
     // get the current narrative element object
     getCurrentNarrativeElement(): NarrativeElement {
         return this._currentNarrativeElement;
-    }
-
-    // display an icon for a choice of links (at a branch in the story)
-    _renderLinkChoiceIcon(
-        choiceId: number,
-        representation: Representation,
-        narrativeElementId: string,
-    ) {
-        // fetch icon
-        const setLinkChoiceControl = (mediaUrl) => {
-            // tell Player to render icon
-            this._player.addLinkChoiceControl(
-                narrativeElementId,
-                mediaUrl,
-                `Option ${(choiceId + 1)}`,
-            );
-        };
-
-        if (
-            representation.asset_collections.icon &&
-            representation.asset_collections.icon.default_id
-        ) {
-            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
-            this._fetchers.assetCollectionFetcher(iconAssetCollectionId)
-                .then((iconAssetCollection) => {
-                    if (iconAssetCollection.assets.image_src) {
-                        setLinkChoiceControl(iconAssetCollection.assets.image_src);
-                    }
-                });
-        } else {
-            setLinkChoiceControl('');
-        }
-        // make overlay visible
-        this._player.enableLinkChoiceControl();
     }
 
     // user has made a choice of link to follow - do it
@@ -238,6 +238,7 @@ export default class RenderManager extends EventEmitter {
         this._renderStory.on('jumpToNarrativeElement', (neid) => {
             this._controller._jumpToNarrativeElement(neid);
         });
+
         if (this._currentRenderer) {
             this._renderStory.start(this._currentRenderer.getRepresentation().id);
         }
@@ -323,28 +324,45 @@ export default class RenderManager extends EventEmitter {
                     if (choice.choice_representation) {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
+                    // Set index of each queued switchable
+                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+                        const renderer = this._upcomingRenderers[rendererNEId];
+                        if (renderer instanceof SwitchableRenderer) {
+                            // eslint-disable-next-line max-len
+                            renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+                        }
+                    });
                 },
             );
+
+            if (newRenderer instanceof SwitchableRenderer) {
+                // eslint-disable-next-line max-len
+                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
+            }
         } else {
             logger.error(`Do not know how to render ${representation.representation_type}`);
         }
         return newRenderer;
     }
 
+    _restartCurrentRenderer() {
+        if (this._currentRenderer) {
+            const currentRenderer = this._currentRenderer;
+            currentRenderer.end();
+            currentRenderer.willStart();
+        }
+    }
+
     // swap the renderers over
     // it's here we might want to be clever with retaining elements if
     // Renderers are of the same type
-    _swapRenderers(newRenderer: BaseRenderer) {
-        // if both same type, just update current
-        //   else
-        // destroy old renderer
-        if (this._currentRenderer) {
-            this._currentRenderer.destroy();
-        }
+    _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
+        const oldRenderer = this._currentRenderer;
         this._currentRenderer = newRenderer;
+        this._currentNarrativeElement = newNarrativeElement;
 
         // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller._getIdOfPreviousNode() !== null);
+        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -361,11 +379,25 @@ export default class RenderManager extends EventEmitter {
             const value = this._rendererState.volumes[label];
             this._player.setVolumeControlLevel(label, value);
         });
+
+        if (oldRenderer) {
+            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
+                .some((renderer) => {
+                    if (renderer === oldRenderer) {
+                        return true;
+                    }
+                    return false;
+                });
+            if (!currentRendererInUpcoming) {
+                oldRenderer.destroy();
+            } else {
+                oldRenderer.end();
+            }
+        }
     }
 
     // show next button, or icons if choice
     _showOnwardIcons() {
-        this._player.clearLinkChoices();
         const next = this._controller.getValidNextSteps();
         if (next) {
             next.then((nextNarrativeElements) => {
@@ -390,18 +422,13 @@ export default class RenderManager extends EventEmitter {
     ): ?BaseRenderer {
         let newRenderer;
         // have we already got a renderer?
-        if (this._upcomingRenderers.length === 1) {
-            const newRenderersList = this._upcomingRenderers.shift();
-            Object.keys(newRenderersList).forEach((rendererNEId) => {
-                if (rendererNEId === narrativeElement.id) {
-                    // this is the correct one - use it
-                    newRenderer = newRenderersList[rendererNEId];
-                } else {
-                    // only using one - destroy any others
-                    newRenderersList[rendererNEId].destroy();
-                }
-            });
-        }
+        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
+            if (rendererNEId === narrativeElement.id) {
+                // this is the correct one - use it
+                newRenderer = this._upcomingRenderers[rendererNEId];
+            }
+        });
+
         // create the new Renderer if we need to
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
@@ -410,7 +437,6 @@ export default class RenderManager extends EventEmitter {
     }
 
     refreshLookahead() {
-        this._upcomingRenderers = [];
         if (this._currentNarrativeElement) {
             this._rendererLookahead(this._currentNarrativeElement);
         }
@@ -418,29 +444,65 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
-        const upcomingIds = this._controller._getIdsOfNextNodes(narrativeElement);
-        const upcomingRenderers = {};
-        upcomingIds.forEach((neid) => {
-            // get the actual NarrativeElement object
-            const neObj = this._controller._getNarrativeElement(neid);
-            if (neObj && neObj.body.representation_collection_target_id) {
-                this._fetchers
-                    .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                    .then(presentation => this._representationReasoner(presentation))
-                    .then((representation) => {
-                        // create the new Renderer
-                        const newRenderer = this._createNewRenderer(representation);
-                        upcomingRenderers[neid] = newRenderer;
+        let allIds = [];
+        const nextIds = this._controller.getIdsOfNextNodes(narrativeElement);
+        const previousId = this._controller.getIdOfPreviousNode();
+        if (previousId) {
+            allIds = nextIds.concat([previousId]);
+        } else {
+            allIds = nextIds;
+        }
+
+        // Generate new renderers for any that are missing
+        const renderPromises = allIds
+            .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
+            .map((neid) => {
+                // Check to see if required NE renderer is the one currently being shown
+                if (
+                    this._currentRenderer &&
+                    this._currentNarrativeElement &&
+                    this._currentNarrativeElement.id === neid
+                ) {
+                    this._upcomingRenderers[neid] = this._currentRenderer;
+                } else {
+                    // get the actual NarrativeElement object
+                    const neObj = this._controller._getNarrativeElement(neid);
+                    if (neObj && neObj.body.representation_collection_target_id) {
+                        return this._fetchers
+                            // eslint-disable-next-line max-len
+                            .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                            .then(presentation => this._representationReasoner(presentation))
+                            .then((representation) => {
+                                // create the new Renderer
+                                const newRenderer = this._createNewRenderer(representation);
+                                if (newRenderer) {
+                                    this._upcomingRenderers[neid] = newRenderer;
+                                }
+                            });
+                    }
+                }
+                return Promise.resolve();
+            });
+
+        Promise.all(renderPromises)
+            // Clean up any renderers that are not needed any longer
+            .then(() => {
+                Object.keys(this._upcomingRenderers)
+                    .filter(neid => allIds.indexOf(neid) === -1)
+                    .forEach((neid) => {
+                        if (narrativeElement.id !== neid) {
+                            this._upcomingRenderers[neid].destroy();
+                        }
+                        delete this._upcomingRenderers[neid];
                     });
-            }
-        });
-        this._upcomingRenderers.push(upcomingRenderers);
+            });
+
         this._showOnwardIcons();
     }
 
     _initialise() {
         this._currentRenderer = null;
-        this._upcomingRenderers = [];
+        this._upcomingRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice

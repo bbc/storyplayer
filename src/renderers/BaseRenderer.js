@@ -12,6 +12,7 @@ import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
     _representation: Representation;
@@ -79,6 +80,18 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
     }
 
+    willStart() {
+        this._player.enterStartBehaviourPhase();
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours(
+                BehaviourTimings.started,
+                RendererEvents.COMPLETE_START_BEHAVIOURS,
+            )
+        ) {
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        }
+    }
+
     /**
      * An event which fires when this renderer has completed it's part of the experience
      * (e.g., video finished, or the user has clicked 'skip', etc)
@@ -93,22 +106,13 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
 
-    willStart() {
-        this._player.enterStartBehaviourPhase();
-        if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(
-                BehaviourTimings.started,
-                RendererEvents.COMPLETE_START_BEHAVIOURS,
-            )
-        ) {
-            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-    }
-
     start() {
         this.emit(RendererEvents.STARTED);
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
+    }
+
+    end() {
     }
 
     /* record some analytics for the renderer - not user actions though */
@@ -173,7 +177,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     switchFrom() {
-        this.destroy();
+        this.end();
     }
 
     // prepare rendere so it can be switched to quickly and in sync
@@ -411,6 +415,7 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
+        this.end();
         this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
