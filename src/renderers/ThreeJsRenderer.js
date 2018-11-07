@@ -275,12 +275,6 @@ export default class ThreeJsRenderer extends BaseRenderer {
         }
     }
 
-    // _handleVolumeClicked(event: Object): void {
-    //     if (event.id === this._representation.id) {
-    //         this._mediaInstance.setVolume(event.value);
-    //     }
-    // }
-
     switchFrom() {
         this.end();
     }
