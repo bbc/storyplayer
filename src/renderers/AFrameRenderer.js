@@ -22,6 +22,8 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _aFrameSceneElement: HTMLElement;
     _videoAssetElement: HTMLVideoElement;
+    _aFrameCamera: any;
+    _initialRotation: string;
 
     _started: boolean;
     _rendered: boolean;
@@ -49,6 +51,7 @@ export default class AFrameRenderer extends BaseRenderer {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
         this._aFrameSceneElement = document.createElement('a-scene');
+        this._initialRotation = '0 90 0';
         this.renderVideoElement();
     }
 
@@ -61,7 +64,7 @@ export default class AFrameRenderer extends BaseRenderer {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
-            this.startThreeSixtyVideo();
+            this._startThreeSixtyVideo();
         }
         this._started = true;
     }
@@ -89,7 +92,7 @@ export default class AFrameRenderer extends BaseRenderer {
                     if (fg.assets.av_src) {
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
-                                this.populateVideoElement(mediaUrl);
+                                this._buildAframeVideoScene(mediaUrl);
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -99,7 +102,7 @@ export default class AFrameRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string) {
+    _buildAframeVideoScene(mediaUrl: string) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
             return;
@@ -117,6 +120,14 @@ export default class AFrameRenderer extends BaseRenderer {
         aFrameVideoSphere.setAttribute('src', '#threesixtyvideo');
         this._aFrameSceneElement.appendChild(aFrameVideoSphere);
 
+        const cameraEntity = document.createElement('a-entity');
+        cameraEntity.setAttribute('position', '0 0 0');
+
+        cameraEntity.setAttribute('rotation', this._initialRotation);
+        this._aFrameCamera = document.createElement('a-camera');
+        cameraEntity.appendChild(this._aFrameCamera);
+        this._aFrameSceneElement.appendChild(cameraEntity);
+
         const aFrameAssetsElement = document.createElement('a-assets');
         this._aFrameSceneElement.appendChild(aFrameAssetsElement);
 
@@ -125,20 +136,35 @@ export default class AFrameRenderer extends BaseRenderer {
         aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
         this._rendered = true;
         if (this._started) {
-            this.startThreeSixtyVideo();
+            this._startThreeSixtyVideo();
         }
     }
 
-    startThreeSixtyVideo() {
+    _startThreeSixtyVideo() {
         this._target.appendChild(this._aFrameSceneElement);
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
 
+        this._target.addEventListener('mouseup', () => { this.getOrientation(); }, false);
+
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
+    }
+
+    // get the direction of view
+    getOrientation(): Object {
+        const rot = this._aFrameCamera.getAttribute('rotation');
+        let phi = -rot.y;
+        if (phi < 0) { phi += 360; }
+        const coords = {
+            phi: Math.round(phi),
+            theta: Math.round(rot.x),
+        };
+        logger.info(`Current view direction: ${coords.phi}, ${coords.theta}`);
+        return coords;
     }
 
     _handlePlayPauseButtonClicked(): void {
