@@ -55,7 +55,15 @@ export default class BasePlayoutEngine {
         }
     }
 
-    fadeInBackgroundAudio(endererId: string) {
+    getMediaDuration(rendererId: string): Promise<any> {
+        return Promise.resolve();
+    }
+
+    fadeInBackgroundAudio(rendererId: string, currentTime: number, fadeDuration: number) {
+
+    }
+
+    fadeOutBackgroundAudio(rendererId: string, timeLeft: number, fadeDuration: number) {
 
     }
 
@@ -64,6 +72,10 @@ export default class BasePlayoutEngine {
     }
 
     pause() {
+
+    }
+
+    getForegroundMediaElementId() {
 
     }
 

@@ -38,6 +38,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _queueSubtitleAttach: Function
 
     fadeInBackgroundAudio: Function
+    fadeOutBackgroundAudio: Function
 
     constructor(player: Player) {
         super(player);
@@ -113,6 +114,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 const audioElement = document.createElement('audio');
                 audioElement.className = 'romper-audio-element romper-media-element-queued';
                 audioElement.crossOrigin = 'anonymous';
+                audioElement.volume = 0;
                 rendererPlayoutObj.mediaElement = audioElement;
                 this._player.backgroundTarget.appendChild(rendererPlayoutObj.mediaElement);
             }
@@ -292,23 +294,22 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-
-    fadeInBackgroundAudio(rendererId: string) {
+    fadeInBackgroundAudio(rendererId: string, currentTime: number, fadeDuration: number) {
         const { mediaElement } = this._media[rendererId];
-        mediaElement.volume = 0;
 
-        const tInt = 10; // ms
-        const vInt = 0.01;
+        const fadeVolume = currentTime / fadeDuration;
+        if (fadeVolume <= 1) {
+            mediaElement.volume = fadeVolume;
+        } else {
+            mediaElement.volume = 1;
+        }
+    }
 
-        const fadeAudio = setInterval(() => {
-            const currentVolume = mediaElement.volume;
-            if (currentVolume + vInt >= 1) {
-                mediaElement.volume = 1;
-                clearInterval(fadeAudio);
-            } else {
-                mediaElement.volume += vInt;
-            }
-        }, tInt);
+    fadeOutBackgroundAudio(rendererId: string, timeLeft: number, fadeDuration: number) {
+        const { mediaElement } = this._media[rendererId];
+
+        const fadeVolume = timeLeft / fadeDuration;
+        mediaElement.volume = fadeVolume;
     }
 
 
@@ -349,6 +350,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             });
     }
 
+    getForegroundMediaElementId() {
+        const filteredMedia = Object.keys(this._media)
+            .filter(key => this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV &&
+                           this._media[key].active === true);
+
+        return filteredMedia[0];
+    }
+
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
@@ -383,16 +392,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     on(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
-            const videoElement = rendererPlayoutObj.mediaElement;
-            videoElement.addEventListener(event, callback);
+            const { mediaElement } = rendererPlayoutObj;
+            mediaElement.addEventListener(event, callback);
         }
     }
 
     off(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
-            const videoElement = rendererPlayoutObj.mediaElement;
-            videoElement.removeEventListener(event, callback);
+            const { mediaElement } = rendererPlayoutObj;
+            mediaElement.removeEventListener(event, callback);
         }
     }
 

@@ -11,6 +11,8 @@ import logger from '../logger';
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
+    _audioFadesHandler: Function;
+    _fadeAudioTimer: IntervalID;
 
     constructor(
         assetCollection: AssetCollection,
@@ -26,19 +28,54 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._renderBackgroundAudio();
     }
 
+    _startAudioFadeTimer() {
+        const foregroundRenderedId = this._playoutEngine.getForegroundMediaElementId();
+        if (foregroundRenderedId) {
+            const foregroundElement = this._playoutEngine.getMediaElement(foregroundRenderedId);
+            if (foregroundElement) {
+                const tInt = 10;
+                this._fadeAudioTimer = setInterval(() => {
+                    const fadeDuration = Math.min(foregroundElement.duration, 2);
+                    const currentForegroundTime = foregroundElement.currentTime;
+
+                    if (currentForegroundTime <= 2) {
+                        this._playoutEngine.fadeInBackgroundAudio(
+                            this._rendererId,
+                            foregroundElement.currentTime,
+                            fadeDuration,
+                        );
+                    } else if (
+                        foregroundElement.currentTime >
+                        foregroundElement.duration -
+                        fadeDuration) {
+                        const timeLeft = foregroundElement.duration -
+                            foregroundElement.currentTime;
+                        this._playoutEngine.fadeOutBackgroundAudio(
+                            this._rendererId,
+                            timeLeft,
+                            fadeDuration,
+                        );
+                    }
+                }, tInt);
+            }
+        }
+    }
+
     start() {
         this._playoutEngine.setPlayoutActive(this._rendererId);
+        this._startAudioFadeTimer();
+
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
             const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
             if (audioElement) {
                 audioElement.setAttribute('loop', 'true');
             }
-            this._playoutEngine.fadeInBackgroundAudio(this._rendererId);
         }
     }
 
     end() {
+        clearInterval(this._fadeAudioTimer);
         this._playoutEngine.setPlayoutInactive(this._rendererId);
     }
 
