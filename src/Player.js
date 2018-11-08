@@ -1,5 +1,4 @@
 // @flow
-
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
@@ -1112,14 +1111,18 @@ class Player extends EventEmitter {
             media.currentTime = percent * media.duration;
         });
 
+        let wasPlaying = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
+            wasPlaying = !media.paused;
             media.pause();
         });
 
-        // Play the media when the slider handle is dropped
+        // Play the media when the slider handle is dropped (if it was previously playing)
         scrubBar.addEventListener('mouseup', () => {
-            media.play();
+            if (wasPlaying) {
+                media.play();
+            }
         });
 
         // Update the seek bar as the media plays
