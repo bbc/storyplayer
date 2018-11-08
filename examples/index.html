@@ -64,7 +64,7 @@
         let loadedStoryJson;
 
         // load demo stories
-        const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json'];
+        const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json', 'demo-background-audio.json'];
         stories.forEach(storyFilename => fetchStoryOption(storyFilename));
 
         // get the story data for an option, and call a function to render it for selection
@@ -189,7 +189,7 @@
                 target: document.getElementById('romper-target'),
                 staticImageBaseUrl: '/src/assets/images/',
                 analyticsLogger: dataObj => {
-                    console.log('ANALYTICS:', dataObj);
+                  //  console.log('ANALYTICS:', dataObj);
                 },
                 storyFetcher: id => Promise.resolve().then(
                     () => config.stories.filter(storyObject => storyObject.id === id)[0]

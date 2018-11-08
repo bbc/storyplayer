@@ -37,6 +37,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _showHideSubtitles: Function
     _queueSubtitleAttach: Function
 
+    fadeInBackgroundAudio: Function
+
     constructor(player: Player) {
         super(player);
 
@@ -289,6 +291,26 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             });
         }
     }
+
+
+    fadeInBackgroundAudio(rendererId: string) {
+        const { mediaElement } = this._media[rendererId];
+        mediaElement.volume = 0;
+
+        const tInt = 10; // ms
+        const vInt = 0.01;
+
+        const fadeAudio = setInterval(() => {
+            const currentVolume = mediaElement.volume;
+            if (currentVolume + vInt >= 1) {
+                mediaElement.volume = 1;
+                clearInterval(fadeAudio);
+            } else {
+                mediaElement.volume += vInt;
+            }
+        }, tInt);
+    }
+
 
     play() {
         this._playing = true;

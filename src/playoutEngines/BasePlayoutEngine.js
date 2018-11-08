@@ -55,6 +55,10 @@ export default class BasePlayoutEngine {
         }
     }
 
+    fadeInBackgroundAudio(endererId: string) {
+
+    }
+
     play() {
 
     }

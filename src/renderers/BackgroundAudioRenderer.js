@@ -28,13 +28,13 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     start() {
         this._playoutEngine.setPlayoutActive(this._rendererId);
-
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
             const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
             if (audioElement) {
                 audioElement.setAttribute('loop', 'true');
             }
+            this._playoutEngine.fadeInBackgroundAudio(this._rendererId);
         }
     }
 
