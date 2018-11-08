@@ -18,6 +18,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     _inCompleteBehaviours: boolean;
     _handleChoiceClicked: Function;
     _switchableIsQueuedNotPlaying: boolean;
+    _preloadedSwitchIcons: Array<Image>;
 
     constructor(
         representation: Representation,
@@ -43,6 +44,9 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._nodeCompleted = false;
         this._inCompleteBehaviours = false;
         this._controller = controller;
+
+        this._preloadSwitchIcons();
+        this._preloadedSwitchIcons = [];
     }
 
     _updateChoiceRenderers() {
@@ -180,6 +184,36 @@ export default class SwitchableRenderer extends BaseRenderer {
             });
         }
         return choices;
+    }
+
+    // loads the switch icons buttons as IMG elements in a list
+    _preloadSwitchIcons() {
+        this._preloadedSwitchIcons = [];
+        if (this._representation.choices) {
+            this._representation.choices.forEach((choice) => {
+                if (choice.choice_representation &&
+                    choice.choice_representation.asset_collections &&
+                    choice.choice_representation.asset_collections.icon &&
+                    choice.choice_representation.asset_collections.icon.default_id
+                ) {
+                    // eslint-disable-next-line max-len
+                    this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
+                        .then((icon) => {
+                            if (icon.assets.image_src) {
+                                return this._fetchMedia(icon.assets.image_src);
+                            }
+                            return Promise.resolve();
+                        })
+                        .then((iconUrl) => {
+                            if (iconUrl) {
+                                const image = new Image();
+                                image.src = iconUrl;
+                                this._preloadedSwitchIcons.push(image);
+                            }
+                        });
+                }
+            });
+        }
     }
 
     // display the buttons as IMG elements in a list in a div

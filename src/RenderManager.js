@@ -358,6 +358,7 @@ export default class RenderManager extends EventEmitter {
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
+
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
