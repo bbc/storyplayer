@@ -31,6 +31,8 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
     _controller: Controller;
 
+    inVariablePanel: boolean;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -63,9 +65,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
 
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
@@ -78,9 +77,14 @@ export default class BaseRenderer extends EventEmitter {
 
         this._destroyed = false;
         this._analytics = analytics;
+        this.inVariablePanel = false;
     }
 
     willStart() {
+        this.inVariablePanel = false;
+        this._behaviourRunner = this._representation.behaviours
+            ? new BehaviourRunner(this._representation.behaviours, this)
+            : null;
         this._player.enterStartBehaviourPhase();
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
@@ -113,6 +117,20 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+    }
+
+    // does this renderer have a show variable panel behaviour
+    hasVariablePanelBehaviour(): boolean {
+        let hasPanel = false;
+        if (this._representation.behaviours && this._representation.behaviours.completed) {
+            this._representation.behaviours.completed.forEach((behave) => {
+                // eslint-disable-next-line max-len
+                if (behave.type === 'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0') {
+                    hasPanel = true;
+                }
+            });
+        }
+        return hasPanel;
     }
 
     /* record some analytics for the renderer - not user actions though */
@@ -343,6 +361,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.setNextAvailable(false);
+        this.inVariablePanel = true;
 
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
@@ -394,6 +413,7 @@ export default class BaseRenderer extends EventEmitter {
                     if (currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
                         overlayImageElement.classList.remove('active');
+                        this.inVariablePanel = false;
                         // complete NE when fade out done
                         setTimeout(() => {
                             this._player.setNextAvailable(true);
