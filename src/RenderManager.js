@@ -174,8 +174,8 @@ export default class RenderManager extends EventEmitter {
             if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
                 assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
-                    // presentation
-                    .then(presentation => this._representationReasoner(presentation))
+                    // representationCollection
+                    .then(representationCollection => this._representationReasoner(representationCollection))
                     // representation
                     .then((representation) => {
                         if (
