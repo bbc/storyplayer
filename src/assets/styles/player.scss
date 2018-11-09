@@ -400,8 +400,14 @@ $romper-hover-text-size: 25px;
    grid-auto-flow: column;
    min-height: 0;
    min-width: 0;
+   transition: all 0.5s ease;
+
    &.tworow {
      grid-template-rows: 1fr 1fr;
+   }
+   &.fade {
+    opacity: 0;
+    margin: 50%;
    }
  }
 

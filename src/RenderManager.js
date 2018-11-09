@@ -199,14 +199,13 @@ export default class RenderManager extends EventEmitter {
             .then((urls) => {
                 this._player.clearLinkChoices();
                 urls.forEach((iconAssetCollection, choiceId) => {
-                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
-                        // tell Player to render icon
-                        this._player.addLinkChoiceControl(
-                            narrativeElements[choiceId].id,
-                            iconAssetCollection.assets.image_src,
-                            `Option ${(choiceId + 1)}`,
-                        );
-                    }
+                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ? iconAssetCollection.assets.image_src : '';
+                    // tell Player to render icon
+                    this._player.addLinkChoiceControl(
+                        narrativeElements[choiceId].id,
+                        imgsrc,
+                        `Option ${(choiceId + 1)}`,
+                    );
                 });
                 this._player.enableLinkChoiceControl();
             });
