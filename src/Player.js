@@ -1,5 +1,4 @@
 // @flow
-
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
@@ -9,6 +8,11 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
+
+const PLAYOUT_ENGINES = {
+    SRC_SWITCH_PLAYOUT: 'src',
+    DOM_SWITCH_PLAYOUT: 'dom',
+};
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -507,12 +511,31 @@ class Player extends EventEmitter {
         this.removeExperienceStartButtonAndImage =
             this.removeExperienceStartButtonAndImage.bind(this);
 
+        let playoutToUse = 'dom';
+
         if (BrowserUserAgent.iOS()) {
+            playoutToUse = 'src';
+        }
+
+        const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
+        if (overridePlayout) {
+            playoutToUse = overridePlayout;
+        }
+
+        logger.info('Using playout engine: ', playoutToUse);
+
+        switch (playoutToUse) {
+        case PLAYOUT_ENGINES.SRC_SWITCH_PLAYOUT:
             // Use craptastic iOS playout engine
             this.playoutEngine = new SrcSwitchPlayoutEngine(this);
-        } else {
+            break;
+        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
             this.playoutEngine = new DOMSwitchPlayoutEngine(this);
+            break;
+        default:
+            logger.fatal('Invalid Playout Engine');
+            throw new Error('Invalid Playout Engine');
         }
     }
 
@@ -1099,14 +1122,18 @@ class Player extends EventEmitter {
             media.currentTime = percent * media.duration;
         });
 
+        let wasPlaying = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
+            wasPlaying = !media.paused;
             media.pause();
         });
 
-        // Play the media when the slider handle is dropped
+        // Play the media when the slider handle is dropped (if it was previously playing)
         scrubBar.addEventListener('mouseup', () => {
-            media.play();
+            if (wasPlaying) {
+                media.play();
+            }
         });
 
         // Update the seek bar as the media plays

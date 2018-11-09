@@ -12,6 +12,7 @@ import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
     _representation: Representation;
@@ -29,6 +30,8 @@ export default class BaseRenderer extends EventEmitter {
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
     _controller: Controller;
+
+    inVariablePanel: boolean;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -62,9 +65,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
 
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
@@ -77,6 +77,23 @@ export default class BaseRenderer extends EventEmitter {
 
         this._destroyed = false;
         this._analytics = analytics;
+        this.inVariablePanel = false;
+    }
+
+    willStart() {
+        this.inVariablePanel = false;
+        this._behaviourRunner = this._representation.behaviours
+            ? new BehaviourRunner(this._representation.behaviours, this)
+            : null;
+        this._player.enterStartBehaviourPhase();
+        if (!this._behaviourRunner ||
+            !this._behaviourRunner.runBehaviours(
+                BehaviourTimings.started,
+                RendererEvents.COMPLETE_START_BEHAVIOURS,
+            )
+        ) {
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        }
     }
 
     /**
@@ -93,22 +110,27 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
 
-    willStart() {
-        this._player.enterStartBehaviourPhase();
-        if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(
-                BehaviourTimings.started,
-                RendererEvents.COMPLETE_START_BEHAVIOURS,
-            )
-        ) {
-            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-    }
-
     start() {
         this.emit(RendererEvents.STARTED);
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
+    }
+
+    end() {
+    }
+
+    // does this renderer have a show variable panel behaviour
+    hasVariablePanelBehaviour(): boolean {
+        let hasPanel = false;
+        if (this._representation.behaviours && this._representation.behaviours.completed) {
+            this._representation.behaviours.completed.forEach((behave) => {
+                // eslint-disable-next-line max-len
+                if (behave.type === 'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0') {
+                    hasPanel = true;
+                }
+            });
+        }
+        return hasPanel;
     }
 
     /* record some analytics for the renderer - not user actions though */
@@ -173,7 +195,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     switchFrom() {
-        this.destroy();
+        this.end();
     }
 
     // prepare rendere so it can be switched to quickly and in sync
@@ -222,6 +244,7 @@ export default class BaseRenderer extends EventEmitter {
     // an input for selecting the value for a boolean variable
     _getBooleanVariableSetter(varName: string) {
         const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
 
         // yes button & label
         const radioYesDiv = document.createElement('div');
@@ -261,36 +284,45 @@ export default class BaseRenderer extends EventEmitter {
 
     // an input for selecting the value for a list variable
     _getListVariableSetter(varName: string, variableDecl: Object) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
         const options = variableDecl.values;
-        const varInput = document.createElement('select');
+        const varInputSelect = document.createElement('select');
         options.forEach((optionValue) => {
             const optionElement = document.createElement('option');
             optionElement.setAttribute('value', optionValue);
             optionElement.textContent = optionValue;
-            varInput.appendChild(optionElement);
+            varInputSelect.appendChild(optionElement);
         });
+        varInput.appendChild(varInputSelect);
 
         this._controller.getVariableValue(varName)
             .then((varValue) => {
-                varInput.value = varValue;
+                varInputSelect.value = varValue;
             });
 
-        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+        varInputSelect.onchange = () =>
+            this._controller.setVariableValue(varName, varInputSelect.value);
 
         return varInput;
     }
 
     // an input for changing the value for an integer number variables
     _getIntegerVariableSetter(varName: string) {
-        const varInput = document.createElement('input');
-        varInput.type = 'number';
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const varIntInput = document.createElement('input');
+        varIntInput.type = 'number';
 
         this._controller.getVariableValue(varName)
             .then((varValue) => {
-                varInput.value = varValue;
+                varIntInput.value = varValue;
             });
 
-        varInput.onchange = () => this._controller.setVariableValue(varName, varInput.value);
+        varIntInput.onchange = () => this._controller.setVariableValue(varName, varIntInput.value);
+        varInput.appendChild(varIntInput);
 
         return varInput;
     }
@@ -316,11 +348,11 @@ export default class BaseRenderer extends EventEmitter {
                 behaviourVar.variable_name,
                 variableDecl,
             );
-            listDiv.className = 'romper-var-form-list-input';
+            listDiv.classList.add('romper-var-form-list-input');
             variableDiv.append(listDiv);
         } else if (variableType === 'number') {
             const numDiv = this._getIntegerVariableSetter(variableName);
-            numDiv.className = 'romper-var-form-number-input';
+            numDiv.classList.add('romper-var-form-number-input');
             variableDiv.append(numDiv);
         }
 
@@ -329,6 +361,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.setNextAvailable(false);
+        this.inVariablePanel = true;
 
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
@@ -346,30 +379,74 @@ export default class BaseRenderer extends EventEmitter {
                 const variablesFormContainer = document.createElement('div');
                 variablesFormContainer.className = 'romper-var-form-var-containers';
 
+                // get an array of divs - one for each question
+                const variableFields = [];
                 // div for each variable Element
-                behaviourVariables.forEach((behaviourVar) => {
+                behaviourVariables.forEach((behaviourVar, i) => {
                     const storyVariable = storyVariables[behaviourVar.variable_name];
                     const variableDiv = this._getVariableSetter(storyVariable, behaviourVar);
+                    if (i === 0) {
+                        variableDiv.classList.add('active');
+                    }
+                    variableFields.push(variableDiv);
                     variablesFormContainer.appendChild(variableDiv);
                 });
 
                 overlayImageElement.appendChild(variablesFormContainer);
+                // show first question
+                let currentQuestion = 0;
 
                 // submit button
                 const okButtonContainer = document.createElement('div');
+
+                // number of questions
+                const feedbackPar = document.createElement('p');
+                feedbackPar.textContent = `Question 1 of ${variableFields.length}`;
+                feedbackPar.classList.add('romper-var-form-feedback');
+
                 okButtonContainer.className = 'romper-var-form-button-container';
                 const okButton = document.createElement('input');
                 okButton.type = 'button';
-                okButton.value = 'Ok!';
+
+                okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
                 okButton.onclick = (() => {
-                    this._player.setNextAvailable(true);
-                    return callback();
+                    if (currentQuestion >= behaviourVariables.length - 1) {
+                        // start fade out
+                        overlayImageElement.classList.remove('active');
+                        this.inVariablePanel = false;
+                        // complete NE when fade out done
+                        setTimeout(() => {
+                            this._player.setNextAvailable(true);
+                            return callback();
+                        }, 700);
+                    }
+                    // hide current question and show next
+                    variableFields.forEach((varDiv, i) => {
+                        if (i === currentQuestion) {
+                            varDiv.classList.remove('active');
+                        } else if (i === currentQuestion + 1) {
+                            varDiv.classList.add('active');
+                        }
+                    });
+
+                    currentQuestion += 1;
+                    // set feedback and button texts
+                    okButton.value = currentQuestion < (behaviourVariables.length - 1)
+                        ? 'Next' : 'OK!';
+                    feedbackPar.textContent =
+                        `Question ${currentQuestion + 1}
+                         of ${behaviourVariables.length}`;
+                    return false;
                 });
                 okButton.className = 'romper-var-form-button';
                 okButtonContainer.appendChild(okButton);
+
+                okButtonContainer.appendChild(feedbackPar);
+
                 overlayImageElement.appendChild(okButtonContainer);
 
                 this._target.appendChild(overlayImageElement);
+                setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
                 this._behaviourElements.push(overlayImageElement);
             });
 
@@ -411,6 +488,7 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
+        this.end();
         this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();

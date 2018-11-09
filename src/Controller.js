@@ -36,6 +36,7 @@ export default class Controller extends EventEmitter {
         this._assetUrls = assetUrls;
         this._linearStoryPath = [];
         this._createRenderManager();
+        this._storyIconRendererCreated = false;
     }
 
     restart(storyId: string, variableState?: Object = {}) {
@@ -62,33 +63,41 @@ export default class Controller extends EventEmitter {
         };
 
         // see if we have a linear story
-        this._testForLinearityAndBuildStoryRenderer(storyId);
+        this._testForLinearityAndBuildStoryRenderer(storyId)
+            .then(() => this._storyReasonerFactory(storyId))
+            .then((reasoner) => {
+                if (this._storyId !== storyId) {
+                    return;
+                }
+                if (this._checkStoryPlayable(reasoner.getRequirements()) === -1) {
+                    return;
+                }
 
-        this._storyReasonerFactory(storyId).then((reasoner) => {
-            if (this._storyId !== storyId) {
-                return;
-            }
-            if (this._checkStoryPlayable(reasoner.getRequirements()) === -1) {
-                return;
-            }
+                reasoner.on('storyEnd', _handleStoryEnd);
+                reasoner.on('error', _handleError);
 
-            reasoner.on('storyEnd', _handleStoryEnd);
-            reasoner.on('error', _handleError);
+                this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                    this._handleNEChange(reasoner, narrativeElement)
+                        .then(() => {
+                            if (this._linearStoryPath && !this._storyIconRendererCreated) {
+                                this._renderManager._createStoryIconRenderer(this._linearStoryPath);
+                                this._storyIconRendererCreated = true;
+                            }
+                        });
+                };
 
-            this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                this._handleNEChange(reasoner, narrativeElement);
-            };
+                reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
-            reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
+                this._reasoner = reasoner;
+                this._reasoner.start(variableState);
 
-            this._reasoner = reasoner;
-            this._reasoner.start(variableState);
+                this._addListenersToRenderManager();
 
-            this._addListenersToRenderManager();
-            this.emit('ControllerReady');
-
-            this._renderManager.handleStoryStart(storyId);
-        });
+                this._renderManager.handleStoryStart(storyId);
+            })
+            .catch((err) => {
+                logger.warn('Error starting story', err);
+            });
     }
 
     // get the current and next narrative elements
@@ -194,26 +203,33 @@ export default class Controller extends EventEmitter {
             this._fetchers.representationCollectionFetcher,
             this._storyReasonerFactory,
         );
+        return new Promise((resolve, reject) => {
+            // handle our StoryPathWalker reaching the end of its travels:
+            // get spw to resolve the list of presentations into representations
+            // then (if story is linear) create and start a StoryIconRenderer
+            const _handleWalkEnd = () => {
+                spw.getStoryItemList(this._representationReasoner)
+                    .then((storyItemPath) => {
+                        this._linearStoryPath = storyItemPath;
+                    })
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch(() => {
+                        reject();
+                    });
+            };
 
-        // handle our StoryPathWalker reaching the end of its travels:
-        // get spw to resolve the list of presentations into representations
-        // then (if story is linear) create and start a StoryIconRenderer
-        const _handleWalkEnd = () => {
-            spw.getStoryItemList(this._representationReasoner).then((storyItemPath) => {
-                this._linearStoryPath = storyItemPath;
-                if (storyItemPath) this._renderManager._createStoryIconRenderer(storyItemPath);
-            });
-        };
-
-        spw.on('walkComplete', _handleWalkEnd);
-        spw.parseStory(storyId);
+            spw.on('walkComplete', _handleWalkEnd);
+            spw.parseStory(storyId);
+        });
     }
 
     //
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
-        const previous = this._getIdOfPreviousNode();
+        const previous = this.getIdOfPreviousNode();
         if (previous) {
             this._jumpToNarrativeElement(previous);
         } else {
@@ -243,7 +259,7 @@ export default class Controller extends EventEmitter {
         }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
         this._currentNarrativeElement = narrativeElement;
-        this._renderManager.handleNEChange(narrativeElement);
+        return this._renderManager.handleNEChange(narrativeElement);
     }
 
     _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
@@ -478,7 +494,7 @@ export default class Controller extends EventEmitter {
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory
     // otherwise, returns null.
-    _getIdOfPreviousNode(): ?string {
+    getIdOfPreviousNode(): ?string {
         let matchingId = null;
         if (this._linearStoryPath) {
             // find current
@@ -499,7 +515,7 @@ export default class Controller extends EventEmitter {
     // get an array of ids of the NarrativeElements that follow narrativeElement
     // finds next NARRATIVE_ELEMENTs, but does not look out of the current subStory,
     // except in case of linear story
-    _getIdsOfNextNodes(narrativeElement: NarrativeElement) {
+    getIdsOfNextNodes(narrativeElement: NarrativeElement) {
         const upcomingIds: Array<string> = [];
         const nextNodes = narrativeElement.links;
         nextNodes.forEach((link) => {
@@ -560,4 +576,5 @@ export default class Controller extends EventEmitter {
     _linearStoryPath: Array<StoryPathItem>;
     _currentNarrativeElement: NarrativeElement;
     _renderManager: RenderManager;
+    _storyIconRendererCreated: boolean;
 }
