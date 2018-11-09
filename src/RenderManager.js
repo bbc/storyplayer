@@ -69,7 +69,21 @@ export default class RenderManager extends EventEmitter {
         });
         this._player.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
-                this._currentRenderer.emit(RendererEvents.NEXT_BUTTON_CLICKED);
+                const rend = this._currentRenderer;
+                if (rend.hasVariablePanelBehaviour()) {
+                    const representationId = rend.getRepresentation().id;
+                    logger.info('Next button ignored due to variable panel, skip to end');
+                    // skip to end if we have time-based media
+                    // (if not, will continue to play then trigger another ended event)
+                    if (this._player.playoutEngine.getCurrentTime(representationId)) {
+                        const playout = this._player.playoutEngine;
+                        const media = playout.getMediaElement(representationId);
+                        // skip to 1/4 s before end
+                        playout.setCurrentTime(representationId, media.duration - 0.25);
+                    }
+                } else {
+                    rend.emit(RendererEvents.NEXT_BUTTON_CLICKED);
+                }
             }
         });
         this._player.on(PlayerEvents.REPEAT_BUTTON_CLICKED, () => {
@@ -350,6 +364,7 @@ export default class RenderManager extends EventEmitter {
             const currentRenderer = this._currentRenderer;
             currentRenderer.end();
             currentRenderer.willStart();
+            this._showOnwardIcons();
         }
     }
 
