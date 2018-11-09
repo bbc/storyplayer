@@ -65,9 +65,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
 
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0': this._applyColourOverlayBehaviour,
@@ -84,6 +81,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     willStart() {
+        this.inVariablePanel = false;
+        this._behaviourRunner = this._representation.behaviours
+            ? new BehaviourRunner(this._representation.behaviours, this)
+            : null;
         this._player.enterStartBehaviourPhase();
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
@@ -116,6 +117,20 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+    }
+
+    // does this renderer have a show variable panel behaviour
+    hasVariablePanelBehaviour(): boolean {
+        let hasPanel = false;
+        if (this._representation.behaviours && this._representation.behaviours.completed) {
+            this._representation.behaviours.completed.forEach((behave) => {
+                // eslint-disable-next-line max-len
+                if (behave.type === 'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0') {
+                    hasPanel = true;
+                }
+            });
+        }
+        return hasPanel;
     }
 
     /* record some analytics for the renderer - not user actions though */
