@@ -180,7 +180,7 @@
             "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
             "asset_collections": {
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
-                "background_ids": ["234568d1-7dce-48f1-1234-396553a9blob"]
+                "background_ids": ["345668d1-7dce-48f1-1234-396553a9blob"]
             },
             "behaviours": {
                 "started": [],
@@ -290,6 +290,19 @@
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:looping-audio/v1.0",
             "assets": {
                 "audio_src": "https://dl.dropboxusercontent.com/s/oht4rh40yk127ow/background2.mp3?dl=0"
+            }
+        },
+        {
+            "id": "ad1576a0-79ce-493a-951d-aca8b867c901",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Presenter icon Image Asset Collection",
+            "description": "",
+            "version": "1538574522:296000000",
+            "tags": {},
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "assets": {
+                "image_src": "https://rdux.files.bbci.co.uk/rd-ux-makealong/test/images/presenter.png"
             }
         }
     ]

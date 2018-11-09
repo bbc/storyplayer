@@ -35,10 +35,11 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             if (foregroundElement) {
                 const tInt = 10;
                 this._fadeAudioTimer = setInterval(() => {
-                    const fadeDuration = Math.min(foregroundElement.duration, 2);
+                    const maxFadeDuration = foregroundElement.duration > 10 ? 2 : 1;
+                    const fadeDuration = Math.min(foregroundElement.duration, maxFadeDuration);
                     const currentForegroundTime = foregroundElement.currentTime;
 
-                    if (currentForegroundTime <= 2) {
+                    if (currentForegroundTime <= maxFadeDuration) {
                         this._playoutEngine.fadeInBackgroundAudio(
                             this._rendererId,
                             foregroundElement.currentTime,
@@ -58,6 +59,22 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                     }
                 }, tInt);
             }
+        } else {
+            // Image
+            const tInt = 10;
+            let currentDuration = 0;
+            const fadeDuration = 1;
+            this._fadeAudioTimer = setInterval(() => {
+                currentDuration += 0.01;
+
+                if (currentDuration <= 1) {
+                    this._playoutEngine.fadeInBackgroundAudio(
+                        this._rendererId,
+                        currentDuration,
+                        fadeDuration,
+                    );
+                }
+            }, tInt);
         }
     }
 

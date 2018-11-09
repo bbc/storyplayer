@@ -86,6 +86,8 @@ export default class RenderManager extends EventEmitter {
         });
 
         this._initialise();
+
+        this.getFadeOutAudioController = this.getFadeOutAudioController.bind(this);
     }
 
     prepareForRestart() {
@@ -244,6 +246,36 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
+
+    // identifies if the current background audio that is being played needs to be faded out or not
+    getFadeOutAudioController(currentBackgroundId: string): Promise<boolean> {
+        this._controller.getValidNextSteps()
+            .then((narrativeElements) => {
+                const repCollIds = narrativeElements.map(ne => ne.body.representation_collection_target_id);
+                const repCollPromises = repCollIds.map(repCollId => this._fetchers.representationCollectionFetcher(repCollId));
+                return Promise.all(repCollPromises);
+            })
+            .then((repColls) => {
+                const repCollReps = repColls.map(repColl => repColl.representations);
+                const flattenRepCollReps = [].concat(...repCollReps);
+                const repCollRepPromises = flattenRepCollReps.map(repCollRep => this._fetchers.representationFetcher(repCollRep.representation_id));
+                return Promise.all(repCollRepPromises);
+            })
+            .then((reps) => {
+                console.log('REPS', reps);
+                const backgroundIds = reps.map(rep => rep.asset_collections.background_ids);
+                const flattenBackgroundIds = [].concat(...backgroundIds);
+                console.log('BACKGROUND: ', flattenBackgroundIds);
+
+                if (flattenBackgroundIds.includes(currentBackgroundId)) {
+                    console.log('SHOULD NOTY FADE');
+                    return false;
+                }
+                console.log('SHOULD FADE!!');
+                return true;
+            });
+    }
+
     // given a new representation, handle the background rendering
     // either:
     //     stop if there is no background
@@ -255,6 +287,9 @@ export default class RenderManager extends EventEmitter {
             && representation.asset_collections.background_ids) {
             newBackgrounds = representation.asset_collections.background_ids;
         }
+
+        this.getFadeOutAudioController(newBackgrounds[0])
+            .then((shouldFadeOut) => { console.log('Should fade out: ', shouldFadeOut); });
 
         // remove dead backgrounds
         Object.keys(this._backgroundRenderers).forEach((rendererACId) => {

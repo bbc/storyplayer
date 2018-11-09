@@ -294,6 +294,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+
     fadeInBackgroundAudio(rendererId: string, currentTime: number, fadeDuration: number) {
         const { mediaElement } = this._media[rendererId];
 
