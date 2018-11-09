@@ -216,6 +216,7 @@ export default class RenderManager extends EventEmitter {
             .then((urls) => {
                 this._player.clearLinkChoices();
                 urls.forEach((iconAssetCollection, choiceId) => {
+                    // @flowignore
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ? iconAssetCollection.assets.image_src : '';
                     // tell Player to render icon
                     this._player.addLinkChoiceControl(
@@ -223,7 +224,6 @@ export default class RenderManager extends EventEmitter {
                         imgsrc,
                         `Option ${(choiceId + 1)}`,
                     );
-
                 });
                 this._player.enableLinkChoiceControl();
             });
