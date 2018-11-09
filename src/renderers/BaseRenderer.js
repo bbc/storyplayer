@@ -31,6 +31,8 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
     _controller: Controller;
 
+    inVariablePanel: boolean;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -78,6 +80,7 @@ export default class BaseRenderer extends EventEmitter {
 
         this._destroyed = false;
         this._analytics = analytics;
+        this.inVariablePanel = false;
     }
 
     willStart() {
@@ -343,6 +346,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.setNextAvailable(false);
+        this.inVariablePanel = true;
 
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
@@ -394,6 +398,7 @@ export default class BaseRenderer extends EventEmitter {
                     if (currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
                         overlayImageElement.classList.remove('active');
+                        this.inVariablePanel = false;
                         // complete NE when fade out done
                         setTimeout(() => {
                             this._player.setNextAvailable(true);

@@ -403,7 +403,9 @@ export default class RenderManager extends EventEmitter {
         if (next) {
             next.then((nextNarrativeElements) => {
                 if (nextNarrativeElements.length === 1) {
-                    this._player.setNextAvailable(true);
+                    if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
+                        this._player.setNextAvailable(true);
+                    }
                 } else {
                     this._player.setNextAvailable(false);
                 }
