@@ -372,10 +372,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string) {
+    getMediaElement(rendererId: string): HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
-            return undefined;
+            return document.createElement('video');
         }
         return rendererPlayoutObj.mediaElement;
     }
