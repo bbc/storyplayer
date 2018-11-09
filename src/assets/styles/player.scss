@@ -374,15 +374,36 @@ $romper-hover-text-size: 25px;
     }
   }
 
-  .romper-link-choice-overlay {
-    display: flex;
-    z-index: 5;
+  @keyframes appear {
+    0%   {margin: 10%; opacity: 0}
+    35%  {margin: 0%;}
+    100% {margin: 5%; opacity: 1}
+  }  
 
-    .romper-link-icon {
-      padding: 10px;
-      width: 100px;
-    }
-  }
+ .romper-link-choice-overlay {
+   display: grid;
+   z-index: 5;
+   width: 100%;
+   height: 100%;
+   grid-auto-flow: column;
+   min-height: 0;
+   min-width: 0;
+   transition: all 0.5s ease;
+
+   &.tworow {
+     grid-template-rows: 1fr 1fr;
+   }
+   &.fade {
+    opacity: 0;
+    margin: 50%;
+   }
+ }
+
+ .romper-link-choice-grid-cell {
+   margin: 5%;
+   opacity: 1;
+   animation: appear 0.5s;
+ }
 }
 
 

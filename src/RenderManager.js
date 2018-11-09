@@ -191,8 +191,8 @@ export default class RenderManager extends EventEmitter {
             if (choiceNarrativeElement.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
                 assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
-                    // presentation
-                    .then(presentation => this._representationReasoner(presentation))
+                    // representationCollection
+                    .then(representationCollection => this._representationReasoner(representationCollection))
                     // representation
                     .then((representation) => {
                         if (
@@ -216,14 +216,14 @@ export default class RenderManager extends EventEmitter {
             .then((urls) => {
                 this._player.clearLinkChoices();
                 urls.forEach((iconAssetCollection, choiceId) => {
-                    if (iconAssetCollection && iconAssetCollection.assets.image_src) {
-                        // tell Player to render icon
-                        this._player.addLinkChoiceControl(
-                            narrativeElements[choiceId].id,
-                            iconAssetCollection.assets.image_src,
-                            `Option ${(choiceId + 1)}`,
-                        );
-                    }
+                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ? iconAssetCollection.assets.image_src : '';
+                    // tell Player to render icon
+                    this._player.addLinkChoiceControl(
+                        narrativeElements[choiceId].id,
+                        imgsrc,
+                        `Option ${(choiceId + 1)}`,
+                    );
+
                 });
                 this._player.enableLinkChoiceControl();
             });
