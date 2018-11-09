@@ -426,7 +426,7 @@ export default class BaseRenderer extends EventEmitter {
                 overlayImageElement.appendChild(okButtonContainer);
 
                 this._target.appendChild(overlayImageElement);
-                setTimeout(() => { overlayImageElement.classList.add('active'); }, 400);
+                setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
                 this._behaviourElements.push(overlayImageElement);
             });
 
