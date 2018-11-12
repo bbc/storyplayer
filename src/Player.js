@@ -246,6 +246,7 @@ class Player extends EventEmitter {
     _nextButton: HTMLButtonElement;
     _subtitlesButton: HTMLButtonElement;
     _fullscreenButton: HTMLButtonElement;
+    _inFullScreen: boolean
     _volume: Object;
     _representation: Object;
     _icon: Object;
@@ -264,6 +265,7 @@ class Player extends EventEmitter {
     _userInteractionStarted: boolean;
     _numChoices: number;
     removeExperienceStartButtonAndImage: Function;
+    _handleFullScreenChange: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
@@ -500,6 +502,8 @@ class Player extends EventEmitter {
             'touchend',
             handleButtonTouchEvent(this._toggleFullScreen.bind(this)),
         );
+        this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
+        this._inFullScreen = false;
 
         document.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
@@ -1277,6 +1281,21 @@ class Player extends EventEmitter {
             window.scrollTo(0, 1);
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
+
+        this._inFullScreen = false;
+        document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
+        document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
+        document.addEventListener('fullscreenchange', this._handleFullScreenChange);
+        document.addEventListener('MSFullscreenChange', this._handleFullScreenChange);
+    }
+
+
+    _handleFullScreenChange() {
+        if (this._inFullScreen) {
+            this._exitFullScreen();
+        } else if (Player._isFullScreen()) {
+            this._inFullScreen = true;
+        }
     }
 
     _exitFullScreen() {
@@ -1299,6 +1318,11 @@ class Player extends EventEmitter {
             this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
         }
         scrollToTop();
+
+        document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
+        document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
+        document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
+        document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 }
 
