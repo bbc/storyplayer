@@ -798,10 +798,12 @@ class Player extends EventEmitter {
     setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
-        if (overlay.childNodes[1]) {
-            overlay.childNodes[1].value = value;
+        if (overlay) {
+            if (overlay.childNodes[1]) {
+                overlay.childNodes[1].value = value;
+            }
+            this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
         }
-        this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
     }
 
     _setVolumeCallback(id: string, label: string) {

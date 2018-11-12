@@ -346,6 +346,11 @@ export default class RenderManager extends EventEmitter {
                             renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
                         }
                     });
+                    // ensure volume persistence
+                    Object.keys(this._rendererState.volumes).forEach((label) => {
+                        const value = this._rendererState.volumes[label];
+                        this._player.setVolumeControlLevel(label, value);
+                    });
                 },
             );
 
