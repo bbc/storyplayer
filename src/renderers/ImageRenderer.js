@@ -13,6 +13,7 @@ export default class ImageRenderer extends BaseRenderer {
     _disableScrubBar: Function;
     _enablePlayButton: Function;
     _enableScrubBar: Function;
+    _visible: boolean;
 
 
     constructor(
@@ -41,17 +42,23 @@ export default class ImageRenderer extends BaseRenderer {
     start() {
         super.start();
         if (!this._imageElement) this.renderImageElement();
+
+        this._visible = true;
         this._setVisibility(true);
+
         this._disablePlayButton();
         this._disableScrubBar();
     }
 
     end() {
+        this._visible = false;
         // Hack to make image transitions smooth (preventing showing of black background with
         // loading wheel). For some reason the DOM transition on images is slow, not sure why this
         // is only the case for images and not video but this fixes it.
         setTimeout(() => {
-            this._setVisibility(false);
+            if (!this._visible) {
+                this._setVisibility(false);
+            }
         }, 100);
         this._enablePlayButton();
         this._enableScrubBar();

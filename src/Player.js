@@ -852,6 +852,10 @@ class Player extends EventEmitter {
         this._volume.remove(id);
     }
 
+    clearAllRepresentationControls() {
+        this._representation.clearAll();
+    }
+
     addRepresentationControl(id: string, src: string, label: string) {
         const representationControl = document.createElement('div');
         representationControl.classList.add('romper-representation-control');

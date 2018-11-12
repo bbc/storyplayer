@@ -218,6 +218,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     // display the buttons as IMG elements in a list in a div
     _renderSwitchButtons() {
+        this._player.clearAllRepresentationControls();
         if (this._representation.choices) {
             this._representation.choices.forEach((choice, idx) => {
                 if (choice.choice_representation &&
