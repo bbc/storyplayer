@@ -350,8 +350,18 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
             videoElement.currentTime = time;
         } else {
+            let setTime = false;
             videoElement.addEventListener('loadeddata', () => {
-                videoElement.currentTime = time;
+                if (!setTime) {
+                    videoElement.currentTime = time;
+                    setTime = true;
+                }
+            });
+            videoElement.addEventListener('timeupdate', () => {
+                if (!setTime) {
+                    videoElement.currentTime = time;
+                    setTime = true;
+                }
             });
         }
         return true;
