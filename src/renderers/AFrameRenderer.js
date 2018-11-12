@@ -5,8 +5,10 @@ import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
-
 import logger from '../logger';
+
+// @flowignore
+require('aframe');
 
 export default class AFrameRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -17,7 +19,6 @@ export default class AFrameRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked: Function;
 
     _aFrameSceneElement: HTMLElement;
-    _aFrameScriptElement: HTMLScriptElement;
     _videoAssetElement: HTMLVideoElement;
 
     constructor(
@@ -60,7 +61,6 @@ export default class AFrameRenderer extends BaseRenderer {
 
         // const player = this._player;
         this._target.removeChild(this._aFrameSceneElement);
-        this._target.removeChild(this._aFrameScriptElement);
         // player.removeVolumeControl(this._representation.id);
         this._player.disconnectScrubBar();
         this._player.removeListener(
@@ -101,7 +101,6 @@ export default class AFrameRenderer extends BaseRenderer {
             return;
         }
         // create AFrame entities in here to display 360 video
-        this._addAFrameScripts();
         this._aFrameSceneElement = document.createElement('a-scene');
         this._aFrameSceneElement.setAttribute('embedded', '');
         this._aFrameSceneElement.classList.add('romper-aframe-scene');
@@ -140,12 +139,6 @@ export default class AFrameRenderer extends BaseRenderer {
         this._videoAssetElement.addEventListener('ended', this._endedEventListener);
         logger.info('360 video playing');
         this._videoAssetElement.play();
-    }
-
-    _addAFrameScripts(): void {
-        this._aFrameScriptElement = document.createElement('script');
-        this._aFrameScriptElement.setAttribute('src', 'https://aframe.io/releases/0.7.1/aframe.min.js');
-        this._target.appendChild(this._aFrameScriptElement);
     }
 
     _handlePlayPauseButtonClicked(): void {
