@@ -319,7 +319,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
-            .filter(key => this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
+            // eslint-disable-next-line max-len
+            .filter(key => this._media[key].media && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
             .forEach((key) => {
                 this._media[key].mediaElement.pause();
             });
@@ -391,7 +392,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _handleSubtitlesClicked(): void {
         this._subtitlesShowing = !this._subtitlesShowing;
         Object.keys(this._media)
-            .filter(key => this._media[key].active)
+            // eslint-disable-next-line max-len
+            .filter(key => this._media[key].media && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
             .forEach((key) => {
                 this._showHideSubtitles(key);
             });
