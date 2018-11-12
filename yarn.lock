@@ -2862,6 +2862,7 @@ flow-bin@^0.85.0:
 flow-typed@^2.5.1:
   version "2.5.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-typed/-/flow-typed-2.5.1.tgz#0ff565cc94d2af8c557744ba364b6f14726a6b9f"
+  integrity sha1-D/VlzJTSr4xVd0S6NktvFHJqa58=
   dependencies:
     "@octokit/rest" "^15.2.6"
     babel-polyfill "^6.26.0"
