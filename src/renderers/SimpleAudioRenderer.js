@@ -58,7 +58,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._lastSetTime = 0;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
-            type: MEDIA_TYPES.FOREGROUND_AV,
+            type: MEDIA_TYPES.FOREGROUND_A,
         });
     }
 
@@ -83,6 +83,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.classList.add('romper-audio-element');
+        }
     }
 
     end() {
@@ -103,6 +108,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.classList.remove('romper-audio-element');
+        }
     }
 
     renderAudioElement() {

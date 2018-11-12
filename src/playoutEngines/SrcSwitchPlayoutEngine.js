@@ -98,6 +98,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 videoElement.className = 'romper-video-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaInstance.attachMedia(videoElement);
+            } else if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A) {
+                rendererPlayoutObj.mediaInstance =
+                    this._mediaManager.getMediaInstance('foreground');
+                const videoElement = document.createElement('video');
+                videoElement.className = 'romper-audio-element romper-media-element-queued';
+                videoElement.crossOrigin = 'anonymous';
+                rendererPlayoutObj.mediaInstance.attachMedia(videoElement);
             } else {
                 rendererPlayoutObj.mediaInstance =
                     this._mediaManager.getMediaInstance('background');
@@ -189,8 +196,16 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
-            // eslint-disable-next-line max-len
-            .filter(key => this._media[key].media && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV ||
+                        this._media[key].media.type === MEDIA_TYPES.FOREGROUND_A
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            })
             .forEach((key) => {
                 this._media[key].mediaInstance.pause();
             });

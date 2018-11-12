@@ -107,6 +107,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = videoElement;
                 this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
+            } else if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A) {
+                const videoElement = document.createElement('video');
+                videoElement.className = 'romper-audio-element romper-media-element-queued';
+                videoElement.crossOrigin = 'anonymous';
+                rendererPlayoutObj.mediaElement = videoElement;
+                this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else {
                 const audioElement = document.createElement('audio');
                 audioElement.className = 'romper-audio-element romper-media-element-queued';
@@ -182,7 +188,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
             }
         }
-        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV ||
+            rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A
+        ) {
             this._player.mediaTarget.removeChild(rendererPlayoutObj.mediaElement);
         } else {
             this._player.backgroundTarget.removeChild(rendererPlayoutObj.mediaElement);
@@ -228,7 +236,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 this._player.enableSubtitlesControl();
             }
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
-                if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+                if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV ||
+                    rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A
+                ) {
                     this._player.addVolumeControl(rendererId, 'Foreground');
                     if (rendererPlayoutObj.mediaElement) {
                         const videoElement = rendererPlayoutObj.mediaElement;
@@ -319,8 +329,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
-            // eslint-disable-next-line max-len
-            .filter(key => this._media[key].media && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV ||
+                        this._media[key].media.type === MEDIA_TYPES.FOREGROUND_A
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            })
             .forEach((key) => {
                 this._media[key].mediaElement.pause();
             });
@@ -392,8 +410,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _handleSubtitlesClicked(): void {
         this._subtitlesShowing = !this._subtitlesShowing;
         Object.keys(this._media)
-            // eslint-disable-next-line max-len
-            .filter(key => this._media[key].media && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV ||
+                        this._media[key].media.type === MEDIA_TYPES.FOREGROUND_A
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            })
             .forEach((key) => {
                 this._showHideSubtitles(key);
             });
