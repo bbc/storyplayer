@@ -192,7 +192,7 @@ export default class RenderManager extends EventEmitter {
                 // eslint-disable-next-line max-len
                 assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
                     // representationCollection
-                    .then(representationCollection => this._representationReasoner(representationCollection))
+                    .then(representationCollection => this._representationReasoner(representationCollection)) // eslint-disable-line max-len
                     // representation
                     .then((representation) => {
                         if (
@@ -217,7 +217,9 @@ export default class RenderManager extends EventEmitter {
                 this._player.clearLinkChoices();
                 urls.forEach((iconAssetCollection, choiceId) => {
                     // @flowignore
-                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ? iconAssetCollection.assets.image_src : '';
+                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
+                        iconAssetCollection.assets.image_src :
+                        '';
                     // tell Player to render icon
                     this._player.addLinkChoiceControl(
                         narrativeElements[choiceId].id,
