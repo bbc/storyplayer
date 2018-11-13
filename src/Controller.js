@@ -411,10 +411,30 @@ export default class Controller extends EventEmitter {
     getVariables(): Promise<Object> {
         const storyId = this._storyId;
         if (storyId) {
+            let variables;
             return this._fetchers.storyFetcher(storyId)
                 .then((story) => {
-                    if (story.variables) {
-                        return story.variables;
+                    // eslint-disable-next-line prefer-destructuring
+                    variables = story.variables;
+                    if (variables) {
+                        const promisesToResolve = [];
+                        Object.keys(variables).forEach((name) => {
+                            if (this._reasoner) {
+                                promisesToResolve.push(this._reasoner.getVariableValue(name));
+                            }
+                        });
+                        return Promise.all(promisesToResolve);
+                    }
+                    return Promise.all([]);
+                })
+                .then((resolvedVariables) => {
+                    if (variables && resolvedVariables.length > 0) {
+                        Object.keys(variables).forEach((name, index) => {
+                            if (variables) {
+                                variables[name].value = resolvedVariables[index];
+                            }
+                        });
+                        return variables;
                     }
                     return {};
                 });
