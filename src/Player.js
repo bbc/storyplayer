@@ -653,6 +653,7 @@ class Player extends EventEmitter {
 
     _clearOverlays() {
         this._icon.clearAll();
+        this._representation.clearAll();
         this._volume.clearAll();
         this._linkChoice.clearAll();
     }
