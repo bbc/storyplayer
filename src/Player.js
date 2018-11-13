@@ -625,7 +625,7 @@ class Player extends EventEmitter {
         this._startExperienceButton.appendChild(continueButtonTextDiv);
 
         this._startExperienceImage = document.createElement('img');
-        this._startExperienceImage.className = 'romper-render-image';
+        this._startExperienceImage.className = 'romper-start-image';
         this._startExperienceImage.src = options.background_art;
 
         this._guiLayer.appendChild(this._startExperienceButton);
