@@ -152,8 +152,12 @@ export default class RenderManager extends EventEmitter {
                 .then(representationCollection =>
                     this._representationReasoner(representationCollection))
                 .then((representation) => {
-                    if (this._currentNarrativeElement === narrativeElement) {
-                        // Restarting Current NE
+                    if (this._currentNarrativeElement
+                            && this._currentNarrativeElement.id === narrativeElement.id
+                            && this._currentRenderer
+                            // need to use _representation as switchable getRepresentation
+                            // reports current choice id
+                            && this._currentRenderer._representation.id === representation.id) {
                         this._restartCurrentRenderer();
                     } else {
                         // get a Renderer for this new NE
@@ -372,6 +376,8 @@ export default class RenderManager extends EventEmitter {
             currentRenderer.end();
             currentRenderer.willStart();
             this._showOnwardIcons();
+        } else {
+            logger.error('no current renderer to restart');
         }
     }
 
