@@ -95,7 +95,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         logger.info(`Started: ${this._representation.id}`);
 
-        this.setCurrentTime(0);
+        this.setCurrentTime(this._lastSetTime);
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
