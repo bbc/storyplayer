@@ -84,6 +84,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
+                videoElement.pause();
                 this._endedEventListener();
             }
         }
