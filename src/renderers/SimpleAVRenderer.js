@@ -32,6 +32,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _outTime: number;
 
     _endedEventListener: Function;
+    _hasEnded: boolean;
     _outTimeEventListener: Function;
     _setOutTime: Function;
     _setInTime: Function;
@@ -53,7 +54,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             controller,
         );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._setInTime = this._setInTime.bind(this);
@@ -77,7 +77,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
-        super.complete();
+        if (!this._hasEnded) {
+            this._hasEnded = true;
+            super.complete();
+        }
     }
 
     _outTimeEventListener() {
@@ -92,6 +95,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
