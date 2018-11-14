@@ -99,7 +99,8 @@ export default class StoryReasoner extends EventEmitter {
      */
     start(initialState?: Object = {}) {
         if (this._storyStarted) {
-            throw new Error('InvalidState: this story has already been');
+            logger.warn('Calling reasoner start on story that has already started');
+            // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
         this._fetchVariablesFromStory();

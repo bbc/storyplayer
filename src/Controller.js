@@ -494,18 +494,22 @@ export default class Controller extends EventEmitter {
     // find what the next steps in the story can be
     getValidNextSteps(): Promise<Array<NarrativeElement>> {
         if (this._reasoner) {
-            return this._reasoner.hasNextNode()
-                .then((links) => {
-                    const narrativeElementList = [];
-                    links.forEach((link) => {
-                        if (this._reasoner && link.target_narrative_element_id) {
-                            narrativeElementList.push(this._reasoner._narrativeElements[
-                                link.target_narrative_element_id
-                            ]);
-                        }
-                    });
-                    return narrativeElementList;
-                }, () => []);
+            const subReasoner = this._reasoner
+                .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
+            if (subReasoner) {
+                return subReasoner.hasNextNode()
+                    .then((links) => {
+                        const narrativeElementList = [];
+                        links.forEach((link) => {
+                            if (subReasoner && link.target_narrative_element_id) {
+                                narrativeElementList.push(subReasoner._narrativeElements[
+                                    link.target_narrative_element_id
+                                ]);
+                            }
+                        });
+                        return narrativeElementList;
+                    }, () => []);
+            }
         }
         return Promise.resolve([]);
     }
