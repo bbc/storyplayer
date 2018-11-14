@@ -114,7 +114,14 @@ export default class StoryReasoner extends EventEmitter {
             const variableTree = this._story.variables;
             Object.keys(variableTree).forEach((storyVariableName) => {
                 const storyVariableValue = variableTree[storyVariableName].default_value;
-                this.setVariableValue(storyVariableName, storyVariableValue);
+                this.getVariableValue(storyVariableName)
+                    .then((value) => {
+                        if (value === null) {
+                            this.setVariableValue(storyVariableName, storyVariableValue);
+                        } else {
+                            logger.info(`Variable ${storyVariableName} already has value ${value}`);
+                        }
+                    });
             });
         } else {
             logger.info('No variables in story');
