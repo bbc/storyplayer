@@ -391,7 +391,11 @@ export default class Controller extends EventEmitter {
         this._currentNarrativeElement.links.forEach((link) => {
             if (link.target_narrative_element_id === narrativeElementId) {
                 if (this._reasoner) {
-                    this._reasoner._followLink(link);
+                    const subReasoner = this._reasoner
+                        .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
+                    if (subReasoner) {
+                        subReasoner._followLink(link);
+                    }
                 }
             }
         });
@@ -406,6 +410,7 @@ export default class Controller extends EventEmitter {
     setVariableValue(name: string, value: any) {
         if (this._reasoner) {
             this._reasoner.setVariableValue(name, value);
+            logger.info(`Controller seting variable '${name}' to ${value}`);
             this._renderManager.refreshLookahead();
         } else {
             logger.warn(`Controller cannot set variable '${name}' - no reasoner`);
@@ -429,39 +434,93 @@ export default class Controller extends EventEmitter {
     /**
      * Get the variables present in the story
      * @param {*} No parameters, it uses the story Id
+     * recurses into substories
      */
     getVariables(): Promise<Object> {
         const storyId = this._storyId;
         if (storyId) {
-            let variables;
-            return this._fetchers.storyFetcher(storyId)
-                .then((story) => {
-                    // eslint-disable-next-line prefer-destructuring
-                    variables = story.variables;
-                    if (variables) {
-                        const promisesToResolve = [];
-                        Object.keys(variables).forEach((name) => {
-                            if (this._reasoner) {
-                                promisesToResolve.push(this._reasoner.getVariableValue(name));
-                            }
-                        });
-                        return Promise.all(promisesToResolve);
-                    }
-                    return Promise.all([]);
+            return this._getAllStories(storyId)
+                .then((subStoryIds) => {
+                    const subVarPromises = [];
+                    subStoryIds.forEach((subid) => {
+                        subVarPromises.push(this._getVariablesForStory(subid));
+                    });
+                    return Promise.all(subVarPromises);
                 })
-                .then((resolvedVariables) => {
-                    if (variables && resolvedVariables.length > 0) {
-                        Object.keys(variables).forEach((name, index) => {
-                            if (variables) {
-                                variables[name].value = resolvedVariables[index];
-                            }
+                .then((subStoryVariables) => {
+                    const allVars = {};
+                    subStoryVariables.forEach((substoryVarObj) => {
+                        Object.keys(substoryVarObj).forEach((varName) => {
+                            allVars[varName] = substoryVarObj[varName];
                         });
-                        return variables;
-                    }
-                    return {};
+                    });
+                    return allVars;
                 });
         }
         return Promise.resolve({});
+    }
+
+    // get the ids of every story nested within the one given
+    _getAllStories(storyId: string): Promise<Array<string>> {
+        return this._fetchers.storyFetcher(storyId)
+            .then((story) => {
+                const nePromises = [];
+                story.narrative_element_ids.forEach((neid) => {
+                    nePromises.push(this._fetchers.narrativeElementFetcher(neid));
+                });
+                return Promise.all(nePromises);
+            })
+            .then((nes) => {
+                const subStoryIds = [];
+                nes.forEach((ne) => {
+                    if (ne.body.type === 'STORY_ELEMENT' && ne.body.story_target_id) {
+                        subStoryIds.push(ne.body.story_target_id);
+                    }
+                });
+                const substoryPromises = [];
+                subStoryIds.forEach((subStory) => {
+                    substoryPromises.push(this._getAllStories(subStory));
+                });
+                return Promise.all(substoryPromises);
+            })
+            .then((subStoryIds) => {
+                const flatSubIds = [].concat(...subStoryIds);
+                const idArray: Array<string> = [];
+                idArray.push(storyId);
+                flatSubIds.forEach(sid => idArray.push(sid));
+                return Promise.resolve(idArray);
+            });
+    }
+
+    // get all the variables for the story given
+    _getVariablesForStory(storyId: string) {
+        let variables;
+        return this._fetchers.storyFetcher(storyId)
+            .then((story) => {
+                const promisesToResolve = [];
+                // eslint-disable-next-line prefer-destructuring
+                variables = story.variables;
+                if (variables) {
+                    Object.keys(variables).forEach((name) => {
+                        if (this._reasoner) {
+                            promisesToResolve.push(this._reasoner.getVariableValue(name));
+                        }
+                    });
+                }
+                // for each - if story, get variables for story
+                return Promise.all(promisesToResolve);
+            })
+            .then((resolvedVariables) => {
+                if (variables && resolvedVariables.length > 0) {
+                    Object.keys(variables).forEach((name, index) => {
+                        if (variables) {
+                            variables[name].value = resolvedVariables[index];
+                        }
+                    });
+                    return variables;
+                }
+                return {};
+            });
     }
 
     /**
@@ -516,18 +575,22 @@ export default class Controller extends EventEmitter {
     // find what the next steps in the story can be
     getValidNextSteps(): Promise<Array<NarrativeElement>> {
         if (this._reasoner) {
-            return this._reasoner.hasNextNode()
-                .then((links) => {
-                    const narrativeElementList = [];
-                    links.forEach((link) => {
-                        if (this._reasoner && link.target_narrative_element_id) {
-                            narrativeElementList.push(this._reasoner._narrativeElements[
-                                link.target_narrative_element_id
-                            ]);
-                        }
-                    });
-                    return narrativeElementList;
-                }, () => []);
+            const subReasoner = this._reasoner
+                .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
+            if (subReasoner) {
+                return subReasoner.hasNextNode()
+                    .then((links) => {
+                        const narrativeElementList = [];
+                        links.forEach((link) => {
+                            if (subReasoner && link.target_narrative_element_id) {
+                                narrativeElementList.push(subReasoner._narrativeElements[
+                                    link.target_narrative_element_id
+                                ]);
+                            }
+                        });
+                        return narrativeElementList;
+                    }, () => []);
+            }
         }
         return Promise.resolve([]);
     }
