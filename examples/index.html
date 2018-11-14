@@ -167,7 +167,6 @@
             const storyJson = jsonEditor.get();
             try {
                 run(storyJson);
-                addVariableControls(storyJson.stories[0]);
                 showMessage('Story loaded - view the renderer.');
             } catch (e) {
                 showMessage('Could not run your json - see the console!');
@@ -214,6 +213,9 @@
             });
 
             romperInstance.start(config.stories[0].id, getVariablesState());
+            romperInstance.on('romperstorystarted', () => {
+                addVariableControls(config.stories[0].id);
+            });
         }
 
         function restart() {
@@ -236,24 +238,25 @@
                     showMessage('Story loaded');
                     const storyJson = JSON.parse(text);
                     run(storyJson);
-                    addVariableControls(storyJson.stories[0]);
                 })
                 .catch((rejection) => {
                     showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
                 });
         };
 
-        function addVariableControls(storyObject) {
+        function addVariableControls() {
             const varPanel = document.getElementById('variables-generic');
-            const variableDeclaration = storyObject.variables;
-            if (variableDeclaration === undefined || variableDeclaration === {}) {
-                varPanel.innerHTML = 'There are no variables in this story';
-                return;
-            }
-
-            varPanel.innerHTML = '';
-            Object.keys(variableDeclaration).forEach((varName) => {
-                addVariableSetter(varName, variableDeclaration[varName]);
+            romperInstance.getVariables()
+            .then((variableDeclaration) => {
+                if (variableDeclaration === undefined || variableDeclaration === {}) {
+                    varPanel.innerHTML = 'There are no variables in this story';
+                    return;
+                }
+    
+                varPanel.innerHTML = '';
+                Object.keys(variableDeclaration).forEach((varName) => {
+                    addVariableSetter(varName, variableDeclaration[varName]);
+                });
             });
         }
 
