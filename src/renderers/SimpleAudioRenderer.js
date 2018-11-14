@@ -32,6 +32,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _lastSetTime: number
 
     _endedEventListener: Function;
+    _hasEnded: boolean;
 
     constructor(
         representation: Representation,
@@ -63,11 +64,15 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
-        super.complete();
+        if (!this._hasEnded) {
+            this._hasEnded = true;
+            super.complete();
+        }
     }
 
     start() {
         super.start();
+        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
