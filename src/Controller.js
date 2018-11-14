@@ -369,7 +369,11 @@ export default class Controller extends EventEmitter {
         this._currentNarrativeElement.links.forEach((link) => {
             if (link.target_narrative_element_id === narrativeElementId) {
                 if (this._reasoner) {
-                    this._reasoner._followLink(link);
+                    const subReasoner = this._reasoner
+                        .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
+                    if (subReasoner) {
+                        subReasoner._followLink(link);
+                    }
                 }
             }
         });
