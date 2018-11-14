@@ -109,11 +109,33 @@ export default class Controller extends EventEmitter {
                 if (nextNarrativeElements.length === 1) {
                     // eslint-disable-next-line prefer-destructuring
                     nextNarrativeElement = nextNarrativeElements[0];
+
+                    if (nextNarrativeElement.body.type === 'STORY_ELEMENT'
+                        && nextNarrativeElement.body.story_target_id) {
+                        // return a promise that resolves to either first ne of substory
+                        // if only one, or story itself if multiple beginnings
+                        return this._fetchers
+                            .storyFetcher(nextNarrativeElement.body.story_target_id)
+                            .then((substory) => {
+                                if (substory.beginnings.length > 1) {
+                                    // multiple beginnings - resolve back to story NE
+                                    return Promise.resolve(nextNarrativeElement);
+                                }
+                                // one beginning - return promise that fetches the first NE
+                                const startNeId = substory.beginnings[0].narrative_element_id;
+                                return this._fetchers.narrativeElementFetcher(startNeId);
+                            });
+                    }
                 }
-                return {
+                // if first NE not a story resolve to it directly
+                // if multiple next NEs, nextNarrativeElement is null
+                return Promise.resolve(nextNarrativeElement);
+            }).then((nextne) => {
+                const statusObject = {
                     currentNarrativeElement,
-                    nextNarrativeElement,
+                    nextNarrativeElement: nextne,
                 };
+                return statusObject;
             });
     }
     /*
