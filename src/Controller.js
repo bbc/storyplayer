@@ -611,7 +611,6 @@ export default class Controller extends EventEmitter {
                     });
                     if (appearances === 1) {
                         const lastVisitedId = history[history.length - 2];
-                        console.log('last ne', lastVisitedId);
                         return this._fetchers.narrativeElementFetcher(lastVisitedId);
                     }
                 }
@@ -619,7 +618,6 @@ export default class Controller extends EventEmitter {
             })
             .then((lastne) => {
                 if (lastne) {
-                    console.log('lastne', lastne);
                     return lastne.id;
                 }
                 return null;
