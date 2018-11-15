@@ -234,6 +234,11 @@ export default class Controller extends EventEmitter {
     _goBackOneStepInStory() {
         this.getIdOfPreviousNode()
             .then((previous) => {
+                this.getVariableValue('romper_path_history')
+                    .then((history) => {
+                        history.pop();
+                        this.setVariableValue('romper_path_history', history.pop());
+                    });
                 if (previous) {
                     this._jumpToNarrativeElement(previous);
                 } else {
@@ -603,16 +608,8 @@ export default class Controller extends EventEmitter {
         return this.getVariableValue('romper_path_history')
             .then((history) => {
                 if (history.length > 1) {
-                    // can't cope with back and forth - make sure
-                    // this._currentNarrativeElement.id only in once
-                    let appearances = 0;
-                    history.forEach((h) => {
-                        if (h === this._currentNarrativeElement.id) { appearances += 1; }
-                    });
-                    if (appearances === 1) {
-                        const lastVisitedId = history[history.length - 2];
-                        return this._fetchers.narrativeElementFetcher(lastVisitedId);
-                    }
+                    const lastVisitedId = history[history.length - 2];
+                    return this._fetchers.narrativeElementFetcher(lastVisitedId);
                 }
                 return Promise.resolve();
             })
