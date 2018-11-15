@@ -391,7 +391,10 @@ export default class RenderManager extends EventEmitter {
         this._currentNarrativeElement = newNarrativeElement;
 
         // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
+        this._controller.getIdOfPreviousNode().then((lastid) => {
+            this._player.setBackAvailable(lastid !== null);
+        });
+        // this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
 
         if (newRenderer instanceof SwitchableRenderer) {
@@ -475,66 +478,68 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement) {
-        this._controller.getIdsOfNextNodes(narrativeElement)
-            .then((nextIds) => {
-                let allIds = [];
-                const previousId = this._controller.getIdOfPreviousNode();
-                if (previousId) {
-                    allIds = nextIds.concat([previousId]);
-                } else {
-                    allIds = nextIds;
-                }
+        this._controller.getIdOfPreviousNode().then((previousId) => {
+            this._controller.getIdsOfNextNodes(narrativeElement)
+                .then((nextIds) => {
+                    let allIds = [];
+                    if (previousId) {
+                        allIds = nextIds.concat([previousId]);
+                    } else {
+                        allIds = nextIds;
+                    }
 
-                // Generate new renderers for any that are missing
-                const renderPromises = allIds
-                    .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
-                    .map((neid) => {
-                        // Check to see if required NE renderer is the one currently being shown
-                        if (
-                            this._currentRenderer &&
-                            this._currentNarrativeElement &&
-                            this._currentNarrativeElement.id === neid
-                        ) {
-                            this._upcomingRenderers[neid] = this._currentRenderer;
-                        } else {
-                            // get the actual NarrativeElement object
-                            return this._fetchers.narrativeElementFetcher(neid)
-                                .then((neObj) => {
-                                    if (neObj && neObj.body.representation_collection_target_id) {
-                                        return this._fetchers
-                                            // eslint-disable-next-line max-len
-                                            .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                                            .then(presentation =>
-                                                this._representationReasoner(presentation))
-                                            .then((representation) => {
-                                                // create the new Renderer
+                    // Generate new renderers for any that are missing
+                    const renderPromises = allIds
+                        .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
+                        .map((neid) => {
+                            // Check to see if required NE renderer is the one currently being shown
+                            if (
+                                this._currentRenderer &&
+                                this._currentNarrativeElement &&
+                                this._currentNarrativeElement.id === neid
+                            ) {
+                                this._upcomingRenderers[neid] = this._currentRenderer;
+                            } else {
+                                // get the actual NarrativeElement object
+                                return this._fetchers.narrativeElementFetcher(neid)
+                                    .then((neObj) => {
+                                        if (neObj &&
+                                            neObj.body.representation_collection_target_id) {
+                                            return this._fetchers
                                                 // eslint-disable-next-line max-len
-                                                const newRenderer = this._createNewRenderer(representation);
-                                                if (newRenderer) {
-                                                    this._upcomingRenderers[neid] = newRenderer;
-                                                }
-                                            });
-                                    }
-                                    return Promise.resolve();
-                                });
-                        }
-                        return Promise.resolve();
-                    });
+                                                .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                                                .then(presentation =>
+                                                    this._representationReasoner(presentation))
+                                                .then((representation) => {
+                                                    // create the new Renderer
+                                                    // eslint-disable-next-line max-len
+                                                    const newRenderer = this._createNewRenderer(representation);
+                                                    if (newRenderer) {
+                                                        this._upcomingRenderers[neid] = newRenderer;
+                                                    }
+                                                });
+                                        }
+                                        return Promise.resolve();
+                                    });
+                            }
+                            return Promise.resolve();
+                        });
 
-                Promise.all(renderPromises)
-                    // Clean up any renderers that are not needed any longer
-                    .then(() => {
-                        Object.keys(this._upcomingRenderers)
-                            .filter(neid => allIds.indexOf(neid) === -1)
-                            .forEach((neid) => {
-                                if (narrativeElement.id !== neid) {
-                                    this._upcomingRenderers[neid].destroy();
-                                }
-                                delete this._upcomingRenderers[neid];
-                            });
-                    });
-                this._showOnwardIcons();
-            });
+                    Promise.all(renderPromises)
+                        // Clean up any renderers that are not needed any longer
+                        .then(() => {
+                            Object.keys(this._upcomingRenderers)
+                                .filter(neid => allIds.indexOf(neid) === -1)
+                                .forEach((neid) => {
+                                    if (narrativeElement.id !== neid) {
+                                        this._upcomingRenderers[neid].destroy();
+                                    }
+                                    delete this._upcomingRenderers[neid];
+                                });
+                        });
+                    this._showOnwardIcons();
+                });
+        });
     }
 
     _initialise() {
