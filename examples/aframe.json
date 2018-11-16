@@ -194,9 +194,9 @@
             "name": "Video 3",
             "meta": {},
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:360-stereo/v1.0",
             "asset_collections": {
-                "foreground_id": "42184381-85ce-4d71-8a42-895cf5d485c9",
+                "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
             "behaviours": {

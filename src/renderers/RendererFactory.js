@@ -8,7 +8,6 @@ import SimpleAudioRenderer from './SimpleAudioRenderer';
 import SimpleTextRenderer from './SimpleTextRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import AFrameRenderer from './AFrameRenderer';
-import ThreeJsRenderer from './ThreeJsRenderer';
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -28,7 +27,7 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:simple-audio/v1.0': SimpleAudioRenderer,
         'urn:x-object-based-media:representation-types:simple-text/v1.0': SimpleTextRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
-        'urn:x-object-based-media:representation-types:360-stereo/v1.0': ThreeJsRenderer,
+        'urn:x-object-based-media:representation-types:360-stereo/v1.0': AFrameRenderer,
         'urn:x-object-based-media:representation-types:360/v1.0': AFrameRenderer,
     };
 
