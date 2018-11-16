@@ -12,8 +12,6 @@ import logger from '../logger';
 // @flowignore
 const AFRAME = require('aframe');
 
-let THREE;
-
 let componentRegistered = false;
 
 export default class AFrameRenderer extends BaseRenderer {
@@ -321,9 +319,9 @@ export default class AFrameRenderer extends BaseRenderer {
                 // while in A-Frame 0.3.0, sphere entities are THREE.BufferGeometry.
 
                 const validGeometries = [
-                    THREE.SphereGeometry,
-                    THREE.SphereBufferGeometry,
-                    THREE.BufferGeometry,
+                    THREE.SphereGeometry, // eslint-disable-line no-undef
+                    THREE.SphereBufferGeometry, // eslint-disable-line no-undef
+                    THREE.BufferGeometry, // eslint-disable-line no-undef
                 ];
                 const isValidGeometry = validGeometries.some(geometry =>
                     object3D.geometry instanceof geometry);
@@ -334,6 +332,7 @@ export default class AFrameRenderer extends BaseRenderer {
                     // (with default 100, radius, 64 width segments and 64 height segments)
                     if (this.data.mode === 'half') {
                         const geoDef = this.el.getAttribute('geometry');
+                        // eslint-disable-next-line no-undef
                         geometry = new THREE.SphereGeometry(
                             geoDef.radius || 100,
                             geoDef.segmentsWidth || 64,
@@ -342,6 +341,7 @@ export default class AFrameRenderer extends BaseRenderer {
                         );
                     } else {
                         const geoDef = this.el.getAttribute('geometry');
+                        // eslint-disable-next-line no-undef
                         geometry = new THREE.SphereGeometry(
                             geoDef.radius || 100,
                             geoDef.segmentsWidth || 64,
@@ -390,6 +390,7 @@ export default class AFrameRenderer extends BaseRenderer {
 
                     // As AFrame 0.2.0 builds bufferspheres from sphere entities, transform
                     // into buffergeometry for coherence
+                    // eslint-disable-next-line no-undef
                     object3D.geometry = new THREE.BufferGeometry().fromGeometry(geometry);
                 }
             },
