@@ -22,6 +22,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _pauseEventListener: Function;
     _handlePlayPauseButtonClicked: Function;
 
+    _videoDivId: string;
     _aFrameSceneElement: any;
     _videoAssetElement: HTMLVideoElement;
     _aFrameCamera: any;
@@ -59,6 +60,10 @@ export default class AFrameRenderer extends BaseRenderer {
             this._representation.meta.romper.rotation) {
             this._initialRotation = this._representation.meta.romper.rotation;
         }
+
+        // this is what we refer to
+        this._videoDivId = `threesixtyvideo-${this._rendererId}`;
+
         this.renderVideoElement();
     }
 
@@ -124,132 +129,134 @@ export default class AFrameRenderer extends BaseRenderer {
             return;
         }
 
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            url: mediaUrl,
+        });
+
+        // build vanilla aFrame infrastructure
+        // these would need to persist across NEs for continuous headset playback
+        // scene
         this._aFrameSceneElement = document.createElement('a-scene');
-        let videoTypeString = '360_mono';
+        this._aFrameSceneElement.setAttribute('embedded', '');
+        this._aFrameSceneElement.classList.add('romper-aframe-scene');
+
+        // camera
+        const cameraEntity = document.createElement('a-entity');
+        cameraEntity.setAttribute('position', '0 0 0');
+        cameraEntity.setAttribute('rotation', this._initialRotation);
+        this._aFrameCamera = document.createElement('a-camera');
+        cameraEntity.appendChild(this._aFrameCamera);
+        this._aFrameSceneElement.appendChild(cameraEntity);
+
+        // assets (add our video div)
+        const aFrameAssetsElement = document.createElement('a-assets');
+        this._aFrameSceneElement.appendChild(aFrameAssetsElement);
+        this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
+        aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+
+        // identify video type and set parameters
+        // now build bits specific for video/type
+        const videoType = { // defaults
+            coverage: 'full',
+            stereo: false,
+            split: 'horizontal',
+            mode: 'full',
+        };
+
+        let videoTypeString = '360_mono'; // default
+        // overwrite if data model specifies
         if (this._representation.meta &&
             this._representation.meta.romper &&
             this._representation.meta.romper.video_type) {
             videoTypeString = this._representation.meta.romper.video_type;
         }
 
-        const cameraEntity = document.createElement('a-entity');
-        cameraEntity.setAttribute('position', '0 0 0');
-
-        cameraEntity.setAttribute('rotation', this._initialRotation);
-        this._aFrameCamera = document.createElement('a-camera');
-        cameraEntity.appendChild(this._aFrameCamera);
-        this._aFrameSceneElement.appendChild(cameraEntity);
-
-        const videoType = {
-            coverage: 'full',
-            stereo: false,
-            split: 'horizontal',
-            mode: 'full',
-        };
-        const videoDivId = 'threesixtyvideo';
-
-        // Get types from type
+        // parse video type from string
         if (videoTypeString.includes('180')) videoType.coverage = 'half';
         if (videoTypeString.includes('stereo')) videoType.stereo = true;
         if (videoTypeString.includes('vertical')) videoType.split = 'vertical';
 
-        this._playoutEngine.queuePlayout(this._rendererId, {
-            url: mediaUrl,
-        });
-
-        // If stereo video
+        // get components for video depending on type
+        // these are the bits that would need to be replaced for each scene
         if (videoType.stereo) {
-            logger.info('360 rendering stereo');
-
-            // ACTIVATE layer 1 (left eye) for camera on monoscopic view
-            // Camera is not existent at this point. If wait for scene "loaded", still is undefined.
-            // So, should wait for scene 'renderstart', set a flag and fire component 'update'
-            this._aFrameSceneElement.addEventListener('renderstart', () => {
-                // Enable left eye on camera layers (1 == left, 2 == right)
-                // this._aFrameSceneElement.camera.layers.enable(1);
-            });
-
-            //    // Emit event for attaching to a menu or player from the outside
-            // this.el.emit("asset_added", {'id': videoDivId}, false);
-
-            const sphereL = document.createElement('a-entity');
-            sphereL.setAttribute('class', 'videospheres');
-            sphereL.setAttribute(
-                'geometry',
-                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-            );
-            AFRAME.utils.entity.setComponentProperty(sphereL, 'material', {
-                shader: 'flat',
-                src: `#${videoDivId}`,
-                side: 'back',
-            });
-            sphereL.setAttribute('scale', '-1 1 1');
-
-            // Sync rotation with 'camera landing rotation'
-            AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', { x: 0, y: 0, z: 0 });
-            AFRAME.utils.entity.setComponentProperty(
-                sphereL,
-                'stereo',
-                { eye: 'left', mode: videoType.mode, split: videoType.split },
-            );
-            this._aFrameSceneElement.appendChild(sphereL);
-
-            const sphereR = document.createElement('a-entity');
-            sphereR.setAttribute('class', 'videospheres');
-            sphereR.setAttribute(
-                'geometry',
-                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-            );
-            AFRAME.utils.entity.setComponentProperty(sphereR, 'material', {
-                shader: 'flat',
-                src: `#${videoDivId}`,
-                side: 'back',
-            });
-            sphereR.setAttribute('scale', '-1 1 1');
-
-            // sphereR.addEventListener('materialvideoloadeddata', () => {
-            //     // this.el.emit("video_loaded", null, false);
-            //     console.log('loaded');
-            // });
-
-            AFRAME.utils.entity.setComponentProperty(
-                sphereR,
-                'stereo',
-                { eye: 'right', mode: videoType.mode, split: videoType.split },
-            );
-
-            this._aFrameSceneElement.appendChild(sphereR);
+            const stereoElements = this._getStereoComponents(videoType);
+            stereoElements.forEach(el => this._aFrameSceneElement.appendChild(el));
         } else {
-            logger.info('360 rendering mono');
-            const sphereMono = document.createElement('a-entity');
-            sphereMono.setAttribute('class', 'videospheres');
-            sphereMono.setAttribute(
-                'geometry',
-                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-            );
-            sphereMono.setAttribute('scale', '-1 1 1');
-            AFRAME.utils.entity.setComponentProperty(sphereMono, 'material', {
-                shader: 'flat',
-                src: `#${videoDivId}`,
-                side: 'back',
-            });
-            this._aFrameSceneElement.appendChild(sphereMono);
+            const monoElements = this._getMonoComponents();
+            monoElements.forEach(el => this._aFrameSceneElement.appendChild(el));
         }
 
-        // create AFrame entities in here to display 360 video
-        this._aFrameSceneElement.setAttribute('embedded', '');
-        this._aFrameSceneElement.classList.add('romper-aframe-scene');
-
-        const aFrameAssetsElement = document.createElement('a-assets');
-        this._aFrameSceneElement.appendChild(aFrameAssetsElement);
-
-        this._playoutEngine.getMediaElement(this._rendererId).id = videoDivId;
-        aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
-        // this may break stuff!!!
+        // all done - start playing if start has been called
+        // if not, we're ready
         this._rendered = true;
         if (this._started) {
             this._startThreeSixtyVideo();
         }
+    }
+
+    // return components needed to render mono 360 video
+    _getMonoComponents(): Array<HTMLElement> {
+        logger.info('360 rendering mono');
+        const sphereMono = document.createElement('a-entity');
+        sphereMono.setAttribute('class', 'videospheres');
+        sphereMono.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        sphereMono.setAttribute('scale', '-1 1 1');
+        AFRAME.utils.entity.setComponentProperty(sphereMono, 'material', {
+            shader: 'flat',
+            src: `#${this._videoDivId}`,
+            side: 'back',
+        });
+        return [sphereMono];
+    }
+
+    // return components needed to render stereo 360 video
+    _getStereoComponents(videoType: Object): Array<HTMLElement> {
+        logger.info('360 rendering stereo');
+
+        const sphereL = document.createElement('a-entity');
+        sphereL.setAttribute('class', 'videospheres');
+        sphereL.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        AFRAME.utils.entity.setComponentProperty(sphereL, 'material', {
+            shader: 'flat',
+            src: `#${this._videoDivId}`,
+            side: 'back',
+        });
+        sphereL.setAttribute('scale', '-1 1 1');
+
+        // Sync rotation with 'camera landing rotation'
+        AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', { x: 0, y: 0, z: 0 });
+        AFRAME.utils.entity.setComponentProperty(
+            sphereL,
+            'stereo',
+            { eye: 'left', mode: videoType.mode, split: videoType.split },
+        );
+
+        const sphereR = document.createElement('a-entity');
+        sphereR.setAttribute('class', 'videospheres');
+        sphereR.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        AFRAME.utils.entity.setComponentProperty(sphereR, 'material', {
+            shader: 'flat',
+            src: `#${this._videoDivId}`,
+            side: 'back',
+        });
+        sphereR.setAttribute('scale', '-1 1 1');
+
+        AFRAME.utils.entity.setComponentProperty(
+            sphereR,
+            'stereo',
+            { eye: 'right', mode: videoType.mode, split: videoType.split },
+        );
+
+        return [sphereL, sphereR];
     }
 
     _startThreeSixtyVideo() {
