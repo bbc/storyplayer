@@ -11,6 +11,7 @@ import logger from '../logger';
 
 // @flowignore
 const AFRAME = require('aframe');
+
 let componentRegistered = false;
 
 export default class AFrameRenderer extends BaseRenderer {
@@ -86,7 +87,7 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     renderVideoElement() {
-        this._registerAframeComponents();
+        AFrameRenderer._registerAframeComponents();
 
         // set video source
         if (this._representation.asset_collections.foreground_id) {
@@ -106,8 +107,11 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     _buildAframeVideoScene(mediaUrl: string) {
-        const videoTypeString = '360_stereo';
-        // const videoTypeString = '360_mono';
+        let videoTypeString = '360_mono';
+        if (this._representation.representation_type ===
+            'urn:x-object-based-media:representation-types:360-stereo/v1.0') {
+            videoTypeString = '360_stereo';
+        }
 
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
@@ -134,16 +138,15 @@ export default class AFrameRenderer extends BaseRenderer {
         if (videoTypeString.includes('180')) videoType.coverage = 'half';
         if (videoTypeString.includes('stereo')) videoType.stereo = true;
         if (videoTypeString.includes('vertical')) videoType.split = 'vertical';
-        
+
         this._playoutEngine.queuePlayout(this._rendererId, {
-            // url: mediaUrl,
-            url: 'https://dl.dropboxusercontent.com/s/nidqscjr1dw3vsb/MaryOculus.webm?dl=0',
+            url: mediaUrl,
         });
 
         // If stereo video
         if (videoType.stereo) {
             logger.info('360 rendering stereo');
-            
+
             // ACTIVATE layer 1 (left eye) for camera on monoscopic view
             // Camera is not existent at this point. If wait for scene "loaded", still is undefined.
             // So, should wait for scene 'renderstart', set a flag and fire component 'update'
@@ -157,7 +160,10 @@ export default class AFrameRenderer extends BaseRenderer {
 
             const sphereL = document.createElement('a-entity');
             sphereL.setAttribute('class', 'videospheres');
-            sphereL.setAttribute('geometry', 'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64');
+            sphereL.setAttribute(
+                'geometry',
+                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+            );
             AFRAME.utils.entity.setComponentProperty(sphereL, 'material', {
                 shader: 'flat',
                 src: `#${videoDivId}`,
@@ -166,17 +172,20 @@ export default class AFrameRenderer extends BaseRenderer {
             sphereL.setAttribute('scale', '-1 1 1');
 
             // Sync rotation with 'camera landing rotation'
-
-            // sphereL.setAttribute('rotation', {x:0, y: 0, z:0});
-            AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', {x: 0, y: 0, z: 0});
-            AFRAME.utils.entity.setComponentProperty(sphereL, 'stereo', {'eye': 'left', 'mode': videoType.mode, 'split': videoType.split});
-
+            AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', { x: 0, y: 0, z: 0 });
+            AFRAME.utils.entity.setComponentProperty(
+                sphereL,
+                'stereo',
+                { eye: 'left', mode: videoType.mode, split: videoType.split },
+            );
             this._aFrameSceneElement.appendChild(sphereL);
 
             const sphereR = document.createElement('a-entity');
-
             sphereR.setAttribute('class', 'videospheres');
-            sphereR.setAttribute('geometry', 'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64');
+            sphereR.setAttribute(
+                'geometry',
+                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+            );
             AFRAME.utils.entity.setComponentProperty(sphereR, 'material', {
                 shader: 'flat',
                 src: `#${videoDivId}`,
@@ -184,31 +193,32 @@ export default class AFrameRenderer extends BaseRenderer {
             });
             sphereR.setAttribute('scale', '-1 1 1');
 
+            // sphereR.addEventListener('materialvideoloadeddata', () => {
+            //     // this.el.emit("video_loaded", null, false);
+            //     console.log('loaded');
+            // });
 
-            sphereR.addEventListener('materialvideoloadeddata', () => {
-                // this.el.emit("video_loaded", null, false);
-                console.log('loaded');
-            });
-
-
-            AFRAME.utils.entity.setComponentProperty(sphereR, 'stereo', {'eye': 'right', 'mode': videoType.mode, 'split': videoType.split});
+            AFRAME.utils.entity.setComponentProperty(
+                sphereR,
+                'stereo',
+                { eye: 'right', mode: videoType.mode, split: videoType.split },
+            );
 
             this._aFrameSceneElement.appendChild(sphereR);
         } else {
             logger.info('360 rendering mono');
             const sphereMono = document.createElement('a-entity');
             sphereMono.setAttribute('class', 'videospheres');
-            sphereMono.setAttribute('geometry', 'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64');
+            sphereMono.setAttribute(
+                'geometry',
+                'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+            );
             sphereMono.setAttribute('scale', '-1 1 1');
             AFRAME.utils.entity.setComponentProperty(sphereMono, 'material', {
                 shader: 'flat',
                 src: `#${videoDivId}`,
                 side: 'back',
             });
-            // sphereMono.addEventListener("materialvideoloadeddata", function(){
-            //     this.el.emit("video_loaded", null, false);
-            // });
-
             this._aFrameSceneElement.appendChild(sphereMono);
         }
 
@@ -236,7 +246,7 @@ export default class AFrameRenderer extends BaseRenderer {
         );
 
         this._target.addEventListener('mouseup', () => { this.getOrientation(); }, false);
-        
+
         this._aFrameSceneElement.addEventListener('renderstart', () => {
             // console.log('layers');
             this._aFrameSceneElement.camera.layers.enable(1);
@@ -271,7 +281,7 @@ export default class AFrameRenderer extends BaseRenderer {
         }
     }
 
-    _registerAframeComponents() {
+    static _registerAframeComponents() {
         if (componentRegistered) {
             logger.info('aFrame stereo component already registered');
             return;
@@ -279,111 +289,122 @@ export default class AFrameRenderer extends BaseRenderer {
 
         AFRAME.registerComponent('stereo', {
             schema: {
-                eye: { type: 'string', default: 'left'},
-                mode: { type: 'string', default: 'full'},
-                split: { type: 'string', default: 'horizontal'}
+                eye: { type: 'string', default: 'left' },
+                mode: { type: 'string', default: 'full' },
+                split: { type: 'string', default: 'horizontal' },
             },
-            init: function () {
+
+            init() {
                 // Flag for video
-                this.material_is_a_video = false;
-        
-                // Check if material is a video from html tag (object3D.material.map instanceof THREE.VideoTexture does not
-                // always work
-                if (this.el.getAttribute('material') !== null && 'src' in this.el.getAttribute('material') && this.el.getAttribute('material').src !== '') {
-                    var src = this.el.getAttribute('material').src;
+                this.materialIsAVideo = false;
+
+                // Check if material is a video from html tag (object3D.material.map
+                // instanceof THREE.VideoTexture does not always work
+                if (this.el.getAttribute('material') !== null
+                    && 'src' in this.el.getAttribute('material')
+                    && this.el.getAttribute('material').src !== '') {
+                    // eslint-disable-next-line prefer-destructuring
+                    const src = this.el.getAttribute('material').src;
                     // If src is an object and its tagName is video...
                     if (typeof src === 'object' && ('tagName' in src && src.tagName === 'VIDEO')) {
-                        this.material_is_a_video = true;
+                        this.materialIsAVideo = true;
                     }
                 }
 
-                var object3D = this.el.object3D.children[0];
-        
+                const object3D = this.el.object3D.children[0];
+
                 // In A-Frame 0.2.0, objects are all groups so sphere is the first children
                 // Check if it's a sphere w/ video material, and if so
-                // Note that in A-Frame 0.2.0, sphere entities are THREE.SphereBufferGeometry, while in A-Frame 0.3.0,
-                // sphere entities are THREE.BufferGeometry.
-        
-                var validGeometries = [THREE.SphereGeometry, THREE.SphereBufferGeometry, THREE.BufferGeometry];
-                var isValidGeometry = validGeometries.some(function (geometry) {
-                    return object3D.geometry instanceof geometry;
-                });
+                // Note that in A-Frame 0.2.0, sphere entities are THREE.SphereBufferGeometry,
+                // while in A-Frame 0.3.0, sphere entities are THREE.BufferGeometry.
 
-                if (isValidGeometry && this.material_is_a_video) {
-                    // if half-dome mode, rebuild geometry (with default 100, radius, 64 width segments and 64 height segments)
+                const validGeometries = [
+                    THREE.SphereGeometry,
+                    THREE.SphereBufferGeometry,
+                    THREE.BufferGeometry,
+                ];
+                const isValidGeometry = validGeometries.some(geometry =>
+                    object3D.geometry instanceof geometry);
+
+                let geometry;
+                if (isValidGeometry && this.materialIsAVideo) {
+                    // if half-dome mode, rebuild geometry
+                    // (with default 100, radius, 64 width segments and 64 height segments)
                     if (this.data.mode === 'half') {
-                        var geo_def = this.el.getAttribute('geometry');
-                        var geometry = new THREE.SphereGeometry(geo_def.radius || 100, geo_def.segmentsWidth || 64, geo_def.segmentsHeight || 64, Math.PI / 2, Math.PI, 0, Math.PI);
-                    }
-                    else {
-                        var geo_def = this.el.getAttribute('geometry');
-                        var geometry = new THREE.SphereGeometry(geo_def.radius || 100, geo_def.segmentsWidth || 64, geo_def.segmentsHeight || 64);
+                        const geoDef = this.el.getAttribute('geometry');
+                        geometry = new THREE.SphereGeometry(
+                            geoDef.radius || 100,
+                            geoDef.segmentsWidth || 64,
+                            geoDef.segmentsHeight || 64,
+                            Math.PI / 2, Math.PI, 0, Math.PI,
+                        );
+                    } else {
+                        const geoDef = this.el.getAttribute('geometry');
+                        geometry = new THREE.SphereGeometry(
+                            geoDef.radius || 100,
+                            geoDef.segmentsWidth || 64,
+                            geoDef.segmentsHeight || 64,
+                        );
                     }
 
                     // Panorama in front
                     object3D.rotation.y = Math.PI / 2;
-        
-                    // If left eye is set, and the split is horizontal, take the left half of the video texture. If the split
+
+                    // If left eye is set, and the split is horizontal,
+                    // take the left half of the video texture. If the split
                     // is set to vertical, take the top/upper half of the video texture.
                     if (this.data.eye === 'left') {
-                        var uvs = geometry.faceVertexUvs[ 0 ];
-                        var axis = this.data.split === 'vertical' ? 'y' : 'x';
-                        for (var i = 0; i < uvs.length; i++) {
-                            for (var j = 0; j < 3; j++) {
-                                if (axis == 'x') {
-                                    uvs[ i ][ j ][ axis ] *= 0.5;
-                                }
-                                else {
-                                    uvs[ i ][ j ][ axis ] *= 0.5;
-                                    uvs[ i ][ j ][ axis ] += 0.5;
+                        const uvs = geometry.faceVertexUvs[0];
+                        const axis = this.data.split === 'vertical' ? 'y' : 'x';
+                        for (let i = 0; i < uvs.length; i += 1) {
+                            for (let j = 0; j < 3; j += 1) {
+                                if (axis === 'x') {
+                                    uvs[i][j][axis] *= 0.5;
+                                } else {
+                                    uvs[i][j][axis] *= 0.5;
+                                    uvs[i][j][axis] += 0.5;
                                 }
                             }
                         }
                     }
-        
-                    // If right eye is set, and the split is horizontal, take the right half of the video texture. If the split
+
+                    // If right eye is set, and the split is horizontal,
+                    // take the right half of the video texture. If the split
                     // is set to vertical, take the bottom/lower half of the video texture.
                     if (this.data.eye === 'right') {
-                        var uvs = geometry.faceVertexUvs[ 0 ];
-                        var axis = this.data.split === 'vertical' ? 'y' : 'x';
-                        for (var i = 0; i < uvs.length; i++) {
-                            for (var j = 0; j < 3; j++) {
-                                if (axis == 'x') {
-                                    uvs[ i ][ j ][ axis ] *= 0.5;
-                                    uvs[ i ][ j ][ axis ] += 0.5;
-                                }
-                                else {
-                                    uvs[ i ][ j ][ axis ] *= 0.5;
+                        const uvs = geometry.faceVertexUvs[0];
+                        const axis = this.data.split === 'vertical' ? 'y' : 'x';
+                        for (let i = 0; i < uvs.length; i += 1) {
+                            for (let j = 0; j < 3; j += 1) {
+                                if (axis === 'x') {
+                                    uvs[i][j][axis] *= 0.5;
+                                    uvs[i][j][axis] += 0.5;
+                                } else {
+                                    uvs[i][j][axis] *= 0.5;
                                 }
                             }
                         }
                     }
-        
+
                     // As AFrame 0.2.0 builds bufferspheres from sphere entities, transform
                     // into buffergeometry for coherence
-        
                     object3D.geometry = new THREE.BufferGeometry().fromGeometry(geometry);
-        
-                }        
+                }
             },
-        
+
             // On element update, put in the right layer, 0:both, 1:left, 2:right (spheres or not)
-        
-            update: function (oldData) {
-                var object3D = this.el.object3D.children[0];
-                var data = this.data;
+            update() {
+                const object3D = this.el.object3D.children[0];
+                // eslint-disable-next-line prefer-destructuring
+                const data = this.data;
                 if (data.eye === 'both') {
                     object3D.layers.set(0);
-                }
-                else {
+                } else {
                     object3D.layers.set(data.eye === 'left' ? 1 : 2);
                 }
-        
             },
-        
-            tick: function (time) {
-        
-            }
+
+            tick() {},
         });
         componentRegistered = true;
     }
