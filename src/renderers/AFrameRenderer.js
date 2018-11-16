@@ -80,13 +80,16 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     end() {
-        if (this._aFrameSceneElement === null) {
-            logger.warn(`AFrameRenderer for ${this._representation.name} already ended`);
-            return;
-        }
-
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        if (!this._rendered) {
+            return;
+        }
 
         if (this._aFrameSceneElement.parentNode !== null) {
             this._target.removeChild(this._aFrameSceneElement);
@@ -94,10 +97,6 @@ export default class AFrameRenderer extends BaseRenderer {
 
         this._aFrameSceneElement = null;
         this._rendered = false;
-        this._player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
     }
 
     renderVideoElement() {
