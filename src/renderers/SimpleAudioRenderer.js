@@ -32,6 +32,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _lastSetTime: number
 
     _endedEventListener: Function;
+    _hasEnded: boolean;
 
     constructor(
         representation: Representation,
@@ -58,16 +59,20 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._lastSetTime = 0;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
-            type: MEDIA_TYPES.FOREGROUND_AV,
+            type: MEDIA_TYPES.FOREGROUND_A,
         });
     }
 
     _endedEventListener() {
-        super.complete();
+        if (!this._hasEnded) {
+            this._hasEnded = true;
+            super.complete();
+        }
     }
 
     start() {
         super.start();
+        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -83,6 +88,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.classList.add('romper-audio-element');
+        }
     }
 
     end() {
@@ -103,6 +113,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.classList.remove('romper-audio-element');
+        }
     }
 
     renderAudioElement() {

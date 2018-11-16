@@ -180,6 +180,9 @@ $romper-hover-text-size: 25px;
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 30%;
+    height: 100%;
+    position: absolute;
+    width: 100%;
   }
 
   .romper-text-element {
@@ -621,6 +624,14 @@ $romper-hover-text-size: 25px;
 
 .romper-image-overlay,
 .romper-render-image {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.romper-start-image {
   height: 100%;
   left: 0;
   position: absolute;

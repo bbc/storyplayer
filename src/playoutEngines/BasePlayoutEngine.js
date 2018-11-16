@@ -6,6 +6,7 @@ import Player from '../Player';
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
+    FOREGROUND_A: 'foreground_a',
     BACKGROUND_A: 'background_a',
 };
 

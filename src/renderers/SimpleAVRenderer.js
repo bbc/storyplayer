@@ -32,6 +32,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _outTime: number;
 
     _endedEventListener: Function;
+    _hasEnded: boolean;
     _outTimeEventListener: Function;
     _setOutTime: Function;
     _setInTime: Function;
@@ -53,7 +54,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             controller,
         );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._setInTime = this._setInTime.bind(this);
@@ -77,13 +77,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
-        super.complete();
+        if (!this._hasEnded) {
+            this._hasEnded = true;
+            super.complete();
+        }
     }
 
     _outTimeEventListener() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
+                videoElement.pause();
                 this._endedEventListener();
             }
         }
@@ -91,11 +95,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
 
-        this.setCurrentTime(this._inTime);
+        // set time to last set time (relative to click start)
+        this.setCurrentTime(this._lastSetTime);
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
@@ -215,6 +221,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (videoTime === undefined) {
             videoTime = this._lastSetTime;
+        } else {
+            // convert to time into segment
+            videoTime -= this._inTime;
         }
         const timeObject = {
             timeBased: true,
@@ -223,14 +232,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
         return timeObject;
     }
 
+    // set how far into the segment this video should be (relative to in-point)
     setCurrentTime(time: number) {
-        this._lastSetTime = time;
-        this._playoutEngine.setCurrentTime(this._rendererId, time);
+        this._lastSetTime = time; // time into segment
+        // convert to absolute time into video
+        this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
     }
 
     _setInTime(time: number) {
         this._inTime = time;
-        this.setCurrentTime(time);
+        this.setCurrentTime(0);
     }
 
     _setOutTime(time: number) {
