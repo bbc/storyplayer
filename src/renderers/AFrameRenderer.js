@@ -12,6 +12,8 @@ import logger from '../logger';
 // @flowignore
 const AFRAME = require('aframe');
 
+let THREE;
+
 let componentRegistered = false;
 
 export default class AFrameRenderer extends BaseRenderer {
