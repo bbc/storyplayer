@@ -52,7 +52,6 @@ export default class AFrameRenderer extends BaseRenderer {
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
-        this._aFrameSceneElement = document.createElement('a-scene');
         this._initialRotation = '0 90 0';
         this.renderVideoElement();
     }
@@ -65,6 +64,9 @@ export default class AFrameRenderer extends BaseRenderer {
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
+        if (this._aFrameSceneElement === null) {
+            this.renderVideoElement();
+        }
         if (this._rendered) {
             this._startThreeSixtyVideo();
         }
@@ -72,14 +74,20 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     end() {
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
+        if (this._aFrameSceneElement === null) {
+            logger.warn(`AFrameRenderer for ${this._representation.name} already ended`);
+            return;
+        }
 
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
 
         if (this._aFrameSceneElement.parentNode !== null) {
             this._target.removeChild(this._aFrameSceneElement);
         }
 
+        this._aFrameSceneElement = null;
+        this._rendered = false;
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
@@ -107,15 +115,16 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     _buildAframeVideoScene(mediaUrl: string) {
+        if (this._destroyed) {
+            logger.warn('trying to populate video element that has been destroyed');
+            return;
+        }
+
+        this._aFrameSceneElement = document.createElement('a-scene');
         let videoTypeString = '360_mono';
         if (this._representation.representation_type ===
             'urn:x-object-based-media:representation-types:360-stereo/v1.0') {
             videoTypeString = '360_stereo';
-        }
-
-        if (this._destroyed) {
-            logger.warn('trying to populate video element that has been destroyed');
-            return;
         }
 
         const cameraEntity = document.createElement('a-entity');
