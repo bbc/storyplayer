@@ -84,6 +84,7 @@ export type Representation = {
             asset_collection_id: string
         }>
     },
+    meta?: Object,
     choices?: Array<RepresentationChoice>,
     behaviours?: {
         started?: Array<{

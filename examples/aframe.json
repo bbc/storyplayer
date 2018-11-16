@@ -174,8 +174,13 @@
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "name": "Video 2",
-            "meta": {},
+            "name": "Video 2 - 360 mono",
+            "meta": {
+                "romper": {
+                    "video_typpe": "360_mono",
+                    "rotation": "0 90 0"
+                }
+            },
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
@@ -191,10 +196,15 @@
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "name": "Video 3",
-            "meta": {},
+            "name": "Video 3 - stereo",
+            "meta": {
+                "romper": {
+                    "video_type": "stereo",
+                    "rotation": "0 0 0"
+                }
+            },
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:360-stereo/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
                 "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []

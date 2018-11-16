@@ -52,7 +52,13 @@ export default class AFrameRenderer extends BaseRenderer {
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
-        this._initialRotation = '0 90 0';
+        this._initialRotation = '0 0 0';
+
+        if (this._representation.meta &&
+            this._representation.meta.romper &&
+            this._representation.meta.romper.rotation) {
+            this._initialRotation = this._representation.meta.romper.rotation;
+        }
         this.renderVideoElement();
     }
 
@@ -122,9 +128,10 @@ export default class AFrameRenderer extends BaseRenderer {
 
         this._aFrameSceneElement = document.createElement('a-scene');
         let videoTypeString = '360_mono';
-        if (this._representation.representation_type ===
-            'urn:x-object-based-media:representation-types:360-stereo/v1.0') {
-            videoTypeString = '360_stereo';
+        if (this._representation.meta &&
+            this._representation.meta.romper &&
+            this._representation.meta.romper.video_type) {
+            videoTypeString = this._representation.meta.romper.video_type;
         }
 
         const cameraEntity = document.createElement('a-entity');
