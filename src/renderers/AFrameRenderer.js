@@ -87,16 +87,15 @@ export default class AFrameRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        if (!this._rendered) {
-            return;
-        }
+        if (this._rendered) {
+            // clear all the UI
+            if (this._aFrameSceneElement.parentNode !== null) {
+                this._target.removeChild(this._aFrameSceneElement);
+            }
 
-        if (this._aFrameSceneElement.parentNode !== null) {
-            this._target.removeChild(this._aFrameSceneElement);
+            this._aFrameSceneElement = null;
+            this._rendered = false;
         }
-
-        this._aFrameSceneElement = null;
-        this._rendered = false;
     }
 
     renderVideoElement() {
