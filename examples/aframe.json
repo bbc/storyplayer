@@ -176,6 +176,13 @@
             "version": "0:0",
             "name": "Video 2 - 360 mono",
             "tags": {},
+            "meta": {
+                "romper": {
+                    "aframe": {
+                        "extras": "<a-sphere position='-3 2 0' radius='0.25' color='#EF2D5E' shadow></a-sphere>"
+                    }
+                }
+            },
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",

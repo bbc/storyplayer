@@ -1,5 +1,7 @@
 // @flow
 
+import AFRAME from 'aframe';
+
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
@@ -8,9 +10,6 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
-
-// @flowignore
-const AFRAME = require('aframe');
 
 let componentRegistered = false;
 
@@ -176,6 +175,15 @@ export default class AFrameRenderer extends BaseRenderer {
         });
 
         this._buildBaseAframeScene();
+
+        // test how we might add other aFrame components specified in DM
+        if (this._representation.meta
+            && this._representation.meta.romper
+            && this._representation.meta.romper.aframe
+            && this._representation.meta.romper.aframe.extras) {
+            this._addAframeComponents(this._representation.meta.romper.aframe.extras);
+        }
+
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
         this._aFrameAssetsElement
             .appendChild(this._playoutEngine.getMediaElement(this._rendererId));
@@ -379,9 +387,9 @@ export default class AFrameRenderer extends BaseRenderer {
                 // while in A-Frame 0.3.0, sphere entities are THREE.BufferGeometry.
 
                 const validGeometries = [
-                    THREE.SphereGeometry, // eslint-disable-line no-undef
-                    THREE.SphereBufferGeometry, // eslint-disable-line no-undef
-                    THREE.BufferGeometry, // eslint-disable-line no-undef
+                    window.THREE.SphereGeometry,
+                    window.THREE.SphereBufferGeometry, // eslint-disable-line no-undef
+                    window.THREE.BufferGeometry, // eslint-disable-line no-undef
                 ];
                 const isValidGeometry = validGeometries.some(geometry =>
                     object3D.geometry instanceof geometry);
@@ -393,7 +401,7 @@ export default class AFrameRenderer extends BaseRenderer {
                     if (this.data.mode === 'half') {
                         const geoDef = this.el.getAttribute('geometry');
                         // eslint-disable-next-line no-undef
-                        geometry = new THREE.SphereGeometry(
+                        geometry = new window.THREE.SphereGeometry(
                             geoDef.radius || 100,
                             geoDef.segmentsWidth || 64,
                             geoDef.segmentsHeight || 64,
@@ -402,7 +410,7 @@ export default class AFrameRenderer extends BaseRenderer {
                     } else {
                         const geoDef = this.el.getAttribute('geometry');
                         // eslint-disable-next-line no-undef
-                        geometry = new THREE.SphereGeometry(
+                        geometry = new window.THREE.SphereGeometry(
                             geoDef.radius || 100,
                             geoDef.segmentsWidth || 64,
                             geoDef.segmentsHeight || 64,
@@ -451,7 +459,7 @@ export default class AFrameRenderer extends BaseRenderer {
                     // As AFrame 0.2.0 builds bufferspheres from sphere entities, transform
                     // into buffergeometry for coherence
                     // eslint-disable-next-line no-undef
-                    object3D.geometry = new THREE.BufferGeometry().fromGeometry(geometry);
+                    object3D.geometry = new window.THREE.BufferGeometry().fromGeometry(geometry);
                 }
             },
 
@@ -492,6 +500,14 @@ export default class AFrameRenderer extends BaseRenderer {
         this._lastSetTime = time; // time into segment
         // convert to absolute time into video
         this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
+    }
+
+    // add bunch of aFrame components, maybe from Data model?
+    _addAframeComponents(objectSpecs: string) {
+        const ent = document.createElement('a-entity');
+        ent.id = 'addedExtras';
+        ent.innerHTML = objectSpecs;
+        this._aFrameSceneElement.appendChild(ent);
     }
 
     _setInTime(time: number) {
