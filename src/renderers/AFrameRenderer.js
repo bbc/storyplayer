@@ -25,6 +25,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _videoDivId: string;
     _aFrameSceneElement: any;
     _videoAssetElement: HTMLVideoElement;
+    _aFrameAssetsElement: any;
     _aFrameCamera: any;
     _initialRotation: string;
 
@@ -64,6 +65,7 @@ export default class AFrameRenderer extends BaseRenderer {
         // this is what we refer to
         this._videoDivId = `threesixtyvideo-${this._rendererId}`;
 
+        // this._buildBaseAframeScene();
         this.renderVideoElement();
     }
 
@@ -82,25 +84,6 @@ export default class AFrameRenderer extends BaseRenderer {
             this._startThreeSixtyVideo();
         }
         this._started = true;
-    }
-
-    end() {
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
-        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-        this._player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-
-        if (this._rendered) {
-            // clear all the UI
-            if (this._aFrameSceneElement.parentNode !== null) {
-                this._target.removeChild(this._aFrameSceneElement);
-            }
-
-            this._aFrameSceneElement = null;
-            this._rendered = false;
-        }
     }
 
     renderVideoElement() {
@@ -123,18 +106,9 @@ export default class AFrameRenderer extends BaseRenderer {
         }
     }
 
-    _buildAframeVideoScene(mediaUrl: string) {
-        if (this._destroyed) {
-            logger.warn('trying to populate video element that has been destroyed');
-            return;
-        }
-
-        this._playoutEngine.queuePlayout(this._rendererId, {
-            url: mediaUrl,
-        });
-
-        // build vanilla aFrame infrastructure
-        // these would need to persist across NEs for continuous headset playback
+    // build vanilla aFrame infrastructure
+    // these would need to persist across NEs for continuous headset playback
+    _buildBaseAframeScene() {
         // scene
         this._aFrameSceneElement = document.createElement('a-scene');
         this._aFrameSceneElement.setAttribute('embedded', '');
@@ -149,10 +123,23 @@ export default class AFrameRenderer extends BaseRenderer {
         this._aFrameSceneElement.appendChild(cameraEntity);
 
         // assets (add our video div)
-        const aFrameAssetsElement = document.createElement('a-assets');
-        this._aFrameSceneElement.appendChild(aFrameAssetsElement);
+        this._aFrameAssetsElement = document.createElement('a-assets');
+        this._aFrameSceneElement.appendChild(this._aFrameAssetsElement);
+    }
+
+    _buildAframeVideoScene(mediaUrl: string) {
+        if (this._destroyed) {
+            logger.warn('trying to populate video element that has been destroyed');
+            return;
+        }
+
+        this._playoutEngine.queuePlayout(this._rendererId, {
+            url: mediaUrl,
+        });
+
+        this._buildBaseAframeScene();
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+        this._aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 
         // identify video type and set parameters
         // now build bits specific for video/type
@@ -269,7 +256,6 @@ export default class AFrameRenderer extends BaseRenderer {
         this._target.addEventListener('mouseup', () => { this.getOrientation(); }, false);
 
         this._aFrameSceneElement.addEventListener('renderstart', () => {
-            // console.log('layers');
             this._aFrameSceneElement.camera.layers.enable(1);
         });
 
@@ -439,6 +425,25 @@ export default class AFrameRenderer extends BaseRenderer {
 
     switchTo() {
         this.start();
+    }
+
+    end() {
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
+        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        if (this._rendered) {
+            // clear all the UI
+            if (this._aFrameSceneElement.parentNode !== null) {
+                this._target.removeChild(this._aFrameSceneElement);
+            }
+
+            this._aFrameSceneElement = null;
+            this._rendered = false;
+        }
     }
 
     destroy() {
