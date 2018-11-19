@@ -245,7 +245,8 @@
                 "romper": {
                     "video_type": "360_mono",
                     "rotation": "0 90 0",
-                    "out": "6.0"
+                    "in": "6.0",
+                    "out": "16.0"
                 }
             },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",

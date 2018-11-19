@@ -71,13 +71,6 @@ export default class AFrameRenderer extends BaseRenderer {
         this._outTime = -1;
 
         this._initialRotation = '0 0 0';
-
-        this._setInTime = this._setInTime.bind(this);
-        this._setOutTime = this._setOutTime.bind(this);
-        this._inTime = 0;
-        this._outTime = -1;
-
-        this._initialRotation = '0 0 0';
         this._videoTypeString = '360_mono';
 
         // this is what we refer to
@@ -113,6 +106,7 @@ export default class AFrameRenderer extends BaseRenderer {
         }
         if (this._rendered) {
             this._startThreeSixtyVideo();
+            this.setCurrentTime(0);
         }
         this._hasEnded = false;
         this._started = true;
@@ -170,27 +164,6 @@ export default class AFrameRenderer extends BaseRenderer {
         }
     }
 
-    // build vanilla aFrame infrastructure
-    // these would need to persist across NEs for continuous headset playback
-    _buildBaseAframeScene() {
-        // scene
-        this._aFrameSceneElement = document.createElement('a-scene');
-        this._aFrameSceneElement.setAttribute('embedded', '');
-        this._aFrameSceneElement.classList.add('romper-aframe-scene');
-
-        // camera
-        const cameraEntity = document.createElement('a-entity');
-        cameraEntity.setAttribute('position', '0 0 0');
-        cameraEntity.setAttribute('rotation', this._initialRotation);
-        this._aFrameCamera = document.createElement('a-camera');
-        cameraEntity.appendChild(this._aFrameCamera);
-        this._aFrameSceneElement.appendChild(cameraEntity);
-
-        // assets (add our video div)
-        this._aFrameAssetsElement = document.createElement('a-assets');
-        this._aFrameSceneElement.appendChild(this._aFrameAssetsElement);
-    }
-
     _buildAframeVideoScene(mediaUrl: string) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
@@ -236,6 +209,27 @@ export default class AFrameRenderer extends BaseRenderer {
         if (this._started) {
             this._startThreeSixtyVideo();
         }
+    }
+
+    // build vanilla aFrame infrastructure
+    // these would need to persist across NEs for continuous headset playback
+    _buildBaseAframeScene() {
+        // scene
+        this._aFrameSceneElement = document.createElement('a-scene');
+        this._aFrameSceneElement.setAttribute('embedded', '');
+        this._aFrameSceneElement.classList.add('romper-aframe-scene');
+
+        // camera
+        const cameraEntity = document.createElement('a-entity');
+        cameraEntity.setAttribute('position', '0 0 0');
+        cameraEntity.setAttribute('rotation', this._initialRotation);
+        this._aFrameCamera = document.createElement('a-camera');
+        cameraEntity.appendChild(this._aFrameCamera);
+        this._aFrameSceneElement.appendChild(cameraEntity);
+
+        // assets (add our video div)
+        this._aFrameAssetsElement = document.createElement('a-assets');
+        this._aFrameSceneElement.appendChild(this._aFrameAssetsElement);
     }
 
     // return components needed to render mono 360 video
@@ -501,7 +495,6 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _setInTime(time: number) {
         this._inTime = time;
-        this.setCurrentTime(0);
     }
 
     _setOutTime(time: number) {
