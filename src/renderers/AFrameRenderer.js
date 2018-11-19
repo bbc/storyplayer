@@ -71,6 +71,13 @@ export default class AFrameRenderer extends BaseRenderer {
         this._outTime = -1;
 
         this._initialRotation = '0 0 0';
+
+        this._setInTime = this._setInTime.bind(this);
+        this._setOutTime = this._setOutTime.bind(this);
+        this._inTime = 0;
+        this._outTime = -1;
+
+        this._initialRotation = '0 0 0';
         this._videoTypeString = '360_mono';
 
         // this is what we refer to
