@@ -29,6 +29,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _aFrameAssetsElement: any;
     _aFrameCamera: any;
     _initialRotation: string;
+    _videoTypeString: string;
 
     _lastSetTime: number;
     _inTime: number;
@@ -70,12 +71,7 @@ export default class AFrameRenderer extends BaseRenderer {
         this._outTime = -1;
 
         this._initialRotation = '0 0 0';
-
-        if (this._representation.meta &&
-            this._representation.meta.romper &&
-            this._representation.meta.romper.rotation) {
-            this._initialRotation = this._representation.meta.romper.rotation;
-        }
+        this._videoTypeString = '360_mono';
 
         // this is what we refer to
         this._videoDivId = `threesixtyvideo-${this._rendererId}`;
@@ -123,11 +119,20 @@ export default class AFrameRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.av_src) {
+                        // get meta
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                             this._setInTime(parseFloat(fg.meta.romper.in));
                         }
                         if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
                             this._setOutTime(parseFloat(fg.meta.romper.out));
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.video_type) {
+                            // mono/stereo, vertical/horizontal split
+                            this._videoTypeString = fg.meta.romper.video_type;
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
+                            // starting rotation
+                            this._initialRotation = fg.meta.romper.rotation;
                         }
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
@@ -203,18 +208,10 @@ export default class AFrameRenderer extends BaseRenderer {
             mode: 'full',
         };
 
-        let videoTypeString = '360_mono'; // default
-        // overwrite if data model specifies
-        if (this._representation.meta &&
-            this._representation.meta.romper &&
-            this._representation.meta.romper.video_type) {
-            videoTypeString = this._representation.meta.romper.video_type;
-        }
-
         // parse video type from string
-        if (videoTypeString.includes('180')) videoType.coverage = 'half';
-        if (videoTypeString.includes('stereo')) videoType.stereo = true;
-        if (videoTypeString.includes('vertical')) videoType.split = 'vertical';
+        if (this._videoTypeString.includes('180')) videoType.coverage = 'half';
+        if (this._videoTypeString.includes('stereo')) videoType.stereo = true;
+        if (this._videoTypeString.includes('vertical')) videoType.split = 'vertical';
 
         // get components for video depending on type
         // these are the bits that would need to be replaced for each scene

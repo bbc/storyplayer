@@ -175,12 +175,6 @@
             "object_class": "REPRESENTATION",
             "version": "0:0",
             "name": "Video 2 - 360 mono",
-            "meta": {
-                "romper": {
-                    "video_typpe": "360_mono",
-                    "rotation": "0 90 0"
-                }
-            },
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
@@ -197,12 +191,6 @@
             "object_class": "REPRESENTATION",
             "version": "0:0",
             "name": "Video 3 - stereo",
-            "meta": {
-                "romper": {
-                    "video_type": "stereo",
-                    "rotation": "0 0 0"
-                }
-            },
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
@@ -253,6 +241,13 @@
             "description": "",
             "version": "0:0",
             "tags": {},
+            "meta": {
+                "romper": {
+                    "video_type": "360_mono",
+                    "rotation": "0 90 0",
+                    "out": "6.0"
+                }
+            },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0"
@@ -264,6 +259,12 @@
             "name": "Planet Earth Arizona",
             "description": "",
             "version": "0:0",
+            "meta": {
+                "romper": {
+                    "video_type": "360_mono",
+                    "rotation": "0 90 0"
+                }
+            },
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
@@ -276,6 +277,12 @@
             "name": "Mary",
             "description": "",
             "version": "0:0",
+            "meta": {
+                "romper": {
+                    "video_type": "stereo",
+                    "rotation": "0 0 0"
+                }
+            },
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
