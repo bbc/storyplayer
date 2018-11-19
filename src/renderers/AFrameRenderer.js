@@ -18,6 +18,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
+    _outTimeEventListener: Function;
     _playEventListener: Function;
     _pauseEventListener: Function;
     _handlePlayPauseButtonClicked: Function;
@@ -29,6 +30,13 @@ export default class AFrameRenderer extends BaseRenderer {
     _aFrameCamera: any;
     _initialRotation: string;
 
+    _lastSetTime: number;
+    _inTime: number;
+    _outTime: number;
+    _setOutTime: Function;
+    _setInTime: Function;
+
+    _hasEnded: boolean;
     _started: boolean;
     _rendered: boolean;
 
@@ -50,10 +58,17 @@ export default class AFrameRenderer extends BaseRenderer {
         );
         this._endedEventListener = this._endedEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+        this._outTimeEventListener = this._outTimeEventListener.bind(this);
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
+
+        this._setInTime = this._setInTime.bind(this);
+        this._setOutTime = this._setOutTime.bind(this);
+        this._inTime = 0;
+        this._outTime = -1;
+
         this._initialRotation = '0 0 0';
 
         if (this._representation.meta &&
@@ -71,7 +86,20 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _endedEventListener() {
         logger.info('360 video ended');
-        super.complete();
+        if (!this._hasEnded) {
+            this._hasEnded = true;
+            super.complete();
+        }
+    }
+
+    _outTimeEventListener() {
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (videoElement) {
+            if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
+                videoElement.pause();
+                this._endedEventListener();
+            }
+        }
     }
 
     start() {
@@ -83,6 +111,7 @@ export default class AFrameRenderer extends BaseRenderer {
         if (this._rendered) {
             this._startThreeSixtyVideo();
         }
+        this._hasEnded = false;
         this._started = true;
     }
 
@@ -94,12 +123,35 @@ export default class AFrameRenderer extends BaseRenderer {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.av_src) {
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                            this._setInTime(parseFloat(fg.meta.romper.in));
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                            this._setOutTime(parseFloat(fg.meta.romper.out));
+                        }
                         this._fetchMedia(fg.assets.av_src)
+                            .then((mediaUrl) => {
+                                let appendedUrl = mediaUrl;
+                                if (this._inTime > 0 || this._outTime > 0) {
+                                    let mediaFragment = `#t=${this._inTime}`;
+                                    if (this._outTime > 0) {
+                                        mediaFragment = `${mediaFragment},${this._outTime}`;
+                                    }
+                                    appendedUrl = `${mediaUrl}${mediaFragment}`;
+                                }
+                                this._buildAframeVideoScene(appendedUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Video not found');
+                            });
+                    }
+                    if (fg.assets.sub_src) {
+                        this._fetchMedia(fg.assets.sub_src)
                             .then((mediaUrl) => {
                                 this._buildAframeVideoScene(mediaUrl);
                             })
                             .catch((err) => {
-                                logger.error(err, 'Video not found');
+                                logger.error(err, 'Subs not found');
                             });
                     }
                 });
@@ -139,7 +191,8 @@ export default class AFrameRenderer extends BaseRenderer {
 
         this._buildBaseAframeScene();
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        this._aFrameAssetsElement.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+        this._aFrameAssetsElement
+            .appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 
         // identify video type and set parameters
         // now build bits specific for video/type
@@ -261,6 +314,7 @@ export default class AFrameRenderer extends BaseRenderer {
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
     }
 
@@ -419,6 +473,37 @@ export default class AFrameRenderer extends BaseRenderer {
         componentRegistered = true;
     }
 
+    getCurrentTime(): Object {
+        let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (videoTime === undefined) {
+            videoTime = this._lastSetTime;
+        } else {
+            // convert to time into segment
+            videoTime -= this._inTime;
+        }
+        const timeObject = {
+            timeBased: true,
+            currentTime: videoTime,
+        };
+        return timeObject;
+    }
+
+    // set how far into the segment this video should be (relative to in-point)
+    setCurrentTime(time: number) {
+        this._lastSetTime = time; // time into segment
+        // convert to absolute time into video
+        this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
+    }
+
+    _setInTime(time: number) {
+        this._inTime = time;
+        this.setCurrentTime(0);
+    }
+
+    _setOutTime(time: number) {
+        this._outTime = time;
+    }
+
     switchFrom() {
         this.end();
     }
@@ -430,6 +515,7 @@ export default class AFrameRenderer extends BaseRenderer {
     end() {
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
