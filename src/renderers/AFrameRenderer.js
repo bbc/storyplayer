@@ -69,6 +69,7 @@ export default class AFrameRenderer extends BaseRenderer {
         this._setOutTime = this._setOutTime.bind(this);
         this._inTime = 0;
         this._outTime = -1;
+        this._lastSetTime = 0;
 
         this._initialRotation = '0 0 0';
         this._videoTypeString = '360_mono';
@@ -106,8 +107,8 @@ export default class AFrameRenderer extends BaseRenderer {
         }
         if (this._rendered) {
             this._startThreeSixtyVideo();
-            this.setCurrentTime(0);
         }
+        this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
         this._started = true;
     }
