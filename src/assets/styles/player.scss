@@ -50,6 +50,7 @@ $romper-hover-text-size: 25px;
   opacity: 0.9;
   overflow-y: auto;
   padding: 5px;
+  z-index: 4;
 
   & > * {
     padding: 5px;
