@@ -26,6 +26,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _videoDivId: string;
     _aFrameSceneElement: any;
     _videoAssetElement: HTMLVideoElement;
+    _spatialAudio: HTMLElement;
     _aFrameAssetsElement: any;
     _aFrameCamera: any;
     _initialRotation: string;
@@ -226,6 +227,7 @@ export default class AFrameRenderer extends BaseRenderer {
             audio.setAttribute('ambiOrder', this._ambisonic);
             audio.setAttribute('spatialaudio', '');
             this._aFrameSceneElement.appendChild(audio);
+            this._spatialAudio = audio;
         }
 
         // all done - start playing if start has been called
@@ -510,6 +512,9 @@ export default class AFrameRenderer extends BaseRenderer {
                 const rot = cameraEl.getAttribute('rotation');
                 this.spatialAudio.updateRotation(rot, true);
             },
+            remove() {
+                logger.info('Removing spatial audio component');
+            },
         });
         componentRegistered = true;
     }
@@ -575,7 +580,10 @@ export default class AFrameRenderer extends BaseRenderer {
                 this._target.removeChild(this._aFrameSceneElement);
             }
 
-            this._aFrameSceneElement = null;
+            if (this._spatialAudio !== undefined) {
+                this._aFrameSceneElement.removeChild(this._spatialAudio);
+            }
+                this._aFrameSceneElement = null;
             this._rendered = false;
         }
     }
