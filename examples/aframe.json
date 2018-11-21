@@ -131,7 +131,7 @@
             "name": "Narrative Element ",
             "representations": [
                 {
-                    "representation_id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
+                    "representation_id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
                     "condition": {"==": [1,1]}
                 }
             ]
@@ -145,7 +145,7 @@
             "name": "Narrative Element ",
             "representations": [
                 {
-                    "representation_id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
+                    "representation_id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
                     "condition": {"==": [1,1]}
                 }
             ]
@@ -185,7 +185,7 @@
             },
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
-                "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
+                "foreground_id": "42184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
             },
             "behaviours": {
@@ -201,7 +201,7 @@
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
-                "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
+                "foreground_id": "084568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
             "behaviours": {
@@ -277,6 +277,25 @@
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/11rcww8vg67t616/S5.mp4?dl=0"
+            }
+        },
+        {
+            "id": "084568d1-7dce-48f1-8c18-396553a9afbd",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Philharmonic",
+            "description": "",
+            "version": "0:0",
+            "meta": {
+                "romper": {
+                    "video_type": "360_mono",
+                    "rotation": "0 90 0",
+                    "audio": "2H1V"
+                }
+            },
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "assets": {
+                "av_src": "./phil_mixedaac.mp4"
             }
         },
         {

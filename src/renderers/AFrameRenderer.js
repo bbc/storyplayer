@@ -1,6 +1,7 @@
 // @flow
 
 import AFRAME from 'aframe';
+import dynamicAudio from 'dynamicaudio';
 
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
@@ -29,6 +30,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _aFrameCamera: any;
     _initialRotation: string;
     _videoTypeString: string;
+    _ambisonic: string;
 
     _lastSetTime: number;
     _inTime: number;
@@ -70,6 +72,7 @@ export default class AFrameRenderer extends BaseRenderer {
         this._outTime = -1;
         this._lastSetTime = 0;
 
+        this._ambisonic = '';
         this._initialRotation = '0 0 0';
         this._videoTypeString = '360_mono';
 
@@ -134,6 +137,10 @@ export default class AFrameRenderer extends BaseRenderer {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
                             // starting rotation
                             this._initialRotation = fg.meta.romper.rotation;
+                        }
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.audio) {
+                            // starting rotation
+                            this._ambisonic = fg.meta.romper.audio;
                         }
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
@@ -210,6 +217,15 @@ export default class AFrameRenderer extends BaseRenderer {
         } else {
             const monoElements = this._getMonoComponents();
             monoElements.forEach(el => this._aFrameSceneElement.appendChild(el));
+        }
+
+        if (this._ambisonic !== '') {
+            logger.info(`${this._ambisonic} ambisonic audio`);
+            const audio = document.createElement('a-entity');
+            audio.setAttribute('src', this._videoDivId);
+            audio.setAttribute('ambiOrder', this._ambisonic);
+            audio.setAttribute('spatialaudio', '');
+            this._aFrameSceneElement.appendChild(audio);
         }
 
         // all done - start playing if start has been called
@@ -476,6 +492,24 @@ export default class AFrameRenderer extends BaseRenderer {
             },
 
             tick() {},
+        });
+        AFRAME.registerComponent('spatialaudio', {
+            schema: {},
+            init() {
+                const source = this.el.getAttribute('src');
+                const ambiOrder = this.el.getAttribute('ambiOrder');
+                const videoElement = document.getElementById(source);
+                // eslint-disable-next-line new-cap
+                this.spatialAudio = new dynamicAudio({ videoElement, ambiOrder });
+                // Throttle soundfield rotation tick to 50ms, rather than every frame
+                this.tick = AFRAME.utils.throttleTick(this.tick, 50, this);
+                logger.info('initialised spatialAudio component');
+            },
+            tick() {
+                const cameraEl = this.el.sceneEl.camera.el;
+                const rot = cameraEl.getAttribute('rotation');
+                this.spatialAudio.updateRotation(rot, true);
+            },
         });
         componentRegistered = true;
     }
