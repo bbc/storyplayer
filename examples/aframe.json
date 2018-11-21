@@ -295,7 +295,7 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "./phil_mixedaac.mp4"
+                "av_src": "https://dl.dropboxusercontent.com/s/vuh0hhlhlhg7u40/phil_mixedaac.mp4?dl=0"
             }
         },
         {
