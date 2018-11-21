@@ -583,7 +583,7 @@ export default class AFrameRenderer extends BaseRenderer {
             if (this._spatialAudio !== undefined) {
                 this._aFrameSceneElement.removeChild(this._spatialAudio);
             }
-                this._aFrameSceneElement = null;
+            this._aFrameSceneElement = null;
             this._rendered = false;
         }
     }

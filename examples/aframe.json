@@ -3,7 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "name": "A 360 test Story",
+            "name": "An ambisonic 360 test Story",
             "description": "A story with a beginning, a middle and an end",
             "beginnings": [
                 {
@@ -174,15 +174,8 @@
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "name": "Video 2 - 360 mono",
+            "name": "Video 2 - 360 concert",
             "tags": {},
-            "meta": {
-                "romper": {
-                    "aframe": {
-                        "extras": "<a-sphere position='-3 2 0' radius='0.25' color='#EF2D5E' shadow></a-sphere>"
-                    }
-                }
-            },
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
                 "foreground_id": "194568d1-7dce-48f1-8c18-396553a9afbd",
@@ -197,7 +190,7 @@
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "name": "Video 3 - stereo",
+            "name": "Video 3 - Story of Betty",
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
             "asset_collections": {
@@ -282,7 +275,7 @@
         {
             "id": "084568d1-7dce-48f1-8c18-396553a9afbd",
             "object_class": "ASSET_COLLECTION",
-            "name": "Philharmonic",
+            "name": "Philharmonic: Grieg",
             "description": "",
             "version": "0:0",
             "meta": {
@@ -301,13 +294,13 @@
         {
             "id": "194568d1-7dce-48f1-8c18-396553a9afbd",
             "object_class": "ASSET_COLLECTION",
-            "name": "Betty",
+            "name": "Orkney: Betty",
             "description": "",
             "version": "0:0",
             "meta": {
                 "romper": {
                     "video_type": "360_mono",
-                    "rotation": "0 0 0",
+                    "rotation": "0 90 0",
                     "audio": "2H1V"
                 }
             },
