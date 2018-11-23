@@ -19,6 +19,7 @@ import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
+import AFrameRenderer from './renderers/AFrameRenderer';
 
 export default class RenderManager extends EventEmitter {
     _controller: Controller;
@@ -408,6 +409,13 @@ export default class RenderManager extends EventEmitter {
         });
 
         if (oldRenderer) {
+            if (oldRenderer instanceof AFrameRenderer
+            && !(newRenderer instanceof AFrameRenderer)) {
+                // exit VR mode if necessary
+                // TODO need to go back to full-screen if appropriate
+                AFrameRenderer.exitVR();
+            }
+
             const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
                 .some((renderer) => {
                     if (renderer === oldRenderer) {

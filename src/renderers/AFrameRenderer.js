@@ -79,7 +79,7 @@ export default class AFrameRenderer extends BaseRenderer {
         this._videoDivId = `threesixtyvideo-${this._rendererId}`;
 
         this._rendered = false;
-        this._buildBaseAframeScene();
+        AFrameRenderer._buildBaseAframeScene();
         this.collectElementsToRender();
     }
 
@@ -172,7 +172,8 @@ export default class AFrameRenderer extends BaseRenderer {
             && this._representation.meta.romper
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
-            videoElements.push(this._addAframeComponents(this._representation.meta.romper.aframe.extras));
+            videoElements.push(AFrameRenderer
+                ._buildAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
@@ -213,7 +214,7 @@ export default class AFrameRenderer extends BaseRenderer {
 
     // build vanilla aFrame infrastructure
     // these would need to persist across NEs for continuous headset playback
-    _buildBaseAframeScene() {
+    static _buildBaseAframeScene() {
         if (AFrameRenderer._aFrameSceneElement) {
             return;
         }
@@ -228,8 +229,9 @@ export default class AFrameRenderer extends BaseRenderer {
 
         // camera
         const cameraEntity = document.createElement('a-entity');
+        cameraEntity.id = 'romper-camera-entity';
         cameraEntity.setAttribute('position', '0 0 0');
-        cameraEntity.setAttribute('rotation', this._initialRotation);
+        cameraEntity.setAttribute('rotation', '0 0 0');
         AFrameRenderer._aFrameCamera = document.createElement('a-camera');
         cameraEntity.appendChild(AFrameRenderer._aFrameCamera);
         AFrameRenderer._aFrameSceneElement.appendChild(cameraEntity);
@@ -238,8 +240,8 @@ export default class AFrameRenderer extends BaseRenderer {
         AFrameRenderer._aFrameAssetsElement = document.createElement('a-assets');
         AFrameRenderer._aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
 
-        AFrameRenderer._aFrameSceneElement.addEventListener('renderstart', this._enableLayers);
-
+        AFrameRenderer._aFrameSceneElement.addEventListener('renderstart', () =>
+            AFrameRenderer._aFrameSceneElement.camera.layers.enable(1));
     }
 
     // return components needed to render mono 360 video
@@ -310,7 +312,7 @@ export default class AFrameRenderer extends BaseRenderer {
     _startThreeSixtyVideo() {
         // add elements
         this._sceneElements.forEach((el) => {
-            if (el.parentNode !== AFrameRenderer._aFrameSceneElement){
+            if (el.parentNode !== AFrameRenderer._aFrameSceneElement) {
                 AFrameRenderer._aFrameSceneElement.appendChild(el);
             }
         });
@@ -324,7 +326,12 @@ export default class AFrameRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        this._target.addEventListener('mouseup', () => { this.getOrientation(); }, false);
+        this._target.addEventListener('mouseup', () => { AFrameRenderer.getOrientation(); }, false);
+
+        const cameraContainer = document.getElementById('romper-camera-entity');
+        if (cameraContainer) {
+            cameraContainer.setAttribute('rotation', this._initialRotation);
+        }
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
@@ -333,12 +340,8 @@ export default class AFrameRenderer extends BaseRenderer {
         AFrameRenderer._aFrameSceneElement.style.height = '100%';
     }
 
-    _enableLayers() {
-        AFrameRenderer._aFrameSceneElement.camera.layers.enable(1);
-    }
-
     // get the direction of view
-    getOrientation(): Object {
+    static getOrientation(): Object {
         const rot = AFrameRenderer._aFrameCamera.getAttribute('rotation');
         let phi = -rot.y;
         if (phi < 0) { phi += 360; }
@@ -515,7 +518,7 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     // add bunch of aFrame components, maybe from Data model?
-    _addAframeComponents(objectSpecs: string): HTMLElement {
+    static _buildAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
         ent.id = 'addedExtras';
         ent.innerHTML = objectSpecs;
@@ -561,6 +564,13 @@ export default class AFrameRenderer extends BaseRenderer {
 
         this._started = false;
         this._rendered = false;
+
+        // AFrameRenderer._aFrameSceneElement.exitVR();
+    }
+
+    static exitVR() {
+        AFrameRenderer._aFrameSceneElement.exitVR();
+        AFrameRenderer._aFrameSceneElement.style.height = '0px';
     }
 
     destroy() {
