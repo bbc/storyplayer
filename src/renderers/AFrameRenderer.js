@@ -86,7 +86,6 @@ export default class AFrameRenderer extends BaseRenderer {
     _endedEventListener() {
         logger.info('360 video ended');
         if (!this._hasEnded) {
-            console.log('ANDY end', this._representation.name);
             this._hasEnded = true;
             super.complete();
         }
@@ -94,7 +93,6 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        // AFrameRenderer._aFrameSceneElement.style.height = '100%';
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
                 videoElement.pause();
@@ -105,7 +103,6 @@ export default class AFrameRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        console.log('ANDY starting', this._representation.name);
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
             this._startThreeSixtyVideo();
@@ -210,7 +207,6 @@ export default class AFrameRenderer extends BaseRenderer {
         // if not, we're ready
         this._rendered = true;
         if (this._started) {
-            console.log('ANDY rendered and started');
             this._startThreeSixtyVideo();
         }
     }
@@ -334,7 +330,6 @@ export default class AFrameRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
-        console.log('ANDY playing - set visible', this._representation.name);
         AFrameRenderer._aFrameSceneElement.style.height = '100%';
     }
 
@@ -544,7 +539,6 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     end() {
-        console.log('ANDY - ending', this._representation.name);
         // hide
         AFrameRenderer._aFrameSceneElement.style.height = '0px';
 

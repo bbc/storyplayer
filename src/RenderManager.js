@@ -401,8 +401,6 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
-        newRenderer.willStart();
-
         // ensure volume persistence
         Object.keys(this._rendererState.volumes).forEach((label) => {
             const value = this._rendererState.volumes[label];
@@ -423,6 +421,8 @@ export default class RenderManager extends EventEmitter {
                 oldRenderer.end();
             }
         }
+
+        newRenderer.willStart();
     }
 
     // show next button, or icons if choice
