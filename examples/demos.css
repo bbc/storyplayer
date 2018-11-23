@@ -8,11 +8,14 @@ h1 {
   width: 780px;
 }
 
+.romper-player {
+  width: 100%;
+}
+
 .story-title {
   background: lightgray;
   padding: 10px;
   text-align: center;
-  width: 780px;
 }
 
 .variable-description {
@@ -47,11 +50,11 @@ h1 {
   background: lightblue;
   color: black;
   height: 50px;
-  padding-bottom: 200px;
-  padding-top: 200px;
+  /* padding-bottom: 200px; */
+  padding: 200px 5%;
   text-align: center;
   vertical-align: middle;
-  width: 800px;
+  width: 90%;
 }
 
 .jsoncontent button, .selection button, .restart-button {
@@ -110,11 +113,12 @@ h1 {
 
 /* Style the tab content */
 .tabcontent {
-  display: none;
-  padding: 6px 12px;
   border: 1px solid #ccc;
   border-top: none;
-} 
+  display: none;
+  padding: 6px 5%;
+  width: 90%;
+}
 
 .switch {
   padding-right: 10px;
