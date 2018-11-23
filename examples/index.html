@@ -64,7 +64,7 @@
         let loadedStoryJson;
 
         // load demo stories
-        const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json'];
+        const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json', 'aframe.json'];
         stories.forEach(storyFilename => fetchStoryOption(storyFilename));
 
         // get the story data for an option, and call a function to render it for selection
@@ -252,7 +252,7 @@
                     varPanel.innerHTML = 'There are no variables in this story';
                     return;
                 }
-    
+
                 varPanel.innerHTML = '';
                 Object.keys(variableDeclaration).forEach((varName) => {
                     addVariableSetter(varName, variableDeclaration[varName]);
