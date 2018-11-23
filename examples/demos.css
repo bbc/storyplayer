@@ -3,8 +3,8 @@ body {
 }
 
 h1 {
-  text-align: center;
   padding: 10px;
+  text-align: center;
   width: 780px;
 }
 
@@ -50,7 +50,6 @@ h1 {
   background: lightblue;
   color: black;
   height: 50px;
-  /* padding-bottom: 200px; */
   padding: 200px 5%;
   text-align: center;
   vertical-align: middle;
@@ -61,11 +60,11 @@ h1 {
   background-color: lightgray;
   border: none;
   color: white;
+  display: inline-block;
+  font-size: 16px;
   padding: 10px 34px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
 }
 
 .selection button, .jsoncontent button.active, .restart-button.active {
@@ -83,12 +82,12 @@ h1 {
 /* Style the buttons that are used to open the tab content */
 .tab button {
   background-color: inherit;
-  float: left;
   border: none;
-  outline: none;
   cursor: pointer;
-  padding: 14px 16px;
+  float: left;
   font-size: 130%;
+  outline: none;
+  padding: 14px 16px;
   transition: 0.3s;
 }
 
@@ -128,4 +127,3 @@ h1 {
   color: gray;
   font-style: oblique;
 }
-
