@@ -14,6 +14,10 @@ import logger from '../logger';
 let componentRegistered = false;
 
 export default class AFrameRenderer extends BaseRenderer {
+    static _aFrameSceneElement: any;
+    static _aFrameAssetsElement: HTMLElement;
+    static _aFrameCamera: any;
+
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
@@ -23,12 +27,10 @@ export default class AFrameRenderer extends BaseRenderer {
     _handlePlayPauseButtonClicked: Function;
 
     _videoDivId: string;
-    _aFrameSceneElement: any;
     _videoAssetElement: HTMLVideoElement;
-    _aFrameAssetsElement: any;
-    _aFrameCamera: any;
     _initialRotation: string;
     _videoTypeString: string;
+    _sceneElements: Array<HTMLElement>;
 
     _lastSetTime: number;
     _inTime: number;
@@ -76,13 +78,15 @@ export default class AFrameRenderer extends BaseRenderer {
         // this is what we refer to
         this._videoDivId = `threesixtyvideo-${this._rendererId}`;
 
-        // this._buildBaseAframeScene();
-        this.renderVideoElement();
+        this._rendered = false;
+        this._buildBaseAframeScene();
+        this.collectElementsToRender();
     }
 
     _endedEventListener() {
         logger.info('360 video ended');
         if (!this._hasEnded) {
+            console.log('ANDY end', this._representation.name);
             this._hasEnded = true;
             super.complete();
         }
@@ -90,6 +94,7 @@ export default class AFrameRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        // AFrameRenderer._aFrameSceneElement.style.height = '100%';
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
                 videoElement.pause();
@@ -100,21 +105,19 @@ export default class AFrameRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        console.log('ANDY starting', this._representation.name);
         logger.info(`Started: ${this._representation.id}`);
-        if (this._aFrameSceneElement === null) {
-            this.renderVideoElement();
-        }
         if (this._rendered) {
             this._startThreeSixtyVideo();
+        } else {
+            this.collectElementsToRender();
         }
         this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
         this._started = true;
     }
 
-    renderVideoElement() {
-        AFrameRenderer._registerAframeComponents();
-
+    collectElementsToRender() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
@@ -151,15 +154,6 @@ export default class AFrameRenderer extends BaseRenderer {
                                 logger.error(err, 'Video not found');
                             });
                     }
-                    if (fg.assets.sub_src) {
-                        this._fetchMedia(fg.assets.sub_src)
-                            .then((mediaUrl) => {
-                                this._buildAframeVideoScene(mediaUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Subs not found');
-                            });
-                    }
                 });
         }
     }
@@ -174,18 +168,18 @@ export default class AFrameRenderer extends BaseRenderer {
             url: mediaUrl,
         });
 
-        this._buildBaseAframeScene();
+        const videoElements = [];
 
         // test how we might add other aFrame components specified in DM
         if (this._representation.meta
             && this._representation.meta.romper
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
-            this._addAframeComponents(this._representation.meta.romper.aframe.extras);
+            videoElements.push(this._addAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        this._aFrameAssetsElement
+        AFrameRenderer._aFrameAssetsElement
             .appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 
         // identify video type and set parameters
@@ -206,16 +200,17 @@ export default class AFrameRenderer extends BaseRenderer {
         // these are the bits that would need to be replaced for each scene
         if (videoType.stereo) {
             const stereoElements = this._getStereoComponents(videoType);
-            stereoElements.forEach(el => this._aFrameSceneElement.appendChild(el));
+            this._sceneElements = videoElements.concat(stereoElements);
         } else {
             const monoElements = this._getMonoComponents();
-            monoElements.forEach(el => this._aFrameSceneElement.appendChild(el));
+            this._sceneElements = videoElements.concat(monoElements);
         }
 
         // all done - start playing if start has been called
         // if not, we're ready
         this._rendered = true;
         if (this._started) {
+            console.log('ANDY rendered and started');
             this._startThreeSixtyVideo();
         }
     }
@@ -223,22 +218,32 @@ export default class AFrameRenderer extends BaseRenderer {
     // build vanilla aFrame infrastructure
     // these would need to persist across NEs for continuous headset playback
     _buildBaseAframeScene() {
+        if (AFrameRenderer._aFrameSceneElement) {
+            return;
+        }
+
+        AFrameRenderer._registerAframeComponents();
+
         // scene
-        this._aFrameSceneElement = document.createElement('a-scene');
-        this._aFrameSceneElement.setAttribute('embedded', '');
-        this._aFrameSceneElement.classList.add('romper-aframe-scene');
+        AFrameRenderer._aFrameSceneElement = document.createElement('a-scene');
+        AFrameRenderer._aFrameSceneElement.id = 'romperascene';
+        AFrameRenderer._aFrameSceneElement.setAttribute('embedded', '');
+        AFrameRenderer._aFrameSceneElement.classList.add('romper-aframe-scene');
 
         // camera
         const cameraEntity = document.createElement('a-entity');
         cameraEntity.setAttribute('position', '0 0 0');
         cameraEntity.setAttribute('rotation', this._initialRotation);
-        this._aFrameCamera = document.createElement('a-camera');
-        cameraEntity.appendChild(this._aFrameCamera);
-        this._aFrameSceneElement.appendChild(cameraEntity);
+        AFrameRenderer._aFrameCamera = document.createElement('a-camera');
+        cameraEntity.appendChild(AFrameRenderer._aFrameCamera);
+        AFrameRenderer._aFrameSceneElement.appendChild(cameraEntity);
 
         // assets (add our video div)
-        this._aFrameAssetsElement = document.createElement('a-assets');
-        this._aFrameSceneElement.appendChild(this._aFrameAssetsElement);
+        AFrameRenderer._aFrameAssetsElement = document.createElement('a-assets');
+        AFrameRenderer._aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
+
+        AFrameRenderer._aFrameSceneElement.addEventListener('renderstart', this._enableLayers);
+
     }
 
     // return components needed to render mono 360 video
@@ -307,7 +312,17 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     _startThreeSixtyVideo() {
-        this._target.appendChild(this._aFrameSceneElement);
+        // add elements
+        this._sceneElements.forEach((el) => {
+            if (el.parentNode !== AFrameRenderer._aFrameSceneElement){
+                AFrameRenderer._aFrameSceneElement.appendChild(el);
+            }
+        });
+
+        if (AFrameRenderer._aFrameSceneElement.parentNode !== this._target) {
+            this._target.appendChild(AFrameRenderer._aFrameSceneElement);
+        }
+
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
@@ -315,19 +330,21 @@ export default class AFrameRenderer extends BaseRenderer {
 
         this._target.addEventListener('mouseup', () => { this.getOrientation(); }, false);
 
-        this._aFrameSceneElement.addEventListener('renderstart', () => {
-            this._aFrameSceneElement.camera.layers.enable(1);
-        });
-
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
+        console.log('ANDY playing - set visible', this._representation.name);
+        AFrameRenderer._aFrameSceneElement.style.height = '100%';
+    }
+
+    _enableLayers() {
+        AFrameRenderer._aFrameSceneElement.camera.layers.enable(1);
     }
 
     // get the direction of view
     getOrientation(): Object {
-        const rot = this._aFrameCamera.getAttribute('rotation');
+        const rot = AFrameRenderer._aFrameCamera.getAttribute('rotation');
         let phi = -rot.y;
         if (phi < 0) { phi += 360; }
         const coords = {
@@ -503,11 +520,11 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     // add bunch of aFrame components, maybe from Data model?
-    _addAframeComponents(objectSpecs: string) {
+    _addAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
         ent.id = 'addedExtras';
         ent.innerHTML = objectSpecs;
-        this._aFrameSceneElement.appendChild(ent);
+        return ent;
     }
 
     _setInTime(time: number) {
@@ -527,6 +544,10 @@ export default class AFrameRenderer extends BaseRenderer {
     }
 
     end() {
+        console.log('ANDY - ending', this._representation.name);
+        // hide
+        AFrameRenderer._aFrameSceneElement.style.height = '0px';
+
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
@@ -536,14 +557,16 @@ export default class AFrameRenderer extends BaseRenderer {
         );
 
         if (this._rendered) {
-            // clear all the UI
-            if (this._aFrameSceneElement.parentNode !== null) {
-                this._target.removeChild(this._aFrameSceneElement);
-            }
-
-            this._aFrameSceneElement = null;
-            this._rendered = false;
+            // remove scene specific elements
+            this._sceneElements.forEach((se) => {
+                if (se.parentNode) {
+                    se.parentNode.removeChild(se);
+                }
+            });
         }
+
+        this._started = false;
+        this._rendered = false;
     }
 
     destroy() {
