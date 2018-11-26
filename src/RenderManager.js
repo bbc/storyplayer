@@ -492,10 +492,8 @@ export default class RenderManager extends EventEmitter {
         } else {
             allIds = nextIds;
         }
-
         // Generate new renderers for any that are missing
         const renderPromises = allIds
-            .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
             .map((neid) => {
                 // Check to see if required NE renderer is the one currently being shown
                 if (
@@ -514,9 +512,19 @@ export default class RenderManager extends EventEmitter {
                             .then(presentation => this._representationReasoner(presentation))
                             .then((representation) => {
                                 // create the new Renderer
-                                const newRenderer = this._createNewRenderer(representation);
-                                if (newRenderer) {
-                                    this._upcomingRenderers[neid] = newRenderer;
+
+                                if (this._upcomingRenderers[neid]) {
+                                    if (this._upcomingRenderers[neid]._representation.id !== representation.id) {
+                                        const newRenderer = this._createNewRenderer(representation);
+                                        if (newRenderer) {
+                                            this._upcomingRenderers[neid] = newRenderer;
+                                        }
+                                    }
+                                } else {
+                                    const newRenderer = this._createNewRenderer(representation);
+                                    if (newRenderer) {
+                                        this._upcomingRenderers[neid] = newRenderer;
+                                    }
                                 }
                             });
                     }
