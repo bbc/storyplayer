@@ -9,13 +9,16 @@ import StoryPathWalker from '../src/StoryPathWalker';
 // eslint-disable-next-line import/no-named-as-default
 import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
+import ObjectDataResolverFactory from '../src/resolvers/ObjectDataResolver';
 
 import type { Experience } from '../src/romper';
 
 const storyjson: Experience = require('./teststory.json');
 
 chai.use(sinonChai);
-const resolver = sinon.stub();
+const resolver = ObjectDataResolverFactory({ test: 'foobar' });
+
+// sinon.stub(resolver.prototype, 'set');
 
 const storyFetcher = id =>
     Promise.resolve(storyjson.stories.filter(storyObject => storyObject.id === id)[0]);
