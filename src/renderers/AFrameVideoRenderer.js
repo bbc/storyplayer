@@ -374,14 +374,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        if (this._rendered) {
-            // remove scene specific elements
-            this._sceneElements.forEach((se) => {
-                if (se.parentNode) {
-                    se.parentNode.removeChild(se);
-                }
-            });
-        }
+        AFrameRenderer.clearSceneElements();
 
         this._started = false;
         this._rendered = false;

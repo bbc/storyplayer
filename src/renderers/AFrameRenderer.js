@@ -12,13 +12,17 @@ export default class AFrameRenderer {
     static _aFrameAssetsElement: HTMLElement;
     static _aFrameCamera: any;
 
+    static sceneElements: Array<HTMLElement>;
+
     // build vanilla aFrame infrastructure
     // these would need to persist across NEs for continuous headset playback
     static buildBaseAframeScene() {
+        logger.info('Building aFrame infrastructure');
         if (AFrameRenderer.aFrameSceneElement) {
             return;
         }
 
+        AFrameRenderer.sceneElements = [];
         AFrameRenderer._registerAframeComponents();
 
         // scene
@@ -36,12 +40,23 @@ export default class AFrameRenderer {
         cameraEntity.appendChild(AFrameRenderer._aFrameCamera);
         AFrameRenderer.aFrameSceneElement.appendChild(cameraEntity);
 
+        const cursor = document.createElement('a-entity');
+        cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
+        cursor.setAttribute('position', '0 0 -2');
+        cursor.setAttribute('geometry', 'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03');
+        cursor.setAttribute('material', 'color: white; shader: flat');
+        AFrameRenderer._aFrameCamera.appendChild(cursor);
+
         // assets (add our video div)
         AFrameRenderer._aFrameAssetsElement = document.createElement('a-assets');
         AFrameRenderer.aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
 
         AFrameRenderer.aFrameSceneElement.addEventListener('renderstart', () =>
             AFrameRenderer.aFrameSceneElement.camera.layers.enable(1));
+    }
+
+    static isBuilt(): boolean {
+        return componentRegistered;
     }
 
     static addAFrameToRenderTarget(target: HTMLElement) {
@@ -57,8 +72,61 @@ export default class AFrameRenderer {
     static addElementToScene(sceneElement: HTMLElement) {
         if (sceneElement.parentNode !== AFrameRenderer.aFrameSceneElement) {
             AFrameRenderer.aFrameSceneElement.appendChild(sceneElement);
+            AFrameRenderer.sceneElements.push(sceneElement);
         }
     }
+
+    static addLinkIcon(iconUrl: string, number: number, callback: Function) {
+        // console.log('adding icon to aFrame', iconUrl);
+        const img = document.createElement('img');
+        img.src = iconUrl;
+        img.id = `icon-image-${number}`;
+        AFrameRenderer.addAsset(img);
+
+        const iconSphere = document.createElement('a-image');
+        iconSphere.addEventListener('click', callback);
+
+        // cunningly render  in a suitable position, and rotate appropriately
+        const phi = (number * 30) + 90;
+        const theta = -3;
+        const cartesian = (AFrameRenderer.polarToCartesian(phi, theta, 10));
+        iconSphere.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
+        iconSphere.setAttribute('width', '2');
+        iconSphere.setAttribute('height', '3');
+        iconSphere.setAttribute('src', `#icon-image-${number}`);
+
+        iconSphere.setAttribute('rotation', `${theta} ${-phi} 0`);
+        AFrameRenderer.addElementToScene(iconSphere);
+    }
+
+    static clearSceneElements() {
+        AFrameRenderer.sceneElements.forEach((el) => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+        AFrameRenderer.sceneElements = [];
+    }
+
+    /*
+    *  Convert polar coordinates to cartesian ones, and apply offsets for device
+    */
+    static polarToCartesian(phi: number, theta: number, radius: number): Object {
+        const phiRad = ((phi - 90) / 180) * Math.PI;
+        const thetaRad = (theta / 180) * Math.PI;
+        const x = Math.cos(phiRad) * radius;
+        const z = Math.sin(phiRad) * radius;
+        const y = Math.sin(thetaRad) * radius * 1.6;
+        // if(device == DEV_CARDBOARD){ y +=1.6; }
+        // if(device == DEV_OCULUS){
+        //     y +=1;
+        //     x *= 1.5;
+        //     y *= 1.5;
+        //     z *= 1.5;
+        // }
+        return { x, y, z };
+    }
+
 
     // get the direction of view
     static getOrientation(): Object {

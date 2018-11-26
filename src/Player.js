@@ -8,6 +8,7 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
+import AFrameRenderer from './renderers/AFrameRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -941,6 +942,10 @@ class Player extends EventEmitter {
             'touchend',
             handleButtonTouchEvent(choiceClick),
         );
+
+        if (AFrameRenderer.isBuilt()) {
+            AFrameRenderer.addLinkIcon(linkChoiceIconSrc, this._numChoices, choiceClick);
+        }
 
         linkChoiceControl.appendChild(iconContainer);
         this._linkChoice.add(id, linkChoiceControl);
