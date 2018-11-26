@@ -18,8 +18,6 @@ const storyjson: Experience = require('./teststory.json');
 chai.use(sinonChai);
 const resolver = ObjectDataResolverFactory({ test: 'foobar' });
 
-// sinon.stub(resolver.prototype, 'set');
-
 const storyFetcher = id =>
     Promise.resolve(storyjson.stories.filter(storyObject => storyObject.id === id)[0]);
 
