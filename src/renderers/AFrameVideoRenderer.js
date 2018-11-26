@@ -75,7 +75,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._videoDivId = `threesixtyvideo-${this._rendererId}`;
 
         this._rendered = false;
-        AFrameRenderer._buildBaseAframeScene();
+        AFrameRenderer.buildBaseAframeScene();
         this.collectElementsToRender();
     }
 
@@ -173,12 +173,11 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
             videoElements.push(AFrameRenderer
-                ._buildAframeComponents(this._representation.meta.romper.aframe.extras));
+                .buildAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        AFrameRenderer._aFrameAssetsElement
-            .appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+        AFrameRenderer.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
 
         // identify video type and set parameters
         // now build bits specific for video/type
@@ -288,15 +287,10 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     _startThreeSixtyVideo() {
         // add elements
-        this._sceneElements.forEach((el) => {
-            if (el.parentNode !== AFrameRenderer._aFrameSceneElement) {
-                AFrameRenderer._aFrameSceneElement.appendChild(el);
-            }
-        });
+        this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
 
-        if (AFrameRenderer._aFrameSceneElement.parentNode !== this._target) {
-            this._target.appendChild(AFrameRenderer._aFrameSceneElement);
-        }
+        // make sure AFrame is in romper target
+        AFrameRenderer.addAFrameToRenderTarget(this._target);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
@@ -314,7 +308,9 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
-        AFrameRenderer._aFrameSceneElement.style.height = '100%';
+
+        // show aFrame content
+        AFrameRenderer.setSceneHidden(false);
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -367,8 +363,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     end() {
-        // hide
-        AFrameRenderer._aFrameSceneElement.style.height = '0px';
+        // hide aFrame content
+        AFrameRenderer.setSceneHidden(true);
 
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);

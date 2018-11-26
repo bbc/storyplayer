@@ -8,24 +8,24 @@ import logger from '../logger';
 let componentRegistered = false;
 
 export default class AFrameRenderer {
-    static _aFrameSceneElement: any;
+    static aFrameSceneElement: any;
     static _aFrameAssetsElement: HTMLElement;
     static _aFrameCamera: any;
 
     // build vanilla aFrame infrastructure
     // these would need to persist across NEs for continuous headset playback
-    static _buildBaseAframeScene() {
-        if (AFrameRenderer._aFrameSceneElement) {
+    static buildBaseAframeScene() {
+        if (AFrameRenderer.aFrameSceneElement) {
             return;
         }
 
         AFrameRenderer._registerAframeComponents();
 
         // scene
-        AFrameRenderer._aFrameSceneElement = document.createElement('a-scene');
-        AFrameRenderer._aFrameSceneElement.id = 'romperascene';
-        AFrameRenderer._aFrameSceneElement.setAttribute('embedded', '');
-        AFrameRenderer._aFrameSceneElement.classList.add('romper-aframe-scene');
+        AFrameRenderer.aFrameSceneElement = document.createElement('a-scene');
+        AFrameRenderer.aFrameSceneElement.id = 'romperascene';
+        AFrameRenderer.aFrameSceneElement.setAttribute('embedded', '');
+        AFrameRenderer.aFrameSceneElement.classList.add('romper-aframe-scene');
 
         // camera
         const cameraEntity = document.createElement('a-entity');
@@ -34,14 +34,30 @@ export default class AFrameRenderer {
         cameraEntity.setAttribute('rotation', '0 0 0');
         AFrameRenderer._aFrameCamera = document.createElement('a-camera');
         cameraEntity.appendChild(AFrameRenderer._aFrameCamera);
-        AFrameRenderer._aFrameSceneElement.appendChild(cameraEntity);
+        AFrameRenderer.aFrameSceneElement.appendChild(cameraEntity);
 
         // assets (add our video div)
         AFrameRenderer._aFrameAssetsElement = document.createElement('a-assets');
-        AFrameRenderer._aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
+        AFrameRenderer.aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
 
-        AFrameRenderer._aFrameSceneElement.addEventListener('renderstart', () =>
-            AFrameRenderer._aFrameSceneElement.camera.layers.enable(1));
+        AFrameRenderer.aFrameSceneElement.addEventListener('renderstart', () =>
+            AFrameRenderer.aFrameSceneElement.camera.layers.enable(1));
+    }
+
+    static addAFrameToRenderTarget(target: HTMLElement) {
+        if (AFrameRenderer.aFrameSceneElement.parentNode !== target) {
+            target.appendChild(AFrameRenderer.aFrameSceneElement);
+        }
+    }
+
+    static addAsset(assetElement: HTMLElement) {
+        AFrameRenderer._aFrameAssetsElement.appendChild(assetElement);
+    }
+
+    static addElementToScene(sceneElement: HTMLElement) {
+        if (sceneElement.parentNode !== AFrameRenderer.aFrameSceneElement) {
+            AFrameRenderer.aFrameSceneElement.appendChild(sceneElement);
+        }
     }
 
     // get the direction of view
@@ -212,16 +228,20 @@ export default class AFrameRenderer {
         componentRegistered = true;
     }
 
-    // add bunch of aFrame components, maybe from Data model?
-    static _buildAframeComponents(objectSpecs: string): HTMLElement {
+    // createa bunch of aFrame components, maybe from Data model?
+    static buildAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
         ent.id = 'addedExtras';
         ent.innerHTML = objectSpecs;
         return ent;
     }
 
+    static setSceneHidden(visible: boolean) {
+        AFrameRenderer.aFrameSceneElement.style.height = visible ? '0px' : '100%';
+    }
+
     static exitVR() {
-        AFrameRenderer._aFrameSceneElement.exitVR();
-        AFrameRenderer._aFrameSceneElement.style.height = '0px';
+        AFrameRenderer.aFrameSceneElement.exitVR();
+        AFrameRenderer.aFrameSceneElement.style.height = '0px';
     }
 }
