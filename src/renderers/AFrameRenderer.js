@@ -137,7 +137,6 @@ export default class AFrameRenderer {
             phi: Math.round(phi),
             theta: Math.round(rot.x),
         };
-        logger.info(`Current view direction: ${coords.phi}, ${coords.theta}`);
         return coords;
     }
 
@@ -296,7 +295,7 @@ export default class AFrameRenderer {
         componentRegistered = true;
     }
 
-    // createa bunch of aFrame components, maybe from Data model?
+    // create a bunch of aFrame components, maybe from Data model?
     static buildAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
         ent.id = 'addedExtras';

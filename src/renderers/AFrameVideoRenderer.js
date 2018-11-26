@@ -297,7 +297,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        this._target.addEventListener('mouseup', () => { AFrameRenderer.getOrientation(); }, false);
+        // this._target.addEventListener('mouseup', () => { AFrameRenderer.getOrientation(); }, false);
 
         const cameraContainer = document.getElementById('romper-camera-entity');
         if (cameraContainer) {

@@ -78,11 +78,6 @@
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
-                },
-                {
-                    "condition": {"==": [1,1]},
-                    "link_type": "NARRATIVE_ELEMENT",
-                    "target_narrative_element_id": "4d2a2442-b9b8-4cca-b934-d067c8967a20"
                 }
             ]
         },
