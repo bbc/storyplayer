@@ -3,7 +3,6 @@
 import 'babel-polyfill';
 // @flowignore
 import chai, { expect } from 'chai';
-import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import StoryPathWalker from '../src/StoryPathWalker';
 // eslint-disable-next-line import/no-named-as-default
