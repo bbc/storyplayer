@@ -505,7 +505,8 @@ export default class RenderManager extends EventEmitter {
                                 // create the new Renderer
 
                                 if (this._upcomingRenderers[neid]) {
-                                    if (this._upcomingRenderers[neid]._representation.id !== representation.id) {
+                                    if (this._upcomingRenderers[neid]._representation.id !==
+                                        representation.id) {
                                         const newRenderer = this._createNewRenderer(representation);
                                         if (newRenderer) {
                                             this._upcomingRenderers[neid] = newRenderer;
