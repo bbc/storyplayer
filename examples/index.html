@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <title>Romper Demo Stories</title>
     <link href="../dist/romper.css" rel="stylesheet" type="text/css">
-    <link href="styles.css" rel="stylesheet" type="text/css">
     <link href="demos.css" rel="stylesheet" type="text/css">
     <link href="../node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="../node_modules/jsoneditor/dist/jsoneditor.min.js"></script>
@@ -18,7 +17,7 @@
     <div class="tab">
         <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
         <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
-        <button class="tablinks" onclick="openTab(event, 'renderer')">Render</button>
+        <button class="tablinks" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
     </div>
 
     <!-- Select a story -->
@@ -60,8 +59,15 @@
 
     <script src="../dist/romper.js"></script>
     <script>
+        window.addEventListener('resize', resizeWindow);
+
         let romperInstance;
         let loadedStoryJson;
+
+        function resizeWindow() {
+            const romperTarget = document.getElementById('romper-target');
+            romperTarget.firstChild.style.height = `${(romperTarget.offsetWidth/16)*9}px`;
+        }
 
         // load demo stories
         const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json'];
@@ -160,6 +166,10 @@
             // Show the current tab, and add an "active" class to the button that opened the tab
             document.getElementById(demoName).style.display = "block";
             evt.currentTarget.className += " active";
+
+            if (evt.currentTarget.id === 'rendertab') {
+                resizeWindow();
+            }
         }
 
         // run edited json
@@ -252,7 +262,7 @@
                     varPanel.innerHTML = 'There are no variables in this story';
                     return;
                 }
-    
+
                 varPanel.innerHTML = '';
                 Object.keys(variableDeclaration).forEach((varName) => {
                     addVariableSetter(varName, variableDeclaration[varName]);
