@@ -1,7 +1,8 @@
 // @flow
 
 import AFRAME from 'aframe';
-import dynamicAudio from 'dynamicaudio';
+// uncomment next line when dynamic-audio-smp360 is available on Artifactory
+// import dynamicAudio from 'dynamicaudio';
 
 import logger from '../logger';
 
@@ -276,8 +277,9 @@ export default class AFrameRenderer {
                 const source = this.el.getAttribute('src');
                 const ambiOrder = this.el.getAttribute('ambiOrder');
                 const videoElement = document.getElementById(source);
+                // uncomment next line when dynamic-audio-smp360 is available on Artifactory
                 // eslint-disable-next-line new-cap
-                this.spatialAudio = new dynamicAudio({ videoElement, ambiOrder });
+                // this.spatialAudio = new dynamicAudio({ videoElement, ambiOrder });
                 // Throttle soundfield rotation tick to 50ms, rather than every frame
                 this.tick = AFRAME.utils.throttleTick(this.tick, 50, this);
                 logger.info('initialised spatialAudio component');
