@@ -132,6 +132,22 @@ export default class StoryReasoner extends EventEmitter {
         Object.keys(initialState).forEach((varName) => {
             this.setVariableValue(varName, initialState[varName]);
         });
+        this._setTodaysDay();
+    }
+
+    // TODO: hacky - need proper way of handling programmatically determined variables
+    // sets the value of this variable to be a string for today's day of the week
+    _setTodaysDay() {
+        const weekday = [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+        ];
+        this.setVariableValue('romper_day_of_week', weekday[new Date().getDay()]);
     }
 
     /**
