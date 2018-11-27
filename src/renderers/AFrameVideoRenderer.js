@@ -78,8 +78,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         this._rendered = false;
 
-        this._afr = AFrameRenderer;
-        // AFrameRenderer.buildBaseAframeScene();
         this.collectElementsToRender();
     }
 
@@ -176,12 +174,12 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             && this._representation.meta.romper
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
-            videoElements.push(this._afr
+            videoElements.push(AFrameRenderer
                 .buildAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        this._afr.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
+        AFrameRenderer.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
 
         // identify video type and set parameters
         // now build bits specific for video/type
@@ -291,17 +289,18 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     _startThreeSixtyVideo() {
         // add elements
-        this._sceneElements.forEach(el => this._afr.addElementToScene(el));
+        this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
 
         // make sure AFrame is in romper target
-        this._afr.addAFrameToRenderTarget(this._target);
+        AFrameRenderer.addAFrameToRenderTarget(this._target);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
 
-        // this._target.addEventListener('mouseup', () => { this._afr.getOrientation(); }, false);
+        // this._target.addEventListener('mouseup', () =>
+        //    { AFrameRenderer.getOrientation(); }, false);
 
         const cameraContainer = document.getElementById('romper-camera-entity');
         if (cameraContainer) {
@@ -314,7 +313,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         // show aFrame content
-        this._afr.setSceneHidden(false);
+        AFrameRenderer.setSceneHidden(false);
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -368,7 +367,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     end() {
         // hide aFrame content
-        this._afr.setSceneHidden(true);
+        AFrameRenderer.setSceneHidden(true);
 
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
@@ -378,7 +377,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        this._afr.clearSceneElements();
+        AFrameRenderer.clearSceneElements();
 
         this._started = false;
         this._rendered = false;

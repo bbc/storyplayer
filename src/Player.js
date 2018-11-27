@@ -943,9 +943,8 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(choiceClick),
         );
 
-        if (AFrameRenderer.isBuilt()) {
-            AFrameRenderer.addLinkIcon(linkChoiceIconSrc, this._numChoices, choiceClick);
-        }
+        // TODO - ideally only do this if using AFrame
+        AFrameRenderer.addLinkIcon(linkChoiceIconSrc, this._numChoices, choiceClick);
 
         linkChoiceControl.appendChild(iconContainer);
         this._linkChoice.add(id, linkChoiceControl);
