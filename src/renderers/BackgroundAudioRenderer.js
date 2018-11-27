@@ -28,8 +28,10 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._renderBackgroundAudio();
     }
 
-    _startAudioFadeTimer() {
+    changeNE(shouldFadeIn: boolean, shouldFadeOut: boolean) {
+        clearInterval(this._fadeAudioTimer);
         const foregroundRenderedId = this._playoutEngine.getForegroundMediaElementId();
+
         if (foregroundRenderedId) {
             const foregroundElement = this._playoutEngine.getMediaElement(foregroundRenderedId);
             if (foregroundElement) {
@@ -38,8 +40,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                     const maxFadeDuration = foregroundElement.duration > 10 ? 2 : 1;
                     const fadeDuration = Math.min(foregroundElement.duration, maxFadeDuration);
                     const currentForegroundTime = foregroundElement.currentTime;
-
-                    if (currentForegroundTime <= maxFadeDuration) {
+                    if (currentForegroundTime === foregroundElement.duration) {
+                        clearInterval(this._fadeAudioTimer);
+                    } else if (currentForegroundTime <= maxFadeDuration && shouldFadeIn) {
                         this._playoutEngine.fadeInBackgroundAudio(
                             this._rendererId,
                             foregroundElement.currentTime,
@@ -51,23 +54,25 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                         fadeDuration) {
                         const timeLeft = foregroundElement.duration -
                             foregroundElement.currentTime;
-                        this._playoutEngine.fadeOutBackgroundAudio(
-                            this._rendererId,
-                            timeLeft,
-                            fadeDuration,
-                        );
+                        if (shouldFadeOut) {
+                            this._playoutEngine.fadeOutBackgroundAudio(
+                                this._rendererId,
+                                timeLeft,
+                                fadeDuration,
+                            );
+                        }
                     }
                 }, tInt);
             }
         } else {
-            // Image
+            // Image -- UNTESTED
             const tInt = 10;
             let currentDuration = 0;
             const fadeDuration = 1;
             this._fadeAudioTimer = setInterval(() => {
                 currentDuration += 0.01;
 
-                if (currentDuration <= 1) {
+                if (currentDuration <= 1 && shouldFadeIn) {
                     this._playoutEngine.fadeInBackgroundAudio(
                         this._rendererId,
                         currentDuration,
@@ -80,7 +85,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     start() {
         this._playoutEngine.setPlayoutActive(this._rendererId);
-        this._startAudioFadeTimer();
 
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {

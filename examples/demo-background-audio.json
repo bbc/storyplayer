@@ -180,7 +180,7 @@
             "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
             "asset_collections": {
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
-                "background_ids": ["345668d1-7dce-48f1-1234-396553a9blob"]
+                "background_ids": ["123468d1-7dce-48f1-8c18-396553a9ldua"]
             },
             "behaviours": {
                 "started": [],

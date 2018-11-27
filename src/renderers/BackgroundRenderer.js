@@ -35,4 +35,8 @@ export default class BackgroundRenderer extends EventEmitter {
     destroy() {
         this._disabled = true;
     }
+
+    changeNE(shouldFadeIn: boolean, shouldFadeOut: boolean) {
+        this._shouldFadeOut = shouldFadeOut;
+    }
 }
