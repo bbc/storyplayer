@@ -1,3 +1,4 @@
+
 // @flow
 
 import AFRAME from 'aframe';
@@ -6,83 +7,81 @@ import AFRAME from 'aframe';
 
 import logger from '../logger';
 
-let componentRegistered = false;
+class AFrameRenderer {
+    aFrameSceneElement: any;
+    _aFrameAssetsElement: HTMLElement;
+    _aFrameCamera: any;
 
-export default class AFrameRenderer {
-    static aFrameSceneElement: any;
-    static _aFrameAssetsElement: HTMLElement;
-    static _aFrameCamera: any;
+    sceneElements: Array<HTMLElement>;
 
-    static sceneElements: Array<HTMLElement>;
+
+    constructor() {
+        AFrameRenderer._registerAframeComponents();
+        this.buildBaseAframeScene();
+        this.sceneElements = [];
+    }
 
     // build vanilla aFrame infrastructure
     // these would need to persist across NEs for continuous headset playback
-    static buildBaseAframeScene() {
+    buildBaseAframeScene() {
         logger.info('Building aFrame infrastructure');
-        if (AFrameRenderer.aFrameSceneElement) {
+        if (this.aFrameSceneElement) {
             return;
         }
 
-        AFrameRenderer.sceneElements = [];
-        AFrameRenderer._registerAframeComponents();
-
         // scene
-        AFrameRenderer.aFrameSceneElement = document.createElement('a-scene');
-        AFrameRenderer.aFrameSceneElement.id = 'romperascene';
-        AFrameRenderer.aFrameSceneElement.setAttribute('embedded', '');
-        AFrameRenderer.aFrameSceneElement.classList.add('romper-aframe-scene');
+        this.aFrameSceneElement = document.createElement('a-scene');
+        this.aFrameSceneElement.id = 'romperascene';
+        this.aFrameSceneElement.setAttribute('embedded', '');
+        this.aFrameSceneElement.classList.add('romper-aframe-scene');
 
         // camera
         const cameraEntity = document.createElement('a-entity');
         cameraEntity.id = 'romper-camera-entity';
         cameraEntity.setAttribute('position', '0 0 0');
         cameraEntity.setAttribute('rotation', '0 0 0');
-        AFrameRenderer._aFrameCamera = document.createElement('a-camera');
-        cameraEntity.appendChild(AFrameRenderer._aFrameCamera);
-        AFrameRenderer.aFrameSceneElement.appendChild(cameraEntity);
+        this._aFrameCamera = document.createElement('a-camera');
+        cameraEntity.appendChild(this._aFrameCamera);
+        this.aFrameSceneElement.appendChild(cameraEntity);
 
         const cursor = document.createElement('a-entity');
         cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
         cursor.setAttribute('position', '0 0 -2');
         cursor.setAttribute('geometry', 'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03');
         cursor.setAttribute('material', 'color: white; shader: flat');
-        AFrameRenderer._aFrameCamera.appendChild(cursor);
+        this._aFrameCamera.appendChild(cursor);
 
         // assets (add our video div)
-        AFrameRenderer._aFrameAssetsElement = document.createElement('a-assets');
-        AFrameRenderer.aFrameSceneElement.appendChild(AFrameRenderer._aFrameAssetsElement);
+        this._aFrameAssetsElement = document.createElement('a-assets');
+        this.aFrameSceneElement.appendChild(this._aFrameAssetsElement);
 
-        AFrameRenderer.aFrameSceneElement.addEventListener('renderstart', () =>
-            AFrameRenderer.aFrameSceneElement.camera.layers.enable(1));
+        this.aFrameSceneElement.addEventListener('renderstart', () =>
+            this.aFrameSceneElement.camera.layers.enable(1));
     }
 
-    static isBuilt(): boolean {
-        return componentRegistered;
-    }
-
-    static addAFrameToRenderTarget(target: HTMLElement) {
-        if (AFrameRenderer.aFrameSceneElement.parentNode !== target) {
-            target.appendChild(AFrameRenderer.aFrameSceneElement);
+    addAFrameToRenderTarget(target: HTMLElement) {
+        if (this.aFrameSceneElement.parentNode !== target) {
+            target.appendChild(this.aFrameSceneElement);
         }
     }
 
-    static addAsset(assetElement: HTMLElement) {
-        AFrameRenderer._aFrameAssetsElement.appendChild(assetElement);
+    addAsset(assetElement: HTMLElement) {
+        this._aFrameAssetsElement.appendChild(assetElement);
     }
 
-    static addElementToScene(sceneElement: HTMLElement) {
-        if (sceneElement.parentNode !== AFrameRenderer.aFrameSceneElement) {
-            AFrameRenderer.aFrameSceneElement.appendChild(sceneElement);
-            AFrameRenderer.sceneElements.push(sceneElement);
+    addElementToScene(sceneElement: HTMLElement) {
+        if (sceneElement.parentNode !== this.aFrameSceneElement) {
+            this.aFrameSceneElement.appendChild(sceneElement);
+            this.sceneElements.push(sceneElement);
         }
     }
 
-    static addLinkIcon(iconUrl: string, number: number, callback: Function) {
+    addLinkIcon(iconUrl: string, number: number, callback: Function) {
         // console.log('adding icon to aFrame', iconUrl);
         const img = document.createElement('img');
         img.src = iconUrl;
         img.id = `icon-image-${number}`;
-        AFrameRenderer.addAsset(img);
+        this.addAsset(img);
 
         const iconSphere = document.createElement('a-image');
         iconSphere.addEventListener('click', callback);
@@ -97,16 +96,16 @@ export default class AFrameRenderer {
         iconSphere.setAttribute('src', `#icon-image-${number}`);
 
         iconSphere.setAttribute('rotation', `${theta} ${-phi} 0`);
-        AFrameRenderer.addElementToScene(iconSphere);
+        this.addElementToScene(iconSphere);
     }
 
-    static clearSceneElements() {
-        AFrameRenderer.sceneElements.forEach((el) => {
+    clearSceneElements() {
+        while (this.sceneElements.length > 0) {
+            const el = this.sceneElements.pop();
             if (el.parentNode) {
                 el.parentNode.removeChild(el);
             }
-        });
-        AFrameRenderer.sceneElements = [];
+        }
     }
 
     /*
@@ -130,8 +129,8 @@ export default class AFrameRenderer {
 
 
     // get the direction of view
-    static getOrientation(): Object {
-        const rot = AFrameRenderer._aFrameCamera.getAttribute('rotation');
+    getOrientation(): Object {
+        const rot = this._aFrameCamera.getAttribute('rotation');
         let phi = -rot.y;
         if (phi < 0) { phi += 360; }
         const coords = {
@@ -142,10 +141,7 @@ export default class AFrameRenderer {
     }
 
     static _registerAframeComponents() {
-        if (componentRegistered) {
-            logger.info('aFrame stereo component already registered');
-            return;
-        }
+        logger.info('registering components for aFrame stereo and ambisonic');
 
         AFRAME.registerComponent('stereo', {
             schema: {
@@ -177,7 +173,6 @@ export default class AFrameRenderer {
                 // Check if it's a sphere w/ video material, and if so
                 // Note that in A-Frame 0.2.0, sphere entities are THREE.SphereBufferGeometry,
                 // while in A-Frame 0.3.0, sphere entities are THREE.BufferGeometry.
-
                 const validGeometries = [
                     window.THREE.SphereGeometry,
                     window.THREE.SphereBufferGeometry, // eslint-disable-line no-undef
@@ -270,47 +265,50 @@ export default class AFrameRenderer {
             tick() {},
         });
 
-        AFRAME.registerComponent('spatialaudio', {
-            schema: {},
-            init() {
-                logger.info('AFrame registering spatial audio component');
-                const source = this.el.getAttribute('src');
-                const ambiOrder = this.el.getAttribute('ambiOrder');
-                const videoElement = document.getElementById(source);
-                // uncomment next line when dynamic-audio-smp360 is available on Artifactory
-                // eslint-disable-next-line new-cap
-                // this.spatialAudio = new dynamicAudio({ videoElement, ambiOrder });
-                // Throttle soundfield rotation tick to 50ms, rather than every frame
-                this.tick = AFRAME.utils.throttleTick(this.tick, 50, this);
-                logger.info('initialised spatialAudio component');
-            },
-            tick() {
-                const cameraEl = this.el.sceneEl.camera.el;
-                const rot = cameraEl.getAttribute('rotation');
-                this.spatialAudio.updateRotation(rot, true);
-            },
-            remove() {
-                logger.info('Removing spatial audio component');
-            },
-        });
-
-        componentRegistered = true;
+        // AFRAME.registerComponent('spatialaudio', {
+        //     schema: {},
+        //     init() {
+        //         logger.info('AFrame registering spatial audio component');
+        //         const source = this.el.getAttribute('src');
+        //         const ambiOrder = this.el.getAttribute('ambiOrder');
+        //         const videoElement = document.getElementById(source);
+        //         // eslint-disable-next-line new-cap
+        //         this.spatialAudio = new dynamicAudio({ videoElement, ambiOrder });
+        //         // Throttle soundfield rotation tick to 50ms, rather than every frame
+        //         this.tick = AFRAME.utils.throttleTick(this.tick, 50, this);
+        //         logger.info('initialised spatialAudio component');
+        //     },
+        //     tick() {
+        //         const cameraEl = this.el.sceneEl.camera.el;
+        //         const rot = cameraEl.getAttribute('rotation');
+        //         this.spatialAudio.updateRotation(rot, true);
+        //     },
+        //     remove() {
+        //         logger.info('Removing spatial audio component');
+        //     },
+        // });
     }
 
     // create a bunch of aFrame components, maybe from Data model?
-    static buildAframeComponents(objectSpecs: string): HTMLElement {
+    // eslint-disable-next-line class-methods-use-this
+    buildAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
         ent.id = 'addedExtras';
         ent.innerHTML = objectSpecs;
         return ent;
     }
 
-    static setSceneHidden(visible: boolean) {
-        AFrameRenderer.aFrameSceneElement.style.height = visible ? '0px' : '100%';
+    setSceneHidden(visible: boolean) {
+        this.aFrameSceneElement.style.height = visible ? '0px' : '100%';
     }
 
-    static exitVR() {
-        AFrameRenderer.aFrameSceneElement.exitVR();
-        AFrameRenderer.aFrameSceneElement.style.height = '0px';
+    exitVR() {
+        this.aFrameSceneElement.exitVR();
+        this.aFrameSceneElement.style.height = '0px';
     }
 }
+
+const instance = new AFrameRenderer();
+Object.freeze(instance);
+
+export default instance;
