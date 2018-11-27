@@ -86,8 +86,6 @@ export default class RenderManager extends EventEmitter {
         });
 
         this._initialise();
-
-        this.getFadeOutAudioController = this.getFadeOutAudioController.bind(this);
     }
 
     prepareForRestart() {
@@ -255,22 +253,25 @@ export default class RenderManager extends EventEmitter {
                     return false;
                 }
                 const repCollIds = narrativeElements.map(ne => ne.body.representation_collection_target_id);
-                const repCollPromises = repCollIds.map(repCollId => this._fetchers.representationCollectionFetcher(repCollId));
-                return Promise.all(repCollPromises)
-                    .then((repColls) => {
-                        const repCollReps = repColls.map(repColl => repColl.representations);
-                        const flattenRepCollReps = [].concat(...repCollReps);
-                        const repCollRepPromises = flattenRepCollReps.map(repCollRep => this._fetchers.representationFetcher(repCollRep.representation_id));
-                        return Promise.all(repCollRepPromises);
-                    })
-                    .then((reps) => {
-                        const backgroundIds = reps.map(rep => rep.asset_collections.background_ids);
-                        const flattenBackgroundIds = [].concat(...backgroundIds);
-                        if (flattenBackgroundIds.includes(currentBackgroundId)) {
-                            return false;
-                        }
-                        return true;
-                    });
+                if (repCollIds) {
+                    const repCollPromises = repCollIds.map(repCollId => this._fetchers.representationCollectionFetcher(repCollId));
+                    return Promise.all(repCollPromises)
+                        .then((repColls) => {
+                            const repCollReps = repColls.map(repColl => repColl.representations);
+                            const flattenRepCollReps = [].concat(...repCollReps);
+                            const repCollRepPromises = flattenRepCollReps.map(repCollRep => this._fetchers.representationFetcher(repCollRep.representation_id));
+                            return Promise.all(repCollRepPromises);
+                        })
+                        .then((reps) => {
+                            const backgroundIds = reps.map(rep => rep.asset_collections.background_ids);
+                            const flattenBackgroundIds = [].concat(...backgroundIds);
+                            if (flattenBackgroundIds.includes(currentBackgroundId)) {
+                                return false;
+                            }
+                            return true;
+                        });
+                }
+                return true;
             });
     }
 

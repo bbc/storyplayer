@@ -37,6 +37,6 @@ export default class BackgroundRenderer extends EventEmitter {
     }
 
     changeNE(shouldFadeIn: boolean, shouldFadeOut: boolean) {
-        this._shouldFadeOut = shouldFadeOut;
+        // eslint errors in here...
     }
 }
