@@ -317,6 +317,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
+        this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (videoElement) {
             if (videoElement.paused === true) {
@@ -324,6 +325,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             }
+            AFrameRenderer.togglePlayPause(videoElement.paused);
         }
     }
 

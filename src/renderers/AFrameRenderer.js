@@ -1,4 +1,3 @@
-
 // @flow
 
 import AFRAME from 'aframe';
@@ -6,6 +5,11 @@ import AFRAME from 'aframe';
 // import dynamicAudio from 'dynamicaudio';
 
 import logger from '../logger';
+
+import '../assets/images/media-play-8x.png';
+import '../assets/images/media-pause-8x.png';
+import '../assets/images/media-step-forward-8x.png';
+import '../assets/images/media-step-backward-8x.png';
 
 class AFrameRenderer {
     aFrameSceneElement: any;
@@ -57,6 +61,9 @@ class AFrameRenderer {
 
         this.aFrameSceneElement.addEventListener('renderstart', () =>
             this.aFrameSceneElement.camera.layers.enable(1));
+
+        this.addNextPreviousImageAssets();
+        this.addPlayPauseImageAssets();
     }
 
     addAFrameToRenderTarget(target: HTMLElement) {
@@ -97,6 +104,103 @@ class AFrameRenderer {
 
         iconSphere.setAttribute('rotation', `${theta} ${-phi} 0`);
         this.addElementToScene(iconSphere);
+    }
+
+    addNextPreviousImageAssets() {
+        const nextImg = document.createElement('img');
+        nextImg.src = '../dist/images/media-step-forward-8x.png';
+        nextImg.id = 'next-image';
+        this.addAsset(nextImg);
+
+        const prevImg = document.createElement('img');
+        prevImg.src = '../dist/images/media-step-backward-8x.png';
+        prevImg.id = 'prev-image';
+        this.addAsset(prevImg);
+    }
+
+    addPlayPauseImageAssets() {
+        const playImg = document.createElement('img');
+        playImg.src = '../dist/images/media-play-8x.png';
+        playImg.id = 'play-image';
+        this.addAsset(playImg);
+
+        const pauseImg = document.createElement('img');
+        pauseImg.src = '../dist/images/media-pause-8x.png';
+        pauseImg.id = 'pause-image';
+        this.addAsset(pauseImg);
+    }
+
+    addPlayPauseButton(callback: Function, position: Object = { phi: -90, theta: -20, rad: 10 }) {
+        const cartesian = AFrameRenderer
+            .polarToCartesian(position.phi, position.theta, position.rad);
+        const playPauseEntity = document.createElement('a-image');
+        playPauseEntity.id = 'romper-aframe-playpause';
+        playPauseEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
+        playPauseEntity.setAttribute('width', '2');
+        playPauseEntity.setAttribute('height', '2');
+        playPauseEntity.setAttribute('src', '#pause-image');
+        playPauseEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
+        playPauseEntity.addEventListener('click', callback);
+        this.addElementToScene(playPauseEntity);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    togglePlayPause(showPlay: boolean) {
+        const playPauseEntity = document.getElementById('romper-aframe-playpause');
+        if (playPauseEntity) {
+            playPauseEntity.removeAttribute('src');
+            playPauseEntity.setAttribute('src', showPlay ? '#play-image' : '#pause-image');
+        }
+    }
+
+    addNext(callback: Function, position: Object = { phi: -75, theta: -20, rad: 10 }) {
+        const cartesian = AFrameRenderer
+            .polarToCartesian(position.phi, position.theta, position.rad);
+        const nextEntity = document.createElement('a-image');
+        nextEntity.id = 'romper-aframe-next';
+        nextEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
+        nextEntity.setAttribute('width', '2');
+        nextEntity.setAttribute('height', '2');
+        nextEntity.setAttribute('src', '#next-image');
+        nextEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
+        nextEntity.addEventListener('click', callback);
+        this.addElementToScene(nextEntity);
+    }
+
+    addPrevious(callback: Function, position: Object = { phi: -105, theta: -20, rad: 10 }) {
+        const cartesian = AFrameRenderer
+            .polarToCartesian(position.phi, position.theta, position.rad);
+        const prevEntity = document.createElement('a-image');
+        prevEntity.id = 'romper-aframe-prev';
+        prevEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
+        prevEntity.setAttribute('width', '2');
+        prevEntity.setAttribute('height', '2');
+        prevEntity.setAttribute('src', '#prev-image');
+        prevEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
+        prevEntity.addEventListener('click', callback);
+        this.addElementToScene(prevEntity);
+    }
+
+    clearPrevious() {
+        this._clearEl(document.getElementById('romper-aframe-prev'));
+    }
+
+    clearNext() {
+        this._clearEl(document.getElementById('romper-aframe-next'));
+    }
+
+    clearPlayPause() {
+        this._clearEl(document.getElementById('romper-aframe-playpause'));
+    }
+
+    _clearEl(element: ?HTMLElement) {
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+        const index = this.sceneElements.indexOf(element);
+        if (index >= 0) {
+            this.sceneElements.splice(index, 1);
+        }
     }
 
     clearSceneElements() {

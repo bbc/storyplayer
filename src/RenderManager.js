@@ -392,6 +392,8 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
+        AFrameRenderer.clearSceneElements();
+
         // Update availability of back and next buttons.
         this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
         this._showOnwardIcons();
