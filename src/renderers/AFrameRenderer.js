@@ -11,6 +11,8 @@ import '../assets/images/media-pause-8x.png';
 import '../assets/images/media-step-forward-8x.png';
 import '../assets/images/media-step-backward-8x.png';
 
+let _vrMode = false;
+
 class AFrameRenderer {
     aFrameSceneElement: any;
     _aFrameAssetsElement: HTMLElement;
@@ -63,6 +65,17 @@ class AFrameRenderer {
         this.aFrameSceneElement.addEventListener('renderstart', () =>
             this.aFrameSceneElement.camera.layers.enable(1));
 
+        this.aFrameSceneElement.addEventListener('enter-vr', () => {
+            logger.info('Entering VR mode');
+            this._controlBar.setAttribute('visible', 'true');
+            _vrMode = true;
+        });
+        this.aFrameSceneElement.addEventListener('exit-vr', () => {
+            logger.info('Exiting VR mode');
+            this._controlBar.setAttribute('visible', 'false');
+            _vrMode = false;
+        });
+
         this.buildControlBar();
         this.addNextPreviousImageAssets();
         this.addPlayPauseImageAssets();
@@ -97,6 +110,8 @@ class AFrameRenderer {
         this._controlBar.setAttribute('color', '#CCC');
         this._controlBar.setAttribute('width', '6');
         this._controlBar.setAttribute('height', '1.5');
+        // only display in vr mode
+        this._controlBar.setAttribute('visible', 'false');
         this.aFrameSceneElement.appendChild(this._controlBar);
     }
 
@@ -244,6 +259,9 @@ class AFrameRenderer {
         return { x, y, z };
     }
 
+    isInVR(): boolean {
+        return _vrMode;
+    }
 
     // get the direction of view
     getOrientation(): Object {
