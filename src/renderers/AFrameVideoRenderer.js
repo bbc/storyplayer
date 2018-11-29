@@ -304,6 +304,11 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         const cameraContainer = document.getElementById('romper-camera-entity');
         if (cameraContainer) {
+            // console.log('ANDY setting rotation to', this._initialRotation);
+            // const orient = AFrameRenderer.getOrientation();
+            // console.log(AFrameRenderer.getOrientation());
+            // cameraContainer.setAttribute('rotation', `0 ${-orient.theta} ${-orient.phi}`);
+            // console.log(AFrameRenderer.getOrientation());
             cameraContainer.setAttribute('rotation', this._initialRotation);
         }
 
@@ -314,6 +319,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
+        // debugger;
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -388,7 +394,15 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this.end();
+        AFrameRenderer.setSceneHidden(true);
+
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
+        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
         super.destroy();
     }
 }

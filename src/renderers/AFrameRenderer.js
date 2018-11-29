@@ -15,6 +15,7 @@ class AFrameRenderer {
     aFrameSceneElement: any;
     _aFrameAssetsElement: HTMLElement;
     _aFrameCamera: any;
+    _controlBar: HTMLElement;
 
     sceneElements: Array<HTMLElement>;
 
@@ -62,6 +63,7 @@ class AFrameRenderer {
         this.aFrameSceneElement.addEventListener('renderstart', () =>
             this.aFrameSceneElement.camera.layers.enable(1));
 
+        this.buildControlBar();
         this.addNextPreviousImageAssets();
         this.addPlayPauseImageAssets();
     }
@@ -83,27 +85,43 @@ class AFrameRenderer {
         }
     }
 
+    buildControlBar() {
+        // const position = { phi: -90, theta: -20, rad: 8 };
+        // const cartesian = AFrameRenderer
+        //     .polarToCartesian(position.phi, position.theta, position.rad);
+
+        this._controlBar = document.createElement('a-plane');
+        this._controlBar.setAttribute('position', '0 -10 -10');
+        this._controlBar.setAttribute('rotation', '-50 0 0');
+        this._controlBar.id = 'aframe-control-bar';
+        this._controlBar.setAttribute('color', '#CCC');
+        this._controlBar.setAttribute('width', '6');
+        this._controlBar.setAttribute('height', '1.5');
+        this.aFrameSceneElement.appendChild(this._controlBar);
+    }
+
     addLinkIcon(iconUrl: string, number: number, callback: Function) {
-        // console.log('adding icon to aFrame', iconUrl);
         const img = document.createElement('img');
-        img.src = iconUrl;
+        img.src = '../dist/images/media-step-forward-8x.png'; // iconUrl;
         img.id = `icon-image-${number}`;
         this.addAsset(img);
 
-        const iconSphere = document.createElement('a-image');
-        iconSphere.addEventListener('click', callback);
+        const iconImageEntity = document.createElement('a-image');
+        iconImageEntity.addEventListener('click', callback);
 
-        // cunningly render  in a suitable position, and rotate appropriately
-        const phi = (number * 30) + 90;
-        const theta = -3;
-        const cartesian = (AFrameRenderer.polarToCartesian(phi, theta, 10));
-        iconSphere.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
-        iconSphere.setAttribute('width', '2');
-        iconSphere.setAttribute('height', '3');
-        iconSphere.setAttribute('src', `#icon-image-${number}`);
+        // cunningly render in the control bar
+        iconImageEntity.setAttribute('position', `${2 * number} 0 0.05`);
+        iconImageEntity.setAttribute('width', '1');
+        iconImageEntity.setAttribute('height', '1');
+        iconImageEntity.setAttribute('src', `#icon-image-${number}`);
 
-        iconSphere.setAttribute('rotation', `${theta} ${-phi} 0`);
-        this.addElementToScene(iconSphere);
+        if (number > 1) {
+            // resize control bar to fit
+            this._controlBar.setAttribute('width', `${(number * 2.5) + 5}`);
+        }
+
+        this.sceneElements.push(iconImageEntity);
+        this._controlBar.appendChild(iconImageEntity);
     }
 
     addNextPreviousImageAssets() {
@@ -130,18 +148,16 @@ class AFrameRenderer {
         this.addAsset(pauseImg);
     }
 
-    addPlayPauseButton(callback: Function, position: Object = { phi: -90, theta: -20, rad: 10 }) {
-        const cartesian = AFrameRenderer
-            .polarToCartesian(position.phi, position.theta, position.rad);
+    addPlayPauseButton(callback: Function) {
         const playPauseEntity = document.createElement('a-image');
         playPauseEntity.id = 'romper-aframe-playpause';
-        playPauseEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
-        playPauseEntity.setAttribute('width', '2');
-        playPauseEntity.setAttribute('height', '2');
+        playPauseEntity.setAttribute('position', '0 0 0.05');
+        playPauseEntity.setAttribute('width', '1');
+        playPauseEntity.setAttribute('height', '1');
         playPauseEntity.setAttribute('src', '#pause-image');
-        playPauseEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
         playPauseEntity.addEventListener('click', callback);
-        this.addElementToScene(playPauseEntity);
+        this.sceneElements.push(playPauseEntity);
+        this._controlBar.appendChild(playPauseEntity);
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -153,32 +169,28 @@ class AFrameRenderer {
         }
     }
 
-    addNext(callback: Function, position: Object = { phi: -75, theta: -20, rad: 10 }) {
-        const cartesian = AFrameRenderer
-            .polarToCartesian(position.phi, position.theta, position.rad);
+    addNext(callback: Function) {
         const nextEntity = document.createElement('a-image');
         nextEntity.id = 'romper-aframe-next';
-        nextEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
-        nextEntity.setAttribute('width', '2');
-        nextEntity.setAttribute('height', '2');
+        nextEntity.setAttribute('position', '2 0 0.05');
+        nextEntity.setAttribute('width', '1');
+        nextEntity.setAttribute('height', '1');
         nextEntity.setAttribute('src', '#next-image');
-        nextEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
         nextEntity.addEventListener('click', callback);
-        this.addElementToScene(nextEntity);
+        this.sceneElements.push(nextEntity);
+        this._controlBar.appendChild(nextEntity);
     }
 
-    addPrevious(callback: Function, position: Object = { phi: -105, theta: -20, rad: 10 }) {
-        const cartesian = AFrameRenderer
-            .polarToCartesian(position.phi, position.theta, position.rad);
+    addPrevious(callback: Function) {
         const prevEntity = document.createElement('a-image');
         prevEntity.id = 'romper-aframe-prev';
-        prevEntity.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
-        prevEntity.setAttribute('width', '2');
-        prevEntity.setAttribute('height', '2');
+        prevEntity.setAttribute('position', '-2 0 0.05');
+        prevEntity.setAttribute('width', '1');
+        prevEntity.setAttribute('height', '1');
         prevEntity.setAttribute('src', '#prev-image');
-        prevEntity.setAttribute('rotation', `${position.theta} ${-position.phi} 0`);
         prevEntity.addEventListener('click', callback);
-        this.addElementToScene(prevEntity);
+        this.sceneElements.push(prevEntity);
+        this._controlBar.appendChild(prevEntity);
     }
 
     clearPrevious() {
@@ -210,6 +222,7 @@ class AFrameRenderer {
                 el.parentNode.removeChild(el);
             }
         }
+        this._controlBar.setAttribute('width', '6');
     }
 
     /*

@@ -394,10 +394,6 @@ export default class RenderManager extends EventEmitter {
 
         AFrameRenderer.clearSceneElements();
 
-        // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
-        this._showOnwardIcons();
-
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
@@ -432,6 +428,10 @@ export default class RenderManager extends EventEmitter {
                 oldRenderer.end();
             }
         }
+
+        // Update availability of back and next buttons.
+        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
+        this._showOnwardIcons();
 
         newRenderer.willStart();
     }
