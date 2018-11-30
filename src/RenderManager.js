@@ -531,8 +531,9 @@ export default class RenderManager extends EventEmitter {
                                 .then((representation) => {
                                     // create the new Renderer
                                     if (this._upcomingRenderers[neid]) {
-                                        if (this._upcomingRenderers[neid]._representation.id !==
-                                            representation.id) {
+                                        if ((this._upcomingRenderers[neid]._representation.id !==
+                                            representation.id) ||
+                                            (this._upcomingRenderers[neid].isVRViewable() !== AFrameRenderer.isInVR())){
                                             const newRenderer = this
                                                 ._createNewRenderer(representation);
                                             if (newRenderer) {
