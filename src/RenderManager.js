@@ -399,12 +399,6 @@ export default class RenderManager extends EventEmitter {
         AFrameRenderer.clearSceneElements();
         AFrameRenderer.setSceneHidden(true);
 
-        // Update availability of back and next buttons.
-        this._controller.getIdOfPreviousNode().then((lastid) => {
-            this._player.setBackAvailable(lastid !== null);
-        });
-        this._showOnwardIcons();
-
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
