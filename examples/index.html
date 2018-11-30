@@ -109,7 +109,8 @@
         // render a story for user selection
         function addStoryOption(filename, storyName, storyDescription) {
             const storyDiv = document.createElement('div');
-            storyDiv.id = storyName.replace(/^[a-zA-Z0-9_]*/g, '_');
+            let id = storyName.replace(/ /g, '_');
+            storyDiv.id = id.replace(/[^0-9a-zA-Z_]*/g, '_');
             const title = document.createElement('h3');
             title.textContent = storyName;
             const desc = document.createElement('p');
