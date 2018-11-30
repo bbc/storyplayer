@@ -109,26 +109,7 @@ export default class Controller extends EventEmitter {
                 if (nextNarrativeElements.length === 1) {
                     // eslint-disable-next-line prefer-destructuring
                     nextNarrativeElement = nextNarrativeElements[0];
-
-                    if (nextNarrativeElement.body.type === 'STORY_ELEMENT'
-                        && nextNarrativeElement.body.story_target_id) {
-                        // return a promise that resolves to either first ne of substory
-                        // if only one, or story itself if multiple beginnings
-                        return this._fetchers
-                            .storyFetcher(nextNarrativeElement.body.story_target_id)
-                            .then((substory) => {
-                                if (substory.beginnings.length > 1) {
-                                    // multiple beginnings - resolve back to story NE
-                                    return Promise.resolve(nextNarrativeElement);
-                                }
-                                // one beginning - return promise that fetches the first NE
-                                const startNeId = substory.beginnings[0].narrative_element_id;
-                                return this._fetchers.narrativeElementFetcher(startNeId);
-                            });
-                    }
                 }
-                // if first NE not a story resolve to it directly
-                // if multiple next NEs, nextNarrativeElement is null
                 return Promise.resolve(nextNarrativeElement);
             }).then((nextne) => {
                 const statusObject = {
@@ -251,12 +232,25 @@ export default class Controller extends EventEmitter {
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
-        const previous = this.getIdOfPreviousNode();
-        if (previous) {
-            this._jumpToNarrativeElement(previous);
-        } else {
-            logger.error('cannot resolve previous node to go to');
-        }
+        return Promise.all([
+            this.getIdOfPreviousNode(),
+            this.getVariableValue('romper_path_history'),
+        ]).then(([previous, history]) => {
+            // remove the current NE from history
+            history.pop();
+            // remove the one we're going to - it'll be added again
+            history.pop();
+            // set history variable directly in reasoner to avoid triggering lookahead
+            if (this._reasoner) {
+                this._reasoner.setVariableValue('romper_path_history', history);
+            }
+
+            if (previous) {
+                this._jumpToNarrativeElement(previous);
+            } else {
+                logger.error('cannot resolve previous node to go to');
+            }
+        });
     }
 
     //
@@ -550,6 +544,7 @@ export default class Controller extends EventEmitter {
                 .getSubReasonerContainingNarrativeElement(narrativeElementId);
             if (currentReasoner) {
                 currentReasoner._setCurrentNarrativeElement(narrativeElementId);
+                currentReasoner._subStoryReasoner = null;
                 currentReasoner.hasNextNode()
                     .then((nodes) => {
                         if (nodes.length > 0 && currentReasoner._storyEnded) {
@@ -573,10 +568,11 @@ export default class Controller extends EventEmitter {
     }
 
     // find what the next steps in the story can be
-    getValidNextSteps(): Promise<Array<NarrativeElement>> {
+    // eslint-disable-next-line max-len
+    getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<NarrativeElement>> {
         if (this._reasoner) {
             const subReasoner = this._reasoner
-                .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
+                .getSubReasonerContainingNarrativeElement(neId);
             if (subReasoner) {
                 return subReasoner.hasNextNode()
                     .then((links) => {
@@ -589,7 +585,30 @@ export default class Controller extends EventEmitter {
                             }
                         });
                         return narrativeElementList;
-                    }, () => []);
+                    }, () => [])
+                    .then((neList) => {
+                        const promiseList = [];
+                        neList.forEach((narrativeElement) => {
+                            if (narrativeElement.body.type ===
+                                'REPRESENTATION_COLLECTION_ELEMENT') {
+                                promiseList.push(Promise.resolve([narrativeElement]));
+                            } else if (narrativeElement.body.type === 'STORY_ELEMENT'
+                                && narrativeElement.body.story_target_id) {
+                                promiseList.push(this._fetchers
+                                    .storyFetcher(narrativeElement.body.story_target_id)
+                                    .then((substory) => {
+                                        const startPromises = [];
+                                        substory.beginnings.forEach((beginning) => {
+                                            // eslint-disable-next-line max-len
+                                            startPromises.push(this._fetchers.narrativeElementFetcher(beginning.narrative_element_id));
+                                        });
+                                        return Promise.all(startPromises);
+                                    }));
+                            }
+                        });
+                        return Promise.all(promiseList)
+                            .then(neArrayArray => [].concat(...neArrayArray));
+                    });
             }
         }
         return Promise.resolve([]);
@@ -599,7 +618,7 @@ export default class Controller extends EventEmitter {
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory
     // otherwise, returns null.
-    getIdOfPreviousNode(): ?string {
+    getIdOfPreviousNode(): Promise<?string> {
         let matchingId = null;
         if (this._linearStoryPath) {
             // find current
@@ -614,34 +633,30 @@ export default class Controller extends EventEmitter {
                 .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
             if (subReasoner) matchingId = subReasoner.findPreviousNodeId();
         }
-        return matchingId;
+        if (matchingId !== null) {
+            return Promise.resolve(matchingId);
+        }
+        return this.getVariableValue('romper_path_history')
+            .then((history) => {
+                if (history.length > 1) {
+                    const lastVisitedId = history[history.length - 2];
+                    return this._fetchers.narrativeElementFetcher(lastVisitedId);
+                }
+                return Promise.resolve();
+            })
+            .then((lastne) => {
+                if (lastne) {
+                    return lastne.id;
+                }
+                return null;
+            });
     }
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
-    // finds next NARRATIVE_ELEMENTs, but does not look out of the current subStory,
-    // except in case of linear story
-    getIdsOfNextNodes(narrativeElement: NarrativeElement) {
-        const upcomingIds: Array<string> = [];
-        const nextNodes = narrativeElement.links;
-        nextNodes.forEach((link) => {
-            if (link.link_type === 'NARRATIVE_ELEMENT' && link.target_narrative_element_id) {
-                upcomingIds.push(link.target_narrative_element_id);
-            } else if (link.link_type === 'END_STORY') {
-                if (this._linearStoryPath) {
-                    let matchingId = null;
-                    this._linearStoryPath.forEach((storyPathItem, i) => {
-                        if (storyPathItem.narrative_element.id === narrativeElement.id
-                            && i < (this._linearStoryPath.length - 1)) {
-                            matchingId = this._linearStoryPath[i + 1].narrative_element.id;
-                        }
-                    });
-                    if (matchingId) {
-                        upcomingIds.push(matchingId);
-                    }
-                }
-            }
-        });
-        return upcomingIds;
+    getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
+        return this.getValidNextSteps(narrativeElement.id)
+            .then(nextNarrativeElements =>
+                nextNarrativeElements.map(ne => ne.id));
     }
 
     reset() {
