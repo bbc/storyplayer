@@ -128,7 +128,12 @@ class AFrameRenderer extends EventEmitter {
 
     addLinkIcon(iconUrl: string, number: number, callback: Function) {
         const img = document.createElement('img');
-        img.src = '../dist/images/media-step-forward-8x.png'; // iconUrl;
+        // TODO: aframe doesn't like svg images ...
+        if (iconUrl.indexOf('.svg') !== -1) {
+            img.src = '/dist/images/media-step-forward-8x.png'; // iconUrl;
+        } else {
+            img.src = iconUrl;
+        }
         img.id = `icon-image-${number}`;
         this.addAsset(img);
 
@@ -152,24 +157,24 @@ class AFrameRenderer extends EventEmitter {
 
     addNextPreviousImageAssets() {
         const nextImg = document.createElement('img');
-        nextImg.src = '../dist/images/media-step-forward-8x.png';
+        nextImg.src = '/dist/images/media-step-forward-8x.png';
         nextImg.id = 'next-image';
         this.addAsset(nextImg);
 
         const prevImg = document.createElement('img');
-        prevImg.src = '../dist/images/media-step-backward-8x.png';
+        prevImg.src = '/dist/images/media-step-backward-8x.png';
         prevImg.id = 'prev-image';
         this.addAsset(prevImg);
     }
 
     addPlayPauseImageAssets() {
         const playImg = document.createElement('img');
-        playImg.src = '../dist/images/media-play-8x.png';
+        playImg.src = '/dist/images/media-play-8x.png';
         playImg.id = 'play-image';
         this.addAsset(playImg);
 
         const pauseImg = document.createElement('img');
-        pauseImg.src = '../dist/images/media-pause-8x.png';
+        pauseImg.src = '/dist/images/media-pause-8x.png';
         pauseImg.id = 'pause-image';
         this.addAsset(pauseImg);
     }
