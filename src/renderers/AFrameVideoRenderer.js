@@ -319,7 +319,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
-        // debugger;
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -374,9 +373,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     end() {
-        // hide aFrame content
-        AFrameRenderer.setSceneHidden(true);
-
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
@@ -385,8 +381,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        AFrameRenderer.clearSceneElements();
-
         this._started = false;
         this._rendered = false;
 
@@ -394,8 +388,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     destroy() {
-        AFrameRenderer.setSceneHidden(true);
-
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
