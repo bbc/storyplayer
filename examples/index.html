@@ -71,31 +71,46 @@
 
         // load demo stories
         const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json', 'aframe.json'];
-        stories.forEach(storyFilename => fetchStoryOption(storyFilename));
 
-        // get the story data for an option, and call a function to render it for selection
-        function fetchStoryOption(filename){
-            fetch(filename)
+        const promises = []
+        stories.forEach(storyFilename => promises.push(fetchFile(storyFilename)));
+        Promise.all(promises).then((texts) => {
+            const divs = [];
+            texts.forEach((text, i) => {
+                const storyjson = JSON.parse(text);
+                const name = storyjson.stories[0].name;
+                const description = storyjson.stories[0].description;
+                divs.push(addStoryOption(stories[i], name, description));
+            });
+            divs.sort( function ( a, b ) {
+                return (a.id < b.id) ? -1 : (a.id > b.id) ? 1 : 0;
+            }).forEach( function ( elem ) {
+                document.getElementById('choices').appendChild(elem);
+            });
+        }).catch((rejection) => {
+            console.warn('Could not load built-in demo file');
+        });
+
+        // return promise to fetch
+        function fetchFile(filename) {
+            return fetch(filename)
             .then((response) => {
-                    if (response.ok) {
-                        return Promise.resolve(response.text());
-                    }
-                    return Promise.reject(response);
-                })
-                .then((text) => {
-                    const storyjson = JSON.parse(text);
-                    const name = storyjson.stories[0].name;
-                    const description = storyjson.stories[0].description;
-                    addStoryOption(filename, name, description);
-                })
-                .catch((rejection) => {
-                    console.warn(`could not fetch story content: ${rejection.status} ${rejection.statusText}`);
-                });
+                if (response.ok) {
+                    return Promise.resolve(response.text());
+                }
+                return Promise.reject(response);
+            })
+            .catch((rejection) => {
+                console.warn(`could not fetch story content for ${filename}: ${rejection.status} ${rejection.statusText}`);
+                return Promise.reject(rejection);
+            });
         }
 
         // render a story for user selection
         function addStoryOption(filename, storyName, storyDescription) {
             const storyDiv = document.createElement('div');
+            let id = storyName.replace(/ /g, '_');
+            storyDiv.id = id.replace(/[^0-9a-zA-Z_]*/g, '_');
             const title = document.createElement('h3');
             title.textContent = storyName;
             const desc = document.createElement('p');
@@ -109,8 +124,7 @@
             storyDiv.appendChild(title);
             storyDiv.appendChild(desc);
             storyDiv.appendChild(selectPar);
-
-            document.getElementById('choices').appendChild(storyDiv);
+            return storyDiv;
         }
 
         // get a GET query parameter
@@ -127,7 +141,15 @@
         // load a story from file whose path supplied in query
         const getFilename = getParameterByName('storyjson');
         if (getFilename) {
-            fetchStoryOption(getFilename);
+            fetchFile(getFilename).then((text) => {
+                const storyjson = JSON.parse(text);
+                const name = storyjson.stories[0].name;
+                const description = storyjson.stories[0].description;
+                document.getElementById('choices').appendChild(addStoryOption(getFilename, name, description));
+            })
+            .catch((rejection) => {
+                console.warn(`could not load GET story content`);
+            });
             loadStory(getFilename);
         }
 
@@ -231,6 +253,7 @@
         function restart() {
             showMessage('Story reloaded');
             run(loadedStoryJson);
+            resizeWindow();
         }
 
         // fetch a story, load and run it
