@@ -531,7 +531,6 @@ export default class RenderManager extends EventEmitter {
                     }
                     return Promise.resolve();
                 });
-                // }});
 
             this._showOnwardIcons();
             return Promise.all(renderPromises)
