@@ -232,26 +232,25 @@ export default class Controller extends EventEmitter {
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
-        this.getIdOfPreviousNode()
-            .then((previous) => {
-                this.getVariableValue('romper_path_history')
-                    .then((history) => {
-                        // remove the current NE from history
-                        history.pop();
-                        // remove the one we're going to - it'll be added again
-                        history.pop();
-                        // set history variable directly in reasoner to avoid triggering lookahead
-                        if (this._reasoner) {
-                            this._reasoner.setVariableValue('romper_path_history', history);
-                        }
+        return Promise.all([
+            this.getIdOfPreviousNode(),
+            this.getVariableValue('romper_path_history'),
+        ]).then(([previous, history]) => {
+            // remove the current NE from history
+            history.pop();
+            // remove the one we're going to - it'll be added again
+            history.pop();
+            // set history variable directly in reasoner to avoid triggering lookahead
+            if (this._reasoner) {
+                this._reasoner.setVariableValue('romper_path_history', history);
+            }
 
-                        if (previous) {
-                            this._jumpToNarrativeElement(previous);
-                        } else {
-                            logger.error('cannot resolve previous node to go to');
-                        }
-                    });
-            });
+            if (previous) {
+                this._jumpToNarrativeElement(previous);
+            } else {
+                logger.error('cannot resolve previous node to go to');
+            }
+        });
     }
 
     //
