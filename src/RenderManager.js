@@ -403,8 +403,6 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
-        newRenderer.willStart();
-
         // ensure volume persistence
         Object.keys(this._rendererState.volumes).forEach((label) => {
             const value = this._rendererState.volumes[label];
@@ -425,6 +423,8 @@ export default class RenderManager extends EventEmitter {
                 oldRenderer.end();
             }
         }
+
+        newRenderer.willStart();
     }
 
     // show next button, or icons if choice
@@ -490,7 +490,6 @@ export default class RenderManager extends EventEmitter {
 
             // Generate new renderers for any that are missing
             const renderPromises = allIds
-                .filter(neid => Object.keys(this._upcomingRenderers).indexOf(neid) === -1)
                 .map((neid) => {
                     // Check to see if required NE renderer is the one currently being shown
                     if (
@@ -501,29 +500,38 @@ export default class RenderManager extends EventEmitter {
                         this._upcomingRenderers[neid] = this._currentRenderer;
                     } else {
                         // get the actual NarrativeElement object
-                        return this._fetchers.narrativeElementFetcher(neid)
-                            .then((neObj) => {
-                                if (neObj &&
-                                    neObj.body.representation_collection_target_id) {
-                                    return this._fetchers
-                                        // eslint-disable-next-line max-len
-                                        .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                                        .then(representationCollection =>
-                                            this._representationReasoner(representationCollection))
-                                        .then((representation) => {
-                                            // create the new Renderer
-                                            // eslint-disable-next-line max-len
-                                            const newRenderer = this._createNewRenderer(representation);
+                        const neObj = this._controller._getNarrativeElement(neid);
+                        if (neObj && neObj.body.representation_collection_target_id) {
+                            return this._fetchers
+                                // eslint-disable-next-line max-len
+                                .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                                .then(representationCollection =>
+                                    this._representationReasoner(representationCollection))
+                                .then((representation) => {
+                                    // create the new Renderer
+                                    if (this._upcomingRenderers[neid]) {
+                                        if (this._upcomingRenderers[neid]._representation.id !==
+                                            representation.id) {
+                                            const newRenderer = this
+                                                ._createNewRenderer(representation);
                                             if (newRenderer) {
                                                 this._upcomingRenderers[neid] = newRenderer;
                                             }
-                                        });
-                                }
-                                return Promise.resolve();
-                            });
+                                        }
+                                    } else {
+                                        const newRenderer = this
+                                            ._createNewRenderer(representation);
+                                        if (newRenderer) {
+                                            this._upcomingRenderers[neid] = newRenderer;
+                                        }
+                                    }
+                                });
+                        }
+                        return Promise.resolve();
                     }
                     return Promise.resolve();
                 });
+                // }});
 
             this._showOnwardIcons();
             return Promise.all(renderPromises)

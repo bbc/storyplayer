@@ -292,6 +292,31 @@ export default class Controller extends EventEmitter {
         this._analytics(logData);
     }
 
+    // try to get the narrative element object with the given id
+    // returns NE if it is either in the current subStory, or if this story is
+    // linear (assuming id is valid).
+    // returns null otherwise
+    _getNarrativeElement(neid: string): ?NarrativeElement {
+        let neObj;
+        if (this._reasoner) {
+            // get the actual NarrativeElement object
+            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
+            if (subReasoner) {
+                neObj = subReasoner._narrativeElements[neid];
+            }
+            if (!neObj && this._linearStoryPath) {
+                // can't find it via reasoner if in different substoruy,
+                // but can get from storyPath if linear
+                this._linearStoryPath.forEach((storyPathItem) => {
+                    if (storyPathItem.narrative_element.id === neid) {
+                        neObj = storyPathItem.narrative_element;
+                    }
+                });
+            }
+        }
+        return neObj;
+    }
+
     // create a reasoner to do a shadow walk of the story graph
     // when it reaches a target node, it boots out the original reasoner
     // and takes its place (with suitable event listeners)
