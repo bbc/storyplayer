@@ -18,6 +18,7 @@ class AFrameRenderer {
     _aFrameAssetsElement: HTMLElement;
     _aFrameCamera: any;
     _controlBar: HTMLElement;
+    _cursor: HTMLElement;
 
     sceneElements: Array<HTMLElement>;
 
@@ -51,12 +52,13 @@ class AFrameRenderer {
         cameraEntity.appendChild(this._aFrameCamera);
         this.aFrameSceneElement.appendChild(cameraEntity);
 
-        const cursor = document.createElement('a-entity');
-        cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
-        cursor.setAttribute('position', '0 0 -2');
-        cursor.setAttribute('geometry', 'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03');
-        cursor.setAttribute('material', 'color: white; shader: flat');
-        this._aFrameCamera.appendChild(cursor);
+        this._cursor = document.createElement('a-entity');
+        this._cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
+        this._cursor.setAttribute('position', '0 0 -2');
+        this._cursor.setAttribute('geometry', 'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03');
+        this._cursor.setAttribute('material', 'color: white; shader: flat');
+        this._cursor.setAttribute('visible', 'false');
+        this._aFrameCamera.appendChild(this._cursor);
 
         // assets (add our video div)
         this._aFrameAssetsElement = document.createElement('a-assets');
@@ -68,11 +70,13 @@ class AFrameRenderer {
         this.aFrameSceneElement.addEventListener('enter-vr', () => {
             logger.info('Entering VR mode');
             this._controlBar.setAttribute('visible', 'true');
+            this._cursor.setAttribute('visible', 'true');
             _vrMode = true;
         });
         this.aFrameSceneElement.addEventListener('exit-vr', () => {
             logger.info('Exiting VR mode');
             this._controlBar.setAttribute('visible', 'false');
+            this._cursor.setAttribute('visible', 'false');
             _vrMode = false;
         });
 
@@ -439,7 +443,6 @@ class AFrameRenderer {
 
     exitVR() {
         this.aFrameSceneElement.exitVR();
-        this.aFrameSceneElement.style.height = '0px';
     }
 }
 
