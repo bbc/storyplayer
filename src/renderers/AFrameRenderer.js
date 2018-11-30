@@ -118,7 +118,7 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.setAttribute('position', '0 -10 -10');
         this._controlBar.setAttribute('rotation', '-50 0 0');
         this._controlBar.id = 'aframe-control-bar';
-        this._controlBar.setAttribute('color', '#CCC');
+        this._controlBar.setAttribute('color', '#999');
         this._controlBar.setAttribute('width', '6');
         this._controlBar.setAttribute('height', '1.5');
         // only display in vr mode

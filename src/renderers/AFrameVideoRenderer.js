@@ -378,6 +378,9 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     end() {
+        // put video element back
+        this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
+
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
