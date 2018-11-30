@@ -476,8 +476,8 @@ export default class RenderManager extends EventEmitter {
     }
 
     // create reasoners for the NEs that follow narrativeElement
-    _rendererLookahead(narrativeElement: NarrativeElement) {
-        Promise.all([
+    _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
+        return Promise.all([
             this._controller.getIdOfPreviousNode(),
             this._controller.getIdsOfNextNodes(narrativeElement),
         ]).then(([previousId, nextIds]) => {
