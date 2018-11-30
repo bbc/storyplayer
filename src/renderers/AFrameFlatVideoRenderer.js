@@ -1,6 +1,4 @@
 // @flow
-import AFRAME from 'aframe';
-
 import AFrameRenderer from './AFrameRenderer';
 import Player, { PlayerEvents } from '../Player';
 import BaseRenderer from './BaseRenderer';
@@ -11,7 +9,7 @@ import Controller from '../Controller';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
-export default class AFrameVideoRenderer extends BaseRenderer {
+export default class AFrameFlatVideoRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
@@ -69,12 +67,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._outTime = -1;
         this._lastSetTime = 0;
 
-        this._ambisonic = '';
-        this._initialRotation = '0 0 0';
-        this._videoTypeString = '360_mono';
-
         // this is what we refer to
-        this._videoDivId = `threesixtyvideo-${this._rendererId}`;
+        this._videoDivId = `flatvideo-${this._rendererId}`;
 
         this._rendered = false;
 
@@ -82,7 +76,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
-        logger.info('360 video ended');
+        logger.info('flat video in 360 ended');
         if (!this._hasEnded) {
             this._hasEnded = true;
             super.complete();
@@ -103,7 +97,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
-            this._startThreeSixtyVideo();
+            this._startFlatVideo();
         } else {
             this.collectElementsToRender();
         }
@@ -124,18 +118,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
                         }
                         if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
                             this._setOutTime(parseFloat(fg.meta.romper.out));
-                        }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.video_type) {
-                            // mono/stereo, vertical/horizontal split
-                            this._videoTypeString = fg.meta.romper.video_type;
-                        }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
-                            // starting rotation
-                            this._initialRotation = fg.meta.romper.rotation;
-                        }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.audio) {
-                            // starting rotation
-                            this._ambisonic = fg.meta.romper.audio;
                         }
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
@@ -181,113 +163,38 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
         AFrameRenderer.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
 
-        // identify video type and set parameters
-        // now build bits specific for video/type
-        const videoType = { // defaults
-            coverage: 'full',
-            stereo: false,
-            split: 'horizontal',
-            mode: 'full',
-        };
-
-        if (this._ambisonic !== '') {
-            logger.info(`${this._ambisonic} ambisonic audio`);
-            const audio = document.createElement('a-entity');
-            audio.setAttribute('src', this._videoDivId);
-            audio.setAttribute('ambiOrder', this._ambisonic);
-            audio.setAttribute('spatialaudio', '');
-            videoElements.push(audio);
-        }
-
-        // parse video type from string
-        if (this._videoTypeString.includes('180')) videoType.coverage = 'half';
-        if (this._videoTypeString.includes('stereo')) videoType.stereo = true;
-        if (this._videoTypeString.includes('vertical')) videoType.split = 'vertical';
-
-        // get components for video depending on type
+        // get components for video
         // these are the bits that would need to be replaced for each scene
-        if (videoType.stereo) {
-            const stereoElements = this._getStereoComponents(videoType);
-            this._sceneElements = videoElements.concat(stereoElements);
-        } else {
-            const monoElements = this._getMonoComponents();
-            this._sceneElements = videoElements.concat(monoElements);
-        }
+        const monoElements = this._getVideoComponents();
+        this._sceneElements = videoElements.concat(monoElements);
 
         // all done - start playing if start has been called
         // if not, we're ready
         this._rendered = true;
         if (this._started) {
-            this._startThreeSixtyVideo();
+            this._startFlatVideo();
         }
     }
 
-    // return components needed to render mono 360 video
-    _getMonoComponents(): Array<HTMLElement> {
+    // return components needed to render flat video in 360
+    _getVideoComponents(): Array<HTMLElement> {
         logger.info('360 rendering mono');
-        const sphereMono = document.createElement('a-entity');
-        sphereMono.setAttribute('class', 'videospheres');
-        sphereMono.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        sphereMono.setAttribute('scale', '-1 1 1');
-        AFRAME.utils.entity.setComponentProperty(sphereMono, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        return [sphereMono];
+
+        const flatVideo = document.createElement('a-video');
+        flatVideo.setAttribute('src', `#${this._videoDivId}`);
+        const width = 8;
+        flatVideo.setAttribute('width', `${width}`);
+        flatVideo.setAttribute('height', `${width * (9 / 16)}`);
+        flatVideo.setAttribute('position', '0 1 -5');
+
+        // sky
+        const sky = document.createElement('a-sky');
+        sky.setAttribute('color', '#6EBAA7');
+
+        return [flatVideo, sky];
     }
 
-    // return components needed to render stereo 360 video
-    _getStereoComponents(videoType: Object): Array<HTMLElement> {
-        logger.info('360 rendering stereo');
-
-        const sphereL = document.createElement('a-entity');
-        sphereL.setAttribute('class', 'videospheres');
-        sphereL.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        AFRAME.utils.entity.setComponentProperty(sphereL, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        sphereL.setAttribute('scale', '-1 1 1');
-
-        // Sync rotation with 'camera landing rotation'
-        AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', { x: 0, y: 0, z: 0 });
-        AFRAME.utils.entity.setComponentProperty(
-            sphereL,
-            'stereo',
-            { eye: 'left', mode: videoType.mode, split: videoType.split },
-        );
-
-        const sphereR = document.createElement('a-entity');
-        sphereR.setAttribute('class', 'videospheres');
-        sphereR.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        AFRAME.utils.entity.setComponentProperty(sphereR, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        sphereR.setAttribute('scale', '-1 1 1');
-
-        AFRAME.utils.entity.setComponentProperty(
-            sphereR,
-            'stereo',
-            { eye: 'right', mode: videoType.mode, split: videoType.split },
-        );
-
-        return [sphereL, sphereR];
-    }
-
-    _startThreeSixtyVideo() {
+    _startFlatVideo() {
         // add elements
         this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
 
@@ -302,16 +209,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         // this._target.addEventListener('mouseup', () =>
         //    { AFrameRenderer.getOrientation(); }, false);
 
-        const cameraContainer = document.getElementById('romper-camera-entity');
-        if (cameraContainer) {
-            // console.log('ANDY setting rotation to', this._initialRotation);
-            // const orient = AFrameRenderer.getOrientation();
-            // console.log(AFrameRenderer.getOrientation());
-            // cameraContainer.setAttribute('rotation', `0 ${-orient.theta} ${-orient.phi}`);
-            // console.log(AFrameRenderer.getOrientation());
-            cameraContainer.setAttribute('rotation', this._initialRotation);
-        }
-
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
@@ -319,6 +216,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
+        // debugger;
     }
 
     _handlePlayPauseButtonClicked(): void {

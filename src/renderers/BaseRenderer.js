@@ -481,6 +481,12 @@ export default class BaseRenderer extends EventEmitter {
         return null;
     }
 
+    // can this render in a headset?
+    // eslint-disable-next-line class-methods-use-this
+    isVRViewable(): boolean {
+        return false;
+    }
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.

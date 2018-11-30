@@ -102,6 +102,9 @@ export default class RenderManager extends EventEmitter {
             this._followLink(event.id);
         });
 
+        AFrameRenderer.on('aframe-vr-toggle', () => {
+            this.refreshLookahead();
+        });
         this._initialise();
     }
 
@@ -411,7 +414,8 @@ export default class RenderManager extends EventEmitter {
 
         if (oldRenderer) {
             if (oldRenderer instanceof AFrameVideoRenderer
-            && !(newRenderer instanceof AFrameVideoRenderer || newRenderer instanceof AFrameFlatVideoRenderer)) {
+            && !(newRenderer instanceof AFrameVideoRenderer ||
+            newRenderer instanceof AFrameFlatVideoRenderer)) {
                 // exit VR mode if necessary
                 // TODO need to go back to full-screen if appropriate
                 AFrameRenderer.exitVR();
@@ -518,8 +522,11 @@ export default class RenderManager extends EventEmitter {
                                 // create the new Renderer
 
                                 if (this._upcomingRenderers[neid]) {
-                                    if (this._upcomingRenderers[neid]
-                                        ._representation.id !== representation.id) {
+                                    if ((this._upcomingRenderers[neid]
+                                        ._representation.id !== representation.id) ||
+                                        // or if need to change VR mode
+                                        (this._upcomingRenderers[neid].isVRViewable() !==
+                                        AFrameRenderer.isInVR())) {
                                         const newRenderer = this._createNewRenderer(representation);
                                         if (newRenderer) {
                                             this._upcomingRenderers[neid] = newRenderer;
