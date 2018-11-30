@@ -4,8 +4,9 @@ import AFRAME from 'aframe';
 // uncomment next line when dynamic-audio-smp360 is available on Artifactory
 // import dynamicAudio from 'dynamicaudio';
 
-import logger from '../logger';
+import EventEmitter from 'events';
 
+import logger from '../logger';
 import '../assets/images/media-play-8x.png';
 import '../assets/images/media-pause-8x.png';
 import '../assets/images/media-step-forward-8x.png';
@@ -13,7 +14,7 @@ import '../assets/images/media-step-backward-8x.png';
 
 let _vrMode = false;
 
-class AFrameRenderer {
+class AFrameRenderer extends EventEmitter {
     aFrameSceneElement: any;
     _aFrameAssetsElement: HTMLElement;
     _aFrameCamera: any;
@@ -24,6 +25,7 @@ class AFrameRenderer {
 
 
     constructor() {
+        super();
         AFrameRenderer._registerAframeComponents();
         this.buildBaseAframeScene();
         this.sceneElements = [];
@@ -55,7 +57,10 @@ class AFrameRenderer {
         this._cursor = document.createElement('a-entity');
         this._cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
         this._cursor.setAttribute('position', '0 0 -2');
-        this._cursor.setAttribute('geometry', 'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03');
+        this._cursor.setAttribute(
+            'geometry',
+            'primitive: ring; radiusInner: 0.02; radiusOuter: 0.03',
+        );
         this._cursor.setAttribute('material', 'color: white; shader: flat');
         this._cursor.setAttribute('visible', 'false');
         this._aFrameCamera.appendChild(this._cursor);
@@ -71,12 +76,14 @@ class AFrameRenderer {
             logger.info('Entering VR mode');
             this._controlBar.setAttribute('visible', 'true');
             this._cursor.setAttribute('visible', 'true');
+            this.emit('aframe-vr-toggle');
             _vrMode = true;
         });
         this.aFrameSceneElement.addEventListener('exit-vr', () => {
             logger.info('Exiting VR mode');
             this._controlBar.setAttribute('visible', 'false');
             this._cursor.setAttribute('visible', 'false');
+            this.emit('aframe-vr-toggle');
             _vrMode = false;
         });
 
@@ -263,6 +270,7 @@ class AFrameRenderer {
         return { x, y, z };
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isInVR(): boolean {
         return _vrMode;
     }
