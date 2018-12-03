@@ -336,26 +336,36 @@ export default class BaseRenderer extends EventEmitter {
         const variableName = behaviourVar.variable_name;
 
         const labelDiv = document.createElement('div');
-        labelDiv.innerHTML = behaviourVar.label;
         labelDiv.className = 'romper-var-form-label-div';
+        const labelSpan = document.createElement('span');
+        labelSpan.innerHTML = behaviourVar.label;
+        labelDiv.appendChild(labelSpan);
         variableDiv.appendChild(labelDiv);
+
+        const answerContainer = document.createElement('div');
+        answerContainer.className = 'romper-var-form-answer-cont-inner';
+        const answerContainerOuter = document.createElement('div');
+        answerContainerOuter.className = 'romper-var-form-answer-cont';
+
+        answerContainerOuter.appendChild(answerContainer);
 
         if (variableType === 'boolean') {
             const boolDiv = this._getBooleanVariableSetter(variableName);
-            variableDiv.append(boolDiv);
+            answerContainer.append(boolDiv);
         } else if (variableType === 'list') {
             const listDiv = this._getListVariableSetter(
                 behaviourVar.variable_name,
                 variableDecl,
             );
             listDiv.classList.add('romper-var-form-list-input');
-            variableDiv.append(listDiv);
+            answerContainer.append(listDiv);
         } else if (variableType === 'number') {
             const numDiv = this._getIntegerVariableSetter(variableName);
             numDiv.classList.add('romper-var-form-number-input');
-            variableDiv.append(numDiv);
+            answerContainer.append(numDiv);
         }
 
+        variableDiv.appendChild(answerContainerOuter);
         return variableDiv;
     }
 

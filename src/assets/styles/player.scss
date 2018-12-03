@@ -625,7 +625,10 @@ $romper-hover-text-size: 25px;
 .romper-variable-panel {
   background-color: $pastel-orange;
   border: 1px solid $half-white;
-  height: 65%;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  font-size: 2vw;
   left: 10%;
   opacity: 0;
   position: absolute;
@@ -643,39 +646,71 @@ $romper-hover-text-size: 25px;
 
 .romper-var-form-title {
   border-bottom: 1px solid $var-panel-border;
-  font-size: 26px;
+  font-size: 120%;
   font-weight: bold;
-  padding: 25px 25px 15px;
+  padding: 2% 25px 1%;
+}
+
+.romper-var-form-var-containers {
+  flex-grow: 1;
+  height: 50%;
 }
 
 .romper-variable-form-item {
-  margin: 10px;
+  display: flex;
+  height: 0;
+  margin: 0.5%;
   opacity: 0;
-  padding-left: 20%;
+  padding-left: 10%;
   pointer-events: none;
-  position: absolute;
-  transition: opacity 0.5s ease;
+  transition: height 1s 0s ease, opacity 0.5s ease;
 
   &.active {
+    // display: flex;
+    height: 100%;
     opacity: 1;
     pointer-events: all;
-    transition: opacity 1s 0.3s ease;
+    transition: height 1s 0s ease, opacity 1s 0.3s ease;
   }
 }
 
 .romper-var-form-input-container {
   display: flex;
   padding-left: 20px;
+  padding-top: 10px;
+}
+
+.romper-var-form-answer-cont {
+  display: table;
+  height: 100%;
+}
+
+.romper-var-form-answer-cont-inner {
+  display: table-cell;
+  height: 100%;
+  vertical-align: middle;
 }
 
 .romper-var-form-label-div {
-  padding: 10px;
+  display: table;
+  height: 100%;
   text-align: left;
+  width: 50%;
+
+  span {
+    display: table-cell;
+    vertical-align: middle;
+  }
 }
 
 .romper-var-form-radio-div {
   display: flex;
-  padding-right: 10px;
+  flex-grow: 1;
+  padding-right: 20%;
+
+  input {
+    margin-right: 10px;
+  }
 }
 
 .romper-var-form-list-input {
@@ -702,10 +737,7 @@ $romper-hover-text-size: 25px;
 
 .romper-var-form-button-container {
   border-top: 1px solid $var-panel-border;
-  bottom: 0;
-  margin: 0;
-  padding: 10px 0;
-  position: absolute;
+  padding: 2% 0;
   text-align: center;
   width: 100%;
 }
@@ -716,12 +748,15 @@ $romper-hover-text-size: 25px;
   border-radius: 3px;
   color: $white;
   cursor: pointer;
-  font-size: 16px;
-  height: 40px;
-  padding: 10px;
+  font-size: 80%;
+  padding: 2% 1%;
   width: 100px;
 }
 
 .romper-var-form-feedback {
-  margin: 10px 0 0;
+  bottom: 2%;
+  font-size: 80%;
+  margin: 0;
+  position: absolute;
+  right: 2%;
 }
