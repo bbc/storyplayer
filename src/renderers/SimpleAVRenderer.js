@@ -181,6 +181,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
+            // ensure video el is in right place - 360 renderer may have moved it
+            this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
             });
