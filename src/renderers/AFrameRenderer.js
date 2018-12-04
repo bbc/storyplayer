@@ -163,6 +163,18 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.appendChild(iconImageEntity);
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    hideVRButton(hide: boolean) {
+        const buttons = document.getElementsByClassName('a-enter-vr-button');
+        for (let i = 0; i < buttons.length; i += 1) {
+            if (hide) {
+                buttons[i].classList.add('romper-inactive');
+            } else {
+                buttons[i].classList.remove('romper-inactive');
+            }
+        }
+    }
+
     addNextPreviousImageAssets() {
         const nextImg = document.createElement('img');
         nextImg.src = '/dist/images/media-step-forward-8x.png';

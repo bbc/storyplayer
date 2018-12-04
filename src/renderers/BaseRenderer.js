@@ -11,6 +11,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import AFrameRenderer from './AFrameRenderer';
 
 
 export default class BaseRenderer extends EventEmitter {
@@ -81,6 +82,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     willStart() {
+        AFrameRenderer.hideVRButton(!this.isVRViewable());
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
