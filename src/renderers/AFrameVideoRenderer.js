@@ -304,13 +304,12 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         const cameraContainer = document.getElementById('romper-camera-entity');
         if (cameraContainer) {
-            // console.log('ANDY setting rotation to', this._initialRotation);
-            // const orient = AFrameRenderer.getOrientation();
-            // console.log(AFrameRenderer.getOrientation());
-            // cameraContainer.setAttribute('rotation', `0 ${-orient.theta} ${-orient.phi}`);
-            // console.log(AFrameRenderer.getOrientation());
             cameraContainer.setAttribute('rotation', this._initialRotation);
         }
+
+        // place the control bar to match initial rotation
+        const angles = this._initialRotation.split(' ');
+        AFrameRenderer.setControlBarPosition(-parseInt(angles[1], 10));
 
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);

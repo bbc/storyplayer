@@ -110,13 +110,13 @@ class AFrameRenderer extends EventEmitter {
     }
 
     buildControlBar() {
-        // const position = { phi: -90, theta: -20, rad: 8 };
-        // const cartesian = AFrameRenderer
-        //     .polarToCartesian(position.phi, position.theta, position.rad);
+        const position = { phi: -90, theta: 0, rad: 10 };
+        const cartesian = AFrameRenderer
+            .polarToCartesian(position.phi, position.theta, position.rad);
 
         this._controlBar = document.createElement('a-plane');
-        this._controlBar.setAttribute('position', '0 -10 -10');
-        this._controlBar.setAttribute('rotation', '-50 0 0');
+        this._controlBar.setAttribute('position', `${cartesian.x} -10 ${cartesian.z}`);
+        this._controlBar.setAttribute('rotation', `-50 ${-position.phi} 0`);
         this._controlBar.id = 'aframe-control-bar';
         this._controlBar.setAttribute('color', '#999');
         this._controlBar.setAttribute('width', '6');
@@ -124,6 +124,14 @@ class AFrameRenderer extends EventEmitter {
         // only display in vr mode
         this._controlBar.setAttribute('visible', 'false');
         this.aFrameSceneElement.appendChild(this._controlBar);
+    }
+
+    setControlBarPosition(angle: number) {
+        const position = { phi: angle, theta: 0, rad: 10 };
+        const cartesian = AFrameRenderer
+            .polarToCartesian(position.phi, position.theta, position.rad);
+        this._controlBar.setAttribute('position', `${cartesian.x} -10 ${cartesian.z}`);
+        this._controlBar.setAttribute('rotation', `-50 ${-position.phi} 0`);
     }
 
     addLinkIcon(iconUrl: string, number: number, callback: Function) {
@@ -264,7 +272,7 @@ class AFrameRenderer extends EventEmitter {
         const thetaRad = (theta / 180) * Math.PI;
         const x = Math.cos(phiRad) * radius;
         const z = Math.sin(phiRad) * radius;
-        const y = Math.sin(thetaRad) * radius * 1.6;
+        const y = Math.sin(thetaRad) * radius; // * 1.6;
         // if(device == DEV_CARDBOARD){ y +=1.6; }
         // if(device == DEV_OCULUS){
         //     y +=1;

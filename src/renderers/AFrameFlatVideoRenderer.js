@@ -209,14 +209,20 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         // this._target.addEventListener('mouseup', () =>
         //    { AFrameRenderer.getOrientation(); }, false);
 
+        const cameraContainer = document.getElementById('romper-camera-entity');
+        if (cameraContainer) {
+            cameraContainer.setAttribute('rotation', '0 0 0');
+        }
+
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
+        AFrameRenderer.setControlBarPosition(0);
+
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
-        // debugger;
     }
 
     _handlePlayPauseButtonClicked(): void {
