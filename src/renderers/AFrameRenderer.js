@@ -87,9 +87,9 @@ class AFrameRenderer extends EventEmitter {
             _vrMode = false;
         });
 
-        this.buildControlBar();
-        this.addNextPreviousImageAssets();
-        this.addPlayPauseImageAssets();
+        this._buildControlBar();
+        this._addNextPreviousImageAssets();
+        this._addPlayPauseImageAssets();
     }
 
     addAFrameToRenderTarget(target: HTMLElement) {
@@ -109,7 +109,7 @@ class AFrameRenderer extends EventEmitter {
         }
     }
 
-    buildControlBar() {
+    _buildControlBar() {
         const position = { phi: -90, theta: 0, rad: 10 };
         const cartesian = AFrameRenderer
             .polarToCartesian(position.phi, position.theta, position.rad);
@@ -175,7 +175,7 @@ class AFrameRenderer extends EventEmitter {
         }
     }
 
-    addNextPreviousImageAssets() {
+    _addNextPreviousImageAssets() {
         const nextImg = document.createElement('img');
         nextImg.src = '/dist/images/media-step-forward-8x.png';
         nextImg.id = 'next-image';
@@ -187,7 +187,7 @@ class AFrameRenderer extends EventEmitter {
         this.addAsset(prevImg);
     }
 
-    addPlayPauseImageAssets() {
+    _addPlayPauseImageAssets() {
         const playImg = document.createElement('img');
         playImg.src = '/dist/images/media-play-8x.png';
         playImg.id = 'play-image';
@@ -266,6 +266,7 @@ class AFrameRenderer extends EventEmitter {
         }
     }
 
+    // remove all elements specific to the scene
     clearSceneElements() {
         while (this.sceneElements.length > 0) {
             const el = this.sceneElements.pop();
@@ -276,9 +277,7 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.setAttribute('width', '6');
     }
 
-    /*
-    *  Convert polar coordinates to cartesian ones, and apply offsets for device
-    */
+    // Convert polar coordinates to cartesian ones, and apply offsets for device
     static polarToCartesian(phi: number, theta: number, radius: number): Object {
         const phiRad = ((phi - 90) / 180) * Math.PI;
         const thetaRad = (theta / 180) * Math.PI;
@@ -462,6 +461,9 @@ class AFrameRenderer extends EventEmitter {
     }
 
     // create a bunch of aFrame components, maybe from Data model?
+    // turns an html aframe string into an entity that can be added to the scene
+    // returns the entity
+    //
     // eslint-disable-next-line class-methods-use-this
     buildAframeComponents(objectSpecs: string): HTMLElement {
         const ent = document.createElement('a-entity');
@@ -470,10 +472,12 @@ class AFrameRenderer extends EventEmitter {
         return ent;
     }
 
+    // toggle whether aFrame scene is visible
     setSceneHidden(visible: boolean) {
         this.aFrameSceneElement.style.height = visible ? '0px' : '100%';
     }
 
+    // exit VR mode
     exitVR() {
         this.aFrameSceneElement.exitVR();
     }
