@@ -155,9 +155,9 @@ export default class StoryReasoner extends EventEmitter {
     _setSegmentOfDay() {
         const hourNow = new Date().getHours();
         let segmentName;
-        if (hourNow <= 12) {
+        if (hourNow < 12) {
             segmentName = 'Morning';
-        } else if (hourNow <= 17) {
+        } else if (hourNow < 17) {
             segmentName = 'Afternoon';
         } else {
             segmentName = 'Evening';
