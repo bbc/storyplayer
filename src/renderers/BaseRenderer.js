@@ -247,8 +247,8 @@ export default class BaseRenderer extends EventEmitter {
         varInput.classList.add('romper-var-form-input-container');
 
         // yes button & label
-        const radioYesDiv = document.createElement('div');
-        radioYesDiv.className = 'romper-var-form-radio-div';
+        const radioYesDiv = document.createElement('label');
+        radioYesDiv.className = 'romper-var-form-radio-div yes';
         const radioYes = document.createElement('input');
         radioYes.onclick = (() => this._controller.setVariableValue(varName, true));
         radioYes.type = 'radio';
@@ -259,8 +259,8 @@ export default class BaseRenderer extends EventEmitter {
         radioYesDiv.appendChild(yesLabel);
 
         // no button & label
-        const radioNoDiv = document.createElement('div');
-        radioNoDiv.className = 'romper-var-form-radio-div';
+        const radioNoDiv = document.createElement('label');
+        radioNoDiv.className = 'romper-var-form-radio-div no';
         const radioNo = document.createElement('input');
         radioNo.onclick = (() => this._controller.setVariableValue(varName, false));
         radioNo.type = 'radio';
@@ -331,6 +331,7 @@ export default class BaseRenderer extends EventEmitter {
     _getVariableSetter(variableDecl: Object, behaviourVar: Object): HTMLDivElement {
         const variableDiv = document.createElement('div');
         variableDiv.className = 'romper-variable-form-item';
+        variableDiv.id = `romper-var-form-${behaviourVar.variable_name.replace('_', '-')}`;
 
         const variableType = variableDecl.variable_type;
         const variableName = behaviourVar.variable_name;
