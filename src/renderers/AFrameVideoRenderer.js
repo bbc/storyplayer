@@ -78,7 +78,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         this._rendered = false;
 
-        this.collectElementsToRender();
+        this._collectElementsToRender();
     }
 
     _endedEventListener() {
@@ -105,14 +105,14 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         if (this._rendered) {
             this._startThreeSixtyVideo();
         } else {
-            this.collectElementsToRender();
+            this._collectElementsToRender();
         }
         this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
         this._started = true;
     }
 
-    collectElementsToRender() {
+    _collectElementsToRender() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)

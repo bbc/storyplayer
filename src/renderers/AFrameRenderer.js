@@ -67,6 +67,8 @@ class AFrameRenderer extends EventEmitter {
 
         // assets (add our video div)
         this._aFrameAssetsElement = document.createElement('a-assets');
+        // won't load scene until assets loaded, but video doesn't emit loaded event...
+        this._aFrameAssetsElement.setAttribute('timeout', '5');
         this.aFrameSceneElement.appendChild(this._aFrameAssetsElement);
 
         this.aFrameSceneElement.addEventListener('renderstart', () =>
