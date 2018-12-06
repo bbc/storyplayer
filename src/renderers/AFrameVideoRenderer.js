@@ -125,17 +125,16 @@ export default class AFrameVideoRenderer extends BaseRenderer {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
                             this._setOutTime(parseFloat(fg.meta.romper.out));
                         }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.video_type) {
+                        if (fg.assets.video_format) {
                             // mono/stereo, vertical/horizontal split
-                            this._videoTypeString = fg.meta.romper.video_type;
+                            this._videoTypeString = fg.assets.video_format;
                         }
                         if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
                             // starting rotation
                             this._initialRotation = fg.meta.romper.rotation;
                         }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.audio) {
-                            // starting rotation
-                            this._ambisonic = fg.meta.romper.audio;
+                        if (fg.assets.audio_format) {
+                            this._ambisonic = fg.assets.audio_format;
                         }
                         this._fetchMedia(fg.assets.av_src)
                             .then((mediaUrl) => {
@@ -201,8 +200,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // parse video type from string
         if (this._videoTypeString.includes('180')) videoType.coverage = 'half';
-        if (this._videoTypeString.includes('stereo')) videoType.stereo = true;
-        if (this._videoTypeString.includes('vertical')) videoType.split = 'vertical';
+        if (this._videoTypeString.includes('STEREO')) videoType.stereo = true;
+        if (this._videoTypeString.includes('VERTICAL')) videoType.split = 'vertical';
 
         // get components for video depending on type
         // these are the bits that would need to be replaced for each scene

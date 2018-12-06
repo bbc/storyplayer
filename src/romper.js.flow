@@ -118,6 +118,8 @@ export type AssetCollection = {
         sub_src?: string,
         text_content?: string,
         text_src?: string,
+        video_format?: string,
+        audio_format?: string,
     },
 };
 

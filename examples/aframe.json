@@ -318,7 +318,6 @@
             "tags": {},
             "meta": {
                 "romper": {
-                    "video_type": "360_mono",
                     "rotation": "0 90 0",
                     "in": "6.0",
                     "out": "16.0"
@@ -326,7 +325,8 @@
             },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0"
+                "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0",
+                "video_format": "MONO"
             }
         },
         {
@@ -337,14 +337,14 @@
             "version": "0:0",
             "meta": {
                 "romper": {
-                    "video_type": "360_mono",
                     "rotation": "0 90 0"
                 }
             },
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/11rcww8vg67t616/S5.mp4?dl=0"
+                "av_src": "https://dl.dropboxusercontent.com/s/11rcww8vg67t616/S5.mp4?dl=0",
+                "video_format": "MONO"
             }
         },
         {
@@ -355,15 +355,15 @@
             "version": "0:0",
             "meta": {
                 "romper": {
-                    "video_type": "360_mono",
-                    "rotation": "0 90 0",
-                    "audio": "2H1V"
+                    "rotation": "0 90 0"
                 }
             },
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/vuh0hhlhlhg7u40/phil_mixedaac.mp4?dl=0"
+                "av_src": "https://dl.dropboxusercontent.com/s/vuh0hhlhlhg7u40/phil_mixedaac.mp4?dl=0",
+                "video_format": "MONO",
+                "audio_format": "2H1V"
             }
         },
         {
@@ -374,15 +374,15 @@
             "version": "0:0",
             "meta": {
                 "romper": {
-                    "video_type": "360_mono",
-                    "rotation": "0 90 0",
-                    "audio": "2H1V"
+                    "rotation": "0 90 0"
                 }
             },
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/2ide8md8d9qw21f/betty_mixedaac.mp4?dl=0"
+                "av_src": "https://dl.dropboxusercontent.com/s/2ide8md8d9qw21f/betty_mixedaac.mp4?dl=0",
+                "video_format": "MONO",
+                "audio_format": "2H1V"
             }
         },
         {
@@ -391,16 +391,12 @@
             "name": "Mary",
             "description": "",
             "version": "0:0",
-            "meta": {
-                "romper": {
-                    "video_type": "stereo",
-                    "rotation": "0 0 0"
-                }
-            },
+            "meta": {},
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
             "assets": {
-                "av_src": "https://dl.dropboxusercontent.com/s/nidqscjr1dw3vsb/MaryOculus.webm?dl=0"
+                "av_src": "https://dl.dropboxusercontent.com/s/nidqscjr1dw3vsb/MaryOculus.webm?dl=0",
+                "video_format": "STEREO_HORIZONTAL"
             }
         }
     ]
