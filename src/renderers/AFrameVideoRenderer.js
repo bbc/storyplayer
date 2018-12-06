@@ -11,6 +11,8 @@ import Controller from '../Controller';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
+const ORIENTATION_POLL_INTERVAL = 2000;
+
 export default class AFrameVideoRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
@@ -19,6 +21,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     _playEventListener: Function;
     _pauseEventListener: Function;
     _handlePlayPauseButtonClicked: Function;
+    _setOrientationVariable: Function;
+    _orientationWatcher: ?IntervalID;
 
     _videoDivId: string;
     _videoAssetElement: HTMLVideoElement;
@@ -58,6 +62,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
+        this._setOrientationVariable = this._setOrientationVariable.bind(this);
+        this._orientationWatcher = null;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
@@ -298,8 +304,11 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             this._handlePlayPauseButtonClicked,
         );
 
-        // this._target.addEventListener('mouseup', () =>
-        //    { AFrameRenderer.getOrientation(); }, false);
+        // poll for direction of view, and save as variable
+        this._orientationWatcher = setInterval(
+            this._setOrientationVariable,
+            ORIENTATION_POLL_INTERVAL,
+        );
 
         const cameraContainer = document.getElementById('romper-camera-entity');
         if (cameraContainer) {
@@ -317,6 +326,14 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
+    }
+
+    _setOrientationVariable(): void {
+        const orientation = AFrameRenderer.getOrientation();
+        this._controller.setVariables({
+            romper_aframe_orientation_phi: orientation.phi,
+            romper_aframe_orientation_theta: orientation.theta,
+        });
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -386,6 +403,10 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        if (this._orientationWatcher) {
+            clearInterval(this._orientationWatcher);
+        }
 
         this._started = false;
         this._rendered = false;
