@@ -7,12 +7,15 @@ import AFRAME from 'aframe';
 import EventEmitter from 'events';
 
 import logger from '../logger';
+import AnalyticEvents from '../AnalyticEvents';
+import type { AnalyticsLogger } from '../AnalyticEvents';
 import '../assets/images/media-play-8x.png';
 import '../assets/images/media-pause-8x.png';
 import '../assets/images/media-step-forward-8x.png';
 import '../assets/images/media-step-backward-8x.png';
 
 let _vrMode = false;
+let _analytics = null;
 
 class AFrameRenderer extends EventEmitter {
     aFrameSceneElement: any;
@@ -20,6 +23,7 @@ class AFrameRenderer extends EventEmitter {
     _aFrameCamera: any;
     _controlBar: HTMLElement;
     _cursor: HTMLElement;
+    _analytics: ?AnalyticsLogger;
 
     sceneElements: Array<HTMLElement>;
 
@@ -75,13 +79,16 @@ class AFrameRenderer extends EventEmitter {
             this.aFrameSceneElement.camera.layers.enable(1));
 
         this.aFrameSceneElement.addEventListener('enter-vr', () => {
+            // ANALYTICS
             logger.info('Entering VR mode');
             this._controlBar.setAttribute('visible', 'true');
             this._cursor.setAttribute('visible', 'true');
             this.emit('aframe-vr-toggle');
             _vrMode = true;
+            this._logVrChange();
         });
         this.aFrameSceneElement.addEventListener('exit-vr', () => {
+            // ANALYTICS
             logger.info('Exiting VR mode');
             this._controlBar.setAttribute('visible', 'false');
             this._cursor.setAttribute('visible', 'false');
@@ -94,10 +101,11 @@ class AFrameRenderer extends EventEmitter {
         this._addPlayPauseImageAssets();
     }
 
-    addAFrameToRenderTarget(target: HTMLElement) {
+    addAFrameToRenderTarget(target: HTMLElement, analytics: AnalyticsLogger) {
         if (this.aFrameSceneElement.parentNode !== target) {
             target.appendChild(this.aFrameSceneElement);
         }
+        _analytics = analytics;
     }
 
     addAsset(assetElement: HTMLElement) {
@@ -476,12 +484,42 @@ class AFrameRenderer extends EventEmitter {
 
     // toggle whether aFrame scene is visible
     setSceneHidden(visible: boolean) {
+        // ANALYTICS
+        if (_analytics) {
+            _analytics({
+                type: AnalyticEvents.types.RENDERER_ACTION,
+                name: AnalyticEvents.names.VR_SCENE_TOGGLE_HIDDEN,
+                from: visible ? 'visible' : 'hidden',
+                to: visible ? 'hidden' : 'visible',
+            });
+        }
         this.aFrameSceneElement.style.height = visible ? '0px' : '100%';
     }
 
     // exit VR mode
     exitVR() {
+        // ANALYTICS
+        if (_analytics) {
+            _analytics({
+                type: AnalyticEvents.types.RENDERER_ACTION,
+                name: AnalyticEvents.names.CHANGE_VR_MODE,
+                from: 'vr',
+                to: 'non-vr',
+            });
+        }
         this.aFrameSceneElement.exitVR();
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _logVrChange() {
+        if (_analytics) {
+            _analytics({
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.CHANGE_VR_MODE,
+                from: _vrMode ? 'non-vr' : 'vr',
+                t0: _vrMode ? 'vr' : 'non-vr',
+            });
+        }
     }
 }
 

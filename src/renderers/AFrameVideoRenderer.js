@@ -297,7 +297,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
 
         // make sure AFrame is in romper target
-        AFrameRenderer.addAFrameToRenderTarget(this._target);
+        AFrameRenderer.addAFrameToRenderTarget(this._target, this._analytics);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
@@ -334,6 +334,15 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             romper_aframe_orientation_phi: orientation.phi,
             romper_aframe_orientation_theta: orientation.theta,
         });
+
+        // and log analytics
+        const logData = {
+            type: AnalyticEvents.types.USER_ACTION,
+            name: AnalyticEvents.names.VR_ORIENTATION_CHANGED,
+            from: 'not_set',
+            to: `${orientation.phi} ${orientation.theta}`,
+        };
+        this._analytics(logData);
     }
 
     _handlePlayPauseButtonClicked(): void {
