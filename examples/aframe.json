@@ -217,7 +217,7 @@
             "version": "0:0",
             "name": "Video 2 - 360 concert",
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:immersive/v1.0",
             "asset_collections": {
                 "foreground_id": "194568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
@@ -233,7 +233,7 @@
             "version": "0:0",
             "name": "Video 3 - Story of Betty",
             "tags": {},
-            "representation_type": "urn:x-object-based-media:representation-types:360/v1.0",
+            "representation_type": "urn:x-object-based-media:representation-types:immersive/v1.0",
             "asset_collections": {
                 "foreground_id": "42184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
@@ -323,10 +323,11 @@
                     "out": "16.0"
                 }
             },
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:immersive/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/4y1125yhzi34nmm/Drone_Test_Trim_0.mp4?dl=0",
-                "video_format": "MONO"
+                "video_format": "MONO",
+                "audio_format": "MONO"
             }
         },
         {
@@ -341,10 +342,11 @@
                 }
             },
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:immersive/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/11rcww8vg67t616/S5.mp4?dl=0",
-                "video_format": "MONO"
+                "video_format": "MONO",
+                "audio_format": "MONO"
             }
         },
         {
@@ -359,7 +361,7 @@
                 }
             },
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:immersive/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/vuh0hhlhlhg7u40/phil_mixedaac.mp4?dl=0",
                 "video_format": "MONO",
@@ -378,7 +380,7 @@
                 }
             },
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:immersive/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/2ide8md8d9qw21f/betty_mixedaac.mp4?dl=0",
                 "video_format": "MONO",
@@ -393,10 +395,11 @@
             "version": "0:0",
             "meta": {},
             "tags": {},
-            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-360/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:immersive/v1.0",
             "assets": {
                 "av_src": "https://dl.dropboxusercontent.com/s/nidqscjr1dw3vsb/MaryOculus.webm?dl=0",
-                "video_format": "STEREO_HORIZONTAL"
+                "video_format": "STEREO_HORIZONTAL",
+                "audio_format": "MONO"
             }
         }
     ]

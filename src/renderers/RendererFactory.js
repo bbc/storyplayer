@@ -30,7 +30,7 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:simple-audio/v1.0': SimpleAudioRenderer,
         'urn:x-object-based-media:representation-types:simple-text/v1.0': SimpleTextRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
-        'urn:x-object-based-media:representation-types:360/v1.0': AFrameVideoRenderer,
+        'urn:x-object-based-media:representation-types:immersive/v1.0': AFrameVideoRenderer,
     };
 
     let currentRenderer;
