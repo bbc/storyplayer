@@ -105,10 +105,10 @@ export default class Controller extends EventEmitter {
         const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
         return this.getValidNextSteps()
-            .then((nextNarrativeElements) => {
-                if (nextNarrativeElements.length === 1) {
+            .then((nextNarrativeElementObjects) => {
+                if (nextNarrativeElementObjects.length === 1) {
                     // eslint-disable-next-line prefer-destructuring
-                    nextNarrativeElement = nextNarrativeElements[0];
+                    nextNarrativeElement = nextNarrativeElementObjects[0].ne;
                 }
                 return Promise.resolve(nextNarrativeElement);
             }).then((nextne) => {
@@ -382,6 +382,7 @@ export default class Controller extends EventEmitter {
 
     // follow link from the narrative element to one following it
     followLink(narrativeElementId: string) {
+        let followed = false;
         this._currentNarrativeElement.links.forEach((link) => {
             if (link.target_narrative_element_id === narrativeElementId) {
                 if (this._reasoner) {
@@ -389,10 +390,21 @@ export default class Controller extends EventEmitter {
                         .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
                     if (subReasoner) {
                         subReasoner._followLink(link);
+                        followed = true;
                     }
                 }
             }
         });
+        // if not in here, could try to get valid next steps, and use that?
+        if (!followed) {
+            this.getValidNextSteps().then((nextNeObjs) => {
+                nextNeObjs.forEach((neObj) => {
+                    if (neObj.ne.id === narrativeElementId && neObj.storyneid) {
+                        this.followLink(neObj.storyneid);
+                    }
+                });
+            });
+        }
     }
 
     /**
@@ -569,7 +581,7 @@ export default class Controller extends EventEmitter {
 
     // find what the next steps in the story can be
     // eslint-disable-next-line max-len
-    getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<NarrativeElement>> {
+    getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<Object>> {
         if (this._reasoner) {
             const subReasoner = this._reasoner
                 .getSubReasonerContainingNarrativeElement(neId);
@@ -591,7 +603,10 @@ export default class Controller extends EventEmitter {
                         neList.forEach((narrativeElement) => {
                             if (narrativeElement.body.type ===
                                 'REPRESENTATION_COLLECTION_ELEMENT') {
-                                promiseList.push(Promise.resolve([narrativeElement]));
+                                promiseList.push(Promise.resolve([{
+                                    ne: narrativeElement,
+                                    storyneid: null,
+                                }]));
                             } else if (narrativeElement.body.type === 'STORY_ELEMENT'
                                 && narrativeElement.body.story_target_id) {
                                 promiseList.push(this._fetchers
@@ -602,7 +617,15 @@ export default class Controller extends EventEmitter {
                                             // eslint-disable-next-line max-len
                                             startPromises.push(this._fetchers.narrativeElementFetcher(beginning.narrative_element_id));
                                         });
-                                        return Promise.all(startPromises);
+                                        return Promise.all(startPromises)
+                                            .then((startNes) => {
+                                                const startNeObjs = [];
+                                                startNes.forEach(startingNe => startNeObjs.push({
+                                                    ne: startingNe,
+                                                    storyneid: narrativeElement.id,
+                                                }));
+                                                return startNeObjs;
+                                            });
                                     }));
                             }
                         });
@@ -655,8 +678,8 @@ export default class Controller extends EventEmitter {
     // get an array of ids of the NarrativeElements that follow narrativeElement
     getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
         return this.getValidNextSteps(narrativeElement.id)
-            .then(nextNarrativeElements =>
-                nextNarrativeElements.map(ne => ne.id));
+            .then(nextNarrativeElementObjects =>
+                nextNarrativeElementObjects.map(neObj => neObj.ne.id));
     }
 
     reset() {
