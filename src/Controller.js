@@ -104,7 +104,7 @@ export default class Controller extends EventEmitter {
     getStatus(): Promise<Object> {
         const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
-        return this.getValidNextSteps(currentNarrativeElement.id)
+        return this.getValidNextSteps()
             .then((nextNarrativeElementObjects) => {
                 if (nextNarrativeElementObjects.length === 1) {
                     // eslint-disable-next-line prefer-destructuring
