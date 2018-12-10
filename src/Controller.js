@@ -104,7 +104,7 @@ export default class Controller extends EventEmitter {
     getStatus(): Promise<Object> {
         const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
-        return this.getValidNextSteps()
+        return this.getValidNextSteps(currentNarrativeElement.id, true)
             .then((nextNarrativeElements) => {
                 if (nextNarrativeElements.length === 1) {
                     // eslint-disable-next-line prefer-destructuring
@@ -569,7 +569,7 @@ export default class Controller extends EventEmitter {
 
     // find what the next steps in the story can be
     // eslint-disable-next-line max-len
-    getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<NarrativeElement>> {
+    getValidNextSteps(neId: string = this._currentNarrativeElement.id, diveIntoStories: boolean = false): Promise<Array<NarrativeElement>> {
         if (this._reasoner) {
             const subReasoner = this._reasoner
                 .getSubReasonerContainingNarrativeElement(neId);
@@ -590,9 +590,11 @@ export default class Controller extends EventEmitter {
                         const promiseList = [];
                         neList.forEach((narrativeElement) => {
                             if (narrativeElement.body.type ===
-                                'REPRESENTATION_COLLECTION_ELEMENT') {
+                                'REPRESENTATION_COLLECTION_ELEMENT' ||
+                                !diveIntoStories) {
                                 promiseList.push(Promise.resolve([narrativeElement]));
                             } else if (narrativeElement.body.type === 'STORY_ELEMENT'
+                                && diveIntoStories
                                 && narrativeElement.body.story_target_id) {
                                 promiseList.push(this._fetchers
                                     .storyFetcher(narrativeElement.body.story_target_id)
@@ -654,7 +656,7 @@ export default class Controller extends EventEmitter {
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
     getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
-        return this.getValidNextSteps(narrativeElement.id)
+        return this.getValidNextSteps(narrativeElement.id, true)
             .then(nextNarrativeElements =>
                 nextNarrativeElements.map(ne => ne.id));
     }
