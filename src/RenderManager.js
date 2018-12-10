@@ -431,17 +431,19 @@ export default class RenderManager extends EventEmitter {
     _showOnwardIcons() {
         const next = this._controller.getValidNextSteps();
         if (next) {
-            next.then((nextNarrativeElements) => {
-                if (nextNarrativeElements.length === 1) {
+            next.then((nextNarrativeElementObjects) => {
+                if (nextNarrativeElementObjects.length === 1) {
                     if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
                         this._player.setNextAvailable(true);
                     }
                 } else {
                     this._player.setNextAvailable(false);
                 }
-                if (nextNarrativeElements.length > 1) {
+                if (nextNarrativeElementObjects.length > 1) {
                     // render icons
-                    this.handleLinkChoice(nextNarrativeElements);
+                    const nes = [];
+                    nextNarrativeElementObjects.forEach(neObj => nes.push(neObj.ne));
+                    this.handleLinkChoice(nes);
                 }
             });
         }
