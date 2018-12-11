@@ -382,7 +382,6 @@ export default class Controller extends EventEmitter {
 
     // follow link from the narrative element to one following it
     followLink(narrativeElementId: string) {
-        let followed = false;
         this._currentNarrativeElement.links.forEach((link) => {
             if (link.target_narrative_element_id === narrativeElementId) {
                 if (this._reasoner) {
@@ -390,21 +389,10 @@ export default class Controller extends EventEmitter {
                         .getSubReasonerContainingNarrativeElement(this._currentNarrativeElement.id);
                     if (subReasoner) {
                         subReasoner._followLink(link);
-                        followed = true;
                     }
                 }
             }
         });
-        // if not in here, could try to get valid next steps, and use that?
-        if (!followed) {
-            this.getValidNextSteps().then((nextNeObjs) => {
-                nextNeObjs.forEach((neObj) => {
-                    if (neObj.ne.id === narrativeElementId && neObj.storyneid) {
-                        this.followLink(neObj.storyneid);
-                    }
-                });
-            });
-        }
     }
 
     /**
@@ -580,6 +568,11 @@ export default class Controller extends EventEmitter {
     }
 
     // find what the next steps in the story can be
+    // returns array of objects, each containing
+    // targetNeId: the id of the ne linked to
+    // ne: the narrative element
+    // the first is the link, the second is the actual NE when
+    // first is a story ne (it resolves into substory)
     // eslint-disable-next-line max-len
     getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<Object>> {
         if (this._reasoner) {
@@ -605,7 +598,7 @@ export default class Controller extends EventEmitter {
                                 'REPRESENTATION_COLLECTION_ELEMENT') {
                                 promiseList.push(Promise.resolve([{
                                     ne: narrativeElement,
-                                    storyneid: null,
+                                    targetNeId: narrativeElement.id,
                                 }]));
                             } else if (narrativeElement.body.type === 'STORY_ELEMENT'
                                 && narrativeElement.body.story_target_id) {
@@ -622,7 +615,7 @@ export default class Controller extends EventEmitter {
                                                 const startNeObjs = [];
                                                 startNes.forEach(startingNe => startNeObjs.push({
                                                     ne: startingNe,
-                                                    storyneid: narrativeElement.id,
+                                                    targetNeId: narrativeElement.id,
                                                 }));
                                                 return startNeObjs;
                                             });
