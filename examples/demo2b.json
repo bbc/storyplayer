@@ -212,8 +212,17 @@
                 "behaviours": []
             },
             "behaviours": {
-                "started": [],
-                "completed": []
+                "started": [
+                    {
+                        "type": "urn:x-object-based-media:representation-behaviour:hidelinksuntilend/v1.0"
+                    }
+                ],
+                "completed": [
+                    {
+                        "type":  "urn:x-object-based-media:representation-behaviour:colouroverlay/v1.0",
+                        "colour": "rgba(100, 100, 150, 0.9)"
+                    }
+                ]
             }
         },
         {

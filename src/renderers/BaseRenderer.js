@@ -25,11 +25,14 @@ export default class BaseRenderer extends EventEmitter {
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _applyShowVariablePanelBehaviour: Function;
+    _hideLinksUntilEndBehaviour: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
     _controller: Controller;
+
+    _hidingIcons: boolean;
 
     inVariablePanel: boolean;
 
@@ -64,6 +67,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
+        this._hideLinksUntilEndBehaviour = this._hideLinksUntilEndBehaviour.bind(this);
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -72,9 +76,12 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:hidelinksuntilend/v1.0': this._hideLinksUntilEndBehaviour,
         };
         this._behaviourElements = [];
 
+        this._hidingIcons = false;
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
@@ -182,6 +189,9 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         this._player.enterCompleteBehavourPhase();
+        if (this._hidingIcons) {
+            this._player._linkChoice.overlay.style.visibility = 'visible';
+        }
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
@@ -231,6 +241,15 @@ export default class BaseRenderer extends EventEmitter {
                 }
             });
         }
+    }
+
+    _hideLinksUntilEndBehaviour(behaviour: Object, callback: () => mixed) {
+        // record this, so we can reveal later
+        this._hidingIcons = true;
+        // set style directly, as romper-active class may be applied
+        // asynchronously
+        this._player._linkChoice.overlay.style.visibility = 'collapse';
+        callback();
     }
 
     _overlayImage(imageSrc: string) {
