@@ -124,6 +124,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+        if (this._hidingIcons) {
+            this._player._linkChoice.overlay.style.visibility = 'visible';
+            this._hidingIcons = false;
+        }
     }
 
     // does this renderer have a show variable panel behaviour
@@ -191,6 +195,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.enterCompleteBehavourPhase();
         if (this._hidingIcons) {
             this._player._linkChoice.overlay.style.visibility = 'visible';
+            this._hidingIcons = false;
         }
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
