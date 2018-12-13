@@ -225,6 +225,7 @@ export default class RenderManager extends EventEmitter {
         Promise.all(assetCollectionPromises)
             .then((urls) => {
                 this._player.clearLinkChoices();
+                AFrameRenderer.clearLinkIcons();
                 urls.forEach((iconAssetCollection, choiceId) => {
                     // @flowignore
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
@@ -236,6 +237,12 @@ export default class RenderManager extends EventEmitter {
                         imgsrc,
                         `Option ${(choiceId + 1)}`,
                     );
+                    if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+                        AFrameRenderer.addLinkIcon(
+                            narrativeElements[choiceId].id,
+                            imgsrc,
+                        );
+                    }
                 });
                 this._player.enableLinkChoiceControl();
             });
@@ -436,10 +443,20 @@ export default class RenderManager extends EventEmitter {
         }
 
         // Update availability of back and next buttons.
-        this._player.setBackAvailable(this._controller.getIdOfPreviousNode() !== null);
+        this._showBackIcon();
         this._showOnwardIcons();
 
         newRenderer.willStart();
+    }
+
+    _showBackIcon() {
+        const showBack = (this._controller.getIdOfPreviousNode() !== null);
+        this._player.setBackAvailable(showBack);
+        if (showBack) {
+            AFrameRenderer.addPrevious(() => this._player.emit(PlayerEvents.BACK_BUTTON_CLICKED));
+        } else {
+            AFrameRenderer.clearPrevious();
+        }
     }
 
     // show next button, or icons if choice
@@ -450,9 +467,12 @@ export default class RenderManager extends EventEmitter {
                 if (nextNarrativeElements.length === 1) {
                     if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
                         this._player.setNextAvailable(true);
+                        AFrameRenderer.addNext(() => this._player
+                            .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
                     }
                 } else {
                     this._player.setNextAvailable(false);
+                    AFrameRenderer.clearNext();
                 }
                 if (nextNarrativeElements.length > 1) {
                     // render icons

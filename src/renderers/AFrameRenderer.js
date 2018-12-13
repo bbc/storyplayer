@@ -8,14 +8,17 @@ import EventEmitter from 'events';
 
 import logger from '../logger';
 import AnalyticEvents from '../AnalyticEvents';
+import Player, { PlayerEvents } from '../Player';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import '../assets/images/media-play-8x.png';
 import '../assets/images/media-pause-8x.png';
 import '../assets/images/media-step-forward-8x.png';
 import '../assets/images/media-step-backward-8x.png';
 
-let _vrMode = false;
-let _analytics = null;
+let _vrMode: boolean = false;
+let _analytics: ?AnalyticsLogger = null;
+let _player: ?Player = null;
+let _iconCount: number = 0;
 
 class AFrameRenderer extends EventEmitter {
     aFrameSceneElement: any;
@@ -26,13 +29,14 @@ class AFrameRenderer extends EventEmitter {
     _analytics: ?AnalyticsLogger;
 
     sceneElements: Array<HTMLElement>;
-
+    linkElements: Array<HTMLElement>;
 
     constructor() {
         super();
         AFrameRenderer._registerAframeComponents();
         this.buildBaseAframeScene();
         this.sceneElements = [];
+        this.linkElements = [];
     }
 
     // build vanilla aFrame infrastructure
@@ -101,11 +105,12 @@ class AFrameRenderer extends EventEmitter {
         this._addPlayPauseImageAssets();
     }
 
-    addAFrameToRenderTarget(target: HTMLElement, analytics: AnalyticsLogger) {
+    addAFrameToRenderTarget(target: HTMLElement, player: Player, analytics: AnalyticsLogger) {
         if (this.aFrameSceneElement.parentNode !== target) {
             target.appendChild(this.aFrameSceneElement);
         }
         _analytics = analytics;
+        _player = player;
     }
 
     addAsset(assetElement: HTMLElement) {
@@ -144,33 +149,62 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.setAttribute('rotation', `-50 ${-position.phi} 0`);
     }
 
-    addLinkIcon(iconUrl: string, number: number, callback: Function) {
+    addLinkIcon(neId: string, iconUrl: string) {
+        _iconCount += 1;
         const img = document.createElement('img');
         // TODO: aframe doesn't like svg images ...
-        if (iconUrl.indexOf('.svg') !== -1) {
-            img.src = '/dist/images/media-step-forward-8x.png'; // iconUrl;
+        if (iconUrl.indexOf('.svg') !== -1 || iconUrl === '') {
+            img.src = '/dist/images/media-step-forward-8x.png';
         } else {
             img.src = iconUrl;
         }
-        img.id = `icon-image-${number}`;
+        img.id = `icon-image-${_iconCount}`;
         this.addAsset(img);
+
+        const callback = () => {
+            if (_player) {
+                _player.emit(PlayerEvents.LINK_CHOSEN, { id: neId });
+                _player.disableLinkChoiceControl();
+                if (_analytics) {
+                    _analytics({
+                        type: AnalyticEvents.types.USER_ACTION,
+                        name: AnalyticEvents.names.LINK_CHOICE_CLICKED,
+                        from: '',
+                        to: neId,
+                    });
+                }
+            }
+        };
 
         const iconImageEntity = document.createElement('a-image');
         iconImageEntity.addEventListener('click', callback);
 
         // cunningly render in the control bar
-        iconImageEntity.setAttribute('position', `${2 * number} 0 0.05`);
+        iconImageEntity.setAttribute('position', `${2 * _iconCount} 0 0.05`);
         iconImageEntity.setAttribute('width', '1');
         iconImageEntity.setAttribute('height', '1');
-        iconImageEntity.setAttribute('src', `#icon-image-${number}`);
+        iconImageEntity.setAttribute('src', `#icon-image-${_iconCount}`);
 
-        if (number > 1) {
+        if (_iconCount > 1) {
             // resize control bar to fit
-            this._controlBar.setAttribute('width', `${(number * 2.5) + 5}`);
+            this._controlBar.setAttribute('width', `${(_iconCount * 2.5) + 5}`);
         }
 
         this.sceneElements.push(iconImageEntity);
+        this.linkElements.push(img);
+        this.linkElements.push(iconImageEntity);
         this._controlBar.appendChild(iconImageEntity);
+    }
+
+    clearLinkIcons() {
+        while (this.linkElements.length > 0) {
+            const el = this.linkElements.pop();
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        }
+        this._controlBar.setAttribute('width', '6');
+        _iconCount = 0;
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -285,6 +319,7 @@ class AFrameRenderer extends EventEmitter {
             }
         }
         this._controlBar.setAttribute('width', '6');
+        _iconCount = 0;
     }
 
     // Convert polar coordinates to cartesian ones, and apply offsets for device

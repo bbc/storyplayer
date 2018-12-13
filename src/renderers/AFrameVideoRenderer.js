@@ -297,7 +297,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
 
         // make sure AFrame is in romper target
-        AFrameRenderer.addAFrameToRenderTarget(this._target, this._analytics);
+        AFrameRenderer.addAFrameToRenderTarget(this._target, this._player, this._analytics);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,

@@ -5,7 +5,7 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import Player from '../Player';
+import Player, { PlayerEvents } from '../Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
@@ -115,6 +115,10 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._player.exitStartBehaviourPhase();
+        if (this.isVRViewable) {
+            AFrameRenderer.addPlayPauseButton(() =>
+                this._player.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        }
         this._clearBehaviourElements();
     }
 
@@ -184,6 +188,9 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         this._player.enterCompleteBehavourPhase();
+        if (this.isVRViewable) {
+            AFrameRenderer.clearPlayPause();
+        }
         this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(

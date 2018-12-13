@@ -8,7 +8,6 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
-import AFrameRenderer from './renderers/AFrameRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -943,9 +942,6 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(choiceClick),
         );
 
-        // TODO - ideally only do this if using AFrame
-        AFrameRenderer.addLinkIcon(linkChoiceIconSrc, this._numChoices, choiceClick);
-
         linkChoiceControl.appendChild(iconContainer);
         this._linkChoice.add(id, linkChoiceControl);
     }
@@ -1178,7 +1174,6 @@ class Player extends EventEmitter {
     disablePlayButton() {
         this._playPauseButton.classList.add('romper-control-disabled');
         this._playPauseButton.setAttribute('disabled', 'true');
-        AFrameRenderer.clearPlayPause();
     }
 
     hideRepeatButton() {
@@ -1188,7 +1183,6 @@ class Player extends EventEmitter {
     enablePlayButton() {
         this._playPauseButton.classList.remove('romper-control-disabled');
         this._playPauseButton.removeAttribute('disabled');
-        AFrameRenderer.addPlayPauseButton(() => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
     }
 
     showRepeatButton() {
@@ -1212,20 +1206,16 @@ class Player extends EventEmitter {
     setNextAvailable(isNextAvailable: boolean) {
         if (isNextAvailable) {
             this._nextButton.classList.remove('romper-inactive');
-            AFrameRenderer.addNext(() => this.emit(PlayerEvents.NEXT_BUTTON_CLICKED));
         } else {
             this._nextButton.classList.add('romper-inactive');
-            AFrameRenderer.clearNext();
         }
     }
 
     setBackAvailable(isBackAvailable: boolean) {
         if (isBackAvailable) {
             this._backButton.classList.remove('romper-inactive');
-            AFrameRenderer.addPrevious(() => this.emit(PlayerEvents.BACK_BUTTON_CLICKED));
         } else {
             this._backButton.classList.add('romper-inactive');
-            AFrameRenderer.clearPrevious();
         }
     }
 
