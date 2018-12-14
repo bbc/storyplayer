@@ -133,6 +133,7 @@ export default class StoryReasoner extends EventEmitter {
             this.setVariableValue(varName, initialState[varName]);
         });
         this._setTodaysDay();
+        this._setSegmentOfDay();
     }
 
     // TODO: hacky - need proper way of handling programmatically determined variables
@@ -148,6 +149,20 @@ export default class StoryReasoner extends EventEmitter {
             'Saturday',
         ];
         this.setVariableValue('romper_day_of_week', weekday[new Date().getDay()]);
+    }
+
+    // sets the value of this variable to be a string for today's time of day
+    _setSegmentOfDay() {
+        const hourNow = new Date().getHours();
+        let segmentName;
+        if (hourNow < 12) {
+            segmentName = 'Morning';
+        } else if (hourNow < 17) {
+            segmentName = 'Afternoon';
+        } else {
+            segmentName = 'Evening';
+        }
+        this.setVariableValue('romper_portion_of_day', segmentName);
     }
 
     /**

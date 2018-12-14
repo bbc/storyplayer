@@ -599,6 +599,7 @@ class Player extends EventEmitter {
     }
 
     _showRomperButtons() {
+        this._logRendererAction(AnalyticEvents.names.BUTTONS_ACTIVATED);
         this._RomperButtonsShowing = true;
         this._buttons.classList.add('show');
         this._narrativeElementTransport.classList.add('show');
@@ -607,6 +608,7 @@ class Player extends EventEmitter {
 
     _hideRomperButtons() {
         if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
+        this._logRendererAction(AnalyticEvents.names.BUTTONS_DEACTIVATED);
         this._RomperButtonsShowing = false;
         this._buttons.classList.remove('show');
         this._narrativeElementTransport.classList.remove('show');

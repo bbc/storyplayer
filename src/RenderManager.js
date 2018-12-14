@@ -191,16 +191,16 @@ export default class RenderManager extends EventEmitter {
 
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
-    handleLinkChoice(narrativeElements: Array<NarrativeElement>) {
+    handleLinkChoice(narrativeElementObjects: Array<Object>) {
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
         const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
-        narrativeElements.forEach((choiceNarrativeElement, i) => {
-            logger.info(`choice ${(i + 1)}: ${choiceNarrativeElement.id}`);
+        narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
+            logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // fetch icon representation
-            if (choiceNarrativeElement.body.representation_collection_target_id) {
+            if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
                 // eslint-disable-next-line max-len
-                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElement.body.representation_collection_target_id)
+                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElementObj.ne.body.representation_collection_target_id)
                     // representationCollection
                     .then(representationCollection => this._representationReasoner(representationCollection)) // eslint-disable-line max-len
                     // representation
@@ -233,13 +233,13 @@ export default class RenderManager extends EventEmitter {
                         '';
                     // tell Player to render icon
                     this._player.addLinkChoiceControl(
-                        narrativeElements[choiceId].id,
+                        narrativeElementObjects[choiceId].targetNeId,
                         imgsrc,
                         `Option ${(choiceId + 1)}`,
                     );
                     if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
                         AFrameRenderer.addLinkIcon(
-                            narrativeElements[choiceId].id,
+                            narrativeElementObjects[choiceId].targetNeId,
                             imgsrc,
                         );
                     }
@@ -463,8 +463,8 @@ export default class RenderManager extends EventEmitter {
     _showOnwardIcons() {
         const next = this._controller.getValidNextSteps();
         if (next) {
-            next.then((nextNarrativeElements) => {
-                if (nextNarrativeElements.length === 1) {
+            next.then((nextNarrativeElementObjects) => {
+                if (nextNarrativeElementObjects.length === 1) {
                     if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
                         this._player.setNextAvailable(true);
                         AFrameRenderer.addNext(() => this._player
@@ -474,9 +474,9 @@ export default class RenderManager extends EventEmitter {
                     this._player.setNextAvailable(false);
                     AFrameRenderer.clearNext();
                 }
-                if (nextNarrativeElements.length > 1) {
+                if (nextNarrativeElementObjects.length > 1) {
                     // render icons
-                    this.handleLinkChoice(nextNarrativeElements);
+                    this.handleLinkChoice(nextNarrativeElementObjects);
                 }
             });
         }
