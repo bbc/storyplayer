@@ -16,7 +16,20 @@
                 "romper": {
                     "onLaunch": {
                         "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
-                    }
+                    },
+                    "requirements": [
+                        {
+                            "logic": {
+                                "==": [
+                                    {
+                                        "var": "browser.iOS"
+                                    },
+                                    false
+                                ]
+                            },
+                            "errorMsg": "aFrame is not compatible with iOS"
+                        }
+                    ]
                 }
             },
             "object_class": "STORY",
