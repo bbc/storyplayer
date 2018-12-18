@@ -331,8 +331,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     _setOrientationVariable(): void {
         const orientation = AFrameRenderer.getOrientation();
         this._controller.setVariables({
-            romper_aframe_orientation_phi: orientation.phi,
-            romper_aframe_orientation_theta: orientation.theta,
+            _aframe_orientation_phi: orientation.phi,
+            _aframe_orientation_theta: orientation.theta,
         });
 
         // and log analytics

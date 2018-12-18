@@ -148,7 +148,7 @@ export default class StoryReasoner extends EventEmitter {
             'Friday',
             'Saturday',
         ];
-        this.setVariableValue('romper_day_of_week', weekday[new Date().getDay()]);
+        this.setVariableValue('_day_of_week', weekday[new Date().getDay()]);
     }
 
     // sets the value of this variable to be a string for today's time of day
@@ -162,7 +162,7 @@ export default class StoryReasoner extends EventEmitter {
         } else {
             segmentName = 'Evening';
         }
-        this.setVariableValue('romper_portion_of_day', segmentName);
+        this.setVariableValue('_portion_of_day', segmentName);
     }
 
     /**
