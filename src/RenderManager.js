@@ -150,6 +150,8 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
+        this._player.clearLinkChoices();
+        AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
             return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
