@@ -448,13 +448,17 @@ export default class RenderManager extends EventEmitter {
     }
 
     _showBackIcon() {
-        const showBack = (this._controller.getIdOfPreviousNode() !== null);
-        this._player.setBackAvailable(showBack);
-        if (showBack) {
-            AFrameRenderer.addPrevious(() => this._player.emit(PlayerEvents.BACK_BUTTON_CLICKED));
-        } else {
-            AFrameRenderer.clearPrevious();
-        }
+        this._controller.getIdOfPreviousNode()
+            .then((id) => {
+                const showBack = id !== null;
+                this._player.setBackAvailable(showBack);
+                if (showBack) {
+                    AFrameRenderer.addPrevious(() =>
+                        this._player.emit(PlayerEvents.BACK_BUTTON_CLICKED));
+                } else {
+                    AFrameRenderer.clearPrevious();
+                }
+            });
     }
 
     // show next button, or icons if choice
