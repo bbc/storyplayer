@@ -91,6 +91,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         logger.info('360 video ended');
         if (!this._hasEnded) {
             this._hasEnded = true;
+            this._player._linkChoice.overlay.style.visibility = 'visible';
             super.complete();
         }
     }
@@ -107,6 +108,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._player._linkChoice.overlay.style.visibility = 'collapse';
         // TODO: problems with this type of representation as first element:
         // starts video, but see nothing unless you enter VR mode...
         logger.info(`Started: ${this._representation.id}`);
@@ -404,6 +406,11 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     end() {
+        // only if this is being rendered
+        if (this._controller.getCurrentRenderer() === this) {
+            this._player._linkChoice.overlay.style.visibility = 'visible';
+        }
+
         // put video element back
         this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 

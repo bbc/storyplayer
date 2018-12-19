@@ -253,6 +253,11 @@ export default class RenderManager extends EventEmitter {
         return this._currentNarrativeElement;
     }
 
+    // get the current Renderer
+    getCurrentRenderer(): ?BaseRenderer {
+        return this._currentRenderer;
+    }
+
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
         this._player.clearLinkChoices();

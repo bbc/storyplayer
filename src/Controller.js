@@ -14,6 +14,7 @@ import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger } from './AnalyticEvents';
 import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
+import BaseRenderer from './renderers/BaseRenderer';
 
 export default class Controller extends EventEmitter {
     constructor(
@@ -182,6 +183,10 @@ export default class Controller extends EventEmitter {
             this._analytics,
             this._assetUrls,
         );
+    }
+
+    getCurrentRenderer(): ?BaseRenderer {
+        return this._renderManager.getCurrentRenderer();
     }
 
     // add event listeners to manager
