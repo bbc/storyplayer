@@ -85,7 +85,7 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         logger.info('flat video in 360 ended');
         if (!this._hasEnded) {
             this._hasEnded = true;
-            this._player._linkChoice.overlay.style.visibility = 'visible';
+            this._player.getLinkChoiceElement().style.visibility = 'visible';
             super.complete();
         }
     }
@@ -102,7 +102,7 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._player._linkChoice.overlay.style.visibility = 'collapse';
+        this._player.getLinkChoiceElement().style.visibility = 'collapse';
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
             this._startFlatVideo();
@@ -313,8 +313,8 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         // put video element back
         this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 
-        if (this._controller.getCurrentRenderer() === this) {
-            this._player._linkChoice.overlay.style.visibility = 'visible';
+        if (this._started) {
+            this._player.getLinkChoiceElement().style.visibility = 'visible';
         }
 
         this._playoutEngine.setPlayoutInactive(this._rendererId);
