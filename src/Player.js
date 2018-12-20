@@ -1070,6 +1070,10 @@ class Player extends EventEmitter {
         this._linkChoice.clearAll();
     }
 
+    getLinkChoiceElement(): HTMLElement {
+        return this._linkChoice.overlay;
+    }
+
     enableRepresentationControl() {
         this._representation.button.removeAttribute('disabled');
         this._representation.button.classList.remove('romper-control-disabled');

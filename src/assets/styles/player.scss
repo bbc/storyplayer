@@ -50,6 +50,7 @@ $romper-hover-text-size: 25px;
   opacity: 0.9;
   overflow-y: auto;
   padding: 5px;
+  z-index: 4;
 
   & > * {
     padding: 5px;
@@ -155,6 +156,24 @@ $romper-hover-text-size: 25px;
     height: 100%;
     position: absolute;
     width: 100%;
+  }
+
+  .romper-aframe-scene {
+    z-index: 4;
+  }
+
+  .a-enter-vr {
+    &.embedded {
+      height: $romper-button-width;
+      top: 0;
+      width: $romper-button-height;
+    }
+  }
+
+  .a-enter-vr-button {
+    bottom: inherit;
+    height: $romper-button-height;
+    top: 5px;
   }
 
   .romper-audio-element {

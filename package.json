@@ -1,6 +1,6 @@
 {
   "name": "@bbc/romper",
-  "version": "0.2.26",
+  "version": "0.2.27",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -66,6 +66,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
+    "aframe": "^0.8.2",
     "browser-bunyan": "^1.2.2",
     "dashjs": "^2.6.7",
     "hls.js": "^0.8.9",

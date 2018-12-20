@@ -19,6 +19,7 @@ import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
+import AFrameRenderer from './renderers/AFrameRenderer';
 
 export default class RenderManager extends EventEmitter {
     _controller: Controller;
@@ -99,6 +100,9 @@ export default class RenderManager extends EventEmitter {
             this._followLink(event.id);
         });
 
+        AFrameRenderer.on('aframe-vr-toggle', () => {
+            this.refreshLookahead();
+        });
         this._initialise();
     }
 
@@ -146,6 +150,8 @@ export default class RenderManager extends EventEmitter {
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
+        this._player.clearLinkChoices();
+        AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
             return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
@@ -219,6 +225,7 @@ export default class RenderManager extends EventEmitter {
         Promise.all(assetCollectionPromises)
             .then((urls) => {
                 this._player.clearLinkChoices();
+                AFrameRenderer.clearLinkIcons();
                 urls.forEach((iconAssetCollection, choiceId) => {
                     // @flowignore
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
@@ -230,6 +237,12 @@ export default class RenderManager extends EventEmitter {
                         imgsrc,
                         `Option ${(choiceId + 1)}`,
                     );
+                    if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+                        AFrameRenderer.addLinkIcon(
+                            narrativeElementObjects[choiceId].targetNeId,
+                            imgsrc,
+                        );
+                    }
                 });
                 this._player.enableLinkChoiceControl();
             });
@@ -238,6 +251,11 @@ export default class RenderManager extends EventEmitter {
     // get the current narrative element object
     getCurrentNarrativeElement(): NarrativeElement {
         return this._currentNarrativeElement;
+    }
+
+    // get the current Renderer
+    getCurrentRenderer(): ?BaseRenderer {
+        return this._currentRenderer;
     }
 
     // user has made a choice of link to follow - do it
@@ -390,11 +408,8 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
-        // Update availability of back and next buttons.
-        this._controller.getIdOfPreviousNode().then((lastid) => {
-            this._player.setBackAvailable(lastid !== null);
-        });
-        this._showOnwardIcons();
+        AFrameRenderer.clearSceneElements();
+        AFrameRenderer.setSceneHidden(true);
 
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
@@ -410,6 +425,12 @@ export default class RenderManager extends EventEmitter {
         });
 
         if (oldRenderer) {
+            if (oldRenderer.isVRViewable() && !newRenderer.isVRViewable()) {
+                // exit VR mode if necessary
+                // TODO need to go back to full-screen if appropriate
+                AFrameRenderer.exitVR();
+            }
+
             const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
                 .some((renderer) => {
                     if (renderer === oldRenderer) {
@@ -424,7 +445,25 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
+        // Update availability of back and next buttons.
+        this._showBackIcon();
+        this._showOnwardIcons();
+
         newRenderer.willStart();
+    }
+
+    _showBackIcon() {
+        this._controller.getIdOfPreviousNode()
+            .then((id) => {
+                const showBack = id !== null;
+                this._player.setBackAvailable(showBack);
+                if (showBack) {
+                    AFrameRenderer.addPrevious(() =>
+                        this._player.emit(PlayerEvents.BACK_BUTTON_CLICKED));
+                } else {
+                    AFrameRenderer.clearPrevious();
+                }
+            });
     }
 
     // show next button, or icons if choice
@@ -435,9 +474,12 @@ export default class RenderManager extends EventEmitter {
                 if (nextNarrativeElementObjects.length === 1) {
                     if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
                         this._player.setNextAvailable(true);
+                        AFrameRenderer.addNext(() => this._player
+                            .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
                     }
                 } else {
                     this._player.setNextAvailable(false);
+                    AFrameRenderer.clearNext();
                 }
                 if (nextNarrativeElementObjects.length > 1) {
                     // render icons
@@ -512,6 +554,14 @@ export default class RenderManager extends EventEmitter {
                                     if (this._upcomingRenderers[neid]) {
                                         if (this._upcomingRenderers[neid]._representation.id !==
                                             representation.id) {
+                                            const newRenderer = this
+                                                ._createNewRenderer(representation);
+                                            if (newRenderer) {
+                                                this._upcomingRenderers[neid] = newRenderer;
+                                            }
+                                        } else if (this._upcomingRenderers[neid].isVRViewable() !==
+                                            AFrameRenderer.isInVR()) {
+                                            this._upcomingRenderers[neid].destroy();
                                             const newRenderer = this
                                                 ._createNewRenderer(representation);
                                             if (newRenderer) {

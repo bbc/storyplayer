@@ -84,6 +84,7 @@ export type Representation = {
             asset_collection_id: string
         }>
     },
+    meta?: Object,
     choices?: Array<RepresentationChoice>,
     behaviours?: {
         started?: Array<{
@@ -117,6 +118,8 @@ export type AssetCollection = {
         sub_src?: string,
         text_content?: string,
         text_src?: string,
+        video_format?: string,
+        audio_format?: string,
     },
 };
 
