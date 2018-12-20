@@ -114,8 +114,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
             this._startThreeSixtyVideo();
-        } else {
-            this._collectElementsToRender();
         }
         this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
