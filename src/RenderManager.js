@@ -261,7 +261,21 @@ export default class RenderManager extends EventEmitter {
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
         this._player.clearLinkChoices();
-        this._controller.followLink(narrativeElementId);
+        const representation = this._currentRenderer.getRepresentation();
+        if (representation.meta.romper && representation.meta.romper.choicewaittoend) {
+            // now make this link the only valid option
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id !== narrativeElementId) {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 0] }; // this will be remembered...
+                }
+            });
+            // refresh next/prev so user can skip now if necessary
+            this._showOnwardIcons();
+        } else {
+            // or follow link now
+            this._controller.followLink(narrativeElementId);
+        }
     }
 
     // create and start a StoryIconRenderer
