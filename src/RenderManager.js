@@ -45,6 +45,8 @@ export default class RenderManager extends EventEmitter {
     _player: Player;
     _assetUrls: AssetUrls;
 
+    _savedLinkConditions: { [key: string]: Object };
+
     constructor(
         controller: Controller,
         target: HTMLElement,
@@ -61,6 +63,7 @@ export default class RenderManager extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+        this._savedLinkConditions = {};
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -96,7 +99,7 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
         this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            this._player.disableLinkChoiceControl();
+            // this._player.disableLinkChoiceControl();
             this._followLink(event.id);
         });
 
@@ -260,21 +263,57 @@ export default class RenderManager extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
-        this._player.clearLinkChoices();
         const representation = this._currentRenderer.getRepresentation();
         if (representation.meta.romper && representation.meta.romper.choicewaittoend) {
+            // if not done so, save initial conditions
+            if (Object.keys(this._savedLinkConditions).length === 0) {
+                this._saveLinkConditions();
+            }
             // now make this link the only valid option
             this._currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id !== narrativeElementId) {
+                if (neLink.target_narrative_element_id === narrativeElementId) {
                     // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 0] }; // this will be remembered...
+                    neLink.condition = { '==': [1, 1] };
+                } else {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 0] };
                 }
             });
-            // refresh next/prev so user can skip now if necessary
-            this._showOnwardIcons();
+            if (representation.meta.romper.choiceoneshot) {
+                // hide icons
+                this._player.clearLinkChoices();
+                // refresh next/prev so user can skip now if necessary
+                this._showOnwardIcons();
+            } // else link will be followed at NE end
         } else {
             // or follow link now
+            this._player.clearLinkChoices();
             this._controller.followLink(narrativeElementId);
+        }
+    }
+
+    // save link conditions for current NE
+    _saveLinkConditions() {
+        if (this._currentNarrativeElement) {
+            this._savedLinkConditions = {};
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                this._savedLinkConditions[neLink.target_narrative_element_id] = neLink.condition;
+            });
+        }
+    }
+
+    // revert link conditions for current NE to what they were originally
+    _reapplyLinkConditions() {
+        if (this._currentNarrativeElement) {
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                const targetId = neLink.target_narrative_element_id;
+                // keep a record of the original condition
+                if (targetId in this._savedLinkConditions) {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = this._savedLinkConditions[targetId];
+                }
+            });
+            this._savedLinkConditions = {};
         }
     }
 
@@ -405,6 +444,7 @@ export default class RenderManager extends EventEmitter {
     _restartCurrentRenderer() {
         if (this._currentRenderer) {
             const currentRenderer = this._currentRenderer;
+            this._reapplyLinkConditions();
             currentRenderer.end();
             currentRenderer.willStart();
             this._showOnwardIcons();
@@ -418,7 +458,7 @@ export default class RenderManager extends EventEmitter {
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
-
+        this._reapplyLinkConditions();
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 

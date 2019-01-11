@@ -930,13 +930,13 @@ class Player extends EventEmitter {
         style.height = '100%';
 
         const choiceClick = () => {
-            classList.add('fade');
-            setTimeout(() => {
-                this.emit(PlayerEvents.LINK_CHOSEN, { id });
-                this._linkChoice.deactivateOverlay();
-                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
-                this._linkChoice.overlay.classList.remove('fade');
-            }, 500);
+            // classList.add('fade');
+            // setTimeout(() => {
+            this.emit(PlayerEvents.LINK_CHOSEN, { id });
+            // this._linkChoice.deactivateOverlay();
+            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+            // this._linkChoice.overlay.classList.remove('fade');
+            // }, 500);
         };
         iconContainer.onclick = choiceClick;
         iconContainer.addEventListener(
