@@ -263,8 +263,10 @@ export default class RenderManager extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
-        if (representation.meta.romper && representation.meta.romper.choicewaittoend) {
+        if (representation.meta && representation.meta.romper &&
+            representation.meta.romper.choicewaittoend) {
             // if not done so, save initial conditions
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
@@ -279,7 +281,8 @@ export default class RenderManager extends EventEmitter {
                     neLink.condition = { '==': [1, 0] };
                 }
             });
-            if (representation.meta.romper.choiceoneshot) {
+            if (representation.meta && representation.meta.romper &&
+                representation.meta.romper.choiceoneshot) {
                 // hide icons
                 this._player.clearLinkChoices();
                 // refresh next/prev so user can skip now if necessary
@@ -297,7 +300,10 @@ export default class RenderManager extends EventEmitter {
         if (this._currentNarrativeElement) {
             this._savedLinkConditions = {};
             this._currentNarrativeElement.links.forEach((neLink) => {
-                this._savedLinkConditions[neLink.target_narrative_element_id] = neLink.condition;
+                if (neLink.target_narrative_element_id) {
+                    this._savedLinkConditions[neLink.target_narrative_element_id] =
+                        neLink.condition;
+                }
             });
         }
     }
@@ -306,11 +312,11 @@ export default class RenderManager extends EventEmitter {
     _reapplyLinkConditions() {
         if (this._currentNarrativeElement) {
             this._currentNarrativeElement.links.forEach((neLink) => {
-                const targetId = neLink.target_narrative_element_id;
-                // keep a record of the original condition
-                if (targetId in this._savedLinkConditions) {
+                if (neLink.target_narrative_element_id &&
+                    neLink.target_narrative_element_id in this._savedLinkConditions) {
                     // eslint-disable-next-line no-param-reassign
-                    neLink.condition = this._savedLinkConditions[targetId];
+                    neLink.condition =
+                        this._savedLinkConditions[neLink.target_narrative_element_id];
                 }
             });
             this._savedLinkConditions = {};
