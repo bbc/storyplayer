@@ -136,6 +136,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         );
     }
 
+    // allow for clip trimming
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
+        super.addTimeEventListener(listenerId, (time + this._inTime), callback);
+    }
+
     renderVideoElement() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
