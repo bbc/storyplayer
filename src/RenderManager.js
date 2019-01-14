@@ -195,6 +195,11 @@ export default class RenderManager extends EventEmitter {
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
     handleLinkChoice(narrativeElementObjects: Array<Object>) {
+        if (!this._currentRenderer) {
+            logger.warn('Handling link choice, but no current renderer');
+            return;
+        }
+
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
         const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
@@ -224,6 +229,9 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
+        // @flowignore - tested for this._currentRepresentation above!
+        const currentRepresentation = this._currentRenderer.getRepresentation();
+
         // go through asset collections and render icons
         Promise.all(assetCollectionPromises)
             .then((urls) => {
@@ -234,21 +242,47 @@ export default class RenderManager extends EventEmitter {
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
                         iconAssetCollection.assets.image_src :
                         '';
-                    // tell Player to render icon
-                    this._player.addLinkChoiceControl(
-                        narrativeElementObjects[choiceId].targetNeId,
-                        imgsrc,
-                        `Option ${(choiceId + 1)}`,
-                    );
-                    if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
-                        AFrameRenderer.addLinkIcon(
-                            narrativeElementObjects[choiceId].targetNeId,
-                            imgsrc,
-                        );
+                    // when do we show?
+                    if (currentRepresentation.meta && currentRepresentation.meta.romper
+                        && currentRepresentation.meta.romper.choicetiming) {
+                        const time = parseFloat(currentRepresentation.meta.romper.choicetiming);
+                        if (time === 0) {
+                            // show from start
+                            logger.info(`Render icon for ${currentRepresentation.name} now`);
+                            this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+                        } else {
+                            // show from specified time into NE
+                            // @flowignore - tested for this._currentRepresentation above!
+                            this._currentRenderer.addTimeEventListener(
+                                `${currentRepresentation.id}-${choiceId}`,
+                                parseFloat(time),
+                                () => this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc),
+                            );
+                            // eslint-disable-next-line max-len
+                            logger.info(`Render icon for ${currentRepresentation.name} at time=${time}`);
+                        }
+                    } else {
+                        // if not specified, show from start
+                        this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
                     }
                 });
                 this._player.enableLinkChoiceControl();
             });
+    }
+
+    _showLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+        // tell Player to render icon
+        this._player.addLinkChoiceControl(
+            narrativeElementObjects[choiceId].targetNeId,
+            imgsrc,
+            `Option ${(choiceId + 1)}`,
+        );
+        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+            AFrameRenderer.addLinkIcon(
+                narrativeElementObjects[choiceId].targetNeId,
+                imgsrc,
+            );
+        }
     }
 
     // get the current narrative element object
