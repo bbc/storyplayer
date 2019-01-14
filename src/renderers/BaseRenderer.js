@@ -1,6 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
+import uuid from 'uuid/v4';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
@@ -33,6 +34,8 @@ export default class BaseRenderer extends EventEmitter {
     _controller: Controller;
 
     inVariablePanel: boolean;
+
+    _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -75,6 +78,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
         };
         this._behaviourElements = [];
+
+        this._timeEventListeners = {};
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -505,6 +510,22 @@ export default class BaseRenderer extends EventEmitter {
     // eslint-disable-next-line class-methods-use-this
     isVRViewable(): boolean {
         return false;
+    }
+
+    addTimeEventListener(time: number, callback: Function) {
+        const listenerId = uuid();
+        this._timeEventListeners[listenerId] = callback;
+        this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
+            const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+            if (mediaElement) {
+                if (time > 0 && mediaElement.currentTime >= time) {
+                    if (listenerId in this._timeEventListeners) {
+                        delete this._timeEventListeners[listenerId];
+                        callback();
+                    }
+                }
+            }
+        });
     }
 
     /**
