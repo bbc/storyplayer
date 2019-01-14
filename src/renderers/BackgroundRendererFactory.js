@@ -15,6 +15,8 @@ export default function BackgroundRendererFactory(
     const RENDERERS = {
         'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0':
             BackgroundAudioRenderer,
+        'urn:x-object-based-media:asset-collection-types:simple-audio/v1.0':
+            BackgroundAudioRenderer,
     };
 
     let currentRenderer;

@@ -44,6 +44,13 @@ export default class BasePlayoutEngine {
         }
     }
 
+    getPlayoutActive(rendererId: string): boolean {
+        if (this._media[rendererId]) {
+            return this._media[rendererId].active;
+        }
+        return false;
+    }
+
     setPlayoutActive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = true;

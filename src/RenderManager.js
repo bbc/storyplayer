@@ -355,10 +355,13 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
+        // get renderers
+        const rendererPromises = [];
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
             if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-                this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)
+                rendererPromises.push(this._fetchers
+                    .assetCollectionFetcher(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         const backgroundRenderer = BackgroundRendererFactory(
                             bgAssetCollection.asset_collection_type,
@@ -367,12 +370,19 @@ export default class RenderManager extends EventEmitter {
                             this._player,
                         );
                         if (backgroundRenderer) {
-                            backgroundRenderer.start();
                             this._backgroundRenderers[backgroundAssetCollectionId]
                                 = backgroundRenderer;
                         }
-                    });
+                        return Promise.resolve(backgroundRenderer);
+                    }));
             }
+        });
+
+        // start renderers
+        Promise.all(rendererPromises).then((bgRendererArray) => {
+            bgRendererArray.forEach((bgRenderer) => {
+                if (bgRenderer) { bgRenderer.start(); }
+            });
         });
     }
 
