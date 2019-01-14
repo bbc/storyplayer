@@ -40,6 +40,7 @@ export default class RenderManager extends EventEmitter {
         volumes: { [key: string]: number },
     };
     _upcomingRenderers: { [key: string]: BaseRenderer };
+    _upcomingBackgroundRenderers: { [key: string]: BackgroundRenderer };
     _nextButton: HTMLButtonElement;
     _previousButton: HTMLButtonElement;
     _player: Player;
@@ -307,12 +308,18 @@ export default class RenderManager extends EventEmitter {
             if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
                 this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
-                        const backgroundRenderer = BackgroundRendererFactory(
-                            bgAssetCollection.asset_collection_type,
-                            bgAssetCollection,
-                            this._fetchers.mediaFetcher,
-                            this._player,
-                        );
+                        let backgroundRenderer = null;
+                        if (backgroundAssetCollectionId in this._upcomingBackgroundRenderers) {
+                            // eslint-disable-next-line max-len
+                            backgroundRenderer = this._upcomingBackgroundRenderers[backgroundAssetCollectionId];
+                        } else {
+                            backgroundRenderer = BackgroundRendererFactory(
+                                bgAssetCollection.asset_collection_type,
+                                bgAssetCollection,
+                                this._fetchers.mediaFetcher,
+                                this._player,
+                            );
+                        }
                         if (backgroundRenderer) {
                             backgroundRenderer.start();
                             this._backgroundRenderers[backgroundAssetCollectionId]
@@ -594,13 +601,77 @@ export default class RenderManager extends EventEmitter {
                             }
                             delete this._upcomingRenderers[neid];
                         });
+                    this._runBackgroundLookahead();
                 });
         });
+    }
+
+    // evaluate queued renderers for any backgrounds that need to be played
+    // and queue up BackgroundRenderers for these
+    _runBackgroundLookahead() {
+        // get all unique ids
+        const backgroundIds = [];
+        Object.keys(this._upcomingRenderers).forEach((rendererId) => {
+            const renderer = this._upcomingRenderers[rendererId];
+            const representation = renderer.getRepresentation();
+            if (representation.asset_collections.background_ids) {
+                // eslint-disable-next-line max-len
+                representation.asset_collections.background_ids.forEach((backgroundAssetCollectionId) => {
+                    if (!(backgroundAssetCollectionId in backgroundIds)) {
+                        backgroundIds.push(backgroundAssetCollectionId);
+                    }
+                });
+            }
+        });
+
+        // fetch asset collection for each id and create renderer if we don't have one
+        const bgPromises = [];
+        backgroundIds.forEach((backgroundAssetCollectionId) => {
+            // if we don't already have a renderer for this asset collection id
+            if (!(backgroundAssetCollectionId in this._upcomingBackgroundRenderers)) {
+                // fetch asset collection
+                bgPromises
+                    .push(this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)
+                        .then((bgAssetCollection) => {
+                            // create bg renderer
+                            const backgroundRenderer = BackgroundRendererFactory(
+                                bgAssetCollection.asset_collection_type,
+                                bgAssetCollection,
+                                this._fetchers.mediaFetcher,
+                                this._player,
+                            );
+                            return backgroundRenderer;
+                        }));
+            }
+        });
+
+        // place renderers in upcoming queue
+        Promise.all(bgPromises)
+            .then((bgRenderers) => {
+                bgRenderers.forEach((backgroundRenderer) => {
+                    if (backgroundRenderer) {
+                        this._upcomingBackgroundRenderers[backgroundRenderer._assetCollection.id]
+                            = backgroundRenderer;
+                    }
+                });
+
+                // clear unused from queue
+                Object.keys(this._upcomingBackgroundRenderers).forEach((assetCollectionId) => {
+                    if (backgroundIds.indexOf(assetCollectionId) === -1) {
+                        delete this._upcomingBackgroundRenderers[assetCollectionId];
+                    }
+                });
+
+                // eslint-disable-next-line max-len
+                logger.info(`completed lookahead: ${Object.keys(this._upcomingBackgroundRenderers).length} backgrounds; ${Object.keys(this._upcomingRenderers).length} foregrounds`);
+                // this._player.playoutEngine._media points to all media elements
+            });
     }
 
     _initialise() {
         this._currentRenderer = null;
         this._upcomingRenderers = {};
+        this._upcomingBackgroundRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
