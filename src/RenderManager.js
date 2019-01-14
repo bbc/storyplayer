@@ -243,9 +243,9 @@ export default class RenderManager extends EventEmitter {
                         iconAssetCollection.assets.image_src :
                         '';
                     // when do we show?
-                    if (currentRepresentation.meta && currentRepresentation.meta.romper
-                        && currentRepresentation.meta.romper.choicetiming) {
-                        const time = parseFloat(currentRepresentation.meta.romper.choicetiming);
+                    if (currentRepresentation.meta && currentRepresentation.meta.storyplayer
+                        && currentRepresentation.meta.storyplayer.choice_timing) {
+                        const time = parseFloat(currentRepresentation.meta.storyplayer.choice_timing);
                         if (time === 0) {
                             // show from start
                             logger.info(`Render icon for ${currentRepresentation.name} now`);
@@ -299,8 +299,8 @@ export default class RenderManager extends EventEmitter {
     _followLink(narrativeElementId: string) {
         if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
-        if (representation.meta && representation.meta.romper &&
-            representation.meta.romper.choicewaittoend) {
+        if (representation.meta && representation.meta.storyplayer &&
+            representation.meta.storyplayer.choice_show_ne_to_end) {
             // if not done so, save initial conditions
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
@@ -315,8 +315,8 @@ export default class RenderManager extends EventEmitter {
                     neLink.condition = { '==': [1, 0] };
                 }
             });
-            if (representation.meta && representation.meta.romper &&
-                representation.meta.romper.choiceoneshot) {
+            if (representation.meta && representation.meta.storyplayer &&
+                representation.meta.storyplayer.choice_one_shot) {
                 // hide icons
                 this._player.clearLinkChoices();
                 // refresh next/prev so user can skip now if necessary
