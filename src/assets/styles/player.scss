@@ -432,8 +432,14 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-control-selected {
-      margin: 3px;
       border: 2px solid $white;
+      margin: 3px;
+      transition: all 0.5s ease;
+    }
+    .romper-control-unselected {
+      border: 2px transparent;
+      margin: 3px;
+      transition: all 0.5s ease;
     }
   }
 
