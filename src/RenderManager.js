@@ -200,6 +200,8 @@ export default class RenderManager extends EventEmitter {
             return;
         }
 
+        this._applyDefaultLink();
+
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
         const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
@@ -245,6 +247,7 @@ export default class RenderManager extends EventEmitter {
                     // when do we show?
                     if (currentRepresentation.meta && currentRepresentation.meta.storyplayer
                         && currentRepresentation.meta.storyplayer.choice_timing) {
+                        // eslint-disable-next-line max-len
                         const time = parseFloat(currentRepresentation.meta.storyplayer.choice_timing);
                         if (time === 0) {
                             // show from start
@@ -262,12 +265,33 @@ export default class RenderManager extends EventEmitter {
                             logger.info(`Render icon for ${currentRepresentation.name} at time=${time}`);
                         }
                     } else {
-                        // if not specified, show from start
+                        // if not specified, show from end
                         this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+                        // if not specified, show from start
+                        // this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
                     }
                 });
                 this._player.enableLinkChoiceControl();
             });
+    }
+
+    _applyDefaultLink() {
+        if (this._currentNarrativeElement.links.filter(link => link.default_link).length === 0) {
+            return;
+        }
+        if (Object.keys(this._savedLinkConditions).length === 0) {
+            this._saveLinkConditions();
+        }
+        this._currentNarrativeElement.links.forEach((neLink) => {
+            if (neLink.default_link) {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 1] };
+            } else {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 0] };
+            }
+        });
+        // and highlight selected icon...
     }
 
     _showLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
@@ -315,14 +339,24 @@ export default class RenderManager extends EventEmitter {
                     neLink.condition = { '==': [1, 0] };
                 }
             });
+            // and reflect choice to user...
+            // get icon, and add class
+            // get other icons and remove class
+
+            // do we keep the choice open?
             if (representation.meta && representation.meta.storyplayer &&
                 representation.meta.storyplayer.choice_one_shot) {
                 // hide icons
                 this._player.clearLinkChoices();
                 // refresh next/prev so user can skip now if necessary
                 this._showOnwardIcons();
-            } // else link will be followed at NE end
-        } else {
+            }
+
+            // if already ended, follow immediately
+            if (this._currentRenderer && this._currentRenderer.hasEnded()) {
+                this._controller.followLink(narrativeElementId);
+            }
+        } else { // else link will be followed at NE end
             // or follow link now
             this._player.clearLinkChoices();
             this._controller.followLink(narrativeElementId);

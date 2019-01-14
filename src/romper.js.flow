@@ -22,6 +22,7 @@ export type Link = {
     condition: any,
     description?: string,
     target_narrative_element_id?: string,
+    default_link?: boolean,
 };
 
 export type Story = {

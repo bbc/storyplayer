@@ -32,6 +32,7 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
     _controller: Controller;
 
+    _hasEnded: boolean;
     inVariablePanel: boolean;
 
     _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
@@ -118,6 +119,7 @@ export default class BaseRenderer extends EventEmitter {
 
     start() {
         this.emit(RendererEvents.STARTED);
+        this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
         if (this.isVRViewable) {
             AFrameRenderer.addPlayPauseButton(() =>
@@ -127,6 +129,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+    }
+
+    hasEnded(): boolean {
+        return this._hasEnded;
     }
 
     // does this renderer have a show variable panel behaviour
@@ -191,6 +197,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this._hasEnded = true;
         this._player.enterCompleteBehavourPhase();
         if (this.isVRViewable) {
             AFrameRenderer.clearPlayPause();

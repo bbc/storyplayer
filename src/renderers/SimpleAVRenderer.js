@@ -32,7 +32,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _outTime: number;
 
     _endedEventListener: Function;
-    _hasEnded: boolean;
     _outTimeEventListener: Function;
     _setOutTime: Function;
     _setInTime: Function;
@@ -78,7 +77,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _endedEventListener() {
         if (!this._hasEnded) {
-            this._hasEnded = true;
             super.complete();
         }
     }
@@ -95,7 +93,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
