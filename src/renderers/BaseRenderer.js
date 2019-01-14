@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
-import uuid from 'uuid/v4';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
@@ -512,8 +511,7 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(time: number, callback: Function) {
-        const listenerId = uuid();
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
         this._timeEventListeners[listenerId] = callback;
         this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
             const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
