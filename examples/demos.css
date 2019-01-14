@@ -115,6 +115,8 @@ h1 {
   border: 1px solid #ccc;
   border-top: none;
   display: none;
+  height: 75%;
+  overflow-y: scroll;
   padding: 6px 5%;
   width: 90%;
 }
