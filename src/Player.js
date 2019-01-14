@@ -903,7 +903,7 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addLinkChoiceControl(id: string, src: string, label: string) {
+    addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
         this._numChoices += 1;
 
         const linkChoiceControl = document.createElement('div');
@@ -946,6 +946,7 @@ class Player extends EventEmitter {
 
         linkChoiceControl.appendChild(iconContainer);
         this._linkChoice.add(id, linkChoiceControl);
+        return linkChoiceControl;
     }
 
     activateRepresentationControl(id: string) {

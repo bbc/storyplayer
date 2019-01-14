@@ -430,6 +430,11 @@ $romper-hover-text-size: 25px;
       margin: 50%;
       opacity: 0;
     }
+
+    .romper-control-selected {
+      margin: 3px;
+      border: 2px solid $white;
+    }
   }
 
   .romper-link-choice-grid-cell {
