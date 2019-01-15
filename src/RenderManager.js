@@ -154,7 +154,10 @@ export default class RenderManager extends EventEmitter {
 
     handleNEChange(narrativeElement: NarrativeElement) {
         this._player.clearLinkChoices();
-        this._timeout = null;
+        if (this._timeout) {
+            clearTimeout(this._timeout);
+            this._timeout = null;
+        }
         AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
@@ -282,12 +285,11 @@ export default class RenderManager extends EventEmitter {
     // start animation to reflect choice remaining
     _startTimeoutAnimation() {
         if (!this._timeout) {
-            let remainingTime = 3;
-            const mediaElement = this._getMediaElement();
+            let remainingTime = 3; // default if we can't find out
             if (this._currentRenderer) {
-                const timeData = this._currentRenderer.getCurrentTime();
-                if (timeData.remainingTime){
-                    remainingTime = timeData.remainingTime;
+                const { reportedRemainingTime } = this._currentRenderer.getCurrentTime();
+                if (reportedRemainingTime) {
+                    remainingTime = reportedRemainingTime;
                 }
             }
             this._reflectTimeout(remainingTime);
@@ -302,9 +304,9 @@ export default class RenderManager extends EventEmitter {
         // work out proportion through media
         let percent = 0;
         if (this._currentRenderer) {
-            const timeData = this._currentRenderer.getCurrentTime();
-            if (timeData.remainingTime){
-                percent = 100 - ((100 * timeData.remainingTime) / totalTime);
+            const { remainingTime } = this._currentRenderer.getCurrentTime();
+            if (remainingTime) {
+                percent = 100 - ((100 * remainingTime) / totalTime);
             }
         }
 
@@ -333,20 +335,9 @@ export default class RenderManager extends EventEmitter {
         if (percent <= 99) {
             this._timeout = setTimeout(() => this._reflectTimeout(totalTime), timeGap);
         } else if (this._timeout) {
-            console.log('ANDY clear timeout');
             clearTimeout(this._timeout);
             this._timeout = null;
         }
-    }
-
-    // returns the foreground media element for the current representation
-    _getMediaElement(): ?HTMLMediaElement {
-        let mediaElement = null;
-        if (this._currentRenderer) {
-            const representationId = this._currentRenderer.getRepresentation().id;
-            mediaElement = this._player.playoutEngine.getMediaElement(representationId);
-        }
-        return mediaElement;
     }
 
     _applyDefaultLink() {

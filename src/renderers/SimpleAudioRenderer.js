@@ -188,15 +188,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             videoTime = this._lastSetTime;
         }
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        let remaining = videoElement.duration;
-        if (this._outTime > 0) {
-            remaining = this._outTime;
-        }
-        remaining -= videoElement.currentTime;
+        const remainingTime = videoElement.duration - videoElement.currentTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
-            remainingTime: remaining,
+            remainingTime,
         };
         return timeObject;
     }
