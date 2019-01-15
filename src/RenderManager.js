@@ -47,6 +47,7 @@ export default class RenderManager extends EventEmitter {
     _timeout: ?TimeoutID;
 
     _savedLinkConditions: { [key: string]: Object };
+    _iconsToShow: { [key: number]: Object }; // data about icons we want to show later
 
     constructor(
         controller: Controller,
@@ -65,6 +66,7 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._savedLinkConditions = {};
+        this._iconsToShow = {};
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -248,24 +250,35 @@ export default class RenderManager extends EventEmitter {
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
                         iconAssetCollection.assets.image_src :
                         '';
+                    // save icon details
+                    this._iconsToShow[choiceId] = { narrativeElementObjects, imgsrc };
                     // when do we show?
-                    if (currentRepresentation.meta && currentRepresentation.meta.storyplayer
-                        && currentRepresentation.meta.storyplayer.choice_timing) {
-                        // eslint-disable-next-line max-len
-                        const time = parseFloat(currentRepresentation.meta.storyplayer.choice_timing);
+                    if (currentRepresentation.meta
+                        && currentRepresentation.meta.storyplayer
+                        && currentRepresentation.meta.storyplayer.choice_icons
+                        && currentRepresentation.meta.storyplayer.choice_icons.time_to_appear) {
+                        // we want to show at specific time into NE; when?
+                        const time = parseFloat(currentRepresentation
+                            .meta.storyplayer.choice_icons.time_to_appear);
+
                         if (time === 0) {
                             // show from start
                             logger.info(`Render icon for ${currentRepresentation.name} now`);
                             this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
                         } else {
                             // show from specified time into NE
-                            // @flowignore - tested for this._currentRepresentation above!
+                            // @flowignore - tested for this._currentRenderer above!
                             this._currentRenderer.addTimeEventListener(
                                 `${currentRepresentation.id}-${choiceId}`,
-                                parseFloat(time),
+                                time,
                                 () => {
-                                    this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
-                                    this._startTimeoutAnimation();
+                                    this._showSavedIcons();
+                                    // do we want to reflect remaining time
+                                    // @flowignore - tested for meta above!
+                                    if (currentRepresentation
+                                        .meta.storyplayer.choice_icons.show_time_remaining) {
+                                        this._startTimeoutAnimation();
+                                    }
                                 },
                             );
                             // eslint-disable-next-line max-len
@@ -273,13 +286,25 @@ export default class RenderManager extends EventEmitter {
                         }
                     } else {
                         // if not specified, show from end
-                        this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
-                        // if not specified, show from start
-                        // this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+                        // and render when we get to the end
+                        // @flowignore - tested for this._currentRenderer above!
+                        this._currentRenderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                            this._showSavedIcons();
+                        });
                     }
                 });
                 this._player.enableLinkChoiceControl();
             });
+    }
+
+    // show some icons that have been saved
+    _showSavedIcons() {
+        Object.keys(this._iconsToShow).forEach((choiceId) => {
+            const choiceNumber = parseInt(choiceId, 10);
+            const { narrativeElementObjects, imgsrc } = this._iconsToShow[choiceNumber];
+            this._showLinkIcon(choiceNumber, narrativeElementObjects, imgsrc);
+        });
+        this._iconsToShow = {};
     }
 
     // start animation to reflect choice remaining
@@ -394,8 +419,9 @@ export default class RenderManager extends EventEmitter {
     _followLink(narrativeElementId: string) {
         if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
-        if (representation.meta && representation.meta.storyplayer &&
-            representation.meta.storyplayer.choice_show_ne_to_end) {
+        if (representation.meta
+            && representation.meta.storyplayer
+            && representation.meta.storyplayer.choice_icons.show_ne_to_end) {
             // if not done so, save initial conditions
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
@@ -415,14 +441,14 @@ export default class RenderManager extends EventEmitter {
             // get other icons and remove class
 
             // do we keep the choice open?
-            if (representation.meta && representation.meta.storyplayer &&
-                representation.meta.storyplayer.choice_one_shot) {
+            if (representation.meta
+                && representation.meta.storyplayer
+                && representation.meta.storyplayer.choice_icons.one_shot) {
                 // hide icons
                 this._player.clearLinkChoices();
                 // refresh next/prev so user can skip now if necessary
                 this._showOnwardIcons();
             }
-
             // if already ended, follow immediately
             if (this._currentRenderer && this._currentRenderer.hasEnded()) {
                 this._controller.followLink(narrativeElementId);
