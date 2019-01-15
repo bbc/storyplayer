@@ -44,6 +44,7 @@ export default class RenderManager extends EventEmitter {
     _previousButton: HTMLButtonElement;
     _player: Player;
     _assetUrls: AssetUrls;
+    _timeout: ?TimeoutID;
 
     _savedLinkConditions: { [key: string]: Object };
 
@@ -99,7 +100,6 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
         this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            // this._player.disableLinkChoiceControl();
             this._followLink(event.id);
         });
 
@@ -154,6 +154,7 @@ export default class RenderManager extends EventEmitter {
 
     handleNEChange(narrativeElement: NarrativeElement) {
         this._player.clearLinkChoices();
+        this._timeout = null;
         AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
@@ -259,7 +260,10 @@ export default class RenderManager extends EventEmitter {
                             this._currentRenderer.addTimeEventListener(
                                 `${currentRepresentation.id}-${choiceId}`,
                                 parseFloat(time),
-                                () => this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc),
+                                () => {
+                                    this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+                                    this._startTimeoutAnimation();
+                                },
                             );
                             // eslint-disable-next-line max-len
                             logger.info(`Render icon for ${currentRepresentation.name} at time=${time}`);
@@ -273,6 +277,76 @@ export default class RenderManager extends EventEmitter {
                 });
                 this._player.enableLinkChoiceControl();
             });
+    }
+
+    // start animation to reflect choice remaining
+    _startTimeoutAnimation() {
+        if (!this._timeout) {
+            let remainingTime = 3;
+            const mediaElement = this._getMediaElement();
+            if (this._currentRenderer) {
+                const timeData = this._currentRenderer.getCurrentTime();
+                if (timeData.remainingTime){
+                    remainingTime = timeData.remainingTime;
+                }
+            }
+            this._reflectTimeout(remainingTime);
+        }
+    }
+
+    // style the selected choice icon to reflect time remaining for choice
+    _reflectTimeout(totalTime: number) {
+        const percentInterval = 1; // how many intervals in gradient
+        const timeGap = 50; // ms between updates
+
+        // work out proportion through media
+        let percent = 0;
+        if (this._currentRenderer) {
+            const timeData = this._currentRenderer.getCurrentTime();
+            if (timeData.remainingTime){
+                percent = 100 - ((100 * timeData.remainingTime) / totalTime);
+            }
+        }
+
+        // find the selected icon
+        let active = null;
+        this._player._linkChoice.overlay.childNodes.forEach((icon) => {
+            if (icon.className.indexOf('romper-control-selected') >= 0) {
+                active = icon;
+            }
+        });
+
+        // apply the gradient border style
+        if (active) {
+            let styleDefinition = 'border-image: linear-gradient(0';
+            for (let i = 100; i > 0; i -= percentInterval) {
+                if (i <= percent) {
+                    styleDefinition += ', transparent';
+                } else {
+                    styleDefinition += ', white';
+                }
+            }
+            styleDefinition += ') 3;';
+            active.style = styleDefinition;
+        }
+
+        if (percent <= 99) {
+            this._timeout = setTimeout(() => this._reflectTimeout(totalTime), timeGap);
+        } else if (this._timeout) {
+            console.log('ANDY clear timeout');
+            clearTimeout(this._timeout);
+            this._timeout = null;
+        }
+    }
+
+    // returns the foreground media element for the current representation
+    _getMediaElement(): ?HTMLMediaElement {
+        let mediaElement = null;
+        if (this._currentRenderer) {
+            const representationId = this._currentRenderer.getRepresentation().id;
+            mediaElement = this._player.playoutEngine.getMediaElement(representationId);
+        }
+        return mediaElement;
     }
 
     _applyDefaultLink() {
