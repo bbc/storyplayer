@@ -930,6 +930,13 @@ class Player extends EventEmitter {
         style.height = '100%';
 
         const choiceClick = () => {
+            // set classes to show which is selected
+            this._linkChoice.overlay.childNodes.forEach((icon) => {
+                icon.classList.remove('romper-control-selected');
+                icon.classList.add('romper-control-unselected');
+            });
+            linkChoiceControl.classList.add('romper-control-selected');
+            linkChoiceControl.classList.remove('romper-control-unselected');
             // classList.add('fade');
             // setTimeout(() => {
             this.emit(PlayerEvents.LINK_CHOSEN, { id });

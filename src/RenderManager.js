@@ -44,7 +44,6 @@ export default class RenderManager extends EventEmitter {
     _previousButton: HTMLButtonElement;
     _player: Player;
     _assetUrls: AssetUrls;
-    _icons: { [key: string]: HTMLDivElement };
 
     _savedLinkConditions: { [key: string]: Object };
 
@@ -201,7 +200,6 @@ export default class RenderManager extends EventEmitter {
             return;
         }
 
-        this._icons = {};
         this._applyDefaultLink();
 
         logger.warn('RenderManager choice of links - inform player');
@@ -309,7 +307,6 @@ export default class RenderManager extends EventEmitter {
                 imgsrc,
             );
         }
-        this._icons[targetId] = element;
         const defaults = this._currentNarrativeElement.links.filter(link => link.default_link);
         if (defaults.length > 0 &&
             defaults[0].target_narrative_element_id === targetId) {
@@ -332,7 +329,6 @@ export default class RenderManager extends EventEmitter {
     _followLink(narrativeElementId: string) {
         if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
-        this._highlightLink(narrativeElementId);
         if (representation.meta && representation.meta.storyplayer &&
             representation.meta.storyplayer.choice_show_ne_to_end) {
             // if not done so, save initial conditions
@@ -371,19 +367,6 @@ export default class RenderManager extends EventEmitter {
             this._player.clearLinkChoices();
             this._controller.followLink(narrativeElementId);
         }
-    }
-
-    _highlightLink(targetId: string) {
-        Object.keys(this._icons).forEach((iconTargetNeId) => {
-            const element = this._icons[iconTargetNeId];
-            if (targetId === iconTargetNeId) {
-                element.classList.remove('romper-control-unselected');
-                element.classList.add('romper-control-selected');
-            } else {
-                element.classList.add('romper-control-unselected');
-                element.classList.remove('romper-control-selected');
-            }
-        });
     }
 
     // save link conditions for current NE
