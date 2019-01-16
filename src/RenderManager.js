@@ -251,6 +251,8 @@ export default class RenderManager extends EventEmitter {
                 this._buildLinkIcon(choiceId, narrativeElementObjects, imgsrc);
             });
 
+            this._player.setNextAvailable(false);
+
             // do we show countdown?
             let countdown = false;
             if (currentRepresentation.meta
@@ -258,6 +260,15 @@ export default class RenderManager extends EventEmitter {
                 && currentRepresentation.meta.storyplayer.choice_icons
                 && currentRepresentation.meta.storyplayer.choice_icons.show_time_remaining) {
                 countdown = true;
+            }
+
+            // do we show countdown?
+            let disableControls = false;
+            if (currentRepresentation.meta
+                && currentRepresentation.meta.storyplayer
+                && currentRepresentation.meta.storyplayer.choice_icons
+                && currentRepresentation.meta.storyplayer.choice_icons.disable_controls) {
+                disableControls = true;
             }
 
             // when do we show?
@@ -271,19 +282,19 @@ export default class RenderManager extends EventEmitter {
 
                 if (time === 0) {
                     // show from start
-                    this._showChoiceIcons(defaultLinkId, countdown);
+                    this._showChoiceIcons(defaultLinkId, disableControls, countdown);
                 } else {
                     // show from specified time into NE
                     renderer.addTimeEventListener(
                         `${currentRepresentation.id}`,
                         time,
-                        () => this._showChoiceIcons(defaultLinkId, countdown),
+                        () => this._showChoiceIcons(defaultLinkId, disableControls, countdown),
                     );
                 }
             } else {
                 // if not specified, show from end
                 renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                    this._showChoiceIcons(defaultLinkId, countdown);
+                    this._showChoiceIcons(defaultLinkId, disableControls, countdown);
                 });
             }
         });
@@ -291,9 +302,15 @@ export default class RenderManager extends EventEmitter {
 
     // tell the player to show the icons
     // parameter specifies whether to reflect time remaining on icon
-    _showChoiceIcons(defaultLinkId: ?string, countdown: boolean = false) {
+    _showChoiceIcons(defaultLinkId: ?string, disableControls: boolean, countdown: boolean = false) {
         this._player.showChoiceIcons(defaultLinkId);
         this._player.enableLinkChoiceControl();
+        if (disableControls) {
+            // disable transport controls
+            this._player.disablePlayButton();
+            this._player.disableScrubBar();
+            this._player.setNextAvailable(false);
+        }
         if (countdown) {
             this._startTimeoutAnimation();
         }
