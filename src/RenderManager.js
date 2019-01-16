@@ -203,6 +203,7 @@ export default class RenderManager extends EventEmitter {
             logger.warn('Handling link choice, but no current renderer');
             return;
         }
+        const renderer = this._currentRenderer;
 
         const defaultLinkId = this._applyDefaultLink();
 
@@ -213,16 +214,15 @@ export default class RenderManager extends EventEmitter {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // fetch icon representation
             if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
-                // eslint-disable-next-line max-len
-                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElementObj.ne.body.representation_collection_target_id)
-                    // representationCollection
-                    .then(representationCollection => this._representationReasoner(representationCollection)) // eslint-disable-line max-len
+                assetCollectionPromises.push(this._fetchers
+                    .representationCollectionFetcher(choiceNarrativeElementObj.ne
+                        .body.representation_collection_target_id)
+                    .then(representationCollection =>
+                        this._representationReasoner(representationCollection))
                     // representation
                     .then((representation) => {
-                        if (
-                            representation.asset_collections.icon &&
-                            representation.asset_collections.icon.default_id
-                        ) {
+                        if (representation.asset_collections.icon
+                            && representation.asset_collections.icon.default_id) {
                             // eslint-disable-next-line max-len
                             const iconAssetCollectionId = representation.asset_collections.icon.default_id;
                             // asset collection
@@ -235,66 +235,68 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
-        // @flowignore - tested for this._currentRepresentation above!
-        const currentRepresentation = this._currentRenderer.getRepresentation();
+        const currentRepresentation = renderer.getRepresentation();
 
         // go through asset collections and render icons
-        Promise.all(assetCollectionPromises)
-            .then((urls) => {
-                this._player.clearLinkChoices();
-                AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconAssetCollection, choiceId) => {
-                    // @flowignore
-                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
-                        iconAssetCollection.assets.image_src :
-                        '';
-
-                    // add the icon to the player
-                    this._buildLinkIcon(choiceId, narrativeElementObjects, imgsrc);
-
-                    // when do we show?
-                    if (currentRepresentation.meta
-                        && currentRepresentation.meta.storyplayer
-                        && currentRepresentation.meta.storyplayer.choice_icons
-                        && currentRepresentation.meta.storyplayer.choice_icons.time_to_appear) {
-                        // we want to show at specific time into NE; when?
-                        const time = parseFloat(currentRepresentation
-                            .meta.storyplayer.choice_icons.time_to_appear);
-
-                        if (time === 0) {
-                            // show from start
-                            logger.info(`Render icon for ${currentRepresentation.name} now`);
-                            this._player.showChoiceIcons(defaultLinkId);
-                        } else {
-                            // show from specified time into NE
-                            // @flowignore - tested for this._currentRenderer above!
-                            this._currentRenderer.addTimeEventListener(
-                                `${currentRepresentation.id}-${choiceId}`,
-                                time,
-                                () => {
-                                    this._player.showChoiceIcons(defaultLinkId);
-                                    // do we want to reflect remaining time
-                                    // @flowignore - tested for meta above!
-                                    if (currentRepresentation
-                                        .meta.storyplayer.choice_icons.show_time_remaining) {
-                                        this._startTimeoutAnimation();
-                                    }
-                                },
-                            );
-                            // eslint-disable-next-line max-len
-                            logger.info(`Render icon for ${currentRepresentation.name} at time=${time}`);
-                        }
-                    } else {
-                        // if not specified, show from end
-                        // and render when we get to the end
-                        // @flowignore - tested for this._currentRenderer above!
-                        this._currentRenderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                            this._player.showChoiceIcons(defaultLinkId);
-                        });
-                    }
-                });
-                this._player.enableLinkChoiceControl();
+        Promise.all(assetCollectionPromises).then((urls) => {
+            this._player.clearLinkChoices();
+            AFrameRenderer.clearLinkIcons();
+            urls.forEach((iconAssetCollection, choiceId) => {
+                // @flowignore
+                const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
+                    iconAssetCollection.assets.image_src :
+                    '';
+                // add the icon to the player
+                this._buildLinkIcon(choiceId, narrativeElementObjects, imgsrc);
             });
+
+            // do we show countdown?
+            let countdown = false;
+            if (currentRepresentation.meta
+                && currentRepresentation.meta.storyplayer
+                && currentRepresentation.meta.storyplayer.choice_icons
+                && currentRepresentation.meta.storyplayer.choice_icons.show_time_remaining) {
+                countdown = true;
+            }
+
+            // when do we show?
+            if (currentRepresentation.meta
+                && currentRepresentation.meta.storyplayer
+                && currentRepresentation.meta.storyplayer.choice_icons
+                && 'time_to_appear' in currentRepresentation.meta.storyplayer.choice_icons) {
+                // we want to show at specific time into NE; when?
+                const time = parseFloat(currentRepresentation
+                    .meta.storyplayer.choice_icons.time_to_appear);
+
+                if (time === 0) {
+                    // show from start
+                    this._showChoiceIcons(defaultLinkId, countdown);
+                } else {
+                    // show from specified time into NE
+                    renderer.addTimeEventListener(
+                        `${currentRepresentation.id}`,
+                        time,
+                        () => this._showChoiceIcons(defaultLinkId, countdown),
+                    );
+                }
+            } else {
+                // if not specified, show from end
+                renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                    this._showChoiceIcons(defaultLinkId, countdown);
+                });
+            }
+        });
+    }
+
+    // tell the player to show the icons
+    // parameter specifies whether to reflect time remaining on icon
+    _showChoiceIcons(defaultLinkId: ?string, countdown: boolean = false) {
+        this._player.showChoiceIcons(defaultLinkId);
+        // TODO: AFrameRenderer still renders when icon added
+        this._player.enableLinkChoiceControl();
+        if (countdown) {
+            this._startTimeoutAnimation();
+        }
     }
 
     // start animation to reflect choice remaining
