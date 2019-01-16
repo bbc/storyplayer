@@ -122,6 +122,7 @@ function createOverlay(name: string, logFunction: Function) {
 
     const elements = {};
     const labels = {};
+    let activeIconId = null;
 
     const add = (id: string, el: HTMLElement, label?: string) => {
         elements[id] = el;
@@ -153,6 +154,7 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const setActive = (id: string) => {
+        activeIconId = id;
         Object.keys(elements).forEach((key) => {
             if (key === id) {
                 elements[key].classList.add('romper-control-selected');
@@ -162,6 +164,14 @@ function createOverlay(name: string, logFunction: Function) {
                 elements[key].classList.remove('romper-control-selected');
             }
         });
+    };
+
+    const getActive = () => {
+        let activeIconElement = null;
+        if (activeIconId) {
+            activeIconElement = elements[activeIconId];
+        }
+        return activeIconElement;
     };
 
     const addClass = (id: string, classname: string) => {
@@ -212,6 +222,7 @@ function createOverlay(name: string, logFunction: Function) {
         remove,
         get,
         setActive,
+        getActive,
         addClass,
         removeClass,
         deactivateOverlay,
@@ -266,11 +277,13 @@ class Player extends EventEmitter {
     _numChoices: number;
     removeExperienceStartButtonAndImage: Function;
     _handleFullScreenChange: Function;
+    _choiceIconSet: { [key: string]: HTMLDivElement };
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
         this._numChoices = 0;
+        this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
@@ -903,7 +916,7 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
+    addLinkChoiceControl(id: string, src: string, label: string) {
         this._numChoices += 1;
 
         const linkChoiceControl = document.createElement('div');
@@ -931,12 +944,7 @@ class Player extends EventEmitter {
 
         const choiceClick = () => {
             // set classes to show which is selected
-            this._linkChoice.overlay.childNodes.forEach((icon) => {
-                icon.classList.remove('romper-control-selected');
-                icon.classList.add('romper-control-unselected');
-            });
-            linkChoiceControl.classList.add('romper-control-selected');
-            linkChoiceControl.classList.remove('romper-control-unselected');
+            this._linkChoice.setActive(id);
             // classList.add('fade');
             // setTimeout(() => {
             this.emit(PlayerEvents.LINK_CHOSEN, { id });
@@ -952,8 +960,20 @@ class Player extends EventEmitter {
         );
 
         linkChoiceControl.appendChild(iconContainer);
-        this._linkChoice.add(id, linkChoiceControl);
-        return linkChoiceControl;
+        this._choiceIconSet[id] = linkChoiceControl;
+    }
+
+    showChoiceIcons(activeLinkId: ?string) {
+        Object.keys(this._choiceIconSet).forEach((id) => {
+            this._linkChoice.add(id, this._choiceIconSet[id]);
+        });
+        if (activeLinkId) {
+            this._linkChoice.setActive(activeLinkId);
+        }
+    }
+
+    getActiveChoiceIcon(): ?HTMLDivElement {
+        return this._linkChoice.getActive();
     }
 
     activateRepresentationControl(id: string) {
@@ -1075,6 +1095,7 @@ class Player extends EventEmitter {
 
     clearLinkChoices() {
         this._numChoices = 0;
+        this._choiceIconSet = {};
         this._linkChoice.clearAll();
     }
 

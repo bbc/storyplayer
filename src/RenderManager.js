@@ -47,7 +47,6 @@ export default class RenderManager extends EventEmitter {
     _timeout: ?TimeoutID;
 
     _savedLinkConditions: { [key: string]: Object };
-    _iconsToShow: { [key: number]: Object }; // data about icons we want to show later
 
     constructor(
         controller: Controller,
@@ -66,7 +65,6 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._savedLinkConditions = {};
-        this._iconsToShow = {};
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -206,7 +204,7 @@ export default class RenderManager extends EventEmitter {
             return;
         }
 
-        this._applyDefaultLink();
+        const defaultLinkId = this._applyDefaultLink();
 
         logger.warn('RenderManager choice of links - inform player');
         // go through promise chain to get asset collections
@@ -250,8 +248,10 @@ export default class RenderManager extends EventEmitter {
                     const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
                         iconAssetCollection.assets.image_src :
                         '';
-                    // save icon details
-                    this._iconsToShow[choiceId] = { narrativeElementObjects, imgsrc };
+
+                    // add the icon to the player
+                    this._buildLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+
                     // when do we show?
                     if (currentRepresentation.meta
                         && currentRepresentation.meta.storyplayer
@@ -264,7 +264,7 @@ export default class RenderManager extends EventEmitter {
                         if (time === 0) {
                             // show from start
                             logger.info(`Render icon for ${currentRepresentation.name} now`);
-                            this._showLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+                            this._player.showChoiceIcons(defaultLinkId);
                         } else {
                             // show from specified time into NE
                             // @flowignore - tested for this._currentRenderer above!
@@ -272,7 +272,7 @@ export default class RenderManager extends EventEmitter {
                                 `${currentRepresentation.id}-${choiceId}`,
                                 time,
                                 () => {
-                                    this._showSavedIcons();
+                                    this._player.showChoiceIcons(defaultLinkId);
                                     // do we want to reflect remaining time
                                     // @flowignore - tested for meta above!
                                     if (currentRepresentation
@@ -289,22 +289,12 @@ export default class RenderManager extends EventEmitter {
                         // and render when we get to the end
                         // @flowignore - tested for this._currentRenderer above!
                         this._currentRenderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                            this._showSavedIcons();
+                            this._player.showChoiceIcons(defaultLinkId);
                         });
                     }
                 });
                 this._player.enableLinkChoiceControl();
             });
-    }
-
-    // show some icons that have been saved
-    _showSavedIcons() {
-        Object.keys(this._iconsToShow).forEach((choiceId) => {
-            const choiceNumber = parseInt(choiceId, 10);
-            const { narrativeElementObjects, imgsrc } = this._iconsToShow[choiceNumber];
-            this._showLinkIcon(choiceNumber, narrativeElementObjects, imgsrc);
-        });
-        this._iconsToShow = {};
     }
 
     // start animation to reflect choice remaining
@@ -335,17 +325,12 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
-        // find the selected icon
-        let active = null;
-        this._player._linkChoice.overlay.childNodes.forEach((icon) => {
-            if (icon.className.indexOf('romper-control-selected') >= 0) {
-                active = icon;
-            }
-        });
+        // get the selected icon
+        const active = this._player.getActiveChoiceIcon();
 
-        // apply the gradient border style
         if (active) {
-            let styleDefinition = 'border-image: linear-gradient(0';
+            // apply the gradient border style
+            let styleDefinition = 'linear-gradient(0';
             for (let i = 100; i > 0; i -= percentInterval) {
                 if (i <= percent) {
                     styleDefinition += ', transparent';
@@ -353,8 +338,8 @@ export default class RenderManager extends EventEmitter {
                     styleDefinition += ', white';
                 }
             }
-            styleDefinition += ') 3;';
-            active.style = styleDefinition;
+            styleDefinition += ') 3';
+            active.style.setProperty('border-image', styleDefinition);
         }
 
         if (percent <= 99) {
@@ -365,10 +350,12 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    _applyDefaultLink() {
+    // set the link conditions so only the default is valid
+    _applyDefaultLink(): ?string {
         if (this._currentNarrativeElement.links.filter(link => link.default_link).length === 0) {
-            return;
+            return null;
         }
+        let defaultLinkId = null;
         if (Object.keys(this._savedLinkConditions).length === 0) {
             this._saveLinkConditions();
         }
@@ -376,17 +363,19 @@ export default class RenderManager extends EventEmitter {
             if (neLink.default_link) {
                 // eslint-disable-next-line no-param-reassign
                 neLink.condition = { '==': [1, 1] };
+                defaultLinkId = neLink.target_narrative_element_id;
             } else {
                 // eslint-disable-next-line no-param-reassign
                 neLink.condition = { '==': [1, 0] };
             }
         });
+        return defaultLinkId;
     }
 
-    _showLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
-        // tell Player to render icon
+    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+        // tell Player to build icon
         const targetId = narrativeElementObjects[choiceId].targetNeId;
-        const element = this._player.addLinkChoiceControl(
+        this._player.addLinkChoiceControl(
             targetId,
             imgsrc,
             `Option ${(choiceId + 1)}`,
@@ -396,12 +385,6 @@ export default class RenderManager extends EventEmitter {
                 targetId,
                 imgsrc,
             );
-        }
-        const defaults = this._currentNarrativeElement.links.filter(link => link.default_link);
-        if (defaults.length > 0 &&
-            defaults[0].target_narrative_element_id === targetId) {
-            element.classList.remove('romper-control-unselected');
-            element.classList.add('romper-control-selected');
         }
     }
 
