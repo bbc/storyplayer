@@ -450,19 +450,30 @@ export default class RenderManager extends EventEmitter {
                 && representation.meta.storyplayer
                 && representation.meta.storyplayer.choice_icons.one_shot) {
                 // hide icons
-                this._player.clearLinkChoices();
+                this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary
                 this._showOnwardIcons();
             }
             // if already ended, follow immediately
             if (this._currentRenderer && this._currentRenderer.hasEnded()) {
-                this._controller.followLink(narrativeElementId);
+                this._hideChoiceIcons(narrativeElementId);
             }
         } else {
             // or follow link now
-            this._player.clearLinkChoices();
-            this._controller.followLink(narrativeElementId);
+            this._hideChoiceIcons(narrativeElementId);
         }
+    }
+
+    // hide the choice icons, and optionally follow the link
+    _hideChoiceIcons(narrativeElementId: ?string) {
+        this._player._linkChoice.overlay.classList.add('fade');
+        setTimeout(() => {
+            this._player._linkChoice.overlay.classList.remove('fade');
+            this._player.clearLinkChoices();
+            if (narrativeElementId) {
+                this._controller.followLink(narrativeElementId);
+            }
+        }, 500);
     }
 
     // save link conditions for current NE

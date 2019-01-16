@@ -400,12 +400,12 @@ $black: #000;
 
   @keyframes appear {
     0%   {
-      margin: 10%;
+      margin: 6%;
       opacity: 0;
     }
 
     35%  {
-      margin: 0%;
+      margin: 4%;
     }
 
     100% {
@@ -429,7 +429,6 @@ $black: #000;
     }
 
     &.fade {
-      margin: 50%;
       opacity: 0;
     }
 
@@ -450,7 +449,7 @@ $black: #000;
   }
 
   .romper-link-choice-grid-cell {
-    animation: appear 0.5s;
+    animation: appear 0.8s;
     margin: 5%;
     opacity: 1;
   }
