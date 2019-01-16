@@ -30,6 +30,7 @@ class AFrameRenderer extends EventEmitter {
 
     sceneElements: Array<HTMLElement>;
     linkElements: Array<HTMLElement>;
+    _choiceIconSet: { [key: string]: HTMLElement };
 
     constructor() {
         super();
@@ -37,6 +38,7 @@ class AFrameRenderer extends EventEmitter {
         this.buildBaseAframeScene();
         this.sceneElements = [];
         this.linkElements = [];
+        this._choiceIconSet = {};
     }
 
     // build vanilla aFrame infrastructure
@@ -193,7 +195,15 @@ class AFrameRenderer extends EventEmitter {
         this.sceneElements.push(iconImageEntity);
         this.linkElements.push(img);
         this.linkElements.push(iconImageEntity);
-        this._controlBar.appendChild(iconImageEntity);
+        this._choiceIconSet[neId] = iconImageEntity;
+        // this._controlBar.appendChild(iconImageEntity);
+    }
+
+    showLinkIcons() {
+        Object.keys(this._choiceIconSet).forEach((neId) => {
+            const iconImageEntity = this._choiceIconSet[neId];
+            this._controlBar.appendChild(iconImageEntity);
+        });
     }
 
     clearLinkIcons() {
@@ -204,6 +214,9 @@ class AFrameRenderer extends EventEmitter {
             }
         }
         this._controlBar.setAttribute('width', '6');
+        Object.keys(this._choiceIconSet).forEach((neId) => {
+            delete this._choiceIconSet[neId];
+        });
         _iconCount = 0;
     }
 

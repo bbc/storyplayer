@@ -198,6 +198,7 @@ export default class RenderManager extends EventEmitter {
 
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
+    // TODO: only do this if no links have yet been rendered, or links have changed
     handleLinkChoice(narrativeElementObjects: Array<Object>) {
         if (!this._currentRenderer) {
             logger.warn('Handling link choice, but no current renderer');
@@ -292,10 +293,13 @@ export default class RenderManager extends EventEmitter {
     // parameter specifies whether to reflect time remaining on icon
     _showChoiceIcons(defaultLinkId: ?string, countdown: boolean = false) {
         this._player.showChoiceIcons(defaultLinkId);
-        // TODO: AFrameRenderer still renders when icon added
         this._player.enableLinkChoiceControl();
         if (countdown) {
             this._startTimeoutAnimation();
+        }
+
+        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+            AFrameRenderer.showLinkIcons();
         }
     }
 
@@ -374,6 +378,8 @@ export default class RenderManager extends EventEmitter {
         return defaultLinkId;
     }
 
+    // tell the player to build an icon
+    // but won't show yet
     _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
         // tell Player to build icon
         const targetId = narrativeElementObjects[choiceId].targetNeId;
@@ -421,9 +427,6 @@ export default class RenderManager extends EventEmitter {
                     neLink.condition = { '==': [1, 0] };
                 }
             });
-            // and reflect choice to user...
-            // get icon, and add class
-            // get other icons and remove class
 
             // do we keep the choice open?
             if (representation.meta
@@ -438,7 +441,7 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer && this._currentRenderer.hasEnded()) {
                 this._controller.followLink(narrativeElementId);
             }
-        } else { // else link will be followed at NE end
+        } else {
             // or follow link now
             this._player.clearLinkChoices();
             this._controller.followLink(narrativeElementId);
