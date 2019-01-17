@@ -258,16 +258,40 @@ export default class RenderManager extends EventEmitter {
     // give choice to user
     // TODO: only do this if no links have yet been rendered, or links have changed
     handleLinkChoice(narrativeElementObjects: Array<Object>) {
+        logger.warn('RenderManager choice of links - inform player');
+
         if (!this._currentRenderer) {
             logger.warn('Handling link choice, but no current renderer');
             return;
         }
         const renderer = this._currentRenderer;
-
         const defaultLinkId = this._applyDefaultLink();
         const currentRepresentation = renderer.getRepresentation();
 
-        logger.warn('RenderManager choice of links - inform player');
+        // get behaviours of links from data
+        let countdown = false;
+        let disableControls = false;
+        let timeSpecified = false;
+        let appearTime = 0;
+        if (currentRepresentation.meta
+            && currentRepresentation.meta.storyplayer
+            && currentRepresentation.meta.storyplayer.choice_icons) {
+            // do we show countdown?
+            if (currentRepresentation.meta.storyplayer.choice_icons.show_time_remaining) {
+                countdown = true;
+            }
+            // do we disable controls while choosing
+            if (currentRepresentation.meta.storyplayer.choice_icons.disable_controls) {
+                disableControls = true;
+            }
+            // when do we show?
+            if ('time_to_appear' in currentRepresentation.meta.storyplayer.choice_icons) {
+                timeSpecified = true;
+                // we want to show at specific time into NE; when?
+                appearTime = parseFloat(currentRepresentation
+                    .meta.storyplayer.choice_icons.time_to_appear);
+            }
+        }
 
         // go through promise chain to get resolved icon source urls
         const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
@@ -285,41 +309,16 @@ export default class RenderManager extends EventEmitter {
 
             this._player.setNextAvailable(false);
 
-            // do we show countdown?
-            let countdown = false;
-            if (currentRepresentation.meta
-                && currentRepresentation.meta.storyplayer
-                && currentRepresentation.meta.storyplayer.choice_icons
-                && currentRepresentation.meta.storyplayer.choice_icons.show_time_remaining) {
-                countdown = true;
-            }
-
-            // do we show countdown?
-            let disableControls = false;
-            if (currentRepresentation.meta
-                && currentRepresentation.meta.storyplayer
-                && currentRepresentation.meta.storyplayer.choice_icons
-                && currentRepresentation.meta.storyplayer.choice_icons.disable_controls) {
-                disableControls = true;
-            }
-
             // when do we show?
-            if (currentRepresentation.meta
-                && currentRepresentation.meta.storyplayer
-                && currentRepresentation.meta.storyplayer.choice_icons
-                && 'time_to_appear' in currentRepresentation.meta.storyplayer.choice_icons) {
-                // we want to show at specific time into NE; when?
-                const time = parseFloat(currentRepresentation
-                    .meta.storyplayer.choice_icons.time_to_appear);
-
-                if (time === 0) {
+            if (timeSpecified) {
+                if (appearTime === 0) {
                     // show from start
                     this._showChoiceIcons(defaultLinkId, disableControls, countdown);
                 } else {
                     // show from specified time into NE
                     renderer.addTimeEventListener(
                         `${currentRepresentation.id}`,
-                        time,
+                        appearTime,
                         () => this._showChoiceIcons(defaultLinkId, disableControls, countdown),
                     );
                 }
