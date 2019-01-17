@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls, AssetCollection,
+    RepresentationChoice, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -204,13 +204,13 @@ export default class RenderManager extends EventEmitter {
         const defaultLinkId = this._applyDefaultLink();
 
         logger.warn('RenderManager choice of links - inform player');
-        // go through promise chain to get asset collections
-        const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
+        // go through promise chain to get resolved icon source urls
+        const iconSrcPromises: Array<Promise<?string>> = [];
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // fetch icon representation
             if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
-                assetCollectionPromises.push(this._fetchers
+                iconSrcPromises.push(this._fetchers
                     .representationCollectionFetcher(choiceNarrativeElementObj.ne
                         .body.representation_collection_target_id)
                     .then(representationCollection =>
@@ -225,25 +225,32 @@ export default class RenderManager extends EventEmitter {
                             return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
                         }
                         return Promise.resolve(null);
+                    })
+                    .then((iconAssetCollection) => {
+                        if (iconAssetCollection
+                            && iconAssetCollection.assets
+                            && iconAssetCollection.assets.image_src) {
+                            return this._fetchers
+                                .mediaFetcher(iconAssetCollection.assets.image_src);
+                        }
+                        return Promise.resolve(null);
                     }));
             } else {
-                assetCollectionPromises.push(Promise.resolve(null));
+                iconSrcPromises.push(Promise.resolve(null));
             }
         });
 
         const currentRepresentation = renderer.getRepresentation();
 
         // go through asset collections and render icons
-        Promise.all(assetCollectionPromises).then((urls) => {
+        Promise.all(iconSrcPromises).then((urls) => {
             this._player.clearLinkChoices();
             AFrameRenderer.clearLinkIcons();
-            urls.forEach((iconAssetCollection, choiceId) => {
-                // @flowignore
-                const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
-                    iconAssetCollection.assets.image_src :
-                    '';
-                // add the icon to the player
-                this._buildLinkIcon(choiceId, narrativeElementObjects, imgsrc);
+            urls.forEach((iconAssetCollectionSrc, choiceId) => {
+                if (iconAssetCollectionSrc) {
+                    // add the icon to the player
+                    this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                }
             });
 
             this._player.setNextAvailable(false);
