@@ -8,6 +8,7 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
+import BaseRenderer from './renderers/BaseRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -278,6 +279,7 @@ class Player extends EventEmitter {
     removeExperienceStartButtonAndImage: Function;
     _handleFullScreenChange: Function;
     _choiceIconSet: { [key: string]: HTMLDivElement };
+    _choiceCountdownTimeout: ?TimeoutID;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
@@ -971,6 +973,55 @@ class Player extends EventEmitter {
         return this._linkChoice.getActive();
     }
 
+    // start animation to reflect choice remaining
+    startChoiceCountdown(currentRenderer: BaseRenderer) {
+        if (!this._choiceCountdownTimeout) {
+            let { remainingTime } = currentRenderer.getCurrentTime();
+            if (!remainingTime) {
+                remainingTime = 3; // default if we can't find out
+            }
+            this._reflectTimeout(currentRenderer, remainingTime);
+        }
+    }
+
+    // style the selected choice icon to reflect time remaining for choice
+    _reflectTimeout(currentRenderer: BaseRenderer, totalTime: number) {
+        const percentInterval = 1; // how many intervals in gradient
+        const timeGap = 50; // ms between updates
+
+        // work out remaining time as a proportion of total time
+        let percent = 0;
+        const { remainingTime } = currentRenderer.getCurrentTime();
+        if (remainingTime) {
+            percent = 100 - ((100 * remainingTime) / totalTime);
+        }
+
+        // get the selected icon
+        const active = this.getActiveChoiceIcon();
+
+        if (active) {
+            // apply the gradient border style
+            let styleDefinition = 'linear-gradient(0';
+            for (let i = 100; i > 0; i -= percentInterval) {
+                if (i <= percent) {
+                    styleDefinition += ', transparent';
+                } else {
+                    styleDefinition += ', white';
+                }
+            }
+            styleDefinition += ') 3';
+            active.style.setProperty('border-image', styleDefinition);
+        }
+
+        if (percent <= 99) {
+            this._choiceCountdownTimeout = setTimeout(() =>
+                this._reflectTimeout(currentRenderer, totalTime), timeGap);
+        } else if (this._choiceCountdownTimeout) {
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+        }
+    }
+
     activateRepresentationControl(id: string) {
         this._representation.removeClass(id, 'romper-control-disabled');
     }
@@ -1092,6 +1143,10 @@ class Player extends EventEmitter {
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._linkChoice.clearAll();
+        if (this._choiceCountdownTimeout) {
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+        }
     }
 
     getLinkChoiceElement(): HTMLElement {

@@ -44,7 +44,6 @@ export default class RenderManager extends EventEmitter {
     _previousButton: HTMLButtonElement;
     _player: Player;
     _assetUrls: AssetUrls;
-    _timeout: ?TimeoutID;
 
     _savedLinkConditions: { [key: string]: Object };
 
@@ -154,10 +153,6 @@ export default class RenderManager extends EventEmitter {
 
     handleNEChange(narrativeElement: NarrativeElement) {
         this._player.clearLinkChoices();
-        if (this._timeout) {
-            clearTimeout(this._timeout);
-            this._timeout = null;
-        }
         AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
@@ -311,8 +306,8 @@ export default class RenderManager extends EventEmitter {
             this._player.disableScrubBar();
             this._player.setNextAvailable(false);
         }
-        if (countdown) {
-            this._startTimeoutAnimation();
+        if (countdown && this._currentRenderer) {
+            this._player.startChoiceCountdown(this._currentRenderer);
         }
 
         if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
@@ -320,60 +315,9 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // start animation to reflect choice remaining
-    _startTimeoutAnimation() {
-        if (!this._timeout) {
-            let remainingTime = 3; // default if we can't find out
-            if (this._currentRenderer) {
-                const { reportedRemainingTime } = this._currentRenderer.getCurrentTime();
-                if (reportedRemainingTime) {
-                    remainingTime = reportedRemainingTime;
-                }
-            }
-            this._reflectTimeout(remainingTime);
-        }
-    }
-
-    // style the selected choice icon to reflect time remaining for choice
-    _reflectTimeout(totalTime: number) {
-        const percentInterval = 1; // how many intervals in gradient
-        const timeGap = 50; // ms between updates
-
-        // work out proportion through media
-        let percent = 0;
-        if (this._currentRenderer) {
-            const { remainingTime } = this._currentRenderer.getCurrentTime();
-            if (remainingTime) {
-                percent = 100 - ((100 * remainingTime) / totalTime);
-            }
-        }
-
-        // get the selected icon
-        const active = this._player.getActiveChoiceIcon();
-
-        if (active) {
-            // apply the gradient border style
-            let styleDefinition = 'linear-gradient(0';
-            for (let i = 100; i > 0; i -= percentInterval) {
-                if (i <= percent) {
-                    styleDefinition += ', transparent';
-                } else {
-                    styleDefinition += ', white';
-                }
-            }
-            styleDefinition += ') 3';
-            active.style.setProperty('border-image', styleDefinition);
-        }
-
-        if (percent <= 99) {
-            this._timeout = setTimeout(() => this._reflectTimeout(totalTime), timeGap);
-        } else if (this._timeout) {
-            clearTimeout(this._timeout);
-            this._timeout = null;
-        }
-    }
-
     // set the link conditions so only the default is valid
+    // returns the id of the NE of the default link or null if
+    // there isn't one
     _applyDefaultLink(): ?string {
         if (this._currentNarrativeElement.links.filter(link => link.default_link).length === 0) {
             return null;
