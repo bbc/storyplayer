@@ -191,21 +191,13 @@ export default class RenderManager extends EventEmitter {
         return Promise.reject(new Error('No representation_collection_target_id on NE'));
     }
 
-    // Reasoner has told us that there are multiple valid paths:
-    // give choice to user
-    // TODO: only do this if no links have yet been rendered, or links have changed
-    handleLinkChoice(narrativeElementObjects: Array<Object>) {
-        if (!this._currentRenderer) {
-            logger.warn('Handling link choice, but no current renderer');
-            return;
-        }
-        const renderer = this._currentRenderer;
-
-        const defaultLinkId = this._applyDefaultLink();
-
-        logger.warn('RenderManager choice of links - inform player');
-        // go through promise chain to get resolved icon source urls
+    _getIconSourceUrls(narrativeElementObjects: Array<Object>): Array<Promise<?string>> {
         const iconSrcPromises: Array<Promise<?string>> = [];
+        if (!this._currentRenderer) {
+            logger.warn('Getting icon source urls, but no current renderer');
+            return [];
+        }
+        const currentRepresentation = this._currentRenderer.getRepresentation();
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // fetch icon representation
@@ -217,11 +209,31 @@ export default class RenderManager extends EventEmitter {
                         this._representationReasoner(representationCollection))
                     // representation
                     .then((representation) => {
-                        if (representation.asset_collections.icon
+                        let iconAssetCollectionId = null;
+                        // is the icon specified in the source (current) representation?
+                        if (currentRepresentation.meta
+                            && currentRepresentation.meta.storyplayer
+                            && currentRepresentation.meta.storyplayer.choice_icons
+                            && currentRepresentation.meta.storyplayer
+                                .choice_icons.icon_asset_collections) {
+                            // eslint-disable-next-line max-len
+                            const linkIcons = currentRepresentation.meta.storyplayer.choice_icons.icon_asset_collections;
+                            linkIcons.forEach((linkIcon) => {
+                                if (linkIcon.target_narrative_element_id
+                                    === choiceNarrativeElementObj.ne.id) {
+                                    iconAssetCollectionId = linkIcon.asset_collection_id;
+                                }
+                            });
+                        }
+                        // if not, is an icon specified in the destination representation?
+                        if (iconAssetCollectionId === null
+                            && representation.asset_collections.icon
                             && representation.asset_collections.icon.default_id) {
                             // eslint-disable-next-line max-len
-                            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
-                            // asset collection
+                            iconAssetCollectionId = representation.asset_collections.icon.default_id;
+                        }
+                        if (iconAssetCollectionId) {
+                            // get the asset collection
                             return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
                         }
                         return Promise.resolve(null);
@@ -239,8 +251,26 @@ export default class RenderManager extends EventEmitter {
                 iconSrcPromises.push(Promise.resolve(null));
             }
         });
+        return iconSrcPromises;
+    }
 
+    // Reasoner has told us that there are multiple valid paths:
+    // give choice to user
+    // TODO: only do this if no links have yet been rendered, or links have changed
+    handleLinkChoice(narrativeElementObjects: Array<Object>) {
+        if (!this._currentRenderer) {
+            logger.warn('Handling link choice, but no current renderer');
+            return;
+        }
+        const renderer = this._currentRenderer;
+
+        const defaultLinkId = this._applyDefaultLink();
         const currentRepresentation = renderer.getRepresentation();
+
+        logger.warn('RenderManager choice of links - inform player');
+
+        // go through promise chain to get resolved icon source urls
+        const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
 
         // go through asset collections and render icons
         Promise.all(iconSrcPromises).then((urls) => {
