@@ -960,12 +960,19 @@ class Player extends EventEmitter {
         this._choiceIconSet[id] = linkChoiceControl;
     }
 
-    showChoiceIcons(activeLinkId: ?string) {
+    // show the choice icons
+    // make the one linking to activeLinkId NE highlighted
+    // optionally apply a class to the overlay
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
         Object.keys(this._choiceIconSet).forEach((id) => {
             this._linkChoice.add(id, this._choiceIconSet[id]);
         });
         if (activeLinkId) {
             this._linkChoice.setActive(activeLinkId);
+        }
+        if (overlayClass
+            && !(overlayClass in this._linkChoice.overlay.classList)) {
+            this._linkChoice.overlay.classList.add(overlayClass);
         }
     }
 

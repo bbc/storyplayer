@@ -273,6 +273,7 @@ export default class RenderManager extends EventEmitter {
         let disableControls = countdown; // default to disable if counting down
         let timeSpecified = false;
         let appearTime = 0;
+        let iconOverlayClass = null;
         if (currentRepresentation.meta
             && currentRepresentation.meta.storyplayer
             && currentRepresentation.meta.storyplayer.choice_icons) {
@@ -283,6 +284,11 @@ export default class RenderManager extends EventEmitter {
             // do we disable controls while choosing
             if (currentRepresentation.meta.storyplayer.choice_icons.disable_controls) {
                 disableControls = true;
+            }
+            // do we apply any special css classes to the overlay
+            if (currentRepresentation.meta.storyplayer.choice_icons.overlay_class) {
+                iconOverlayClass = currentRepresentation
+                    .meta.storyplayer.choice_icons.overlay_class;
             }
             // when do we show?
             if ('time_to_appear' in currentRepresentation.meta.storyplayer.choice_icons) {
@@ -309,32 +315,47 @@ export default class RenderManager extends EventEmitter {
 
             this._player.setNextAvailable(false);
 
+            // create object specifying how icons presented
+            const iconDataObject = {
+                defaultLinkId,
+                disableControls,
+                countdown,
+                iconOverlayClass,
+            };
+
             // when do we show?
             if (timeSpecified) {
                 if (appearTime === 0) {
                     // show from start
-                    this._showChoiceIcons(defaultLinkId, disableControls, countdown);
+                    this._showChoiceIcons(iconDataObject);
                 } else {
                     // show from specified time into NE
                     renderer.addTimeEventListener(
                         `${currentRepresentation.id}`,
                         appearTime,
-                        () => this._showChoiceIcons(defaultLinkId, disableControls, countdown),
+                        () => this._showChoiceIcons(iconDataObject),
                     );
                 }
             } else {
                 // if not specified, show from end
                 renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                    this._showChoiceIcons(defaultLinkId, disableControls, countdown);
+                    this._showChoiceIcons(iconDataObject);
                 });
             }
         });
     }
 
     // tell the player to show the icons
-    // parameter specifies whether to reflect time remaining on icon
-    _showChoiceIcons(defaultLinkId: ?string, disableControls: boolean, countdown: boolean = false) {
-        this._player.showChoiceIcons(defaultLinkId);
+    // parameter specifies how icons are presented
+    _showChoiceIcons(iconDataObject: Object) {
+        const {
+            defaultLinkId, // id for link to highlight at start
+            disableControls, // are controls disabled while icons shown
+            countdown, // do we animate countdown
+            iconOverlayClass, // css classes to apply to overlay
+        } = iconDataObject;
+
+        this._player.showChoiceIcons(defaultLinkId, iconOverlayClass);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
