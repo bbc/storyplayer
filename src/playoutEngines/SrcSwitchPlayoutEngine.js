@@ -211,6 +211,41 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             });
     }
 
+    isPlaying(): boolean {
+        return this._playing;
+    }
+
+    pauseBackgrounds() {
+        Object.keys(this._media)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .forEach((key) => {
+                this._media[key].mediaInstance.pause();
+            });
+    }
+
+    playBackgrounds() {
+        Object.keys(this._media)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A
+                        && this._media[key].active) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .forEach((key) => {
+                this._media[key].mediaInstance.play();
+            });
+    }
+
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaInstance) {

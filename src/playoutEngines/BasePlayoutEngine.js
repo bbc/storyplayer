@@ -71,6 +71,18 @@ export default class BasePlayoutEngine {
 
     }
 
+    isPlaying(): boolean {
+        return false;
+    }
+
+    pauseBackgrounds() {
+
+    }
+
+    playBackgrounds() {
+
+    }
+
     getCurrentTime(rendererId: string) {
         return undefined;
     }

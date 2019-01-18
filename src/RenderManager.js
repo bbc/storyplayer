@@ -45,6 +45,10 @@ export default class RenderManager extends EventEmitter {
     _player: Player;
     _assetUrls: AssetUrls;
 
+    _handleVisibilityChange: Function;
+    _isVisible: boolean;
+    _isPlaying: boolean;
+
     _savedLinkConditions: { [key: string]: Object };
 
     constructor(
@@ -64,6 +68,8 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._savedLinkConditions = {};
+        this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
+        this._isVisible = true;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -105,11 +111,45 @@ export default class RenderManager extends EventEmitter {
         AFrameRenderer.on('aframe-vr-toggle', () => {
             this.refreshLookahead();
         });
+
+        // make sure playback toggles correctly when user goes away from tab/browser
+        // Set the name of the hidden property and the change event for visibility
+        // cross-browser hackery
+        let visibilityChange = 'visibilitychange';
+        if (typeof document.hidden !== 'undefined') {
+            visibilityChange = 'visibilitychange';
+        // @flowignore
+        } else if (typeof document.msHidden !== 'undefined') {
+            visibilityChange = 'msvisibilitychange';
+        // @flowignore
+        } else if (typeof document.mozHidden !== 'undefined') {
+            visibilityChange = 'mozvisibilitychange';
+        // @flowignore
+        } else if (typeof document.webkitHidden !== 'undefined') {
+            visibilityChange = 'webkitvisibilitychange';
+        }
+        document.addEventListener(visibilityChange, this._handleVisibilityChange, false);
+
         this._initialise();
     }
 
     prepareForRestart() {
         this._player.prepareForRestart();
+    }
+
+    _handleVisibilityChange() {
+        if (this._isVisible) {
+            this._isVisible = false;
+            this._isPlaying = this._player.playoutEngine.isPlaying();
+            this._player.playoutEngine.pause();
+            this._player.playoutEngine.pauseBackgrounds();
+        } else {
+            this._isVisible = true;
+            if (this._isPlaying) {
+                this._player.playoutEngine.play();
+            }
+            this._player.playoutEngine.playBackgrounds();
+        }
     }
 
     handleStoryStart(storyId: string) {

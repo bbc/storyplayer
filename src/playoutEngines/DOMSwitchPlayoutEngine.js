@@ -344,6 +344,57 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             });
     }
 
+    isPlaying(): boolean {
+        return this._playing;
+    }
+
+    pauseBackgrounds() {
+        Object.keys(this._media)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .forEach((key) => {
+                this._media[key].mediaElement.pause();
+            });
+    }
+
+    playBackgrounds() {
+        Object.keys(this._media)
+            .filter((key) => {
+                if (this._media[key].media) {
+                    if (this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .forEach((key) => {
+                const { mediaElement } = this._media[key];
+                const playCallback = () => {
+                    mediaElement.removeEventListener(
+                        'loadeddata',
+                        playCallback,
+                    );
+                    this._play(key);
+                };
+                if (!mediaElement) {
+                    setTimeout(() => { this._play(key); }, 500);
+                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
+                    this._play(key);
+                } else {
+                    mediaElement.addEventListener(
+                        'loadeddata',
+                        playCallback,
+                    );
+                }
+            });
+    }
+
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
