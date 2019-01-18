@@ -270,7 +270,7 @@ export default class RenderManager extends EventEmitter {
 
         // get behaviours of links from data
         let countdown = false;
-        let disableControls = false;
+        let disableControls = countdown; // default to disable if counting down
         let timeSpecified = false;
         let appearTime = 0;
         if (currentRepresentation.meta

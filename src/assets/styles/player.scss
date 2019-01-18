@@ -398,29 +398,51 @@ $romper-hover-text-size: 25px;
 
   @keyframes appear {
     0%   {
-      margin: 6%;
       opacity: 0;
     }
 
     35%  {
-      margin: 4%;
+      opacity: 0.35;
     }
 
     100% {
-      margin: 5%;
       opacity: 1;
     }
   }
 
+  @keyframes countdown {
+    0% {
+      border-bottom-color: inherit;
+      border-bottom-width: 10px;
+      padding-bottom: 3px;
+    }
+
+    100% {
+      border-bottom-color: transparent;
+      border-bottom-width: 1px;
+      padding-bottom: 12px;
+    }
+  }
+
   .romper-link-choice-overlay {
+    border-bottom-color: transparent;
+    border-bottom-style: solid;
+    border-bottom-width: 13px;
     display: grid;
     grid-auto-flow: column;
-    height: 100%;
+    height: calc(100% - 13px);
     min-height: 0;
     min-width: 0;
-    transition: all 0.5s ease;
     width: 100%;
     z-index: 5;
+
+    &.icon-bar {
+      // add this class to overlay for small low icons
+      bottom: 65px;
+      height: 80px;
+      position: absolute;
+      width: 90%;
+    }
 
     &.tworow {
       grid-template-rows: 1fr 1fr;
@@ -433,22 +455,21 @@ $romper-hover-text-size: 25px;
     .romper-control-selected {
       border-image: $white;
       border-style: solid;
-      border-width: 3px;
+      border-width: 1px;
       margin: 3px;
-      transition: border none;
     }
 
     .romper-control-unselected {
-      border: 3px transparent;
+      border: 1px transparent;
       margin: 3px;
-      transition: all 0.5s ease;
+      // transition: all 0.5s ease;
     }
 
   }
 
   .romper-link-choice-grid-cell {
     animation: appear 0.8s;
-    margin: 5%;
+    // margin: 5%;
     opacity: 1;
   }
 }
