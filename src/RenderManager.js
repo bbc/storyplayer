@@ -412,24 +412,31 @@ export default class RenderManager extends EventEmitter {
     // returns the id of the NE of the default link or null if
     // there isn't one
     _applyDefaultLink(): ?string {
-        if (this._currentNarrativeElement.links.filter(link => link.default_link).length === 0) {
+        // if none have ranks, return
+        if (this._currentNarrativeElement.links.filter(link =>
+            link.link_rank).length === 0) {
             return null;
         }
-        let defaultLinkId = null;
+        // else find one with highest rank
+        const rankedLinks = this._currentNarrativeElement.links.sort((linkA, linkB) => {
+            const rankA = linkA.link_rank ? linkA.link_rank : 10000;
+            const rankB = linkB.link_rank ? linkB.link_rank : 10000;
+            return rankA - rankB;
+        });
+        const defaultLink = rankedLinks[0];
         if (Object.keys(this._savedLinkConditions).length === 0) {
             this._saveLinkConditions();
         }
         this._currentNarrativeElement.links.forEach((neLink) => {
-            if (neLink.default_link) {
+            if (neLink === defaultLink) {
                 // eslint-disable-next-line no-param-reassign
                 neLink.condition = { '==': [1, 1] };
-                defaultLinkId = neLink.target_narrative_element_id;
             } else {
                 // eslint-disable-next-line no-param-reassign
                 neLink.condition = { '==': [1, 0] };
             }
         });
-        return defaultLinkId;
+        return defaultLink.target_narrative_element_id;
     }
 
     // tell the player to build an icon
