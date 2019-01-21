@@ -196,7 +196,6 @@ class AFrameRenderer extends EventEmitter {
         this.linkElements.push(img);
         this.linkElements.push(iconImageEntity);
         this._choiceIconSet[neId] = iconImageEntity;
-        // this._controlBar.appendChild(iconImageEntity);
     }
 
     showLinkIcons() {

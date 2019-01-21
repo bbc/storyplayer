@@ -297,12 +297,12 @@ export default class RenderManager extends EventEmitter {
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
     // TODO: only do this if no links have yet been rendered, or links have changed
-    handleLinkChoice(narrativeElementObjects: Array<Object>) {
+    handleLinkChoice(narrativeElementObjects: Array<Object>): Promise<any> {
         logger.warn('RenderManager choice of links - inform player');
 
         if (!this._currentRenderer) {
             logger.warn('Handling link choice, but no current renderer');
-            return;
+            return Promise.reject();
         }
         const renderer = this._currentRenderer;
         const defaultLinkId = this._applyDefaultLink();
@@ -343,7 +343,7 @@ export default class RenderManager extends EventEmitter {
         const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
 
         // go through asset collections and render icons
-        Promise.all(iconSrcPromises).then((urls) => {
+        return Promise.all(iconSrcPromises).then((urls) => {
             this._player.clearLinkChoices();
             AFrameRenderer.clearLinkIcons();
             urls.forEach((iconAssetCollectionSrc, choiceId) => {
@@ -568,7 +568,7 @@ export default class RenderManager extends EventEmitter {
     //     stop if there is no background
     //     continue with the current one (do nothing) if background is same asset_collection
     //  or start a new background renderer
-    _handleBackgroundRendering(representation: Representation) {
+    _handleBackgroundRendering(representation: Representation): Promise<any> {
         let newBackgrounds = [];
         if (representation
             && representation.asset_collections.background_ids) {
@@ -607,7 +607,7 @@ export default class RenderManager extends EventEmitter {
         });
 
         // start renderers
-        Promise.all(rendererPromises).then((bgRendererArray) => {
+        return Promise.all(rendererPromises).then((bgRendererArray) => {
             bgRendererArray.forEach((bgRenderer) => {
                 if (bgRenderer) { bgRenderer.start(); }
             });

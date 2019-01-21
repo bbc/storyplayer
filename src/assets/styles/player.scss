@@ -462,14 +462,12 @@ $romper-hover-text-size: 25px;
     .romper-control-unselected {
       border: 1px transparent;
       margin: 3px;
-      // transition: all 0.5s ease;
     }
 
   }
 
   .romper-link-choice-grid-cell {
     animation: appear 0.8s;
-    // margin: 5%;
     opacity: 1;
   }
 }
