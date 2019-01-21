@@ -251,13 +251,9 @@ export default class RenderManager extends EventEmitter {
                     .then((representation) => {
                         let iconAssetCollectionId = null;
                         // is the icon specified in the source (current) representation?
-                        if (currentRepresentation.meta
-                            && currentRepresentation.meta.storyplayer
-                            && currentRepresentation.meta.storyplayer.choice_icons
-                            && currentRepresentation.meta.storyplayer
-                                .choice_icons.icon_asset_collections) {
+                        if (currentRepresentation.asset_collections.link_assets) {
                             // eslint-disable-next-line max-len
-                            const linkIcons = currentRepresentation.meta.storyplayer.choice_icons.icon_asset_collections;
+                            const linkIcons = currentRepresentation.asset_collections.link_assets;
                             linkIcons.forEach((linkIcon) => {
                                 if (linkIcon.target_narrative_element_id
                                     === choiceNarrativeElementObj.ne.id) {
@@ -315,27 +311,27 @@ export default class RenderManager extends EventEmitter {
         let appearTime = 0;
         let iconOverlayClass = null;
         if (currentRepresentation.meta
-            && currentRepresentation.meta.storyplayer
-            && currentRepresentation.meta.storyplayer.choice_icons) {
+            && currentRepresentation.meta.romper
+            && currentRepresentation.meta.romper.choice_interactivity) {
             // do we show countdown?
-            if (currentRepresentation.meta.storyplayer.choice_icons.show_time_remaining) {
+            if (currentRepresentation.meta.romper.choice_interactivity.show_time_remaining) {
                 countdown = true;
             }
             // do we disable controls while choosing
-            if (currentRepresentation.meta.storyplayer.choice_icons.disable_controls) {
+            if (currentRepresentation.meta.romper.choice_interactivity.disable_controls) {
                 disableControls = true;
             }
             // do we apply any special css classes to the overlay
-            if (currentRepresentation.meta.storyplayer.choice_icons.overlay_class) {
+            if (currentRepresentation.meta.romper.choice_interactivity.overlay_class) {
                 iconOverlayClass = currentRepresentation
-                    .meta.storyplayer.choice_icons.overlay_class;
+                    .meta.romper.choice_interactivity.overlay_class;
             }
             // when do we show?
-            if ('time_to_appear' in currentRepresentation.meta.storyplayer.choice_icons) {
+            if ('time_to_appear' in currentRepresentation.meta.romper.choice_interactivity) {
                 timeSpecified = true;
                 // we want to show at specific time into NE; when?
                 appearTime = parseFloat(currentRepresentation
-                    .meta.storyplayer.choice_icons.time_to_appear);
+                    .meta.romper.choice_interactivity.time_to_appear);
             }
         }
 
@@ -469,8 +465,8 @@ export default class RenderManager extends EventEmitter {
         if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
         if (representation.meta
-            && representation.meta.storyplayer
-            && representation.meta.storyplayer.choice_icons.show_ne_to_end) {
+            && representation.meta.romper
+            && representation.meta.romper.choice_interactivity.show_ne_to_end) {
             // if not done so, save initial conditions
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
@@ -488,8 +484,8 @@ export default class RenderManager extends EventEmitter {
 
             // do we keep the choice open?
             if (representation.meta
-                && representation.meta.storyplayer
-                && representation.meta.storyplayer.choice_icons.one_shot) {
+                && representation.meta.romper
+                && representation.meta.romper.choice_interactivity.one_shot) {
                 // hide icons
                 this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary

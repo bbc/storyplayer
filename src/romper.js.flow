@@ -80,6 +80,10 @@ export type Representation = {
             default_id: string,
             active_id?: string,
         },
+        link_assets?: Array<{
+            target_narrative_element_id: string,
+            asset_collection_id: string,
+        }>,
         behaviours?: Array<{
             behaviour_asset_collection_mapping_id: string,
             asset_collection_id: string
