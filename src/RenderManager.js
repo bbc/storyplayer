@@ -662,9 +662,20 @@ export default class RenderManager extends EventEmitter {
                     }
                 });
 
-                // eslint-disable-next-line max-len
-                logger.info(`completed lookahead: ${Object.keys(this._upcomingBackgroundRenderers).length} backgrounds; ${Object.keys(this._upcomingRenderers).length} foregrounds`);
-                // this._player.playoutEngine._media points to all media elements
+                Object.keys(this._backgroundRenderers).forEach((id) => {
+                    if (Object.keys(this._upcomingBackgroundRenderers).indexOf(id) === -1) {
+                        // bg renderer will end
+                        if (this._currentRenderer) {
+                            const timeObj = this._currentRenderer.getCurrentTime();
+                            if (timeObj.remainingTime) {
+                                this._backgroundRenderers[id].setFade(true, timeObj.remainingTime);
+                            }
+                        }
+                    } else {
+                        // background renderer _may_ continue (but may also end)
+                        this._backgroundRenderers[id].setFade(false);
+                    }
+                });
             });
     }
 
