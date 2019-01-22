@@ -301,7 +301,7 @@ export default class RenderManager extends EventEmitter {
             return Promise.reject();
         }
         const renderer = this._currentRenderer;
-        const defaultLinkId = this._applyDefaultLink();
+        const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
         const currentRepresentation = renderer.getRepresentation();
 
         // get behaviours of links from data
@@ -411,23 +411,37 @@ export default class RenderManager extends EventEmitter {
     // set the link conditions so only the default is valid
     // returns the id of the NE of the default link or null if
     // there isn't one
-    _applyDefaultLink(): ?string {
-        // if none have ranks, return
-        if (this._currentNarrativeElement.links.filter(link =>
-            link.link_rank).length === 0) {
+    // takes an array of objects for all currently valid links
+    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        // filter links to ones amongst the valid links
+        const validLinks = this._currentNarrativeElement.links.filter((link) => {
+            let isValidLink = false;
+            narrativeElementObjects.forEach((ne) => {
+                if (ne.targetNeId === link.target_narrative_element_id) {
+                    isValidLink = true;
+                }
+            });
+            return isValidLink;
+        });
+
+        // if no valid links have ranks, return
+        if (validLinks.filter(link => link.link_rank).length === 0) {
             return null;
         }
+
         // else find one with highest rank
-        const rankedLinks = this._currentNarrativeElement.links.sort((linkA, linkB) => {
+        const rankedLinks = validLinks.sort((linkA, linkB) => {
             const rankA = linkA.link_rank ? linkA.link_rank : 10000;
             const rankB = linkB.link_rank ? linkB.link_rank : 10000;
             return rankA - rankB;
         });
         const defaultLink = rankedLinks[0];
+
+        // save link conditions from model, and apply new ones to force default choice
         if (Object.keys(this._savedLinkConditions).length === 0) {
             this._saveLinkConditions();
         }
-        this._currentNarrativeElement.links.forEach((neLink) => {
+        validLinks.forEach((neLink) => {
             if (neLink === defaultLink) {
                 // eslint-disable-next-line no-param-reassign
                 neLink.condition = { '==': [1, 1] };
