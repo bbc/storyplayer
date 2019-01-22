@@ -414,15 +414,9 @@ export default class RenderManager extends EventEmitter {
     // takes an array of objects for all currently valid links
     _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
         // filter links to ones amongst the valid links
-        const validLinks = this._currentNarrativeElement.links.filter((link) => {
-            let isValidLink = false;
-            narrativeElementObjects.forEach((ne) => {
-                if (ne.targetNeId === link.target_narrative_element_id) {
-                    isValidLink = true;
-                }
-            });
-            return isValidLink;
-        });
+        const validLinks = this._currentNarrativeElement.links.filter(link =>
+            narrativeElementObjects.filter(ne =>
+                ne.targetNeId === link.target_narrative_element_id).length > 0);
 
         // if no valid links have ranks, return
         if (validLinks.filter(link => link.link_rank).length === 0) {
