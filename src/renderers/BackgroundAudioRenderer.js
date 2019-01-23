@@ -36,22 +36,21 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
             this._playoutEngine.setPlayoutActive(this._rendererId);
         }
-
-        if (this._assetCollection && this._assetCollection.asset_collection_type
+        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (audioElement) {
+            if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-            const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-            if (audioElement) {
                 audioElement.setAttribute('loop', 'true');
-                audioElement.volume = 0;
-                this._volFadeInterval = setInterval(() => {
-                    if (audioElement.volume >= (1 - (50 / FADE_IN_TIME)) && this._volFadeInterval) {
-                        clearInterval(this._volFadeInterval);
-                        this._volFadeInterval = null;
-                    } else {
-                        audioElement.volume += (50 / FADE_IN_TIME);
-                    }
-                }, 50);
             }
+            audioElement.volume = 0;
+            this._volFadeInterval = setInterval(() => {
+                if (audioElement.volume >= (1 - (50 / FADE_IN_TIME)) && this._volFadeInterval) {
+                    clearInterval(this._volFadeInterval);
+                    this._volFadeInterval = null;
+                } else {
+                    audioElement.volume += (50 / FADE_IN_TIME);
+                }
+            }, 50);
         }
     }
 
