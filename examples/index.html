@@ -251,8 +251,8 @@
         }
 
         function restart() {
-            showMessage('Story reloaded');
-            run(loadedStoryJson);
+            showMessage('Story restarted');
+            romperInstance.restart(loadedStoryJson.stories[0].id, getVariablesState());
             resizeWindow();
         }
 

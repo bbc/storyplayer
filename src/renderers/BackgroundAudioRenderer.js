@@ -34,7 +34,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     start() {
         this._fadePaused = false;
-        this._playoutEngine.setPlayoutActive(this._rendererId);
+        if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            this._playoutEngine.setPlayoutActive(this._rendererId);
+        }
 
         if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
