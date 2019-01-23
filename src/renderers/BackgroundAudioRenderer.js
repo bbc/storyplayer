@@ -16,6 +16,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _volFadeInterval: ?IntervalID; // fade in interval
     _fadeIntervalId: ?IntervalID; // fade out interval
     _fadeTimeoutId: ?TimeoutID; // fade out timeout
+    _fadePaused: boolean;
 
     constructor(
         assetCollection: AssetCollection,
@@ -32,6 +33,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     start() {
+        this._fadePaused = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         if (this._assetCollection && this._assetCollection.asset_collection_type
@@ -65,6 +67,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     setFade(fade: boolean, timeRemaining: ?number = null) {
+        // TODO: doesn't cope with pauses...
         if (fade && timeRemaining) {
             const msTimeRemaining = timeRemaining * 1000; // milliseconds
             // find current time
@@ -90,6 +93,14 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
     }
 
+    pauseFade() {
+        this._fadePaused = true;
+    }
+
+    resumeFade() {
+        this._fadePaused = false;
+    }
+
     // start fading out the volume, over given duration
     _fadeOut(duration: number) {
         // clear fade in
@@ -102,7 +113,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             const interval = duration / 50; // number of steps
             this._fadeIntervalId = setInterval(() => {
                 if (audioElement.volume >= (1 / interval) && this._fadeIntervalId) {
-                    audioElement.volume -= (1 / interval);
+                    if (!this._fadePaused) {
+                        audioElement.volume -= (1 / interval);
+                    }
                 } else if (this._fadeIntervalId) {
                     audioElement.volume = 0;
                     clearInterval(this._fadeIntervalId);

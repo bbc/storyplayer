@@ -100,6 +100,16 @@ export default class RenderManager extends EventEmitter {
             this._player.disableLinkChoiceControl();
             this._followLink(event.id);
         });
+        // pause background fade when fg renderer pauses
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, () => {
+            if (this._player.playoutEngine.isPlaying()) {
+                Object.keys(this._backgroundRenderers).forEach(bgrId =>
+                    this._backgroundRenderers[bgrId].resumeFade());
+            } else {
+                Object.keys(this._backgroundRenderers).forEach(bgrId =>
+                    this._backgroundRenderers[bgrId].pauseFade());
+            }
+        });
 
         AFrameRenderer.on('aframe-vr-toggle', () => {
             this.refreshLookahead();
@@ -690,6 +700,7 @@ export default class RenderManager extends EventEmitter {
                     if (this._currentRenderer) {
                         const timeObj = this._currentRenderer.getCurrentTime();
                         if (timeObj.remainingTime) {
+                            // TODO: start fade on callback from current renderer reaching time
                             this._backgroundRenderers[id].setFade(true, timeObj.remainingTime);
                         }
                     }

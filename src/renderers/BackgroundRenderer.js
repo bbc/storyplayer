@@ -34,6 +34,10 @@ export default class BackgroundRenderer extends EventEmitter {
     // eslint-disable-next-line no-unused-vars
     setFade(fade: boolean, timeRemaining: ?number) { }
 
+    pauseFade() { }
+
+    resumeFade() { }
+
     destroy() {
         this._disabled = true;
     }
