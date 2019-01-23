@@ -157,7 +157,10 @@ export default class RenderManager extends EventEmitter {
         } else {
             this._isVisible = true;
             if (this._isPlaying) {
-                this._player.playoutEngine.play();
+                // unless it has already ended, set it going again
+                if (this._currentRenderer && !this._currentRenderer.hasEnded()) {
+                    this._player.playoutEngine.play();
+                }
             }
             this._player.playoutEngine.playBackgrounds();
         }
