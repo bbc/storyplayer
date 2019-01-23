@@ -489,6 +489,7 @@ export default class RenderManager extends EventEmitter {
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
         if (!this._currentRenderer) { return; }
+        this.refreshLookahead();
         const representation = this._currentRenderer.getRepresentation();
         if (representation.meta
             && representation.meta.romper
@@ -603,7 +604,7 @@ export default class RenderManager extends EventEmitter {
             assetCollectionPromises
                 .push(this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)));
 
-        Promise.all(assetCollectionPromises).then((assetCollections) => {
+        return Promise.all(assetCollectionPromises).then((assetCollections) => {
             const srcs = [];
             assetCollections.forEach((ac) => {
                 if (ac.assets.audio_src) {
@@ -649,6 +650,7 @@ export default class RenderManager extends EventEmitter {
                         });
                 }
             });
+        });
     }
 
     /**
@@ -994,12 +996,20 @@ export default class RenderManager extends EventEmitter {
                         const timeObj = this._currentRenderer.getCurrentTime();
                         if (timeObj.remainingTime) {
                             // TODO: start fade on callback from current renderer reaching time
-                            this._backgroundRenderers[id].setFade(true, timeObj.remainingTime);
+                            if (timeObj.remainingTime < 2) {
+                                this._backgroundRenderers[id].fadeOut(timeObj.remainingTime);
+                            } else {
+                                const fadeStartTime = timeObj.currentTime + (timeObj.remainingTime - 2);
+                                this._currentRenderer.addTimeEventListener(id, fadeStartTime, () => {
+                                    this._backgroundRenderers[id].fadeOut(2000);
+                                });
+                            }
                         }
                     }
                 } else {
                     // background renderer _may_ continue (but may also end)
-                    this._backgroundRenderers[id].setFade(false);
+                    this._backgroundRenderers[id].cancelFade();
+                    this._currentRenderer.deleteTimeEventListener(id);
                 }
             });
         });
