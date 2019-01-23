@@ -1,5 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
 
 import EventEmitter from 'events';
 import uuid from 'uuid/v4';
@@ -31,8 +32,9 @@ export default class BackgroundRenderer extends EventEmitter {
 
     start() { }
 
-    // eslint-disable-next-line no-unused-vars
-    setFade(fade: boolean, timeRemaining: ?number) { }
+    cancelFade() { }
+
+    fadeOut(timeRemaining: number) { }
 
     pauseFade() { }
 

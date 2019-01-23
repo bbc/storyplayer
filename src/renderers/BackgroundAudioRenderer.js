@@ -15,7 +15,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _handleVolumeClicked: Function;
     _volFadeInterval: ?IntervalID; // fade in interval
     _fadeIntervalId: ?IntervalID; // fade out interval
-    _fadeTimeoutId: ?TimeoutID; // fade out timeout
     _fadePaused: boolean;
 
     constructor(
@@ -68,30 +67,10 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
     }
 
-    setFade(fade: boolean, timeRemaining: ?number = null) {
-        // TODO: doesn't cope with pauses...
-        if (fade && timeRemaining) {
-            const msTimeRemaining = timeRemaining * 1000; // milliseconds
-            // find current time
-            let fadeOutTime = FADETIME;
-            if (msTimeRemaining < FADETIME) {
-                fadeOutTime = msTimeRemaining;
-                this._fadeOut(fadeOutTime);
-            } else {
-                this._fadeTimeoutId = setTimeout(() => {
-                    // set interval/timeout
-                    this._fadeOut(fadeOutTime);
-                }, msTimeRemaining - fadeOutTime);
-            }
-        } else {
-            if (this._fadeIntervalId) {
-                clearInterval(this._fadeIntervalId);
-                this._fadeIntervalId = null;
-            }
-            if (this._fadeTimeoutId) {
-                clearTimeout(this._fadeTimeoutId);
-                this._fadeTimeoutId = null;
-            }
+    cancelFade() {
+        if (this._fadeIntervalId) {
+            clearInterval(this._fadeIntervalId);
+            this._fadeIntervalId = null;
         }
     }
 
@@ -104,7 +83,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     // start fading out the volume, over given duration
-    _fadeOut(duration: number) {
+    fadeOut(duration: number) {
         // clear fade in
         if (this._volFadeInterval) {
             clearInterval(this._volFadeInterval);
