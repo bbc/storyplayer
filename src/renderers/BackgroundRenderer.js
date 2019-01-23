@@ -8,6 +8,8 @@ import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 
+export const FADE_OUT_TIME = 2000; // time over which audio fades in ms
+
 export default class BackgroundRenderer extends EventEmitter {
     _rendererId: string;
     _assetCollection: AssetCollection;

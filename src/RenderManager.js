@@ -12,7 +12,7 @@ import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
-import BackgroundRenderer from './renderers/BackgroundRenderer';
+import BackgroundRenderer, { FADE_OUT_TIME } from './renderers/BackgroundRenderer';
 import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
@@ -989,6 +989,7 @@ export default class RenderManager extends EventEmitter {
                 }
             });
 
+            // set fade outs for the current background renderers
             Object.keys(this._backgroundRenderers).forEach((id) => {
                 if (Object.keys(this._upcomingBackgroundRenderers).indexOf(id) === -1) {
                     // bg renderer will end
@@ -996,16 +997,16 @@ export default class RenderManager extends EventEmitter {
                         const renderer = this._currentRenderer;
                         const timeObj = renderer.getCurrentTime();
                         if (timeObj.remainingTime) {
-                            // TODO: start fade on callback from current renderer reaching time
-                            if (timeObj.remainingTime < 2) {
+                            if (timeObj.remainingTime < (FADE_OUT_TIME / 1000)) {
                                 this._backgroundRenderers[id].fadeOut(timeObj.remainingTime);
                             } else {
                                 const fadeStartTime = timeObj.currentTime +
-                                    (timeObj.remainingTime - 2);
+                                    (timeObj.remainingTime - (FADE_OUT_TIME / 1000));
                                 renderer.addTimeEventListener(
                                     id,
                                     fadeStartTime,
-                                    () => this._backgroundRenderers[id].fadeOut(2000),
+                                    () => this._backgroundRenderers[id]
+                                        .fadeOut(FADE_OUT_TIME),
                                 );
                             }
                         }

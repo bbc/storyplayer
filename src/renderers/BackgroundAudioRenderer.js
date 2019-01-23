@@ -8,7 +8,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 
-const FADETIME = 2000; // fade in time for audio (from 0 to 1)
+const FADE_IN_TIME = 2000; // fade in time for audio in ms
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
@@ -44,11 +44,11 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                 audioElement.setAttribute('loop', 'true');
                 audioElement.volume = 0;
                 this._volFadeInterval = setInterval(() => {
-                    if (audioElement.volume >= (1 - (50 / FADETIME)) && this._volFadeInterval) {
+                    if (audioElement.volume >= (1 - (50 / FADE_IN_TIME)) && this._volFadeInterval) {
                         clearInterval(this._volFadeInterval);
                         this._volFadeInterval = null;
                     } else {
-                        audioElement.volume += (50 / FADETIME);
+                        audioElement.volume += (50 / FADE_IN_TIME);
                     }
                 }, 50);
             }
