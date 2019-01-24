@@ -17,6 +17,7 @@ import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
+import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import AFrameRenderer from './renderers/AFrameRenderer';
@@ -167,6 +168,12 @@ export default class RenderManager extends EventEmitter {
             }
             this._player.playoutEngine.playBackgrounds();
         }
+        this._analytics({
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,
+            from: this._isVisible ? 'hidden' : 'visible',
+            to: this._isVisible ? 'visible' : 'hidden',
+        });
     }
 
     handleStoryStart(storyId: string) {
