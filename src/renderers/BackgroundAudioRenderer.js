@@ -81,7 +81,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._fadePaused = false;
     }
 
-    // start fading out the volume, over given duration
+    // start fading out the volume, over given duration (seconds)
     fadeOut(duration: number) {
         // clear fade in
         if (this._volFadeInterval) {
@@ -90,7 +90,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
         const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (audioElement && !this._fadeIntervalId) {
-            const interval = duration / 50; // number of steps
+            const interval = (duration * 1000) / 50; // number of steps
             this._fadeIntervalId = setInterval(() => {
                 if (audioElement.volume >= (1 / interval) && this._fadeIntervalId) {
                     if (!this._fadePaused) {

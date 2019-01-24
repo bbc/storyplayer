@@ -12,7 +12,7 @@ import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
-import BackgroundRenderer, { FADE_OUT_TIME } from './renderers/BackgroundRenderer';
+import BackgroundRenderer from './renderers/BackgroundRenderer';
 import Controller from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
@@ -20,6 +20,8 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import AFrameRenderer from './renderers/AFrameRenderer';
+
+const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
 export default class RenderManager extends EventEmitter {
     _controller: Controller;
@@ -1000,11 +1002,11 @@ export default class RenderManager extends EventEmitter {
                         const renderer = this._currentRenderer;
                         const timeObj = renderer.getCurrentTime();
                         if (timeObj.remainingTime) {
-                            if (timeObj.remainingTime < (FADE_OUT_TIME / 1000)) {
+                            if (timeObj.remainingTime < FADE_OUT_TIME) {
                                 this._backgroundRenderers[id].fadeOut(timeObj.remainingTime);
                             } else {
                                 const fadeStartTime = timeObj.currentTime +
-                                    (timeObj.remainingTime - (FADE_OUT_TIME / 1000));
+                                    (timeObj.remainingTime - FADE_OUT_TIME);
                                 renderer.addTimeEventListener(
                                     id,
                                     fadeStartTime,
