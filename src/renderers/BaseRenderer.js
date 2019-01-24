@@ -32,7 +32,10 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
     _controller: Controller;
 
+    _hasEnded: boolean;
     inVariablePanel: boolean;
+
+    _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -76,6 +79,8 @@ export default class BaseRenderer extends EventEmitter {
         };
         this._behaviourElements = [];
 
+        this._timeEventListeners = {};
+
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
@@ -114,6 +119,7 @@ export default class BaseRenderer extends EventEmitter {
 
     start() {
         this.emit(RendererEvents.STARTED);
+        this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
         if (this.isVRViewable) {
             AFrameRenderer.addPlayPauseButton(() =>
@@ -123,6 +129,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+    }
+
+    hasEnded(): boolean {
+        return this._hasEnded;
     }
 
     // does this renderer have a show variable panel behaviour
@@ -187,6 +197,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this._hasEnded = true;
         this._player.enterCompleteBehavourPhase();
         if (this.isVRViewable) {
             AFrameRenderer.clearPlayPause();
@@ -505,6 +516,21 @@ export default class BaseRenderer extends EventEmitter {
     // eslint-disable-next-line class-methods-use-this
     isVRViewable(): boolean {
         return false;
+    }
+
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
+        this._timeEventListeners[listenerId] = callback;
+        this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
+            const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+            if (mediaElement) {
+                if (time > 0 && mediaElement.currentTime >= time) {
+                    if (listenerId in this._timeEventListeners) {
+                        delete this._timeEventListeners[listenerId];
+                        callback();
+                    }
+                }
+            }
+        });
     }
 
     /**

@@ -8,6 +8,7 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
+import BaseRenderer from './renderers/BaseRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -122,6 +123,7 @@ function createOverlay(name: string, logFunction: Function) {
 
     const elements = {};
     const labels = {};
+    let activeIconId = null;
 
     const add = (id: string, el: HTMLElement, label?: string) => {
         elements[id] = el;
@@ -153,6 +155,7 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const setActive = (id: string) => {
+        activeIconId = id;
         Object.keys(elements).forEach((key) => {
             if (key === id) {
                 elements[key].classList.add('romper-control-selected');
@@ -162,6 +165,14 @@ function createOverlay(name: string, logFunction: Function) {
                 elements[key].classList.remove('romper-control-selected');
             }
         });
+    };
+
+    const getActive = () => {
+        let activeIconElement = null;
+        if (activeIconId) {
+            activeIconElement = elements[activeIconId];
+        }
+        return activeIconElement;
     };
 
     const addClass = (id: string, classname: string) => {
@@ -212,6 +223,7 @@ function createOverlay(name: string, logFunction: Function) {
         remove,
         get,
         setActive,
+        getActive,
         addClass,
         removeClass,
         deactivateOverlay,
@@ -266,11 +278,14 @@ class Player extends EventEmitter {
     _numChoices: number;
     removeExperienceStartButtonAndImage: Function;
     _handleFullScreenChange: Function;
+    _choiceIconSet: { [key: string]: HTMLDivElement };
+    _choiceCountdownTimeout: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
         this._numChoices = 0;
+        this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
 
@@ -930,13 +945,10 @@ class Player extends EventEmitter {
         style.height = '100%';
 
         const choiceClick = () => {
-            classList.add('fade');
-            setTimeout(() => {
-                this.emit(PlayerEvents.LINK_CHOSEN, { id });
-                this._linkChoice.deactivateOverlay();
-                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
-                this._linkChoice.overlay.classList.remove('fade');
-            }, 500);
+            // set classes to show which is selected
+            this._linkChoice.setActive(id);
+            this.emit(PlayerEvents.LINK_CHOSEN, { id });
+            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
         };
         iconContainer.onclick = choiceClick;
         iconContainer.addEventListener(
@@ -945,7 +957,39 @@ class Player extends EventEmitter {
         );
 
         linkChoiceControl.appendChild(iconContainer);
-        this._linkChoice.add(id, linkChoiceControl);
+        this._choiceIconSet[id] = linkChoiceControl;
+    }
+
+    // show the choice icons
+    // make the one linking to activeLinkId NE highlighted
+    // optionally apply a class to the overlay
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+        Object.keys(this._choiceIconSet).forEach((id) => {
+            this._linkChoice.add(id, this._choiceIconSet[id]);
+        });
+        if (activeLinkId) {
+            this._linkChoice.setActive(activeLinkId);
+        }
+        if (overlayClass
+            && !(overlayClass in this._linkChoice.overlay.classList)) {
+            this._linkChoice.overlay.classList.add(overlayClass);
+        }
+    }
+
+    getActiveChoiceIcon(): ?HTMLDivElement {
+        return this._linkChoice.getActive();
+    }
+
+    // start animation to reflect choice remaining
+    startChoiceCountdown(currentRenderer: BaseRenderer) {
+        if (!this._choiceCountdownTimeout) {
+            let { remainingTime } = currentRenderer.getCurrentTime();
+            if (!remainingTime) {
+                remainingTime = 3; // default if we can't find out
+            }
+            this._choiceCountdownTimeout = true;
+            this._linkChoice.overlay.style.setProperty('animation', `countdown ${remainingTime}s`);
+        }
     }
 
     activateRepresentationControl(id: string) {
@@ -1067,7 +1111,12 @@ class Player extends EventEmitter {
 
     clearLinkChoices() {
         this._numChoices = 0;
+        this._choiceIconSet = {};
         this._linkChoice.clearAll();
+        if (this._choiceCountdownTimeout) {
+            this._choiceCountdownTimeout = false;
+        }
+        this._linkChoice.overlay.style.setProperty('animation', 'none');
     }
 
     getLinkChoiceElement(): HTMLElement {

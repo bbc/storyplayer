@@ -32,7 +32,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _outTime: number;
 
     _endedEventListener: Function;
-    _hasEnded: boolean;
     _outTimeEventListener: Function;
     _setOutTime: Function;
     _setInTime: Function;
@@ -78,7 +77,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _endedEventListener() {
         if (!this._hasEnded) {
-            this._hasEnded = true;
             super.complete();
         }
     }
@@ -95,7 +93,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -134,6 +131,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+    }
+
+    // allow for clip trimming
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
+        super.addTimeEventListener(listenerId, (time + this._inTime), callback);
     }
 
     renderVideoElement() {
@@ -225,9 +227,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // convert to time into segment
             videoTime -= this._inTime;
         }
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        let remaining = videoElement.duration;
+        if (this._outTime > 0) {
+            remaining = this._outTime;
+        }
+        remaining -= videoElement.currentTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
+            remainingTime: remaining,
         };
         return timeObject;
     }

@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls, AssetCollection,
+    RepresentationChoice, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -46,6 +46,12 @@ export default class RenderManager extends EventEmitter {
     _player: Player;
     _assetUrls: AssetUrls;
 
+    _handleVisibilityChange: Function;
+    _isVisible: boolean;
+    _isPlaying: boolean;
+
+    _savedLinkConditions: { [key: string]: Object };
+
     constructor(
         controller: Controller,
         target: HTMLElement,
@@ -62,6 +68,9 @@ export default class RenderManager extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+        this._savedLinkConditions = {};
+        this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
+        this._isVisible = true;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -97,18 +106,51 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
         this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            this._player.disableLinkChoiceControl();
             this._followLink(event.id);
         });
 
         AFrameRenderer.on('aframe-vr-toggle', () => {
             this.refreshLookahead();
         });
+
+        // make sure playback toggles correctly when user goes away from tab/browser
+        // Set the name of the hidden property and the change event for visibility
+        // cross-browser hackery
+        let visibilityChange = 'visibilitychange';
+        if (typeof document.hidden !== 'undefined') {
+            visibilityChange = 'visibilitychange';
+        // @flowignore
+        } else if (typeof document.msHidden !== 'undefined') {
+            visibilityChange = 'msvisibilitychange';
+        // @flowignore
+        } else if (typeof document.mozHidden !== 'undefined') {
+            visibilityChange = 'mozvisibilitychange';
+        // @flowignore
+        } else if (typeof document.webkitHidden !== 'undefined') {
+            visibilityChange = 'webkitvisibilitychange';
+        }
+        document.addEventListener(visibilityChange, this._handleVisibilityChange, false);
+
         this._initialise();
     }
 
     prepareForRestart() {
         this._player.prepareForRestart();
+    }
+
+    _handleVisibilityChange() {
+        if (this._isVisible) {
+            this._isVisible = false;
+            this._isPlaying = this._player.playoutEngine.isPlaying();
+            this._player.playoutEngine.pause();
+            this._player.playoutEngine.pauseBackgrounds();
+        } else {
+            this._isVisible = true;
+            if (this._isPlaying) {
+                this._player.playoutEngine.play();
+            }
+            this._player.playoutEngine.playBackgrounds();
+        }
     }
 
     handleStoryStart(storyId: string) {
@@ -190,63 +232,238 @@ export default class RenderManager extends EventEmitter {
         return Promise.reject(new Error('No representation_collection_target_id on NE'));
     }
 
-    // Reasoner has told us that there are multiple valid paths:
-    // give choice to user
-    handleLinkChoice(narrativeElementObjects: Array<Object>) {
-        logger.warn('RenderManager choice of links - inform player');
-        // go through promise chain to get asset collections
-        const assetCollectionPromises: Array<Promise<?AssetCollection>> = [];
+    _getIconSourceUrls(narrativeElementObjects: Array<Object>): Array<Promise<?string>> {
+        const iconSrcPromises: Array<Promise<?string>> = [];
+        if (!this._currentRenderer) {
+            logger.warn('Getting icon source urls, but no current renderer');
+            return [];
+        }
+        const currentRepresentation = this._currentRenderer.getRepresentation();
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // fetch icon representation
             if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
-                // eslint-disable-next-line max-len
-                assetCollectionPromises.push(this._fetchers.representationCollectionFetcher(choiceNarrativeElementObj.ne.body.representation_collection_target_id)
-                    // representationCollection
-                    .then(representationCollection => this._representationReasoner(representationCollection)) // eslint-disable-line max-len
+                iconSrcPromises.push(this._fetchers
+                    .representationCollectionFetcher(choiceNarrativeElementObj.ne
+                        .body.representation_collection_target_id)
+                    .then(representationCollection =>
+                        this._representationReasoner(representationCollection))
                     // representation
                     .then((representation) => {
-                        if (
-                            representation.asset_collections.icon &&
-                            representation.asset_collections.icon.default_id
-                        ) {
+                        let iconAssetCollectionId = null;
+                        // is the icon specified in the source (current) representation?
+                        if (currentRepresentation.asset_collections.link_assets) {
                             // eslint-disable-next-line max-len
-                            const iconAssetCollectionId = representation.asset_collections.icon.default_id;
-                            // asset collection
+                            const linkIcons = currentRepresentation.asset_collections.link_assets;
+                            linkIcons.forEach((linkIcon) => {
+                                if (linkIcon.target_narrative_element_id
+                                    === choiceNarrativeElementObj.ne.id) {
+                                    iconAssetCollectionId = linkIcon.asset_collection_id;
+                                }
+                            });
+                        }
+                        // if not, is an icon specified in the destination representation?
+                        if (iconAssetCollectionId === null
+                            && representation.asset_collections.icon
+                            && representation.asset_collections.icon.default_id) {
+                            // eslint-disable-next-line max-len
+                            iconAssetCollectionId = representation.asset_collections.icon.default_id;
+                        }
+                        if (iconAssetCollectionId) {
+                            // get the asset collection
                             return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
+                        }
+                        return Promise.resolve(null);
+                    })
+                    .then((iconAssetCollection) => {
+                        if (iconAssetCollection
+                            && iconAssetCollection.assets
+                            && iconAssetCollection.assets.image_src) {
+                            return this._fetchers
+                                .mediaFetcher(iconAssetCollection.assets.image_src);
                         }
                         return Promise.resolve(null);
                     }));
             } else {
-                assetCollectionPromises.push(Promise.resolve(null));
+                iconSrcPromises.push(Promise.resolve(null));
             }
         });
+        return iconSrcPromises;
+    }
+
+    // Reasoner has told us that there are multiple valid paths:
+    // give choice to user
+    // TODO: only do this if no links have yet been rendered, or links have changed
+    handleLinkChoice(narrativeElementObjects: Array<Object>): Promise<any> {
+        logger.warn('RenderManager choice of links - inform player');
+
+        if (!this._currentRenderer) {
+            logger.warn('Handling link choice, but no current renderer');
+            return Promise.reject();
+        }
+        const renderer = this._currentRenderer;
+        const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
+        const currentRepresentation = renderer.getRepresentation();
+
+        // get behaviours of links from data
+        let countdown = false;
+        let disableControls = countdown; // default to disable if counting down
+        let timeSpecified = false;
+        let appearTime = 0;
+        let iconOverlayClass = null;
+        if (currentRepresentation.meta
+            && currentRepresentation.meta.romper
+            && currentRepresentation.meta.romper.choice_interactivity) {
+            // do we show countdown?
+            if (currentRepresentation.meta.romper.choice_interactivity.show_time_remaining) {
+                countdown = true;
+            }
+            // do we disable controls while choosing
+            if (currentRepresentation.meta.romper.choice_interactivity.disable_controls) {
+                disableControls = true;
+            }
+            // do we apply any special css classes to the overlay
+            if (currentRepresentation.meta.romper.choice_interactivity.overlay_class) {
+                iconOverlayClass = currentRepresentation
+                    .meta.romper.choice_interactivity.overlay_class;
+            }
+            // when do we show?
+            if ('time_to_appear' in currentRepresentation.meta.romper.choice_interactivity) {
+                timeSpecified = true;
+                // we want to show at specific time into NE; when?
+                appearTime = parseFloat(currentRepresentation
+                    .meta.romper.choice_interactivity.time_to_appear);
+            }
+        }
+
+        // go through promise chain to get resolved icon source urls
+        const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
 
         // go through asset collections and render icons
-        Promise.all(assetCollectionPromises)
-            .then((urls) => {
-                this._player.clearLinkChoices();
-                AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconAssetCollection, choiceId) => {
-                    // @flowignore
-                    const imgsrc = (iconAssetCollection && iconAssetCollection.assets) ?
-                        iconAssetCollection.assets.image_src :
-                        '';
-                    // tell Player to render icon
-                    this._player.addLinkChoiceControl(
-                        narrativeElementObjects[choiceId].targetNeId,
-                        imgsrc,
-                        `Option ${(choiceId + 1)}`,
-                    );
-                    if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
-                        AFrameRenderer.addLinkIcon(
-                            narrativeElementObjects[choiceId].targetNeId,
-                            imgsrc,
-                        );
-                    }
-                });
-                this._player.enableLinkChoiceControl();
+        return Promise.all(iconSrcPromises).then((urls) => {
+            this._player.clearLinkChoices();
+            AFrameRenderer.clearLinkIcons();
+            urls.forEach((iconAssetCollectionSrc, choiceId) => {
+                if (iconAssetCollectionSrc) {
+                    // add the icon to the player
+                    this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                }
             });
+
+            this._player.setNextAvailable(false);
+
+            // create object specifying how icons presented
+            const iconDataObject = {
+                defaultLinkId,
+                disableControls,
+                countdown,
+                iconOverlayClass,
+            };
+
+            // when do we show?
+            if (timeSpecified) {
+                if (appearTime === 0) {
+                    // show from start
+                    this._showChoiceIcons(iconDataObject);
+                } else {
+                    // show from specified time into NE
+                    renderer.addTimeEventListener(
+                        `${currentRepresentation.id}`,
+                        appearTime,
+                        () => this._showChoiceIcons(iconDataObject),
+                    );
+                }
+            } else {
+                // if not specified, show from end
+                renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                    this._showChoiceIcons(iconDataObject);
+                });
+            }
+        });
+    }
+
+    // tell the player to show the icons
+    // parameter specifies how icons are presented
+    _showChoiceIcons(iconDataObject: Object) {
+        const {
+            defaultLinkId, // id for link to highlight at start
+            disableControls, // are controls disabled while icons shown
+            countdown, // do we animate countdown
+            iconOverlayClass, // css classes to apply to overlay
+        } = iconDataObject;
+
+        this._player.showChoiceIcons(defaultLinkId, iconOverlayClass);
+        this._player.enableLinkChoiceControl();
+        if (disableControls) {
+            // disable transport controls
+            this._player.disablePlayButton();
+            this._player.disableScrubBar();
+            this._player.setNextAvailable(false);
+        }
+        if (countdown && this._currentRenderer) {
+            this._player.startChoiceCountdown(this._currentRenderer);
+        }
+
+        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+            AFrameRenderer.showLinkIcons();
+        }
+    }
+
+    // set the link conditions so only the default is valid
+    // returns the id of the NE of the default link or null if
+    // there isn't one
+    // takes an array of objects for all currently valid links
+    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        // filter links to ones amongst the valid links
+        const validLinks = this._currentNarrativeElement.links.filter(link =>
+            narrativeElementObjects.filter(ne =>
+                ne.targetNeId === link.target_narrative_element_id).length > 0);
+
+        // if no valid links have ranks, return
+        if (validLinks.filter(link => link.link_rank).length === 0) {
+            return null;
+        }
+
+        // else find one with highest rank
+        const rankedLinks = validLinks.sort((linkA, linkB) => {
+            const rankA = linkA.link_rank ? linkA.link_rank : 10000;
+            const rankB = linkB.link_rank ? linkB.link_rank : 10000;
+            return rankA - rankB;
+        });
+        const defaultLink = rankedLinks[0];
+
+        // save link conditions from model, and apply new ones to force default choice
+        if (Object.keys(this._savedLinkConditions).length === 0) {
+            this._saveLinkConditions();
+        }
+        validLinks.forEach((neLink) => {
+            if (neLink === defaultLink) {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 1] };
+            } else {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 0] };
+            }
+        });
+        return defaultLink.target_narrative_element_id;
+    }
+
+    // tell the player to build an icon
+    // but won't show yet
+    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+        // tell Player to build icon
+        const targetId = narrativeElementObjects[choiceId].targetNeId;
+        this._player.addLinkChoiceControl(
+            targetId,
+            imgsrc,
+            `Option ${(choiceId + 1)}`,
+        );
+        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
+            AFrameRenderer.addLinkIcon(
+                targetId,
+                imgsrc,
+            );
+        }
     }
 
     // get the current narrative element object
@@ -261,8 +478,83 @@ export default class RenderManager extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
-        this._player.clearLinkChoices();
-        this._controller.followLink(narrativeElementId);
+        if (!this._currentRenderer) { return; }
+        const representation = this._currentRenderer.getRepresentation();
+        if (representation.meta
+            && representation.meta.romper
+            && representation.meta.romper.choice_interactivity.show_ne_to_end) {
+            // if not done so, save initial conditions
+            if (Object.keys(this._savedLinkConditions).length === 0) {
+                this._saveLinkConditions();
+            }
+            // now make this link the only valid option
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id === narrativeElementId) {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 1] };
+                } else {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 0] };
+                }
+            });
+
+            // do we keep the choice open?
+            if (representation.meta
+                && representation.meta.romper
+                && representation.meta.romper.choice_interactivity.one_shot) {
+                // hide icons
+                this._hideChoiceIcons(null);
+                // refresh next/prev so user can skip now if necessary
+                this._showOnwardIcons();
+            }
+            // if already ended, follow immediately
+            if (this._currentRenderer && this._currentRenderer.hasEnded()) {
+                this._hideChoiceIcons(narrativeElementId);
+            }
+        } else {
+            // or follow link now
+            this._hideChoiceIcons(narrativeElementId);
+        }
+    }
+
+    // hide the choice icons, and optionally follow the link
+    _hideChoiceIcons(narrativeElementId: ?string) {
+        this._player._linkChoice.overlay.classList.add('fade');
+        setTimeout(() => {
+            this._player._linkChoice.overlay.classList.remove('fade');
+            this._player.clearLinkChoices();
+            if (narrativeElementId) {
+                this._controller.followLink(narrativeElementId);
+            }
+        }, 500);
+    }
+
+    // save link conditions for current NE
+    _saveLinkConditions() {
+        if (this._currentNarrativeElement) {
+            this._savedLinkConditions = {};
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id) {
+                    this._savedLinkConditions[neLink.target_narrative_element_id] =
+                        neLink.condition;
+                }
+            });
+        }
+    }
+
+    // revert link conditions for current NE to what they were originally
+    _reapplyLinkConditions() {
+        if (this._currentNarrativeElement) {
+            this._currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id &&
+                    neLink.target_narrative_element_id in this._savedLinkConditions) {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition =
+                        this._savedLinkConditions[neLink.target_narrative_element_id];
+                }
+            });
+            this._savedLinkConditions = {};
+        }
     }
 
     // create and start a StoryIconRenderer
@@ -288,7 +580,7 @@ export default class RenderManager extends EventEmitter {
     //     stop if there is no background
     //     continue with the current one (do nothing) if background is same asset_collection
     //  or start a new background renderer
-    _handleBackgroundRendering(representation: Representation) {
+    _handleBackgroundRendering(representation: Representation): Promise<any> {
         let newBackgrounds = [];
         if (representation
             && representation.asset_collections.background_ids) {
@@ -303,10 +595,13 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
+        // get renderers
+        const rendererPromises = [];
         newBackgrounds.forEach((backgroundAssetCollectionId) => {
             // maintain ones in both, add new ones, remove old ones
             if (!this._backgroundRenderers.hasOwnProperty(backgroundAssetCollectionId)) {
-                this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)
+                rendererPromises.push(this._fetchers
+                    .assetCollectionFetcher(backgroundAssetCollectionId)
                     .then((bgAssetCollection) => {
                         let backgroundRenderer = null;
                         if (backgroundAssetCollectionId in this._upcomingBackgroundRenderers) {
@@ -321,12 +616,19 @@ export default class RenderManager extends EventEmitter {
                             );
                         }
                         if (backgroundRenderer) {
-                            backgroundRenderer.start();
                             this._backgroundRenderers[backgroundAssetCollectionId]
                                 = backgroundRenderer;
                         }
-                    });
+                        return Promise.resolve(backgroundRenderer);
+                    }));
             }
+        });
+
+        // start renderers
+        return Promise.all(rendererPromises).then((bgRendererArray) => {
+            bgRendererArray.forEach((bgRenderer) => {
+                if (bgRenderer) { bgRenderer.start(); }
+            });
         });
     }
 
@@ -398,6 +700,7 @@ export default class RenderManager extends EventEmitter {
     _restartCurrentRenderer() {
         if (this._currentRenderer) {
             const currentRenderer = this._currentRenderer;
+            this._reapplyLinkConditions();
             currentRenderer.end();
             currentRenderer.willStart();
             this._showOnwardIcons();
@@ -411,7 +714,7 @@ export default class RenderManager extends EventEmitter {
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
-
+        this._reapplyLinkConditions();
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
