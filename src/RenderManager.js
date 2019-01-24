@@ -166,7 +166,9 @@ export default class RenderManager extends EventEmitter {
                     this._player.playoutEngine.play();
                 }
             }
-            this._player.playoutEngine.playBackgrounds();
+            if (this._player.playoutEngine.hasStarted()) {
+                this._player.playoutEngine.playBackgrounds();
+            }
         }
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,

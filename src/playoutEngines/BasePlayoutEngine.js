@@ -14,11 +14,13 @@ export default class BasePlayoutEngine {
     _player: Player
     _media: Object
     _permissionToPlay: boolean;
+    _hasStarted: boolean;
 
     constructor(player: Player) {
         this._player = player;
         this._media = {};
         this._permissionToPlay = false;
+        this._hasStarted = false;
     }
 
     setPermissionToPlay(value: boolean) {
@@ -73,6 +75,10 @@ export default class BasePlayoutEngine {
 
     isPlaying(): boolean {
         return false;
+    }
+
+    hasStarted(): boolean {
+        return this._hasStarted;
     }
 
     pauseBackgrounds() {
