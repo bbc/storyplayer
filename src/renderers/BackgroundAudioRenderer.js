@@ -35,6 +35,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._fadePaused = false;
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
             this._playoutEngine.setPlayoutActive(this._rendererId);
+            logger.info(`Starting new background audio ${this._getDescriptionString()}`);
+        } else {
+            logger.info(`Continuing background audio ${this._getDescriptionString()}`);
         }
         const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (audioElement) {
@@ -52,6 +55,10 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                 }
             }, 50);
         }
+    }
+
+    _getDescriptionString(): string {
+        return this._assetCollection.name;
     }
 
     end() {
@@ -83,6 +90,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     // start fading out the volume, over given duration (seconds)
     fadeOut(duration: number) {
+        logger.info(`Fading out background audio ${this._getDescriptionString()}`);
         // clear fade in
         if (this._volFadeInterval) {
             clearInterval(this._volFadeInterval);
@@ -122,20 +130,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
             });
-        }
-    }
-
-    _renderDataModelInfo() {
-        const assetList = document.createElement('ul');
-        const backgroundItem = document.createElement('li');
-        assetList.appendChild(backgroundItem);
-        this._target.appendChild(assetList);
-
-        if (this._assetCollection) {
-            backgroundItem.textContent = `background: ${this._assetCollection.name}`;
-            if (this._assetCollection.assets.audio_src) {
-                backgroundItem.textContent += ` from ${this._assetCollection.assets.audio_src}`;
-            }
         }
     }
 
