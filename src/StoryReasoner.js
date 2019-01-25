@@ -133,7 +133,7 @@ export default class StoryReasoner extends EventEmitter {
         Object.keys(initialState).forEach((varName) => {
             this.setVariableValue(varName, initialState[varName]);
         });
-        const internalVarSetter = new InternalVariables(this._dataResolver);
+        const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
     }
 

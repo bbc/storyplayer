@@ -7,19 +7,31 @@ export const InternalVariableNames = {
     DAY_OF_WEEK: '_day_of_week',
     PORTION_OF_DAY: '_portion_of_day',
     PATH_HISTORY: '_romper_path_history',
-    LOCATION: '_location',
+    LONGITUDE: '_location_longitude',
+    LATITUDE: '_location_latitude',
 };
 
 export default class InternalVariables {
     _dataResolver: DataResolver;
+    _requirements: Object;
 
-    constructor(dataResolver: DataResolver) {
+    constructor(dataResolver: DataResolver, storyMeta: ?Object) {
         this._dataResolver = dataResolver;
+        if (storyMeta
+            && storyMeta.romper
+            && storyMeta.romper.data_requirements) {
+            this._requirements = storyMeta.romper.data_requirements;
+        } else {
+            this._requirements = {};
+        }
     }
 
     setAllVariables() {
         this._setTodaysDay();
         this._setSegmentOfDay();
+        if (this._requirements.location) {
+            this._setLocation();
+        }
     }
 
     /**
@@ -28,7 +40,7 @@ export default class InternalVariables {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any) {
+    _setVariableValue(name: string, value: any) {
         logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
     }
@@ -44,7 +56,7 @@ export default class InternalVariables {
             'Friday',
             'Saturday',
         ];
-        this.setVariableValue(InternalVariableNames.DAY_OF_WEEK, weekday[new Date().getDay()]);
+        this._setVariableValue(InternalVariableNames.DAY_OF_WEEK, weekday[new Date().getDay()]);
     }
 
     // sets the value of this variable to be a string for today's time of day
@@ -58,6 +70,23 @@ export default class InternalVariables {
         } else {
             segmentName = 'Evening';
         }
-        this.setVariableValue(InternalVariableNames.PORTION_OF_DAY, segmentName);
+        this._setVariableValue(InternalVariableNames.PORTION_OF_DAY, segmentName);
+    }
+
+    _setLocation() {
+        let latitude = null;
+        let longitude = null;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                latitude = position.coords.latitude; // eslint-disable-line prefer-destructuring
+                longitude = position.coords.longitude; // eslint-disable-line prefer-destructuring
+                this._setVariableValue(InternalVariableNames.LONGITUDE, longitude);
+                this._setVariableValue(InternalVariableNames.LATITUDE, latitude);
+            }, () => {
+                logger.info('Geolocation information not available');
+            });
+        } else {
+            logger.info('Geolocation is not supported by users browser');
+        }
     }
 }
