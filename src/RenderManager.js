@@ -55,6 +55,7 @@ export default class RenderManager extends EventEmitter {
     _isPlaying: boolean;
 
     _savedLinkConditions: { [key: string]: Object };
+    _controlsAvailable: boolean;
 
     constructor(
         controller: Controller,
@@ -75,6 +76,7 @@ export default class RenderManager extends EventEmitter {
         this._savedLinkConditions = {};
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
         this._isVisible = true;
+        this._controlsAvailable = true;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -219,6 +221,7 @@ export default class RenderManager extends EventEmitter {
 
     handleNEChange(narrativeElement: NarrativeElement) {
         this._player.clearLinkChoices();
+        this._controlsAvailable = true;
         AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
@@ -421,6 +424,7 @@ export default class RenderManager extends EventEmitter {
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
+            this._controlsAvailable = false;
             this._player.disablePlayButton();
             this._player.disableScrubBar();
             this._player.setNextAvailable(false);
@@ -530,8 +534,11 @@ export default class RenderManager extends EventEmitter {
                 && representation.meta.romper.choice_interactivity.one_shot) {
                 // hide icons
                 this._hideChoiceIcons(null);
-                // refresh next/prev so user can skip now if necessary
-                this._showOnwardIcons();
+                // @flowignore
+                if (!representation.meta.romper.choice_interactivity.disable_controls) {
+                    // refresh next/prev so user can skip now if necessary
+                    this._refreshOnwardIcons();
+                }
             }
             // if already ended, follow immediately
             if (this._currentRenderer && this._currentRenderer.hasEnded()) {
@@ -739,7 +746,7 @@ export default class RenderManager extends EventEmitter {
             this._reapplyLinkConditions();
             currentRenderer.end();
             currentRenderer.willStart();
-            this._showOnwardIcons();
+            this._refreshOnwardIcons();
         } else {
             logger.error('no current renderer to restart');
         }
@@ -793,7 +800,7 @@ export default class RenderManager extends EventEmitter {
 
         // Update availability of back and next buttons.
         this._showBackIcon();
-        this._showOnwardIcons();
+        this._refreshOnwardIcons();
 
         newRenderer.willStart();
     }
@@ -813,7 +820,12 @@ export default class RenderManager extends EventEmitter {
     }
 
     // show next button, or icons if choice
-    _showOnwardIcons() {
+    _refreshOnwardIcons() {
+        if (!this._controlsAvailable) {
+            this._player.setNextAvailable(false);
+            this._player.setBackAvailable(false);
+            return;
+        }
         const next = this._controller.getValidNextSteps();
         if (next) {
             next.then((nextNarrativeElementObjects) => {
@@ -929,7 +941,7 @@ export default class RenderManager extends EventEmitter {
                     return Promise.resolve();
                 });
 
-            this._showOnwardIcons();
+            this._refreshOnwardIcons();
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
