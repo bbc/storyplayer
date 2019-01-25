@@ -51,6 +51,7 @@ export default class RenderManager extends EventEmitter {
     _isPlaying: boolean;
 
     _savedLinkConditions: { [key: string]: Object };
+    _forceChoice: boolean;
 
     constructor(
         controller: Controller,
@@ -334,6 +335,11 @@ export default class RenderManager extends EventEmitter {
                 appearTime = parseFloat(currentRepresentation
                     .meta.romper.choice_interactivity.time_to_appear);
             }
+            if (currentRepresentation.meta.romper.choice_interactivity.force_choice) {
+                this._forceChoice = true;
+            } else {
+                this._forceChoice = false;
+            }
         }
 
         // go through promise chain to get resolved icon source urls
@@ -392,7 +398,7 @@ export default class RenderManager extends EventEmitter {
             iconOverlayClass, // css classes to apply to overlay
         } = iconDataObject;
 
-        this._player.showChoiceIcons(defaultLinkId, iconOverlayClass);
+        this._player.showChoiceIcons(this._forceChoice ? null : defaultLinkId, iconOverlayClass);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -419,18 +425,7 @@ export default class RenderManager extends EventEmitter {
             narrativeElementObjects.filter(ne =>
                 ne.targetNeId === link.target_narrative_element_id).length > 0);
 
-        // if no valid links have ranks, return
-        if (validLinks.filter(link => link.link_rank).length === 0) {
-            return null;
-        }
-
-        // else find one with highest rank
-        const rankedLinks = validLinks.sort((linkA, linkB) => {
-            const rankA = linkA.link_rank ? linkA.link_rank : 10000;
-            const rankB = linkB.link_rank ? linkB.link_rank : 10000;
-            return rankA - rankB;
-        });
-        const defaultLink = rankedLinks[0];
+        const defaultLink = validLinks[0];
 
         // save link conditions from model, and apply new ones to force default choice
         if (Object.keys(this._savedLinkConditions).length === 0) {
@@ -478,6 +473,7 @@ export default class RenderManager extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        this._forceChoice = false; // they have made their choice
         if (!this._currentRenderer) { return; }
         const representation = this._currentRenderer.getRepresentation();
         if (representation.meta
@@ -632,6 +628,12 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
+    _handleCompleted() {
+        if (!this._forceChoice) {
+            this.emit(RendererEvents.COMPLETED);
+        }
+    }
+
     /**
      * Move on to the next node of this story.
      *
@@ -656,7 +658,7 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
-                this.emit(RendererEvents.COMPLETED);
+                this._handleCompleted();
             });
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
