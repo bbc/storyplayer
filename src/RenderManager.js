@@ -342,50 +342,58 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
-        // go through promise chain to get resolved icon source urls
-        const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
+        // we want to show icons - fetch them and set their timing and behaviour
+        if (timeSpecified || this._forceChoice) {
+            // go through promise chain to get resolved icon source urls
+            const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
 
-        // go through asset collections and render icons
-        return Promise.all(iconSrcPromises).then((urls) => {
-            this._player.clearLinkChoices();
-            AFrameRenderer.clearLinkIcons();
-            urls.forEach((iconAssetCollectionSrc, choiceId) => {
-                if (iconAssetCollectionSrc) {
-                    // add the icon to the player
-                    this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+            // go through asset collections and render icons
+            return Promise.all(iconSrcPromises).then((urls) => {
+                this._player.clearLinkChoices();
+                AFrameRenderer.clearLinkIcons();
+                urls.forEach((iconAssetCollectionSrc, choiceId) => {
+                    if (iconAssetCollectionSrc) {
+                        // add the icon to the player
+                        // eslint-disable-next-line max-len
+                        this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                    }
+                });
+
+                this._player.setNextAvailable(false);
+
+                // create object specifying how icons presented
+                const iconDataObject = {
+                    defaultLinkId,
+                    disableControls,
+                    countdown,
+                    iconOverlayClass,
+                };
+
+                // when do we show?
+                if (timeSpecified) {
+                    if (appearTime === 0) {
+                        // show from start
+                        this._showChoiceIcons(iconDataObject);
+                    } else {
+                        // show from specified time into NE
+                        renderer.addTimeEventListener(
+                            `${currentRepresentation.id}`,
+                            appearTime,
+                            () => this._showChoiceIcons(iconDataObject),
+                        );
+                    }
+                } else if (this._forceChoice) {
+                    // if no time specified, then follow default link without surfacing other opions
+                    // unless choice is forced
+                    renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
+                        this._showChoiceIcons(iconDataObject);
+                    });
                 }
             });
+        }
 
-            this._player.setNextAvailable(false);
-
-            // create object specifying how icons presented
-            const iconDataObject = {
-                defaultLinkId,
-                disableControls,
-                countdown,
-                iconOverlayClass,
-            };
-
-            // when do we show?
-            if (timeSpecified) {
-                if (appearTime === 0) {
-                    // show from start
-                    this._showChoiceIcons(iconDataObject);
-                } else {
-                    // show from specified time into NE
-                    renderer.addTimeEventListener(
-                        `${currentRepresentation.id}`,
-                        appearTime,
-                        () => this._showChoiceIcons(iconDataObject),
-                    );
-                }
-            } else {
-                // if not specified, show from end
-                renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                    this._showChoiceIcons(iconDataObject);
-                });
-            }
-        });
+        // otherwise, just follow default path
+        return Promise.resolve();
     }
 
     // tell the player to show the icons

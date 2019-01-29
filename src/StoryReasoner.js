@@ -225,10 +225,9 @@ export default class StoryReasoner extends EventEmitter {
                 if (nextElementChoices) {
                     if (nextElementChoices.length > 1) {
                         this.emit('multipleValidLinks', nextElementChoices);
-                        logger.info('StoryReasoner: choice of paths - waiting for user');
-                    } else {
-                        this._followLink(nextElementChoices[0]);
+                        logger.info('StoryReasoner: multiple valid paths');
                     }
+                    this._followLink(nextElementChoices[0]);
                 } else {
                     this.emit('error', new Error('There are no possible links'));
                 }
