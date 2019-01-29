@@ -292,6 +292,59 @@ export default class RenderManager extends EventEmitter {
         return iconSrcPromises;
     }
 
+
+    // get behaviours of links from representation meta data
+    _getLinkChoiceBehaviours(): Object {
+        let countdown = false;
+        let disableControls = countdown; // default to disable if counting down
+        let timeSpecified = false;
+        let appearTime = 0;
+        let iconOverlayClass = null;
+        let forceChoice = false;
+
+        if (this._currentRenderer) {
+            const renderer = this._currentRenderer;
+            const currentRepresentation = renderer.getRepresentation();
+
+            if (currentRepresentation.meta
+                && currentRepresentation.meta.romper
+                && currentRepresentation.meta.romper.choice_interactivity) {
+                // do we show countdown?
+                if (currentRepresentation.meta.romper.choice_interactivity.show_time_remaining) {
+                    countdown = true;
+                }
+                // do we disable controls while choosing
+                if (currentRepresentation.meta.romper.choice_interactivity.disable_controls) {
+                    disableControls = true;
+                }
+                // do we apply any special css classes to the overlay
+                if (currentRepresentation.meta.romper.choice_interactivity.overlay_class) {
+                    iconOverlayClass = currentRepresentation
+                        .meta.romper.choice_interactivity.overlay_class;
+                }
+                // when do we show?
+                if ('time_to_appear' in currentRepresentation.meta.romper.choice_interactivity) {
+                    timeSpecified = true;
+                    // we want to show at specific time into NE; when?
+                    appearTime = parseFloat(currentRepresentation
+                        .meta.romper.choice_interactivity.time_to_appear);
+                }
+                if (currentRepresentation.meta.romper.choice_interactivity.force_choice) {
+                    forceChoice = true;
+                }
+            }
+        }
+
+        return {
+            countdown,
+            disableControls,
+            timeSpecified,
+            appearTime,
+            iconOverlayClass,
+            forceChoice,
+        };
+    }
+
     // Reasoner has told us that there are multiple valid paths:
     // give choice to user
     // TODO: only do this if no links have yet been rendered, or links have changed
@@ -307,40 +360,16 @@ export default class RenderManager extends EventEmitter {
         const currentRepresentation = renderer.getRepresentation();
 
         // get behaviours of links from data
-        let countdown = false;
-        let disableControls = countdown; // default to disable if counting down
-        let timeSpecified = false;
-        let appearTime = 0;
-        let iconOverlayClass = null;
-        if (currentRepresentation.meta
-            && currentRepresentation.meta.romper
-            && currentRepresentation.meta.romper.choice_interactivity) {
-            // do we show countdown?
-            if (currentRepresentation.meta.romper.choice_interactivity.show_time_remaining) {
-                countdown = true;
-            }
-            // do we disable controls while choosing
-            if (currentRepresentation.meta.romper.choice_interactivity.disable_controls) {
-                disableControls = true;
-            }
-            // do we apply any special css classes to the overlay
-            if (currentRepresentation.meta.romper.choice_interactivity.overlay_class) {
-                iconOverlayClass = currentRepresentation
-                    .meta.romper.choice_interactivity.overlay_class;
-            }
-            // when do we show?
-            if ('time_to_appear' in currentRepresentation.meta.romper.choice_interactivity) {
-                timeSpecified = true;
-                // we want to show at specific time into NE; when?
-                appearTime = parseFloat(currentRepresentation
-                    .meta.romper.choice_interactivity.time_to_appear);
-            }
-            if (currentRepresentation.meta.romper.choice_interactivity.force_choice) {
-                this._forceChoice = true;
-            } else {
-                this._forceChoice = false;
-            }
-        }
+        const {
+            countdown,
+            disableControls,
+            timeSpecified,
+            appearTime,
+            iconOverlayClass,
+            forceChoice,
+        } = this._getLinkChoiceBehaviours();
+
+        this._forceChoice = forceChoice;
 
         // we want to show icons - fetch them and set their timing and behaviour
         if (timeSpecified || this._forceChoice) {
