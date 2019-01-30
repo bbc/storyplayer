@@ -50,7 +50,6 @@ export default class RenderManager extends EventEmitter {
     _isVisible: boolean;
     _isPlaying: boolean;
 
-    _savedLinkConditions: { [key: string]: Object };
     _forceChoice: boolean;
 
     constructor(
@@ -69,7 +68,6 @@ export default class RenderManager extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
-        this._savedLinkConditions = {};
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
         this._isVisible = true;
 
@@ -107,7 +105,9 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
         this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            this._followLink(event.id);
+            if (this._currentRenderer) {
+                this._currentRenderer._followLink(event.id);
+            }
         });
 
         AFrameRenderer.on('aframe-vr-toggle', () => {
@@ -233,271 +233,6 @@ export default class RenderManager extends EventEmitter {
         return Promise.reject(new Error('No representation_collection_target_id on NE'));
     }
 
-    _getIconSourceUrls(narrativeElementObjects: Array<Object>): Array<Promise<?string>> {
-        const iconSrcPromises: Array<Promise<?string>> = [];
-        if (!this._currentRenderer) {
-            logger.warn('Getting icon source urls, but no current renderer');
-            return [];
-        }
-        const currentRepresentation = this._currentRenderer.getRepresentation();
-        narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
-            logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
-            // fetch icon representation
-            if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
-                iconSrcPromises.push(this._fetchers
-                    .representationCollectionFetcher(choiceNarrativeElementObj.ne
-                        .body.representation_collection_target_id)
-                    .then(representationCollection =>
-                        this._representationReasoner(representationCollection))
-                    // representation
-                    .then((representation) => {
-                        let iconAssetCollectionId = null;
-                        // is the icon specified in the source (current) representation?
-                        if (currentRepresentation.asset_collections.link_assets) {
-                            // eslint-disable-next-line max-len
-                            const linkIcons = currentRepresentation.asset_collections.link_assets;
-                            linkIcons.forEach((linkIcon) => {
-                                if (linkIcon.target_narrative_element_id
-                                    === choiceNarrativeElementObj.ne.id) {
-                                    iconAssetCollectionId = linkIcon.asset_collection_id;
-                                }
-                            });
-                        }
-                        // if not, is an icon specified in the destination representation?
-                        if (iconAssetCollectionId === null
-                            && representation.asset_collections.icon
-                            && representation.asset_collections.icon.default_id) {
-                            // eslint-disable-next-line max-len
-                            iconAssetCollectionId = representation.asset_collections.icon.default_id;
-                        }
-                        if (iconAssetCollectionId) {
-                            // get the asset collection
-                            return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
-                        }
-                        return Promise.resolve(null);
-                    })
-                    .then((iconAssetCollection) => {
-                        if (iconAssetCollection
-                            && iconAssetCollection.assets
-                            && iconAssetCollection.assets.image_src) {
-                            return this._fetchers
-                                .mediaFetcher(iconAssetCollection.assets.image_src);
-                        }
-                        return Promise.resolve(null);
-                    }));
-            } else {
-                iconSrcPromises.push(Promise.resolve(null));
-            }
-        });
-        return iconSrcPromises;
-    }
-
-
-    // get behaviours of links from representation meta data
-    _getLinkChoiceBehaviours(): Object {
-        let countdown = false;
-        let disableControls = countdown; // default to disable if counting down
-        let timeSpecified = false;
-        let appearTime = 0;
-        let iconOverlayClass = null;
-        let forceChoice = false;
-
-        if (this._currentRenderer) {
-            const renderer = this._currentRenderer;
-            const currentRepresentation = renderer.getRepresentation();
-
-            if (currentRepresentation.meta
-                && currentRepresentation.meta.romper
-                && currentRepresentation.meta.romper.choice_interactivity) {
-                // do we show countdown?
-                if (currentRepresentation.meta.romper.choice_interactivity.show_time_remaining) {
-                    countdown = true;
-                }
-                // do we disable controls while choosing
-                if (currentRepresentation.meta.romper.choice_interactivity.disable_controls) {
-                    disableControls = true;
-                }
-                // do we apply any special css classes to the overlay
-                if (currentRepresentation.meta.romper.choice_interactivity.overlay_class) {
-                    iconOverlayClass = currentRepresentation
-                        .meta.romper.choice_interactivity.overlay_class;
-                }
-                // when do we show?
-                if ('time_to_appear' in currentRepresentation.meta.romper.choice_interactivity) {
-                    timeSpecified = true;
-                    // we want to show at specific time into NE; when?
-                    appearTime = parseFloat(currentRepresentation
-                        .meta.romper.choice_interactivity.time_to_appear);
-                }
-                if (currentRepresentation.meta.romper.choice_interactivity.force_choice) {
-                    forceChoice = true;
-                }
-            }
-        }
-
-        return {
-            countdown,
-            disableControls,
-            timeSpecified,
-            appearTime,
-            iconOverlayClass,
-            forceChoice,
-        };
-    }
-
-    // Reasoner has told us that there are multiple valid paths:
-    // give choice to user
-    // TODO: only do this if no links have yet been rendered, or links have changed
-    handleLinkChoice(narrativeElementObjects: Array<Object>): Promise<any> {
-        logger.warn('RenderManager choice of links - inform player');
-
-        if (!this._currentRenderer) {
-            logger.warn('Handling link choice, but no current renderer');
-            return Promise.reject();
-        }
-        const renderer = this._currentRenderer;
-        const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
-        const currentRepresentation = renderer.getRepresentation();
-
-        // get behaviours of links from data
-        const {
-            countdown,
-            disableControls,
-            timeSpecified,
-            appearTime,
-            iconOverlayClass,
-            forceChoice,
-        } = this._getLinkChoiceBehaviours();
-
-        this._forceChoice = forceChoice;
-
-        // we want to show icons - fetch them and set their timing and behaviour
-        if (timeSpecified || this._forceChoice) {
-            // go through promise chain to get resolved icon source urls
-            const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects);
-
-            // go through asset collections and render icons
-            return Promise.all(iconSrcPromises).then((urls) => {
-                this._player.clearLinkChoices();
-                AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconAssetCollectionSrc, choiceId) => {
-                    if (iconAssetCollectionSrc) {
-                        // add the icon to the player
-                        // eslint-disable-next-line max-len
-                        this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
-                    }
-                });
-
-                this._player.setNextAvailable(false);
-
-                // create object specifying how icons presented
-                const iconDataObject = {
-                    defaultLinkId,
-                    disableControls,
-                    countdown,
-                    iconOverlayClass,
-                };
-
-                // when do we show?
-                if (timeSpecified) {
-                    if (appearTime === 0) {
-                        // show from start
-                        this._showChoiceIcons(iconDataObject);
-                    } else {
-                        // show from specified time into NE
-                        renderer.addTimeEventListener(
-                            `${currentRepresentation.id}`,
-                            appearTime,
-                            () => this._showChoiceIcons(iconDataObject),
-                        );
-                    }
-                } else if (this._forceChoice) {
-                    // if no time specified, then follow default link without surfacing other opions
-                    // unless choice is forced
-                    renderer.on(RendererEvents.STARTED_COMPLETE_BEHAVIOURS, () => {
-                        this._showChoiceIcons(iconDataObject);
-                    });
-                }
-            });
-        }
-
-        // otherwise, just follow default path
-        return Promise.resolve();
-    }
-
-    // tell the player to show the icons
-    // parameter specifies how icons are presented
-    _showChoiceIcons(iconDataObject: Object) {
-        const {
-            defaultLinkId, // id for link to highlight at start
-            disableControls, // are controls disabled while icons shown
-            countdown, // do we animate countdown
-            iconOverlayClass, // css classes to apply to overlay
-        } = iconDataObject;
-
-        this._player.showChoiceIcons(this._forceChoice ? null : defaultLinkId, iconOverlayClass);
-        this._player.enableLinkChoiceControl();
-        if (disableControls) {
-            // disable transport controls
-            this._player.disablePlayButton();
-            this._player.disableScrubBar();
-            this._player.setNextAvailable(false);
-        }
-        if (countdown && this._currentRenderer) {
-            this._player.startChoiceCountdown(this._currentRenderer);
-        }
-
-        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
-            AFrameRenderer.showLinkIcons();
-        }
-    }
-
-    // set the link conditions so only the default is valid
-    // returns the id of the NE of the default link or null if
-    // there isn't one
-    // takes an array of objects for all currently valid links
-    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
-        // filter links to ones amongst the valid links
-        const validLinks = this._currentNarrativeElement.links.filter(link =>
-            narrativeElementObjects.filter(ne =>
-                ne.targetNeId === link.target_narrative_element_id).length > 0);
-
-        const defaultLink = validLinks[0];
-
-        // save link conditions from model, and apply new ones to force default choice
-        if (Object.keys(this._savedLinkConditions).length === 0) {
-            this._saveLinkConditions();
-        }
-        validLinks.forEach((neLink) => {
-            if (neLink === defaultLink) {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 1] };
-            } else {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 0] };
-            }
-        });
-        return defaultLink.target_narrative_element_id;
-    }
-
-    // tell the player to build an icon
-    // but won't show yet
-    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
-        // tell Player to build icon
-        const targetId = narrativeElementObjects[choiceId].targetNeId;
-        this._player.addLinkChoiceControl(
-            targetId,
-            imgsrc,
-            `Option ${(choiceId + 1)}`,
-        );
-        if (this._currentRenderer && this._currentRenderer.isVRViewable()) {
-            AFrameRenderer.addLinkIcon(
-                targetId,
-                imgsrc,
-            );
-        }
-    }
-
     // get the current narrative element object
     getCurrentNarrativeElement(): NarrativeElement {
         return this._currentNarrativeElement;
@@ -506,88 +241,6 @@ export default class RenderManager extends EventEmitter {
     // get the current Renderer
     getCurrentRenderer(): ?BaseRenderer {
         return this._currentRenderer;
-    }
-
-    // user has made a choice of link to follow - do it
-    _followLink(narrativeElementId: string) {
-        this._forceChoice = false; // they have made their choice
-        if (!this._currentRenderer) { return; }
-        const representation = this._currentRenderer.getRepresentation();
-        if (representation.meta
-            && representation.meta.romper
-            && representation.meta.romper.choice_interactivity.show_ne_to_end) {
-            // if not done so, save initial conditions
-            if (Object.keys(this._savedLinkConditions).length === 0) {
-                this._saveLinkConditions();
-            }
-            // now make this link the only valid option
-            this._currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id === narrativeElementId) {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 1] };
-                } else {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 0] };
-                }
-            });
-
-            // do we keep the choice open?
-            if (representation.meta
-                && representation.meta.romper
-                && representation.meta.romper.choice_interactivity.one_shot) {
-                // hide icons
-                this._hideChoiceIcons(null);
-                // refresh next/prev so user can skip now if necessary
-                this._showOnwardIcons();
-            }
-            // if already ended, follow immediately
-            if (this._currentRenderer && this._currentRenderer.hasEnded()) {
-                this._hideChoiceIcons(narrativeElementId);
-            }
-        } else {
-            // or follow link now
-            this._hideChoiceIcons(narrativeElementId);
-        }
-    }
-
-    // hide the choice icons, and optionally follow the link
-    _hideChoiceIcons(narrativeElementId: ?string) {
-        this._player._linkChoice.overlay.classList.add('fade');
-        setTimeout(() => {
-            this._player._linkChoice.overlay.classList.remove('fade');
-            this._player.clearLinkChoices();
-            if (narrativeElementId) {
-                this._controller.followLink(narrativeElementId);
-            }
-        }, 500);
-    }
-
-    // save link conditions for current NE
-    _saveLinkConditions() {
-        if (this._currentNarrativeElement) {
-            this._savedLinkConditions = {};
-            this._currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id) {
-                    this._savedLinkConditions[neLink.target_narrative_element_id] =
-                        neLink.condition;
-                }
-            });
-        }
-    }
-
-    // revert link conditions for current NE to what they were originally
-    _reapplyLinkConditions() {
-        if (this._currentNarrativeElement) {
-            this._currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id &&
-                    neLink.target_narrative_element_id in this._savedLinkConditions) {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition =
-                        this._savedLinkConditions[neLink.target_narrative_element_id];
-                }
-            });
-            this._savedLinkConditions = {};
-        }
     }
 
     // create and start a StoryIconRenderer
@@ -665,12 +318,6 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    _handleCompleted() {
-        if (!this._forceChoice) {
-            this.emit(RendererEvents.COMPLETED);
-        }
-    }
-
     /**
      * Move on to the next node of this story.
      *
@@ -695,7 +342,7 @@ export default class RenderManager extends EventEmitter {
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
-                this._handleCompleted();
+                this.emit(RendererEvents.COMPLETED);
             });
             newRenderer.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.NEXT_BUTTON_CLICKED);
@@ -739,7 +386,6 @@ export default class RenderManager extends EventEmitter {
     _restartCurrentRenderer() {
         if (this._currentRenderer) {
             const currentRenderer = this._currentRenderer;
-            this._reapplyLinkConditions();
             currentRenderer.end();
             currentRenderer.willStart();
             this._showOnwardIcons();
@@ -753,7 +399,6 @@ export default class RenderManager extends EventEmitter {
     // Renderers are of the same type
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
-        this._reapplyLinkConditions();
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
@@ -817,24 +462,10 @@ export default class RenderManager extends EventEmitter {
 
     // show next button, or icons if choice
     _showOnwardIcons() {
-        const next = this._controller.getValidNextSteps();
-        if (next) {
-            next.then((nextNarrativeElementObjects) => {
-                if (nextNarrativeElementObjects.length === 1) {
-                    if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
-                        this._player.setNextAvailable(true);
-                        AFrameRenderer.addNext(() => this._player
-                            .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
-                    }
-                } else {
-                    this._player.setNextAvailable(false);
-                    AFrameRenderer.clearNext();
-                }
-                if (nextNarrativeElementObjects.length > 1) {
-                    // render icons
-                    this.handleLinkChoice(nextNarrativeElementObjects);
-                }
-            });
+        if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
+            this._player.setNextAvailable(true);
+            AFrameRenderer.addNext(() => this._player
+                .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
         }
     }
 

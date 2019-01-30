@@ -106,6 +106,19 @@ export type Representation = {
             image?: string,
             blur?: string,
         }>,
+        during?: Array<{
+            behaviour: {
+                type: string,
+                show_ne_to_end: boolean,
+                one_shot: boolean,
+                disable_controls: boolean,
+                show_time_remaining: boolean,
+                force_choice: boolean,
+                overlay_class: string,
+    },
+            start_time: number,
+            duration?: number,
+        }>,
     },
 };
 
