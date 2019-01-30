@@ -50,8 +50,6 @@ export default class RenderManager extends EventEmitter {
     _isVisible: boolean;
     _isPlaying: boolean;
 
-    _forceChoice: boolean;
-
     constructor(
         controller: Controller,
         target: HTMLElement,

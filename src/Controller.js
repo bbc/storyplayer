@@ -4,7 +4,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { ExperienceFetchers, NarrativeElement, AssetUrls } from './romper';
+import type { ExperienceFetchers, NarrativeElement, AssetUrls, Representation } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
@@ -187,6 +187,10 @@ export default class Controller extends EventEmitter {
 
     getCurrentRenderer(): ?BaseRenderer {
         return this._renderManager.getCurrentRenderer();
+    }
+
+    getCurrentNarrativeElement(): NarrativeElement {
+        return this._currentNarrativeElement;
     }
 
     // add event listeners to manager
@@ -678,6 +682,20 @@ export default class Controller extends EventEmitter {
         return this.getValidNextSteps(narrativeElement.id)
             .then(nextNarrativeElementObjects =>
                 nextNarrativeElementObjects.map(neObj => neObj.ne.id));
+    }
+
+    // given the NE id, reason to find a representation
+    getRepresentationForNarrativeElementId(narrativeElementId: string): Promise<?Representation> {
+        return this._fetchers.narrativeElementFetcher(narrativeElementId).then((narrativeElement) => {
+            if (narrativeElement && narrativeElement.body.representation_collection_target_id) {
+                return this._fetchers
+                    .representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
+                    .then(representationCollection =>
+                        this._representationReasoner(representationCollection));
+            }
+            // TODO: go into story if ne points to one
+            return Promise.resolve(null);
+        });
     }
 
     reset() {

@@ -393,9 +393,19 @@ export default class BaseRenderer extends EventEmitter {
                 });
             }
             if (iconAssetCollectionId === null) {
-                // not specified - get default icon...
+                // TODO not specified - get default icon...
+                iconAssetCollectionIdPromises.push(this._controller.getRepresentationForNarrativeElementId(choiceNarrativeElementObj
+                    .ne.id).then((representation) => {
+                    if (representation && representation.asset_collections.icon
+                        && representation.asset_collections.icon.default_id) {
+                        // eslint-disable-next-line max-len
+                        return Promise.resolve(representation.asset_collections.icon.default_id);
+                    }
+                    return Promise.resolve(null);
+                }));
+            } else {
+                iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
             }
-            iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
         });
 
         return Promise.all(iconAssetCollectionIdPromises).then((iconAssetCollectionIds) => {
@@ -419,42 +429,6 @@ export default class BaseRenderer extends EventEmitter {
             });
             return urls;
         });
-        // // fetch icon representation
-        // if (choiceNarrativeElementObj.ne.body.representation_collection_target_id) {
-        //     iconSrcPromises.push(this._fetchers
-        //         .representationCollectionFetcher(choiceNarrativeElementObj.ne
-        //             .body.representation_collection_target_id)
-        //         .then(representationCollection =>
-        //             this._representationReasoner(representationCollection))
-        //         // representation
-        //         .then((representation) => {
-        //              // if not, is an icon specified in the destination representation?
-        //             if (iconAssetCollectionId === null
-        //                 && representation.asset_collections.icon
-        //                 && representation.asset_collections.icon.default_id) {
-        //                 // eslint-disable-next-line max-len
-        //                 iconAssetCollectionId = representation.asset_collections.icon.default_id;
-        //             }
-        //             if (iconAssetCollectionId) {
-        //                 // get the asset collection
-        //                 return this._fetchers.assetCollectionFetcher(iconAssetCollectionId);
-        //             }
-        //             return Promise.resolve(null);
-        //         })
-        //         .then((iconAssetCollection) => {
-        //             if (iconAssetCollection
-        //                 && iconAssetCollection.assets
-        //                 && iconAssetCollection.assets.image_src) {
-        //                 return this._fetchers
-        //                     .mediaFetcher(iconAssetCollection.assets.image_src);
-        //             }
-        //             return Promise.resolve(null);
-        //         }));
-        // } else {
-        //     iconSrcPromises.push(Promise.resolve(null));
-        // }
-        // });
-        // return iconSrcPromises;
     }
 
     // tell the player to build an icon
@@ -508,8 +482,7 @@ export default class BaseRenderer extends EventEmitter {
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
-        const currentNarrativeElement = this._controller._renderManager
-            .getCurrentNarrativeElement();
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         if (this._linkBehaviour && this._linkBehaviour.showNeToEnd) {
             // if not done so, save initial conditions
             if (Object.keys(this._savedLinkConditions).length === 0) {
@@ -549,8 +522,7 @@ export default class BaseRenderer extends EventEmitter {
     // takes an array of objects for all currently valid links
     _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
         // filter links to ones amongst the valid links
-        const currentNarrativeElement = this._controller._renderManager
-            .getCurrentNarrativeElement();
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         const validLinks = currentNarrativeElement.links.filter(link =>
             narrativeElementObjects.filter(ne =>
                 ne.targetNeId === link.target_narrative_element_id).length > 0);
@@ -575,8 +547,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // save link conditions for current NE
     _saveLinkConditions() {
-        const currentNarrativeElement = this._controller._renderManager
-            .getCurrentNarrativeElement();
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         this._savedLinkConditions = {};
         currentNarrativeElement.links.forEach((neLink) => {
             if (neLink.target_narrative_element_id) {
@@ -588,8 +559,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // revert link conditions for current NE to what they were originally
     _reapplyLinkConditions() {
-        const currentNarrativeElement = this._controller._renderManager
-            .getCurrentNarrativeElement();
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         currentNarrativeElement.links.forEach((neLink) => {
             if (neLink.target_narrative_element_id &&
                 neLink.target_narrative_element_id in this._savedLinkConditions) {
