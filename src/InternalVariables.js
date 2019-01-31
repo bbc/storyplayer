@@ -6,7 +6,7 @@ import logger from './logger';
 export const InternalVariableNames = {
     DAY_OF_WEEK: '_day_of_week',
     PORTION_OF_DAY: '_portion_of_day',
-    PATH_HISTORY: '_romper_path_history',
+    PATH_HISTORY: '_path_history',
     LONGITUDE: '_location_longitude',
     LATITUDE: '_location_latitude',
 };
