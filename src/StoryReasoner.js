@@ -6,6 +6,7 @@ import type { Story, NarrativeElement, Link, DataResolver } from './romper';
 import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
+import InternalVariables, { InternalVariableNames } from './InternalVariables';
 
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
@@ -132,38 +133,10 @@ export default class StoryReasoner extends EventEmitter {
         Object.keys(initialState).forEach((varName) => {
             this.setVariableValue(varName, initialState[varName]);
         });
-        this._setTodaysDay();
-        this._setSegmentOfDay();
+        const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
+        internalVarSetter.setAllVariables();
     }
 
-    // TODO: hacky - need proper way of handling programmatically determined variables
-    // sets the value of this variable to be a string for today's day of the week
-    _setTodaysDay() {
-        const weekday = [
-            'Sunday',
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-        ];
-        this.setVariableValue('_day_of_week', weekday[new Date().getDay()]);
-    }
-
-    // sets the value of this variable to be a string for today's time of day
-    _setSegmentOfDay() {
-        const hourNow = new Date().getHours();
-        let segmentName;
-        if (hourNow < 12) {
-            segmentName = 'Morning';
-        } else if (hourNow < 17) {
-            segmentName = 'Afternoon';
-        } else {
-            segmentName = 'Evening';
-        }
-        this.setVariableValue('_portion_of_day', segmentName);
-    }
 
     /**
      * Move on to the next node of this story.
@@ -302,14 +275,14 @@ export default class StoryReasoner extends EventEmitter {
      */
     appendToHistory(narrativeElementId: string) {
         logger.info(`Storing ${narrativeElementId} in history`);
-        this._dataResolver.get('romper_path_history')
+        this._dataResolver.get(InternalVariableNames.PATH_HISTORY)
             .then((value) => {
                 let neList = [];
                 if (value !== null) {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
-                this.setVariableValue('romper_path_history', neList);
+                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList);
             });
     }
 
