@@ -102,11 +102,6 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
             this._rendererState.volumes[event.label] = event.value;
         });
-        this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            if (this._currentRenderer) {
-                this._currentRenderer._followLink(event.id);
-            }
-        });
 
         AFrameRenderer.on('aframe-vr-toggle', () => {
             this.refreshLookahead();

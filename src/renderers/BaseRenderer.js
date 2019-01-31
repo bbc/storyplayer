@@ -296,6 +296,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
+        this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
+            this._followLink(event.id);
+        });
+
         logger.info('Rendering link icons for user choice');
         // get behaviours of links from data
         const {
