@@ -353,35 +353,34 @@ export default class BaseRenderer extends EventEmitter {
 
     // get behaviours of links from behaviour meta data
     _getLinkChoiceBehaviours(behaviour: Object): Object {
-        // TODO: need to think about defaults...
         let countdown = false;
         let disableControls = countdown; // default to disable if counting down
         let iconOverlayClass = null;
         let forceChoice = false;
         let oneShot = false;
-        let showNeToEnd = false;
+        let showNeToEnd = true;
 
-        if (behaviour.show_ne_to_end) {
-            showNeToEnd = true;
+        if (behaviour.hasOwnProperty('show_ne_to_end')) {
+            showNeToEnd = behaviour.show_ne_to_end;
         }
-        if (behaviour.one_shot) {
-            oneShot = true;
+        if (behaviour.hasOwnProperty('one_shot')) {
+            oneShot = behaviour.one_shot;
         }
 
         // do we show countdown?
-        if (behaviour.show_time_remaining) {
-            countdown = true;
+        if (behaviour.hasOwnProperty('show_time_remaining')) {
+            countdown = behaviour.show_time_remaining;
         }
         // do we disable controls while choosing
-        if (behaviour.disable_controls) {
-            disableControls = true;
+        if (behaviour.hasOwnProperty('disable_controls')) {
+            disableControls = behaviour.disable_controls;
         }
         // do we apply any special css classes to the overlay
-        if (behaviour.overlay_class) {
+        if (behaviour.hasOwnProperty('overlay_class')) {
             iconOverlayClass = behaviour.overlay_class;
         }
-        if (behaviour.force_choice) {
-            forceChoice = true;
+        if (behaviour.hasOwnProperty('force_choice')) {
+            forceChoice = behaviour.force_choice;
         }
 
         return {
@@ -619,7 +618,7 @@ export default class BaseRenderer extends EventEmitter {
             this._player.clearLinkChoices();
             if (narrativeElementId) {
                 this._controller.followLink(narrativeElementId);
-            } else{
+            } else {
                 this._linkBehaviour.callback();
             }
         }, 500);
