@@ -619,6 +619,7 @@ export default class BaseRenderer extends EventEmitter {
             this._player.clearLinkChoices();
             if (narrativeElementId) {
                 this._controller.followLink(narrativeElementId);
+            } else{
                 this._linkBehaviour.callback();
             }
         }, 500);
