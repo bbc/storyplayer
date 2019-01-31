@@ -394,15 +394,16 @@ export default class BaseRenderer extends EventEmitter {
             }
             if (iconAssetCollectionId === null) {
                 // TODO not specified - get default icon...
-                iconAssetCollectionIdPromises.push(this._controller.getRepresentationForNarrativeElementId(choiceNarrativeElementObj
-                    .ne.id).then((representation) => {
-                    if (representation && representation.asset_collections.icon
-                        && representation.asset_collections.icon.default_id) {
-                        // eslint-disable-next-line max-len
-                        return Promise.resolve(representation.asset_collections.icon.default_id);
-                    }
-                    return Promise.resolve(null);
-                }));
+                iconAssetCollectionIdPromises.push(this._controller
+                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
+                    .then((representation) => {
+                        if (representation && representation.asset_collections.icon
+                            && representation.asset_collections.icon.default_id) {
+                            // eslint-disable-next-line max-len
+                            return Promise.resolve(representation.asset_collections.icon.default_id);
+                        }
+                        return Promise.resolve(null);
+                    }));
             } else {
                 iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
             }

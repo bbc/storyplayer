@@ -685,17 +685,36 @@ export default class Controller extends EventEmitter {
     }
 
     // given the NE id, reason to find a representation
+    // reasons into sub story if necessary
     getRepresentationForNarrativeElementId(narrativeElementId: string): Promise<?Representation> {
-        return this._fetchers.narrativeElementFetcher(narrativeElementId).then((narrativeElement) => {
-            if (narrativeElement && narrativeElement.body.representation_collection_target_id) {
-                return this._fetchers
-                    .representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
-                    .then(representationCollection =>
-                        this._representationReasoner(representationCollection));
-            }
-            // TODO: go into story if ne points to one
-            return Promise.resolve(null);
-        });
+        return this._fetchers.narrativeElementFetcher(narrativeElementId)
+            .then((narrativeElement) => {
+                if (narrativeElement && narrativeElement.body.representation_collection_target_id) {
+                    return this._fetchers
+                        .representationCollectionFetcher(narrativeElement.body
+                            .representation_collection_target_id)
+                        .then(representationCollection =>
+                            this._representationReasoner(representationCollection));
+                } else if (this._reasoner
+                    && narrativeElement
+                    && narrativeElement.body.story_target_id) {
+                    // fetch story
+                    return this._fetchers.storyFetcher(narrativeElement.body.story_target_id)
+                        .then((story) => {
+                            if (this._reasoner) {
+                                return this._reasoner.getBeginning(story);
+                            }
+                            return Promise.resolve(null);
+                        })
+                        .then((beginning) => {
+                            if (beginning) {
+                                return this.getRepresentationForNarrativeElementId(beginning);
+                            }
+                            return Promise.resolve(null);
+                        });
+                }
+                return Promise.resolve(null);
+            });
     }
 
     reset() {

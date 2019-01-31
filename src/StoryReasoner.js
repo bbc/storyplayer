@@ -211,6 +211,16 @@ export default class StoryReasoner extends EventEmitter {
             });
     }
 
+    getBeginning(story: Story): Promise<?string> {
+        return evaluateConditions(story.beginnings, this._dataResolver)
+            .then((beginnings) => {
+                if (beginnings && beginnings.length > 0) {
+                    return beginnings[0].narrative_element_id;
+                }
+                return null;
+            });
+    }
+
     _chooseNextNode() {
         this._resolving = true;
         if (this._currentNarrativeElement.links.length === 0) {
