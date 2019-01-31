@@ -33,7 +33,7 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
     _controller: Controller;
 
-    _savedLinkConditions: { [key: string]: Object };
+    _savedLinkConditions: Object;
     _linkBehaviour: Object;
 
     _hasEnded: boolean;
@@ -210,7 +210,6 @@ export default class BaseRenderer extends EventEmitter {
         this._hasEnded = true;
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
-            this._reapplyLinkConditions();
             this._player.enterCompleteBehavourPhase();
             if (this.isVRViewable) {
                 AFrameRenderer.clearPlayPause();
@@ -285,6 +284,7 @@ export default class BaseRenderer extends EventEmitter {
             showNeToEnd,
             oneShot,
             forceChoice,
+            callback: forceChoice ? callback : () => {},
         };
 
         // get valid links
@@ -317,7 +317,9 @@ export default class BaseRenderer extends EventEmitter {
                 // associate click behaviour
                 // add to player
                 // callback
-                callback();
+                if (!forceChoice) {
+                    callback();
+                }
             });
         });
     }
@@ -529,9 +531,8 @@ export default class BaseRenderer extends EventEmitter {
                 ne.targetNeId === link.target_narrative_element_id).length > 0);
 
         const defaultLink = validLinks[0];
-
         // save link conditions from model, and apply new ones to force default choice
-        if (Object.keys(this._savedLinkConditions).length === 0) {
+        if (!this._savedLinkConditions.narrativeElement) {
             this._saveLinkConditions();
         }
         validLinks.forEach((neLink) => {
@@ -549,37 +550,49 @@ export default class BaseRenderer extends EventEmitter {
     // save link conditions for current NE
     _saveLinkConditions() {
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        this._savedLinkConditions = {};
+        const conditions = [];
         currentNarrativeElement.links.forEach((neLink) => {
             if (neLink.target_narrative_element_id) {
-                this._savedLinkConditions[neLink.target_narrative_element_id] =
-                    neLink.condition;
+                conditions.push({
+                    target: neLink.target_narrative_element_id,
+                    condition: neLink.condition,
+                });
             }
         });
+        this._savedLinkConditions = {
+            narrativeElement: currentNarrativeElement,
+            conditions,
+        };
     }
 
     // revert link conditions for current NE to what they were originally
     _reapplyLinkConditions() {
-        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        currentNarrativeElement.links.forEach((neLink) => {
-            if (neLink.target_narrative_element_id &&
-                neLink.target_narrative_element_id in this._savedLinkConditions) {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition =
-                    this._savedLinkConditions[neLink.target_narrative_element_id];
-            }
-        });
-        this._savedLinkConditions = {};
+        if (this._savedLinkConditions.narrativeElement) {
+            const currentNarrativeElement = this._savedLinkConditions.narrativeElement;
+            currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id) {
+                    const matches = this._savedLinkConditions.conditions
+                        .filter(cond => cond.target === neLink.target_narrative_element_id);
+                    if (matches.length > 0) {
+                        // eslint-disable-next-line no-param-reassign
+                        neLink.condition = matches[0].condition;
+                    }
+                }
+            });
+            this._savedLinkConditions = {};
+        }
     }
 
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
+        if (narrativeElementId) { this._reapplyLinkConditions(); }
         this._player._linkChoice.overlay.classList.add('fade');
         setTimeout(() => {
             this._player._linkChoice.overlay.classList.remove('fade');
             this._player.clearLinkChoices();
             if (narrativeElementId) {
                 this._controller.followLink(narrativeElementId);
+                this._linkBehaviour.callback();
             }
         }, 500);
     }

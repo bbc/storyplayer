@@ -53,6 +53,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     end() {
+        super.end();
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
