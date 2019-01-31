@@ -242,6 +242,33 @@ export default class BaseRenderer extends EventEmitter {
         return this._behaviourRendererMap[behaviourUrn];
     }
 
+    hasShowIconBehaviour(): boolean {
+        if (this._representation.behaviours) {
+            if (this._representation.behaviours.started) {
+                const startMatches = this._representation.behaviours.started.filter(behave =>
+                    behave.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (startMatches.length > 0) {
+                    return true;
+                }
+            }
+            if (this._representation.behaviours.completed) {
+                const endMatches = this._representation.behaviours.completed.filter(behave =>
+                    behave.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (endMatches.length > 0) {
+                    return true;
+                }
+            }
+            if (this._representation.behaviours.during) {
+                const matches = this._representation.behaviours.during.filter(behave =>
+                    behave.behaviour.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (matches.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     _runDuringBehaviours() {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             // for each behaviour

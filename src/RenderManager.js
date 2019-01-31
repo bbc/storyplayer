@@ -460,10 +460,18 @@ export default class RenderManager extends EventEmitter {
 
     // show next button, or icons if choice
     _showOnwardIcons() {
-        if (this._currentRenderer && !this._currentRenderer.inVariablePanel) {
-            this._player.setNextAvailable(true);
-            AFrameRenderer.addNext(() => this._player
-                .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
+        if (this._currentRenderer
+            && !this._currentRenderer.inVariablePanel
+            && !this._currentRenderer.hasShowIconBehaviour()) {
+            // and current representation doesn't have show icons behaviour
+            // show next, but only if there is one!
+            this._controller.getValidNextSteps().then((nextNodes) => {
+                this._player.setNextAvailable(nextNodes.length > 0);
+                AFrameRenderer.addNext(() => this._player
+                    .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
+            });
+        } else {
+            this._player.setNextAvailable(false);
         }
     }
 
