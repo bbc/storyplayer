@@ -1,5 +1,6 @@
 // @flow
-
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
 
 import EventEmitter from 'events';
 import uuid from 'uuid/v4';
@@ -29,8 +30,15 @@ export default class BackgroundRenderer extends EventEmitter {
         this._disabled = false;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     start() { }
+
+    cancelFade() { }
+
+    fadeOut(duration: number) { }
+
+    pauseFade() { }
+
+    resumeFade() { }
 
     destroy() {
         this._disabled = true;

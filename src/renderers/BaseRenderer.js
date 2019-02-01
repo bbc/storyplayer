@@ -533,6 +533,12 @@ export default class BaseRenderer extends EventEmitter {
         });
     }
 
+    deleteTimeEventListener(listenerId: string) {
+        if (listenerId in this._timeEventListeners) {
+            delete this._timeEventListeners[listenerId];
+        }
+    }
+
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.

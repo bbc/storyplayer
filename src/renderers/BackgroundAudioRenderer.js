@@ -8,9 +8,14 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 
+const FADE_IN_TIME = 2000; // fade in time for audio in ms
+
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
     _handleVolumeClicked: Function;
+    _volFadeInterval: ?IntervalID; // fade in interval
+    _fadeIntervalId: ?IntervalID; // fade out interval
+    _fadePaused: boolean;
 
     constructor(
         assetCollection: AssetCollection,
@@ -27,21 +32,85 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     start() {
+        this._fadePaused = false;
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
             this._playoutEngine.setPlayoutActive(this._rendererId);
+            logger.info(`Starting new background audio ${this._getDescriptionString()}`);
+        } else {
+            logger.info(`Continuing background audio ${this._getDescriptionString()}`);
         }
-
-        if (this._assetCollection && this._assetCollection.asset_collection_type
+        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (audioElement) {
+            if (this._assetCollection && this._assetCollection.asset_collection_type
                 === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-            const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-            if (audioElement) {
                 audioElement.setAttribute('loop', 'true');
             }
+            audioElement.volume = 0;
+            this._volFadeInterval = setInterval(() => {
+                if (audioElement.volume >= (1 - (50 / FADE_IN_TIME)) && this._volFadeInterval) {
+                    clearInterval(this._volFadeInterval);
+                    this._volFadeInterval = null;
+                } else {
+                    audioElement.volume += (50 / FADE_IN_TIME);
+                }
+            }, 50);
         }
+    }
+
+    _getDescriptionString(): string {
+        return this._assetCollection.name;
     }
 
     end() {
         this._playoutEngine.setPlayoutInactive(this._rendererId);
+        if (this._volFadeInterval) {
+            clearInterval(this._volFadeInterval);
+            this._volFadeInterval = null;
+        }
+        if (this._fadeIntervalId) {
+            clearInterval(this._fadeIntervalId);
+            this._fadeIntervalId = null;
+        }
+    }
+
+    cancelFade() {
+        if (this._fadeIntervalId) {
+            clearInterval(this._fadeIntervalId);
+            this._fadeIntervalId = null;
+        }
+    }
+
+    pauseFade() {
+        this._fadePaused = true;
+    }
+
+    resumeFade() {
+        this._fadePaused = false;
+    }
+
+    // start fading out the volume, over given duration (seconds)
+    fadeOut(duration: number) {
+        logger.info(`Fading out background audio ${this._getDescriptionString()}`);
+        // clear fade in
+        if (this._volFadeInterval) {
+            clearInterval(this._volFadeInterval);
+            this._volFadeInterval = null;
+        }
+        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (audioElement && !this._fadeIntervalId) {
+            const interval = (duration * 1000) / 50; // number of steps
+            this._fadeIntervalId = setInterval(() => {
+                if (audioElement.volume >= (1 / interval) && this._fadeIntervalId) {
+                    if (!this._fadePaused) {
+                        audioElement.volume -= (1 / interval);
+                    }
+                } else if (this._fadeIntervalId) {
+                    audioElement.volume = 0;
+                    clearInterval(this._fadeIntervalId);
+                    this._fadeIntervalId = null;
+                }
+            }, 50);
+        }
     }
 
     _renderBackgroundAudio() {
@@ -61,20 +130,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
             });
-        }
-    }
-
-    _renderDataModelInfo() {
-        const assetList = document.createElement('ul');
-        const backgroundItem = document.createElement('li');
-        assetList.appendChild(backgroundItem);
-        this._target.appendChild(assetList);
-
-        if (this._assetCollection) {
-            backgroundItem.textContent = `background: ${this._assetCollection.name}`;
-            if (this._assetCollection.assets.audio_src) {
-                backgroundItem.textContent += ` from ${this._assetCollection.assets.audio_src}`;
-            }
         }
     }
 

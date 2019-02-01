@@ -38,6 +38,7 @@ const names = [
     'VR_ORIENTATION_CHANGED',
     'VR_SCENE_TOGGLE_HIDDEN',
     'CHANGE_VR_MODE',
+    'BROWSER_VISIBILITY_CHANGE',
 ];
 
 const AnalyticEvents = {
