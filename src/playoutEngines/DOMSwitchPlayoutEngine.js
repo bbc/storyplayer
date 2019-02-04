@@ -300,6 +300,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     play() {
         this._playing = true;
+        this._hasStarted = true;
         this._player.setPlaying(true);
         Object.keys(this._media)
             .filter(key => this._media[key].active)
@@ -368,7 +369,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             .filter((key) => {
                 if (this._media[key].media) {
                     if (this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A) {
-                        return true;
+                        return this._media[key].active;
                     }
                 }
                 return false;

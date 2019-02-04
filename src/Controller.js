@@ -15,6 +15,7 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
+import { InternalVariableNames } from './InternalVariables';
 
 export default class Controller extends EventEmitter {
     constructor(
@@ -243,7 +244,7 @@ export default class Controller extends EventEmitter {
     _goBackOneStepInStory() {
         return Promise.all([
             this.getIdOfPreviousNode(),
-            this.getVariableValue('romper_path_history'),
+            this.getVariableValue(InternalVariableNames.PATH_HISTORY),
         ]).then(([previous, history]) => {
             // remove the current NE from history
             history.pop();
@@ -251,7 +252,7 @@ export default class Controller extends EventEmitter {
             history.pop();
             // set history variable directly in reasoner to avoid triggering lookahead
             if (this._reasoner) {
-                this._reasoner.setVariableValue('romper_path_history', history);
+                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history);
             }
 
             if (previous) {
@@ -661,7 +662,7 @@ export default class Controller extends EventEmitter {
         if (matchingId !== null) {
             return Promise.resolve(matchingId);
         }
-        return this.getVariableValue('romper_path_history')
+        return this.getVariableValue(InternalVariableNames.PATH_HISTORY)
             .then((history) => {
                 if (history.length > 1) {
                     const lastVisitedId = history[history.length - 2];
