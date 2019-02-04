@@ -731,6 +731,16 @@ $romper-hover-text-size: 25px;
   padding-top: 10px;
 }
 
+.romper-var-form-slider-output {
+  opacity: 1;
+  padding-left: 15px;
+
+  &.inactive {
+    opacity: 0;
+    transition: all 0.5s ease;
+  }
+}
+
 .romper-var-form-answer-cont {
   display: table;
   height: 100%;
@@ -783,6 +793,10 @@ $romper-hover-text-size: 25px;
     height: 35px;
     text-align: center;
     width: 50px;
+
+    &.romper-var-form-slider {
+      width: 100px;
+    }
   }
 }
 
