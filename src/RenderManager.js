@@ -416,7 +416,7 @@ export default class RenderManager extends EventEmitter {
             const currentRenderer = this._currentRenderer;
             currentRenderer.end();
             currentRenderer.willStart();
-            this._refreshOnwardIcons();
+            this.refreshOnwardIcons();
         } else {
             logger.error('no current renderer to restart');
         }
@@ -469,7 +469,7 @@ export default class RenderManager extends EventEmitter {
 
         // Update availability of back and next buttons.
         this._showBackIcon();
-        this._refreshOnwardIcons();
+        this.refreshOnwardIcons();
 
         newRenderer.willStart();
     }
@@ -489,7 +489,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     // show next button, or icons if choice
-    _refreshOnwardIcons() {
+    refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel
             && !this._currentRenderer.hasShowIconBehaviour()) {
@@ -599,7 +599,7 @@ export default class RenderManager extends EventEmitter {
                     return Promise.resolve();
                 });
 
-            this._refreshOnwardIcons();
+            this.refreshOnwardIcons();
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {

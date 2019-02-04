@@ -640,6 +640,10 @@ export default class Controller extends EventEmitter {
         return Promise.resolve([]);
     }
 
+    refreshPlayerNextAndBack() {
+        this._renderManager.refreshOnwardIcons();
+    }
+
     // get the id of the previous node
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory

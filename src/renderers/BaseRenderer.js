@@ -27,6 +27,7 @@ export default class BaseRenderer extends EventEmitter {
     _applyShowImageBehaviour: Function;
     _applyShowVariablePanelBehaviour: Function;
     _applyShowChoiceBehaviour: Function;
+    _handleLinkChoiceEvent: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
@@ -73,6 +74,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
+        this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -139,6 +141,7 @@ export default class BaseRenderer extends EventEmitter {
 
     end() {
         this._reapplyLinkConditions();
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
     }
 
     hasEnded(): boolean {
@@ -296,9 +299,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        this._player.on(PlayerEvents.LINK_CHOSEN, (event) => {
-            this._followLink(event.id);
-        });
+        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         logger.info('Rendering link icons for user choice');
         // get behaviours of links from data
@@ -353,6 +354,10 @@ export default class BaseRenderer extends EventEmitter {
                 }
             });
         });
+    }
+
+    _handleLinkChoiceEvent(eventObject: Object) {
+        this._followLink(eventObject.id);
     }
 
     // get behaviours of links from behaviour meta data
@@ -537,10 +542,10 @@ export default class BaseRenderer extends EventEmitter {
                 // hide icons
                 this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary
-                this._controller._renderManager._showOnwardIcons();
+                this._controller.refreshPlayerNextAndBack();
             }
             // if already ended, follow immediately
-            if (this.hasEnded()) {
+            if (this._hasEnded) {
                 this._hideChoiceIcons(narrativeElementId);
             }
         } else {
