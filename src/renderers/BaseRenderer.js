@@ -26,11 +26,16 @@ export default class BaseRenderer extends EventEmitter {
     _applyColourOverlayBehaviour: Function;
     _applyShowImageBehaviour: Function;
     _applyShowVariablePanelBehaviour: Function;
+    _applyShowChoiceBehaviour: Function;
+    _handleLinkChoiceEvent: Function;
     _behaviourElements: Array<HTMLElement>;
     _target: HTMLDivElement;
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
     _controller: Controller;
+
+    _savedLinkConditions: Object;
+    _linkBehaviour: Object;
 
     _hasEnded: boolean;
     inVariablePanel: boolean;
@@ -68,6 +73,8 @@ export default class BaseRenderer extends EventEmitter {
         this._applyColourOverlayBehaviour = this._applyColourOverlayBehaviour.bind(this);
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
+        this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
+        this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -76,6 +83,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:showimage/v1.0': this._applyShowImageBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': this._applyShowChoiceBehaviour,
         };
         this._behaviourElements = [];
 
@@ -84,6 +93,7 @@ export default class BaseRenderer extends EventEmitter {
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
+        this._savedLinkConditions = {};
     }
 
     willStart() {
@@ -126,9 +136,12 @@ export default class BaseRenderer extends EventEmitter {
                 this._player.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
         }
         this._clearBehaviourElements();
+        this._runDuringBehaviours();
     }
 
     end() {
+        this._reapplyLinkConditions();
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
     }
 
     hasEnded(): boolean {
@@ -198,19 +211,22 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         this._hasEnded = true;
-        this._player.enterCompleteBehavourPhase();
-        if (this.isVRViewable) {
-            AFrameRenderer.clearPlayPause();
-        }
-        this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
-        if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(
-                BehaviourTimings.completed,
-                RendererEvents.COMPLETED,
-            )
-        ) {
-            // we didn't find any behaviours to run, so emit completion event
-            this.emit(RendererEvents.COMPLETED);
+        if (!this._linkBehaviour ||
+            (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
+            this._player.enterCompleteBehavourPhase();
+            if (this.isVRViewable) {
+                AFrameRenderer.clearPlayPause();
+            }
+            this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
+            if (!this._behaviourRunner ||
+                !this._behaviourRunner.runBehaviours(
+                    BehaviourTimings.completed,
+                    RendererEvents.COMPLETED,
+                )
+            ) {
+                // we didn't find any behaviours to run, so emit completion event
+                this.emit(RendererEvents.COMPLETED);
+            }
         }
     }
 
@@ -228,6 +244,392 @@ export default class BaseRenderer extends EventEmitter {
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
         return this._behaviourRendererMap[behaviourUrn];
     }
+
+    hasShowIconBehaviour(): boolean {
+        if (this._representation.behaviours) {
+            if (this._representation.behaviours.started) {
+                const startMatches = this._representation.behaviours.started.filter(behave =>
+                    behave.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (startMatches.length > 0) {
+                    return true;
+                }
+            }
+            if (this._representation.behaviours.completed) {
+                const endMatches = this._representation.behaviours.completed.filter(behave =>
+                    behave.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (endMatches.length > 0) {
+                    return true;
+                }
+            }
+            if (this._representation.behaviours.during) {
+                const matches = this._representation.behaviours.during.filter(behave =>
+                    behave.behaviour.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'); // eslint-disable-line max-len
+                if (matches.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    _runDuringBehaviours() {
+        if (this._representation.behaviours && this._representation.behaviours.during) {
+            // for each behaviour
+            this._representation.behaviours.during.forEach((behaviour) => {
+                // get start time
+                const startTime = behaviour.start_time;
+                const behaviourObject = behaviour.behaviour;
+                // get function to handle behaviour
+                const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
+                // set up to run function at set time
+                this.addTimeEventListener(behaviourObject.type, startTime, () =>
+                    behaviourRunner(behaviourObject, () => {
+                        logger.info(`started during behaviour ${behaviourObject.type}`);
+                    }));
+                // if there is a duration
+                if (behaviour.duration) {
+                    const endTime = startTime + behaviour.duration;
+                    this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => {
+                        // tidy up...
+                        logger.error('StoryPlayer does not yet support duration on behaviours');
+                    });
+                }
+            });
+        }
+    }
+
+    // //////////// show link choice behaviour
+
+    _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
+        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+
+        logger.info('Rendering link icons for user choice');
+        // get behaviours of links from data
+        const {
+            showNeToEnd,
+            countdown,
+            disableControls,
+            iconOverlayClass,
+            forceChoice,
+            oneShot,
+        } = this._getLinkChoiceBehaviours(behaviour);
+
+        this._linkBehaviour = {
+            showNeToEnd,
+            oneShot,
+            forceChoice,
+            callback: forceChoice ? callback : () => {},
+        };
+
+        // get valid links
+        return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
+            // build icons
+            const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
+            const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
+
+            // go through asset collections and render icons
+            return iconSrcPromises.then((urls) => {
+                this._player.clearLinkChoices();
+                AFrameRenderer.clearLinkIcons();
+                urls.forEach((iconAssetCollectionSrc, choiceId) => {
+                    if (iconAssetCollectionSrc) {
+                        // add the icon to the player
+                        // eslint-disable-next-line max-len
+                        this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                    }
+                });
+
+                this._player.setNextAvailable(false);
+                this._showChoiceIcons({
+                    defaultLinkId, // id for link to highlight at start
+                    forceChoice, // do we highlight
+                    disableControls, // are controls disabled while icons shown
+                    countdown, // do we animate countdown
+                    iconOverlayClass, // css classes to apply to overlay
+                });
+
+                // callback to say behaviour is done, but not if user can
+                // change their mind
+                if (!forceChoice) {
+                    callback();
+                }
+            });
+        });
+    }
+
+    // handler for user clicking on link choice
+    _handleLinkChoiceEvent(eventObject: Object) {
+        this._followLink(eventObject.id);
+    }
+
+    // get behaviours of links from behaviour meta data
+    _getLinkChoiceBehaviours(behaviour: Object): Object {
+        // set default behaviours if not specified in data model
+        let countdown = false;
+        let disableControls = countdown; // default to disable if counting down
+        let iconOverlayClass = null;
+        let forceChoice = false;
+        let oneShot = false;
+        let showNeToEnd = true;
+
+        // and override if they are specified
+        if (behaviour.hasOwnProperty('show_ne_to_end')) {
+            showNeToEnd = behaviour.show_ne_to_end;
+        }
+        if (behaviour.hasOwnProperty('one_shot')) {
+            oneShot = behaviour.one_shot;
+        }
+
+        // do we show countdown?
+        if (behaviour.hasOwnProperty('show_time_remaining')) {
+            countdown = behaviour.show_time_remaining;
+        }
+        // do we disable controls while choosing
+        if (behaviour.hasOwnProperty('disable_controls')) {
+            disableControls = behaviour.disable_controls;
+        }
+        // do we apply any special css classes to the overlay
+        if (behaviour.hasOwnProperty('overlay_class')) {
+            iconOverlayClass = behaviour.overlay_class;
+        }
+        if (behaviour.hasOwnProperty('force_choice')) {
+            forceChoice = behaviour.force_choice;
+        }
+
+        return {
+            showNeToEnd,
+            countdown,
+            disableControls,
+            iconOverlayClass,
+            forceChoice,
+            oneShot,
+        };
+    }
+
+    // get src urls for icons to represent link choices
+    _getIconSourceUrls(
+        narrativeElementObjects: Array<Object>,
+        behaviour: Object,
+    ): Promise<Array<?string>> {
+        const iconAssetCollectionIdPromises: Array<Promise<?string>> = [];
+        narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
+            logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
+            let iconAssetCollectionId = null;
+            if (behaviour.link_icons) {
+                behaviour.link_icons.forEach((linkIconObject) => {
+                    // eslint-disable-next-line max-len
+                    if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
+                        // map representation to asset
+                        iconAssetCollectionId =
+                            this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
+                    }
+                });
+            }
+            if (iconAssetCollectionId === null) {
+                // if not specified - get default icon...
+                iconAssetCollectionIdPromises.push(this._controller
+                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
+                    .then((representation) => {
+                        if (representation && representation.asset_collections.icon
+                            && representation.asset_collections.icon.default_id) {
+                            // eslint-disable-next-line max-len
+                            return Promise.resolve(representation.asset_collections.icon.default_id);
+                        }
+                        return Promise.resolve(null);
+                    }));
+            } else {
+                iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
+            }
+        });
+
+        return Promise.all(iconAssetCollectionIdPromises).then((iconAssetCollectionIds) => {
+            const iconAssetCollectionPromises = [];
+            iconAssetCollectionIds.forEach((iconAcId) => {
+                if (iconAcId) {
+                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconAcId));
+                } else {
+                    iconAssetCollectionPromises.push(Promise.resolve(null));
+                }
+            });
+            return Promise.all(iconAssetCollectionPromises);
+        }).then((assetCollections) => {
+            const urls = [];
+            assetCollections.forEach((ac) => {
+                if (ac && ac.assets.image_src) {
+                    urls.push(ac.assets.image_src);
+                } else {
+                    urls.push(null);
+                }
+            });
+            return urls;
+        });
+    }
+
+    // tell the player to build an icon
+    // but won't show yet
+    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+        // tell Player to build icon
+        const targetId = narrativeElementObjects[choiceId].targetNeId;
+        this._player.addLinkChoiceControl(
+            targetId,
+            imgsrc,
+            `Option ${(choiceId + 1)}`,
+        );
+        if (this.isVRViewable()) {
+            AFrameRenderer.addLinkIcon(
+                targetId,
+                imgsrc,
+            );
+        }
+    }
+
+    // tell the player to show the icons
+    // parameter specifies how icons are presented
+    _showChoiceIcons(iconDataObject: Object) {
+        const {
+            defaultLinkId, // id for link to highlight at start
+            forceChoice,
+            disableControls, // are controls disabled while icons shown
+            countdown, // do we animate countdown
+            iconOverlayClass, // css classes to apply to overlay
+        } = iconDataObject;
+
+        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass);
+        this._player.enableLinkChoiceControl();
+        if (disableControls) {
+            // disable transport controls
+            this._player.disablePlayButton();
+            this._player.disableScrubBar();
+            this._player.setNextAvailable(false);
+        }
+        if (countdown) {
+            this._player.startChoiceCountdown(this);
+        }
+
+        if (this.isVRViewable()) {
+            AFrameRenderer.showLinkIcons();
+        }
+    }
+
+    // user has made a choice of link to follow - do it
+    _followLink(narrativeElementId: string) {
+        if (this._linkBehaviour) {
+            this._linkBehaviour.forceChoice = false; // they have made their choice
+        }
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        if (this._linkBehaviour && this._linkBehaviour.showNeToEnd) {
+            // if not done so, save initial conditions
+            if (Object.keys(this._savedLinkConditions).length === 0) {
+                this._saveLinkConditions();
+            }
+            // now make this link the only valid option
+            currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id === narrativeElementId) {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 1] };
+                } else {
+                    // eslint-disable-next-line no-param-reassign
+                    neLink.condition = { '==': [1, 0] };
+                }
+            });
+
+            // do we keep the choice open?
+            if (this._linkBehaviour && this._linkBehaviour.oneShot) {
+                // hide icons
+                this._hideChoiceIcons(null);
+                // refresh next/prev so user can skip now if necessary
+                this._controller.refreshPlayerNextAndBack();
+            }
+            // if already ended, follow immediately
+            if (this._hasEnded) {
+                this._hideChoiceIcons(narrativeElementId);
+            }
+        } else {
+            // or follow link now
+            this._hideChoiceIcons(narrativeElementId);
+        }
+    }
+
+    // set the link conditions so only the default is valid
+    // returns the id of the NE of the default link or null if
+    // there isn't one
+    // takes an array of objects for all currently valid links
+    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        // filter links to ones amongst the valid links
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        const validLinks = currentNarrativeElement.links.filter(link =>
+            narrativeElementObjects.filter(ne =>
+                ne.targetNeId === link.target_narrative_element_id).length > 0);
+
+        const defaultLink = validLinks[0];
+        // save link conditions from model, and apply new ones to force default choice
+        if (!this._savedLinkConditions.narrativeElement) {
+            this._saveLinkConditions();
+        }
+        validLinks.forEach((neLink) => {
+            if (neLink === defaultLink) {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 1] };
+            } else {
+                // eslint-disable-next-line no-param-reassign
+                neLink.condition = { '==': [1, 0] };
+            }
+        });
+        return defaultLink.target_narrative_element_id;
+    }
+
+    // save link conditions for current NE
+    _saveLinkConditions() {
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        const conditions = [];
+        currentNarrativeElement.links.forEach((neLink) => {
+            if (neLink.target_narrative_element_id) {
+                conditions.push({
+                    target: neLink.target_narrative_element_id,
+                    condition: neLink.condition,
+                });
+            }
+        });
+        this._savedLinkConditions = {
+            narrativeElement: currentNarrativeElement,
+            conditions,
+        };
+    }
+
+    // revert link conditions for current NE to what they were originally
+    _reapplyLinkConditions() {
+        if (this._savedLinkConditions.narrativeElement) {
+            const currentNarrativeElement = this._savedLinkConditions.narrativeElement;
+            currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id) {
+                    const matches = this._savedLinkConditions.conditions
+                        .filter(cond => cond.target === neLink.target_narrative_element_id);
+                    if (matches.length > 0) {
+                        // eslint-disable-next-line no-param-reassign
+                        neLink.condition = matches[0].condition;
+                    }
+                }
+            });
+            this._savedLinkConditions = {};
+        }
+    }
+
+    // hide the choice icons, and optionally follow the link
+    _hideChoiceIcons(narrativeElementId: ?string) {
+        if (narrativeElementId) { this._reapplyLinkConditions(); }
+        this._player._linkChoice.overlay.classList.add('fade');
+        setTimeout(() => {
+            this._player._linkChoice.overlay.classList.remove('fade');
+            this._player.clearLinkChoices();
+            if (narrativeElementId) {
+                this._controller.followLink(narrativeElementId);
+            } else {
+                this._linkBehaviour.callback();
+            }
+        }, 500);
+    }
+
+    // //////////// end of show link choice behaviour
 
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
         const { colour } = behaviour;
@@ -260,6 +662,8 @@ export default class BaseRenderer extends EventEmitter {
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
     }
+
+    // //////////// variables panel choice behaviour
 
     // an input for selecting the value for a boolean variable
     _getBooleanVariableSetter(varName: string) {
@@ -480,9 +884,9 @@ export default class BaseRenderer extends EventEmitter {
                 setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
                 this._behaviourElements.push(overlayImageElement);
             });
-
-        // callback();
     }
+
+    // //////////// end of variables panel choice behaviour
 
     _clearBehaviourElements() {
         this._behaviourElements.forEach((be) => {

@@ -213,7 +213,14 @@
             },
             "behaviours": {
                 "started": [],
-                "completed": []
+                "completed": [
+                    {
+                        "type": "urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0",
+                        "one_shot": true,
+                        "disable_controls": true,
+                        "force_choice": true
+                    }
+                ]
             }
         },
         {

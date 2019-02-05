@@ -184,6 +184,16 @@ export default class StoryReasoner extends EventEmitter {
             });
     }
 
+    getBeginning(story: Story): Promise<?string> {
+        return evaluateConditions(story.beginnings, this._dataResolver)
+            .then((beginnings) => {
+                if (beginnings && beginnings.length > 0) {
+                    return beginnings[0].narrative_element_id;
+                }
+                return null;
+            });
+    }
+
     _chooseNextNode() {
         this._resolving = true;
         if (this._currentNarrativeElement.links.length === 0) {
@@ -198,10 +208,9 @@ export default class StoryReasoner extends EventEmitter {
                 if (nextElementChoices) {
                     if (nextElementChoices.length > 1) {
                         this.emit('multipleValidLinks', nextElementChoices);
-                        logger.info('StoryReasoner: choice of paths - waiting for user');
-                    } else {
-                        this._followLink(nextElementChoices[0]);
+                        logger.info('StoryReasoner: multiple valid paths');
                     }
+                    this._followLink(nextElementChoices[0]);
                 } else {
                     this.emit('error', new Error('There are no possible links'));
                 }
