@@ -51,6 +51,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     end() {
+        super.end();
         this._visible = false;
         // Hack to make image transitions smooth (preventing showing of black background with
         // loading wheel). For some reason the DOM transition on images is slow, not sure why this

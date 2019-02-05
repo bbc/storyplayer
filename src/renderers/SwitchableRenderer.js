@@ -344,6 +344,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     end() {
+        super.end();
         if (this._switchableIsQueuedNotPlaying === false) {
             this._switchableIsQueuedNotPlaying = true;
             this._updateChoiceRenderers();

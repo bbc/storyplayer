@@ -158,6 +158,8 @@ export default class StoryPathWalker extends EventEmitter {
 
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
+                this._pathmap = [];
+                this.emit('walkComplete');
             };
             linearReasoner.on('error', _handleError);
 

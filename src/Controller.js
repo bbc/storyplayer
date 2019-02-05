@@ -4,7 +4,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
-import type { ExperienceFetchers, NarrativeElement, AssetUrls } from './romper';
+import type { ExperienceFetchers, NarrativeElement, AssetUrls, Representation } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';
@@ -188,6 +188,10 @@ export default class Controller extends EventEmitter {
 
     getCurrentRenderer(): ?BaseRenderer {
         return this._renderManager.getCurrentRenderer();
+    }
+
+    getCurrentNarrativeElement(): NarrativeElement {
+        return this._currentNarrativeElement;
     }
 
     // add event listeners to manager
@@ -636,6 +640,10 @@ export default class Controller extends EventEmitter {
         return Promise.resolve([]);
     }
 
+    refreshPlayerNextAndBack() {
+        this._renderManager.refreshOnwardIcons();
+    }
+
     // get the id of the previous node
     // if it's a linear path, will use the linearStoryPath to identify
     // if not will ask reasoner to try within ths substory
@@ -679,6 +687,39 @@ export default class Controller extends EventEmitter {
         return this.getValidNextSteps(narrativeElement.id)
             .then(nextNarrativeElementObjects =>
                 nextNarrativeElementObjects.map(neObj => neObj.ne.id));
+    }
+
+    // given the NE id, reason to find a representation
+    // reasons into sub story if necessary
+    getRepresentationForNarrativeElementId(narrativeElementId: string): Promise<?Representation> {
+        return this._fetchers.narrativeElementFetcher(narrativeElementId)
+            .then((narrativeElement) => {
+                if (narrativeElement && narrativeElement.body.representation_collection_target_id) {
+                    return this._fetchers
+                        .representationCollectionFetcher(narrativeElement.body
+                            .representation_collection_target_id)
+                        .then(representationCollection =>
+                            this._representationReasoner(representationCollection));
+                } else if (this._reasoner
+                    && narrativeElement
+                    && narrativeElement.body.story_target_id) {
+                    // fetch story
+                    return this._fetchers.storyFetcher(narrativeElement.body.story_target_id)
+                        .then((story) => {
+                            if (this._reasoner) {
+                                return this._reasoner.getBeginning(story);
+                            }
+                            return Promise.resolve(null);
+                        })
+                        .then((beginning) => {
+                            if (beginning) {
+                                return this.getRepresentationForNarrativeElementId(beginning);
+                            }
+                            return Promise.resolve(null);
+                        });
+                }
+                return Promise.resolve(null);
+            });
     }
 
     reset() {
