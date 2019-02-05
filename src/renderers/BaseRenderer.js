@@ -407,7 +407,6 @@ export default class BaseRenderer extends EventEmitter {
         behaviour: Object,
     ): Promise<Array<?string>> {
         const iconAssetCollectionIdPromises: Array<Promise<?string>> = [];
-        const currentRepresentation = this._representation;
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             let iconAssetCollectionId = null;
@@ -416,16 +415,8 @@ export default class BaseRenderer extends EventEmitter {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
                         // map representation to asset
-                        const mapId = linkIconObject.image;
-                        if (currentRepresentation.asset_collections.behaviours) {
-                            currentRepresentation.asset_collections.behaviours
-                                .forEach((behaviourAsset) => {
-                                    // eslint-disable-next-line max-len
-                                    if (behaviourAsset.behaviour_asset_collection_mapping_id === mapId) {
-                                        iconAssetCollectionId = behaviourAsset.asset_collection_id;
-                                    }
-                                });
-                        }
+                        iconAssetCollectionId =
+                            this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
                     }
                 });
             }
