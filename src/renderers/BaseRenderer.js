@@ -751,6 +751,51 @@ export default class BaseRenderer extends EventEmitter {
         return varInput;
     }
 
+    _getNumberRangeVariableSetter(varName: string, range: Object) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.classList.add('romper-var-form-slider');
+        slider.id = `variable-input-${varName}`;
+
+        const numberInput = document.createElement('input');
+        numberInput.classList.add('romper-var-form-slider-output');
+        numberInput.type = 'number';
+
+        slider.min = range.min_val;
+        slider.max = range.max_val;
+        this._controller.getVariableValue(varName)
+            .then((varValue) => {
+                slider.value = varValue;
+                numberInput.value = varValue;
+            });
+
+        slider.onchange = () => {
+            this._controller.setVariableValue(varName, slider.value);
+            numberInput.value = slider.value;
+        };
+
+        slider.oninput = () => {
+            numberInput.value = slider.value;
+        };
+
+        numberInput.onchange = () => {
+            this._controller.setVariableValue(varName, numberInput.value);
+            slider.value = numberInput.value;
+        };
+
+        numberInput.oninput = () => {
+            this._controller.setVariableValue(varName, numberInput.value);
+        };
+
+        varInput.appendChild(slider);
+        varInput.appendChild(numberInput);
+
+        return varInput;
+    }
+
     // create an input element for setting a variable
     _getVariableSetter(variableDecl: Object, behaviourVar: Object): HTMLDivElement {
         const variableDiv = document.createElement('div');
@@ -785,7 +830,12 @@ export default class BaseRenderer extends EventEmitter {
             listDiv.classList.add('romper-var-form-list-input');
             answerContainer.append(listDiv);
         } else if (variableType === 'number') {
-            const numDiv = this._getIntegerVariableSetter(variableName);
+            let numDiv;
+            if (variableDecl.hasOwnProperty('range')) {
+                numDiv = this._getNumberRangeVariableSetter(variableName, variableDecl.range);
+            } else {
+                numDiv = this._getIntegerVariableSetter(variableName);
+            }
             numDiv.classList.add('romper-var-form-number-input');
             answerContainer.append(numDiv);
         }

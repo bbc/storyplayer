@@ -731,6 +731,10 @@ $romper-hover-text-size: 25px;
   padding-top: 10px;
 }
 
+.romper-var-form-slider-output {
+  margin-left: 15px;
+}
+
 .romper-var-form-answer-cont {
   display: table;
   height: 100%;
@@ -768,8 +772,8 @@ $romper-hover-text-size: 25px;
   select {
     border: 0;
     color: $dark-grey-blue;
-    font-size: 14px;
-    height: 35px;
+    font-size: 2vw;
+    height: 3vw;
     text-align: left;
   }
 }
@@ -779,10 +783,14 @@ $romper-hover-text-size: 25px;
     border: 0;
     border-radius: 5px;
     color: $dark-grey-blue;
-    font-size: 14px;
-    height: 35px;
+    font-size: 2vw;
+    height: 3vw;
     text-align: center;
-    width: 50px;
+    width: 5vw;
+
+    &.romper-var-form-slider {
+      width: 10vw;
+    }
   }
 }
 
