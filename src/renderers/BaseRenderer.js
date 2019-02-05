@@ -755,47 +755,43 @@ export default class BaseRenderer extends EventEmitter {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
-        const varIntInput = document.createElement('input');
-        varIntInput.type = 'range';
-        varIntInput.classList.add('romper-var-form-slider');
-        varIntInput.id = `variable-input-${varName}`;
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.classList.add('romper-var-form-slider');
+        slider.id = `variable-input-${varName}`;
 
-        // const minLabel = document.createElement('span');
-        // minLabel.textContent = range.min_val;
-        // minLabel.classList.add('romper-var-form-slider-limit');
-        // const maxLabel = document.createElement('span');
-        // maxLabel.textContent = range.max_val;
-        // maxLabel.classList.add('romper-var-form-slider-limit');
+        const numberInput = document.createElement('input');
+        numberInput.classList.add('romper-var-form-slider-output');
+        numberInput.type = 'number';
 
-        const output = document.createElement('span');
-        output.classList.add('romper-var-form-slider-output');
-        output.classList.add('inactive');
-
-        varIntInput.min = range.min_val;
-        varIntInput.max = range.max_val;
+        slider.min = range.min_val;
+        slider.max = range.max_val;
         this._controller.getVariableValue(varName)
             .then((varValue) => {
-                varIntInput.value = varValue;
+                slider.value = varValue;
+                numberInput.value = varValue;
             });
 
-        varIntInput.onchange = () => {
-            this._controller.setVariableValue(varName, varIntInput.value);
-            output.textContent = varIntInput.value;
-            output.classList.add('inactive');
+        slider.onchange = () => {
+            this._controller.setVariableValue(varName, slider.value);
+            numberInput.value = slider.value;
         };
 
-        varIntInput.onmousedown = () => {
-            output.classList.remove('inactive');
+        slider.oninput = () => {
+            numberInput.value = slider.value;
         };
 
-        varIntInput.oninput = () => {
-            output.textContent = varIntInput.value;
+        numberInput.onchange = () => {
+            this._controller.setVariableValue(varName, numberInput.value);
+            slider.value = numberInput.value;
         };
 
-        // varInput.appendChild(minLabel);
-        varInput.appendChild(varIntInput);
-        // varInput.appendChild(maxLabel);
-        varInput.appendChild(output);
+        numberInput.oninput = () => {
+            this._controller.setVariableValue(varName, numberInput.value);
+        };
+
+        varInput.appendChild(slider);
+        varInput.appendChild(numberInput);
 
         return varInput;
     }
