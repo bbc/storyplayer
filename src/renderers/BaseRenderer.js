@@ -298,6 +298,8 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    // //////////// show link choice behaviour
+
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
@@ -346,9 +348,8 @@ export default class BaseRenderer extends EventEmitter {
                     iconOverlayClass, // css classes to apply to overlay
                 });
 
-                // associate click behaviour
-                // add to player
-                // callback
+                // callback to say behaviour is done, but not if user can
+                // change their mind
                 if (!forceChoice) {
                     callback();
                 }
@@ -356,12 +357,14 @@ export default class BaseRenderer extends EventEmitter {
         });
     }
 
+    // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         this._followLink(eventObject.id);
     }
 
     // get behaviours of links from behaviour meta data
     _getLinkChoiceBehaviours(behaviour: Object): Object {
+        // set default behaviours if not specified in data model
         let countdown = false;
         let disableControls = countdown; // default to disable if counting down
         let iconOverlayClass = null;
@@ -369,6 +372,7 @@ export default class BaseRenderer extends EventEmitter {
         let oneShot = false;
         let showNeToEnd = true;
 
+        // and override if they are specified
         if (behaviour.hasOwnProperty('show_ne_to_end')) {
             showNeToEnd = behaviour.show_ne_to_end;
         }
@@ -402,6 +406,7 @@ export default class BaseRenderer extends EventEmitter {
         };
     }
 
+    // get src urls for icons to represent link choices
     _getIconSourceUrls(
         narrativeElementObjects: Array<Object>,
         behaviour: Object,
@@ -421,7 +426,7 @@ export default class BaseRenderer extends EventEmitter {
                 });
             }
             if (iconAssetCollectionId === null) {
-                // TODO not specified - get default icon...
+                // if not specified - get default icon...
                 iconAssetCollectionIdPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
                     .then((representation) => {
@@ -624,6 +629,8 @@ export default class BaseRenderer extends EventEmitter {
         }, 500);
     }
 
+    // //////////// end of show link choice behaviour
+
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
         const { colour } = behaviour;
         const overlayImageElement = document.createElement('div');
@@ -655,6 +662,8 @@ export default class BaseRenderer extends EventEmitter {
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
     }
+
+    // //////////// variables panel choice behaviour
 
     // an input for selecting the value for a boolean variable
     _getBooleanVariableSetter(varName: string) {
@@ -875,9 +884,9 @@ export default class BaseRenderer extends EventEmitter {
                 setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
                 this._behaviourElements.push(overlayImageElement);
             });
-
-        // callback();
     }
+
+    // //////////// end of variables panel choice behaviour
 
     _clearBehaviourElements() {
         this._behaviourElements.forEach((be) => {
