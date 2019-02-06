@@ -50,6 +50,9 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, variableState?: Object = {}) {
         this._storyId = storyId;
+        this._getAllNarrativeElements().then((neList) => {
+            this._allNarrativeElements = neList;
+        });
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -542,6 +545,34 @@ export default class Controller extends EventEmitter {
         this._renderManager.refreshLookahead();
     }
 
+    _getAllNarrativeElements(): Promise<Array<NarrativeElement>> {
+        if (!this._storyId) {
+            return Promise.resolve([]);
+        }
+        return this._getAllStories(this._storyId)
+            .then((storyIds) => {
+                // @flowignore
+                storyIds.push(this._storyId);
+                const storyPromises = [];
+                storyIds.forEach(sid =>
+                    storyPromises.push(this._fetchers.storyFetcher(sid)));
+                return Promise.all(storyPromises);
+            }).then((stories) => {
+                const neIds = [];
+                stories.forEach((story) => {
+                    story.narrative_element_ids.forEach((neid) => {
+                        if (neIds.indexOf(neid) === -1) {
+                            neIds.push(neid);
+                        }
+                    });
+                });
+                const nePromises = [];
+                neIds.forEach(neid =>
+                    nePromises.push(this._fetchers.narrativeElementFetcher(neid)));
+                return Promise.all(nePromises);
+            });
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to
@@ -593,15 +624,18 @@ export default class Controller extends EventEmitter {
                     .then((links) => {
                         const narrativeElementList = [];
                         links.forEach((link) => {
-                            if (subReasoner && link.target_narrative_element_id) {
-                                narrativeElementList.push(subReasoner._narrativeElements[
-                                    link.target_narrative_element_id
-                                ]);
+                            if (link.target_narrative_element_id) {
+                                if (this._allNarrativeElements) {
+                                    this._allNarrativeElements.forEach((ne) => {
+                                        if (ne.id === link.target_narrative_element_id) {
+                                            narrativeElementList.push(ne);
+                                        }
+                                    });
+                                }
                             }
                         });
                         return narrativeElementList;
-                    }, () => [])
-                    .then((neList) => {
+                    }).then((neList) => {
                         const promiseList = [];
                         neList.forEach((narrativeElement) => {
                             if (narrativeElement.body.type ===
@@ -760,4 +794,5 @@ export default class Controller extends EventEmitter {
     _currentNarrativeElement: NarrativeElement;
     _renderManager: RenderManager;
     _storyIconRendererCreated: boolean;
+    _allNarrativeElements: ?Array<NarrativeElement>;
 }
