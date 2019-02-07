@@ -306,25 +306,16 @@ export default class Controller extends EventEmitter {
     }
 
     // try to get the narrative element object with the given id
-    // returns NE if it is either in the current subStory, or if this story is
-    // linear (assuming id is valid).
-    // returns null otherwise
+    // returns NE or null if not found
     _getNarrativeElement(neid: string): ?NarrativeElement {
         let neObj;
-        if (this._reasoner) {
+        if (this._allNarrativeElements) {
+            neObj = this._allNarrativeElements.filter(ne => ne.id === neid).shift();
+        } else if (this._reasoner) {
             // get the actual NarrativeElement object
             const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
             if (subReasoner) {
                 neObj = subReasoner._narrativeElements[neid];
-            }
-            if (!neObj && this._linearStoryPath) {
-                // can't find it via reasoner if in different substoruy,
-                // but can get from storyPath if linear
-                this._linearStoryPath.forEach((storyPathItem) => {
-                    if (storyPathItem.narrative_element.id === neid) {
-                        neObj = storyPathItem.narrative_element;
-                    }
-                });
             }
         }
         return neObj;
@@ -625,19 +616,15 @@ export default class Controller extends EventEmitter {
                         const narrativeElementList = [];
                         links.forEach((link) => {
                             if (link.target_narrative_element_id) {
-                                if (this._allNarrativeElements) {
-                                    this._allNarrativeElements.forEach((ne) => {
-                                        if (ne.id === link.target_narrative_element_id) {
-                                            narrativeElementList.push(ne);
-                                        }
-                                    });
+                                const ne =
+                                    this._getNarrativeElement(link.target_narrative_element_id);
+                                if (ne) {
+                                    narrativeElementList.push(ne);
                                 }
                             }
                         });
-                        return narrativeElementList;
-                    }).then((neList) => {
                         const promiseList = [];
-                        neList.forEach((narrativeElement) => {
+                        narrativeElementList.forEach((narrativeElement) => {
                             if (narrativeElement.body.type ===
                                 'REPRESENTATION_COLLECTION_ELEMENT') {
                                 promiseList.push(Promise.resolve([{
