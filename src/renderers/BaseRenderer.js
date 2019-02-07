@@ -797,14 +797,16 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _setVariableValue(varName: string, value: any) {
-        this._controller.setVariableValue(varName, value);
-        const logData = {
-            type: AnalyticEvents.types.USER_ACTION,
-            name: AnalyticEvents.names.USER_SET_VARIABLE,
-            from: varName, // not really a from value...
-            to: value,
-        };
-        this._analytics(logData);
+        this._controller.getVariableValue(varName).then((oldVal) => {
+            this._controller.setVariableValue(varName, value);
+            const logData = {
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.USER_SET_VARIABLE,
+                from: `${varName}: ${oldVal}`,
+                to: `${varName}: ${value}`,
+            };
+            this._analytics(logData);
+        });
     }
 
     // create an input element for setting a variable
