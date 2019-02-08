@@ -22,6 +22,7 @@ export default class StoryReasoner extends EventEmitter {
     _storyEnded: boolean;
     _resolving: boolean;
     _subStoryReasoner: ?StoryReasoner;
+    _parent: ?StoryReasoner;
 
     /**
      * An error event. This will get fired if the narrative gets stuck or some other error occurs.
@@ -68,6 +69,7 @@ export default class StoryReasoner extends EventEmitter {
         this._storyStarted = false;
         this._storyEnded = false;
         this._resolving = false;
+        this._parent = null;
 
         this._narrativeElements = {};
         narrativeElements.forEach((narrativeElement) => {
@@ -319,21 +321,46 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.on('storyEnd', storyEndCallback);
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
+        this._subStoryReasoner.setParent(this);
         subStoryReasoner.start();
+    }
+
+    setParent(parent: StoryReasoner) {
+        this._parent = parent;
+    }
+
+    getParent(): ?StoryReasoner {
+        return this._parent;
     }
 
     /**
      * Does the current narrative element have any valid ongoing links?
      * returns a list of links to valid following nodes
+     * Recurses up the reasoner tree if end_story is met.
      */
     hasNextNode(): Promise<Array<Link>> {
         return evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
             .then((nextElementChoices) => {
+                const promiseArray = [];
                 if (nextElementChoices) {
-                    return nextElementChoices;
+                    nextElementChoices.forEach((neChoice) => {
+                        if (neChoice.link_type === 'END_STORY') {
+                            if (this._parent) {
+                                promiseArray.push(this._parent.hasNextNode());
+                            }
+                        } else {
+                            promiseArray.push(Promise.resolve([neChoice]));
+                        }
+                    });
                 }
-                return [];
-            }, () => []);
+                return Promise.all(promiseArray);
+            }).then((linkArrayArray) => {
+                let linkArray = [];
+                linkArrayArray.forEach((la) => {
+                    linkArray = linkArray.concat(la);
+                });
+                return linkArray;
+            });
     }
 
     // is there a next node in the path.  Takes a reasoner and

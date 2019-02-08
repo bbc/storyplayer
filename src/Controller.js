@@ -50,6 +50,9 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, variableState?: Object = {}) {
         this._storyId = storyId;
+        this._getAllNarrativeElements().then((neList) => {
+            this._allNarrativeElements = neList;
+        });
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -303,25 +306,16 @@ export default class Controller extends EventEmitter {
     }
 
     // try to get the narrative element object with the given id
-    // returns NE if it is either in the current subStory, or if this story is
-    // linear (assuming id is valid).
-    // returns null otherwise
+    // returns NE or null if not found
     _getNarrativeElement(neid: string): ?NarrativeElement {
         let neObj;
-        if (this._reasoner) {
+        if (this._allNarrativeElements) {
+            [neObj] = this._allNarrativeElements.filter(ne => ne.id === neid);
+        } else if (this._reasoner) {
             // get the actual NarrativeElement object
             const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
             if (subReasoner) {
                 neObj = subReasoner._narrativeElements[neid];
-            }
-            if (!neObj && this._linearStoryPath) {
-                // can't find it via reasoner if in different substoruy,
-                // but can get from storyPath if linear
-                this._linearStoryPath.forEach((storyPathItem) => {
-                    if (storyPathItem.narrative_element.id === neid) {
-                        neObj = storyPathItem.narrative_element;
-                    }
-                });
             }
         }
         return neObj;
@@ -542,6 +536,34 @@ export default class Controller extends EventEmitter {
         this._renderManager.refreshLookahead();
     }
 
+    _getAllNarrativeElements(): Promise<Array<NarrativeElement>> {
+        if (!this._storyId) {
+            return Promise.resolve([]);
+        }
+        return this._getAllStories(this._storyId)
+            .then((storyIds) => {
+                // @flowignore
+                storyIds.push(this._storyId);
+                const storyPromises = [];
+                storyIds.forEach(sid =>
+                    storyPromises.push(this._fetchers.storyFetcher(sid)));
+                return Promise.all(storyPromises);
+            }).then((stories) => {
+                const neIds = [];
+                stories.forEach((story) => {
+                    story.narrative_element_ids.forEach((neid) => {
+                        if (neIds.indexOf(neid) === -1) {
+                            neIds.push(neid);
+                        }
+                    });
+                });
+                const nePromises = [];
+                neIds.forEach(neid =>
+                    nePromises.push(this._fetchers.narrativeElementFetcher(neid)));
+                return Promise.all(nePromises);
+            });
+    }
+
     //
     // go to an arbitrary node in the current story
     // @param neid: id of narrative element to jump to
@@ -593,17 +615,16 @@ export default class Controller extends EventEmitter {
                     .then((links) => {
                         const narrativeElementList = [];
                         links.forEach((link) => {
-                            if (subReasoner && link.target_narrative_element_id) {
-                                narrativeElementList.push(subReasoner._narrativeElements[
-                                    link.target_narrative_element_id
-                                ]);
+                            if (link.target_narrative_element_id) {
+                                const ne =
+                                    this._getNarrativeElement(link.target_narrative_element_id);
+                                if (ne) {
+                                    narrativeElementList.push(ne);
+                                }
                             }
                         });
-                        return narrativeElementList;
-                    }, () => [])
-                    .then((neList) => {
                         const promiseList = [];
-                        neList.forEach((narrativeElement) => {
+                        narrativeElementList.forEach((narrativeElement) => {
                             if (narrativeElement.body.type ===
                                 'REPRESENTATION_COLLECTION_ELEMENT') {
                                 promiseList.push(Promise.resolve([{
@@ -760,4 +781,5 @@ export default class Controller extends EventEmitter {
     _currentNarrativeElement: NarrativeElement;
     _renderManager: RenderManager;
     _storyIconRendererCreated: boolean;
+    _allNarrativeElements: ?Array<NarrativeElement>;
 }

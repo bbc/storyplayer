@@ -674,7 +674,7 @@ export default class BaseRenderer extends EventEmitter {
         const radioYesDiv = document.createElement('label');
         radioYesDiv.className = 'romper-var-form-radio-div yes';
         const radioYes = document.createElement('input');
-        radioYes.onclick = (() => this._controller.setVariableValue(varName, true));
+        radioYes.onclick = (() => this._setVariableValue(varName, true));
         radioYes.type = 'radio';
         radioYes.name = 'bool-option';
         const yesLabel = document.createElement('div');
@@ -686,7 +686,7 @@ export default class BaseRenderer extends EventEmitter {
         const radioNoDiv = document.createElement('label');
         radioNoDiv.className = 'romper-var-form-radio-div no';
         const radioNo = document.createElement('input');
-        radioNo.onclick = (() => this._controller.setVariableValue(varName, false));
+        radioNo.onclick = (() => this._setVariableValue(varName, false));
         radioNo.type = 'radio';
         radioNo.name = 'bool-option';
         const noLabel = document.createElement('div');
@@ -727,7 +727,7 @@ export default class BaseRenderer extends EventEmitter {
             });
 
         varInputSelect.onchange = () =>
-            this._controller.setVariableValue(varName, varInputSelect.value);
+            this._setVariableValue(varName, varInputSelect.value);
 
         return varInput;
     }
@@ -745,7 +745,7 @@ export default class BaseRenderer extends EventEmitter {
                 varIntInput.value = varValue;
             });
 
-        varIntInput.onchange = () => this._controller.setVariableValue(varName, varIntInput.value);
+        varIntInput.onchange = () => this._setVariableValue(varName, varIntInput.value);
         varInput.appendChild(varIntInput);
 
         return varInput;
@@ -773,7 +773,7 @@ export default class BaseRenderer extends EventEmitter {
             });
 
         slider.onchange = () => {
-            this._controller.setVariableValue(varName, slider.value);
+            this._setVariableValue(varName, slider.value);
             numberInput.value = slider.value;
         };
 
@@ -782,18 +782,31 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         numberInput.onchange = () => {
-            this._controller.setVariableValue(varName, numberInput.value);
+            this._setVariableValue(varName, numberInput.value);
             slider.value = numberInput.value;
         };
 
         numberInput.oninput = () => {
-            this._controller.setVariableValue(varName, numberInput.value);
+            this._setVariableValue(varName, numberInput.value);
         };
 
         varInput.appendChild(slider);
         varInput.appendChild(numberInput);
 
         return varInput;
+    }
+
+    _setVariableValue(varName: string, value: any) {
+        this._controller.getVariableValue(varName).then((oldVal) => {
+            this._controller.setVariableValue(varName, value);
+            const logData = {
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.USER_SET_VARIABLE,
+                from: `${varName}: ${oldVal}`,
+                to: `${varName}: ${value}`,
+            };
+            this._analytics(logData);
+        });
     }
 
     // create an input element for setting a variable
