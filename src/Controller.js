@@ -310,7 +310,7 @@ export default class Controller extends EventEmitter {
     _getNarrativeElement(neid: string): ?NarrativeElement {
         let neObj;
         if (this._allNarrativeElements) {
-            neObj = this._allNarrativeElements.filter(ne => ne.id === neid).shift();
+            [neObj] = this._allNarrativeElements.filter(ne => ne.id === neid);
         } else if (this._reasoner) {
             // get the actual NarrativeElement object
             const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
