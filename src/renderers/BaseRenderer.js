@@ -332,7 +332,8 @@ export default class BaseRenderer extends EventEmitter {
                 this._player.clearLinkChoices();
                 AFrameRenderer.clearLinkIcons();
                 urls.forEach((iconAssetCollectionSrc, choiceId) => {
-                    if (iconAssetCollectionSrc) {
+                    const src = iconAssetCollectionSrc.resolvedUrl;
+                    if (src) {
                         // add the icon to the player
                         // eslint-disable-next-line max-len
                         this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
@@ -406,26 +407,38 @@ export default class BaseRenderer extends EventEmitter {
         };
     }
 
-    // get src urls for icons to represent link choices
+    // get data objects including src urls for icons to represent link choices
     _getIconSourceUrls(
         narrativeElementObjects: Array<Object>,
         behaviour: Object,
-    ): Promise<Array<?string>> {
-        const iconAssetCollectionIdPromises: Array<Promise<?string>> = [];
+    ): Promise<Array<Object>> {
+        const iconAssetCollectionIdPromises: Array<Promise<Object>> = [];
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
-            let iconAssetCollectionId = null;
+            const iconSpecObject = {
+                src: null,
+                position: null,
+                size: null,
+                ac: null,
+                resolvedUrl: null,
+            };
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
                         // map representation to asset
-                        iconAssetCollectionId =
+                        iconSpecObject.src =
                             this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
+                        if (linkIconObject.position) {
+                            iconSpecObject.position = linkIconObject.position;
+                        }
+                        if (linkIconObject.size) {
+                            iconSpecObject.size = linkIconObject.size;
+                        }
                     }
                 });
             }
-            if (iconAssetCollectionId === null) {
+            if (iconSpecObject.src === null) {
                 // if not specified - get default icon...
                 iconAssetCollectionIdPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
@@ -433,52 +446,61 @@ export default class BaseRenderer extends EventEmitter {
                         if (representation && representation.asset_collections.icon
                             && representation.asset_collections.icon.default_id) {
                             // eslint-disable-next-line max-len
-                            return Promise.resolve(representation.asset_collections.icon.default_id);
+                            return Promise.resolve({ src: representation.asset_collections.icon.default_id });
                         }
-                        return Promise.resolve(null);
+                        return Promise.resolve({ src: null });
                     }));
             } else {
-                iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
+                iconAssetCollectionIdPromises.push(Promise.resolve(iconSpecObject));
             }
         });
 
-        return Promise.all(iconAssetCollectionIdPromises).then((iconAssetCollectionIds) => {
+        return Promise.all(iconAssetCollectionIdPromises).then((iconSpecObjects) => {
             const iconAssetCollectionPromises = [];
-            iconAssetCollectionIds.forEach((iconAcId) => {
-                if (iconAcId) {
-                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconAcId));
+            iconSpecObjects.forEach((iconSpecObj) => {
+                if (iconSpecObj.src) {
+                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconSpecObj.src));
                 } else {
                     iconAssetCollectionPromises.push(Promise.resolve(null));
                 }
             });
-            return Promise.all(iconAssetCollectionPromises);
-        }).then((assetCollections) => {
-            const urls = [];
-            assetCollections.forEach((ac) => {
-                if (ac && ac.assets.image_src) {
-                    urls.push(ac.assets.image_src);
-                } else {
-                    urls.push(null);
-                }
+            return Promise.all(iconAssetCollectionPromises).then((resolvedAcs) => {
+                resolvedAcs.forEach((resolvedAc, index) => {
+                    const holdingObj = iconSpecObjects[index];
+                    holdingObj.ac = resolvedAc;
+                });
+                return Promise.resolve(iconSpecObjects);
             });
-            return urls;
+        }).then((iconObjects) => {
+            const returnObjects = [];
+            iconObjects.forEach((iconObject) => {
+                const obj = iconObject;
+                if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
+                    obj.resolvedUrl = iconObject.ac.assets.image_src;
+                } else {
+                    obj.resolvedUrl = null;
+                }
+                returnObjects.push(obj);
+            });
+            return returnObjects;
         });
     }
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, iconObject: Object) {
         // tell Player to build icon
         const targetId = narrativeElementObjects[choiceId].targetNeId;
         this._player.addLinkChoiceControl(
             targetId,
-            imgsrc,
+            iconObject.resolvedUrl,
             `Option ${(choiceId + 1)}`,
         );
         if (this.isVRViewable()) {
             AFrameRenderer.addLinkIcon(
                 targetId,
-                imgsrc,
+                iconObject.resolvedUrl,
+                iconObject,
             );
         }
     }
