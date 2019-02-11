@@ -161,6 +161,7 @@ class AFrameRenderer extends EventEmitter {
             img.src = iconUrl;
         }
         img.id = `icon-image-${_iconCount}`;
+        img.setAttribute('crossorigin', 'anonymous');
         this.addAsset(img);
 
         const callback = () => {

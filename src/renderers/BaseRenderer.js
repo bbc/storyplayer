@@ -617,6 +617,9 @@ export default class BaseRenderer extends EventEmitter {
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
+        if (this.isVRViewable()) {
+            AFrameRenderer.clearLinkIcons();
+        }
         this._player._linkChoice.overlay.classList.add('fade');
         setTimeout(() => {
             this._player._linkChoice.overlay.classList.remove('fade');
