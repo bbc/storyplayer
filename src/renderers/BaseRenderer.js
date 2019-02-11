@@ -331,12 +331,12 @@ export default class BaseRenderer extends EventEmitter {
             return iconSrcPromises.then((urls) => {
                 this._player.clearLinkChoices();
                 AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconAssetCollectionSrc, choiceId) => {
-                    const src = iconAssetCollectionSrc.resolvedUrl;
+                urls.forEach((iconSpecObject, choiceId) => {
+                    const src = iconSpecObject.resolvedUrl;
                     if (src) {
                         // add the icon to the player
                         // eslint-disable-next-line max-len
-                        this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                        this._buildLinkIcon(choiceId, iconSpecObject);
                     }
                 });
 
@@ -421,6 +421,7 @@ export default class BaseRenderer extends EventEmitter {
                 size: null,
                 ac: null,
                 resolvedUrl: null,
+                targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
             };
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
@@ -488,9 +489,9 @@ export default class BaseRenderer extends EventEmitter {
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, iconObject: Object) {
+    _buildLinkIcon(choiceId: number, iconObject: Object) {
         // tell Player to build icon
-        const targetId = narrativeElementObjects[choiceId].targetNeId;
+        const targetId = iconObject.targetNarrativeElementId;
         this._player.addLinkChoiceControl(
             targetId,
             iconObject.resolvedUrl,
