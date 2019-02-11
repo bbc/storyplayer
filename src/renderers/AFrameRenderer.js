@@ -30,7 +30,7 @@ class AFrameRenderer extends EventEmitter {
 
     sceneElements: Array<HTMLElement>;
     linkElements: Array<HTMLElement>;
-    _choiceIconSet: { [key: string]: HTMLElement };
+    _choiceIconSet: { [key: string]: { entity: HTMLElement, control: boolean } };
 
     constructor() {
         super();
@@ -151,7 +151,7 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.setAttribute('rotation', `-50 ${-position.phi} 0`);
     }
 
-    addLinkIcon(neId: string, iconUrl: string) {
+    addLinkIcon(neId: string, iconUrl: string, iconDataObject: Object) {
         _iconCount += 1;
         const img = document.createElement('img');
         // TODO: aframe doesn't like svg images ...
@@ -179,30 +179,50 @@ class AFrameRenderer extends EventEmitter {
             }
         };
 
+        let placeInControl = true;
         const iconImageEntity = document.createElement('a-image');
         iconImageEntity.addEventListener('click', callback);
-
-        // cunningly render in the control bar
-        iconImageEntity.setAttribute('position', `${2 * _iconCount} 0 0.05`);
-        iconImageEntity.setAttribute('width', '1');
-        iconImageEntity.setAttribute('height', '1');
         iconImageEntity.setAttribute('src', `#icon-image-${_iconCount}`);
 
-        if (_iconCount > 1) {
-            // resize control bar to fit
-            this._controlBar.setAttribute('width', `${(_iconCount * 2.5) + 5}`);
+        if (iconDataObject.position && iconDataObject.position.polar_coordinates) {
+            placeInControl = false;
+            const { phi, theta, radius } = iconDataObject.position.polar_coordinates;
+            const cartPos = AFrameRenderer.polarToCartesian(phi, theta, radius);
+            iconImageEntity.setAttribute('position', `${cartPos.x} ${cartPos.y} ${cartPos.z}`);
+        } else {
+            // cunningly render in the control bar
+            iconImageEntity.setAttribute('position', `${2 * _iconCount} 0 0.05`);
+
+            if (_iconCount > 1) {
+                // resize control bar to fit
+                this._controlBar.setAttribute('width', `${(_iconCount * 2.5) + 5}`);
+            }
         }
+
+        let width = 1;
+        let height = 1;
+        if (iconDataObject.size && iconDataObject.size.width && iconDataObject.size.height) {
+            const { w, h } = iconDataObject.size;
+            width = w;
+            height = h;
+        }
+        iconImageEntity.setAttribute('width', `${width}`);
+        iconImageEntity.setAttribute('height', `${height}`);
 
         this.sceneElements.push(iconImageEntity);
         this.linkElements.push(img);
         this.linkElements.push(iconImageEntity);
-        this._choiceIconSet[neId] = iconImageEntity;
+        this._choiceIconSet[neId] = { entity: iconImageEntity, control: placeInControl };
     }
 
     showLinkIcons() {
         Object.keys(this._choiceIconSet).forEach((neId) => {
-            const iconImageEntity = this._choiceIconSet[neId];
-            this._controlBar.appendChild(iconImageEntity);
+            const iconImageObject = this._choiceIconSet[neId];
+            if (iconImageObject.control) {
+                this._controlBar.appendChild(iconImageObject.entity);
+            } else {
+                this.aFrameSceneElement.appendChild(iconImageObject.entity);
+            }
         });
     }
 
