@@ -4,7 +4,7 @@
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
             "name": "An ambisonic 360 test Story",
-            "description": "A story with a beginning, a middle and an end",
+            "description": "A story with a beginning, two middle sections and an end.  Step 2 branches - follow the orkney flag to see part 3, follow the step 2 icon to jump to the end.",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -91,6 +91,11 @@
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
+                },
+                {
+                    "condition": {"==": [1,1]},
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "target_narrative_element_id": "4d2a2442-b9b8-4cca-b934-d067c8967a20"
                 }
             ]
         },
@@ -249,11 +254,73 @@
             "representation_type": "urn:x-object-based-media:representation-types:immersive/v1.0",
             "asset_collections": {
                 "foreground_id": "42184381-85ce-4d71-8a42-895cf5d485c9",
-                "background_ids": []
+                "background_ids": [],
+                "behaviours": [
+                    {
+                        "behaviour_asset_collection_mapping_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
+                        "asset_collection_id": "97106527-4204-42B2-91F7-FD0EED9D2032"
+                    },
+                    {
+                        "behaviour_asset_collection_mapping_id": "42184381-85ce-4d71-8a42-895cf5d485c9",
+                        "asset_collection_id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725"
+                    }
+                ]
             },
             "behaviours": {
                 "started": [],
-                "completed": []
+                "completed": [],
+                "during": [
+                    {
+                        "behaviour": {
+                            "type": "urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0",
+                            "show_ne_to_end": true,
+                            "one_shot": false,
+                            "disable_controls": true,
+                            "show_time_remaining": true,
+                            "overlay_class": "icon-bar",
+                            "force_choice": false,
+                            "link_icons": [
+                                {
+                                    "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20",
+                                    "image": "32184381-85ce-4d71-8a42-895cf5d485c9",
+                                    "position": {
+                                        "three_d": {
+                                            "phi": 0,
+                                            "theta": 0,
+                                            "radius": 8,
+                                            "geometry": "polar"
+                                        }
+                                    },
+                                    "size": {
+                                        "three_d": {
+                                            "width": 2,
+                                            "height": 2
+                                        }
+                                    }
+                                },
+                                {
+                                    "target_narrative_element_id": "4d2a2442-b9b8-4cca-b934-d067c8967a20",
+                                    "image": "42184381-85ce-4d71-8a42-895cf5d485c9",
+                                    "position": {
+                                        "three_d": {
+                                            "phi": 20,
+                                            "theta": 0,
+                                            "radius": 8,
+                                            "geometry": "polar"
+                                        }
+                                    },
+                                    "size": {
+                                        "three_d": {
+                                            "width": 2,
+                                            "height": 2
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "start_time": 150.0
+                    }
+                ]
             }
         },
         {
@@ -274,6 +341,30 @@
         }
     ],
     "asset_collections": [
+        {
+            "id": "97106527-4204-42B2-91F7-FD0EED9D2032",
+            "object_class": "ASSET_COLLECTION",
+            "description": "squirrel icon",
+            "version": "",
+            "name": "",
+            "tags": {},
+            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "assets": {
+                "image_src": "https://rdux.files.bbci.co.uk/romper/orkney.png"
+            }
+        },
+        {
+            "id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725",
+            "object_class": "ASSET_COLLECTION",
+            "description": "Bird icon",
+            "version": "",
+            "name": "",
+            "tags": {},
+            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "assets": {
+                "image_src": "https://rdux.files.bbci.co.uk/romper/step2.png"
+            }
+        },
         {
             "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
             "object_class": "ASSET_COLLECTION",
