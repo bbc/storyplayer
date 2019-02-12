@@ -328,15 +328,13 @@ export default class BaseRenderer extends EventEmitter {
             const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
-            return iconSrcPromises.then((urls) => {
+            return iconSrcPromises.then((iconObjects) => {
                 this._player.clearLinkChoices();
                 AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconSpecObject, choiceId) => {
-                    const src = iconSpecObject.resolvedUrl;
-                    if (src) {
-                        // add the icon to the player
-                        // eslint-disable-next-line max-len
-                        this._buildLinkIcon(choiceId, iconSpecObject);
+                iconObjects.forEach((iconSpecObject) => {
+                    // add the icon to the player
+                    if (iconSpecObject.resolvedUrl) {
+                        this._buildLinkIcon(iconSpecObject);
                     }
                 });
 
@@ -417,6 +415,7 @@ export default class BaseRenderer extends EventEmitter {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
             // blank object describing each icon
             const iconSpecObject = {
+                choiceId: i,
                 acId: null,
                 ac: null,
                 resolvedUrl: null,
@@ -445,12 +444,18 @@ export default class BaseRenderer extends EventEmitter {
                 iconObjectPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
                     .then((representation) => {
+                        let defaultSrcAcId = null;
                         if (representation && representation.asset_collections.icon
                             && representation.asset_collections.icon.default_id) {
-                            // eslint-disable-next-line max-len
-                            return Promise.resolve({ acId: representation.asset_collections.icon.default_id });
+                            defaultSrcAcId = representation.asset_collections.icon.default_id;
                         }
-                        return Promise.resolve({ acId: null });
+                        return Promise.resolve({
+                            choiceId: i,
+                            acId: defaultSrcAcId,
+                            ac: null,
+                            resolvedUrl: null,
+                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+                        });
                     }));
             } else {
                 iconObjectPromises.push(Promise.resolve(iconSpecObject));
@@ -498,13 +503,13 @@ export default class BaseRenderer extends EventEmitter {
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(choiceId: number, iconObject: Object) {
+    _buildLinkIcon(iconObject: Object) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
         this._player.addLinkChoiceControl(
             targetId,
             iconObject.resolvedUrl,
-            `Option ${(choiceId + 1)}`,
+            `Option ${(iconObject.choiceId + 1)}`,
         );
         if (this.isVRViewable()) {
             AFrameRenderer.addLinkIcon(
