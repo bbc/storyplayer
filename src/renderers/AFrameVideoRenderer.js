@@ -108,7 +108,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._player.getLinkChoiceElement().style.visibility = 'collapse';
         // TODO: problems with this type of representation as first element:
         // starts video, but see nothing unless you enter VR mode...
         logger.info(`Started: ${this._representation.id}`);

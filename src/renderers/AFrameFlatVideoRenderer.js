@@ -102,7 +102,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._player.getLinkChoiceElement().style.visibility = 'collapse';
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
             this._startFlatVideo();
