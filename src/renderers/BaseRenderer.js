@@ -407,60 +407,62 @@ export default class BaseRenderer extends EventEmitter {
         };
     }
 
-    // get data objects including src urls for icons to represent link choices
+    // get data objects including resolved src urls for icons to represent link choices
     _getIconSourceUrls(
         narrativeElementObjects: Array<Object>,
         behaviour: Object,
     ): Promise<Array<Object>> {
-        const iconAssetCollectionIdPromises: Array<Promise<Object>> = [];
+        const iconObjectPromises: Array<Promise<Object>> = [];
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
+            // blank object describing each icon
             const iconSpecObject = {
-                src: null,
-                position: null,
-                size: null,
+                acId: null,
                 ac: null,
                 resolvedUrl: null,
                 targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
             };
+            // first get an asset collection id for each icon
+            // firstly is there an  icon specified in the behaviour
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
                         // map representation to asset
-                        iconSpecObject.src =
+                        iconSpecObject.acId =
                             this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
-                        if (linkIconObject.position) {
-                            iconSpecObject.position = linkIconObject.position;
-                        }
-                        if (linkIconObject.size) {
-                            iconSpecObject.size = linkIconObject.size;
-                        }
+                        // inject any other properties in data model into the object
+                        Object.keys(linkIconObject).forEach((key) => {
+                            if (key !== 'image') {
+                                iconSpecObject[key] = linkIconObject[key];
+                            }
+                        });
                     }
                 });
             }
-            if (iconSpecObject.src === null) {
+            if (iconSpecObject.acId === null) {
                 // if not specified - get default icon...
-                iconAssetCollectionIdPromises.push(this._controller
+                iconObjectPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
                     .then((representation) => {
                         if (representation && representation.asset_collections.icon
                             && representation.asset_collections.icon.default_id) {
                             // eslint-disable-next-line max-len
-                            return Promise.resolve({ src: representation.asset_collections.icon.default_id });
+                            return Promise.resolve({ acId: representation.asset_collections.icon.default_id });
                         }
-                        return Promise.resolve({ src: null });
+                        return Promise.resolve({ acId: null });
                     }));
             } else {
-                iconAssetCollectionIdPromises.push(Promise.resolve(iconSpecObject));
+                iconObjectPromises.push(Promise.resolve(iconSpecObject));
             }
         });
 
-        return Promise.all(iconAssetCollectionIdPromises).then((iconSpecObjects) => {
+        return Promise.all(iconObjectPromises).then((iconSpecObjects) => {
+            // next resolve asset collection ids into asset collection objects
             const iconAssetCollectionPromises = [];
             iconSpecObjects.forEach((iconSpecObj) => {
-                if (iconSpecObj.src) {
-                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconSpecObj.src));
+                if (iconSpecObj.acId) {
+                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconSpecObj.acId));
                 } else {
                     iconAssetCollectionPromises.push(Promise.resolve(null));
                 }
@@ -473,17 +475,24 @@ export default class BaseRenderer extends EventEmitter {
                 return Promise.resolve(iconSpecObjects);
             });
         }).then((iconObjects) => {
-            const returnObjects = [];
+            // next get src urls from each asset collection and resolve them using media fetcher
+            const fetcherPromises = [];
             iconObjects.forEach((iconObject) => {
-                const obj = iconObject;
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
-                    obj.resolvedUrl = iconObject.ac.assets.image_src;
+                    fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
                 } else {
-                    obj.resolvedUrl = null;
+                    fetcherPromises.push(Promise.resolve(null));
                 }
-                returnObjects.push(obj);
             });
-            return returnObjects;
+            return Promise.all(fetcherPromises).then((resolvedUrls) => {
+                const returnObjects = [];
+                resolvedUrls.forEach((resolvedUrl, i) => {
+                    const obj = iconObjects[i];
+                    obj.resolvedUrl = resolvedUrl;
+                    returnObjects.push(obj);
+                });
+                return returnObjects;
+            });
         });
     }
 
