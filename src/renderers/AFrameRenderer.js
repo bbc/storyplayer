@@ -184,9 +184,9 @@ class AFrameRenderer extends EventEmitter {
         iconImageEntity.addEventListener('click', callback);
         iconImageEntity.setAttribute('src', `#icon-image-${_iconCount}`);
 
-        if (iconDataObject.position && iconDataObject.position.polar_coordinates) {
+        if (iconDataObject.position && iconDataObject.position.aframe_polar_coordinates) {
             placeInControl = false;
-            const { phi, theta, radius } = iconDataObject.position.polar_coordinates;
+            const { phi, theta, radius } = iconDataObject.position.aframe_polar_coordinates;
             const cartPos = AFrameRenderer.polarToCartesian(phi, theta, radius);
             iconImageEntity.setAttribute('position', `${cartPos.x} ${cartPos.y} ${cartPos.z}`);
         } else {
@@ -199,15 +199,16 @@ class AFrameRenderer extends EventEmitter {
             }
         }
 
-        let width = 1;
-        let height = 1;
-        if (iconDataObject.size && iconDataObject.size.width && iconDataObject.size.height) {
-            const { w, h } = iconDataObject.size;
-            width = w;
-            height = h;
+        let iconWidth = 1;
+        let iconHeight = 1;
+        if (iconDataObject.size && iconDataObject.size.aframe
+            && iconDataObject.size.aframe.width && iconDataObject.size.aframe.height) {
+            const { width, height } = iconDataObject.size.aframe;
+            iconHeight = height;
+            iconWidth = width;
         }
-        iconImageEntity.setAttribute('width', `${width}`);
-        iconImageEntity.setAttribute('height', `${height}`);
+        iconImageEntity.setAttribute('width', `${iconWidth}`);
+        iconImageEntity.setAttribute('height', `${iconHeight}`);
 
         this.sceneElements.push(iconImageEntity);
         this.linkElements.push(img);
