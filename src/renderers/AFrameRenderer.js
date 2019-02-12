@@ -184,26 +184,31 @@ class AFrameRenderer extends EventEmitter {
         iconImageEntity.addEventListener('click', callback);
         iconImageEntity.setAttribute('src', `#icon-image-${_iconCount}`);
 
-        if (iconDataObject.position && iconDataObject.position.aframe_polar_coordinates) {
-            placeInControl = false;
-            const { phi, theta, radius } = iconDataObject.position.aframe_polar_coordinates;
-            const cartPos = AFrameRenderer.polarToCartesian(phi, theta, radius);
-            iconImageEntity.setAttribute('position', `${cartPos.x} ${cartPos.y} ${cartPos.z}`);
-        } else {
-            // cunningly render in the control bar
-            iconImageEntity.setAttribute('position', `${2 * _iconCount} 0 0.05`);
+        // default position depends on how many already in control bar
+        const numInControl = Object.keys(this._choiceIconSet).filter(neid =>
+            this._choiceIconSet[neid].control).length + 1;
+        let position = `${2 * numInControl} 0 0.05`;
 
-            if (_iconCount > 1) {
-                // resize control bar to fit
-                this._controlBar.setAttribute('width', `${(_iconCount * 2.5) + 5}`);
+        // now see if have 3D position
+        if (iconDataObject.position && iconDataObject.position.three_d) {
+            placeInControl = false;
+            if (iconDataObject.position.three_d.geometry === 'polar') {
+                const { phi, theta, radius } = iconDataObject.position.three_d;
+                const cartPos = AFrameRenderer.polarToCartesian(phi, theta, radius);
+                position = `${cartPos.x} ${cartPos.y} ${cartPos.z}`;
+            } else {
+                const { x, y, z } = iconDataObject.position.three_d;
+                position = `${x} ${y} ${z}`;
             }
         }
+        iconImageEntity.setAttribute('position', position);
 
         let iconWidth = 1;
         let iconHeight = 1;
-        if (iconDataObject.size && iconDataObject.size.aframe
-            && iconDataObject.size.aframe.width && iconDataObject.size.aframe.height) {
-            const { width, height } = iconDataObject.size.aframe;
+        // override if w and h specified, but not if going in control bar
+        if (!placeInControl && iconDataObject.size && iconDataObject.size.three_d
+            && iconDataObject.size.three_d.width && iconDataObject.size.three_d.height) {
+            const { width, height } = iconDataObject.size.three_d;
             iconHeight = height;
             iconWidth = width;
         }
@@ -217,6 +222,12 @@ class AFrameRenderer extends EventEmitter {
     }
 
     showLinkIcons() {
+        // work out size of the control bar
+        const numInControl = Object.keys(this._choiceIconSet).filter(neid =>
+            this._choiceIconSet[neid].control).length;
+        if (numInControl > 1) {
+            this._controlBar.setAttribute('width', `${(numInControl * 2.5) + 5}`);
+        }
         Object.keys(this._choiceIconSet).forEach((neId) => {
             const iconImageObject = this._choiceIconSet[neId];
             if (iconImageObject.control) {
