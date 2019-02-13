@@ -188,30 +188,42 @@ class AFrameRenderer extends EventEmitter {
         const numInControl = Object.keys(this._choiceIconSet).filter(neid =>
             this._choiceIconSet[neid].control).length + 1;
         let position = `${2 * numInControl} 0 0.05`;
+        let iconWidth = 1;
+        let iconHeight = 1;
 
         // now see if have 3D position
         if (iconDataObject.position && iconDataObject.position.three_d) {
             placeInControl = false;
-            if (iconDataObject.position.three_d.geometry === 'polar') {
-                const { phi, theta, radius } = iconDataObject.position.three_d;
-                const cartPos = AFrameRenderer.polarToCartesian(phi, theta, radius);
-                position = `${cartPos.x} ${cartPos.y} ${cartPos.z}`;
-            } else {
-                const { x, y, z } = iconDataObject.position.three_d;
+            const positionSpec = iconDataObject.position.three_d;
+            if (positionSpec.hasOwnProperty('phi') && positionSpec.hasOwnProperty('theta')) {
+                const { phi, theta } = positionSpec;
+                let iconRadius = 8;
+                if (positionSpec.hasOwnProperty('radius')) {
+                    const { radius } = positionSpec;
+                    iconRadius = radius;
+                }
+                const { x, y, z } = AFrameRenderer.polarToCartesian(phi, theta, iconRadius);
+                // const { x, y, z } = cartPos;
                 position = `${x} ${y} ${z}`;
+            } else if (positionSpec.hasOwnProperty('x')
+                && positionSpec.hasOwnProperty('y')
+                && positionSpec.hasOwnProperty('z')) {
+                const { x, y, z } = positionSpec;
+                position = `${x} ${y} ${z}`;
+            } else {
+                placeInControl = true;
+            }
+            // override if w and h specified, but not if going in control bar
+            if (!placeInControl
+                && positionSpec.hasOwnProperty('width')
+                && positionSpec.hasOwnProperty('height')) {
+                const { width, height } = positionSpec;
+                iconHeight = height;
+                iconWidth = width;
             }
         }
-        iconImageEntity.setAttribute('position', position);
 
-        let iconWidth = 1;
-        let iconHeight = 1;
-        // override if w and h specified, but not if going in control bar
-        if (!placeInControl && iconDataObject.size && iconDataObject.size.three_d
-            && iconDataObject.size.three_d.width && iconDataObject.size.three_d.height) {
-            const { width, height } = iconDataObject.size.three_d;
-            iconHeight = height;
-            iconWidth = width;
-        }
+        iconImageEntity.setAttribute('position', position);
         iconImageEntity.setAttribute('width', `${iconWidth}`);
         iconImageEntity.setAttribute('height', `${iconHeight}`);
 

@@ -288,11 +288,6 @@
                                             "phi": 0,
                                             "theta": 0,
                                             "radius": 8,
-                                            "geometry": "polar"
-                                        }
-                                    },
-                                    "size": {
-                                        "three_d": {
                                             "width": 2,
                                             "height": 2
                                         }
@@ -306,11 +301,6 @@
                                             "phi": 20,
                                             "theta": 0,
                                             "radius": 8,
-                                            "geometry": "polar"
-                                        }
-                                    },
-                                    "size": {
-                                        "three_d": {
                                             "width": 2,
                                             "height": 2
                                         }
