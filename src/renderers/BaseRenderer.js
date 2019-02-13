@@ -671,36 +671,45 @@ export default class BaseRenderer extends EventEmitter {
         varInput.classList.add('romper-var-form-input-container');
 
         // yes button & label
-        const radioYesDiv = document.createElement('label');
+        const radioYesDiv = document.createElement('span');
         radioYesDiv.className = 'romper-var-form-radio-div yes';
         const radioYes = document.createElement('input');
-        radioYes.onclick = (() => this._setVariableValue(varName, true));
-        radioYes.type = 'radio';
+        radioYes.onclick = (ev => this._setVariableValue(varName, ev.target.checked));
+        radioYes.type = 'checkbox';
         radioYes.name = 'bool-option';
         const yesLabel = document.createElement('div');
         yesLabel.innerHTML = 'Yes';
-        radioYesDiv.appendChild(radioYes);
         radioYesDiv.appendChild(yesLabel);
 
+        const switchel = document.createElement('label');
+        switchel.classList.add('switch');
+        switchel.classList.add('romper-var-form-boolean-toggle');
+        switchel.appendChild(radioYes);
+
+        const slider = document.createElement('span');
+        slider.classList.add('slider');
+        switchel.appendChild(slider);
+
         // no button & label
-        const radioNoDiv = document.createElement('label');
+        const radioNoDiv = document.createElement('span');
         radioNoDiv.className = 'romper-var-form-radio-div no';
-        const radioNo = document.createElement('input');
-        radioNo.onclick = (() => this._setVariableValue(varName, false));
-        radioNo.type = 'radio';
-        radioNo.name = 'bool-option';
+        // const radioNo = document.createElement('input');
+        // radioNo.onclick = (() => this._setVariableValue(varName, false));
+        // radioNo.type = 'radio';
+        // radioNo.name = 'bool-option';
         const noLabel = document.createElement('div');
         noLabel.innerHTML = 'No';
-        radioNoDiv.appendChild(radioNo);
+        // radioNoDiv.appendChild(radioNo);
         radioNoDiv.appendChild(noLabel);
 
         varInput.appendChild(radioYesDiv);
+        varInput.appendChild(switchel);
         varInput.appendChild(radioNoDiv);
 
         this._controller.getVariableValue(varName)
             .then((varValue) => {
                 radioYes.checked = varValue;
-                radioNo.checked = !varValue;
+                // radioNo.checked = !varValue;
             });
 
         return varInput;
