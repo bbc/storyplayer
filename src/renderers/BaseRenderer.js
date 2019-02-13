@@ -670,46 +670,41 @@ export default class BaseRenderer extends EventEmitter {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
-        // yes button & label
-        const radioYesDiv = document.createElement('span');
-        radioYesDiv.className = 'romper-var-form-radio-div yes';
-        const radioYes = document.createElement('input');
-        radioYes.onclick = (ev => this._setVariableValue(varName, ev.target.checked));
-        radioYes.type = 'checkbox';
-        radioYes.name = 'bool-option';
+        // yes label
+        const yesLabelSpan = document.createElement('span');
+        yesLabelSpan.className = 'romper-var-form-radio-div yes';
         const yesLabel = document.createElement('div');
         yesLabel.innerHTML = 'Yes';
-        radioYesDiv.appendChild(yesLabel);
+        yesLabelSpan.appendChild(yesLabel);
+
+        // checkbox (hidden by toggle)
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.onclick = (() => this._setVariableValue(varName, checkbox.checked));
 
         const switchel = document.createElement('label');
         switchel.classList.add('switch');
         switchel.classList.add('romper-var-form-boolean-toggle');
-        switchel.appendChild(radioYes);
+        switchel.appendChild(checkbox);
 
         const slider = document.createElement('span');
         slider.classList.add('slider');
         switchel.appendChild(slider);
 
         // no button & label
-        const radioNoDiv = document.createElement('span');
-        radioNoDiv.className = 'romper-var-form-radio-div no';
-        // const radioNo = document.createElement('input');
-        // radioNo.onclick = (() => this._setVariableValue(varName, false));
-        // radioNo.type = 'radio';
-        // radioNo.name = 'bool-option';
+        const noLabelSpan = document.createElement('span');
+        noLabelSpan.className = 'romper-var-form-radio-div no';
         const noLabel = document.createElement('div');
         noLabel.innerHTML = 'No';
-        // radioNoDiv.appendChild(radioNo);
-        radioNoDiv.appendChild(noLabel);
+        noLabelSpan.appendChild(noLabel);
 
-        varInput.appendChild(radioYesDiv);
+        varInput.appendChild(yesLabelSpan);
         varInput.appendChild(switchel);
-        varInput.appendChild(radioNoDiv);
+        varInput.appendChild(noLabelSpan);
 
         this._controller.getVariableValue(varName)
             .then((varValue) => {
-                radioYes.checked = varValue;
-                // radioNo.checked = !varValue;
+                checkbox.checked = varValue;
             });
 
         return varInput;
