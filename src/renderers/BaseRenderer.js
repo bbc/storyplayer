@@ -506,11 +506,34 @@ export default class BaseRenderer extends EventEmitter {
     _buildLinkIcon(iconObject: Object) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
-        this._player.addLinkChoiceControl(
+        const icon = this._player.addLinkChoiceControl(
             targetId,
             iconObject.resolvedUrl,
             `Option ${(iconObject.choiceId + 1)}`,
         );
+        if (iconObject.position && iconObject.position.two_d) {
+            const {
+                left,
+                top,
+            } = iconObject.position.two_d;
+            let {
+                width,
+                height,
+            } = iconObject.position.two_d;
+            if (left !== undefined && top !== undefined
+                && (width !== undefined || height !== undefined)) {
+                if (width === undefined) {
+                    width = height;
+                } else if (height === undefined) {
+                    height = width;
+                }
+                icon.style.position = 'absolute';
+                icon.style.top = `${top}%`;
+                icon.style.left = `${left}%`;
+                icon.style.width = `${width}%`;
+                icon.style.height = `${height}%`;
+            }
+        }
         if (this.isVRViewable()) {
             AFrameRenderer.addLinkIcon(
                 targetId,
