@@ -680,7 +680,11 @@ export default class BaseRenderer extends EventEmitter {
         // checkbox (hidden by toggle)
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.onclick = (() => this._setVariableValue(varName, checkbox.checked));
+
+        yesLabelSpan.onclick = () => {
+            checkbox.checked = true;
+            this._setVariableValue(varName, true);
+        };
 
         const switchel = document.createElement('label');
         switchel.classList.add('switch');
@@ -691,12 +695,22 @@ export default class BaseRenderer extends EventEmitter {
         slider.classList.add('slider');
         switchel.appendChild(slider);
 
+        switchel.onclick = () => {
+            checkbox.checked = !checkbox.checked;
+            this._setVariableValue(varName, checkbox.checked);
+        };
+
         // no button & label
         const noLabelSpan = document.createElement('span');
         noLabelSpan.className = 'romper-var-form-radio-div no';
         const noLabel = document.createElement('div');
         noLabel.innerHTML = 'No';
         noLabelSpan.appendChild(noLabel);
+
+        noLabelSpan.onclick = () => {
+            checkbox.checked = false;
+            this._setVariableValue(varName, false);
+        };
 
         varInput.appendChild(yesLabelSpan);
         varInput.appendChild(switchel);
