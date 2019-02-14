@@ -983,11 +983,21 @@ export default class BaseRenderer extends EventEmitter {
 
                 okButtonContainer.className = 'romper-var-form-button-container';
                 const okButton = document.createElement('input');
+                okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
-
                 okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
-                okButton.onclick = (() => {
-                    if (currentQuestion >= behaviourVariables.length - 1) {
+
+                // back button
+                const backButton = document.createElement('input');
+                backButton.type = 'button';
+                backButton.value = 'Back';
+                backButton.classList.add('var-back');
+                backButton.classList.add('romper-var-form-button');
+
+                const changeSlide = (fwd: boolean) => {
+                    const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
+
+                    if (fwd && currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
                         overlayImageElement.classList.remove('active');
                         this.inVariablePanel = false;
@@ -999,25 +1009,33 @@ export default class BaseRenderer extends EventEmitter {
                     }
                     // hide current question and show next
                     variableFields.forEach((varDiv, i) => {
-                        if (i === currentQuestion) {
-                            varDiv.classList.remove('active');
-                        } else if (i === currentQuestion + 1) {
+                        if (i === targetId) {
                             varDiv.classList.add('active');
+                        } else {
+                            varDiv.classList.remove('active');
                         }
                     });
 
-                    currentQuestion += 1;
+                    currentQuestion = targetId;
                     // set feedback and button texts
+                    if (currentQuestion > 0) {
+                        backButton.classList.add('active');
+                    } else {
+                        backButton.classList.remove('active');
+                    }
                     okButton.value = currentQuestion < (behaviourVariables.length - 1)
                         ? 'Next' : 'OK!';
                     feedbackPar.textContent =
                         `Question ${currentQuestion + 1}
                          of ${behaviourVariables.length}`;
                     return false;
-                });
-                okButton.className = 'romper-var-form-button';
-                okButtonContainer.appendChild(okButton);
+                };
 
+                backButton.onclick = () => { changeSlide(false); };
+                okButton.onclick = () => { changeSlide(true); };
+
+                okButtonContainer.appendChild(okButton);
+                okButtonContainer.appendChild(backButton);
                 okButtonContainer.appendChild(feedbackPar);
 
                 overlayImageElement.appendChild(okButtonContainer);

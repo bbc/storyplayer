@@ -888,6 +888,16 @@ $romper-hover-text-size: 25px;
   padding: 2% 0;
   text-align: center;
   width: 100%;
+
+  .var-back {
+    left: 2vw;
+    position: absolute;
+    visibility: hidden;
+
+    &.active {
+      visibility: visible;
+    }
+  }
 }
 
 .romper-var-form-button {
