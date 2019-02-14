@@ -606,8 +606,12 @@ export default class Controller extends EventEmitter {
     // the first is the link, the second is the actual NE when
     // first is a story ne (it resolves into substory)
     // eslint-disable-next-line max-len
-    getValidNextSteps(neId: string = this._currentNarrativeElement.id): Promise<Array<Object>> {
-        if (this._reasoner) {
+    getValidNextSteps(narrativeElementId: ?string = null): Promise<Array<Object>> {
+        let neId = narrativeElementId;
+        if (neId === null && this._currentNarrativeElement) {
+            neId = this._currentNarrativeElement.id;
+        }
+        if (this._reasoner && neId) {
             const subReasoner = this._reasoner
                 .getSubReasonerContainingNarrativeElement(neId);
             if (subReasoner) {
