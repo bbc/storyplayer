@@ -731,8 +731,25 @@ $romper-hover-text-size: 25px;
   padding-top: 10px;
 }
 
+.romper-var-form-button-div button {
+  background-color: $backing-colour-dark;
+  border: 0;
+  border-left: 5px solid transparent;
+  border-radius: 3px;
+  color: $white;
+  cursor: pointer;
+  font-size: 80%;
+  margin-right: 10%;
+  margin-bottom: 2%;
+  min-width: 10vw;
+
+  &.selected {
+    border-left: 5px solid $white;
+  }
+}
+
 .romper-var-form-slider-output {
-  margin-left: 15px;
+  margin-left: 10%;
 }
 
 .romper-var-form-answer-cont {
@@ -761,11 +778,11 @@ $romper-hover-text-size: 25px;
 .romper-var-form-boolean-toggle {
   display: flex;
   flex-grow: 1;
-  height: 2vw;
+  height: 30px;//2vw;
   margin-left: 1vw;
   margin-right: 1vw;
   position: relative;
-  width: 3vw;
+  width: 66px;// 3vw;
 
   input {
     height: 0;
@@ -777,15 +794,15 @@ $romper-hover-text-size: 25px;
     }
 
     &:checked + .slider::before {
-      -ms-transform: translateX(-1.5vw);
-      -webkit-transform: translateX(-1.5vw);
-      transform: translateX(-1.5vw);
+      -ms-transform: translateX(-45px);
+      -webkit-transform: translateX(-45px);
+      transform: translateX(-45px);
     }
   }
 
   .slider {
     background-color: $romper-background-color;
-    border-radius: 1vw;
+    border-radius: 15px;
     bottom: 0;
     cursor: pointer;
     left: 0;
@@ -798,13 +815,13 @@ $romper-hover-text-size: 25px;
   .slider::before {
     background-color: $white;
     border-radius: 50%;
-    bottom: 0.1vw;
+    bottom: 4px;// 0.1vw;
     content: '';
-    height: 1.8vw;
-    left: 1.6vw;
+    height: 22px;//1.8vw;
+    left: 50px;//1.65vw;
     position: absolute;
     transition: all .4s ease;
-    width: 1.8vw;
+    width: 22px;// 1.8vw;
   }
 }
 
@@ -819,17 +836,47 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-number-input {
+  display: table-cell;
+  width: 100%;
+
+  >div{
+    display: flex;
+  }
+
   input {
     border: 0;
     border-radius: 5px;
     color: $dark-grey-blue;
-    font-size: 2vw;
-    height: 3vw;
+    font-size: 1.5vw;
+    height: 2.5vw;
     text-align: center;
-    width: 5vw;
+
+    &.romper-var-form-slider-output {
+      background: $romper-background-color;
+      margin-left: 0;
+      margin-top: 1vw;
+      width: 60%;
+    }
 
     &.romper-var-form-slider {
-      width: 10vw;
+      margin-left: 1vw;
+      margin-right: 1vw;
+      width: 90%;
+    }
+  }
+
+  span {
+    color: $romper-background-color;
+    font-size: 1.5vw;
+    margin-top: -1vw;
+    width: 50%;
+
+    &.min {
+      text-align: left;
+    }
+
+    &.max {
+      text-align: right;
     }
   }
 }

@@ -712,11 +712,20 @@ export default class BaseRenderer extends EventEmitter {
 
     // an input for selecting the value for a list variable
     _getListVariableSetter(varName: string, variableDecl: Object) {
+        if (variableDecl.values.length > 3) {
+            return this._getLongListVariableSetter(varName, variableDecl);
+        }
+        return this._getShortListVariableSetter(varName, variableDecl);
+    }
+
+    // a drop-down list input for selecting the value for a list variable
+    _getLongListVariableSetter(varName: string, variableDecl: Object) {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
         const options = variableDecl.values;
         const varInputSelect = document.createElement('select');
+
         options.forEach((optionValue) => {
             const optionElement = document.createElement('option');
             optionElement.setAttribute('value', optionValue);
@@ -732,6 +741,44 @@ export default class BaseRenderer extends EventEmitter {
 
         varInputSelect.onchange = () =>
             this._setVariableValue(varName, varInputSelect.value);
+
+        return varInput;
+    }
+
+    // an input for selecting the value for a list variable
+    _getShortListVariableSetter(varName: string, variableDecl: Object) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const options = variableDecl.values;
+        const varInputSelect = document.createElement('div');
+        varInputSelect.classList.add('romper-var-form-button-div');
+
+        const buttons = {};
+        const setSelected = (varValue) => {
+            Object.keys(buttons).forEach((key) => {
+                if (key === varValue) {
+                    buttons[key].classList.add('selected');
+                } else {
+                    buttons[key].classList.remove('selected');
+                }
+            });
+        };
+
+        options.forEach((optionValue) => {
+            const optionElement = document.createElement('button');
+            optionElement.textContent = optionValue;
+            buttons[optionValue] = optionElement;
+            optionElement.onclick = () => {
+                this._setVariableValue(varName, optionValue);
+                setSelected(optionValue);
+            };
+            varInputSelect.appendChild(optionElement);
+        });
+        varInput.appendChild(varInputSelect);
+
+        this._controller.getVariableValue(varName)
+            .then(varValue => setSelected(varValue));
 
         return varInput;
     }
@@ -759,10 +806,23 @@ export default class BaseRenderer extends EventEmitter {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
+        const sliderDiv = document.createElement('div');
+        const minSpan = document.createElement('span');
+        minSpan.classList.add('min');
+        minSpan.textContent = range.min_val;
+        const maxSpan = document.createElement('span');
+        maxSpan.classList.add('max');
+        maxSpan.textContent = range.max_val;
+
+
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.classList.add('romper-var-form-slider');
         slider.id = `variable-input-${varName}`;
+
+        sliderDiv.appendChild(minSpan);
+        // sliderDiv.appendChild(slider);
+        sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
         numberInput.classList.add('romper-var-form-slider-output');
@@ -795,6 +855,7 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         varInput.appendChild(slider);
+        varInput.appendChild(sliderDiv);
         varInput.appendChild(numberInput);
 
         return varInput;
