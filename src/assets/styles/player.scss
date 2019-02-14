@@ -731,20 +731,22 @@ $romper-hover-text-size: 25px;
   padding-top: 10px;
 }
 
-.romper-var-form-button-div button {
-  background-color: $backing-colour-dark;
-  border: 0;
-  border-left: 5px solid transparent;
-  border-radius: 3px;
-  color: $white;
-  cursor: pointer;
-  font-size: 80%;
-  margin-right: 10%;
-  margin-bottom: 2%;
-  min-width: 10vw;
+.romper-var-form-button-div {
+  button {
+    background-color: $backing-colour-dark;
+    border: 0;
+    border-left: 5px solid transparent;
+    border-radius: 3px;
+    color: $white;
+    cursor: pointer;
+    font-size: 80%;
+    margin-bottom: 2%;
+    margin-right: 10%;
+    min-width: 10vw;
 
-  &.selected {
-    border-left: 5px solid $white;
+    &.selected {
+      border-left: 5px solid $white;
+    }
   }
 }
 
@@ -839,7 +841,7 @@ $romper-hover-text-size: 25px;
   display: table-cell;
   width: 100%;
 
-  >div{
+  >div {
     display: flex;
   }
 
