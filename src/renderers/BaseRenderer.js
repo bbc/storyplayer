@@ -868,8 +868,8 @@ export default class BaseRenderer extends EventEmitter {
             this._setVariableValue(varName, numberInput.value);
         };
 
-        varInput.appendChild(slider);
         varInput.appendChild(sliderDiv);
+        varInput.appendChild(slider);
         varInput.appendChild(numberInput);
 
         return varInput;

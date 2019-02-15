@@ -723,7 +723,7 @@ $romper-hover-text-size: 25px;
   pointer-events: all;
   position: absolute;
   transition: margin 1s 0.3s ease, opacity 0.5s ease;
-  width: 100%;
+  width: 80%;
 
   &.left {
     margin-left: -100%;
@@ -740,8 +740,7 @@ $romper-hover-text-size: 25px;
 
 .romper-var-form-input-container {
   display: flex;
-  padding-left: 20px;
-  padding-top: 10px;
+  padding-left: 5vw;
 }
 
 .romper-var-form-button-div {
@@ -883,7 +882,7 @@ $romper-hover-text-size: 25px;
   span {
     color: $romper-background-color;
     font-size: 1.5vw;
-    margin-top: -1vw;
+    margin-bottom: -1vw;
     width: 50%;
 
     &.min {
