@@ -956,20 +956,24 @@ export default class BaseRenderer extends EventEmitter {
                 const variablesFormContainer = document.createElement('div');
                 variablesFormContainer.className = 'romper-var-form-var-containers';
 
+                const carouselDiv = document.createElement('div');
+                carouselDiv.className = 'romper-var-form-carousel';
+                variablesFormContainer.appendChild(carouselDiv);
+
                 // get an array of divs - one for each question
                 const variableFields = [];
                 // div for each variable Element
                 behaviourVariables.forEach((behaviourVar, i) => {
                     const storyVariable = storyVariables[behaviourVar.variable_name];
                     const variableDiv = this._getVariableSetter(storyVariable, behaviourVar);
-                    if (i === 0) {
-                        variableDiv.classList.add('active');
+                    if (i > 0) {
+                        variableDiv.classList.add('right');
                     }
                     variableFields.push(variableDiv);
-                    variablesFormContainer.appendChild(variableDiv);
+                    carouselDiv.appendChild(variableDiv);
                 });
 
-                overlayImageElement.appendChild(variablesFormContainer);
+                overlayImageElement.appendChild(carouselDiv);
                 // show first question
                 let currentQuestion = 0;
 
@@ -1010,9 +1014,16 @@ export default class BaseRenderer extends EventEmitter {
                     // hide current question and show next
                     variableFields.forEach((varDiv, i) => {
                         if (i === targetId) {
-                            varDiv.classList.add('active');
+                            varDiv.classList.remove('left');
+                            varDiv.classList.remove('right');
+                            // varDiv.classList.add('active');
+                        } else if (i < targetId) {
+                            varDiv.classList.add('left');
+                            // varDiv.classList.remove('active');
+                            varDiv.classList.remove('right');
                         } else {
-                            varDiv.classList.remove('active');
+                            varDiv.classList.remove('left');
+                            varDiv.classList.add('right');
                         }
                     });
 
