@@ -196,13 +196,8 @@ class AFrameRenderer extends EventEmitter {
             placeInControl = false;
             const positionSpec = iconDataObject.position.three_d;
             if (positionSpec.hasOwnProperty('phi') && positionSpec.hasOwnProperty('theta')) {
-                const { phi, theta } = positionSpec;
-                let iconRadius = 8;
-                if (positionSpec.hasOwnProperty('radius')) {
-                    const { radius } = positionSpec;
-                    iconRadius = radius;
-                }
-                const { x, y, z } = AFrameRenderer.polarToCartesian(phi, theta, iconRadius);
+                const { phi, theta, radius } = positionSpec;
+                const { x, y, z } = AFrameRenderer.polarToCartesian(phi, theta, radius);
                 position = `${x} ${y} ${z}`;
             } else {
                 placeInControl = true;
