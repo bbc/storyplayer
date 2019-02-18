@@ -571,6 +571,6 @@ class AFrameRenderer extends EventEmitter {
 }
 
 const instance = new AFrameRenderer();
-Object.freeze(instance);
+Object.seal(instance);
 
 export default instance;
