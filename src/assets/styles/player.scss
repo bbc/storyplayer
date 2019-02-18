@@ -792,11 +792,11 @@ $romper-hover-text-size: 25px;
 .romper-var-form-boolean-toggle {
   display: flex;
   flex-grow: 1;
-  height: 30px;//2vw;
+  height: 30px;
   margin-left: 1vw;
   margin-right: 1vw;
   position: relative;
-  width: 66px;// 3vw;
+  width: 66px;
 
   input {
     height: 0;
@@ -829,13 +829,13 @@ $romper-hover-text-size: 25px;
   .slider::before {
     background-color: $white;
     border-radius: 50%;
-    bottom: 4px;// 0.1vw;
+    bottom: 4px;
     content: '';
-    height: 22px;//1.8vw;
-    left: 50px;//1.65vw;
+    height: 22px;
+    left: 50px;
     position: absolute;
     transition: all .4s ease;
-    width: 22px;// 1.8vw;
+    width: 22px;
   }
 }
 

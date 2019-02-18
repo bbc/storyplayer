@@ -835,7 +835,6 @@ export default class BaseRenderer extends EventEmitter {
         slider.id = `variable-input-${varName}`;
 
         sliderDiv.appendChild(minSpan);
-        // sliderDiv.appendChild(slider);
         sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
