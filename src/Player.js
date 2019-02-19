@@ -965,6 +965,7 @@ class Player extends EventEmitter {
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+        this._linkChoice.overlay.classList.remove('romper-inactive');
         Object.keys(this._choiceIconSet).forEach((id) => {
             this._linkChoice.add(id, this._choiceIconSet[id]);
         });
@@ -1117,6 +1118,7 @@ class Player extends EventEmitter {
         if (this._choiceCountdownTimeout) {
             this._choiceCountdownTimeout = false;
         }
+        this._linkChoice.overlay.classList.add('romper-inactive');
         this._linkChoice.overlay.style.setProperty('animation', 'none');
     }
 
