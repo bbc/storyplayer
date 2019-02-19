@@ -690,7 +690,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-variable-panel {
-  background-color: $pastel-orange;
+  background-color: $var-panel-background;
   border: 1px solid $half-white;
   bottom: 120px;
   display: flex;
@@ -723,31 +723,64 @@ $romper-hover-text-size: 25px;
   height: 50%;
 }
 
+.romper-var-form-carousel {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
 .romper-variable-form-item {
   display: flex;
-  height: 0;
+  height: 60%;
   margin: 0.5%;
-  opacity: 0;
+  opacity: 1;
   padding-left: 10%;
-  pointer-events: none;
-  transition: height 1s 0s ease, opacity 0.5s ease;
+  pointer-events: all;
+  position: absolute;
+  transition: margin 0.5s ease, opacity 0.5s 0.5s ease;
+  width: 80%;
 
-  &.active {
-    height: 100%;
-    opacity: 1;
-    pointer-events: all;
-    transition: height 1s 0s ease, opacity 1s 0.3s ease;
+  &.left {
+    margin-left: -100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: margin 0.5s 0.2s ease, opacity 0.5s ease;
+  }
+
+  &.right {
+    margin-left: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: margin 0.5s 0.2s ease, opacity 0.5s ease;
   }
 }
 
 .romper-var-form-input-container {
   display: flex;
-  padding-left: 20px;
-  padding-top: 10px;
+  padding-left: 5vw;
+}
+
+.romper-var-form-button-div {
+  button {
+    background-color: $backing-colour-dark;
+    border: 0;
+    border-left: 5px solid transparent;
+    border-radius: 3px;
+    color: $white;
+    cursor: pointer;
+    font-size: 80%;
+    margin-bottom: 2%;
+    margin-right: 10%;
+    min-width: 10vw;
+
+    &.selected {
+      border-left: 5px solid $white;
+    }
+  }
 }
 
 .romper-var-form-slider-output {
-  margin-left: 15px;
+  margin-left: 10%;
 }
 
 .romper-var-form-answer-cont {
@@ -773,13 +806,54 @@ $romper-hover-text-size: 25px;
   }
 }
 
-.romper-var-form-radio-div {
+.romper-var-form-boolean-toggle {
   display: flex;
   flex-grow: 1;
-  padding-right: 20%;
+  height: 2vw;
+  margin-left: 1vw;
+  margin-right: 1vw;
+  position: relative;
+  width: 4.4vw;
 
   input {
-    margin-right: 10px;
+    height: 0;
+    opacity: 0;
+    width: 0;
+
+    &:checked + .slider {
+      background-color: $dark-grey-blue;
+    }
+
+    &:checked + .slider::before {
+      -ms-transform: translateX(-3vw);
+      -webkit-transform: translateX(-3vw);
+      transform: translateX(-3vw);
+    }
+  }
+
+  .slider {
+    background-color: $romper-background-color;
+    border-radius: 1vw;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: all .4s ease;
+  }
+
+  .slider::before {
+    background-color: $white;
+    border-radius: 50%;
+    bottom: 0.25vw;
+    content: '';
+    height: 1.46667vw;
+    left: 3vw;
+    margin-left: 0.25vw;
+    position: absolute;
+    transition: all .4s ease;
+    width: 1.46667vw;
   }
 }
 
@@ -794,17 +868,47 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-number-input {
+  display: table-cell;
+  width: 100%;
+
+  >div {
+    display: flex;
+  }
+
   input {
     border: 0;
     border-radius: 5px;
     color: $dark-grey-blue;
-    font-size: 2vw;
-    height: 3vw;
+    font-size: 1.5vw;
+    height: 2.5vw;
     text-align: center;
-    width: 5vw;
+
+    &.romper-var-form-slider-output {
+      background: $romper-background-color;
+      margin-left: 0;
+      margin-top: 1vw;
+      width: 60%;
+    }
 
     &.romper-var-form-slider {
-      width: 10vw;
+      margin-left: 1vw;
+      margin-right: 1vw;
+      width: 90%;
+    }
+  }
+
+  span {
+    color: $romper-background-color;
+    font-size: 1.5vw;
+    margin-bottom: -1vw;
+    width: 50%;
+
+    &.min {
+      text-align: left;
+    }
+
+    &.max {
+      text-align: right;
     }
   }
 }
@@ -814,6 +918,16 @@ $romper-hover-text-size: 25px;
   padding: 2% 0;
   text-align: center;
   width: 100%;
+
+  .var-back {
+    left: 2vw;
+    position: absolute;
+    visibility: hidden;
+
+    &.active {
+      visibility: visible;
+    }
+  }
 }
 
 .romper-var-form-button {

@@ -733,37 +733,55 @@ export default class BaseRenderer extends EventEmitter {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
-        // yes button & label
-        const radioYesDiv = document.createElement('label');
-        radioYesDiv.className = 'romper-var-form-radio-div yes';
-        const radioYes = document.createElement('input');
-        radioYes.onclick = (() => this._setVariableValue(varName, true));
-        radioYes.type = 'radio';
-        radioYes.name = 'bool-option';
+        // yes label
+        const yesLabelSpan = document.createElement('span');
+        yesLabelSpan.className = 'romper-var-form-radio-div yes';
         const yesLabel = document.createElement('div');
         yesLabel.innerHTML = 'Yes';
-        radioYesDiv.appendChild(radioYes);
-        radioYesDiv.appendChild(yesLabel);
+        yesLabelSpan.appendChild(yesLabel);
+
+        // checkbox (hidden by toggle)
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+
+        yesLabelSpan.onclick = () => {
+            checkbox.checked = true;
+            this._setVariableValue(varName, true);
+        };
+
+        const switchel = document.createElement('label');
+        switchel.classList.add('switch');
+        switchel.classList.add('romper-var-form-boolean-toggle');
+        switchel.appendChild(checkbox);
+
+        const slider = document.createElement('span');
+        slider.classList.add('slider');
+        switchel.appendChild(slider);
+
+        switchel.onclick = () => {
+            checkbox.checked = !checkbox.checked;
+            this._setVariableValue(varName, checkbox.checked);
+        };
 
         // no button & label
-        const radioNoDiv = document.createElement('label');
-        radioNoDiv.className = 'romper-var-form-radio-div no';
-        const radioNo = document.createElement('input');
-        radioNo.onclick = (() => this._setVariableValue(varName, false));
-        radioNo.type = 'radio';
-        radioNo.name = 'bool-option';
+        const noLabelSpan = document.createElement('span');
+        noLabelSpan.className = 'romper-var-form-radio-div no';
         const noLabel = document.createElement('div');
         noLabel.innerHTML = 'No';
-        radioNoDiv.appendChild(radioNo);
-        radioNoDiv.appendChild(noLabel);
+        noLabelSpan.appendChild(noLabel);
 
-        varInput.appendChild(radioYesDiv);
-        varInput.appendChild(radioNoDiv);
+        noLabelSpan.onclick = () => {
+            checkbox.checked = false;
+            this._setVariableValue(varName, false);
+        };
+
+        varInput.appendChild(yesLabelSpan);
+        varInput.appendChild(switchel);
+        varInput.appendChild(noLabelSpan);
 
         this._controller.getVariableValue(varName)
             .then((varValue) => {
-                radioYes.checked = varValue;
-                radioNo.checked = !varValue;
+                checkbox.checked = varValue;
             });
 
         return varInput;
@@ -771,11 +789,20 @@ export default class BaseRenderer extends EventEmitter {
 
     // an input for selecting the value for a list variable
     _getListVariableSetter(varName: string, variableDecl: Object) {
+        if (variableDecl.values.length > 3) {
+            return this._getLongListVariableSetter(varName, variableDecl);
+        }
+        return this._getShortListVariableSetter(varName, variableDecl);
+    }
+
+    // a drop-down list input for selecting the value for a list variable
+    _getLongListVariableSetter(varName: string, variableDecl: Object) {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
         const options = variableDecl.values;
         const varInputSelect = document.createElement('select');
+
         options.forEach((optionValue) => {
             const optionElement = document.createElement('option');
             optionElement.setAttribute('value', optionValue);
@@ -791,6 +818,44 @@ export default class BaseRenderer extends EventEmitter {
 
         varInputSelect.onchange = () =>
             this._setVariableValue(varName, varInputSelect.value);
+
+        return varInput;
+    }
+
+    // an input for selecting the value for a list variable
+    _getShortListVariableSetter(varName: string, variableDecl: Object) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const options = variableDecl.values;
+        const varInputSelect = document.createElement('div');
+        varInputSelect.classList.add('romper-var-form-button-div');
+
+        const buttons = {};
+        const setSelected = (varValue) => {
+            Object.keys(buttons).forEach((key) => {
+                if (key === varValue) {
+                    buttons[key].classList.add('selected');
+                } else {
+                    buttons[key].classList.remove('selected');
+                }
+            });
+        };
+
+        options.forEach((optionValue) => {
+            const optionElement = document.createElement('button');
+            optionElement.textContent = optionValue;
+            buttons[optionValue] = optionElement;
+            optionElement.onclick = () => {
+                this._setVariableValue(varName, optionValue);
+                setSelected(optionValue);
+            };
+            varInputSelect.appendChild(optionElement);
+        });
+        varInput.appendChild(varInputSelect);
+
+        this._controller.getVariableValue(varName)
+            .then(varValue => setSelected(varValue));
 
         return varInput;
     }
@@ -818,10 +883,22 @@ export default class BaseRenderer extends EventEmitter {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
+        const sliderDiv = document.createElement('div');
+        const minSpan = document.createElement('span');
+        minSpan.classList.add('min');
+        minSpan.textContent = range.min_val;
+        const maxSpan = document.createElement('span');
+        maxSpan.classList.add('max');
+        maxSpan.textContent = range.max_val;
+
+
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.classList.add('romper-var-form-slider');
         slider.id = `variable-input-${varName}`;
+
+        sliderDiv.appendChild(minSpan);
+        sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
         numberInput.classList.add('romper-var-form-slider-output');
@@ -853,6 +930,7 @@ export default class BaseRenderer extends EventEmitter {
             this._setVariableValue(varName, numberInput.value);
         };
 
+        varInput.appendChild(sliderDiv);
         varInput.appendChild(slider);
         varInput.appendChild(numberInput);
 
@@ -929,16 +1007,23 @@ export default class BaseRenderer extends EventEmitter {
         const overlayImageElement = document.createElement('div');
         overlayImageElement.className = 'romper-variable-panel';
 
+        if (behaviour.background_colour) {
+            overlayImageElement.style.background = behaviour.background_colour;
+        }
+
         const titleDiv = document.createElement('div');
         titleDiv.innerHTML = formTitle;
         titleDiv.className = 'romper-var-form-title';
         overlayImageElement.appendChild(titleDiv);
 
-
         this._controller.getVariables()
             .then((storyVariables) => {
                 const variablesFormContainer = document.createElement('div');
                 variablesFormContainer.className = 'romper-var-form-var-containers';
+
+                const carouselDiv = document.createElement('div');
+                carouselDiv.className = 'romper-var-form-carousel';
+                variablesFormContainer.appendChild(carouselDiv);
 
                 // get an array of divs - one for each question
                 const variableFields = [];
@@ -946,14 +1031,14 @@ export default class BaseRenderer extends EventEmitter {
                 behaviourVariables.forEach((behaviourVar, i) => {
                     const storyVariable = storyVariables[behaviourVar.variable_name];
                     const variableDiv = this._getVariableSetter(storyVariable, behaviourVar);
-                    if (i === 0) {
-                        variableDiv.classList.add('active');
+                    if (i > 0) {
+                        variableDiv.classList.add('right');
                     }
                     variableFields.push(variableDiv);
-                    variablesFormContainer.appendChild(variableDiv);
+                    carouselDiv.appendChild(variableDiv);
                 });
 
-                overlayImageElement.appendChild(variablesFormContainer);
+                overlayImageElement.appendChild(carouselDiv);
                 // show first question
                 let currentQuestion = 0;
 
@@ -967,11 +1052,21 @@ export default class BaseRenderer extends EventEmitter {
 
                 okButtonContainer.className = 'romper-var-form-button-container';
                 const okButton = document.createElement('input');
+                okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
-
                 okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
-                okButton.onclick = (() => {
-                    if (currentQuestion >= behaviourVariables.length - 1) {
+
+                // back button
+                const backButton = document.createElement('input');
+                backButton.type = 'button';
+                backButton.value = 'Back';
+                backButton.classList.add('var-back');
+                backButton.classList.add('romper-var-form-button');
+
+                const changeSlide = (fwd: boolean) => {
+                    const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
+
+                    if (fwd && currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
                         overlayImageElement.classList.remove('active');
                         this.inVariablePanel = false;
@@ -983,25 +1078,40 @@ export default class BaseRenderer extends EventEmitter {
                     }
                     // hide current question and show next
                     variableFields.forEach((varDiv, i) => {
-                        if (i === currentQuestion) {
-                            varDiv.classList.remove('active');
-                        } else if (i === currentQuestion + 1) {
-                            varDiv.classList.add('active');
+                        if (i === targetId) {
+                            varDiv.classList.remove('left');
+                            varDiv.classList.remove('right');
+                            // varDiv.classList.add('active');
+                        } else if (i < targetId) {
+                            varDiv.classList.add('left');
+                            // varDiv.classList.remove('active');
+                            varDiv.classList.remove('right');
+                        } else {
+                            varDiv.classList.remove('left');
+                            varDiv.classList.add('right');
                         }
                     });
 
-                    currentQuestion += 1;
+                    currentQuestion = targetId;
                     // set feedback and button texts
+                    if (currentQuestion > 0) {
+                        backButton.classList.add('active');
+                    } else {
+                        backButton.classList.remove('active');
+                    }
                     okButton.value = currentQuestion < (behaviourVariables.length - 1)
                         ? 'Next' : 'OK!';
                     feedbackPar.textContent =
                         `Question ${currentQuestion + 1}
                          of ${behaviourVariables.length}`;
                     return false;
-                });
-                okButton.className = 'romper-var-form-button';
-                okButtonContainer.appendChild(okButton);
+                };
 
+                backButton.onclick = () => { changeSlide(false); };
+                okButton.onclick = () => { changeSlide(true); };
+
+                okButtonContainer.appendChild(okButton);
+                okButtonContainer.appendChild(backButton);
                 okButtonContainer.appendChild(feedbackPar);
 
                 overlayImageElement.appendChild(okButtonContainer);
