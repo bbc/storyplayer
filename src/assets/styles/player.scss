@@ -792,11 +792,11 @@ $romper-hover-text-size: 25px;
 .romper-var-form-boolean-toggle {
   display: flex;
   flex-grow: 1;
-  height: 30px;
+  height: 2vw;
   margin-left: 1vw;
   margin-right: 1vw;
   position: relative;
-  width: 66px;
+  width: 4.4vw;
 
   input {
     height: 0;
@@ -808,15 +808,15 @@ $romper-hover-text-size: 25px;
     }
 
     &:checked + .slider::before {
-      -ms-transform: translateX(-45px);
-      -webkit-transform: translateX(-45px);
-      transform: translateX(-45px);
+      -ms-transform: translateX(-3vw);
+      -webkit-transform: translateX(-3vw);
+      transform: translateX(-3vw);
     }
   }
 
   .slider {
     background-color: $romper-background-color;
-    border-radius: 15px;
+    border-radius: 1vw;
     bottom: 0;
     cursor: pointer;
     left: 0;
@@ -829,13 +829,14 @@ $romper-hover-text-size: 25px;
   .slider::before {
     background-color: $white;
     border-radius: 50%;
-    bottom: 4px;
+    bottom: 0.25vw;
     content: '';
-    height: 22px;
-    left: 50px;
+    height: 1.46667vw;
+    left: 3vw;
+    margin-left: 0.25vw;
     position: absolute;
     transition: all .4s ease;
-    width: 22px;
+    width: 1.46667vw;
   }
 }
 
