@@ -722,19 +722,21 @@ $romper-hover-text-size: 25px;
   padding-left: 10%;
   pointer-events: all;
   position: absolute;
-  transition: margin 1s 0.3s ease, opacity 0.5s ease;
+  transition: margin 0.5s ease, opacity 0.5s 0.5s ease;
   width: 80%;
 
   &.left {
     margin-left: -100%;
     opacity: 0;
     pointer-events: none;
+    transition: margin 0.5s 0.2s ease, opacity 0.5s ease;
   }
 
   &.right {
     margin-left: 100%;
     opacity: 0;
     pointer-events: none;
+    transition: margin 0.5s 0.2s ease, opacity 0.5s ease;
   }
 }
 
