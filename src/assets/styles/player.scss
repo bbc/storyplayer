@@ -133,6 +133,16 @@ $romper-hover-text-size: 25px;
 
   .romper-media {
     background-color: $romper-background-color;
+
+    &.romper-prestart {
+      .romper-start-image {
+        visibility: visible;
+      }
+
+      div {
+        visibility: hidden;
+      }
+    }
   }
 
   .romper-loading {

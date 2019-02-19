@@ -651,6 +651,7 @@ class Player extends EventEmitter {
 
         this._guiLayer.appendChild(this._startExperienceButton);
         this._mediaLayer.appendChild(this._startExperienceImage);
+        this._mediaLayer.classList.add('romper-prestart');
 
         const buttonClickHandler = () => {
             this.removeExperienceStartButtonAndImage();
@@ -689,6 +690,7 @@ class Player extends EventEmitter {
         try {
             this._guiLayer.removeChild(this._startExperienceButton);
             this._mediaLayer.removeChild(this._startExperienceImage);
+            this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
             logger.warn('could not remove start button and/or image');
         }

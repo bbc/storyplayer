@@ -103,6 +103,7 @@ export default class BaseRenderer extends EventEmitter {
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
         this._player.enterStartBehaviourPhase();
+        this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
                 BehaviourTimings.started,
