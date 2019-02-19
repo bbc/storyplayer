@@ -533,16 +533,15 @@ export default class BaseRenderer extends EventEmitter {
                 }
             });
 
+            // if already ended, follow immediately
+            if (this._hasEnded) {
+                this._hideChoiceIcons(narrativeElementId);
             // do we keep the choice open?
-            if (this._linkBehaviour && this._linkBehaviour.oneShot) {
+            } else if (this._linkBehaviour && this._linkBehaviour.oneShot) {
                 // hide icons
                 this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
-            }
-            // if already ended, follow immediately
-            if (this._hasEnded) {
-                this._hideChoiceIcons(narrativeElementId);
             }
         } else {
             // or follow link now
