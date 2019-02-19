@@ -108,7 +108,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._player.getLinkChoiceElement().style.visibility = 'collapse';
         // TODO: problems with this type of representation as first element:
         // starts video, but see nothing unless you enter VR mode...
         logger.info(`Started: ${this._representation.id}`);
@@ -368,9 +367,16 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             // convert to time into segment
             videoTime -= this._inTime;
         }
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        let remaining = videoElement.duration;
+        if (this._outTime > 0) {
+            remaining = this._outTime;
+        }
+        remaining -= videoElement.currentTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
+            remainingTime: remaining,
         };
         return timeObject;
     }

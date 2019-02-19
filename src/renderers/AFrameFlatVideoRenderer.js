@@ -102,7 +102,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._player.getLinkChoiceElement().style.visibility = 'collapse';
         logger.info(`Started: ${this._representation.id}`);
         if (this._rendered) {
             this._startFlatVideo();
@@ -272,9 +271,16 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
             // convert to time into segment
             videoTime -= this._inTime;
         }
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        let remaining = videoElement.duration;
+        if (this._outTime > 0) {
+            remaining = this._outTime;
+        }
+        remaining -= videoElement.currentTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
+            remainingTime: remaining,
         };
         return timeObject;
     }

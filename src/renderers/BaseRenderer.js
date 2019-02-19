@@ -328,14 +328,13 @@ export default class BaseRenderer extends EventEmitter {
             const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
-            return iconSrcPromises.then((urls) => {
+            return iconSrcPromises.then((iconObjects) => {
                 this._player.clearLinkChoices();
                 AFrameRenderer.clearLinkIcons();
-                urls.forEach((iconAssetCollectionSrc, choiceId) => {
-                    if (iconAssetCollectionSrc) {
-                        // add the icon to the player
-                        // eslint-disable-next-line max-len
-                        this._buildLinkIcon(choiceId, narrativeElementObjects, iconAssetCollectionSrc);
+                iconObjects.forEach((iconSpecObject) => {
+                    // add the icon to the player
+                    if (iconSpecObject.resolvedUrl) {
+                        this._buildLinkIcon(iconSpecObject);
                     }
                 });
 
@@ -406,79 +405,140 @@ export default class BaseRenderer extends EventEmitter {
         };
     }
 
-    // get src urls for icons to represent link choices
+    // get data objects including resolved src urls for icons to represent link choices
     _getIconSourceUrls(
         narrativeElementObjects: Array<Object>,
         behaviour: Object,
-    ): Promise<Array<?string>> {
-        const iconAssetCollectionIdPromises: Array<Promise<?string>> = [];
+    ): Promise<Array<Object>> {
+        const iconObjectPromises: Array<Promise<Object>> = [];
         narrativeElementObjects.forEach((choiceNarrativeElementObj, i) => {
             logger.info(`choice ${(i + 1)}: ${choiceNarrativeElementObj.ne.id}`);
-            let iconAssetCollectionId = null;
+            // blank object describing each icon
+            const iconSpecObject = {
+                choiceId: i,
+                acId: null,
+                ac: null,
+                resolvedUrl: null,
+                targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+            };
+            // first get an asset collection id for each icon
+            // firstly is there an  icon specified in the behaviour
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
                         // map representation to asset
-                        iconAssetCollectionId =
+                        iconSpecObject.acId =
                             this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
+                        // inject any other properties in data model into the object
+                        Object.keys(linkIconObject).forEach((key) => {
+                            if (key !== 'image') {
+                                iconSpecObject[key] = linkIconObject[key];
+                            }
+                        });
                     }
                 });
             }
-            if (iconAssetCollectionId === null) {
+            if (iconSpecObject.acId === null) {
                 // if not specified - get default icon...
-                iconAssetCollectionIdPromises.push(this._controller
+                iconObjectPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
                     .then((representation) => {
+                        let defaultSrcAcId = null;
                         if (representation && representation.asset_collections.icon
                             && representation.asset_collections.icon.default_id) {
-                            // eslint-disable-next-line max-len
-                            return Promise.resolve(representation.asset_collections.icon.default_id);
+                            defaultSrcAcId = representation.asset_collections.icon.default_id;
                         }
-                        return Promise.resolve(null);
+                        return Promise.resolve({
+                            choiceId: i,
+                            acId: defaultSrcAcId,
+                            ac: null,
+                            resolvedUrl: null,
+                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+                        });
                     }));
             } else {
-                iconAssetCollectionIdPromises.push(Promise.resolve(iconAssetCollectionId));
+                iconObjectPromises.push(Promise.resolve(iconSpecObject));
             }
         });
 
-        return Promise.all(iconAssetCollectionIdPromises).then((iconAssetCollectionIds) => {
+        return Promise.all(iconObjectPromises).then((iconSpecObjects) => {
+            // next resolve asset collection ids into asset collection objects
             const iconAssetCollectionPromises = [];
-            iconAssetCollectionIds.forEach((iconAcId) => {
-                if (iconAcId) {
-                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconAcId));
+            iconSpecObjects.forEach((iconSpecObj) => {
+                if (iconSpecObj.acId) {
+                    iconAssetCollectionPromises.push(this._fetchAssetCollection(iconSpecObj.acId));
                 } else {
                     iconAssetCollectionPromises.push(Promise.resolve(null));
                 }
             });
-            return Promise.all(iconAssetCollectionPromises);
-        }).then((assetCollections) => {
-            const urls = [];
-            assetCollections.forEach((ac) => {
-                if (ac && ac.assets.image_src) {
-                    urls.push(ac.assets.image_src);
+            return Promise.all(iconAssetCollectionPromises).then((resolvedAcs) => {
+                resolvedAcs.forEach((resolvedAc, index) => {
+                    const holdingObj = iconSpecObjects[index];
+                    holdingObj.ac = resolvedAc;
+                });
+                return Promise.resolve(iconSpecObjects);
+            });
+        }).then((iconObjects) => {
+            // next get src urls from each asset collection and resolve them using media fetcher
+            const fetcherPromises = [];
+            iconObjects.forEach((iconObject) => {
+                if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
+                    fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
                 } else {
-                    urls.push(null);
+                    fetcherPromises.push(Promise.resolve(null));
                 }
             });
-            return urls;
+            return Promise.all(fetcherPromises).then((resolvedUrls) => {
+                const returnObjects = [];
+                resolvedUrls.forEach((resolvedUrl, i) => {
+                    const obj = iconObjects[i];
+                    obj.resolvedUrl = resolvedUrl;
+                    returnObjects.push(obj);
+                });
+                return returnObjects;
+            });
         });
     }
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(choiceId: number, narrativeElementObjects: Array<Object>, imgsrc: string) {
+    _buildLinkIcon(iconObject: Object) {
         // tell Player to build icon
-        const targetId = narrativeElementObjects[choiceId].targetNeId;
-        this._player.addLinkChoiceControl(
+        const targetId = iconObject.targetNarrativeElementId;
+        const icon = this._player.addLinkChoiceControl(
             targetId,
-            imgsrc,
-            `Option ${(choiceId + 1)}`,
+            iconObject.resolvedUrl,
+            `Option ${(iconObject.choiceId + 1)}`,
         );
+        if (iconObject.position && iconObject.position.two_d) {
+            const {
+                left,
+                top,
+            } = iconObject.position.two_d;
+            let {
+                width,
+                height,
+            } = iconObject.position.two_d;
+            if (left !== undefined && top !== undefined
+                && (width !== undefined || height !== undefined)) {
+                if (width === undefined) {
+                    width = height;
+                } else if (height === undefined) {
+                    height = width;
+                }
+                icon.style.position = 'absolute';
+                icon.style.top = `${top}%`;
+                icon.style.left = `${left}%`;
+                icon.style.width = `${width}%`;
+                icon.style.height = `${height}%`;
+            }
+        }
         if (this.isVRViewable()) {
             AFrameRenderer.addLinkIcon(
                 targetId,
-                imgsrc,
+                iconObject.resolvedUrl,
+                iconObject,
             );
         }
     }
@@ -617,6 +677,9 @@ export default class BaseRenderer extends EventEmitter {
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
+        if (this.isVRViewable()) {
+            AFrameRenderer.clearLinkIcons();
+        }
         this._player._linkChoice.overlay.classList.add('fade');
         setTimeout(() => {
             this._player._linkChoice.overlay.classList.remove('fade');

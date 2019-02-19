@@ -30,7 +30,7 @@ class AFrameRenderer extends EventEmitter {
 
     sceneElements: Array<HTMLElement>;
     linkElements: Array<HTMLElement>;
-    _choiceIconSet: { [key: string]: HTMLElement };
+    _choiceIconSet: { [key: string]: { entity: HTMLElement, control: boolean } };
 
     constructor() {
         super();
@@ -151,7 +151,7 @@ class AFrameRenderer extends EventEmitter {
         this._controlBar.setAttribute('rotation', `-50 ${-position.phi} 0`);
     }
 
-    addLinkIcon(neId: string, iconUrl: string) {
+    addLinkIcon(neId: string, iconUrl: string, iconDataObject: Object) {
         _iconCount += 1;
         const img = document.createElement('img');
         // TODO: aframe doesn't like svg images ...
@@ -161,6 +161,7 @@ class AFrameRenderer extends EventEmitter {
             img.src = iconUrl;
         }
         img.id = `icon-image-${_iconCount}`;
+        img.setAttribute('crossorigin', 'anonymous');
         this.addAsset(img);
 
         const callback = () => {
@@ -178,30 +179,63 @@ class AFrameRenderer extends EventEmitter {
             }
         };
 
+        let placeInControl = true;
         const iconImageEntity = document.createElement('a-image');
         iconImageEntity.addEventListener('click', callback);
-
-        // cunningly render in the control bar
-        iconImageEntity.setAttribute('position', `${2 * _iconCount} 0 0.05`);
-        iconImageEntity.setAttribute('width', '1');
-        iconImageEntity.setAttribute('height', '1');
         iconImageEntity.setAttribute('src', `#icon-image-${_iconCount}`);
 
-        if (_iconCount > 1) {
-            // resize control bar to fit
-            this._controlBar.setAttribute('width', `${(_iconCount * 2.5) + 5}`);
+        // default position depends on how many already in control bar
+        const numInControl = Object.keys(this._choiceIconSet).filter(neid =>
+            this._choiceIconSet[neid].control).length + 1;
+        let position = `${2 * numInControl} 0 0.05`;
+        let iconWidth = 1;
+        let iconHeight = 1;
+
+        // now see if have 3D position
+        if (iconDataObject.position && iconDataObject.position.three_d) {
+            placeInControl = false;
+            const positionSpec = iconDataObject.position.three_d;
+            if (positionSpec.hasOwnProperty('phi') && positionSpec.hasOwnProperty('theta')) {
+                const { phi, theta, radius } = positionSpec;
+                const { x, y, z } = AFrameRenderer.polarToCartesian(phi, theta, radius);
+                position = `${x} ${y} ${z}`;
+            } else {
+                placeInControl = true;
+            }
+            // override if w and h specified, but not if going in control bar
+            if (!placeInControl
+                && positionSpec.hasOwnProperty('width')
+                && positionSpec.hasOwnProperty('height')) {
+                const { width, height } = positionSpec;
+                iconHeight = height;
+                iconWidth = width;
+            }
         }
+
+        iconImageEntity.setAttribute('position', position);
+        iconImageEntity.setAttribute('width', `${iconWidth}`);
+        iconImageEntity.setAttribute('height', `${iconHeight}`);
 
         this.sceneElements.push(iconImageEntity);
         this.linkElements.push(img);
         this.linkElements.push(iconImageEntity);
-        this._choiceIconSet[neId] = iconImageEntity;
+        this._choiceIconSet[neId] = { entity: iconImageEntity, control: placeInControl };
     }
 
     showLinkIcons() {
+        // work out size of the control bar
+        const numInControl = Object.keys(this._choiceIconSet).filter(neid =>
+            this._choiceIconSet[neid].control).length;
+        if (numInControl > 1) {
+            this._controlBar.setAttribute('width', `${(numInControl * 2.5) + 5}`);
+        }
         Object.keys(this._choiceIconSet).forEach((neId) => {
-            const iconImageEntity = this._choiceIconSet[neId];
-            this._controlBar.appendChild(iconImageEntity);
+            const iconImageObject = this._choiceIconSet[neId];
+            if (iconImageObject.control) {
+                this._controlBar.appendChild(iconImageObject.entity);
+            } else {
+                this.aFrameSceneElement.appendChild(iconImageObject.entity);
+            }
         });
     }
 
