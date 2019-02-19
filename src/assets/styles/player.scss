@@ -440,8 +440,13 @@ $romper-hover-text-size: 25px;
       // add this class to overlay for small low icons
       bottom: 65px;
       height: 80px;
+      opacity: 1;
       position: absolute;
       width: 90%;
+
+      &.romper-inactive {
+        opacity: 0;
+      }
     }
 
     &.tworow {
