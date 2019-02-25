@@ -12,6 +12,8 @@ import logger from './logger';
 
 import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 
+import Package from '../package.json';
+
 // @flowignore
 import './assets/styles/player.scss';
 
@@ -37,6 +39,7 @@ module.exports = {
     BrowserCapabilities,
 
     init: (settings: Settings): ?Controller => {
+        logger.info('StoryPlayer Version: ', Package.version);
         const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
 
         if (!mergedSettings.dataResolver) {

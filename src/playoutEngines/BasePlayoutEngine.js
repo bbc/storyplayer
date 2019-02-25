@@ -48,7 +48,9 @@ export default class BasePlayoutEngine {
 
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+        if (rendererPlayoutObj) {
+            rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+        }
     }
 
     getPlayoutActive(rendererId: string): boolean {
