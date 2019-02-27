@@ -345,18 +345,23 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
 
-                this._player.setNextAvailable(false);
-                this._showChoiceIcons({
-                    defaultLinkId, // id for link to highlight at start
-                    forceChoice, // do we highlight
-                    disableControls, // are controls disabled while icons shown
-                    countdown, // do we animate countdown
-                    iconOverlayClass, // css classes to apply to overlay
-                });
+                if (iconObjects.length > 1) {
+                    this._player.setNextAvailable(false);
+                    this._showChoiceIcons({
+                        defaultLinkId, // id for link to highlight at start
+                        forceChoice, // do we highlight
+                        disableControls, // are controls disabled while icons shown
+                        countdown, // do we animate countdown
+                        iconOverlayClass, // css classes to apply to overlay
+                    });
 
-                // callback to say behaviour is done, but not if user can
-                // change their mind
-                if (!forceChoice) {
+                    // callback to say behaviour is done, but not if user can
+                    // change their mind
+                    if (!forceChoice) {
+                        callback();
+                    }
+                } else {
+                    this._linkBehaviour.forceChoice = false;
                     callback();
                 }
             });
