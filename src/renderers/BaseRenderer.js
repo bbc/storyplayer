@@ -282,11 +282,17 @@ export default class BaseRenderer extends EventEmitter {
                 const behaviourObject = behaviour.behaviour;
                 // get function to handle behaviour
                 const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
-                // set up to run function at set time
-                this.addTimeEventListener(behaviourObject.type, startTime, () =>
+                if (startTime === 0) {
                     behaviourRunner(behaviourObject, () => {
                         logger.info(`started during behaviour ${behaviourObject.type}`);
-                    }));
+                    });
+                } else {
+                    // set up to run function at set time
+                    this.addTimeEventListener(behaviourObject.type, startTime, () =>
+                        behaviourRunner(behaviourObject, () => {
+                            logger.info(`started during behaviour ${behaviourObject.type}`);
+                        }));
+                }
                 // if there is a duration
                 if (behaviour.duration) {
                     const endTime = startTime + behaviour.duration;
