@@ -92,6 +92,8 @@ export default class RenderManager extends EventEmitter {
                         const media = playout.getMediaElement(representationId);
                         // skip to 1/4 s before end
                         playout.setCurrentTime(representationId, media.duration - 0.25);
+                    } else if (this._currentRenderer) {
+                        this._currentRenderer.complete();
                     }
                 } else {
                     rend.emit(RendererEvents.NEXT_BUTTON_CLICKED);
