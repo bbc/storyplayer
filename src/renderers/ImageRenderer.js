@@ -48,6 +48,7 @@ export default class ImageRenderer extends BaseRenderer {
 
         this._disablePlayButton();
         this._disableScrubBar();
+        this._hasEnded = true;
     }
 
     end() {
