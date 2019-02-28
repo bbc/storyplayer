@@ -451,6 +451,7 @@ $romper-hover-text-size: 25px;
       bottom: 65px;
       height: 80px;
       opacity: 1;
+      padding: 100% 5% 0; // so can't click off and hide overlay
       position: absolute;
       width: 90%;
 
