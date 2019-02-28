@@ -361,6 +361,7 @@ export default class BaseRenderer extends EventEmitter {
                         callback();
                     }
                 } else {
+                    logger.info('Link Choice behaviour ignored - only one link');
                     this._linkBehaviour.forceChoice = false;
                     callback();
                 }
