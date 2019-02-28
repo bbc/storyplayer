@@ -493,7 +493,8 @@ export default class BaseRenderer extends EventEmitter {
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
                     fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
                 } else {
-                    fetcherPromises.push(Promise.resolve(null));
+                    const noIconSrc = this._controller._assetUrls.noAssetIconUrl;
+                    fetcherPromises.push(Promise.resolve(noIconSrc));
                 }
             });
             return Promise.all(fetcherPromises).then((resolvedUrls) => {
