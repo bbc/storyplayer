@@ -1081,6 +1081,7 @@ export default class BaseRenderer extends EventEmitter {
                             this._player.setNextAvailable(true);
                             return callback();
                         }, 700);
+                        return;
                     }
                     // hide current question and show next
                     variableFields.forEach((varDiv, i) => {
