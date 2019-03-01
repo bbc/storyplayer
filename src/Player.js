@@ -963,6 +963,46 @@ class Player extends EventEmitter {
         return linkChoiceControl;
     }
 
+    addTextLinkChoice(id: string, text: string, label: string): HTMLDivElement {
+        this._numChoices += 1;
+
+        const linkChoiceControl = document.createElement('div');
+        linkChoiceControl.classList.add('romper-link-control');
+        linkChoiceControl.classList.add(`romper-link-choice-${id}`);
+        linkChoiceControl.setAttribute('title', label);
+        linkChoiceControl.setAttribute('aria-label', label);
+
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'romper-text-link-container';
+        const { classList } = this._linkChoice.overlay;
+        classList.add('romper-link-choice-grid-cell');
+        if (this._numChoices > 3) {
+            classList.add('tworow');
+        } else {
+            classList.remove('tworow');
+        }
+        const iconTextPar = document.createElement('p');
+        iconTextPar.textContent = text;
+        iconTextPar.className = 'romper-link-text-icon';
+        iconContainer.appendChild(iconTextPar);
+
+        const choiceClick = () => {
+            // set classes to show which is selected
+            this._linkChoice.setActive(id);
+            this.emit(PlayerEvents.LINK_CHOSEN, { id });
+            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+        };
+        iconContainer.onclick = choiceClick;
+        iconContainer.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(choiceClick),
+        );
+
+        linkChoiceControl.appendChild(iconContainer);
+        this._choiceIconSet[id] = linkChoiceControl;
+        return linkChoiceControl;
+    }
+
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
