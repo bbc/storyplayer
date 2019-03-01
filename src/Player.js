@@ -921,49 +921,14 @@ class Player extends EventEmitter {
     }
 
     addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
-        this._numChoices += 1;
-
-        const linkChoiceControl = document.createElement('div');
-        linkChoiceControl.classList.add('romper-link-control');
-        linkChoiceControl.classList.add(`romper-link-choice-${id}`);
-        linkChoiceControl.setAttribute('title', label);
-        linkChoiceControl.setAttribute('aria-label', label);
-
-        const iconContainer = document.createElement('div');
-        const { classList } = this._linkChoice.overlay;
-        classList.add('romper-link-choice-grid-cell');
-        if (this._numChoices > 3) {
-            classList.add('tworow');
-        } else {
-            classList.remove('tworow');
-        }
-
-        const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-        const { style } = iconContainer;
-        style.backgroundImage = `url(${linkChoiceIconSrc})`;
-        style.backgroundSize = 'contain';
-        style.backgroundRepeat = 'no-repeat';
-        style.backgroundPosition = 'center';
-        style.height = '100%';
-
-        const choiceClick = () => {
-            // set classes to show which is selected
-            this._linkChoice.setActive(id);
-            this.emit(PlayerEvents.LINK_CHOSEN, { id });
-            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
-        };
-        iconContainer.onclick = choiceClick;
-        iconContainer.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(choiceClick),
-        );
-
-        linkChoiceControl.appendChild(iconContainer);
-        this._choiceIconSet[id] = linkChoiceControl;
-        return linkChoiceControl;
+        return this._addLinkChoiceContainer(id, label, null, src);
     }
 
     addTextLinkChoice(id: string, text: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(id, label, text, null);
+    }
+
+    _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
         this._numChoices += 1;
 
         const linkChoiceControl = document.createElement('div');
@@ -973,18 +938,22 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-        iconContainer.className = 'romper-text-link-container';
-        const { classList } = this._linkChoice.overlay;
-        classList.add('romper-link-choice-grid-cell');
-        if (this._numChoices > 3) {
-            classList.add('tworow');
-        } else {
-            classList.remove('tworow');
+
+        if (src) {
+            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+            const { style } = iconContainer;
+            style.backgroundImage = `url(${linkChoiceIconSrc})`;
+            style.backgroundSize = 'contain';
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundPosition = 'center';
+            style.height = '100%';
+        } else if (text) {
+            iconContainer.className = 'romper-text-link-container';
+            const iconTextPar = document.createElement('p');
+            iconTextPar.textContent = text;
+            iconTextPar.className = 'romper-link-text-icon';
+            iconContainer.appendChild(iconTextPar);
         }
-        const iconTextPar = document.createElement('p');
-        iconTextPar.textContent = text;
-        iconTextPar.className = 'romper-link-text-icon';
-        iconContainer.appendChild(iconTextPar);
 
         const choiceClick = () => {
             // set classes to show which is selected
