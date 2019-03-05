@@ -33,6 +33,7 @@ export default class BaseRenderer extends EventEmitter {
     _destroyed: boolean;
     _analytics: AnalyticsLogger;
     _controller: Controller;
+    _preloadedBehaviourAssets: Array<Image>;
 
     _savedLinkConditions: Object;
     _linkBehaviour: Object;
@@ -94,6 +95,8 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._savedLinkConditions = {};
+        this._preloadedBehaviourAssets = [];
+        this._preloadBehaviourAssets();
     }
 
     willStart() {
@@ -240,6 +243,28 @@ export default class BaseRenderer extends EventEmitter {
 
     switchTo() {
         this.start();
+    }
+
+    _preloadBehaviourAssets() {
+        this._preloadedBehaviourAssets = [];
+        const assetCollectionIds = this._representation.asset_collections.behaviours ?
+            this._representation.asset_collections.behaviours : [];
+        assetCollectionIds.forEach((behaviour) => {
+            this._fetchAssetCollection(behaviour.asset_collection_id)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        const image = new Image();
+                        image.src = imageUrl;
+                        this._preloadedBehaviourAssets.push(image);
+                    }
+                });
+        });
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
