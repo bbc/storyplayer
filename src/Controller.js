@@ -212,7 +212,7 @@ export default class Controller extends EventEmitter {
 
     // see if we have a linear story
     // and if we do, create a StoryIconRenderer
-    _testForLinearityAndBuildStoryRenderer(storyId: string) {
+    _testForLinearityAndBuildStoryRenderer(storyId: string): Promise<any> {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
             this._fetchers.storyFetcher,
