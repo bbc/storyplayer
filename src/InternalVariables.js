@@ -13,6 +13,7 @@ export const InternalVariableNames = {
 
 export default class InternalVariables {
     _dataResolver: DataResolver;
+
     _requirements: Object;
 
     constructor(dataResolver: DataResolver, storyMeta: ?Object) {

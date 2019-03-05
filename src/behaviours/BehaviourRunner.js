@@ -1,16 +1,21 @@
 // @flow
 
-import BehaviourFactory from '../behaviours/BehaviourFactory';
+import BehaviourFactory from "./BehaviourFactory";
 import BaseRenderer from '../renderers/BaseRenderer';
 import type { RendererEvent } from '../renderers/RendererEvents';
 import type { BehaviourTiming } from './BehaviourTimings';
 
 export default class BehaviourRunner {
     behaviourDefinitions: Object;
+
     eventCounters: Object;
+
     baseRenderer: BaseRenderer;
+
     eventNames: Array<string>;
+
     behaviours: Array<Object>;
+
     handleCompletion: Function;
 
     constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {

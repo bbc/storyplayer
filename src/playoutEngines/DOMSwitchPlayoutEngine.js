@@ -18,7 +18,7 @@ MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 const getMediaType = (src: string) => {
     if (src.indexOf('.m3u8') !== -1) {
         return MediaTypes.HLS;
-    } else if (src.indexOf('.mpd') !== -1) {
+    } if (src.indexOf('.mpd') !== -1) {
         return MediaTypes.DASH;
     }
     return MediaTypes.OTHER;
@@ -26,15 +26,23 @@ const getMediaType = (src: string) => {
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
+
     _subtitlesShowing: boolean;
+
     _useHlsJs: boolean;
+
     _activeConfig: Object;
+
     _inactiveConfig: Object;
 
     _handlePlayPauseButtonClicked: Function
+
     _handleSubtitlesClicked: Function
+
     _handleVolumeClicked: Function
+
     _showHideSubtitles: Function
+
     _queueSubtitleAttach: Function
 
     constructor(player: Player) {

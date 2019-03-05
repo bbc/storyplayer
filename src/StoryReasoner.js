@@ -14,14 +14,23 @@ import InternalVariables, { InternalVariableNames } from './InternalVariables';
  */
 export default class StoryReasoner extends EventEmitter {
     _story: Story;
+
     _dataResolver: DataResolver;
+
     _reasonerFactory: StoryReasonerFactory;
+
     _narrativeElements: { [id: string]: NarrativeElement };
+
     _currentNarrativeElement: NarrativeElement;
+
     _storyStarted: boolean;
+
     _storyEnded: boolean;
+
     _resolving: boolean;
+
     _subStoryReasoner: ?StoryReasoner;
+
     _parent: ?StoryReasoner;
 
     /**
@@ -396,7 +405,7 @@ export default class StoryReasoner extends EventEmitter {
     ): ?StoryReasoner {
         if (reasoner._isInReasoner(narrativeElementId)) {
             return reasoner;
-        } else if (reasoner._subStoryReasoner) {
+        } if (reasoner._subStoryReasoner) {
             return StoryReasoner._getSubReasonerWithNarrativeElement(
                 narrativeElementId,
                 reasoner._subStoryReasoner,

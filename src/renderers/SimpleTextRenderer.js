@@ -19,9 +19,13 @@ export type HTMLTrackElement = HTMLElement & {
 
 export default class SimpleTextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
+
     _canvas: HTMLCanvasElement;
+
     _behaviourElements: Array<HTMLElement>;
+
     _target: HTMLDivElement;
+
     _textDiv: HTMLDivElement;
 
 

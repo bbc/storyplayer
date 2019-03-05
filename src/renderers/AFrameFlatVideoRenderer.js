@@ -15,28 +15,45 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
+
     _outTimeEventListener: Function;
+
     _playEventListener: Function;
+
     _pauseEventListener: Function;
+
     _handlePlayPauseButtonClicked: Function;
+
     _setOrientationVariable: Function;
+
     _orientationWatcher: ?IntervalID;
 
     _videoDivId: string;
+
     _videoAssetElement: HTMLVideoElement;
+
     _initialRotation: string;
+
     _videoTypeString: string;
+
     _sceneElements: Array<HTMLElement>;
+
     _ambisonic: string;
 
     _lastSetTime: number;
+
     _inTime: number;
+
     _outTime: number;
+
     _setOutTime: Function;
+
     _setInTime: Function;
 
     _hasEnded: boolean;
+
     _started: boolean;
+
     _rendered: boolean;
 
     _afr: typeof AFrameRenderer;

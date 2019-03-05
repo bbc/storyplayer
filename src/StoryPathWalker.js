@@ -46,10 +46,15 @@ const convertPartialToFull = (
  */
 export default class StoryPathWalker extends EventEmitter {
     _storyFetcher: StoryFetcher;
+
     _representationCollectionFetcher: RepresentationCollectionFetcher;
+
     _storyReasonerFactory: StoryReasonerFactory;
+
     _linear: boolean;
+
     _pathmap: Array<PartialStoryPathItem>;
+
     _storyItemMap: Array<StoryPathItem>;
 
     /**
