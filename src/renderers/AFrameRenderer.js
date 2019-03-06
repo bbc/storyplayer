@@ -22,14 +22,21 @@ let _iconCount: number = 0;
 
 class AFrameRenderer extends EventEmitter {
     aFrameSceneElement: any;
+
     _aFrameAssetsElement: HTMLElement;
+
     _aFrameCamera: any;
+
     _controlBar: HTMLElement;
+
     _cursor: HTMLElement;
+
     _analytics: ?AnalyticsLogger;
 
     sceneElements: Array<HTMLElement>;
+
     linkElements: Array<HTMLElement>;
+
     _choiceIconSet: { [key: string]: { entity: HTMLElement, control: boolean } };
 
     constructor() {

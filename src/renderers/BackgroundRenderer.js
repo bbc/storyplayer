@@ -10,10 +10,15 @@ import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 
 export default class BackgroundRenderer extends EventEmitter {
     _rendererId: string;
+
     _assetCollection: AssetCollection;
+
     _fetchMedia: MediaFetcher;
+
     _player: Player;
+
     _playoutEngine: PlayoutEngine;
+
     _disabled: boolean;
 
     constructor(

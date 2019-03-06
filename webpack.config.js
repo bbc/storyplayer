@@ -1,8 +1,9 @@
 /* eslint-disable comma-dangle */
 const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+require('@babel/polyfill');
 
-const extractSass = new ExtractTextPlugin('romper.css');
+const productionBuild = process.env.NODE_ENV === 'production';
 
 const config = {
     entry: './src/romper.js',
@@ -13,6 +14,7 @@ const config = {
         library: 'Romper',
         libraryTarget: 'umd'
     },
+    mode: productionBuild ? 'production' : 'development',
     module: {
         rules: [
             {
@@ -21,8 +23,17 @@ const config = {
                 exclude: /node_modules/
             },
             {
-                test: /\.scss$/,
-                use: extractSass.extract(['css-loader', 'sass-loader'])
+                test: /\.(scss|sass)$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                        }
+                    }
+                ]
             },
             {
                 test: /\.(jpe?g|png|gif|svg)$/,
@@ -35,7 +46,9 @@ const config = {
         ]
     },
     plugins: [
-        extractSass
+        new MiniCssExtractPlugin({
+            filename: 'romper.css',
+        }),
     ]
 };
 

@@ -1,7 +1,7 @@
 // @flow
 
 import ObjectDataResolver from './resolvers/ObjectDataResolver';
-import type { Settings, ExperienceFetchers, AssetUrls } from './romper';
+import type { Settings, ExperienceFetchers, AssetUrls } from './romper.js.flow';
 import Controller from './Controller';
 
 // eslint-disable-next-line import/no-named-as-default

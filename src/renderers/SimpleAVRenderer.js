@@ -23,17 +23,25 @@ export type HTMLTrackElement = HTMLElement & {
 
 export default class SimpleAVRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
+
     _videoTrack: HTMLTrackElement;
+
     _applyBlurBehaviour: Function;
+
     _handlePlayPauseButtonClicked: Function;
 
     _lastSetTime: number;
+
     _inTime: number;
+
     _outTime: number;
 
     _endedEventListener: Function;
+
     _outTimeEventListener: Function;
+
     _setOutTime: Function;
+
     _setInTime: Function;
 
     constructor(

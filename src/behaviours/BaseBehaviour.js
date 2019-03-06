@@ -4,7 +4,9 @@ import logger from '../logger';
 /* eslint-disable class-methods-use-this */
 export default class BaseBehaviour {
     _behaviourDefinition: Object;
+
     _handleDone: Function;
+
     _onComplete: () => void;
 
     constructor(behaviourDefinition: Object, onComplete: () => void) {

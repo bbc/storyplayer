@@ -9,10 +9,15 @@ import Controller from '../Controller';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
+
     _disablePlayButton: Function;
+
     _disableScrubBar: Function;
+
     _enablePlayButton: Function;
+
     _enableScrubBar: Function;
+
     _visible: boolean;
 
 

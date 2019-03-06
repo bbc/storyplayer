@@ -212,7 +212,7 @@ export default class Controller extends EventEmitter {
 
     // see if we have a linear story
     // and if we do, create a StoryIconRenderer
-    _testForLinearityAndBuildStoryRenderer(storyId: string) {
+    _testForLinearityAndBuildStoryRenderer(storyId: string): Promise<any> {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
             this._fetchers.storyFetcher,
@@ -725,7 +725,7 @@ export default class Controller extends EventEmitter {
                             .representation_collection_target_id)
                         .then(representationCollection =>
                             this._representationReasoner(representationCollection));
-                } else if (this._reasoner
+                } if (this._reasoner
                     && narrativeElement
                     && narrativeElement.body.story_target_id) {
                     // fetch story
@@ -770,20 +770,36 @@ export default class Controller extends EventEmitter {
     }
 
     _storyId: ?string;
+
     _reasoner: ?StoryReasoner;
+
     _target: HTMLElement;
+
     _storyReasonerFactory: StoryReasonerFactory;
+
     _fetchers: ExperienceFetchers;
+
     _representationReasoner: RepresentationReasoner;
+
     _analytics: AnalyticsLogger;
+
     _assetUrls: AssetUrls;
+
     _handleError: ?Function;
+
     _handleStoryEnd: ?Function;
+
     _handleNarrativeElementChanged: ?Function;
+
     _handleLinkChoice: ?Function;
+
     _linearStoryPath: Array<StoryPathItem>;
+
     _currentNarrativeElement: NarrativeElement;
+
     _renderManager: RenderManager;
+
     _storyIconRendererCreated: boolean;
+
     _allNarrativeElements: ?Array<NarrativeElement>;
 }

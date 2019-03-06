@@ -28,6 +28,7 @@ export type ConsoleFormattedStreamOptions = {
 
 export default class ConsoleFormattedStream {
     logByLevel: boolean;
+
     css: Object;
 
     constructor(settings: ConsoleFormattedStreamOptions) {

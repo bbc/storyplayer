@@ -10,17 +10,23 @@ import { BrowserUserAgent } from '../browserCapabilities';
 
 export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
+
     _backgroundMediaElement: HTMLAudioElement
 
     _mediaManager: MediaManager
 
     _playing: boolean;
+
     _subtitlesShowing: boolean;
 
     _handlePlayPauseButtonClicked: Function
+
     _handleSubtitlesClicked: Function
+
     _handleVolumeClicked: Function
+
     _showHideSubtitles: Function
+
     _queueSubtitleAttach: Function
 
     constructor(player: Player) {
