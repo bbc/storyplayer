@@ -338,6 +338,7 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             forceChoice,
             oneShot,
+            showIfOneLink,
         } = this._getLinkChoiceBehaviours(behaviour);
 
         this._linkBehaviour = {
@@ -364,18 +365,24 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
 
-                this._player.setNextAvailable(false);
-                this._showChoiceIcons({
-                    defaultLinkId, // id for link to highlight at start
-                    forceChoice, // do we highlight
-                    disableControls, // are controls disabled while icons shown
-                    countdown, // do we animate countdown
-                    iconOverlayClass, // css classes to apply to overlay
-                });
+                if (iconObjects.length > 1 || showIfOneLink) {
+                    this._player.setNextAvailable(false);
+                    this._showChoiceIcons({
+                        defaultLinkId, // id for link to highlight at start
+                        forceChoice, // do we highlight
+                        disableControls, // are controls disabled while icons shown
+                        countdown, // do we animate countdown
+                        iconOverlayClass, // css classes to apply to overlay
+                    });
 
-                // callback to say behaviour is done, but not if user can
-                // change their mind
-                if (!forceChoice) {
+                    // callback to say behaviour is done, but not if user can
+                    // change their mind
+                    if (!forceChoice) {
+                        callback();
+                    }
+                } else {
+                    logger.info('Link Choice behaviour ignored - only one link');
+                    this._linkBehaviour.forceChoice = false;
                     callback();
                 }
             });
@@ -396,6 +403,7 @@ export default class BaseRenderer extends EventEmitter {
         let forceChoice = false;
         let oneShot = false;
         let showNeToEnd = true;
+        let showIfOneLink = false;
 
         // and override if they are specified
         if (behaviour.hasOwnProperty('show_ne_to_end')) {
@@ -403,6 +411,9 @@ export default class BaseRenderer extends EventEmitter {
         }
         if (behaviour.hasOwnProperty('one_shot')) {
             oneShot = behaviour.one_shot;
+        }
+        if (behaviour.hasOwnProperty('show_if_one_choice')) {
+            showIfOneLink = behaviour.show_if_one_choice;
         }
 
         // do we show countdown?
@@ -428,6 +439,7 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             forceChoice,
             oneShot,
+            showIfOneLink,
         };
     }
 
