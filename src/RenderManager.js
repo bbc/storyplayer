@@ -26,32 +26,54 @@ const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
 export default class RenderManager extends EventEmitter {
     _controller: Controller;
+
     _currentRenderer: ?BaseRenderer;
+
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
+
     _target: HTMLElement;
+
     _backgroundTarget: HTMLElement;
+
     _representationReasoner: RepresentationReasoner;
+
     _fetchers: ExperienceFetchers;
+
     _analytics: AnalyticsLogger;
+
     _renderStory: StoryIconRenderer;
+
     _neTarget: HTMLDivElement;
+
     _storyTarget: HTMLDivElement;
+
     _linearStoryPath: Array<StoryPathItem>;
+
     _currentNarrativeElement: NarrativeElement;
+
     _rendererState: {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
     };
+
     _upcomingRenderers: { [key: string]: BaseRenderer };
+
     _upcomingBackgroundRenderers: { [key: string]: BackgroundRenderer };
+
     _previousNeId: ?string;
+
     _nextButton: HTMLButtonElement;
+
     _previousButton: HTMLButtonElement;
+
     _player: Player;
+
     _assetUrls: AssetUrls;
 
     _handleVisibilityChange: Function;
+
     _isVisible: boolean;
+
     _isPlaying: boolean;
 
     constructor(

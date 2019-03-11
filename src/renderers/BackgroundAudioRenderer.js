@@ -12,9 +12,15 @@ const FADE_IN_TIME = 2000; // fade in time for audio in ms
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
+
     _handleVolumeClicked: Function;
-    _volFadeInterval: ?IntervalID; // fade in interval
-    _fadeIntervalId: ?IntervalID; // fade out interval
+
+    _volFadeInterval: ?IntervalID;
+
+    // fade in interval
+    _fadeIntervalId: ?IntervalID;
+
+    // fade out interval
     _fadePaused: boolean;
 
     constructor(

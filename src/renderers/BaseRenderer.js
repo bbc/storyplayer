@@ -16,28 +16,47 @@ import AFrameRenderer from './AFrameRenderer';
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
+
     _representation: Representation;
+
     _fetchAssetCollection: AssetCollectionFetcher;
+
     _fetchMedia: MediaFetcher;
+
     _player: Player;
+
     _playoutEngine: PlayoutEngine;
+
     _behaviourRunner: ?BehaviourRunner;
+
     _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
+
     _applyColourOverlayBehaviour: Function;
+
     _applyShowImageBehaviour: Function;
+
     _applyShowVariablePanelBehaviour: Function;
+
     _applyShowChoiceBehaviour: Function;
+
     _handleLinkChoiceEvent: Function;
+
     _behaviourElements: Array<HTMLElement>;
+
     _target: HTMLDivElement;
+
     _destroyed: boolean;
+
     _analytics: AnalyticsLogger;
+
     _controller: Controller;
 
     _savedLinkConditions: Object;
+
     _linkBehaviour: Object;
 
     _hasEnded: boolean;
+
     inVariablePanel: boolean;
 
     _timeEventListeners: { [key: string]: (callback: () => mixed) => void };

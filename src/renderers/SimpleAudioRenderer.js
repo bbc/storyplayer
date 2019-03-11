@@ -26,12 +26,15 @@ export type HTMLTrackElement = HTMLElement & {
 
 export default class SimpleAudioRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
+
     _audioTrack: HTMLTrackElement;
+
     _handlePlayPauseButtonClicked: Function;
 
     _lastSetTime: number
 
     _endedEventListener: Function;
+
     _hasEnded: boolean;
 
     constructor(

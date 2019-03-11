@@ -6,15 +6,25 @@ import MediaInstance from './MediaInstance';
 
 export default class MediaManager {
     _mediaInstancePool: Array<Object>
+
     _defaultConfig: Object
+
     _activeConfig: Object
+
     _inactiveConfig: Object
+
     _idTotal: number
+
     _foregroundMediaElement: HTMLVideoElement
+
     _backgroundMediaElement: HTMLAudioElement
+
     _debug: boolean
+
     _getPermissionToPlay: Function
+
     _permissionToPlay: boolean
+
     static _hlsjsSupported: boolean
 
     constructor(

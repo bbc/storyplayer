@@ -58,6 +58,7 @@ export class BrowserUserAgent {
 
 export default class BrowserCapabilities {
     static hlsSupported: boolean
+
     static dashSupported: boolean
 
     static hlsSupport() {

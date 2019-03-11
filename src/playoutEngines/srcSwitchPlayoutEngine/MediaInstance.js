@@ -16,7 +16,7 @@ MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 const getMediaType = (src: string) => {
     if (src.indexOf('.m3u8') !== -1) {
         return MediaTypes.HLS;
-    } else if (src.indexOf('.mpd') !== -1) {
+    } if (src.indexOf('.mpd') !== -1) {
         return MediaTypes.DASH;
     }
     return MediaTypes.OTHER;
@@ -30,21 +30,37 @@ const getMediaType = (src: string) => {
 // This is using the built-in support of the plain video element, without using hls.js.
 export default class HlsInstance {
     _hls: Object
+
     _dashjs: Object
+
     _mountedMediaElement: HTMLMediaElement
+
     _id: number
+
     _eventList: Array<Object>
+
     _attached: boolean
+
     _debug: boolean
+
     _useHlsJs: boolean
+
     _mediaSrc: string
+
     _mediaType: string
+
     _mediaElement: HTMLMediaElement
+
     _activeConfig: Object
+
     _inactiveConfig: Object
+
     _permissionToPlay: Function
+
     _sourceLoaded: boolean
+
     _loadSourceQueue: Array<Function>
+
     _playCallback: Function
 
     constructor(

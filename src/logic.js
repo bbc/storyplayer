@@ -15,9 +15,9 @@ import logger from './logger';
 function sortCandidates(a, b) {
     if (a.result === b.result) {
         return a.i - b.i;
-    } else if (a.result === true) {
+    } if (a.result === true) {
         return -1;
-    } else if (b.result === true) {
+    } if (b.result === true) {
         return 1;
     }
     return b.result - a.result;

@@ -11,13 +11,21 @@ import Controller from '../Controller';
 
 export default class SwitchableRenderer extends BaseRenderer {
     _choiceRenderers: Array<?BaseRenderer>;
+
     _fetchMedia: MediaFetcher;
+
     _currentRendererIndex: number;
+
     _previousRendererPlayheadTime: number;
+
     _nodeCompleted: boolean;
+
     _inCompleteBehaviours: boolean;
+
     _handleChoiceClicked: Function;
+
     _switchableIsQueuedNotPlaying: boolean;
+
     _preloadedSwitchIcons: Array<Image>;
 
     constructor(

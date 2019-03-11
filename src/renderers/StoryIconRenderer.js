@@ -14,13 +14,23 @@ export type AssetCollectionPair = {
 // currently focused on chapter icons
 export default class StoryIconRenderer extends EventEmitter {
     _pathItemList: Array<StoryPathItem>;
+
     _fetchAssetCollection: AssetCollectionFetcher;
+
     _fetchMedia: MediaFetcher;
-    _currentRepresentationId: string; // the id of the current representation
-    _deepestCommonSubstory: string; // the story id of the deepest story with all icons
+
+    _currentRepresentationId: string;
+
+    // the id of the current representation
+    _deepestCommonSubstory: string;
+
+    // the story id of the deepest story with all icons
     _iconUrlMap: { [key: string]: { default: ?string, active: ?string } };
+
     _player: Player;
+
     _handleIconClicked: Function;
+
     _preloadedIcons: Array<Image>
 
     /**

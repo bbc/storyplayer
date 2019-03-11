@@ -129,3 +129,12 @@ h1 {
   color: gray;
   font-style: oblique;
 }
+
+.romper-loading-inner {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 28%;
+  max-width: 50px;
+  transform-origin: 50% 0;
+  width: 20%;
+}

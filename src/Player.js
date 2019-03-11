@@ -235,50 +235,95 @@ function createOverlay(name: string, logFunction: Function) {
 
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
+
     _player: HTMLDivElement;
+
     _playerParent: HTMLElement;
+
     _backgroundLayer: HTMLDivElement;
+
     _mediaLayer: HTMLDivElement;
+
     _guiLayer: HTMLDivElement;
+
     backgroundTarget: HTMLDivElement;
+
     mediaTarget: HTMLDivElement;
+
     guiTarget: HTMLDivElement;
+
     showingSubtitles: boolean;
+
     _overlays: HTMLDivElement;
+
     _overlayToggleButtons: HTMLDivElement;
+
     _buttons: HTMLDivElement;
+
     _buttonsActivateArea: HTMLDivElement;
+
     _narrativeElementTransport: HTMLDivElement;
+
     _mediaTransport: HTMLDivElement;
+
     _startExperienceButton: HTMLButtonElement;
+
     _startExperienceImage: HTMLImageElement;
+
     _repeatButton: HTMLButtonElement;
+
     _playPauseButton: HTMLButtonElement;
+
     _backButton: HTMLButtonElement;
+
     _nextButton: HTMLButtonElement;
+
     _subtitlesButton: HTMLButtonElement;
+
     _fullscreenButton: HTMLButtonElement;
+
     _inFullScreen: boolean
+
     _volume: Object;
+
     _representation: Object;
+
     _icon: Object;
+
     _linkChoice: Object;
+
     _scrubBar: HTMLInputElement;
+
     _timeFeedback: HTMLDivElement;
+
     _currentTime: HTMLSpanElement;
+
     _totalTime: HTMLSpanElement;
+
     _analytics: AnalyticsLogger;
+
     _assetUrls: AssetUrls;
+
     _logUserInteraction: Function;
+
     _volumeEventTimeouts: Object;
+
     _scrubbedEventTimeout: TimeoutID;
+
     _showRomperButtonsTimeout: TimeoutID;
+
     _RomperButtonsShowing: boolean;
+
     _userInteractionStarted: boolean;
+
     _numChoices: number;
+
     removeExperienceStartButtonAndImage: Function;
+
     _handleFullScreenChange: Function;
+
     _choiceIconSet: { [key: string]: HTMLDivElement };
+
     _choiceCountdownTimeout: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
