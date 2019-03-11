@@ -360,7 +360,7 @@ export default class BaseRenderer extends EventEmitter {
                 AFrameRenderer.clearLinkIcons();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
-                    if (iconSpecObject.resolvedUrl) {
+                    if (iconSpecObject.resolvedUrl || iconSpecObject.iconText) {
                         this._buildLinkIcon(iconSpecObject);
                     }
                 });
@@ -458,6 +458,7 @@ export default class BaseRenderer extends EventEmitter {
                 ac: null,
                 resolvedUrl: null,
                 targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+                iconText: null,
             };
             // first get an asset collection id for each icon
             // firstly is there an  icon specified in the behaviour
@@ -465,19 +466,23 @@ export default class BaseRenderer extends EventEmitter {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
-                        // map representation to asset
-                        iconSpecObject.acId =
-                            this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
-                        // inject any other properties in data model into the object
-                        Object.keys(linkIconObject).forEach((key) => {
-                            if (key !== 'image') {
-                                iconSpecObject[key] = linkIconObject[key];
-                            }
-                        });
+                        if (linkIconObject.image) {
+                            // map representation to asset
+                            iconSpecObject.acId =
+                                this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
+                            // inject any other properties in data model into the object
+                            Object.keys(linkIconObject).forEach((key) => {
+                                if (key !== 'image') {
+                                    iconSpecObject[key] = linkIconObject[key];
+                                }
+                            });
+                        } else if (linkIconObject.text) {
+                            iconSpecObject.iconText = linkIconObject.text;
+                        }
                     }
                 });
             }
-            if (iconSpecObject.acId === null) {
+            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
                 // if not specified - get default icon...
                 iconObjectPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
@@ -544,11 +549,20 @@ export default class BaseRenderer extends EventEmitter {
     _buildLinkIcon(iconObject: Object) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
-        const icon = this._player.addLinkChoiceControl(
-            targetId,
-            iconObject.resolvedUrl,
-            `Option ${(iconObject.choiceId + 1)}`,
-        );
+        let icon;
+        if (iconObject.iconText) {
+            icon = this._player.addTextLinkChoice(
+                targetId,
+                iconObject.iconText,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        } else {
+            icon = this._player.addLinkChoiceControl(
+                targetId,
+                iconObject.resolvedUrl,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        }
         if (iconObject.position && iconObject.position.two_d) {
             const {
                 left,
