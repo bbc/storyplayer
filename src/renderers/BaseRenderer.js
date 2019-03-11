@@ -340,9 +340,7 @@ export default class BaseRenderer extends EventEmitter {
                 AFrameRenderer.clearLinkIcons();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
-                    if (iconSpecObject.resolvedUrl) {
-                        this._buildLinkIcon(iconSpecObject);
-                    }
+                    this._buildLinkIcon(iconSpecObject);
                 });
 
                 this._player.setNextAvailable(false);
@@ -493,8 +491,7 @@ export default class BaseRenderer extends EventEmitter {
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
                     fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
                 } else {
-                    const noIconSrc = this._controller._assetUrls.noAssetIconUrl;
-                    fetcherPromises.push(Promise.resolve(noIconSrc));
+                    fetcherPromises.push(Promise.resolve(''));
                 }
             });
             return Promise.all(fetcherPromises).then((resolvedUrls) => {
