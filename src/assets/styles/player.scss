@@ -488,6 +488,17 @@ $romper-hover-text-size: 25px;
   }
 }
 
+.romper-text-link-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.romper-link-text-icon {
+  font-size: 300%;
+  text-align: center;
+}
 
 .romper-player > .romper-gui {
 

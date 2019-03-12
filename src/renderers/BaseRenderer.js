@@ -50,6 +50,7 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
 
     _controller: Controller;
+    _preloadedBehaviourAssets: Array<Image>;
 
     _savedLinkConditions: Object;
 
@@ -113,6 +114,8 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._savedLinkConditions = {};
+        this._preloadedBehaviourAssets = [];
+        this._preloadBehaviourAssets();
     }
 
     willStart() {
@@ -261,6 +264,28 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
+    _preloadBehaviourAssets() {
+        this._preloadedBehaviourAssets = [];
+        const assetCollectionIds = this._representation.asset_collections.behaviours ?
+            this._representation.asset_collections.behaviours : [];
+        assetCollectionIds.forEach((behaviour) => {
+            this._fetchAssetCollection(behaviour.asset_collection_id)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        const image = new Image();
+                        image.src = imageUrl;
+                        this._preloadedBehaviourAssets.push(image);
+                    }
+                });
+        });
+    }
+
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
         return this._behaviourRendererMap[behaviourUrn];
     }
@@ -338,6 +363,7 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             forceChoice,
             oneShot,
+            showIfOneLink,
         } = this._getLinkChoiceBehaviours(behaviour);
 
         this._linkBehaviour = {
@@ -362,18 +388,24 @@ export default class BaseRenderer extends EventEmitter {
                     this._buildLinkIcon(iconSpecObject);
                 });
 
-                this._player.setNextAvailable(false);
-                this._showChoiceIcons({
-                    defaultLinkId, // id for link to highlight at start
-                    forceChoice, // do we highlight
-                    disableControls, // are controls disabled while icons shown
-                    countdown, // do we animate countdown
-                    iconOverlayClass, // css classes to apply to overlay
-                });
+                if (iconObjects.length > 1 || showIfOneLink) {
+                    this._player.setNextAvailable(false);
+                    this._showChoiceIcons({
+                        defaultLinkId, // id for link to highlight at start
+                        forceChoice, // do we highlight
+                        disableControls, // are controls disabled while icons shown
+                        countdown, // do we animate countdown
+                        iconOverlayClass, // css classes to apply to overlay
+                    });
 
-                // callback to say behaviour is done, but not if user can
-                // change their mind
-                if (!forceChoice) {
+                    // callback to say behaviour is done, but not if user can
+                    // change their mind
+                    if (!forceChoice) {
+                        callback();
+                    }
+                } else {
+                    logger.info('Link Choice behaviour ignored - only one link');
+                    this._linkBehaviour.forceChoice = false;
                     callback();
                 }
             });
@@ -394,6 +426,7 @@ export default class BaseRenderer extends EventEmitter {
         let forceChoice = false;
         let oneShot = false;
         let showNeToEnd = true;
+        let showIfOneLink = false;
 
         // and override if they are specified
         if (behaviour.hasOwnProperty('show_ne_to_end')) {
@@ -401,6 +434,9 @@ export default class BaseRenderer extends EventEmitter {
         }
         if (behaviour.hasOwnProperty('one_shot')) {
             oneShot = behaviour.one_shot;
+        }
+        if (behaviour.hasOwnProperty('show_if_one_choice')) {
+            showIfOneLink = behaviour.show_if_one_choice;
         }
 
         // do we show countdown?
@@ -426,6 +462,7 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             forceChoice,
             oneShot,
+            showIfOneLink,
         };
     }
 
@@ -444,6 +481,7 @@ export default class BaseRenderer extends EventEmitter {
                 ac: null,
                 resolvedUrl: null,
                 targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+                iconText: null,
             };
             // first get an asset collection id for each icon
             // firstly is there an  icon specified in the behaviour
@@ -451,19 +489,23 @@ export default class BaseRenderer extends EventEmitter {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
                     if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
-                        // map representation to asset
-                        iconSpecObject.acId =
-                            this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
-                        // inject any other properties in data model into the object
-                        Object.keys(linkIconObject).forEach((key) => {
-                            if (key !== 'image') {
-                                iconSpecObject[key] = linkIconObject[key];
-                            }
-                        });
+                        if (linkIconObject.image) {
+                            // map representation to asset
+                            iconSpecObject.acId =
+                                this.resolveBehaviourAssetCollectionMappingId(linkIconObject.image);
+                            // inject any other properties in data model into the object
+                            Object.keys(linkIconObject).forEach((key) => {
+                                if (key !== 'image') {
+                                    iconSpecObject[key] = linkIconObject[key];
+                                }
+                            });
+                        } else if (linkIconObject.text) {
+                            iconSpecObject.iconText = linkIconObject.text;
+                        }
                     }
                 });
             }
-            if (iconSpecObject.acId === null) {
+            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
                 // if not specified - get default icon...
                 iconObjectPromises.push(this._controller
                     .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
@@ -530,11 +572,20 @@ export default class BaseRenderer extends EventEmitter {
     _buildLinkIcon(iconObject: Object) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
-        const icon = this._player.addLinkChoiceControl(
-            targetId,
-            iconObject.resolvedUrl,
-            `Option ${(iconObject.choiceId + 1)}`,
-        );
+        let icon;
+        if (iconObject.iconText) {
+            icon = this._player.addTextLinkChoice(
+                targetId,
+                iconObject.iconText,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        } else {
+            icon = this._player.addLinkChoiceControl(
+                targetId,
+                iconObject.resolvedUrl,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        }
         if (iconObject.position && iconObject.position.two_d) {
             const {
                 left,

@@ -966,6 +966,14 @@ class Player extends EventEmitter {
     }
 
     addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(id, label, null, src);
+    }
+
+    addTextLinkChoice(id: string, text: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(id, label, text, null);
+    }
+
+    _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
         this._numChoices += 1;
 
         const linkChoiceControl = document.createElement('div');
@@ -975,21 +983,22 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-        const { classList } = this._linkChoice.overlay;
-        classList.add('romper-link-choice-grid-cell');
-        if (this._numChoices > 3) {
-            classList.add('tworow');
-        } else {
-            classList.remove('tworow');
-        }
 
-        const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-        const { style } = iconContainer;
-        style.backgroundImage = `url(${linkChoiceIconSrc})`;
-        style.backgroundSize = 'contain';
-        style.backgroundRepeat = 'no-repeat';
-        style.backgroundPosition = 'center';
-        style.height = '100%';
+        if (src) {
+            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+            const { style } = iconContainer;
+            style.backgroundImage = `url(${linkChoiceIconSrc})`;
+            style.backgroundSize = 'contain';
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundPosition = 'center';
+            style.height = '100%';
+        } else if (text) {
+            iconContainer.className = 'romper-text-link-container';
+            const iconTextPar = document.createElement('p');
+            iconTextPar.textContent = text;
+            iconTextPar.className = 'romper-link-text-icon';
+            iconContainer.appendChild(iconTextPar);
+        }
 
         const choiceClick = () => {
             // set classes to show which is selected
