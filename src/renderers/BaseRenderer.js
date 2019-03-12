@@ -50,6 +50,7 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
 
     _controller: Controller;
+
     _preloadedBehaviourAssets: Array<Image>;
 
     _savedLinkConditions: Object;
