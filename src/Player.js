@@ -983,21 +983,21 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-
-        if (src) {
-            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-            const { style } = iconContainer;
-            style.backgroundImage = `url(${linkChoiceIconSrc})`;
-            style.backgroundSize = 'contain';
-            style.backgroundRepeat = 'no-repeat';
-            style.backgroundPosition = 'center';
-            style.height = '100%';
-        } else if (text) {
+        if (text) {
             iconContainer.className = 'romper-text-link-container';
             const iconTextPar = document.createElement('p');
             iconTextPar.textContent = text;
             iconTextPar.className = 'romper-link-text-icon';
             iconContainer.appendChild(iconTextPar);
+        } else {
+            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+            const { style } = iconContainer;
+            // @flowignore
+            style.backgroundImage = `url(${linkChoiceIconSrc})`;
+            style.backgroundSize = 'contain';
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundPosition = 'center';
+            style.height = '100%';
         }
 
         const choiceClick = () => {

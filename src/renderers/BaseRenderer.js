@@ -50,6 +50,7 @@ export default class BaseRenderer extends EventEmitter {
     _analytics: AnalyticsLogger;
 
     _controller: Controller;
+
     _preloadedBehaviourAssets: Array<Image>;
 
     _savedLinkConditions: Object;
@@ -385,9 +386,7 @@ export default class BaseRenderer extends EventEmitter {
                 AFrameRenderer.clearLinkIcons();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
-                    if (iconSpecObject.resolvedUrl || iconSpecObject.iconText) {
-                        this._buildLinkIcon(iconSpecObject);
-                    }
+                    this._buildLinkIcon(iconSpecObject);
                 });
 
                 if (iconObjects.length > 1 || showIfOneLink) {
@@ -554,7 +553,7 @@ export default class BaseRenderer extends EventEmitter {
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
                     fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
                 } else {
-                    fetcherPromises.push(Promise.resolve(null));
+                    fetcherPromises.push(Promise.resolve(''));
                 }
             });
             return Promise.all(fetcherPromises).then((resolvedUrls) => {
