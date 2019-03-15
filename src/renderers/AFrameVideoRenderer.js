@@ -414,11 +414,17 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this.end();
+        AFrameRenderer.setSceneHidden(true);
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
     }
 
     switchTo() {
-        this.start();
+        if (this._started) {
+            this._playoutEngine.setPlayoutActive(this._rendererId);
+            AFrameRenderer.setSceneHidden(false);
+        } else {
+            this.start();
+        }
     }
 
     // eslint-disable-next-line class-methods-use-this
