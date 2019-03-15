@@ -1,5 +1,4 @@
 // @flow
-import AFRAME from 'aframe';
 
 import AFrameRenderer from './AFrameRenderer';
 import Player, { PlayerEvents } from '../Player';
@@ -37,6 +36,8 @@ export default class AFrameVideoRenderer extends BaseRenderer {
     _initialRotation: string;
 
     _videoTypeString: string;
+
+    _videoType: Object;
 
     _sceneElements: Array<HTMLElement>;
 
@@ -190,14 +191,14 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             url: mediaUrl,
         });
 
-        const videoElements = [];
+        this._sceneElements = [];
 
         // test how we might add other aFrame components specified in DM
         if (this._representation.meta
             && this._representation.meta.romper
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
-            videoElements.push(AFrameRenderer
+            this._sceneElements.push(AFrameRenderer
                 .buildAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
@@ -206,7 +207,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         // identify video type and set parameters
         // now build bits specific for video/type
-        const videoType = { // defaults
+        this._videoType = { // defaults
             coverage: 'full',
             stereo: false,
             split: 'horizontal',
@@ -219,23 +220,13 @@ export default class AFrameVideoRenderer extends BaseRenderer {
             audio.setAttribute('src', this._videoDivId);
             audio.setAttribute('ambiOrder', this._ambisonic);
             audio.setAttribute('spatialaudio', '');
-            videoElements.push(audio);
+            this._sceneElements.push(audio);
         }
 
         // parse video type from string
-        if (this._videoTypeString.includes('180')) videoType.coverage = 'half';
-        if (this._videoTypeString.includes('STEREO')) videoType.stereo = true;
-        if (this._videoTypeString.includes('VERTICAL')) videoType.split = 'vertical';
-
-        // get components for video depending on type
-        // these are the bits that would need to be replaced for each scene
-        if (videoType.stereo) {
-            const stereoElements = this._getStereoComponents(videoType);
-            this._sceneElements = videoElements.concat(stereoElements);
-        } else {
-            const monoElements = this._getMonoComponents();
-            this._sceneElements = videoElements.concat(monoElements);
-        }
+        if (this._videoTypeString.includes('180')) this._videoType.coverage = 'half';
+        if (this._videoTypeString.includes('STEREO')) this._videoType.stereo = true;
+        if (this._videoTypeString.includes('VERTICAL')) this._videoType.split = 'vertical';
 
         // all done - start playing if start has been called
         // if not, we're ready
@@ -243,71 +234,6 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         if (this._started) {
             this._startThreeSixtyVideo();
         }
-    }
-
-    // return components needed to render mono 360 video
-    _getMonoComponents(): Array<HTMLElement> {
-        logger.info('360 rendering mono');
-        const sphereMono = document.createElement('a-entity');
-        sphereMono.setAttribute('class', 'videospheres');
-        sphereMono.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        sphereMono.setAttribute('scale', '-1 1 1');
-        AFRAME.utils.entity.setComponentProperty(sphereMono, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        return [sphereMono];
-    }
-
-    // return components needed to render stereo 360 video
-    _getStereoComponents(videoType: Object): Array<HTMLElement> {
-        logger.info('360 rendering stereo');
-
-        const sphereL = document.createElement('a-entity');
-        sphereL.setAttribute('class', 'videospheres');
-        sphereL.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        AFRAME.utils.entity.setComponentProperty(sphereL, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        sphereL.setAttribute('scale', '-1 1 1');
-
-        // Sync rotation with 'camera landing rotation'
-        AFRAME.utils.entity.setComponentProperty(sphereL, 'rotation', { x: 0, y: 0, z: 0 });
-        AFRAME.utils.entity.setComponentProperty(
-            sphereL,
-            'stereo',
-            { eye: 'left', mode: videoType.mode, split: videoType.split },
-        );
-
-        const sphereR = document.createElement('a-entity');
-        sphereR.setAttribute('class', 'videospheres');
-        sphereR.setAttribute(
-            'geometry',
-            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
-        );
-        AFRAME.utils.entity.setComponentProperty(sphereR, 'material', {
-            shader: 'flat',
-            src: `#${this._videoDivId}`,
-            side: 'back',
-        });
-        sphereR.setAttribute('scale', '-1 1 1');
-
-        AFRAME.utils.entity.setComponentProperty(
-            sphereR,
-            'stereo',
-            { eye: 'right', mode: videoType.mode, split: videoType.split },
-        );
-
-        return [sphereL, sphereR];
     }
 
     _startThreeSixtyVideo() {
@@ -342,6 +268,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
+        AFrameRenderer.showVideo(this._videoDivId, this._videoType);
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
     }
@@ -420,6 +347,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
     switchTo() {
         if (this._started) {
+            AFrameRenderer.showVideo(this._videoDivId, this._videoType);
             this._playoutEngine.setPlayoutActive(this._rendererId);
             AFrameRenderer.setSceneHidden(false);
         } else {

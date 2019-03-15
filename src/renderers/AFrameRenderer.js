@@ -39,6 +39,12 @@ class AFrameRenderer extends EventEmitter {
 
     _choiceIconSet: { [key: string]: { entity: HTMLElement, control: boolean } };
 
+    _sphereMono: HTMLElement;
+
+    _sphereL: HTMLElement;
+
+    _sphereR: HTMLElement;
+
     constructor() {
         super();
         AFrameRenderer._registerAframeComponents();
@@ -109,6 +115,8 @@ class AFrameRenderer extends EventEmitter {
             _vrMode = false;
         });
 
+        this._createMonoComponents();
+        this._createStereoComponents();
         this._buildControlBar();
         this._addNextPreviousImageAssets();
         this._addPlayPauseImageAssets();
@@ -131,6 +139,136 @@ class AFrameRenderer extends EventEmitter {
             this.aFrameSceneElement.appendChild(sceneElement);
             this.sceneElements.push(sceneElement);
         }
+    }
+
+    // return components needed to render mono 360 video
+    _createMonoComponents() {
+        logger.info('360 rendering mono');
+        this._sphereMono = document.createElement('a-entity');
+        this._sphereMono.setAttribute('class', 'videospheres');
+        this._sphereMono.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        this._sphereMono.setAttribute('scale', '-1 1 1');
+        AFRAME.utils.entity.setComponentProperty(this._sphereMono, 'material', {
+            shader: 'flat',
+            src: null,
+            side: 'back',
+        });
+        this.aFrameSceneElement.appendChild(this._sphereMono);
+    }
+
+    // return components needed to render stereo 360 video
+    _createStereoComponents() {
+        logger.info('360 rendering stereo');
+
+        this._sphereL = document.createElement('a-entity');
+        this._sphereL.setAttribute('class', 'videospheres');
+        this._sphereL.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:200; segmentsWidth: 64; segmentsHeight:64',
+        );
+        AFRAME.utils.entity.setComponentProperty(this._sphereL, 'material', {
+            shader: 'flat',
+            src: null,
+            side: 'back',
+        });
+        this._sphereL.setAttribute('scale', '-1 1 1');
+
+        // Sync rotation with 'camera landing rotation'
+        AFRAME.utils.entity.setComponentProperty(this._sphereL, 'rotation', { x: 0, y: 0, z: 0 });
+        AFRAME.utils.entity.setComponentProperty(
+            this._sphereL,
+            'stereo',
+            { eye: 'left', mode: 'full', split: 'horizontal' },
+        );
+
+        this._sphereR = document.createElement('a-entity');
+        this._sphereR.setAttribute('class', 'videospheres');
+        this._sphereR.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:200; segmentsWidth: 64; segmentsHeight:64',
+        );
+        AFRAME.utils.entity.setComponentProperty(this._sphereR, 'material', {
+            shader: 'flat',
+            src: null,
+            side: 'back',
+        });
+        this._sphereR.setAttribute('scale', '-1 1 1');
+
+        AFRAME.utils.entity.setComponentProperty(
+            this._sphereR,
+            'stereo',
+            { eye: 'right', mode: 'full', split: 'horizontal' },
+        );
+        this.aFrameSceneElement.appendChild(this._sphereL);
+        this.aFrameSceneElement.appendChild(this._sphereR);
+    }
+
+    _showStereoVideo(videoElementId: string, videoType: Object){
+        AFRAME.utils.entity.setComponentProperty(this._sphereL, 'material', {
+            shader: 'flat',
+            src: `#${videoElementId}`,
+            side: 'back',
+        });
+
+        AFRAME.utils.entity.setComponentProperty(
+            this._sphereL,
+            'stereo',
+            { eye: 'left', mode: videoType.mode , split: videoType.split },
+        );
+
+        AFRAME.utils.entity.setComponentProperty(this._sphereR, 'material', {
+            shader: 'flat',
+            src: `#${videoElementId}`,
+            side: 'back',
+        });
+
+        AFRAME.utils.entity.setComponentProperty(
+            this._sphereR,
+            'stereo',
+            { eye: 'right', mode: videoType.mode , split: videoType.split },
+        );
+        this._sphereR.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        this._sphereL.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        this._sphereMono.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:200; segmentsWidth: 64; segmentsHeight:64',
+        );
+    }
+
+    _showMonoVideo(videoElementId: string){
+        this._sphereR.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:200; segmentsWidth: 64; segmentsHeight:64',
+        );
+        this._sphereL.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:200; segmentsWidth: 64; segmentsHeight:64',
+        );
+        this._sphereMono.setAttribute(
+            'geometry',
+            'primitive:sphere; radius:100; segmentsWidth: 64; segmentsHeight:64',
+        );
+        AFRAME.utils.entity.setComponentProperty(this._sphereMono, 'material', {
+            shader: 'flat',
+            src: `#${videoElementId}`,
+            side: 'back',
+        });
+    }
+
+    showVideo(videoElementId: string, videoType: Object) {
+        if (videoType.stereo) {
+            this._showStereoVideo(videoElementId, videoType);
+        }
+        this._showMonoVideo(videoElementId);
     }
 
     _buildControlBar() {
