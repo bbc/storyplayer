@@ -171,24 +171,19 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
             url: mediaUrl,
         });
 
-        const videoElements = [];
+        this._sceneElements = [];
 
         // test how we might add other aFrame components specified in DM
         if (this._representation.meta
             && this._representation.meta.romper
             && this._representation.meta.romper.aframe
             && this._representation.meta.romper.aframe.extras) {
-            videoElements.push(AFrameRenderer
+            this._sceneElements.push(AFrameRenderer
                 .buildAframeComponents(this._representation.meta.romper.aframe.extras));
         }
 
         this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
         AFrameRenderer.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
-
-        // get components for video
-        // these are the bits that would need to be replaced for each scene
-        const monoElements = this._getVideoComponents();
-        this._sceneElements = videoElements.concat(monoElements);
 
         // all done - start playing if start has been called
         // if not, we're ready
@@ -198,23 +193,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         }
     }
 
-    // return components needed to render flat video in 360
-    _getVideoComponents(): Array<HTMLElement> {
-        logger.info('360 rendering mono');
-
-        const flatVideo = document.createElement('a-video');
-        flatVideo.setAttribute('src', `#${this._videoDivId}`);
-        const width = 8;
-        flatVideo.setAttribute('width', `${width}`);
-        flatVideo.setAttribute('height', `${width * (9 / 16)}`);
-        flatVideo.setAttribute('position', '0 1 -5');
-
-        // sky
-        const sky = document.createElement('a-sky');
-        sky.setAttribute('color', '#6EBAA7');
-
-        return [flatVideo, sky];
-    }
 
     _startFlatVideo() {
         // add elements
@@ -246,6 +224,7 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
         AFrameRenderer.setControlBarPosition(0);
 
+        AFrameRenderer._showFlatVideo(this._videoDivId);
         // show aFrame content
         AFrameRenderer.setSceneHidden(false);
     }
