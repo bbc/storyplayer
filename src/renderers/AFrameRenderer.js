@@ -146,6 +146,15 @@ class AFrameRenderer extends EventEmitter {
         }
     }
 
+    // give it a poke - otherwisae doesn't show as first NE
+    // eslint-disable-next-line class-methods-use-this
+    kickStart() {
+        const scene = AFRAME.scenes[0];
+        if (scene) {
+            scene.resize();
+        }
+    }
+
     // return components needed to render mono 360 video
     _createMonoComponents() {
         logger.info('360 rendering mono');
