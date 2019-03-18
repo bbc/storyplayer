@@ -448,12 +448,12 @@ $romper-hover-text-size: 25px;
 
     &.icon-bar {
       // add this class to overlay for small low icons
-      bottom: 65px;
-      height: 80px;
       opacity: 1;
-      padding: 100% 5% 0; // so can't click off and hide overlay
-      position: absolute;
-      width: 90%;
+
+      >.romper-link-control {
+        align-self: end;
+        height: 80px;
+      }
 
       &.romper-inactive {
         opacity: 0;
@@ -462,6 +462,11 @@ $romper-hover-text-size: 25px;
 
     &.tworow {
       grid-template-rows: 1fr 1fr;
+
+      // only have one row in compact mode
+      &.icon-bar {
+        grid-template-rows: unset;
+      }
     }
 
     &.fade {
@@ -614,7 +619,7 @@ $romper-hover-text-size: 25px;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    height: 87%;
+    height: calc(100% - 120px);
     justify-content: center;
     width: 100%;
 
