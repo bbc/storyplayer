@@ -9,6 +9,7 @@ import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
+import AFrameRenderer from './renderers/AFrameRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -766,6 +767,7 @@ class Player extends EventEmitter {
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
         this._playPauseButtonClicked();
+        AFrameRenderer.kickStart();
     }
 
     _playPauseButtonClicked() {
