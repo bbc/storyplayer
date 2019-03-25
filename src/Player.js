@@ -602,6 +602,14 @@ class Player extends EventEmitter {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
+
+        this._createAframeRenderer();
+    }
+
+    _createAframeRenderer() {
+        AFrameRenderer.populateAframeAssetUrls(this._assetUrls);
+        AFrameRenderer.buildBaseAframeScene();
+        Object.seal(AFrameRenderer);
     }
 
     _handleTouchEndEvent(event: Object) {

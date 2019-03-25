@@ -14,6 +14,13 @@ import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 
 import Package from '../package.json';
 
+// Import Assets for assetUrls object as they may not of been imported in CSS
+import './assets/images/media-play-8x.png';
+import './assets/images/media-pause-8x.png';
+import './assets/images/media-step-forward-8x.png';
+import './assets/images/media-step-backward-8x.png';
+import './assets/images/no-asset.svg';
+
 // @flowignore
 import './assets/styles/player.scss';
 
@@ -27,7 +34,7 @@ const DEFAULT_SETTINGS = {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
         }
     },
-    staticImageBaseUrl: '/images',
+    staticImageBaseUrl: '/dist/images',
 };
 
 module.exports = {
@@ -61,6 +68,12 @@ module.exports = {
         const assetUrls: AssetUrls = {
             noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
             noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
+            aframe: {
+                play: `${mergedSettings.staticImageBaseUrl}/media-play-8x.png`,
+                pause: `${mergedSettings.staticImageBaseUrl}/media-pause-8x.png`,
+                forward: `${mergedSettings.staticImageBaseUrl}/media-step-forward-8x.png`,
+                backward: `${mergedSettings.staticImageBaseUrl}/media-step-backward-8x.png`,
+            }
         };
 
         const fetchers: ExperienceFetchers = {
