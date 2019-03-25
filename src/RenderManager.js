@@ -464,12 +464,6 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
-        // ensure volume persistence
-        Object.keys(this._rendererState.volumes).forEach((label) => {
-            const value = this._rendererState.volumes[label];
-            this._player.setVolumeControlLevel(label, value);
-        });
-
         if (oldRenderer) {
             if (oldRenderer.isVRViewable() && !newRenderer.isVRViewable()) {
                 // exit VR mode if necessary
@@ -496,6 +490,13 @@ export default class RenderManager extends EventEmitter {
         this.refreshOnwardIcons();
 
         newRenderer.willStart();
+
+        // ensure volume persistence
+        Object.keys(this._rendererState.volumes).forEach((label) => {
+            const value = this._rendererState.volumes[label];
+            this._player.setVolumeControlLevel(label, value);
+        });
+
     }
 
     _showBackIcon() {
