@@ -198,4 +198,10 @@ export type Settings = {
 export type AssetUrls = {
     noAssetIconUrl: string,
     noBackgroundAssetUrl?: string,
+    aframe: {
+        play: string,
+        pause: string,
+        forward: string,
+        backward: string,
+    }
 }

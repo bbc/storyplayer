@@ -10,10 +10,7 @@ import logger from '../logger';
 import AnalyticEvents from '../AnalyticEvents';
 import Player, { PlayerEvents } from '../Player';
 import type { AnalyticsLogger } from '../AnalyticEvents';
-import '../assets/images/media-play-8x.png';
-import '../assets/images/media-pause-8x.png';
-import '../assets/images/media-step-forward-8x.png';
-import '../assets/images/media-step-backward-8x.png';
+import type { AssetUrls } from '../romper.js.flow';
 
 let _vrMode: boolean = false;
 let _analytics: ?AnalyticsLogger = null;
@@ -49,13 +46,31 @@ class AFrameRenderer extends EventEmitter {
 
     _sky: HTMLElement;
 
+    _aframeAssetUrls: Object;
+
+    buildBaseAframeScene: Function;
+
+    populateAframeAssetUrls: Function;
+
     constructor() {
         super();
         AFrameRenderer._registerAframeComponents();
-        this.buildBaseAframeScene();
+        this._aframeAssetUrls = {
+            play: '',
+            pause: '',
+            forward: '',
+            backward: '',
+        }
         this.sceneElements = [];
         this.linkElements = [];
         this._choiceIconSet = {};
+
+        this.buildBaseAframeScene = this.buildBaseAframeScene.bind(this)
+        this.populateAframeAssetUrls = this.populateAframeAssetUrls.bind(this)
+    }
+
+    populateAframeAssetUrls(assetUrls: AssetUrls) {
+        this._aframeAssetUrls = assetUrls.aframe;
     }
 
     // build vanilla aFrame infrastructure
@@ -324,7 +339,7 @@ class AFrameRenderer extends EventEmitter {
         const img = document.createElement('img');
         // TODO: aframe doesn't like svg images ...
         if (iconUrl.indexOf('.svg') !== -1 || iconUrl === '') {
-            img.src = '/dist/images/media-step-forward-8x.png';
+            img.src = this._aframeAssetUrls.forward;
         } else {
             img.src = iconUrl;
         }
@@ -435,24 +450,24 @@ class AFrameRenderer extends EventEmitter {
 
     _addNextPreviousImageAssets() {
         const nextImg = document.createElement('img');
-        nextImg.src = '/dist/images/media-step-forward-8x.png';
+        nextImg.src = this._aframeAssetUrls.forward;
         nextImg.id = 'next-image';
         this.addAsset(nextImg);
 
         const prevImg = document.createElement('img');
-        prevImg.src = '/dist/images/media-step-backward-8x.png';
+        prevImg.src = this._aframeAssetUrls.backward;
         prevImg.id = 'prev-image';
         this.addAsset(prevImg);
     }
 
     _addPlayPauseImageAssets() {
         const playImg = document.createElement('img');
-        playImg.src = '/dist/images/media-play-8x.png';
+        playImg.src = this._aframeAssetUrls.play;
         playImg.id = 'play-image';
         this.addAsset(playImg);
 
         const pauseImg = document.createElement('img');
-        pauseImg.src = '/dist/images/media-pause-8x.png';
+        pauseImg.src = this._aframeAssetUrls.pause;
         pauseImg.id = 'pause-image';
         this.addAsset(pauseImg);
     }
@@ -773,6 +788,5 @@ class AFrameRenderer extends EventEmitter {
 }
 
 const instance = new AFrameRenderer();
-Object.seal(instance);
 
 export default instance;
