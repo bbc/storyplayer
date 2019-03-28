@@ -206,6 +206,15 @@ export default class RenderManager extends EventEmitter {
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
+                if (story.meta && story.meta.romper && story.meta.romper.dog) {
+                    const dog = Object.assign(story.meta.romper.dog);
+                    this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
+                        .then((fg) => {
+                            if (fg.assets.image_src) {
+                                this._player.addDog(fg.assets.image_src, dog.position);
+                            }
+                        });
+                }
                 if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
                     return this._fetchers

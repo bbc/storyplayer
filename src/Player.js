@@ -327,6 +327,8 @@ class Player extends EventEmitter {
 
     _choiceCountdownTimeout: boolean;
 
+    _dogImage: HTMLImageElement;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -604,6 +606,20 @@ class Player extends EventEmitter {
         }
 
         this._createAframeRenderer();
+    }
+
+    addDog(src: string, position: Object) {
+        if (this._dogImage === undefined) {
+            this._dogImage = document.createElement('img');
+        }
+        this._dogImage.className = 'romper-dog';
+        this._dogImage.src = src;
+        this._player.appendChild(this._dogImage);
+        const { top, left, width, height } = position;
+        this._dogImage.style.top = `${top}%`;
+        this._dogImage.style.left = `${left}%`;
+        this._dogImage.style.width = `${width}%`;
+        this._dogImage.style.height = `${height}%`;
     }
 
     _createAframeRenderer() {
