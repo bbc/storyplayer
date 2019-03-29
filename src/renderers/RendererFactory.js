@@ -33,10 +33,11 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
         'urn:x-object-based-media:representation-types:immersive/v1.0': AFrameVideoRenderer,
         'urn:x-object-based-media:representation-types:image360/v1.0': AFrameImageRenderer,
-
     };
 
     let currentRenderer;
+
+    console.error(representation);
     if (representation.representation_type in RENDERERS) {
         const Renderer = RENDERERS[representation.representation_type];
         currentRenderer = new Renderer(
@@ -47,6 +48,7 @@ export default function RendererFactory(
             analytics,
             controller,
         );
+        console.log(representation.representation_type);
     } else {
         logger.error(`Do not know how to render ${representation.representation_type}`);
     }

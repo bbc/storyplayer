@@ -6,8 +6,10 @@ import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
+import AFrameRenderer from './AFrameRenderer';
 
-export default class ImageRenderer extends BaseRenderer {
+
+export default class AFrameImageRenderer extends BaseRenderer {
     _aFrameSceneElement: any;
 
     _disablePlayButton: Function;
@@ -20,6 +22,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _visible: boolean;
 
+    _afr: typeof AFrameRenderer;
 
     constructor(
         representation: Representation,
@@ -37,16 +40,19 @@ export default class ImageRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-        this.renderImageElement();
+
         this._disablePlayButton = () => { this._player.disablePlayButton(); };
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
+
+        this._collectElementsToRender();
+
     }
 
     start() {
         super.start();
-        if (!this._aFrameSceneElement) this.renderImageElement();
+       // if (!this._aFrameSceneElement) this.renderImageElement();
 
         this._visible = true;
         this._setVisibility(true);
@@ -71,43 +77,54 @@ export default class ImageRenderer extends BaseRenderer {
         this._enableScrubBar();
     }
 
-    buildBaseAframeScene() {
-        // create a-frame scene
-        // scene
-        logger.info('Building aFrame image infrastructure');
-        if (this._aFrameSceneElement) {
-            return;
-        }
-        // scene
-        this._aFrameSceneElement = document.createElement('a-scene');
-        this._aFrameSceneElement.id = 'romperimgascene';
-        this._aFrameSceneElement.setAttribute('embedded', '');
-        this._aFrameSceneElement.classList.add('romper-aframe-scene');
+    _buildAssets(mediaUrl) {
+       
 
-        // sky
-        this.sky = document.createElement('a-sky');
-        
+        // create HTML img asset and add it as an aframe asset
+        this._imageElement = document.createElement('img');
+        this._imageElement.src = mediaUrl;
+        this._imageElement.id = mediaUrl;
+        AFrameRenderer.addAsset(this._imageElement);
+
+        console.log('build', this._imageElement);
+        console.log('build', mediaUrl);
+
+        this.renderImageElement();
+
     }
 
-    renderImageElement() {
-        
-        this.buildBaseAframeScene();
-       
-        this._setVisibility(false);
+    _collectElementsToRender() {
+        console.log('collect')
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
+                    console.log(fg);
                     if (fg.assets.image_src) {
-                        this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
-                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                            console.log(mediaUrl);
-                            this.sky.src = mediaUrl;
-                        }).catch((err) => { logger.error(err, 'Notfound'); });
+                       
+                        if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
+                            // starting rotation
+                            this._initialRotation = fg.meta.romper.rotation;
+                        }
+                     
+                        this._fetchMedia(fg.assets.image_src)
+                            .then((mediaUrl) => {
+                                this._buildAssets(mediaUrl);
+                            })
+                            .catch((err) => {
+                                logger.error(err, 'Video not found');
+                            });
                     }
                 });
         }
-        this._aFrameSceneElement.appendChild(this.sky);
-        this._target.appendChild(this._aFrameSceneElement);
+
+    }
+
+ 
+    renderImageElement() {
+        console.log('render', this._imageElement, this._imageElement.id);
+        this._setVisibility(false);
+        AFrameRenderer.addAFrameToRenderTarget(this._target, this._player, this._analytics);
+        AFrameRenderer._show360Image(this._imageElement.id);
     }
 
     switchFrom() {
