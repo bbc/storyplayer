@@ -443,6 +443,7 @@ $romper-hover-text-size: 25px;
     height: calc(100% - 13px);
     min-height: 0;
     min-width: 0;
+    pointer-events: none;
     width: 100%;
     z-index: 5;
 
@@ -453,6 +454,7 @@ $romper-hover-text-size: 25px;
       >.romper-link-control {
         align-self: end;
         height: 80px;
+        pointer-events: all;
       }
 
       &.romper-inactive {
@@ -471,6 +473,10 @@ $romper-hover-text-size: 25px;
 
     &.fade {
       opacity: 0;
+    }
+
+    .romper-link-control {
+      pointer-events: all;
     }
 
     .romper-control-selected {
