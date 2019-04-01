@@ -266,6 +266,7 @@ class AFrameRenderer extends EventEmitter {
         this._sphereL.setAttribute('visible', 'false');
         this._sphereR.setAttribute('visible', 'false');
         this._flatVideo.setAttribute('visible', 'false');
+        this._sky.setAttribute('color', '#ffffff');
         this._sky.setAttribute('src', `#${imageElementId}`);
     }
 
