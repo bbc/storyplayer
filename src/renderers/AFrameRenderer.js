@@ -252,6 +252,7 @@ class AFrameRenderer extends EventEmitter {
     }
 
     _showFlatVideo(videoElementId: string) {
+        this._sky.setAttribute('src', '');
         this._sky.setAttribute('color', '#6EBAA7');
         this._sphereMono.setAttribute('visible', 'false');
         this._sphereL.setAttribute('visible', 'false');
@@ -266,8 +267,6 @@ class AFrameRenderer extends EventEmitter {
         this._sphereR.setAttribute('visible', 'false');
         this._flatVideo.setAttribute('visible', 'false');
         this._sky.setAttribute('src', `#${imageElementId}`);
-        console.log(this._sky);
-        console.log(imageElementId);
     }
 
     _showStereoVideo(videoElementId: string, videoType: Object){
