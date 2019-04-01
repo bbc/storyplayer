@@ -52,7 +52,8 @@ export default class AFrameImageRenderer extends BaseRenderer {
 
     start() {
         super.start();
-       // if (!this._aFrameSceneElement) this.renderImageElement();
+        // if (!this._aFrameSceneElement) this.renderImageElement();
+        this.renderImageElement();
 
         this._visible = true;
         this._setVisibility(true);
@@ -78,7 +79,7 @@ export default class AFrameImageRenderer extends BaseRenderer {
     }
 
     _buildAssets(mediaUrl) {
-       
+
 
         // create HTML img asset and add it as an aframe asset
         this._imageElement = document.createElement('img');
@@ -89,7 +90,6 @@ export default class AFrameImageRenderer extends BaseRenderer {
         console.log('build', this._imageElement);
         console.log('build', mediaUrl);
 
-        this.renderImageElement();
 
     }
 
@@ -100,12 +100,12 @@ export default class AFrameImageRenderer extends BaseRenderer {
                 .then((fg) => {
                     console.log(fg);
                     if (fg.assets.image_src) {
-                       
+
                         if (fg.meta && fg.meta.romper && fg.meta.romper.rotation) {
                             // starting rotation
                             this._initialRotation = fg.meta.romper.rotation;
                         }
-                     
+
                         this._fetchMedia(fg.assets.image_src)
                             .then((mediaUrl) => {
                                 this._buildAssets(mediaUrl);
@@ -119,12 +119,13 @@ export default class AFrameImageRenderer extends BaseRenderer {
 
     }
 
- 
+
     renderImageElement() {
         console.log('render', this._imageElement, this._imageElement.id);
         this._setVisibility(false);
         AFrameRenderer.addAFrameToRenderTarget(this._target, this._player, this._analytics);
         AFrameRenderer._show360Image(this._imageElement.id);
+        AFrameRenderer.setSceneHidden(false);
     }
 
     switchFrom() {
