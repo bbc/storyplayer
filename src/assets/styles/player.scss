@@ -131,6 +131,12 @@ $romper-hover-text-size: 25px;
     top: 0;
   }
 
+  .romper-dog {
+    pointer-events: none;
+    position: absolute;
+    z-index: 101;
+  }
+
   .romper-media {
     background-color: $romper-background-color;
 
