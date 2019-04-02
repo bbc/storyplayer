@@ -24,6 +24,9 @@ export default class AFrameImageRenderer extends BaseRenderer {
 
     _initialRotation: string;
 
+    _rendered: boolean;
+
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -45,13 +48,18 @@ export default class AFrameImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
+
+        this._rendered = false;
+
         this._collectElementsToRender();
 
     }
 
     start() {
         super.start();
-        this.renderImageElement();
+        if(this._rendered){
+            this.renderImageElement();
+        }
 
         this._disablePlayButton();
         this._disableScrubBar();
@@ -62,14 +70,29 @@ export default class AFrameImageRenderer extends BaseRenderer {
         super.end();
         this._enablePlayButton();
         this._enableScrubBar();
+        this._rendered = false;
+
     }
 
     _buildAssets(mediaUrl: string) {
         // create HTML img asset and add it as an aframe asset
         this._imageElement = document.createElement('img');
-        this._imageElement.src = mediaUrl;
-        this._imageElement.id = mediaUrl;
-        AFrameRenderer.addAsset(this._imageElement);
+        this._imageElement.setAttribute('crossorigin', 'anonymous');
+        
+        // combat a-frame redirect weridness
+        fetch(mediaUrl).then(response => {
+            let _mediaUrl = mediaUrl
+            if(response.redirected) {
+                _mediaUrl = response.url;
+            }
+            this._imageElement.src = _mediaUrl;
+            this._imageElement.id = _mediaUrl;
+    
+            this._target.appendChild(this._imageElement);
+            AFrameRenderer.addAsset(this._imageElement);
+    
+            this._rendered = true;
+        })
     }
 
     _collectElementsToRender() {
