@@ -155,10 +155,6 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
-        if (this.isVRViewable) {
-            AFrameRenderer.addPlayPauseButton(() =>
-                this._player.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        }
         this._clearBehaviourElements();
         this._runDuringBehaviours();
     }

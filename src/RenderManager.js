@@ -505,8 +505,7 @@ export default class RenderManager extends EventEmitter {
                 const showBack = id !== null;
                 this._player.setBackAvailable(showBack);
                 if (showBack) {
-                    AFrameRenderer.addPrevious(() =>
-                        this._player.emit(PlayerEvents.BACK_BUTTON_CLICKED));
+                    AFrameRenderer.addPrevious();
                 } else {
                     AFrameRenderer.clearPrevious();
                 }
@@ -522,8 +521,7 @@ export default class RenderManager extends EventEmitter {
                 // @flowignore
                 if (nextNodes.length === 1 || !this._currentRenderer.hasShowIconBehaviour()) {
                     this._player.setNextAvailable(nextNodes.length > 0);
-                    AFrameRenderer.addNext(() => this._player
-                        .emit(PlayerEvents.NEXT_BUTTON_CLICKED));
+                    AFrameRenderer.addNext();
                 } else {
                     this._player.setNextAvailable(false);
                 }

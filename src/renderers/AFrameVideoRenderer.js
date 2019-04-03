@@ -135,6 +135,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
         this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
         this._started = true;
+        AFrameRenderer.addPlayPauseButton();
     }
 
     _collectElementsToRender() {
@@ -383,8 +384,7 @@ export default class AFrameVideoRenderer extends BaseRenderer {
 
         this._started = false;
         this._rendered = false;
-
-        // AFrameRenderer._aFrameSceneElement.exitVR();
+        AFrameRenderer.clearPlayPause();
     }
 
     destroy() {

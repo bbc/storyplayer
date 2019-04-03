@@ -46,6 +46,12 @@ class AFrameRenderer extends EventEmitter {
 
     _sky: HTMLElement;
 
+    _playPauseEntity: HTMLElement;
+
+    _nextEntity: HTMLElement;
+
+    _prevEntity: HTMLElement;
+
     _aframeAssetUrls: Object;
 
     buildBaseAframeScene: Function;
@@ -138,9 +144,9 @@ class AFrameRenderer extends EventEmitter {
         this._createMonoComponents();
         this._createStereoComponents();
         this._createFlatVideoComponents();
-        this._buildControlBar();
-        this._addNextPreviousImageAssets();
         this._addPlayPauseImageAssets();
+        this._addNextPreviousImageAssets();
+        this._buildControlBar();
     }
 
     addAFrameToRenderTarget(target: HTMLElement, player: Player, analytics: AnalyticsLogger) {
@@ -335,6 +341,10 @@ class AFrameRenderer extends EventEmitter {
         // only display in vr mode
         this._controlBar.setAttribute('visible', 'false');
         this.aFrameSceneElement.appendChild(this._controlBar);
+
+        this._createPlayPauseButton();
+        this._createNext();
+        this._createPrevious();
     }
 
     setControlBarPosition(angle: number) {
@@ -483,61 +493,77 @@ class AFrameRenderer extends EventEmitter {
         this.addAsset(pauseImg);
     }
 
-    addPlayPauseButton(callback: Function) {
-        const playPauseEntity = document.createElement('a-image');
-        playPauseEntity.id = 'romper-aframe-playpause';
-        playPauseEntity.setAttribute('position', '0 0 0.05');
-        playPauseEntity.setAttribute('width', '1');
-        playPauseEntity.setAttribute('height', '1');
-        playPauseEntity.setAttribute('src', '#pause-image');
-        playPauseEntity.addEventListener('click', callback);
-        this.sceneElements.push(playPauseEntity);
-        this._controlBar.appendChild(playPauseEntity);
+    _createPlayPauseButton() {
+        this._playPauseEntity = document.createElement('a-image');
+        this._playPauseEntity.id = 'romper-aframe-playpause';
+        this._playPauseEntity.setAttribute('position', '0 0 0.05');
+        this._playPauseEntity.setAttribute('width', '1');
+        this._playPauseEntity.setAttribute('height', '1');
+        this._playPauseEntity.setAttribute('src', '#pause-image');
+        this._controlBar.appendChild(this._playPauseEntity);
     }
 
-    // eslint-disable-next-line class-methods-use-this
+    connectPlayPauseButton(callback: Function) {
+        this._playPauseEntity.addEventListener('click', () => {
+            callback();
+        });
+    }
+
+    addPlayPauseButton() {
+        this._playPauseEntity.setAttribute('visible', 'true');
+    }
+
     togglePlayPause(showPlay: boolean) {
-        const playPauseEntity = document.getElementById('romper-aframe-playpause');
-        if (playPauseEntity) {
-            playPauseEntity.removeAttribute('src');
-            playPauseEntity.setAttribute('src', showPlay ? '#play-image' : '#pause-image');
-        }
+        this._playPauseEntity.removeAttribute('src');
+        this._playPauseEntity.setAttribute('src', showPlay ? '#play-image' : '#pause-image');
     }
 
-    addNext(callback: Function) {
-        const nextEntity = document.createElement('a-image');
-        nextEntity.id = 'romper-aframe-next';
-        nextEntity.setAttribute('position', '2 0 0.05');
-        nextEntity.setAttribute('width', '1');
-        nextEntity.setAttribute('height', '1');
-        nextEntity.setAttribute('src', '#next-image');
-        nextEntity.addEventListener('click', callback);
-        this.sceneElements.push(nextEntity);
-        this._controlBar.appendChild(nextEntity);
+    _createNext() {
+        this._nextEntity = document.createElement('a-image');
+        this._nextEntity.id = 'romper-aframe-next';
+        this._nextEntity.setAttribute('position', '2 0 0.05');
+        this._nextEntity.setAttribute('width', '1');
+        this._nextEntity.setAttribute('height', '1');
+        this._nextEntity.setAttribute('src', '#next-image');
+        this._controlBar.appendChild(this._nextEntity);
     }
 
-    addPrevious(callback: Function) {
-        const prevEntity = document.createElement('a-image');
-        prevEntity.id = 'romper-aframe-prev';
-        prevEntity.setAttribute('position', '-2 0 0.05');
-        prevEntity.setAttribute('width', '1');
-        prevEntity.setAttribute('height', '1');
-        prevEntity.setAttribute('src', '#prev-image');
-        prevEntity.addEventListener('click', callback);
-        this.sceneElements.push(prevEntity);
-        this._controlBar.appendChild(prevEntity);
+    _createPrevious() {
+        this._prevEntity = document.createElement('a-image');
+        this._prevEntity.id = 'romper-aframe-prev';
+        this._prevEntity.setAttribute('position', '-2 0 0.05');
+        this._prevEntity.setAttribute('width', '1');
+        this._prevEntity.setAttribute('height', '1');
+        this._prevEntity.setAttribute('src', '#prev-image');
+        this._controlBar.appendChild(this._prevEntity);
+    }
+
+    connectNextButton(callback: Function) {
+        this._nextEntity.addEventListener('click', callback);
+    }
+
+    addNext() {
+        this._nextEntity.setAttribute('visible', 'true');
+    }
+
+    connectPreviousButton(callback: Function) {
+        this._prevEntity.addEventListener('click', callback);
+    }
+
+    addPrevious() {
+        this._prevEntity.setAttribute('visible', 'true');
     }
 
     clearPrevious() {
-        this._clearEl(document.getElementById('romper-aframe-prev'));
+        this._prevEntity.setAttribute('visible', 'false');
     }
 
     clearNext() {
-        this._clearEl(document.getElementById('romper-aframe-next'));
+        this._nextEntity.setAttribute('visible', 'false');
     }
 
     clearPlayPause() {
-        this._clearEl(document.getElementById('romper-aframe-playpause'));
+        this._playPauseEntity.setAttribute('visible', 'false');
     }
 
     _clearEl(element: ?HTMLElement) {
