@@ -161,6 +161,12 @@ class AFrameRenderer extends EventEmitter {
         this._aFrameAssetsElement.appendChild(assetElement);
     }
 
+    removeAsset(assetElement: HTMLElement) {
+        if (assetElement.parentNode === this._aFrameAssetsElement) {
+            this._aFrameAssetsElement.removeChild(assetElement);
+        }
+    }
+
     addElementToScene(sceneElement: HTMLElement) {
         if (sceneElement.parentNode !== this.aFrameSceneElement) {
             this.aFrameSceneElement.appendChild(sceneElement);

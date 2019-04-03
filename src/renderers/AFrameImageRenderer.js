@@ -68,6 +68,7 @@ export default class AFrameImageRenderer extends BaseRenderer {
 
     end() {
         super.end();
+        AFrameRenderer.removeAsset(this._imageElement);
         this._enablePlayButton();
         this._enableScrubBar();
         this._rendered = false;
@@ -78,7 +79,7 @@ export default class AFrameImageRenderer extends BaseRenderer {
         // create HTML img asset and add it as an aframe asset
         this._imageElement = document.createElement('img');
         this._imageElement.setAttribute('crossorigin', 'anonymous');
-        
+
         // combat a-frame redirect weridness
         fetch(mediaUrl).then(response => {
             let _mediaUrl = mediaUrl
@@ -87,10 +88,10 @@ export default class AFrameImageRenderer extends BaseRenderer {
             }
             this._imageElement.src = _mediaUrl;
             this._imageElement.id = _mediaUrl;
-    
+
             this._target.appendChild(this._imageElement);
             AFrameRenderer.addAsset(this._imageElement);
-    
+
             this._rendered = true;
         })
     }
