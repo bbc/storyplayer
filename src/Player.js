@@ -625,6 +625,12 @@ class Player extends EventEmitter {
     _createAframeRenderer() {
         AFrameRenderer.populateAframeAssetUrls(this._assetUrls);
         AFrameRenderer.buildBaseAframeScene();
+        AFrameRenderer.connectPlayPauseButton(() =>
+            this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        AFrameRenderer.connectNextButton(() =>
+            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED));
+        AFrameRenderer.connectPreviousButton(() =>
+            this.emit(PlayerEvents.BACK_BUTTON_CLICKED));
         Object.seal(AFrameRenderer);
     }
 

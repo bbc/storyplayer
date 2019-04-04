@@ -9,6 +9,7 @@ import SimpleTextRenderer from './SimpleTextRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import AFrameRenderer from './AFrameRenderer';
 import AFrameVideoRenderer from './AFrameVideoRenderer';
+import AFrameImageRenderer from './AFrameImageRenderer';
 import AFrameFlatVideoRenderer from './AFrameFlatVideoRenderer';
 import Player from '../Player';
 import logger from '../logger';
@@ -31,9 +32,11 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:simple-text/v1.0': SimpleTextRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
         'urn:x-object-based-media:representation-types:immersive/v1.0': AFrameVideoRenderer,
+        'urn:x-object-based-media:representation-types:image360/v1.0': AFrameImageRenderer,
     };
 
     let currentRenderer;
+
     if (representation.representation_type in RENDERERS) {
         const Renderer = RENDERERS[representation.representation_type];
         currentRenderer = new Renderer(
