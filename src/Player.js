@@ -323,7 +323,7 @@ class Player extends EventEmitter {
 
     _handleFullScreenChange: Function;
 
-    _choiceIconSet: { [key: string]: HTMLDivElement };
+    _choiceIconSet: { [key: string]: Promise<HTMLDivElement> };
 
     _choiceCountdownTimeout: boolean;
 
@@ -1020,38 +1020,48 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('title', label);
         linkChoiceControl.setAttribute('aria-label', label);
 
-        const iconContainer = document.createElement('div');
-        if (text) {
-            iconContainer.className = 'romper-text-link-container';
-            const iconTextPar = document.createElement('p');
-            iconTextPar.textContent = text;
-            iconTextPar.className = 'romper-link-text-icon';
-            iconContainer.appendChild(iconTextPar);
-        } else {
-            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-            const { style } = iconContainer;
-            // @flowignore
-            style.backgroundImage = `url(${linkChoiceIconSrc})`;
-            style.backgroundSize = 'contain';
-            style.backgroundRepeat = 'no-repeat';
-            style.backgroundPosition = 'center';
-            style.height = '100%';
-        }
+        const containerPromise = new Promise((resolve) => {
 
-        const choiceClick = () => {
-            // set classes to show which is selected
-            this._linkChoice.setActive(id);
-            this.emit(PlayerEvents.LINK_CHOSEN, { id });
-            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
-        };
-        iconContainer.onclick = choiceClick;
-        iconContainer.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(choiceClick),
-        );
+            const iconContainer = document.createElement('div');
+            const choiceClick = () => {
+                // set classes to show which is selected
+                this._linkChoice.setActive(id);
+                this.emit(PlayerEvents.LINK_CHOSEN, { id });
+                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+            };
+            iconContainer.onclick = choiceClick;
+            iconContainer.addEventListener(
+                'touchend',
+                handleButtonTouchEvent(choiceClick),
+            );
 
-        linkChoiceControl.appendChild(iconContainer);
-        this._choiceIconSet[id] = linkChoiceControl;
+            linkChoiceControl.appendChild(iconContainer);
+            if (text) {
+                iconContainer.className = 'romper-text-link-container';
+                const iconTextPar = document.createElement('p');
+                iconTextPar.textContent = text;
+                iconTextPar.className = 'romper-link-text-icon';
+                iconContainer.appendChild(iconTextPar);
+                resolve(linkChoiceControl);
+            } else {
+                const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+                const { style } = iconContainer;
+                const iconImage = new Image();
+                // @flowignore
+                iconImage.src = linkChoiceIconSrc;
+                // @flowignore
+                style.backgroundImage = `url(${linkChoiceIconSrc})`;
+                iconImage.onload = () => {
+                    resolve(linkChoiceControl);
+                };
+                style.backgroundSize = 'contain';
+                style.backgroundRepeat = 'no-repeat';
+                style.backgroundPosition = 'center';
+                style.height = '100%';
+            }
+        });
+
+        this._choiceIconSet[id] = containerPromise;
         return linkChoiceControl;
     }
 
@@ -1060,8 +1070,14 @@ class Player extends EventEmitter {
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
         this._linkChoice.overlay.classList.remove('romper-inactive');
+        const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
-            this._linkChoice.add(id, this._choiceIconSet[id]);
+            promisesArray.push(this._choiceIconSet[id]);
+        });
+        Promise.all(promisesArray).then((icons) => {
+            icons.forEach((icon, id) => {
+                this._linkChoice.add(id, icon);
+            });
         });
         if (activeLinkId) {
             this._linkChoice.setActive(activeLinkId);
