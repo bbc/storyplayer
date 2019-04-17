@@ -53,6 +53,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _preloadedBehaviourAssets: Array<Image>;
 
+    _preloadedIconAssets: Array<Image>;
+
     _savedLinkConditions: Object;
 
     _linkBehaviour: Object;
@@ -117,6 +119,7 @@ export default class BaseRenderer extends EventEmitter {
         this._savedLinkConditions = {};
         this._preloadedBehaviourAssets = [];
         this._preloadBehaviourAssets();
+        this._preloadIconAssets();
     }
 
     willStart() {
@@ -254,7 +257,7 @@ export default class BaseRenderer extends EventEmitter {
         this.end();
     }
 
-    // prepare rendere so it can be switched to quickly and in sync
+    // prepare renderer so it can be switched to quickly and in sync
     cueUp() { }
 
     switchTo() {
@@ -278,6 +281,36 @@ export default class BaseRenderer extends EventEmitter {
                         const image = new Image();
                         image.src = imageUrl;
                         this._preloadedBehaviourAssets.push(image);
+                    }
+                });
+        });
+    }
+
+    _preloadIconAssets() {
+        this._preloadedIconAssets = [];
+        const assetCollectionIds = [];
+        if (this._representation.asset_collections.icon) {
+            if (this._representation.asset_collections.icon.default_id) {
+                assetCollectionIds.push(this._representation.asset_collections.icon.default_id);
+            }
+            if (this._representation.asset_collections.icon.active_id) {
+                assetCollectionIds.push(this._representation.asset_collections.icon.active_id);
+            }
+        }
+        assetCollectionIds.forEach((iconAssetCollection) => {
+            this._fetchAssetCollection(iconAssetCollection)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        const image = new Image();
+                        image.src = imageUrl;
+                        logger.info(`Preloading icon ${imageUrl}`);
+                        this._preloadedIconAssets.push(image);
                     }
                 });
         });
