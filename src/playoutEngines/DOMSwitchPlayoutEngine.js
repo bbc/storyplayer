@@ -12,7 +12,7 @@ const MediaTypesArray = [
     'OTHER',
 ];
 
-const DEBUG_DASH = false;
+const DEBUG_PLAYOUT = false;
 
 const MediaTypes = {};
 MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
@@ -64,7 +64,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 600,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: DEBUG_PLAYOUT,
             },
         };
         this._inactiveConfig = {
@@ -73,7 +73,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 4,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: DEBUG_PLAYOUT,
             },
         };
 
@@ -168,7 +168,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             // [TODO]: Dash needs different streaming buffer configs for active/inactive
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
-            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
+            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(DEBUG_PLAYOUT);
             rendererPlayoutObj._dashjs.preload()
             break;
         }
@@ -230,7 +230,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH: {
-                    if(DEBUG_DASH) {
+                    if(DEBUG_PLAYOUT) {
                         const eventsArray = [
                             "CAN_PLAY",
                             "PLAYBACK_PAUSED",
@@ -489,16 +489,30 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.addEventListener(event, callback);
             /* Hack to force player to move on for small dash clip sizes
-               Small clips cause the error:
-               [2035][Stream] onBufferingCompleted - One streamProcessor
-               has finished but audio one is not buffering completed
                No idea what the issue is but a consequence is that dashjs
                throws a PLAYBACK_RATE_CHANGED event with playbackRate=0
+               The PLAYBACK_RATE_CHANGED event isn't thrown on a replay of the
+               same video so we put in a hook on PLAYBACK_TIME_UPDATED and move
+               on when the time is near the end.
+               Interestingly the SRC Playout engine doesn't have the same issue.
             */
             const playbackRateChangedHandler = (ev) => {
                 if(ev.playbackRate === 0) {
                     logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
                     callback()
+                    rendererPlayoutObj._dashjs.setPlaybackRate(1)
+                    rendererPlayoutObj._dashjs.off(
+                        dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+                        playbackRateChangedHandler
+                    )
+                    rendererPlayoutObj._dashjs.on(
+                        dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
+                        (ev2) => {
+                            if(ev2.timeToEnd < 0.1){
+                                callback()
+                            }
+                        }
+                    )
                 }
             }
 
