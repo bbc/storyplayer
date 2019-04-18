@@ -66,6 +66,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 startLevel: 3,
                 debug: DEBUG_PLAYOUT,
             },
+            dash: {
+                bufferAheadToKeep: 80,
+            }
         };
         this._inactiveConfig = {
             hls: {
@@ -75,6 +78,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 startLevel: 3,
                 debug: DEBUG_PLAYOUT,
             },
+            dash: {
+                bufferAheadToKeep: 2,
+            }
         };
 
         this._playing = false;
@@ -165,11 +171,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
             break;
         case MediaTypes.DASH: {
-            // [TODO]: Dash needs different streaming buffer configs for active/inactive
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
             rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(DEBUG_PLAYOUT);
             rendererPlayoutObj._dashjs.preload()
+            rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                this._inactiveConfig.dash.bufferAheadToKeep
+            )
             break;
         }
         case MediaTypes.OTHER:
@@ -230,6 +238,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH: {
+                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                        this._activeConfig.dash.bufferAheadToKeep
+                    )
                     if(DEBUG_PLAYOUT) {
                         const eventsArray = [
                             "CAN_PLAY",
@@ -317,6 +328,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH:
+                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                        this._inactiveConfig.dash.bufferAheadToKeep
+                    )
                     break;
                 case MediaTypes.OTHER:
                     break;
@@ -508,7 +522,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._dashjs.on(
                         dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
                         (ev2) => {
-                            if(ev2.timeToEnd < 0.1){
+                            if(ev2.timeToEnd < 0.2){
                                 callback()
                             }
                         }
