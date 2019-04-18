@@ -12,6 +12,8 @@ const MediaTypesArray = [
     'OTHER',
 ];
 
+const DEBUG_DASH = false;
+
 const MediaTypes = {};
 MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 
@@ -162,12 +164,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 rendererPlayoutObj.mediaElement.src = url;
             }
             break;
-        case MediaTypes.DASH:
+        case MediaTypes.DASH: {
+            // [TODO]: Dash needs different streaming buffer configs for active/inactive
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
             rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
             rendererPlayoutObj._dashjs.preload()
             break;
+        }
         case MediaTypes.OTHER:
             rendererPlayoutObj.mediaElement.src = url;
             break;
@@ -225,8 +229,41 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         );
                     }
                     break;
-                case MediaTypes.DASH:
+                case MediaTypes.DASH: {
+                    if(DEBUG_DASH) {
+                        const eventsArray = [
+                            "CAN_PLAY",
+                            "PLAYBACK_PAUSED",
+                            "PLAYBACK_TIME_UPDATED",
+                            "PLAYBACK_PLAYING",
+                            "PLAYBACK_ENDED",
+                            "PLAYBACK_ERROR",
+                            "PLAYBACK_STALLED",
+                            "PLAYBACK_WAITING",
+                            "PLAYBACK_NOT_ALLOWED",
+                            "PLAYBACK_RATE_CHANGED",
+                            "PLAYBACK_SEEK_ASKED",
+                            "PLAYBACK_SEEKED",
+                            "PLAYBACK_SEEKING",
+                            "PLAYBACK_STARTED",
+                            "ERROR",
+                            "STREAM_INITIALIZED",
+                            "SOURCE_INITIALIZED",
+                            "STREAM_TEARDOWN_COMPLETE"
+                        ]
+
+                        eventsArray.forEach((e) => {
+                            rendererPlayoutObj._dashjs.on(
+                                dashjs.MediaPlayer.events[e],
+                                (ev) => {
+                                    // eslint-disable-next-line no-console
+                                    console.log(e, ev)
+                                }
+                            )
+                        })
+                    }
                     break;
+                }
                 case MediaTypes.OTHER:
                     break;
                 default:
@@ -451,6 +488,30 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
             const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.addEventListener(event, callback);
+            /* Hack to force player to move on for small dash clip sizes
+               Small clips cause the error:
+               [2035][Stream] onBufferingCompleted - One streamProcessor
+               has finished but audio one is not buffering completed
+               No idea what the issue is but a consequence is that dashjs
+               throws a PLAYBACK_RATE_CHANGED event with playbackRate=0
+            */
+            const playbackRateChangedHandler = (ev) => {
+                if(ev.playbackRate === 0) {
+                    logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
+                    callback()
+                }
+            }
+
+            if (
+                rendererPlayoutObj.mediaType &&
+                rendererPlayoutObj.mediaType === MediaTypes.DASH &&
+                event === "ended"
+            ) {
+                rendererPlayoutObj._dashjs.on(
+                    dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+                    playbackRateChangedHandler
+                )
+            }
         }
     }
 
