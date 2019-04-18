@@ -188,6 +188,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    // nothing to do here - only one media element that is always visible
+    setPlayoutVisible(rendererId: string) { }
+
     play() {
         this._playing = true;
         this._hasStarted = true;
