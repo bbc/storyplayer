@@ -166,6 +166,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
             rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
+            rendererPlayoutObj._dashjs.preload()
             break;
         case MediaTypes.OTHER:
             rendererPlayoutObj.mediaElement.src = url;
