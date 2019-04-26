@@ -12,6 +12,8 @@ const MediaTypesArray = [
     'OTHER',
 ];
 
+const DEBUG_PLAYOUT = false;
+
 const MediaTypes = {};
 MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 
@@ -62,8 +64,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 600,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: DEBUG_PLAYOUT,
             },
+            dash: {
+                bufferAheadToKeep: 80,
+            }
         };
         this._inactiveConfig = {
             hls: {
@@ -71,8 +76,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 4,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: DEBUG_PLAYOUT,
             },
+            dash: {
+                bufferAheadToKeep: 2,
+            }
         };
 
         this._playing = false;
@@ -162,11 +170,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 rendererPlayoutObj.mediaElement.src = url;
             }
             break;
-        case MediaTypes.DASH:
+        case MediaTypes.DASH: {
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
-            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
+            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(DEBUG_PLAYOUT);
+            rendererPlayoutObj._dashjs.preload()
+            rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                this._inactiveConfig.dash.bufferAheadToKeep
+            )
             break;
+        }
         case MediaTypes.OTHER:
             rendererPlayoutObj.mediaElement.src = url;
             break;
@@ -224,8 +237,44 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         );
                     }
                     break;
-                case MediaTypes.DASH:
+                case MediaTypes.DASH: {
+                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                        this._activeConfig.dash.bufferAheadToKeep
+                    )
+                    if(DEBUG_PLAYOUT) {
+                        const eventsArray = [
+                            "CAN_PLAY",
+                            "PLAYBACK_PAUSED",
+                            "PLAYBACK_TIME_UPDATED",
+                            "PLAYBACK_PLAYING",
+                            "PLAYBACK_ENDED",
+                            "PLAYBACK_ERROR",
+                            "PLAYBACK_STALLED",
+                            "PLAYBACK_WAITING",
+                            "PLAYBACK_NOT_ALLOWED",
+                            "PLAYBACK_RATE_CHANGED",
+                            "PLAYBACK_SEEK_ASKED",
+                            "PLAYBACK_SEEKED",
+                            "PLAYBACK_SEEKING",
+                            "PLAYBACK_STARTED",
+                            "ERROR",
+                            "STREAM_INITIALIZED",
+                            "SOURCE_INITIALIZED",
+                            "STREAM_TEARDOWN_COMPLETE"
+                        ]
+
+                        eventsArray.forEach((e) => {
+                            rendererPlayoutObj._dashjs.on(
+                                dashjs.MediaPlayer.events[e],
+                                (ev) => {
+                                    // eslint-disable-next-line no-console
+                                    console.log(e, ev)
+                                }
+                            )
+                        })
+                    }
                     break;
+                }
                 case MediaTypes.OTHER:
                     break;
                 default:
@@ -279,6 +328,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH:
+                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                        this._inactiveConfig.dash.bufferAheadToKeep
+                    )
                     break;
                 case MediaTypes.OTHER:
                     break;
@@ -450,6 +502,44 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
             const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.addEventListener(event, callback);
+            /* Hack to force player to move on for small dash clip sizes
+               No idea what the issue is but a consequence is that dashjs
+               throws a PLAYBACK_RATE_CHANGED event with playbackRate=0
+               The PLAYBACK_RATE_CHANGED event isn't thrown on a replay of the
+               same video so we put in a hook on PLAYBACK_TIME_UPDATED and move
+               on when the time is near the end.
+               Interestingly the SRC Playout engine doesn't have the same issue.
+            */
+            const playbackRateChangedHandler = (ev) => {
+                if(ev.playbackRate === 0) {
+                    logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
+                    callback()
+                    rendererPlayoutObj._dashjs.setPlaybackRate(1)
+                    rendererPlayoutObj._dashjs.off(
+                        dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+                        playbackRateChangedHandler
+                    )
+                    rendererPlayoutObj._dashjs.on(
+                        dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
+                        (ev2) => {
+                            if(ev2.timeToEnd < 0.2){
+                                callback()
+                            }
+                        }
+                    )
+                }
+            }
+
+            if (
+                rendererPlayoutObj.mediaType &&
+                rendererPlayoutObj.mediaType === MediaTypes.DASH &&
+                event === "ended"
+            ) {
+                rendererPlayoutObj._dashjs.on(
+                    dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+                    playbackRateChangedHandler
+                )
+            }
         }
     }
 
