@@ -510,36 +510,36 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                on when the time is near the end.
                Interestingly the SRC Playout engine doesn't have the same issue.
             */
-            const playbackRateChangedHandler = (ev) => {
-                if(ev.playbackRate === 0) {
-                    logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
-                    callback()
-                    rendererPlayoutObj._dashjs.setPlaybackRate(1)
-                    rendererPlayoutObj._dashjs.off(
-                        dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
-                        playbackRateChangedHandler
-                    )
-                    rendererPlayoutObj._dashjs.on(
-                        dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
-                        (ev2) => {
-                            if(ev2.timeToEnd < 0.2){
-                                callback()
-                            }
-                        }
-                    )
-                }
-            }
-
-            if (
-                rendererPlayoutObj.mediaType &&
-                rendererPlayoutObj.mediaType === MediaTypes.DASH &&
-                event === "ended"
-            ) {
-                rendererPlayoutObj._dashjs.on(
-                    dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
-                    playbackRateChangedHandler
-                )
-            }
+            // const playbackRateChangedHandler = (ev) => {
+            //     if(ev.playbackRate === 0) {
+            //         logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
+            //         callback()
+            //         rendererPlayoutObj._dashjs.setPlaybackRate(1)
+            //         rendererPlayoutObj._dashjs.off(
+            //             dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+            //             playbackRateChangedHandler
+            //         )
+            //         rendererPlayoutObj._dashjs.on(
+            //             dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
+            //             (ev2) => {
+            //                 if(ev2.timeToEnd < 0.2){
+            //                     callback()
+            //                 }
+            //             }
+            //         )
+            //     }
+            // }
+            //
+            // if (
+            //     rendererPlayoutObj.mediaType &&
+            //     rendererPlayoutObj.mediaType === MediaTypes.DASH &&
+            //     event === "ended"
+            // ) {
+            //     rendererPlayoutObj._dashjs.on(
+            //         dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
+            //         playbackRateChangedHandler
+            //     )
+            // }
         }
     }
 
