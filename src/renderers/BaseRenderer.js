@@ -799,65 +799,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// variables panel choice behaviour
 
-    // an input for selecting the value for a boolean variable
-    _getBooleanVariableSetter(varName: string) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        // yes label
-        const yesLabelSpan = document.createElement('span');
-        yesLabelSpan.className = 'romper-var-form-radio-div yes';
-        const yesLabel = document.createElement('div');
-        yesLabel.innerHTML = 'Yes';
-        yesLabelSpan.appendChild(yesLabel);
-
-        // checkbox (hidden by toggle)
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-
-        yesLabelSpan.onclick = () => {
-            checkbox.checked = true;
-            this._setVariableValue(varName, true);
-        };
-
-        const switchel = document.createElement('label');
-        switchel.classList.add('switch');
-        switchel.classList.add('romper-var-form-boolean-toggle');
-        switchel.appendChild(checkbox);
-
-        const slider = document.createElement('span');
-        slider.classList.add('slider');
-        switchel.appendChild(slider);
-
-        switchel.onclick = () => {
-            checkbox.checked = !checkbox.checked;
-            this._setVariableValue(varName, checkbox.checked);
-        };
-
-        // no button & label
-        const noLabelSpan = document.createElement('span');
-        noLabelSpan.className = 'romper-var-form-radio-div no';
-        const noLabel = document.createElement('div');
-        noLabel.innerHTML = 'No';
-        noLabelSpan.appendChild(noLabel);
-
-        noLabelSpan.onclick = () => {
-            checkbox.checked = false;
-            this._setVariableValue(varName, false);
-        };
-
-        varInput.appendChild(yesLabelSpan);
-        varInput.appendChild(switchel);
-        varInput.appendChild(noLabelSpan);
-
-        this._controller.getVariableValue(varName)
-            .then((varValue) => {
-                checkbox.checked = varValue;
-            });
-
-        return varInput;
-    }
-
     // an input for selecting the value for a list variable
     _getListVariableSetter(varName: string, variableDecl: Object) {
         if (variableDecl.values.length > 3) {
@@ -889,6 +830,48 @@ export default class BaseRenderer extends EventEmitter {
 
         varInputSelect.onchange = () =>
             this._setVariableValue(varName, varInputSelect.value);
+
+        return varInput;
+    }
+
+    // an input for selecting the value for a list variable
+    _getBooleanVariableSetter(varName: string) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const varInputSelect = document.createElement('div');
+        varInputSelect.classList.add('romper-var-form-button-div');
+
+        const yesElement = document.createElement('button');
+        const noElement = document.createElement('button');
+
+        const setSelected = (varVal) => {
+            if (varVal) {
+                yesElement.classList.add('selected');
+                noElement.classList.remove('selected');
+            } else {
+                yesElement.classList.remove('selected');
+                noElement.classList.add('selected');
+            }
+        };
+
+        yesElement.textContent = 'Yes';
+        yesElement.onclick = () => {
+            this._setVariableValue(varName, true);
+            setSelected(true);
+        };
+        varInputSelect.appendChild(yesElement);
+        noElement.textContent = 'No';
+        noElement.onclick = () => {
+            this._setVariableValue(varName, false);
+            setSelected(false);
+        };
+        varInputSelect.appendChild(noElement);
+
+        varInput.appendChild(varInputSelect);
+
+        this._controller.getVariableValue(varName)
+            .then(varValue => setSelected(varValue));
 
         return varInput;
     }

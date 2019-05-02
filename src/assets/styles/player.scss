@@ -10,7 +10,7 @@ $romper-hover-text-size: 25px;
 }
 
 @mixin button {
-  background-color: $backing-colour;
+  background-color: $black; //$backing-colour;
   border: 0;
   height: 100%;
   margin: 0;
@@ -218,6 +218,10 @@ $romper-hover-text-size: 25px;
     visibility: collapse !important;
   }
 
+  .romper-unavailable {
+    cursor: not-allowed;
+  }
+
   .romper-control-selected > .romper-icon {
     background-color: $highlight;
   }
@@ -232,7 +236,7 @@ $romper-hover-text-size: 25px;
 
   .romper-play-button {
     @include button;
-    margin-right: 20px;
+    // margin-right: 20px;
 
     div {
       @include button-icon('../images/media-play.svg');
@@ -243,7 +247,7 @@ $romper-hover-text-size: 25px;
 
   .romper-pause-button {
     @include button;
-    margin-right: 20px;
+    // margin-right: 20px;
 
     div {
       @include button-icon('../images/media-pause.svg');
@@ -277,11 +281,12 @@ $romper-hover-text-size: 25px;
 
   .romper-repeat-button {
     @include button;
+    // display: none;
 
     div {
       @include button-icon('../images/reload.svg');
-      height: 40px;
-      width: 40px;
+      height: 30px;
+      width: 30px;
     }
   }
 
@@ -307,7 +312,7 @@ $romper-hover-text-size: 25px;
 
   .romper-fullscreen-button {
     @include button;
-    margin-left: 20px;
+    // margin-left: 20px;
 
     div {
       @include button-icon('../images/fullscreen-enter.svg');
@@ -338,6 +343,7 @@ $romper-hover-text-size: 25px;
 
   .romper-next-button {
     @include button;
+    margin-right: auto;
 
     div {
       @include button-icon('../images/media-step-forward.svg');
@@ -558,7 +564,7 @@ $romper-hover-text-size: 25px;
 
   >.romper-buttons {
 
-    background-color: $backing-colour;
+    background-color: $black; //$backing-colour;
     bottom: 0;
     display: flex;
     height: 100%;
@@ -569,7 +575,21 @@ $romper-hover-text-size: 25px;
     width: 100%;
     z-index: 10;
 
+    .left {
+      flex-grow: 1;
+    }
+
+    .center {
+      flex-grow: 1;
+    }
+
+    .right {
+      display: flex;
+    }
+
     >.romper-media-transport {
+      display: flex;
+      flex-direction: row;
       width: 100%;
    }
 
@@ -579,13 +599,14 @@ $romper-hover-text-size: 25px;
 
   }
 
-  >.romper-narrative-element-transport {
+  .romper-narrative-element-transport {
     bottom: $romper-buttons-max-height;
     display: flex;
+    height: 100%;
     opacity: 1; // set to 0 to hide with rest of buttons
-    position: absolute;
+    // position: absolute;
     transition: all 1s ease;
-    width: 100%;
+    // width: 100%;
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
@@ -593,13 +614,13 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-repeat-button {
-      background-color: $backing-colour;
-      bottom: 0;
-      height: $romper-button-height;
-      left: 50%;
-      margin-right: -50%;
-      position: absolute;
-      transform: translate(-50%, 0%);
+      // background-color: $backing-colour;
+      // bottom: 0;
+      // height: $romper-button-height;
+      // left: 50%;
+      // margin-right: -50%;
+      // position: absolute;
+      // transform: translate(-50%, 0%);
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -607,8 +628,8 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-back-button {
-      background-color: $backing-colour;
-      height: $romper-button-height;
+      // background-color: $backing-colour;
+      // height: $romper-button-height;
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -616,9 +637,9 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-next-button {
-      background-color: $backing-colour;
-      height: $romper-button-height;
-      margin-left: auto;
+      // background-color: $backing-colour;
+      // height: $romper-button-height;
+      // margin-left: auto;
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -689,7 +710,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-scrub-bar {
-  display: flex;
+  display: none;
   height: 100%;
   margin-left: 10px;
   margin-right: 10px;
@@ -719,19 +740,20 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-variable-panel {
-  background-color: $var-panel-background;
-  border: 1px solid $half-white;
-  bottom: 120px;
+  background-color: $black;
+  border-top: 1px solid $white;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   font-size: 2vw;
-  left: 10%;
+  left: 0;
   opacity: 0;
+  padding-bottom: $romper-buttons-max-height;
   position: absolute;
+  right: 0;
   text-align: center;
-  top: 5%;
+  top: 25%;
   transition: opacity 0.5s ease;
-  width: 80%;
   z-index: 2;
 
   &.active {
@@ -760,7 +782,7 @@ $romper-hover-text-size: 25px;
 
 .romper-variable-form-item {
   display: flex;
-  height: 60%;
+  height: 50%;
   margin: 0.5%;
   opacity: 1;
   padding-left: 10%;
@@ -832,57 +854,6 @@ $romper-hover-text-size: 25px;
   span {
     display: table-cell;
     vertical-align: middle;
-  }
-}
-
-.romper-var-form-boolean-toggle {
-  display: flex;
-  flex-grow: 1;
-  height: 2vw;
-  margin-left: 1vw;
-  margin-right: 1vw;
-  position: relative;
-  width: 4.4vw;
-
-  input {
-    height: 0;
-    opacity: 0;
-    width: 0;
-
-    &:checked + .slider {
-      background-color: $dark-grey-blue;
-    }
-
-    &:checked + .slider::before {
-      -ms-transform: translateX(-3vw);
-      -webkit-transform: translateX(-3vw);
-      transform: translateX(-3vw);
-    }
-  }
-
-  .slider {
-    background-color: $romper-background-color;
-    border-radius: 1vw;
-    bottom: 0;
-    cursor: pointer;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    transition: all .4s ease;
-  }
-
-  .slider::before {
-    background-color: $white;
-    border-radius: 50%;
-    bottom: 0.25vw;
-    content: '';
-    height: 1.46667vw;
-    left: 3vw;
-    margin-left: 0.25vw;
-    position: absolute;
-    transition: all .4s ease;
-    width: 1.46667vw;
   }
 }
 
@@ -971,9 +942,19 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-feedback {
-  bottom: 2%;
+  bottom: ($romper-buttons-max-height + 20px);
   font-size: 80%;
   margin: 0;
   position: absolute;
   right: 2%;
+}
+
+.romper-ux-divider {
+  border-top: 1px solid $white;
+  bottom: 0;
+  height: $romper-buttons-max-height;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
 }
