@@ -710,11 +710,13 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-scrub-bar {
-  display: none;
+  bottom: $romper-button-height;
+  display: block;
   height: 100%;
-  margin-left: 10px;
-  margin-right: 10px;
-  width: 100%;
+  left: 5%;
+  position: absolute;
+  right: 0;
+  width: 90%;
 }
 
 .romper-image-overlay {
@@ -950,7 +952,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-ux-divider {
-  border-top: 1px solid $white;
+  // border-top: 1px solid $white;
   bottom: 0;
   height: $romper-buttons-max-height;
   left: 0;
