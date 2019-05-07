@@ -587,6 +587,14 @@ class Player extends EventEmitter {
         const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
         if (overridePlayout) {
             playoutToUse = overridePlayout;
+            logger.info("Overriding playout engine: ",playoutToUse)
+        }
+
+        let debugPlayout = false
+        const overrideDebug = new URLSearchParams(window.location.search).get('debugPlayout');
+        if (overrideDebug && overrideDebug === "true") {
+            debugPlayout = true
+            logger.info("Playout debugging: ON")
         }
 
         logger.info('Using playout engine: ', playoutToUse);
@@ -594,11 +602,11 @@ class Player extends EventEmitter {
         switch (playoutToUse) {
         case PLAYOUT_ENGINES.SRC_SWITCH_PLAYOUT:
             // Use craptastic iOS playout engine
-            this.playoutEngine = new SrcSwitchPlayoutEngine(this);
+            this.playoutEngine = new SrcSwitchPlayoutEngine(this, debugPlayout);
             break;
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
-            this.playoutEngine = new DOMSwitchPlayoutEngine(this);
+            this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
             break;
         default:
             logger.fatal('Invalid Playout Engine');

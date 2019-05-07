@@ -29,8 +29,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function
 
-    constructor(player: Player) {
-        super(player);
+    constructor(player: Player, debugPlayout: boolean) {
+        super(player, debugPlayout);
         this._foregroundMediaElement = document.createElement('video');
         this._foregroundMediaElement.className = 'romper-video-element';
         this._foregroundMediaElement.crossOrigin = 'anonymous';
@@ -54,6 +54,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._mediaManager = new MediaManager(
             this._foregroundMediaElement,
             this._backgroundMediaElement,
+            this._debugPlayout,
         );
 
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
