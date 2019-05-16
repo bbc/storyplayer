@@ -10,7 +10,7 @@ $romper-hover-text-size: 25px;
 }
 
 @mixin button {
-  background-color: $black; //$backing-colour;
+  background-color: $transparent; //$backing-colour;
   border: 0;
   height: 100%;
   margin: 0;
@@ -24,7 +24,8 @@ $romper-hover-text-size: 25px;
   }
 
   &.romper-button-selected {
-    border-bottom: 4px solid $highlight;
+    // border-bottom: 4px solid $highlight;
+    background-color: $highlight;
     padding-bottom: 0;
   }
 }
@@ -372,11 +373,16 @@ $romper-hover-text-size: 25px;
 
   .romper-volume-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-direction: column;
+    left: 10%;
+    position: absolute;
+    z-index: 14;
 
     .romper-volume-control {
       align-items: center;
-      display: flex;
+      display: block;
       flex: none;
       flex-direction: row;
       font-size: smaller;
@@ -447,17 +453,18 @@ $romper-hover-text-size: 25px;
   }
 
   .romper-link-choice-overlay {
-    border-bottom-color: transparent;
-    border-bottom-style: solid;
-    border-bottom-width: 13px;
+    background: linear-gradient($transparent 0, $black 70%, $black 100%);
+    bottom: 0;
     display: grid;
     grid-auto-flow: column;
-    height: calc(100% - 13px);
-    min-height: 0;
+    // height: 20%; // calc(100% - 13px);
+    min-height: 10%;
     min-width: 0;
+    padding: 3% 10%;
     pointer-events: none;
-    width: 100%;
-    z-index: 5;
+    position: absolute;
+    width: 80%;
+    z-index: 15;
 
     &.icon-bar {
       // add this class to overlay for small low icons
@@ -488,27 +495,45 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-link-control {
+      border-bottom-color: $transparent;
+      border-bottom-style: solid;
+      border-bottom-width: 5px;
+      height: 100%;
+      margin-bottom: 1%;
       pointer-events: all;
+      width: 100%;
     }
 
     .romper-control-selected {
-      border-image: $white;
-      border-style: solid;
-      border-width: 1px;
-      margin: 3px;
+      border-bottom: 5px solid $highlight;
+
+      .romper-link-icon-container {
+        border: 1px solid $highlight;
+      }
     }
 
     .romper-control-unselected {
-      border: 1px transparent;
-      margin: 3px;
+      border-bottom: 5px solid $transparent;
+
+      .romper-link-icon-container {
+        border: 1px solid $transparent;
+      }
     }
 
   }
 
   .romper-link-choice-grid-cell {
-    animation: appear 0.8s;
+    // animation: appear 0.8s;
     opacity: 1;
   }
+}
+
+.romper-link-icon-container {
+  border-radius: 50%;
+  height: 8em;
+  margin-left: auto;
+  margin-right: auto;
+  width: 8em;
 }
 
 .romper-text-link-container {
@@ -520,6 +545,7 @@ $romper-hover-text-size: 25px;
 
 .romper-link-text-icon {
   font-size: 300%;
+  margin: 10px;
   text-align: center;
 }
 
@@ -563,13 +589,13 @@ $romper-hover-text-size: 25px;
   }
 
   >.romper-buttons {
-
-    background-color: $black; //$backing-colour;
+    background: linear-gradient($transparent 0, $black 70%, $black 100%);
     bottom: 0;
     display: flex;
     height: 100%;
-    max-height: $romper-buttons-max-height;
+    max-height: 180px;
     opacity: 0;
+    padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
     width: 100%;
@@ -590,7 +616,14 @@ $romper-hover-text-size: 25px;
     >.romper-media-transport {
       display: flex;
       flex-direction: row;
-      width: 100%;
+      height: $romper-buttons-max-height;
+      margin-left: 10%;
+      padding-top: 120px;
+      width: 80%;
+
+      >div {
+        border-top: 1px solid $white;
+      }
    }
 
     &.show {
@@ -604,9 +637,7 @@ $romper-hover-text-size: 25px;
     display: flex;
     height: 100%;
     opacity: 1; // set to 0 to hide with rest of buttons
-    // position: absolute;
     transition: all 1s ease;
-    // width: 100%;
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
@@ -614,13 +645,6 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-repeat-button {
-      // background-color: $backing-colour;
-      // bottom: 0;
-      // height: $romper-button-height;
-      // left: 50%;
-      // margin-right: -50%;
-      // position: absolute;
-      // transform: translate(-50%, 0%);
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -628,8 +652,6 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-back-button {
-      // background-color: $backing-colour;
-      // height: $romper-button-height;
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -637,9 +659,6 @@ $romper-hover-text-size: 25px;
     }
 
     >.romper-next-button {
-      // background-color: $backing-colour;
-      // height: $romper-button-height;
-      // margin-left: auto;
 
       &:hover {
         background-color: $backing-colour-dark;
@@ -711,7 +730,7 @@ $romper-hover-text-size: 25px;
 
 .romper-scrub-bar {
   bottom: $romper-button-height;
-  display: block;
+  display: none;
   height: 100%;
   left: 5%;
   position: absolute;
@@ -742,9 +761,9 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-variable-panel {
-  background-color: $black;
-  border-top: 1px solid $white;
+  background: linear-gradient($transparent 0%, $forty-percent-black 20%, $ninety-percent-black 100%);
   bottom: 0;
+  color: $transparent-white;
   display: flex;
   flex-direction: column;
   font-size: 2vw;
@@ -754,21 +773,20 @@ $romper-hover-text-size: 25px;
   position: absolute;
   right: 0;
   text-align: center;
-  top: 25%;
+  top: 40%;
   transition: opacity 0.5s ease;
   z-index: 2;
 
   &.active {
     opacity: 1;
     transition: opacity 0.7s ease;
+    z-index: 12;
   }
 }
 
 .romper-var-form-title {
-  border-bottom: 1px solid $var-panel-border;
   font-size: 120%;
-  font-weight: bold;
-  padding: 2% 25px 1%;
+  padding: 5% 25px 1%;
 }
 
 .romper-var-form-var-containers {
@@ -784,7 +802,7 @@ $romper-hover-text-size: 25px;
 
 .romper-variable-form-item {
   display: flex;
-  height: 50%;
+  height: 30%;
   margin: 0.5%;
   opacity: 1;
   padding-left: 10%;
@@ -810,24 +828,26 @@ $romper-hover-text-size: 25px;
 
 .romper-var-form-input-container {
   display: flex;
-  padding-left: 5vw;
+  width: 100%;
 }
 
 .romper-var-form-button-div {
+  display: inline-flex;
+  padding-left: 10vw;
+  width: 100%;
+
   button {
-    background-color: $backing-colour-dark;
+    background-color: $transparent;
     border: 0;
-    border-left: 5px solid transparent;
-    border-radius: 3px;
-    color: $white;
+    color: $transparent-white;
     cursor: pointer;
     font-size: 80%;
     margin-bottom: 2%;
     margin-right: 10%;
-    min-width: 10vw;
+    min-width: 2em;
 
     &.selected {
-      border-left: 5px solid $white;
+      border-bottom: 2px solid $white;
     }
   }
 }
@@ -839,6 +859,8 @@ $romper-hover-text-size: 25px;
 .romper-var-form-answer-cont {
   display: table;
   height: 100%;
+  padding: 0 2%;
+  width: 50%;
 }
 
 .romper-var-form-answer-cont-inner {
@@ -866,6 +888,7 @@ $romper-hover-text-size: 25px;
     font-size: 2vw;
     height: 3vw;
     text-align: left;
+    width: 80%;
   }
 }
 
@@ -916,31 +939,44 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-button-container {
-  border-top: 1px solid $var-panel-border;
+  margin-left: 10%;
   padding: 2% 0;
+  position: relative;
   text-align: center;
-  width: 100%;
+  width: 80%;
 
   .var-back {
-    left: 2vw;
+    background: url('../images/media-step-backward.svg') no-repeat left;
+    background-size: contain;
+    bottom: 0;
+    left: 0;
     position: absolute;
+    text-align: right;
     visibility: hidden;
 
     &.active {
       visibility: visible;
     }
   }
+
+  .var-next {
+    background: url('../images/media-step-forward.svg') no-repeat right;
+    background-size: contain;
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    text-align: left;
+  }
 }
 
 .romper-var-form-button {
-  background-color: $backing-colour-dark;
-  border: 0;
+  background-color: $transparent;
   border-radius: 3px;
-  color: $white;
+  color: $transparent-white;
   cursor: pointer;
   font-size: 80%;
-  padding: 2% 1%;
-  width: 10%;
+  padding: 1%;
+  width: 15%;
 }
 
 .romper-var-form-feedback {
@@ -952,11 +988,11 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-ux-divider {
-  // border-top: 1px solid $white;
+  border-top: 1px solid $white;
   bottom: 0;
-  height: $romper-buttons-max-height;
-  left: 0;
+  height: 70px;
+  left: 10%;
   pointer-events: none;
   position: absolute;
-  right: 0;
+  right: 10%;
 }
