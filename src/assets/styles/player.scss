@@ -505,7 +505,7 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-control-selected {
-      border-bottom: 5px solid $highlight;
+      border-bottom: 4px solid $highlight;
 
       .romper-link-icon-container {
         border: 1px solid $highlight;
@@ -513,7 +513,11 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-control-unselected {
-      border-bottom: 5px solid $transparent;
+      border-bottom: 4px solid $transparent;
+
+      &.default {
+        border-bottom: 4px solid $backing-colour;
+      }
 
       .romper-link-icon-container {
         border: 1px solid $transparent;
@@ -988,11 +992,24 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-ux-divider {
-  border-top: 1px solid $white;
-  bottom: 0;
-  height: 70px;
+  border-bottom: 1px solid $white;
+  display: none;
+  height: 2px;
   left: 10%;
   pointer-events: none;
   position: absolute;
-  right: 10%;
+  top: 20px;
+  width: 80%;
+  z-index: 16;
+
+  &.show {
+    display: initial;
+  }
+}
+
+.romper-ux-countdown {
+  background: $highlight;
+  height: 2px;
+  margin-left: 49%;
+  width: 2%;
 }

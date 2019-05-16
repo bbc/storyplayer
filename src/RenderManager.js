@@ -187,6 +187,10 @@ export default class RenderManager extends EventEmitter {
             if (this._player.playoutEngine.hasStarted()) {
                 this._player.playoutEngine.playBackgrounds();
             }
+            if (this._player._choiceCountdownTimeout && this._currentRenderer) {
+                // restart countdown
+                this._player.startChoiceCountdown(this._currentRenderer);
+            }
         }
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,

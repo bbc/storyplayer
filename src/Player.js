@@ -161,9 +161,11 @@ function createOverlay(name: string, logFunction: Function) {
             if (key === id) {
                 elements[key].classList.add('romper-control-selected');
                 elements[key].classList.remove('romper-control-unselected');
+                elements[key].classList.remove('default');
             } else {
                 elements[key].classList.add('romper-control-unselected');
                 elements[key].classList.remove('romper-control-selected');
+                elements[key].classList.remove('default');
             }
         });
     };
@@ -329,7 +331,13 @@ class Player extends EventEmitter {
 
     _choiceIconSet: { [key: string]: HTMLDivElement };
 
-    _choiceCountdownTimeout: boolean;
+    _choiceCountdownTimeout: ?TimeoutID;
+
+    _countdowner: HTMLDivElement;
+
+    _countdownContainer: HTMLDivElement;
+
+    _countdownTotal: number;
 
     _dogImage: HTMLImageElement;
 
@@ -340,6 +348,7 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
+        this._countdownTotal = 0;
 
         this._userInteractionStarted = false;
 
@@ -444,10 +453,6 @@ class Player extends EventEmitter {
         nextButtonIconDiv.classList.add('romper-next-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
-        // const uidivider = document.createElement('div');
-        // uidivider.classList.add('romper-ux-divider');
-        // this._buttons.appendChild(uidivider);
-
         this._guiLayer.appendChild(this._overlays);
         // this._guiLayer.appendChild(this._narrativeElementTransport);
         this._guiLayer.appendChild(this._buttons);
@@ -500,6 +505,12 @@ class Player extends EventEmitter {
         this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
         this._overlays.appendChild(this._linkChoice.overlay);
         // no need for toggle button
+        this._countdownContainer = document.createElement('div');
+        this._countdownContainer.classList.add('romper-ux-divider');
+        this._linkChoice.overlay.appendChild(this._countdownContainer);
+        this._countdowner = document.createElement('div');
+        this._countdowner.classList.add('romper-ux-countdown');
+        this._countdownContainer.appendChild(this._countdowner);
 
         this._timeFeedback = document.createElement('div');
         this._timeFeedback.classList.add('romper-timer');
@@ -1121,10 +1132,10 @@ class Player extends EventEmitter {
         this._linkChoice.overlay.classList.remove('romper-inactive');
         Object.keys(this._choiceIconSet).forEach((id) => {
             this._linkChoice.add(id, this._choiceIconSet[id]);
+            if (activeLinkId && id === activeLinkId) {
+                this._choiceIconSet[id].classList.add('default');
+            }
         });
-        if (activeLinkId) {
-            this._linkChoice.setActive(activeLinkId);
-        }
         if (overlayClass
             && !(overlayClass in this._linkChoice.overlay.classList)) {
             this._linkChoice.overlay.classList.add(overlayClass);
@@ -1137,13 +1148,40 @@ class Player extends EventEmitter {
 
     // start animation to reflect choice remaining
     startChoiceCountdown(currentRenderer: BaseRenderer) {
-        if (!this._choiceCountdownTimeout) {
+        if (this._choiceCountdownTimeout) {
+            clearTimeout(this._choiceCountdownTimeout);
+        }
+        if (this._countdownTotal === 0) {
             let { remainingTime } = currentRenderer.getCurrentTime();
             if (!remainingTime) {
                 remainingTime = 3; // default if we can't find out
             }
-            this._choiceCountdownTimeout = true;
-            this._linkChoice.overlay.style.setProperty('animation', `countdown ${remainingTime}s`);
+            this._countdownTotal = remainingTime;
+        }
+        this._choiceCountdownTimeout = setTimeout(() => {
+            this.reflectTimeout(currentRenderer);
+        }, 10);
+        this._countdownContainer.classList.add('show');
+        // }
+    }
+
+    reflectTimeout(currentRenderer: BaseRenderer) {
+        const { remainingTime } = currentRenderer.getCurrentTime();
+        const { style } = this._countdowner;
+        const percentRemain = 100 * (remainingTime / this._countdownTotal);
+        if (percentRemain > 0) {
+            style.width = `${percentRemain}%`;
+            style.marginLeft = `${(100 - percentRemain)/2}%`;
+            this._choiceCountdownTimeout = setTimeout(() => {
+                this.reflectTimeout(currentRenderer);
+
+            }, 10);
+        } else {
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+            this._countdownTotal = 0;
+            style.width = '2%';
+            style.marginLeft = '49%';
         }
     }
 
@@ -1269,7 +1307,10 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._linkChoice.clearAll();
         if (this._choiceCountdownTimeout) {
-            this._choiceCountdownTimeout = false;
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+            this._countdownTotal = 0;
+            this._countdownContainer.classList.remove('show');
         }
         this._linkChoice.overlay.classList.add('romper-inactive');
         this._linkChoice.overlay.style.setProperty('animation', 'none');
