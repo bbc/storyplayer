@@ -725,6 +725,10 @@ $romper-hover-text-size: 25px;
       height: 0%;
       width: 0%;
     }
+
+    &.disabled {
+      pointer-events: none;
+    }
   }
 }
 

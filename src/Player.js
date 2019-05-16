@@ -1289,6 +1289,7 @@ class Player extends EventEmitter {
 
     exitStartBehaviourPhase() {
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
+        this.enableControls();
         this.enablePlayButton();
         this.enableScrubBar();
         this.enableRepresentationControl();
@@ -1328,6 +1329,14 @@ class Player extends EventEmitter {
     disableRepresentationControl() {
         this._representation.button.setAttribute('disabled', 'true');
         this._representation.button.classList.add('romper-control-disabled');
+    }
+
+    disableControls() {
+        this._buttonsActivateArea.classList.add('disabled');
+    }
+
+    enableControls() {
+        this._buttonsActivateArea.classList.remove('disabled');
     }
 
     enableScrubBar() {

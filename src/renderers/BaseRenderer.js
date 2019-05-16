@@ -638,9 +638,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
-            this._player.disablePlayButton();
-            this._player.disableScrubBar();
-            this._player.setNextAvailable(false);
+            this._player.disableControls();
         }
         if (countdown) {
             this._player.startChoiceCountdown(this);
