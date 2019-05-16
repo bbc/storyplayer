@@ -496,7 +496,8 @@ export default class BaseRenderer extends EventEmitter {
                                     iconSpecObject[key] = linkIconObject[key];
                                 }
                             });
-                        } else if (linkIconObject.text) {
+                        }
+                        if (linkIconObject.text) {
                             iconSpecObject.iconText = linkIconObject.text;
                         }
                     }
@@ -570,7 +571,14 @@ export default class BaseRenderer extends EventEmitter {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
         let icon;
-        if (iconObject.iconText) {
+        if (iconObject.iconText && iconObject.resolvedUrl) {
+            icon = this._player.addTextLinkIconChoice(
+                targetId,
+                iconObject.iconText,
+                iconObject.resolvedUrl,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        } else if (iconObject.iconText) {
             icon = this._player.addTextLinkChoice(
                 targetId,
                 iconObject.iconText,
@@ -1031,7 +1039,7 @@ export default class BaseRenderer extends EventEmitter {
             const boolDiv = this._getBooleanVariableSetter(variableName);
             answerContainer.append(boolDiv);
         } else if (variableType === 'list') {
-            const listDiv = this._getListVariableSetter(
+            const listDiv = this._getLongListVariableSetter(
                 behaviourVar.variable_name,
                 variableDecl,
             );
@@ -1099,15 +1107,11 @@ export default class BaseRenderer extends EventEmitter {
                 // submit button
                 const okButtonContainer = document.createElement('div');
 
-                // number of questions
-                const feedbackPar = document.createElement('p');
-                feedbackPar.textContent = `Question 1 of ${variableFields.length}`;
-                feedbackPar.classList.add('romper-var-form-feedback');
-
                 okButtonContainer.className = 'romper-var-form-button-container';
                 const okButton = document.createElement('input');
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
+                okButton.classList.add('var-next');
                 okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
 
                 // back button
@@ -1156,9 +1160,6 @@ export default class BaseRenderer extends EventEmitter {
                     }
                     okButton.value = currentQuestion < (behaviourVariables.length - 1)
                         ? 'Next' : 'OK!';
-                    feedbackPar.textContent =
-                        `Question ${currentQuestion + 1}
-                         of ${behaviourVariables.length}`;
                     return false;
                 };
 
@@ -1167,7 +1168,6 @@ export default class BaseRenderer extends EventEmitter {
 
                 okButtonContainer.appendChild(okButton);
                 okButtonContainer.appendChild(backButton);
-                okButtonContainer.appendChild(feedbackPar);
 
                 overlayImageElement.appendChild(okButtonContainer);
 

@@ -444,9 +444,9 @@ class Player extends EventEmitter {
         nextButtonIconDiv.classList.add('romper-next-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
-        const uidivider = document.createElement('div');
-        uidivider.classList.add('romper-ux-divider');
-        this._buttons.appendChild(uidivider);
+        // const uidivider = document.createElement('div');
+        // uidivider.classList.add('romper-ux-divider');
+        // this._buttons.appendChild(uidivider);
 
         this._guiLayer.appendChild(this._overlays);
         // this._guiLayer.appendChild(this._narrativeElementTransport);
@@ -485,7 +485,8 @@ class Player extends EventEmitter {
         mediaTransportRight.appendChild(this._overlayToggleButtons);
 
         this._volume = createOverlay('volume', this._logUserInteraction);
-        this._overlays.appendChild(this._volume.overlay);
+        // this._overlays.appendChild(this._volume.overlay);
+        mediaTransportLeft.appendChild(this._volume.overlay);
         mediaTransportLeft.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
@@ -1036,6 +1037,10 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
+    addTextLinkIconChoice(id: string, text: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(id, label, text, src);
+    }
+
     addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
         return this._addLinkChoiceContainer(id, label, null, src);
     }
@@ -1060,13 +1065,29 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-        if (text) {
+        if (text && src) {
+            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+            const iconElement = document.createElement('div');
+            iconElement.className = 'romper-link-icon-container';
+            iconContainer.appendChild(iconElement);
+            const { style } = iconElement;
+            // @flowignore
+            style.backgroundImage = `url(${linkChoiceIconSrc})`;
+            style.backgroundSize = 'contain';
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundPosition = 'center';
+            const iconTextPar = document.createElement('p');
+            iconTextPar.textContent = text;
+            iconTextPar.className = 'romper-link-text-icon';
+            iconContainer.appendChild(iconTextPar);
+        } else if (text) {
             iconContainer.className = 'romper-text-link-container';
             const iconTextPar = document.createElement('p');
             iconTextPar.textContent = text;
             iconTextPar.className = 'romper-link-text-icon';
             iconContainer.appendChild(iconTextPar);
         } else {
+            iconContainer.className = 'romper-link-icon-container';
             const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
             const { style } = iconContainer;
             // @flowignore
@@ -1074,7 +1095,6 @@ class Player extends EventEmitter {
             style.backgroundSize = 'contain';
             style.backgroundRepeat = 'no-repeat';
             style.backgroundPosition = 'center';
-            style.height = '100%';
         }
 
         const choiceClick = () => {
