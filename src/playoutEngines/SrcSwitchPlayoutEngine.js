@@ -355,14 +355,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     _handleSeekBackwardButtonClicked(): void {
-        this._seek(SEEK_TIME);
+        this._seek(-SEEK_TIME);
     }
 
     _seek(time: number) {
         Object.keys(this._media)
             .filter(key => this._media[key].active)
             .forEach((key) => {
-                const { mediaElement } = this._media[key];
+                const mediaElement = this.getMediaElement(key);
                 if (mediaElement) {
                     const { currentTime } = mediaElement;
                     const { duration } = mediaElement;
