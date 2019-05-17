@@ -1010,9 +1010,23 @@ class Player extends EventEmitter {
         }
     }
 
-    _setVolumeCallback(id: string, label: string) {
+    _setVolumeCallback(
+        id: string,
+        label: string,
+        levelSpan: HTMLSpanElement,
+        muteButton: HTMLDivElement,
+    ) {
         return (event: Object) => {
             const value = parseFloat(event.target.value);
+            levelSpan.setAttribute('textContent', `${Math.floor(10 * value)}`);
+            if (value === 0) {
+                muteButton.classList.remove('romper-mute-button');
+                muteButton.classList.add('romper-muted-button');
+            } else {
+                muteButton.classList.add('romper-mute-button');
+                muteButton.classList.remove('romper-muted-button');
+            }
+
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
 
             // Don't spam analtics with lots of volume changes
@@ -1038,6 +1052,15 @@ class Player extends EventEmitter {
         volumeLabel.classList.add('romper-volume-label');
         volumeLabel.textContent = label;
 
+        const controlDiv = document.createElement('div');
+        controlDiv.classList.add('romper-control-line');
+        const muteDiv = document.createElement('div');
+        muteDiv.classList.add('romper-mute-button');
+        muteDiv.appendChild(document.createElement('div'));
+        const levelSpan = document.createElement('span');
+        levelSpan.classList.add('romper-volume-level');
+        levelSpan.textContent = '10';
+
         const volumeRange = document.createElement('input');
         volumeRange.type = 'range';
         volumeRange.min = '0';
@@ -1045,11 +1068,21 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
-        volumeRange.oninput = this._setVolumeCallback(id, label).bind(this);
-        volumeRange.onchange = this._setVolumeCallback(id, label).bind(this);
+        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+
+        muteDiv.onclick = () => {
+            volumeRange.value = '0';
+            this._setVolumeCallback(id, label, levelSpan, muteDiv)
+                .bind(this)({ target: { value: 0 }});
+        }
+
+        controlDiv.appendChild(muteDiv);
+        controlDiv.appendChild(volumeRange);
+        controlDiv.appendChild(levelSpan);
 
         volumeControl.appendChild(volumeLabel);
-        volumeControl.appendChild(volumeRange);
+        volumeControl.appendChild(controlDiv);
 
         this._volume.add(id, volumeControl, label);
     }
