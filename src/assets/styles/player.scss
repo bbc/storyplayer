@@ -237,7 +237,6 @@ $romper-hover-text-size: 25px;
 
   .romper-play-button {
     @include button;
-    // margin-right: 20px;
 
     div {
       @include button-icon('../images/play-40.svg');
@@ -248,7 +247,6 @@ $romper-hover-text-size: 25px;
 
   .romper-pause-button {
     @include button;
-    // margin-right: 20px;
 
     div {
       @include button-icon('../images/media-pause.svg');
@@ -259,7 +257,6 @@ $romper-hover-text-size: 25px;
 
   .romper-seek-fwd-button {
     @include button;
-    // margin-right: 20px;
 
     div {
       @include button-icon('../images/seek-forward-40.svg');
@@ -270,7 +267,6 @@ $romper-hover-text-size: 25px;
 
   .romper-seek-back-button {
     @include button;
-    // margin-right: 20px;
 
     div {
       @include button-icon('../images/seek-back-40.svg');
@@ -284,9 +280,9 @@ $romper-hover-text-size: 25px;
     margin-left: auto;
 
     div {
-      @include button-icon('../images/volume-high.svg');
-      height: 50%;
-      width: 50%;
+      @include button-icon('../images/volume-20.svg');
+      height: 80%;
+      width: 80%;
     }
   }
 
@@ -304,12 +300,11 @@ $romper-hover-text-size: 25px;
 
   .romper-repeat-button {
     @include button;
-    // display: none;
 
     div {
-      @include button-icon('../images/reload.svg');
-      height: 30px;
-      width: 30px;
+      @include button-icon('../images/step-backward-20.svg');
+      height: 80%;
+      width: 80%;
     }
   }
 
@@ -318,8 +313,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/layers.svg');
-      height: 50%;
-      width: 50%;
+      height: 30%;
+      width: 30%;
     }
   }
 
@@ -328,28 +323,27 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/list.svg');
-      height: 50%;
-      width: 50%;
+      height: 30%;
+      width: 30%;
     }
   }
 
   .romper-fullscreen-button {
     @include button;
-    // margin-left: 20px;
 
     div {
-      @include button-icon('../images/fullscreen-enter.svg');
-      height: 50%;
-      width: 50%;
+      @include button-icon('../images/exit-fullscreen-20.svg');
+      height: 80%;
+      width: 80%;
     }
   }
 
   .romper-buttons-fullscreen {
     .romper-fullscreen-button {
       div {
-        @include button-icon('../images/fullscreen-exit.svg');
-        height: 50%;
-        width: 50%;
+        @include button-icon('../images/exit-fullscreen-20.svg');
+        height: 80%;
+        width: 80%;
       }
     }
   }
@@ -358,9 +352,10 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/media-step-backward.svg');
-      height: 50%;
-      width: 50%;
+      @include button-icon('../images/step-backward-20.svg');
+      border: 1px solid $pastel-orange;
+      height: 80%;
+      width: 80%;
     }
   }
 
@@ -369,9 +364,9 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
 
     div {
-      @include button-icon('../images/media-step-forward.svg');
-      height: 50%;
-      width: 50%;
+      @include button-icon('../images/step-forward-20.svg');
+      height: 80%;
+      width: 80%;
     }
   }
 
@@ -387,9 +382,9 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/subtitles.svg');
-      height: 50%;
-      width: 50%;
+      @include button-icon('../images/accessibility-20.svg');
+      height: 80%;
+      width: 80%;
     }
   }
 
@@ -619,7 +614,7 @@ $romper-hover-text-size: 25px;
     display: flex;
     height: 100%;
     max-height: 180px;
-    // opacity: 0;
+    opacity: 0;
     padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
