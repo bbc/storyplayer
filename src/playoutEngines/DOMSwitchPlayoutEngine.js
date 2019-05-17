@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES, SEEK_TIME } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -38,6 +38,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _inactiveConfig: Object;
 
     _handlePlayPauseButtonClicked: Function
+
+    _handleSeekForwardButtonClicked: Function
+
+    _handleSeekBackwardButtonClicked: Function
 
     _handleSubtitlesClicked: Function
 
@@ -87,6 +91,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._subtitlesShowing = false;
 
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
+        this._handleSeekForwardButtonClicked = this._handleSeekForwardButtonClicked.bind(this);
+        this._handleSeekBackwardButtonClicked = this._handleSeekBackwardButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
@@ -95,6 +101,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
+        );
+
+        this._player.on(
+            PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED,
+            this._handleSeekForwardButtonClicked,
+        );
+
+        this._player.on(
+            PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED,
+            this._handleSeekBackwardButtonClicked,
         );
 
         this._player.on(
@@ -567,6 +583,34 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    _handleSeekForwardButtonClicked(): void {
+        this._seek(SEEK_TIME);
+    }
+
+    _handleSeekBackwardButtonClicked(): void {
+        this._seek(-SEEK_TIME);
+    }
+
+    _seek(time: number) {
+        Object.keys(this._media)
+            .filter(key => this._media[key].active)
+            .forEach((key) => {
+                const { mediaElement } = this._media[key];
+                if (mediaElement) {
+                    const { currentTime } = mediaElement;
+                    const { duration } = mediaElement;
+                    let targetTime = currentTime + time;
+                    if (targetTime > duration) {
+                        targetTime = duration;
+                    }
+                    if (targetTime < 0) {
+                        targetTime = 0;
+                    }
+                    mediaElement.currentTime = targetTime;
+                }
+            });
+    }
+
     _handleSubtitlesClicked(): void {
         this._subtitlesShowing = !this._subtitlesShowing;
         Object.keys(this._media)
@@ -597,7 +641,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
-
         const videoElement = rendererPlayoutObj.mediaElement;
         if (videoElement) {
             videoElement.addEventListener('loadedmetadata', () => {

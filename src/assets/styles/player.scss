@@ -240,7 +240,7 @@ $romper-hover-text-size: 25px;
     // margin-right: 20px;
 
     div {
-      @include button-icon('../images/media-play.svg');
+      @include button-icon('../images/play-40.svg');
       height: 50%;
       width: 50%;
     }
@@ -252,6 +252,28 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/media-pause.svg');
+      height: 50%;
+      width: 50%;
+    }
+  }
+
+  .romper-seek-fwd-button {
+    @include button;
+    // margin-right: 20px;
+
+    div {
+      @include button-icon('../images/seek-forward-40.svg');
+      height: 50%;
+      width: 50%;
+    }
+  }
+
+  .romper-seek-back-button {
+    @include button;
+    // margin-right: 20px;
+
+    div {
+      @include button-icon('../images/seek-back-40.svg');
       height: 50%;
       width: 50%;
     }
