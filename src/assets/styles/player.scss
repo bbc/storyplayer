@@ -101,8 +101,6 @@ $romper-hover-text-size: 25px;
   }
 }
 
-
-
 .romper-player {
   color: $accent-colour;
   display: flex;
@@ -111,6 +109,10 @@ $romper-hover-text-size: 25px;
   justify-content: flex-end;
   position: relative;
   width: 800px;
+
+  * {
+    box-sizing: content-box;
+  }
 
   &.romper-player-fullscreen {
     height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
@@ -660,7 +662,8 @@ $romper-hover-text-size: 25px;
 
     .left,
     .right {
-      flex-grow: 0;
+      flex-grow: 1;
+      max-width: 200px;
       width: 200px;
     }
 
