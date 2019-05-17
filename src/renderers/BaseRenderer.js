@@ -1150,14 +1150,11 @@ export default class BaseRenderer extends EventEmitter {
                     });
 
                     currentQuestion = targetId;
-                    // set feedback and button texts
                     if (currentQuestion > 0) {
                         backButton.classList.add('active');
                     } else {
                         backButton.classList.remove('active');
                     }
-                    okButton.value = currentQuestion < (behaviourVariables.length - 1)
-                        ? 'Next' : 'OK!';
                     return false;
                 };
 
