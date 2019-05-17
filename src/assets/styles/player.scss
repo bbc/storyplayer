@@ -353,7 +353,6 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/step-backward-20.svg');
-      border: 1px solid $pastel-orange;
       height: 80%;
       width: 80%;
     }
