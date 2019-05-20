@@ -796,11 +796,6 @@ class Player extends EventEmitter {
         continueButtonIconDiv.classList.add('romper-button-icon-div');
         continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
         continueButtonIconHolder.appendChild(continueButtonIconDiv);
-        const continueButtonTextDiv = document.createElement('div');
-        continueButtonTextDiv.innerHTML = options.text;
-        continueButtonTextDiv.classList.add('romper-button-text-div');
-        continueButtonTextDiv.classList.add(`${options.button_class}-text-div`);
-        this._startExperienceButton.appendChild(continueButtonTextDiv);
 
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';

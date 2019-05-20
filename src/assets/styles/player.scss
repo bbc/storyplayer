@@ -1,8 +1,8 @@
 @import './colours';
 
-$romper-button-height: 50px;
-$romper-button-width: 50px;
-$romper-buttons-max-height: 60px;
+$romper-button-height: 56px;
+$romper-button-width: 56px;
+$romper-buttons-max-height: 64px;
 $romper-hover-text-size: 25px;
 
 .romper-media-element-queued {
@@ -15,7 +15,7 @@ $romper-hover-text-size: 25px;
   height: 100%;
   margin: 0;
   outline: none;
-  padding: 4px 0;
+  padding: 4px;
   vertical-align: top;
   width: $romper-button-width;
 
@@ -183,7 +183,7 @@ $romper-hover-text-size: 25px;
 
   .a-enter-vr {
     &.embedded {
-      height: $romper-button-width;
+      height: $romper-button-height;
       top: 0;
       width: $romper-button-height;
     }
@@ -223,6 +223,7 @@ $romper-hover-text-size: 25px;
 
   .romper-unavailable {
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .romper-control-selected > .romper-icon {
@@ -242,8 +243,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/play-40.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -252,8 +253,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/media-pause.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -262,8 +263,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/seek-forward-40.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -272,8 +273,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/seek-back-40.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -283,8 +284,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/volume-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -305,8 +306,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/step-backward-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -315,8 +316,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/layers.svg');
-      height: 30%;
-      width: 30%;
+      height: 60%;
+      width: 60%;
     }
   }
 
@@ -325,8 +326,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/list.svg');
-      height: 30%;
-      width: 30%;
+      height: 60%;
+      width: 60%;
     }
   }
 
@@ -335,8 +336,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/exit-fullscreen-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -344,8 +345,8 @@ $romper-hover-text-size: 25px;
     .romper-fullscreen-button {
       div {
         @include button-icon('../images/exit-fullscreen-20.svg');
-        height: 80%;
-        width: 80%;
+        height: $romper-button-height;
+        width: $romper-button-width;
       }
     }
   }
@@ -355,8 +356,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/step-backward-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -366,8 +367,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/step-forward-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -384,8 +385,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/accessibility-20.svg');
-      height: 80%;
-      width: 80%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -439,6 +440,7 @@ $romper-hover-text-size: 25px;
       .romper-volume-level {
         align-self: center;
         padding-left: 15px;
+        width: 1.2em;
       }
 
       .romper-volume-label {
@@ -653,7 +655,7 @@ $romper-hover-text-size: 25px;
     display: flex;
     height: 100%;
     max-height: 180px;
-    opacity: 0;
+    // opacity: 0;
     padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
@@ -664,11 +666,13 @@ $romper-hover-text-size: 25px;
     .right {
       flex-grow: 1;
       max-width: 200px;
+      padding-top: 10px;
       width: 200px;
     }
 
     .center {
       flex-grow: 1;
+      padding-top: 10px;
     }
 
     .right {
@@ -678,7 +682,7 @@ $romper-hover-text-size: 25px;
     >.romper-media-transport {
       display: flex;
       flex-direction: row;
-      height: $romper-buttons-max-height;
+      height: 74px;
       margin-left: 10%;
       padding-top: 120px;
       width: 80%;
@@ -702,7 +706,7 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
     opacity: 1; // set to 0 to hide with rest of buttons
     transition: all 1s ease;
-    width: 150px;
+    width: 320px;
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
