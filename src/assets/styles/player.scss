@@ -460,21 +460,41 @@ $romper-hover-text-size: 25px;
 
   .romper-representation-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-wrap: wrap;
     justify-content: center;
+    max-height: unset;
+    position: absolute;
+    right: 10%;
+    z-index: 14;
 
     .romper-representation-icon {
       width: 3em;
+
+      &:hover {
+        background-color: $backing-colour-dark;
+      }
     }
   }
 
   .romper-icon-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-wrap: wrap;
     justify-content: center;
+    max-height: unset;
+    position: absolute;
+    right: 10%;
+    z-index: 14;
 
     .romper-icon {
       width: 3em;
+
+      &:hover {
+        background-color: $backing-colour-dark;
+      }
     }
   }
 
