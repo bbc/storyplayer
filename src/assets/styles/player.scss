@@ -986,6 +986,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-button-container {
+  display: inline-flex;
   margin-left: 10%;
   padding: 2% 0;
   position: relative;
@@ -995,9 +996,7 @@ $romper-hover-text-size: 25px;
   .var-back {
     background: url('../images/step-backward-20.svg') no-repeat left;
     background-size: contain;
-    bottom: 0;
-    left: 0;
-    position: absolute;
+    margin-right: auto;
     text-align: right;
     visibility: hidden;
 
@@ -1006,12 +1005,15 @@ $romper-hover-text-size: 25px;
     }
   }
 
+  .var-count {
+    font-size: 80%;
+    line-height: $romper-button-height;
+  }
+
   .var-next {
     background: url('../images/step-forward-20.svg') no-repeat right;
     background-size: contain;
-    bottom: 0;
-    position: absolute;
-    right: 0;
+    margin-left: auto;
     text-align: left;
   }
 }

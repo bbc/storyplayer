@@ -1119,6 +1119,11 @@ export default class BaseRenderer extends EventEmitter {
                 backButton.classList.add('var-back');
                 backButton.classList.add('romper-var-form-button');
 
+                const statusSpan = document.createElement('span');
+                statusSpan.classList.add('var-count');
+                let statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
+                statusSpan.textContent = statusText;
+
                 const changeSlide = (fwd: boolean) => {
                     const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
 
@@ -1155,14 +1160,17 @@ export default class BaseRenderer extends EventEmitter {
                     } else {
                         backButton.classList.remove('active');
                     }
+                    statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
+                    statusSpan.textContent = statusText;
                     return false;
                 };
 
                 backButton.onclick = () => { changeSlide(false); };
                 okButton.onclick = () => { changeSlide(true); };
 
-                okButtonContainer.appendChild(okButton);
                 okButtonContainer.appendChild(backButton);
+                okButtonContainer.appendChild(statusSpan);
+                okButtonContainer.appendChild(okButton);
 
                 overlayImageElement.appendChild(okButtonContainer);
 
