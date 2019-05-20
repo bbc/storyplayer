@@ -10,7 +10,7 @@ $romper-hover-text-size: 25px;
 }
 
 @mixin button {
-  background-color: $transparent; //$backing-colour;
+  background-color: $transparent;
   border: 0;
   height: 100%;
   margin: 0;
@@ -20,12 +20,12 @@ $romper-hover-text-size: 25px;
   width: $romper-button-width;
 
   &:hover {
-    background-color: $backing-colour-dark;
+    background-color: $highlight-invert;
+    filter: invert(100%);
   }
 
   &.romper-button-selected {
-    // border-bottom: 4px solid $highlight;
-    background-color: $highlight;
+    border-bottom: 4px solid $highlight;
     padding-bottom: 0;
   }
 }
@@ -624,11 +624,7 @@ $romper-hover-text-size: 25px;
       width: 100px;
 
       &:hover {
-        background-color: $highlight;
-
-        .romper-start-button-icon-div {
-          background-image: url('../images/play-40-black.svg');
-        }
+        background-color: $highlight-invert;
       }
     }
 
