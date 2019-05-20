@@ -511,8 +511,7 @@ $romper-hover-text-size: 25px;
   .romper-link-choice-overlay {
     background: linear-gradient($transparent 0%, $forty-percent-black 20%, $ninety-percent-black 100%);
     bottom: 0;
-    display: grid;
-    grid-auto-flow: column;
+    display: flex;
     min-height: 10%;
     min-width: 0;
     padding: 3% 10%;
@@ -520,30 +519,6 @@ $romper-hover-text-size: 25px;
     position: absolute;
     width: 80%;
     z-index: 15;
-
-    &.icon-bar {
-      // add this class to overlay for small low icons
-      opacity: 1;
-
-      >.romper-link-control {
-        align-self: end;
-        height: 80px;
-        pointer-events: all;
-      }
-
-      &.romper-inactive {
-        opacity: 0;
-      }
-    }
-
-    &.tworow {
-      grid-template-rows: 1fr 1fr;
-
-      // only have one row in compact mode
-      &.icon-bar {
-        grid-template-rows: unset;
-      }
-    }
 
     &.fade {
       opacity: 0;
@@ -553,6 +528,7 @@ $romper-hover-text-size: 25px;
       border-bottom-color: $transparent;
       border-bottom-style: solid;
       border-bottom-width: 5px;
+      flex: 1 1 0;
       height: 100%;
       margin-bottom: 1%;
       pointer-events: all;
@@ -965,13 +941,14 @@ $romper-hover-text-size: 25px;
     &.romper-var-form-slider {
       margin-left: 1vw;
       margin-right: 1vw;
-      width: 90%;
+      width: 12vw;
     }
   }
 
   span {
     color: $romper-background-color;
     font-size: 1.5vw;
+    line-height: 2.5vw;
     margin-bottom: -1vw;
     width: 50%;
 
