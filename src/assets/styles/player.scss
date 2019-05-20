@@ -294,7 +294,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     .romper-button-icon-div {
-      @include button-icon('../images/media-play.svg');
+      @include button-icon('../images/play-40.svg');
       height: 50%;
       width: 50%;
     }
@@ -587,9 +587,8 @@ $romper-hover-text-size: 25px;
 .romper-player > .romper-gui {
 
   >.romper-start-button {
-    background-color: $start-button-colour;
-    bottom: 30%;
-    display: flex;
+    bottom: 50%;
+    display: grid;
     height: $romper-button-height;
     left: 50%;
     margin-right: -50%;
@@ -599,27 +598,42 @@ $romper-hover-text-size: 25px;
     width: 170px;
     z-index: 101;
 
+    &:hover {
+      background-color: $transparent;
+    }
+
+    .romper-start-button-icon {
+      background-color: $transparent;
+      border: 1px solid $white;
+      border-radius: 50%;
+      height: 100px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100px;
+
+      &:hover {
+        background-color: $highlight;
+
+        .romper-start-button-icon-div {
+          background-image: url('../images/play-40-black.svg');
+        }
+      }
+    }
+
     .romper-start-button-icon-div {
-      display: flex;
-      flex: 0 0 auto;
-      height: $romper-button-height;
-      margin-left: 0;
-      margin-right: 0;
-      width: $romper-button-height;
+      height: 40px;
+      margin-left: 37px;
+      margin-top: 30px;
+      width: 33px;
     }
 
     .romper-start-button-text-div {
       color: $white;
-      display: flex;
-      flex: 1 1 auto;
-      font-size: $romper-hover-text-size;
+      font-size: 48px;
       font-weight: bold;
       line-height: $romper-button-height;
-      margin-left: 10px;
-    }
-
-    &:hover {
-      background-color: $start-button-colour-dark;
+      margin-top: 10px;
+      text-align: center;
     }
   }
 

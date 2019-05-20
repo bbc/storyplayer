@@ -789,10 +789,13 @@ class Player extends EventEmitter {
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Continue Button');
         this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconHolder = document.createElement('div');
+        this._startExperienceButton.appendChild(continueButtonIconHolder);
+        continueButtonIconHolder.classList.add('romper-start-button-icon');
         const continueButtonIconDiv = document.createElement('div');
         continueButtonIconDiv.classList.add('romper-button-icon-div');
         continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
-        this._startExperienceButton.appendChild(continueButtonIconDiv);
+        continueButtonIconHolder.appendChild(continueButtonIconDiv);
         const continueButtonTextDiv = document.createElement('div');
         continueButtonTextDiv.innerHTML = options.text;
         continueButtonTextDiv.classList.add('romper-button-text-div');
