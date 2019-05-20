@@ -1006,8 +1006,11 @@ class Player extends EventEmitter {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
         if (overlay) {
-            if (overlay.childNodes[1]) {
-                overlay.childNodes[1].value = value;
+            if (overlay.childNodes[1] && overlay.childNodes[1].childNodes[2]) {
+                // set slider value
+                overlay.childNodes[1].childNodes[1].value = value;
+                // and feedback div
+                overlay.childNodes[1].childNodes[2].textContent = `${Math.floor(10 * value)}`;
             }
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
         }
@@ -1021,7 +1024,8 @@ class Player extends EventEmitter {
     ) {
         return (event: Object) => {
             const value = parseFloat(event.target.value);
-            levelSpan.setAttribute('textContent', `${Math.floor(10 * value)}`);
+            // eslint-disable-next-line no-param-reassign
+            levelSpan.textContent = `${Math.floor(10 * value)}`;
             if (value === 0) {
                 muteButton.classList.remove('romper-mute-button');
                 muteButton.classList.add('romper-muted-button');

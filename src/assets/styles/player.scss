@@ -397,7 +397,6 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/volume-20.svg');
-      height: 80%;
       width: 80%;
     }
   }
@@ -410,7 +409,6 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/volume-off-20.svg');
-      height: 80%;
       width: 80%;
     }
   }

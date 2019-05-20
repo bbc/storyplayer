@@ -454,6 +454,11 @@ export default class RenderManager extends EventEmitter {
             currentRenderer.end();
             currentRenderer.willStart();
             this.refreshOnwardIcons();
+            // ensure volume persistence
+            Object.keys(this._rendererState.volumes).forEach((label) => {
+                const value = this._rendererState.volumes[label];
+                this._player.setVolumeControlLevel(label, value);
+            });
         } else {
             logger.error('no current renderer to restart');
         }
