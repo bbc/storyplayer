@@ -939,17 +939,25 @@ export default class BaseRenderer extends EventEmitter {
         return varInput;
     }
 
-    _getNumberRangeVariableSetter(varName: string, range: Object) {
+    _getNumberRangeVariableSetter(varName: string, range: Object, behaviourVar: Object) {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
         const sliderDiv = document.createElement('div');
         const minSpan = document.createElement('span');
         minSpan.classList.add('min');
-        minSpan.textContent = range.min_val;
+        if (behaviourVar.hasOwnProperty('min_label')) {
+            minSpan.textContent = behaviourVar.min_label === null ? '' : behaviourVar.min_label;
+        } else {
+            minSpan.textContent = range.min_val;
+        }
         const maxSpan = document.createElement('span');
         maxSpan.classList.add('max');
-        maxSpan.textContent = range.max_val;
+        if (behaviourVar.hasOwnProperty('max_label')) {
+            maxSpan.textContent = behaviourVar.max_label === null ? '' : behaviourVar.max_label;
+        } else {
+            maxSpan.textContent = range.max_val;
+        }
 
 
         const slider = document.createElement('input');
@@ -958,6 +966,7 @@ export default class BaseRenderer extends EventEmitter {
         slider.id = `variable-input-${varName}`;
 
         sliderDiv.appendChild(minSpan);
+        sliderDiv.appendChild(slider);
         sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
@@ -991,8 +1000,10 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         varInput.appendChild(sliderDiv);
-        varInput.appendChild(slider);
-        varInput.appendChild(numberInput);
+        // varInput.appendChild(slider);
+        if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
+            varInput.appendChild(numberInput);
+        }
 
         return varInput;
     }
@@ -1046,7 +1057,11 @@ export default class BaseRenderer extends EventEmitter {
         } else if (variableType === 'number') {
             let numDiv;
             if (variableDecl.hasOwnProperty('range')) {
-                numDiv = this._getNumberRangeVariableSetter(variableName, variableDecl.range);
+                numDiv = this._getNumberRangeVariableSetter(
+                    variableName,
+                    variableDecl.range,
+                    behaviourVar,
+                );
             } else {
                 numDiv = this._getIntegerVariableSetter(variableName);
             }
@@ -1110,7 +1125,7 @@ export default class BaseRenderer extends EventEmitter {
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
                 okButton.classList.add('var-next');
-                okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
+                okButton.value = 'Next'; // behaviourVariables.length > 1 ? 'Next' : 'OK!';
 
                 // back button
                 const backButton = document.createElement('input');
