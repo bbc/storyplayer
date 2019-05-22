@@ -612,6 +612,10 @@ $romper-hover-text-size: 25px;
 
     &:hover {
       background-color: $transparent;
+
+      >div {
+        background-color: $highlight-invert;
+      }
     }
 
     .romper-start-button-icon {
@@ -622,10 +626,6 @@ $romper-hover-text-size: 25px;
       margin-left: auto;
       margin-right: auto;
       width: 100px;
-
-      &:hover {
-        background-color: $highlight-invert;
-      }
     }
 
     .romper-start-button-icon-div {
@@ -702,32 +702,15 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
     opacity: 1; // set to 0 to hide with rest of buttons
     transition: all 1s ease;
-    width: 320px;
+    width: 340px;
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
       opacity: 1;
     }
 
-    >.romper-repeat-button {
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
-    }
-
-    >.romper-back-button {
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
-    }
-
-    >.romper-next-button {
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
+    .romper-button {
+      margin: 0 5px;
     }
   }
 
@@ -951,7 +934,6 @@ $romper-hover-text-size: 25px;
     border: 0;
     border-radius: 5px;
     color: $dark-grey-blue;
-    font-size: 1.5vw;
     height: 2.5vw;
     text-align: center;
 
