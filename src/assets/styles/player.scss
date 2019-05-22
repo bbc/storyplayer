@@ -242,7 +242,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/play-40.svg');
+      @include button-icon('../images/media-play.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -262,7 +262,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/seek-forward-40.svg');
+      @include button-icon('../images/seek-forward-gel.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -272,7 +272,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/seek-back-40.svg');
+      @include button-icon('../images/seek-back-gel.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -283,7 +283,7 @@ $romper-hover-text-size: 25px;
     margin-left: auto;
 
     div {
-      @include button-icon('../images/volume-20.svg');
+      @include button-icon('../images/volume-high.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -295,7 +295,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     .romper-button-icon-div {
-      @include button-icon('../images/play-40.svg');
+      @include button-icon('../images/media-play.svg');
       height: 50%;
       width: 50%;
     }
@@ -305,7 +305,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/step-backward-20.svg');
+      @include button-icon('../images/media-step-backward.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -335,7 +335,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/exit-fullscreen-20.svg');
+      @include button-icon('../images/fullscreen-enter.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -344,7 +344,7 @@ $romper-hover-text-size: 25px;
   .romper-buttons-fullscreen {
     .romper-fullscreen-button {
       div {
-        @include button-icon('../images/exit-fullscreen-20.svg');
+        @include button-icon('../images/fullscreen-exit.svg');
         height: $romper-button-height;
         width: $romper-button-width;
       }
@@ -355,7 +355,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/step-backward-20.svg');
+      @include button-icon('../images/media-step-backward.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -366,7 +366,7 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
 
     div {
-      @include button-icon('../images/step-forward-20.svg');
+      @include button-icon('../images/media-step-forward.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -384,7 +384,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/accessibility-20.svg');
+      @include button-icon('../images/subtitles.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -397,7 +397,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     div {
-      @include button-icon('../images/volume-20.svg');
+      @include button-icon('../images/volume-high.svg');
       width: 80%;
     }
   }
@@ -409,7 +409,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     div {
-      @include button-icon('../images/volume-off-20.svg');
+      @include button-icon('../images/volume-off-gel.svg');
       width: 80%;
     }
   }
@@ -977,7 +977,7 @@ $romper-hover-text-size: 25px;
   width: 80%;
 
   .var-back {
-    background: url('../images/step-backward-20.svg') no-repeat left;
+    background: url('../images/media-step-backward.svg') no-repeat left;
     background-size: contain;
     margin-right: auto;
     text-align: right;
@@ -994,7 +994,7 @@ $romper-hover-text-size: 25px;
   }
 
   .var-next {
-    background: url('../images/step-forward-20.svg') no-repeat right;
+    background: url('../images/media-step-forward.svg') no-repeat right;
     background-size: contain;
     margin-left: auto;
     text-align: left;
