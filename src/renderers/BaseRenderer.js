@@ -13,6 +13,7 @@ import Controller from '../Controller';
 import logger from '../logger';
 import AFrameRenderer from './AFrameRenderer';
 
+const SEEK_TIME = 10;
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
@@ -40,6 +41,10 @@ export default class BaseRenderer extends EventEmitter {
     _applyShowChoiceBehaviour: Function;
 
     _handleLinkChoiceEvent: Function;
+
+    _seekForward: Function;
+
+    _seekBack: Function;
 
     _behaviourElements: Array<HTMLElement>;
 
@@ -96,6 +101,8 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
+        this._seekBack = this._seekBack.bind(this);
+        this._seekForward = this._seekForward.bind(this);
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -135,6 +142,8 @@ export default class BaseRenderer extends EventEmitter {
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
     }
 
     /**
@@ -162,6 +171,8 @@ export default class BaseRenderer extends EventEmitter {
     end() {
         this._reapplyLinkConditions();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
     }
 
     hasEnded(): boolean {
@@ -227,6 +238,24 @@ export default class BaseRenderer extends EventEmitter {
 
     setCurrentTime(time: number) {
         logger.warn(`ignoring setting time on BaseRenderer ${time}`);
+    }
+
+    _seekBack() {
+        const { timeBased, currentTime } = this.getCurrentTime();
+        if (timeBased) {
+            let targetTime = currentTime - SEEK_TIME;
+            if (targetTime < 0) {
+                targetTime = 0;
+            }
+            this.setCurrentTime(targetTime);
+        }
+    }
+
+    _seekForward() {
+        const { timeBased, currentTime } = this.getCurrentTime();
+        if (timeBased) {
+            this.setCurrentTime(currentTime + SEEK_TIME);
+        }
     }
 
     complete() {

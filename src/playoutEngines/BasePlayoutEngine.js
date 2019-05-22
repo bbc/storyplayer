@@ -10,8 +10,6 @@ export const MEDIA_TYPES = {
     BACKGROUND_A: 'background_a',
 };
 
-export const SEEK_TIME = 10;
-
 export default class BasePlayoutEngine {
     _player: Player
 

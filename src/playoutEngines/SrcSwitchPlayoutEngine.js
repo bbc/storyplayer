@@ -1,6 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
-import BasePlayoutEngine, { MEDIA_TYPES, SEEK_TIME } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import { BrowserUserAgent } from '../browserCapabilities';
@@ -71,16 +71,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
-        );
-
-        this._player.on(
-            PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED,
-            this._handleSeekForwardButtonClicked,
-        );
-
-        this._player.on(
-            PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED,
-            this._handleSeekBackwardButtonClicked,
         );
 
         this._player.on(
@@ -348,34 +338,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         } else {
             this.pause();
         }
-    }
-
-    _handleSeekForwardButtonClicked(): void {
-        this._seek(SEEK_TIME);
-    }
-
-    _handleSeekBackwardButtonClicked(): void {
-        this._seek(-SEEK_TIME);
-    }
-
-    _seek(time: number) {
-        Object.keys(this._media)
-            .filter(key => this._media[key].active)
-            .forEach((key) => {
-                const mediaElement = this.getMediaElement(key);
-                if (mediaElement) {
-                    const { currentTime } = mediaElement;
-                    const { duration } = mediaElement;
-                    let targetTime = currentTime + time;
-                    if (targetTime > duration) {
-                        targetTime = duration;
-                    }
-                    if (targetTime < 0) {
-                        targetTime = 0;
-                    }
-                    mediaElement.currentTime = targetTime;
-                }
-            });
     }
 
     _handleSubtitlesClicked(): void {
