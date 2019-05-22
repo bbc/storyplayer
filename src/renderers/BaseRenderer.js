@@ -247,6 +247,10 @@ export default class BaseRenderer extends EventEmitter {
             if (targetTime < 0) {
                 targetTime = 0;
             }
+            this.logUserInteraction(AnalyticEvents.names.SEEK_BACKWARD_BUTTON_CLICKED,
+                currentTime,
+                `${targetTime}`,
+            );
             this.setCurrentTime(targetTime);
         }
     }
@@ -254,7 +258,12 @@ export default class BaseRenderer extends EventEmitter {
     _seekForward() {
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
-            this.setCurrentTime(currentTime + SEEK_TIME);
+            const targetTime = currentTime + SEEK_TIME;
+            this.setCurrentTime(targetTime);
+            this.logUserInteraction(AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
+                currentTime,
+                `${targetTime}`,
+            );
         }
     }
 

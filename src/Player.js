@@ -883,12 +883,10 @@ class Player extends EventEmitter {
 
     _seekForwardButtonClicked() {
         this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
-        this._logUserInteraction(AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED);
     }
 
     _seekBackwardButtonClicked() {
         this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
-        this._logUserInteraction(AnalyticEvents.names.SEEK_BACKWARD_BUTTON_CLICKED);
     }
 
     _repeatButtonClicked() {
