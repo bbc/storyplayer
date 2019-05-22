@@ -21,10 +21,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _handlePlayPauseButtonClicked: Function
 
-    _handleSeekForwardButtonClicked: Function
-
-    _handleSeekBackwardButtonClicked: Function
-
     _handleSubtitlesClicked: Function
 
     _handleVolumeClicked: Function
@@ -61,8 +57,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         );
 
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-        this._handleSeekForwardButtonClicked = this._handleSeekForwardButtonClicked.bind(this);
-        this._handleSeekBackwardButtonClicked = this._handleSeekBackwardButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
