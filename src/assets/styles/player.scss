@@ -262,7 +262,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/seek-forward-gel.svg');
+      @include button-icon('../images/seek-forward-40.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -272,7 +272,7 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/seek-back-gel.svg');
+      @include button-icon('../images/seek-back-40.svg');
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -296,8 +296,6 @@ $romper-hover-text-size: 25px;
 
     .romper-button-icon-div {
       @include button-icon('../images/media-play.svg');
-      height: 50%;
-      width: 50%;
     }
   }
 
@@ -409,7 +407,7 @@ $romper-hover-text-size: 25px;
     padding: 0;
 
     div {
-      @include button-icon('../images/volume-off-gel.svg');
+      @include button-icon('../images/volume-off.svg');
       width: 80%;
     }
   }
@@ -629,10 +627,10 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-start-button-icon-div {
-      height: 40px;
-      margin-left: 37px;
-      margin-top: 30px;
-      width: 33px;
+      height: 100px; // 40px;
+      margin-left: 15px; // 37px;
+      margin-top: 0; //30px;
+      width: 80px; // 33px;
     }
 
     .romper-start-button-text-div {
