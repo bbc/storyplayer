@@ -1,7 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
-import dashjs from 'dashjs';
+import shaka from 'shaka-player';
 import logger from '../../logger';
 
 const MediaTypesArray = [
@@ -22,6 +22,14 @@ const getMediaType = (src: string) => {
     return MediaTypes.OTHER;
 };
 
+const onError = (err) => {
+    logger.error('Error code', err.code, 'object', err);
+};
+
+const onErrorEvent = (e) => {
+    onError(e.detail);
+}
+
 // Class wraps Hls.js but also provides failover for browsers not supporting Hls.js:
 
 // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
@@ -31,7 +39,7 @@ const getMediaType = (src: string) => {
 export default class HlsInstance {
     _hls: Object
 
-    _dashjs: Object
+    _shaka: Object
 
     _mountedMediaElement: HTMLMediaElement
 
@@ -261,12 +269,15 @@ export default class HlsInstance {
             }
             break;
         case MediaTypes.DASH:
-            this._dashjs = dashjs.MediaPlayer().create();
-            this._dashjs.initialize(null, this._mediaSrc, false);
-            if (!this._debug) {
-                this._dashjs.getDebug().setLogToBrowserConsole(false);
-            }
-
+        // shaka log level
+            shaka.log.setLevel(shaka.log.Level.V2);
+            shaka.polyfill.installAll();
+            console.log('Loading shaka player');
+            this._shaka = new shaka.Player(this._mediaElement);
+            this._shaka.addEventListener('error', onErrorEvent);
+            this._shaka.load(this._mediaSrc).then(() => {
+                logger.info(`Loaded ${this._mediaSrc}`);
+            }).catch(onError);
             break;
         case MediaTypes.OTHER:
             this._mediaElement.src = this._mediaSrc;
@@ -300,7 +311,7 @@ export default class HlsInstance {
                 break;
             case MediaTypes.DASH:
                 try {
-                    this._dashjs.attachView(element);
+                    this._shaka.attach(element);
                 } catch (err) {
                     logger.warning(err, 'attachMedia Failed');
                 }
@@ -328,10 +339,14 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.DASH:
-                this._dashjs.reset();
-                if (this._mediaSrc && this._mediaSrc !== '') {
-                    this._dashjs.attachSource(this._mediaSrc);
-                }
+                this._shaka.unload().then(() => {
+                    if (this._mediaSrc && this._mediaSrc !== '') {
+                        this._shaka.load(this._mediaSrc).then(() => {
+                            console.log(`Loaded ${this._mediaSrc}`);
+                        }).catch(err => logger.info(err));
+                    }
+                });
+                
                 break;
             case MediaTypes.OTHER:
                 if (this._mountedMediaElement &&
@@ -426,7 +441,7 @@ export default class HlsInstance {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                this._dashjs.reset();
+                this._shaka.unload();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (attachMedia)');
