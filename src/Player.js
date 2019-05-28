@@ -1074,11 +1074,6 @@ class Player extends EventEmitter {
         Object.keys(this._choiceIconSet).forEach((id) => {
             promisesArray.push(this._choiceIconSet[id]);
         });
-        Promise.all(promisesArray).then((icons) => {
-            icons.forEach((icon, id) => {
-                this._linkChoice.add(id, icon);
-            });
-        });
         if (activeLinkId) {
             this._linkChoice.setActive(activeLinkId);
         }
@@ -1086,6 +1081,11 @@ class Player extends EventEmitter {
             && !(overlayClass in this._linkChoice.overlay.classList)) {
             this._linkChoice.overlay.classList.add(overlayClass);
         }
+        return Promise.all(promisesArray).then((icons) => {
+            icons.forEach((icon, id) => {
+                this._linkChoice.add(id, icon);
+            });
+        });
     }
 
     getActiveChoiceIcon(): ?HTMLDivElement {

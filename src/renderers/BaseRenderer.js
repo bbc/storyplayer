@@ -297,8 +297,8 @@ export default class BaseRenderer extends EventEmitter {
                 assetCollectionIds.push(this._representation.asset_collections.icon.active_id);
             }
         }
-        assetCollectionIds.forEach((iconAssetCollection) => {
-            this._fetchAssetCollection(iconAssetCollection)
+        return Promise.all(assetCollectionIds.map((iconAssetCollection) => {
+            return this._fetchAssetCollection(iconAssetCollection)
                 .then((assetCollection) => {
                     if (assetCollection.assets.image_src) {
                         return this._fetchMedia(assetCollection.assets.image_src);
@@ -313,7 +313,7 @@ export default class BaseRenderer extends EventEmitter {
                         this._preloadedIconAssets.push(image);
                     }
                 });
-        });
+        }));
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
