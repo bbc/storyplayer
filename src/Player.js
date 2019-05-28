@@ -26,6 +26,8 @@ const PlayerEvents = [
     'SCRUB_BAR_CHANGED',
     'SCRUB_BAR_MOUSE_UP',
     'PLAY_PAUSE_BUTTON_CLICKED',
+    'SEEK_FORWARD_BUTTON_CLICKED',
+    'SEEK_BACKWARD_BUTTON_CLICKED',
     'SUBTITLES_BUTTON_CLICKED',
     'FULLSCREEN_BUTTON_CLICKED',
     'REPEAT_BUTTON_CLICKED',
@@ -161,9 +163,11 @@ function createOverlay(name: string, logFunction: Function) {
             if (key === id) {
                 elements[key].classList.add('romper-control-selected');
                 elements[key].classList.remove('romper-control-unselected');
+                elements[key].classList.remove('default');
             } else {
                 elements[key].classList.add('romper-control-unselected');
                 elements[key].classList.remove('romper-control-selected');
+                elements[key].classList.remove('default');
             }
         });
     };
@@ -277,6 +281,10 @@ class Player extends EventEmitter {
 
     _backButton: HTMLButtonElement;
 
+    _seekBackButton: HTMLButtonElement;
+
+    _seekForwardButton: HTMLButtonElement;
+
     _nextButton: HTMLButtonElement;
 
     _subtitlesButton: HTMLButtonElement;
@@ -313,6 +321,8 @@ class Player extends EventEmitter {
 
     _showRomperButtonsTimeout: TimeoutID;
 
+    _backRepeatTimeout: TimeoutID;
+
     _RomperButtonsShowing: boolean;
 
     _userInteractionStarted: boolean;
@@ -323,9 +333,17 @@ class Player extends EventEmitter {
 
     _handleFullScreenChange: Function;
 
+    resetRepeatBackButton: Function;
+
     _choiceIconSet: { [key: string]: HTMLDivElement };
 
-    _choiceCountdownTimeout: boolean;
+    _choiceCountdownTimeout: ?TimeoutID;
+
+    _countdowner: HTMLDivElement;
+
+    _countdownContainer: HTMLDivElement;
+
+    _countdownTotal: number;
 
     _dogImage: HTMLImageElement;
 
@@ -336,6 +354,7 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
+        this._countdownTotal = 0;
 
         this._userInteractionStarted = false;
 
@@ -345,6 +364,7 @@ class Player extends EventEmitter {
         this._assetUrls = assetUrls;
 
         this._logUserInteraction = this._logUserInteraction.bind(this);
+        this.resetRepeatBackButton = this.resetRepeatBackButton.bind(this);
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -385,7 +405,7 @@ class Player extends EventEmitter {
 
         this._buttonsActivateArea = document.createElement('div');
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
-
+        this._buttonsActivateArea.classList.add('hide');
 
         this._buttons = document.createElement('div');
         this._buttons.classList.add('romper-buttons');
@@ -396,6 +416,7 @@ class Player extends EventEmitter {
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
+        this._backButton.classList.add('romper-inactive');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
         const backButtonIconDiv = document.createElement('div');
@@ -407,14 +428,49 @@ class Player extends EventEmitter {
         this._repeatButton = document.createElement('button');
         this._repeatButton.classList.add('romper-button');
         this._repeatButton.classList.add('romper-repeat-button');
-        this._repeatButton.classList.add('romper-inactive');
+        // this._repeatButton.classList.add('romper-inactive');
         this._repeatButton.setAttribute('title', 'Repeat Button');
         this._repeatButton.setAttribute('aria-label', 'Repeat Button');
         const repeatButtonIconDiv = document.createElement('div');
         repeatButtonIconDiv.classList.add('romper-button-icon-div');
-        repeatButtonIconDiv.classList.add('romper-repeat-button-icon-div');
+        // repeatButtonIconDiv.classList.add('romper-repeat-button-icon-div');
         this._repeatButton.appendChild(repeatButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._repeatButton);
+
+        this._seekBackButton = document.createElement('button');
+        this._seekBackButton.classList.add('romper-button');
+        this._seekBackButton.classList.add('romper-seek-back-button');
+        // this._seekBackButton.classList.add('romper-inactive');
+        this._seekBackButton.setAttribute('title', 'Seek Back Button');
+        this._seekBackButton.setAttribute('aria-label', 'Seek Back Button');
+        const seekBackButtonIconDiv = document.createElement('div');
+        seekBackButtonIconDiv.classList.add('romper-button-icon-div');
+        // seekBackButtonIconDiv.classList.add('romper-back-button-icon-div');
+        this._seekBackButton.appendChild(seekBackButtonIconDiv);
+        this._narrativeElementTransport.appendChild(this._seekBackButton);
+
+        this._playPauseButton = document.createElement('button');
+        this._playPauseButton.classList.add('romper-button');
+        this._playPauseButton.classList.add('romper-play-button');
+        this._playPauseButton.setAttribute('title', 'Play Pause Button');
+        this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
+        const playPauseButtonIconDiv = document.createElement('div');
+        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
+        // playPauseButtonIconDiv.classList.add('romper-play-button-icon-div');
+        this._playPauseButton.appendChild(playPauseButtonIconDiv);
+        this._narrativeElementTransport.appendChild(this._playPauseButton);
+
+        this._seekForwardButton = document.createElement('button');
+        this._seekForwardButton.classList.add('romper-button');
+        this._seekForwardButton.classList.add('romper-seek-fwd-button');
+        // this._seekForwardButton.classList.add('romper-inactive');
+        this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
+        this._seekForwardButton.setAttribute('aria-label', 'Seek Forward Button');
+        const seekForwardButtonIconDiv = document.createElement('div');
+        seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
+        // seekForwardButtonIconDiv.classList.add('romper-back-button-icon-div');
+        this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
+        this._narrativeElementTransport.appendChild(this._seekForwardButton);
 
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
@@ -424,11 +480,11 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._nextButton);
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
-        nextButtonIconDiv.classList.add('romper-next-button-icon-div');
+        // nextButtonIconDiv.classList.add('romper-next-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
         this._guiLayer.appendChild(this._overlays);
-        this._guiLayer.appendChild(this._narrativeElementTransport);
+        // this._guiLayer.appendChild(this._narrativeElementTransport);
         this._guiLayer.appendChild(this._buttons);
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
@@ -443,26 +499,30 @@ class Player extends EventEmitter {
         this._mediaTransport = document.createElement('div');
         this._mediaTransport.classList.add('romper-media-transport');
 
-        this._playPauseButton = document.createElement('button');
-        this._playPauseButton.classList.add('romper-button');
-        this._playPauseButton.classList.add('romper-play-button');
-        this._playPauseButton.setAttribute('title', 'Play Pause Button');
-        this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
-        const playPauseButtonIconDiv = document.createElement('div');
-        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
-        playPauseButtonIconDiv.classList.add('romper-play-button-icon-div');
-        this._playPauseButton.appendChild(playPauseButtonIconDiv);
-        this._mediaTransport.appendChild(this._playPauseButton);
+        const mediaTransportLeft = document.createElement('div');
+        mediaTransportLeft.classList.add('left');
+
+        const mediaTransportCenter = document.createElement('div');
+        mediaTransportCenter.classList.add('center');
+        mediaTransportCenter.appendChild(this._narrativeElementTransport);
+
+        const mediaTransportRight = document.createElement('div');
+        mediaTransportRight.classList.add('right');
+        this._mediaTransport.appendChild(mediaTransportLeft);
+        this._mediaTransport.appendChild(mediaTransportCenter);
+        this._mediaTransport.appendChild(mediaTransportRight);
 
         // Create the overlays.
         this._overlayToggleButtons = document.createElement('div');
         this._overlayToggleButtons.classList.add('romper-overlay-controls');
         this._overlayToggleButtons.classList.add('romper-inactive');
-        this._guiLayer.appendChild(this._overlayToggleButtons);
+        // this._guiLayer.appendChild(this._overlayToggleButtons);
+        mediaTransportRight.appendChild(this._overlayToggleButtons);
 
         this._volume = createOverlay('volume', this._logUserInteraction);
-        this._overlays.appendChild(this._volume.overlay);
-        this._mediaTransport.appendChild(this._volume.button);
+        // this._overlays.appendChild(this._volume.overlay);
+        mediaTransportLeft.appendChild(this._volume.overlay);
+        mediaTransportLeft.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
         this._overlays.appendChild(this._representation.overlay);
@@ -475,6 +535,12 @@ class Player extends EventEmitter {
         this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
         this._overlays.appendChild(this._linkChoice.overlay);
         // no need for toggle button
+        this._countdownContainer = document.createElement('div');
+        this._countdownContainer.classList.add('romper-ux-divider');
+        this._linkChoice.overlay.appendChild(this._countdownContainer);
+        this._countdowner = document.createElement('div');
+        this._countdowner.classList.add('romper-ux-countdown');
+        this._countdownContainer.appendChild(this._countdowner);
 
         this._timeFeedback = document.createElement('div');
         this._timeFeedback.classList.add('romper-timer');
@@ -485,9 +551,9 @@ class Player extends EventEmitter {
         this._timeFeedback.appendChild(this._currentTime);
         const divider = document.createElement('span');
         divider.innerHTML = ' &#47; ';
-        this._timeFeedback.appendChild(divider);
-        this._timeFeedback.appendChild(this._totalTime);
-        this._mediaTransport.appendChild(this._timeFeedback);
+        // this._timeFeedback.appendChild(divider);
+        // this._timeFeedback.appendChild(this._totalTime);
+        // this._mediaTransport.appendChild(this._timeFeedback);
 
         this._subtitlesButton = document.createElement('button');
         this._subtitlesButton.classList.add('romper-button');
@@ -499,7 +565,7 @@ class Player extends EventEmitter {
         subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
         subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
         this._subtitlesButton.appendChild(subtitlesButtonIconDiv);
-        this._mediaTransport.appendChild(this._subtitlesButton);
+        mediaTransportRight.appendChild(this._subtitlesButton);
 
         this._fullscreenButton = document.createElement('button');
         this._fullscreenButton.classList.add('romper-button');
@@ -510,7 +576,7 @@ class Player extends EventEmitter {
         fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
         fullscreenButtonIconDiv.classList.add('romper-fullscreen-button-icon-div');
         this._fullscreenButton.appendChild(fullscreenButtonIconDiv);
-        this._mediaTransport.appendChild(this._fullscreenButton);
+        mediaTransportRight.appendChild(this._fullscreenButton);
 
         this._buttons.appendChild(this._mediaTransport);
 
@@ -552,6 +618,18 @@ class Player extends EventEmitter {
         this._playPauseButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._playPauseButtonClicked.bind(this)),
+        );
+
+        this._seekBackButton.onclick = this._seekBackwardButtonClicked.bind(this);
+        this._seekBackButton.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this._seekBackwardButtonClicked.bind(this)),
+        );
+
+        this._seekForwardButton.onclick = this._seekForwardButtonClicked.bind(this);
+        this._seekForwardButton.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this._seekForwardButtonClicked.bind(this)),
         );
 
         this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
@@ -719,15 +797,13 @@ class Player extends EventEmitter {
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Continue Button');
         this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
+        const continueButtonIconHolder = document.createElement('div');
+        this._startExperienceButton.appendChild(continueButtonIconHolder);
+        continueButtonIconHolder.classList.add('romper-start-button-icon');
         const continueButtonIconDiv = document.createElement('div');
         continueButtonIconDiv.classList.add('romper-button-icon-div');
         continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
-        this._startExperienceButton.appendChild(continueButtonIconDiv);
-        const continueButtonTextDiv = document.createElement('div');
-        continueButtonTextDiv.innerHTML = options.text;
-        continueButtonTextDiv.classList.add('romper-button-text-div');
-        continueButtonTextDiv.classList.add(`${options.button_class}-text-div`);
-        this._startExperienceButton.appendChild(continueButtonTextDiv);
+        continueButtonIconHolder.appendChild(continueButtonIconDiv);
 
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';
@@ -813,9 +889,31 @@ class Player extends EventEmitter {
         this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
     }
 
+    _seekForwardButtonClicked() {
+        this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+    }
+
+    _seekBackwardButtonClicked() {
+        this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+    }
+
     _repeatButtonClicked() {
+        // reveal back button and hide this
+        this._backButton.classList.remove('romper-inactive');
+        this._repeatButton.classList.add('romper-inactive');
+        // set timer
+        if (this._backRepeatTimeout) {
+            clearTimeout(this._backRepeatTimeout);
+        }
+        // on timer end, hide back button and reveal this
+        this._backRepeatTimeout = setTimeout(this.resetRepeatBackButton, 2000);
         this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.REPEAT_BUTTON_CLICKED);
+    }
+
+    resetRepeatBackButton() {
+        this._backButton.classList.add('romper-inactive');
+        this._repeatButton.classList.remove('romper-inactive');
     }
 
     _backButtonClicked() {
@@ -831,6 +929,7 @@ class Player extends EventEmitter {
         this._hideAllOverlays();
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+        this.resetRepeatBackButton();
     }
 
     _hideAllOverlays() {
@@ -908,16 +1007,34 @@ class Player extends EventEmitter {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
         if (overlay) {
-            if (overlay.childNodes[1]) {
-                overlay.childNodes[1].value = value;
+            if (overlay.childNodes[1] && overlay.childNodes[1].childNodes[2]) {
+                // set slider value
+                overlay.childNodes[1].childNodes[1].value = value;
+                // and feedback div
+                overlay.childNodes[1].childNodes[2].textContent = `${Math.floor(10 * value)}`;
             }
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
         }
     }
 
-    _setVolumeCallback(id: string, label: string) {
+    _setVolumeCallback(
+        id: string,
+        label: string,
+        levelSpan: HTMLSpanElement,
+        muteButton: HTMLDivElement,
+    ) {
         return (event: Object) => {
             const value = parseFloat(event.target.value);
+            // eslint-disable-next-line no-param-reassign
+            levelSpan.textContent = `${Math.floor(10 * value)}`;
+            if (value === 0) {
+                muteButton.classList.remove('romper-mute-button');
+                muteButton.classList.add('romper-muted-button');
+            } else {
+                muteButton.classList.add('romper-mute-button');
+                muteButton.classList.remove('romper-muted-button');
+            }
+
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
 
             // Don't spam analtics with lots of volume changes
@@ -943,6 +1060,15 @@ class Player extends EventEmitter {
         volumeLabel.classList.add('romper-volume-label');
         volumeLabel.textContent = label;
 
+        const controlDiv = document.createElement('div');
+        controlDiv.classList.add('romper-control-line');
+        const muteDiv = document.createElement('div');
+        muteDiv.classList.add('romper-mute-button');
+        muteDiv.appendChild(document.createElement('div'));
+        const levelSpan = document.createElement('span');
+        levelSpan.classList.add('romper-volume-level');
+        levelSpan.textContent = '10';
+
         const volumeRange = document.createElement('input');
         volumeRange.type = 'range';
         volumeRange.min = '0';
@@ -950,11 +1076,21 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
-        volumeRange.oninput = this._setVolumeCallback(id, label).bind(this);
-        volumeRange.onchange = this._setVolumeCallback(id, label).bind(this);
+        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+
+        muteDiv.onclick = () => {
+            volumeRange.value = '0';
+            this._setVolumeCallback(id, label, levelSpan, muteDiv)
+                .bind(this)({ target: { value: 0 }});
+        }
+
+        controlDiv.appendChild(muteDiv);
+        controlDiv.appendChild(volumeRange);
+        controlDiv.appendChild(levelSpan);
 
         volumeControl.appendChild(volumeLabel);
-        volumeControl.appendChild(volumeRange);
+        volumeControl.appendChild(controlDiv);
 
         this._volume.add(id, volumeControl, label);
     }
@@ -1005,6 +1141,10 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
+    addTextLinkIconChoice(id: string, text: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(id, label, text, src);
+    }
+
     addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
         return this._addLinkChoiceContainer(id, label, null, src);
     }
@@ -1029,13 +1169,29 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
-        if (text) {
+        if (text && src) {
+            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+            const iconElement = document.createElement('div');
+            iconElement.className = 'romper-link-icon-container';
+            iconContainer.appendChild(iconElement);
+            const { style } = iconElement;
+            // @flowignore
+            style.backgroundImage = `url(${linkChoiceIconSrc})`;
+            style.backgroundSize = 'contain';
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundPosition = 'center';
+            const iconTextPar = document.createElement('p');
+            iconTextPar.textContent = text;
+            iconTextPar.className = 'romper-link-text-icon';
+            iconContainer.appendChild(iconTextPar);
+        } else if (text) {
             iconContainer.className = 'romper-text-link-container';
             const iconTextPar = document.createElement('p');
             iconTextPar.textContent = text;
             iconTextPar.className = 'romper-link-text-icon';
             iconContainer.appendChild(iconTextPar);
         } else {
+            iconContainer.className = 'romper-link-icon-container';
             const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
             const { style } = iconContainer;
             // @flowignore
@@ -1043,7 +1199,6 @@ class Player extends EventEmitter {
             style.backgroundSize = 'contain';
             style.backgroundRepeat = 'no-repeat';
             style.backgroundPosition = 'center';
-            style.height = '100%';
         }
 
         const choiceClick = () => {
@@ -1070,10 +1225,10 @@ class Player extends EventEmitter {
         this._linkChoice.overlay.classList.remove('romper-inactive');
         Object.keys(this._choiceIconSet).forEach((id) => {
             this._linkChoice.add(id, this._choiceIconSet[id]);
+            if (activeLinkId && id === activeLinkId) {
+                this._choiceIconSet[id].classList.add('default');
+            }
         });
-        if (activeLinkId) {
-            this._linkChoice.setActive(activeLinkId);
-        }
         if (overlayClass
             && !(overlayClass in this._linkChoice.overlay.classList)) {
             this._linkChoice.overlay.classList.add(overlayClass);
@@ -1086,13 +1241,40 @@ class Player extends EventEmitter {
 
     // start animation to reflect choice remaining
     startChoiceCountdown(currentRenderer: BaseRenderer) {
-        if (!this._choiceCountdownTimeout) {
+        if (this._choiceCountdownTimeout) {
+            clearTimeout(this._choiceCountdownTimeout);
+        }
+        if (this._countdownTotal === 0) {
             let { remainingTime } = currentRenderer.getCurrentTime();
             if (!remainingTime) {
                 remainingTime = 3; // default if we can't find out
             }
-            this._choiceCountdownTimeout = true;
-            this._linkChoice.overlay.style.setProperty('animation', `countdown ${remainingTime}s`);
+            this._countdownTotal = remainingTime;
+        }
+        this._choiceCountdownTimeout = setTimeout(() => {
+            this.reflectTimeout(currentRenderer);
+        }, 10);
+        this._countdownContainer.classList.add('show');
+        // }
+    }
+
+    reflectTimeout(currentRenderer: BaseRenderer) {
+        const { remainingTime } = currentRenderer.getCurrentTime();
+        const { style } = this._countdowner;
+        const percentRemain = 100 * (remainingTime / this._countdownTotal);
+        if (percentRemain > 0) {
+            style.width = `${percentRemain}%`;
+            style.marginLeft = `${(100 - percentRemain)/2}%`;
+            this._choiceCountdownTimeout = setTimeout(() => {
+                this.reflectTimeout(currentRenderer);
+
+            }, 10);
+        } else {
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+            this._countdownTotal = 0;
+            style.width = '2%';
+            style.marginLeft = '49%';
         }
     }
 
@@ -1195,11 +1377,12 @@ class Player extends EventEmitter {
 
     enterStartBehaviourPhase() {
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
-        this.hideRepeatButton();
+        // this.hideRepeatButton();
     }
 
     exitStartBehaviourPhase() {
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
+        this.enableControls();
         this.enablePlayButton();
         this.enableScrubBar();
         this.enableRepresentationControl();
@@ -1218,7 +1401,10 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._linkChoice.clearAll();
         if (this._choiceCountdownTimeout) {
-            this._choiceCountdownTimeout = false;
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+            this._countdownTotal = 0;
+            this._countdownContainer.classList.remove('show');
         }
         this._linkChoice.overlay.classList.add('romper-inactive');
         this._linkChoice.overlay.style.setProperty('animation', 'none');
@@ -1236,6 +1422,14 @@ class Player extends EventEmitter {
     disableRepresentationControl() {
         this._representation.button.setAttribute('disabled', 'true');
         this._representation.button.classList.add('romper-control-disabled');
+    }
+
+    disableControls() {
+        this._buttonsActivateArea.classList.add('disabled');
+    }
+
+    enableControls() {
+        this._buttonsActivateArea.classList.remove('disabled');
     }
 
     enableScrubBar() {
@@ -1365,17 +1559,17 @@ class Player extends EventEmitter {
 
     setNextAvailable(isNextAvailable: boolean) {
         if (isNextAvailable) {
-            this._nextButton.classList.remove('romper-inactive');
+            this._nextButton.classList.remove('romper-unavailable');
         } else {
-            this._nextButton.classList.add('romper-inactive');
+            this._nextButton.classList.add('romper-unavailable');
         }
     }
 
     setBackAvailable(isBackAvailable: boolean) {
         if (isBackAvailable) {
-            this._backButton.classList.remove('romper-inactive');
+            this._backButton.classList.remove('romper-unavailable');
         } else {
-            this._backButton.classList.add('romper-inactive');
+            this._backButton.classList.add('romper-unavailable');
         }
     }
 

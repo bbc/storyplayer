@@ -187,6 +187,10 @@ export default class RenderManager extends EventEmitter {
             if (this._player.playoutEngine.hasStarted()) {
                 this._player.playoutEngine.playBackgrounds();
             }
+            if (this._player._choiceCountdownTimeout && this._currentRenderer) {
+                // restart countdown
+                this._player.startChoiceCountdown(this._currentRenderer);
+            }
         }
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
@@ -450,6 +454,11 @@ export default class RenderManager extends EventEmitter {
             currentRenderer.end();
             currentRenderer.willStart();
             this.refreshOnwardIcons();
+            // ensure volume persistence
+            Object.keys(this._rendererState.volumes).forEach((label) => {
+                const value = this._rendererState.volumes[label];
+                this._player.setVolumeControlLevel(label, value);
+            });
         } else {
             logger.error('no current renderer to restart');
         }
