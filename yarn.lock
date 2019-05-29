@@ -7762,10 +7762,10 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-shaka-player@^2.5.0-beta3:
-  version "2.5.0-beta3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/shaka-player/-/shaka-player-2.5.0-beta3.tgz#4602ee89459f3b3b37997dde85faea2056055208"
-  integrity sha1-RgLuiUWfOzs3mX3ehfrqIFYFUgg=
+shaka-player@^2.5.1:
+  version "2.5.1"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/shaka-player/-/shaka-player-2.5.1.tgz#34b02a0ac8e865699426de9defbebf3e6afeff4c"
+  integrity sha1-NLAqCsjoZWmUJt6d776/Pmr+/0w=
 
 shallow-clone@^1.0.0:
   version "1.0.0"

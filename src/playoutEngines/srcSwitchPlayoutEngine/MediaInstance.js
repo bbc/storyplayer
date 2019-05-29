@@ -273,7 +273,7 @@ export default class HlsInstance {
         this._mediaSrc = src;
         this._mediaType = getMediaType(this._mediaSrc);
         const params = getParams_();
-        
+
         switch (this._mediaType) {
         case MediaTypes.HLS:
             if (this._useHlsJs) {
@@ -371,14 +371,7 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.DASH:
-                this._shaka.unload().then(() => {
-                    if (this._mediaSrc && this._mediaSrc !== '') {
-                        this._shaka.load(this._mediaSrc).then(() => {
-                            console.log(`Loaded ${this._mediaSrc}`);
-                        }).catch(err => logger.info(err));
-                    }
-                });
-                
+                this._shaka.unload();
                 break;
             case MediaTypes.OTHER:
                 if (this._mountedMediaElement &&
@@ -474,6 +467,7 @@ export default class HlsInstance {
                 break;
             case MediaTypes.DASH:
                 this._shaka.unload();
+                this._shaka.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (attachMedia)');

@@ -238,6 +238,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 break;
             case MediaTypes.DASH:
                 rendererPlayoutObj._dashjs.unload();
+                rendererPlayoutObj._dashjs.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
