@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
+import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
@@ -23,6 +24,15 @@ const getMediaType = (src: string) => {
     }
     return MediaTypes.OTHER;
 };
+
+
+const onError = (err) => {
+    logger.error('Error code', err.code, 'object', err);
+};
+
+const onErrorEvent = (e) => {
+    onError(e.detail);
+}
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
@@ -163,9 +173,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
             break;
         case MediaTypes.DASH:
-            rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
-            rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
-            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(false);
+
+            shaka.log.setLevel(shaka.log.Level.V2);
+            shaka.polyfill.installAll();
+            rendererPlayoutObj._dashjs = new shaka.Player(rendererPlayoutObj.mediaElement);
+            rendererPlayoutObj._dashjs.addEventListener('error', onErrorEvent);
+            rendererPlayoutObj._dashjs.load(url).then(() => {
+                logger.info(`Loaded ${url}`);
+            }).catch(onError);
             break;
         case MediaTypes.OTHER:
             rendererPlayoutObj.mediaElement.src = url;
@@ -190,7 +205,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                rendererPlayoutObj._dashjs.reset();
+                rendererPlayoutObj._dashjs.unload();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
