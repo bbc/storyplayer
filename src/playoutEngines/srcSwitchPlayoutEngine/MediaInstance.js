@@ -23,7 +23,7 @@ const getParams_ = () => {
     /** @type {!Array.<string>} */
     const combined = fields.concat(fragments);
     const params = {};
-    for (let i = 0; i < combined.length; ++i) {
+    for (let i = 0; i < combined.length; i+=1) {
         const kv = combined[i].split('=');
         params[kv[0]] = kv.slice(1).join('=');
     }
