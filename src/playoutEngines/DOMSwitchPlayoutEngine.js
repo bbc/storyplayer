@@ -26,6 +26,36 @@ const getMediaType = (src: string) => {
     return MediaTypes.OTHER;
 };
 
+const printActiveMSEBuffers = () => {
+    if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
+        const videoElement = window.activeDashPlayer.mediaElement;
+        const bufferRanges = videoElement.buffered.length;
+        const { currentTime } = videoElement;
+        let i;
+        let validPlayback = false
+        for (i = 0; i < bufferRanges; i+=1) {
+            const start = videoElement.buffered.start(i)
+            const end = videoElement.buffered.end(i)
+            // eslint-disable-next-line no-console
+            console.log(`DASH BUFFER: Buffer Range ${i}: `
+              + `${start} - `
+              + `${end}`)
+            if(currentTime > start && currentTime < end) {
+                validPlayback = true
+            }
+        }
+        // eslint-disable-next-line no-console
+        console.log(`DASH BUFFER: Current Time: ${currentTime}`)
+        if(validPlayback !== true) {
+            // eslint-disable-next-line no-console
+            console.log("DASH BUFFER WARNING: current playback time outside of buffered range")
+        }
+        // eslint-disable-next-line no-console
+        console.log("DASH BUFFER ---------")
+    }
+    setTimeout(printActiveMSEBuffers, 1000)
+}
+
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
 
@@ -50,6 +80,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
 
+        if(this._debugPlayout) {
+            printActiveMSEBuffers()
+        }
+
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
             this._useHlsJs = true;
@@ -69,6 +103,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 bufferAheadToKeep: 80,
             }
         };
+
+        const activeBufferOverride = new URLSearchParams(window.location.search)
+            .get('activeBufferOverride');
+        if (activeBufferOverride) {
+            logger.info(`activeBufferOverride: ${activeBufferOverride}`)
+            this._activeConfig.dash.bufferAheadToKeep = parseInt(activeBufferOverride, 10)
+        }
+
         this._inactiveConfig = {
             hls: {
                 maxBufferLength: 2,
@@ -81,6 +123,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 bufferAheadToKeep: 2,
             }
         };
+
+        const inactiveBufferOverride = new URLSearchParams(window.location.search)
+            .get('inactiveBufferOverride');
+        if (inactiveBufferOverride) {
+            logger.info(`inactiveBufferOverride: ${inactiveBufferOverride}`)
+            this._inactiveConfig.dash.bufferAheadToKeep = parseInt(inactiveBufferOverride, 10)
+        }
 
         this._playing = false;
         this._subtitlesShowing = false;
@@ -173,10 +222,23 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
             rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
             rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(this._debugPlayout);
-            rendererPlayoutObj._dashjs.preload()
-            rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                this._inactiveConfig.dash.bufferAheadToKeep
-            )
+            const disablePreload = new URLSearchParams(window.location.search)
+                .get('disablePreload');
+            if (disablePreload) {
+                logger.info("Disabling Preload")
+            } else {
+                rendererPlayoutObj._dashjs.preload()
+            }
+
+            const disableVariableBuffer = new URLSearchParams(window.location.search)
+                .get('disableVariableBuffer');
+            if (disableVariableBuffer) {
+                logger.info("Disabling Variable Buffer")
+            } else {
+                rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                    this._inactiveConfig.dash.bufferAheadToKeep
+                )
+            }
             break;
         }
         case MediaTypes.OTHER:
@@ -249,9 +311,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH: {
-                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                        this._activeConfig.dash.bufferAheadToKeep
-                    )
+                    const disableVariableBuffer = new URLSearchParams(window.location.search)
+                        .get('disableVariableBuffer');
+                    if (disableVariableBuffer) {
+                        logger.info("Disabling Variable Buffer")
+                    } else {
+                        rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                            this._activeConfig.dash.bufferAheadToKeep
+                        )
+                    }
                     if(this._debugPlayout) {
                         allDashEvents.forEach((e) => {
                             rendererPlayoutObj._dashjs.on(
@@ -274,6 +342,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+
+            if(this._debugPlayout) {
+                window.activeDashPlayer = rendererPlayoutObj;
+            }
 
             if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
                 this.play();
@@ -317,11 +389,18 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         );
                     }
                     break;
-                case MediaTypes.DASH:
-                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                        this._inactiveConfig.dash.bufferAheadToKeep
-                    )
+                case MediaTypes.DASH: {
+                    const disableVariableBuffer = new URLSearchParams(window.location.search)
+                        .get('disableVariableBuffer');
+                    if (disableVariableBuffer) {
+                        logger.info("Disabling Variable Buffer")
+                    } else {
+                        rendererPlayoutObj._dashjs.setBufferAheadToKeep(
+                            this._inactiveConfig.dash.bufferAheadToKeep
+                        )
+                    }
                     break;
+                }
                 case MediaTypes.OTHER:
                     break;
                 default:
