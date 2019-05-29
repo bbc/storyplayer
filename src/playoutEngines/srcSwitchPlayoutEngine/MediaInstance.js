@@ -10,6 +10,26 @@ const MediaTypesArray = [
     'OTHER',
 ];
 
+const getParams_ = () => {
+    // Read URL parameters.
+    let fields = window.location.search.substr(1);
+    fields = fields ? fields.split(';') : [];
+    let fragments = window.location.hash.substr(1);
+    fragments = fragments ? fragments.split(';') : [];
+
+    // Because they are being concatenated in this order, if both an
+    // URL fragment and an URL parameter of the same type are present
+    // the URL fragment takes precendence.
+    /** @type {!Array.<string>} */
+    const combined = fields.concat(fragments);
+    const params = {};
+    for (let i = 0; i < combined.length; ++i) {
+        const kv = combined[i].split('=');
+        params[kv[0]] = kv.slice(1).join('=');
+    }
+    return params;
+};
+
 const MediaTypes = {};
 MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
 
@@ -252,7 +272,8 @@ export default class HlsInstance {
 
         this._mediaSrc = src;
         this._mediaType = getMediaType(this._mediaSrc);
-
+        const params = getParams_();
+        
         switch (this._mediaType) {
         case MediaTypes.HLS:
             if (this._useHlsJs) {
@@ -269,8 +290,19 @@ export default class HlsInstance {
             }
             break;
         case MediaTypes.DASH:
-        // shaka log level
-            shaka.log.setLevel(shaka.log.Level.V2);
+            // shaka log level
+            
+            if (shaka.log) {
+                if ('vv' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V2);
+                } else if ('v' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V1);
+                } else if ('debug' in params) {
+                    shaka.log.setLevel(shaka.log.Level.DEBUG);
+                } else if ('info' in params) {
+                    shaka.log.setLevel(shaka.log.Level.INFO);
+                }
+            }
             shaka.polyfill.installAll();
             console.log('Loading shaka player');
             this._shaka = new shaka.Player(this._mediaElement);

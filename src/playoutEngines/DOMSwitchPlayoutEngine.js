@@ -32,7 +32,27 @@ const onError = (err) => {
 
 const onErrorEvent = (e) => {
     onError(e.detail);
-}
+};
+
+const getParams_ = () => {
+    // Read URL parameters.
+    let fields = window.location.search.substr(1);
+    fields = fields ? fields.split(';') : [];
+    let fragments = window.location.hash.substr(1);
+    fragments = fragments ? fragments.split(';') : [];
+
+    // Because they are being concatenated in this order, if both an
+    // URL fragment and an URL parameter of the same type are present
+    // the URL fragment takes precendence.
+    /** @type {!Array.<string>} */
+    const combined = fields.concat(fragments);
+    const params = {};
+    for (let i = 0; i < combined.length; ++i) {
+        const kv = combined[i].split('=');
+        params[kv[0]] = kv.slice(1).join('=');
+    }
+    return params;
+};
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
@@ -157,6 +177,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
+        const params = getParams_();
+
         const { url } = rendererPlayoutObj.media;
         rendererPlayoutObj.mediaType = getMediaType(url);
 
@@ -174,7 +196,17 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             break;
         case MediaTypes.DASH:
 
-            shaka.log.setLevel(shaka.log.Level.V2);
+            if (shaka.log) {
+                if ('vv' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V2);
+                } else if ('v' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V1);
+                } else if ('debug' in params) {
+                    shaka.log.setLevel(shaka.log.Level.DEBUG);
+                } else if ('info' in params) {
+                    shaka.log.setLevel(shaka.log.Level.INFO);
+                }
+            }
             shaka.polyfill.installAll();
             rendererPlayoutObj._dashjs = new shaka.Player(rendererPlayoutObj.mediaElement);
             rendererPlayoutObj._dashjs.addEventListener('error', onErrorEvent);
