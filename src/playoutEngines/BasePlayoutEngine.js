@@ -13,17 +13,20 @@ export const MEDIA_TYPES = {
 export default class BasePlayoutEngine {
     _player: Player
 
+    _debugPlayout: boolean;
+
     _media: Object
 
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
 
-    constructor(player: Player) {
+    constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
         this._permissionToPlay = false;
         this._hasStarted = false;
+        this._debugPlayout = debugPlayout;
     }
 
     setPermissionToPlay(value: boolean) {

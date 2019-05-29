@@ -7,6 +7,8 @@ import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
+import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
+
 const MediaTypesArray = [
     'HLS',
     'DASH',
@@ -47,12 +49,41 @@ const getParams_ = () => {
     /** @type {!Array.<string>} */
     const combined = fields.concat(fragments);
     const params = {};
-    for (let i = 0; i < combined.length; ++i) {
+    for (let i = 0; i < combined.length; i+=1) {
         const kv = combined[i].split('=');
         params[kv[0]] = kv.slice(1).join('=');
     }
     return params;
 };
+const printActiveMSEBuffers = () => {
+    if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
+        const videoElement = window.activeDashPlayer.mediaElement;
+        const bufferRanges = videoElement.buffered.length;
+        const { currentTime } = videoElement;
+        let i;
+        let validPlayback = false
+        for (i = 0; i < bufferRanges; i+=1) {
+            const start = videoElement.buffered.start(i)
+            const end = videoElement.buffered.end(i)
+            // eslint-disable-next-line no-console
+            console.log(`DASH BUFFER: Buffer Range ${i}: `
+              + `${start} - `
+              + `${end}`)
+            if(currentTime > start && currentTime < end) {
+                validPlayback = true
+            }
+        }
+        // eslint-disable-next-line no-console
+        console.log(`DASH BUFFER: Current Time: ${currentTime}`)
+        if(validPlayback !== true) {
+            // eslint-disable-next-line no-console
+            console.log("DASH BUFFER WARNING: current playback time outside of buffered range")
+        }
+        // eslint-disable-next-line no-console
+        console.log("DASH BUFFER ---------")
+    }
+    setTimeout(printActiveMSEBuffers, 1000)
+}
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
@@ -75,9 +106,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function
 
-    constructor(player: Player) {
-        super(player);
+    constructor(player: Player, debugPlayout: boolean) {
+        super(player, debugPlayout);
 
+        if(this._debugPlayout) {
+            printActiveMSEBuffers()
+        }
 
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
@@ -92,18 +126,39 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 600,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: this._debugPlayout,
             },
+            dash: {
+                bufferAheadToKeep: 80,
+            }
         };
+
+        const activeBufferOverride = new URLSearchParams(window.location.search)
+            .get('activeBufferOverride');
+        if (activeBufferOverride) {
+            logger.info(`activeBufferOverride: ${activeBufferOverride}`)
+            this._activeConfig.dash.bufferAheadToKeep = parseInt(activeBufferOverride, 10)
+        }
+
         this._inactiveConfig = {
             hls: {
                 maxBufferLength: 2,
                 maxMaxBufferLength: 4,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: false,
+                debug: this._debugPlayout,
             },
+            dash: {
+                bufferAheadToKeep: 2,
+            }
         };
+
+        const inactiveBufferOverride = new URLSearchParams(window.location.search)
+            .get('inactiveBufferOverride');
+        if (inactiveBufferOverride) {
+            logger.info(`inactiveBufferOverride: ${inactiveBufferOverride}`)
+            this._inactiveConfig.dash.bufferAheadToKeep = parseInt(inactiveBufferOverride, 10)
+        }
 
         this._playing = false;
         this._subtitlesShowing = false;
@@ -194,9 +249,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 rendererPlayoutObj.mediaElement.src = url;
             }
             break;
-        case MediaTypes.DASH:
-
-            if (shaka.log) {
+        case MediaTypes.DASH: {
+            if (shaka.log && this._debugPlayout) {
                 if ('vv' in params) {
                     shaka.log.setLevel(shaka.log.Level.V2);
                 } else if ('v' in params) {
@@ -214,6 +268,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 logger.info(`Loaded ${url}`);
             }).catch(onError);
             break;
+        }
         case MediaTypes.OTHER:
             rendererPlayoutObj.mediaElement.src = url;
             break;
@@ -270,10 +325,34 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._activeConfig.hls,
                         );
+                        if(this._debugPlayout) {
+                            allHlsEvents.forEach((e) => {
+                                rendererPlayoutObj._hls.on(
+                                    Hls.Events[e], (ev) => {
+                                        // eslint-disable-next-line no-console
+                                        console.log("HLS EVENT: ",e, ev)
+                                    }
+                                );
+
+                            })
+                        }
+
                     }
                     break;
-                case MediaTypes.DASH:
+                case MediaTypes.DASH: {
+                    if(this._debugPlayout) {
+                        allShakaEvents.forEach((e) => {
+                            rendererPlayoutObj._dashjs.on(
+                                dashjs.MediaPlayer.events[e],
+                                (ev) => {
+                                    // eslint-disable-next-line no-console
+                                    console.log("DASH EVENT: ", e, ev)
+                                }
+                            )
+                        })
+                    }
                     break;
+                }
                 case MediaTypes.OTHER:
                     break;
                 default:
@@ -283,6 +362,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+
+            if(this._debugPlayout) {
+                window.activeDashPlayer = rendererPlayoutObj;
+            }
 
             if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
                 this.play();

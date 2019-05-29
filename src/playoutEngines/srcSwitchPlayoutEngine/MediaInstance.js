@@ -304,7 +304,6 @@ export default class HlsInstance {
                 }
             }
             shaka.polyfill.installAll();
-            console.log('Loading shaka player');
             this._shaka = new shaka.Player(this._mediaElement);
             this._shaka.addEventListener('error', onErrorEvent);
             this._shaka.load(this._mediaSrc).then(() => {

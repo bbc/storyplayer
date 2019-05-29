@@ -103,7 +103,7 @@ class AFrameRenderer extends EventEmitter {
         this.aFrameSceneElement.appendChild(cameraEntity);
 
         this._cursor = document.createElement('a-entity');
-        this._cursor.setAttribute('cursor', 'fuse: true; maxDistance: 30; timeout: 500');
+        this._cursor.setAttribute('cursor', 'fuse: true;');
         this._cursor.setAttribute('position', '0 0 -2');
         this._cursor.setAttribute(
             'geometry',
@@ -400,6 +400,7 @@ class AFrameRenderer extends EventEmitter {
         let position = `${2 * numInControl} 0 0.05`;
         let iconWidth = 1;
         let iconHeight = 1;
+        let rotation = '';
 
         // now see if have 3D position
         if (iconDataObject.position && iconDataObject.position.three_d) {
@@ -409,6 +410,7 @@ class AFrameRenderer extends EventEmitter {
                 const { phi, theta, radius } = positionSpec;
                 const { x, y, z } = AFrameRenderer.polarToCartesian(phi, theta, radius);
                 position = `${x} ${y} ${z}`;
+                rotation = `${theta} ${-phi} 0`;
             } else {
                 placeInControl = true;
             }
@@ -423,6 +425,9 @@ class AFrameRenderer extends EventEmitter {
         }
 
         iconImageEntity.setAttribute('position', position);
+        if (rotation !== '') {
+            iconImageEntity.setAttribute('rotation', rotation);
+        }
         iconImageEntity.setAttribute('width', `${iconWidth}`);
         iconImageEntity.setAttribute('height', `${iconHeight}`);
 
