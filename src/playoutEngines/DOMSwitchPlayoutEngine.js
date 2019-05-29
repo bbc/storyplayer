@@ -2,11 +2,12 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import dashjs from 'dashjs';
+import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
-import { allHlsEvents, allDashEvents} from './playoutEngineConsts'
+import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
 
 const MediaTypesArray = [
     'HLS',
@@ -26,6 +27,34 @@ const getMediaType = (src: string) => {
     return MediaTypes.OTHER;
 };
 
+
+const onError = (err) => {
+    logger.error('Error code', err.code, 'object', err);
+};
+
+const onErrorEvent = (e) => {
+    onError(e.detail);
+};
+
+const getParams_ = () => {
+    // Read URL parameters.
+    let fields = window.location.search.substr(1);
+    fields = fields ? fields.split(';') : [];
+    let fragments = window.location.hash.substr(1);
+    fragments = fragments ? fragments.split(';') : [];
+
+    // Because they are being concatenated in this order, if both an
+    // URL fragment and an URL parameter of the same type are present
+    // the URL fragment takes precendence.
+    /** @type {!Array.<string>} */
+    const combined = fields.concat(fragments);
+    const params = {};
+    for (let i = 0; i < combined.length; i+=1) {
+        const kv = combined[i].split('=');
+        params[kv[0]] = kv.slice(1).join('=');
+    }
+    return params;
+};
 const printActiveMSEBuffers = () => {
     if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
         const videoElement = window.activeDashPlayer.mediaElement;
@@ -203,6 +232,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
+        const params = getParams_();
+
         const { url } = rendererPlayoutObj.media;
         rendererPlayoutObj.mediaType = getMediaType(url);
 
@@ -219,26 +250,23 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
             break;
         case MediaTypes.DASH: {
-            rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
-            rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
-            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(this._debugPlayout);
-            const disablePreload = new URLSearchParams(window.location.search)
-                .get('disablePreload');
-            if (disablePreload) {
-                logger.info("Disabling Preload")
-            } else {
-                rendererPlayoutObj._dashjs.preload()
+            if (shaka.log && this._debugPlayout) {
+                if ('vv' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V2);
+                } else if ('v' in params) {
+                    shaka.log.setLevel(shaka.log.Level.V1);
+                } else if ('debug' in params) {
+                    shaka.log.setLevel(shaka.log.Level.DEBUG);
+                } else if ('info' in params) {
+                    shaka.log.setLevel(shaka.log.Level.INFO);
+                }
             }
-
-            const disableVariableBuffer = new URLSearchParams(window.location.search)
-                .get('disableVariableBuffer');
-            if (disableVariableBuffer) {
-                logger.info("Disabling Variable Buffer")
-            } else {
-                rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                    this._inactiveConfig.dash.bufferAheadToKeep
-                )
-            }
+            shaka.polyfill.installAll();
+            rendererPlayoutObj._dashjs = new shaka.Player(rendererPlayoutObj.mediaElement);
+            rendererPlayoutObj._dashjs.addEventListener('error', onErrorEvent);
+            rendererPlayoutObj._dashjs.load(url).then(() => {
+                logger.info(`Loaded ${url}`);
+            }).catch(onError);
             break;
         }
         case MediaTypes.OTHER:
@@ -264,7 +292,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                rendererPlayoutObj._dashjs.reset();
+                rendererPlayoutObj._dashjs.unload();
+                rendererPlayoutObj._dashjs.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
@@ -311,17 +340,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH: {
-                    const disableVariableBuffer = new URLSearchParams(window.location.search)
-                        .get('disableVariableBuffer');
-                    if (disableVariableBuffer) {
-                        logger.info("Disabling Variable Buffer")
-                    } else {
-                        rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                            this._activeConfig.dash.bufferAheadToKeep
-                        )
-                    }
                     if(this._debugPlayout) {
-                        allDashEvents.forEach((e) => {
+                        allShakaEvents.forEach((e) => {
                             rendererPlayoutObj._dashjs.on(
                                 dashjs.MediaPlayer.events[e],
                                 (ev) => {
@@ -389,18 +409,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         );
                     }
                     break;
-                case MediaTypes.DASH: {
-                    const disableVariableBuffer = new URLSearchParams(window.location.search)
-                        .get('disableVariableBuffer');
-                    if (disableVariableBuffer) {
-                        logger.info("Disabling Variable Buffer")
-                    } else {
-                        rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                            this._inactiveConfig.dash.bufferAheadToKeep
-                        )
-                    }
+                case MediaTypes.DASH:
                     break;
-                }
                 case MediaTypes.OTHER:
                     break;
                 default:
