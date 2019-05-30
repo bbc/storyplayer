@@ -241,9 +241,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 'streaming.bufferingGoal',
                 this._inactiveConfig.dash.bufferingGoal
             );
-            rendererPlayoutObj._shaka.load(url).then(() => {
-                logger.info(`Loaded ${url}`);
-            })
+            rendererPlayoutObj._shaka.load(url)
+                .then(() => {
+                    logger.info(`Loaded ${url}`);
+                })
+                .catch((err) => {
+                    logger.fatal(`Could not load manifest ${url}`, err)
+                })
+
             break;
         }
         case MediaTypes.OTHER:

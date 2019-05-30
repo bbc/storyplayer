@@ -265,6 +265,9 @@ export default class HlsInstance {
             this._shaka.load(this._mediaSrc).then(() => {
                 logger.info(`Loaded ${this._mediaSrc}`);
             })
+                .catch((err) => {
+                    logger.fatal(`Could not load manifest ${this._mediaSrc}`, err)
+                })
             break;
         case MediaTypes.OTHER:
             this._mediaElement.src = this._mediaSrc;
