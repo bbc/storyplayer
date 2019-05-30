@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
-import dashjs from 'dashjs';
 import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
@@ -27,34 +26,6 @@ const getMediaType = (src: string) => {
     return MediaTypes.OTHER;
 };
 
-
-const onError = (err) => {
-    logger.error('Error code', err.code, 'object', err);
-};
-
-const onErrorEvent = (e) => {
-    onError(e.detail);
-};
-
-const getParams_ = () => {
-    // Read URL parameters.
-    let fields = window.location.search.substr(1);
-    fields = fields ? fields.split(';') : [];
-    let fragments = window.location.hash.substr(1);
-    fragments = fragments ? fragments.split(';') : [];
-
-    // Because they are being concatenated in this order, if both an
-    // URL fragment and an URL parameter of the same type are present
-    // the URL fragment takes precendence.
-    /** @type {!Array.<string>} */
-    const combined = fields.concat(fragments);
-    const params = {};
-    for (let i = 0; i < combined.length; i+=1) {
-        const kv = combined[i].split('=');
-        params[kv[0]] = kv.slice(1).join('=');
-    }
-    return params;
-};
 const printActiveMSEBuffers = () => {
     if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
         const videoElement = window.activeDashPlayer.mediaElement;
@@ -66,7 +37,7 @@ const printActiveMSEBuffers = () => {
             const start = videoElement.buffered.start(i)
             const end = videoElement.buffered.end(i)
             // eslint-disable-next-line no-console
-            console.log(`DASH BUFFER: Buffer Range ${i}: `
+            console.log(`BUFFER: Buffer Range ${i}: `
               + `${start} - `
               + `${end}`)
             if(currentTime > start && currentTime < end) {
@@ -74,13 +45,13 @@ const printActiveMSEBuffers = () => {
             }
         }
         // eslint-disable-next-line no-console
-        console.log(`DASH BUFFER: Current Time: ${currentTime}`)
+        console.log(`BUFFER: Current Time: ${currentTime}`)
         if(validPlayback !== true) {
             // eslint-disable-next-line no-console
-            console.log("DASH BUFFER WARNING: current playback time outside of buffered range")
+            console.log("BUFFER WARNING: current playback time outside of buffered range")
         }
         // eslint-disable-next-line no-console
-        console.log("DASH BUFFER ---------")
+        console.log("BUFFER ---------")
     }
     setTimeout(printActiveMSEBuffers, 1000)
 }
@@ -129,15 +100,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 debug: this._debugPlayout,
             },
             dash: {
-                bufferAheadToKeep: 80,
+                bufferingGoal: 10,
             }
         };
 
-        const activeBufferOverride = new URLSearchParams(window.location.search)
-            .get('activeBufferOverride');
-        if (activeBufferOverride) {
-            logger.info(`activeBufferOverride: ${activeBufferOverride}`)
-            this._activeConfig.dash.bufferAheadToKeep = parseInt(activeBufferOverride, 10)
+        const activeBufferingOverride = new URLSearchParams(window.location.search)
+            .get('activeBufferingOverride');
+        if (activeBufferingOverride) {
+            logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
+            this._activeConfig.dash.bufferingGoal = parseInt(activeBufferingOverride, 10)
         }
 
         this._inactiveConfig = {
@@ -149,16 +120,33 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 debug: this._debugPlayout,
             },
             dash: {
-                bufferAheadToKeep: 2,
+                bufferingGoal: 2,
             }
         };
 
-        const inactiveBufferOverride = new URLSearchParams(window.location.search)
-            .get('inactiveBufferOverride');
-        if (inactiveBufferOverride) {
-            logger.info(`inactiveBufferOverride: ${inactiveBufferOverride}`)
-            this._inactiveConfig.dash.bufferAheadToKeep = parseInt(inactiveBufferOverride, 10)
+        const inactiveBufferingOverride = new URLSearchParams(window.location.search)
+            .get('inactiveBufferingOverride');
+        if (inactiveBufferingOverride) {
+            logger.info(`inactiveBufferingOverride: ${inactiveBufferingOverride}`)
+            this._inactiveConfig.dash.bufferingGoal = parseInt(inactiveBufferingOverride, 10)
         }
+
+        // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
+        const shakaDebugLevel
+            = new URLSearchParams(window.location.search).get('shakaDebugLevel');
+        if (shaka.log && this._debugPlayout && shakaDebugLevel) {
+            if (shakaDebugLevel === 'vv') {
+                shaka.log.setLevel(shaka.log.Level.V2);
+            } else if (shakaDebugLevel === 'v') {
+                shaka.log.setLevel(shaka.log.Level.V1);
+            } else if (shakaDebugLevel === 'debug') {
+                shaka.log.setLevel(shaka.log.Level.DEBUG);
+            } else if (shakaDebugLevel === 'info') {
+                shaka.log.setLevel(shaka.log.Level.INFO);
+            }
+        }
+        shaka.polyfill.installAll();
+
 
         this._playing = false;
         this._subtitlesShowing = false;
@@ -232,8 +220,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
-        const params = getParams_();
-
         const { url } = rendererPlayoutObj.media;
         rendererPlayoutObj.mediaType = getMediaType(url);
 
@@ -250,23 +236,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
             break;
         case MediaTypes.DASH: {
-            if (shaka.log && this._debugPlayout) {
-                if ('vv' in params) {
-                    shaka.log.setLevel(shaka.log.Level.V2);
-                } else if ('v' in params) {
-                    shaka.log.setLevel(shaka.log.Level.V1);
-                } else if ('debug' in params) {
-                    shaka.log.setLevel(shaka.log.Level.DEBUG);
-                } else if ('info' in params) {
-                    shaka.log.setLevel(shaka.log.Level.INFO);
-                }
-            }
-            shaka.polyfill.installAll();
-            rendererPlayoutObj._dashjs = new shaka.Player(rendererPlayoutObj.mediaElement);
-            rendererPlayoutObj._dashjs.addEventListener('error', onErrorEvent);
-            rendererPlayoutObj._dashjs.load(url).then(() => {
+            rendererPlayoutObj._shaka = new shaka.Player(rendererPlayoutObj.mediaElement);
+            rendererPlayoutObj._shaka.configure(
+                'streaming.bufferingGoal',
+                this._inactiveConfig.dash.bufferingGoal
+            );
+            rendererPlayoutObj._shaka.load(url).then(() => {
                 logger.info(`Loaded ${url}`);
-            }).catch(onError);
+            })
             break;
         }
         case MediaTypes.OTHER:
@@ -292,8 +269,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                rendererPlayoutObj._dashjs.unload();
-                rendererPlayoutObj._dashjs.destroy();
+                rendererPlayoutObj._shaka.unload();
+                rendererPlayoutObj._shaka.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
@@ -340,13 +317,17 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH: {
+                    rendererPlayoutObj._shaka.configure(
+                        'streaming.bufferingGoal',
+                        this._activeConfig.dash.bufferingGoal
+                    );
                     if(this._debugPlayout) {
                         allShakaEvents.forEach((e) => {
-                            rendererPlayoutObj._dashjs.on(
-                                dashjs.MediaPlayer.events[e],
+                            rendererPlayoutObj._shaka.addEventListener(
+                                e,
                                 (ev) => {
                                     // eslint-disable-next-line no-console
-                                    console.log("DASH EVENT: ", e, ev)
+                                    console.log("DASH SHAKA EVENT: ", e, ev)
                                 }
                             )
                         })
@@ -410,6 +391,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH:
+                    rendererPlayoutObj._shaka.configure(
+                        'streaming.bufferingGoal',
+                        this._inactiveConfig.dash.bufferingGoal
+                    );
                     break;
                 case MediaTypes.OTHER:
                     break;

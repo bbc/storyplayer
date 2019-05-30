@@ -92,3 +92,11 @@ The `BaseRenderer` is the base class for all the Renderers and handles concerns 
 
 ### Behaviours
 Behaviours are associated with Representations in the Data Model, and can be run at the start, middle, or end of an Element.  They are handled by the Renderer for the given Representation; this uses a `BehaviourRunner` to run the behaviours.  The BehaviourRunner passes each behaviour to the `BehaviourFactory`; which returns a `Behaviour` that is capable of handling it.  Some (e.g., pause) are generic enough to be handled by their own class for all Renderer types; other behaviours can only be handled by certain Representation types, or need to be handled differently for different Representation types; these are handled by the `BaseBehaviour`, which basically passes responsibility on to the Renderer for the Representation.  Each Renderer has a map that associates functions with the URNs of the behaviours it can handle; the function is called when the behaviour needs to be run and runs a callback when it is completed.  The behaviours are considered complete when all of those which are capable of being run have run their callbacks.
+
+## URL Parameters
+Below are the URL parameters that can be used to toggle features in StoryPlayer
+- overridePlayout - Takes 'src' or 'dom'. Sets the playout engine.
+- debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines.
+- inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
+- activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
+- shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
