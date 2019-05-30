@@ -62,7 +62,7 @@ export default class MediaManager {
 
         const shakaDebugLevel
             = new URLSearchParams(window.location.search).get('shakaDebugLevel');
-        if (shaka.log && this._debugPlayout && shakaDebugLevel) {
+        if (shaka.log && this._debug && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);
             } else if (shakaDebugLevel === 'v') {

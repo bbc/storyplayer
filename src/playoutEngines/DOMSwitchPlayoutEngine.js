@@ -248,7 +248,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 .catch((err) => {
                     logger.fatal(`Could not load manifest ${url}`, err)
                 })
-
             break;
         }
         case MediaTypes.OTHER:
