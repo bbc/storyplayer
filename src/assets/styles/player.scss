@@ -757,13 +757,13 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-scrub-bar {
-  bottom: $romper-button-height;
-  display: none;
-  height: 100%;
-  left: 5%;
+  bottom: 100px;
+  height: 10px;
+  left: 10%;
+  margin: 0;
   position: absolute;
   right: 0;
-  width: 90%;
+  width: 80%;
 }
 
 .romper-image-overlay {

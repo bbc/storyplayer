@@ -347,6 +347,8 @@ class Player extends EventEmitter {
 
     _dogImage: HTMLImageElement;
 
+    _debugDisplay: boolean;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -362,6 +364,14 @@ class Player extends EventEmitter {
 
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+
+        const debugDisplay = new URLSearchParams(window.location.search).get('debug');
+        if (debugDisplay !== null) {
+            this._debugDisplay = true;
+            logger.info('Player display in debug mode');
+        } else {
+            this._debugDisplay = false;
+        }
 
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this.resetRepeatBackButton = this.resetRepeatBackButton.bind(this);
@@ -494,6 +504,9 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
+        if (!this._debugDisplay) {
+            this._scrubBar.classList.add('romper-inactive');
+        }
         this._buttons.appendChild(this._scrubBar);
 
         this._mediaTransport = document.createElement('div');
