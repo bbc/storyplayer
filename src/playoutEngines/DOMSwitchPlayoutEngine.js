@@ -1,18 +1,18 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
-import dashjs from 'dashjs';
+import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
+
+import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
 
 const MediaTypesArray = [
     'HLS',
     'DASH',
     'OTHER',
 ];
-
-const DEBUG_PLAYOUT = false;
 
 const MediaTypes = {};
 MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
@@ -25,6 +25,36 @@ const getMediaType = (src: string) => {
     }
     return MediaTypes.OTHER;
 };
+
+const printActiveMSEBuffers = () => {
+    if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
+        const videoElement = window.activeDashPlayer.mediaElement;
+        const bufferRanges = videoElement.buffered.length;
+        const { currentTime } = videoElement;
+        let i;
+        let validPlayback = false
+        for (i = 0; i < bufferRanges; i+=1) {
+            const start = videoElement.buffered.start(i)
+            const end = videoElement.buffered.end(i)
+            // eslint-disable-next-line no-console
+            console.log(`BUFFER: Buffer Range ${i}: `
+              + `${start} - `
+              + `${end}`)
+            if(currentTime > start && currentTime < end) {
+                validPlayback = true
+            }
+        }
+        // eslint-disable-next-line no-console
+        console.log(`BUFFER: Current Time: ${currentTime}`)
+        if(validPlayback !== true) {
+            // eslint-disable-next-line no-console
+            console.log("BUFFER WARNING: current playback time outside of buffered range")
+        }
+        // eslint-disable-next-line no-console
+        console.log("BUFFER ---------")
+    }
+    setTimeout(printActiveMSEBuffers, 1000)
+}
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
@@ -47,9 +77,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function
 
-    constructor(player: Player) {
-        super(player);
+    constructor(player: Player, debugPlayout: boolean) {
+        super(player, debugPlayout);
 
+        if(this._debugPlayout) {
+            printActiveMSEBuffers()
+        }
 
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');
@@ -64,24 +97,56 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 600,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: DEBUG_PLAYOUT,
+                debug: this._debugPlayout,
             },
             dash: {
-                bufferAheadToKeep: 80,
+                bufferingGoal: 10,
             }
         };
+
+        const activeBufferingOverride = new URLSearchParams(window.location.search)
+            .get('activeBufferingOverride');
+        if (activeBufferingOverride) {
+            logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
+            this._activeConfig.dash.bufferingGoal = parseInt(activeBufferingOverride, 10)
+        }
+
         this._inactiveConfig = {
             hls: {
                 maxBufferLength: 2,
                 maxMaxBufferLength: 4,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: DEBUG_PLAYOUT,
+                debug: this._debugPlayout,
             },
             dash: {
-                bufferAheadToKeep: 2,
+                bufferingGoal: 2,
             }
         };
+
+        const inactiveBufferingOverride = new URLSearchParams(window.location.search)
+            .get('inactiveBufferingOverride');
+        if (inactiveBufferingOverride) {
+            logger.info(`inactiveBufferingOverride: ${inactiveBufferingOverride}`)
+            this._inactiveConfig.dash.bufferingGoal = parseInt(inactiveBufferingOverride, 10)
+        }
+
+        // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
+        const shakaDebugLevel
+            = new URLSearchParams(window.location.search).get('shakaDebugLevel');
+        if (shaka.log && this._debugPlayout && shakaDebugLevel) {
+            if (shakaDebugLevel === 'vv') {
+                shaka.log.setLevel(shaka.log.Level.V2);
+            } else if (shakaDebugLevel === 'v') {
+                shaka.log.setLevel(shaka.log.Level.V1);
+            } else if (shakaDebugLevel === 'debug') {
+                shaka.log.setLevel(shaka.log.Level.DEBUG);
+            } else if (shakaDebugLevel === 'info') {
+                shaka.log.setLevel(shaka.log.Level.INFO);
+            }
+        }
+        shaka.polyfill.installAll();
+
 
         this._playing = false;
         this._subtitlesShowing = false;
@@ -171,13 +236,18 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
             break;
         case MediaTypes.DASH: {
-            rendererPlayoutObj._dashjs = dashjs.MediaPlayer().create();
-            rendererPlayoutObj._dashjs.initialize(rendererPlayoutObj.mediaElement, url, false);
-            rendererPlayoutObj._dashjs.getDebug().setLogToBrowserConsole(DEBUG_PLAYOUT);
-            rendererPlayoutObj._dashjs.preload()
-            rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                this._inactiveConfig.dash.bufferAheadToKeep
-            )
+            rendererPlayoutObj._shaka = new shaka.Player(rendererPlayoutObj.mediaElement);
+            rendererPlayoutObj._shaka.configure(
+                'streaming.bufferingGoal',
+                this._inactiveConfig.dash.bufferingGoal
+            );
+            rendererPlayoutObj._shaka.load(url)
+                .then(() => {
+                    logger.info(`Loaded ${url}`);
+                })
+                .catch((err) => {
+                    logger.fatal(`Could not load manifest ${url}`, err)
+                })
             break;
         }
         case MediaTypes.OTHER:
@@ -203,7 +273,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                rendererPlayoutObj._dashjs.reset();
+                rendererPlayoutObj._shaka.unload();
+                rendererPlayoutObj._shaka.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (unqueuePlayout)');
@@ -235,40 +306,32 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._activeConfig.hls,
                         );
+                        if(this._debugPlayout) {
+                            allHlsEvents.forEach((e) => {
+                                rendererPlayoutObj._hls.on(
+                                    Hls.Events[e], (ev) => {
+                                        // eslint-disable-next-line no-console
+                                        console.log("HLS EVENT: ",e, ev)
+                                    }
+                                );
+
+                            })
+                        }
+
                     }
                     break;
                 case MediaTypes.DASH: {
-                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                        this._activeConfig.dash.bufferAheadToKeep
-                    )
-                    if(DEBUG_PLAYOUT) {
-                        const eventsArray = [
-                            "CAN_PLAY",
-                            "PLAYBACK_PAUSED",
-                            "PLAYBACK_TIME_UPDATED",
-                            "PLAYBACK_PLAYING",
-                            "PLAYBACK_ENDED",
-                            "PLAYBACK_ERROR",
-                            "PLAYBACK_STALLED",
-                            "PLAYBACK_WAITING",
-                            "PLAYBACK_NOT_ALLOWED",
-                            "PLAYBACK_RATE_CHANGED",
-                            "PLAYBACK_SEEK_ASKED",
-                            "PLAYBACK_SEEKED",
-                            "PLAYBACK_SEEKING",
-                            "PLAYBACK_STARTED",
-                            "ERROR",
-                            "STREAM_INITIALIZED",
-                            "SOURCE_INITIALIZED",
-                            "STREAM_TEARDOWN_COMPLETE"
-                        ]
-
-                        eventsArray.forEach((e) => {
-                            rendererPlayoutObj._dashjs.on(
-                                dashjs.MediaPlayer.events[e],
+                    rendererPlayoutObj._shaka.configure(
+                        'streaming.bufferingGoal',
+                        this._activeConfig.dash.bufferingGoal
+                    );
+                    if(this._debugPlayout) {
+                        allShakaEvents.forEach((e) => {
+                            rendererPlayoutObj._shaka.addEventListener(
+                                e,
                                 (ev) => {
                                     // eslint-disable-next-line no-console
-                                    console.log(e, ev)
+                                    console.log("DASH SHAKA EVENT: ", e, ev)
                                 }
                             )
                         })
@@ -284,6 +347,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+
+            if(this._debugPlayout) {
+                window.activeDashPlayer = rendererPlayoutObj;
+            }
 
             if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
                 this.play();
@@ -328,9 +395,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
                     break;
                 case MediaTypes.DASH:
-                    rendererPlayoutObj._dashjs.setBufferAheadToKeep(
-                        this._inactiveConfig.dash.bufferAheadToKeep
-                    )
+                    rendererPlayoutObj._shaka.configure(
+                        'streaming.bufferingGoal',
+                        this._inactiveConfig.dash.bufferingGoal
+                    );
                     break;
                 case MediaTypes.OTHER:
                     break;
@@ -502,44 +570,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
             const videoElement = rendererPlayoutObj.mediaElement;
             videoElement.addEventListener(event, callback);
-            /* Hack to force player to move on for small dash clip sizes
-               No idea what the issue is but a consequence is that dashjs
-               throws a PLAYBACK_RATE_CHANGED event with playbackRate=0
-               The PLAYBACK_RATE_CHANGED event isn't thrown on a replay of the
-               same video so we put in a hook on PLAYBACK_TIME_UPDATED and move
-               on when the time is near the end.
-               Interestingly the SRC Playout engine doesn't have the same issue.
-            */
-            const playbackRateChangedHandler = (ev) => {
-                if(ev.playbackRate === 0) {
-                    logger.warn("PLAYBACK RATE CHANGED - Assuming playback finished")
-                    callback()
-                    rendererPlayoutObj._dashjs.setPlaybackRate(1)
-                    rendererPlayoutObj._dashjs.off(
-                        dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
-                        playbackRateChangedHandler
-                    )
-                    rendererPlayoutObj._dashjs.on(
-                        dashjs.MediaPlayer.events.PLAYBACK_TIME_UPDATED,
-                        (ev2) => {
-                            if(ev2.timeToEnd < 0.2){
-                                callback()
-                            }
-                        }
-                    )
-                }
-            }
-
-            if (
-                rendererPlayoutObj.mediaType &&
-                rendererPlayoutObj.mediaType === MediaTypes.DASH &&
-                event === "ended"
-            ) {
-                rendererPlayoutObj._dashjs.on(
-                    dashjs.MediaPlayer.events.PLAYBACK_RATE_CHANGED,
-                    playbackRateChangedHandler
-                )
-            }
         }
     }
 

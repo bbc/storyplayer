@@ -1,6 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
+import shaka from 'shaka-player';
 import logger from '../../logger';
 import MediaInstance from './MediaInstance';
 
@@ -58,6 +59,21 @@ export default class MediaManager {
         this._permissionToPlay = false;
 
         this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
+
+        const shakaDebugLevel
+            = new URLSearchParams(window.location.search).get('shakaDebugLevel');
+        if (shaka.log && this._debug && shakaDebugLevel) {
+            if (shakaDebugLevel === 'vv') {
+                shaka.log.setLevel(shaka.log.Level.V2);
+            } else if (shakaDebugLevel === 'v') {
+                shaka.log.setLevel(shaka.log.Level.V1);
+            } else if (shakaDebugLevel === 'debug') {
+                shaka.log.setLevel(shaka.log.Level.DEBUG);
+            } else if (shakaDebugLevel === 'info') {
+                shaka.log.setLevel(shaka.log.Level.INFO);
+            }
+        }
+        shaka.polyfill.installAll();
 
         if (Hls.isSupported()) {
             logger.info('HLS.js being used');

@@ -74,20 +74,8 @@ export default class InternalVariables {
         this._setVariableValue(InternalVariableNames.PORTION_OF_DAY, segmentName);
     }
 
+    // eslint-disable-next-line class-methods-use-this
     _setLocation() {
-        let latitude = null;
-        let longitude = null;
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                latitude = position.coords.latitude; // eslint-disable-line prefer-destructuring
-                longitude = position.coords.longitude; // eslint-disable-line prefer-destructuring
-                this._setVariableValue(InternalVariableNames.LONGITUDE, longitude);
-                this._setVariableValue(InternalVariableNames.LATITUDE, latitude);
-            }, () => {
-                logger.info('Geolocation information not available');
-            });
-        } else {
-            logger.info('Geolocation is not supported by users browser');
-        }
+        logger.info('GeoLocation has been disabled');
     }
 }
