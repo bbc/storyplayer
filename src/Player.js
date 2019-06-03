@@ -366,7 +366,7 @@ class Player extends EventEmitter {
         this._assetUrls = assetUrls;
 
         const debugDisplay = new URLSearchParams(window.location.search).get('debugPlayout');
-        if (debugDisplay !== null) {
+        if (debugDisplay) {
             this._debugDisplay = true;
             logger.info('Player display in debug mode');
         } else {
