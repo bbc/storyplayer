@@ -365,7 +365,7 @@ class Player extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
 
-        const debugDisplay = new URLSearchParams(window.location.search).get('debug');
+        const debugDisplay = new URLSearchParams(window.location.search).get('debugPlayout');
         if (debugDisplay !== null) {
             this._debugDisplay = true;
             logger.info('Player display in debug mode');
@@ -504,8 +504,8 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
-        if (!this._debugDisplay) {
-            this._scrubBar.classList.add('romper-inactive');
+        if (this._debugDisplay) {
+            this._scrubBar.classList.add('debug');
         }
         this._buttons.appendChild(this._scrubBar);
 
