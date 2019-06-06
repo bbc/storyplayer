@@ -136,7 +136,6 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
 
         this._userInteracting = false;
 
-        // this._collectElementsToRender();
         this.renderVideoElement();
     }
 
@@ -161,16 +160,11 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        // TODO: problems with this type of representation as first element:
-        // starts video, but see nothing unless you enter VR mode...
         logger.info(`Started: ${this._representation.id}`);
-        // if (this._rendered) {
-        // }
         this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
         this._hasEnded = false;
         this._started = true;
-        // AFrameRenderer.addPlayPauseButton();
     }
 
     _startThreeSixtyVideo() {
@@ -183,19 +177,16 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
 
         const webGlRenderer = new THREE.WebGLRenderer();
         webGlRenderer.setPixelRatio(window.devicePixelRatio);
-        // webGlRenderer.vr.enabled = true;
 
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const texture = new THREE.VideoTexture(videoElement);
         const material = new THREE.MeshBasicMaterial({ map: texture });
-        // scene.background = new THREE.Color(0x101010);
 
         const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
 
         const mesh = new THREE.Mesh(geometry, material);
-        // mesh.rotation.y = -Math.PI / 2;
         scene.add(mesh);
 
         this._domElement = webGlRenderer.domElement;
@@ -211,7 +202,6 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
 
         this._playoutEngine.setPlayoutActive(this._rendererId);
         videoElement.style.visibility = 'hidden';
-        // videoElement.style.width = 'unset';
 
         const update = () => {
             const lat = Math.max(-85, Math.min(85, this._view.lat));
@@ -310,7 +300,6 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             }
-            // AFrameRenderer.togglePlayPause(videoElement.paused);
         }
     }
 
@@ -385,13 +374,11 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
     }
 
     switchTo() {
-        // if (this._started) {
-        //     AFrameRenderer.showVideo(this._videoDivId, this._videoType);
-        //     this._playoutEngine.setPlayoutActive(this._rendererId);
-        //     AFrameRenderer.setSceneHidden(false);
-        // } else {
-        this.start();
-        // }
+        if (this._started) {
+            this._playoutEngine.setPlayoutActive(this._rendererId);
+        } else {
+            this.start();
+        }
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -408,7 +395,7 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
         // put video element back
         this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
 
-        if (this._domElement.parentNode) {
+        if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
         }
 
@@ -419,6 +406,8 @@ export default class ThreeJsVideoRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
+
+        // remove drag view handler
         const uiLayer = this._player._overlays;
         uiLayer.removeEventListener('mousedown', this._onMouseDown);
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
