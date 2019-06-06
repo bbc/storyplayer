@@ -8,6 +8,7 @@ import SimpleAudioRenderer from './SimpleAudioRenderer';
 import SimpleTextRenderer from './SimpleTextRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import ThreeJsVideoRenderer from './ThreeJsVideoRenderer';
+import ThreeJsImageRenderer from './ThreeJsImageRenderer';
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -28,6 +29,7 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:simple-text/v1.0': SimpleTextRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
         'urn:x-object-based-media:representation-types:immersive/v1.0': ThreeJsVideoRenderer,
+        'urn:x-object-based-media:representation-types:image360/v1.0': ThreeJsImageRenderer,
     };
 
     let currentRenderer;
