@@ -20,7 +20,6 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
-import AFrameRenderer from './renderers/AFrameRenderer';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -141,10 +140,6 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
-        AFrameRenderer.on('aframe-vr-toggle', () => {
-            this.refreshLookahead();
-        });
-
         // make sure playback toggles correctly when user goes away from tab/browser
         // Set the name of the hidden property and the change event for visibility
         // cross-browser hackery
@@ -246,7 +241,6 @@ export default class RenderManager extends EventEmitter {
 
     handleNEChange(narrativeElement: NarrativeElement) {
         this._player.clearLinkChoices();
-        AFrameRenderer.clearLinkIcons();
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
             return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
@@ -463,9 +457,6 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
-        AFrameRenderer.clearSceneElements();
-        AFrameRenderer.setSceneHidden(true);
-
         if (newRenderer instanceof SwitchableRenderer) {
             if (this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
@@ -474,12 +465,6 @@ export default class RenderManager extends EventEmitter {
         }
 
         if (oldRenderer) {
-            if (oldRenderer.isVRViewable() && !newRenderer.isVRViewable()) {
-                // exit VR mode if necessary
-                // TODO need to go back to full-screen if appropriate
-                AFrameRenderer.exitVR();
-            }
-
             const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
                 .some((renderer) => {
                     if (renderer === oldRenderer) {
@@ -513,11 +498,6 @@ export default class RenderManager extends EventEmitter {
             .then((id) => {
                 const showBack = id !== null;
                 this._player.setBackAvailable(showBack);
-                if (showBack) {
-                    AFrameRenderer.addPrevious();
-                } else {
-                    AFrameRenderer.clearPrevious();
-                }
             });
     }
 
@@ -530,7 +510,6 @@ export default class RenderManager extends EventEmitter {
                 // @flowignore
                 if (nextNodes.length === 1 || !this._currentRenderer.hasShowIconBehaviour()) {
                     this._player.setNextAvailable(nextNodes.length > 0);
-                    AFrameRenderer.addNext();
                 } else {
                     this._player.setNextAvailable(false);
                 }
@@ -606,14 +585,6 @@ export default class RenderManager extends EventEmitter {
                                     if (this._upcomingRenderers[neid]) {
                                         if (this._upcomingRenderers[neid]._representation.id !==
                                             representation.id) {
-                                            const newRenderer = this
-                                                ._createNewRenderer(representation);
-                                            if (newRenderer) {
-                                                this._upcomingRenderers[neid] = newRenderer;
-                                            }
-                                        } else if (this._upcomingRenderers[neid].isVRViewable() !==
-                                            AFrameRenderer.isInVR()) {
-                                            this._upcomingRenderers[neid].destroy();
                                             const newRenderer = this
                                                 ._createNewRenderer(representation);
                                             if (newRenderer) {

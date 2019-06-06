@@ -9,7 +9,6 @@ import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
-import AFrameRenderer from './renderers/AFrameRenderer';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -612,8 +611,6 @@ class Player extends EventEmitter {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
-
-        this._createAframeRenderer();
     }
 
     addDog(src: string, position: Object) {
@@ -628,18 +625,6 @@ class Player extends EventEmitter {
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
-    }
-
-    _createAframeRenderer() {
-        AFrameRenderer.populateAframeAssetUrls(this._assetUrls);
-        AFrameRenderer.buildBaseAframeScene();
-        AFrameRenderer.connectPlayPauseButton(() =>
-            this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        AFrameRenderer.connectNextButton(() =>
-            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED));
-        AFrameRenderer.connectPreviousButton(() =>
-            this.emit(PlayerEvents.BACK_BUTTON_CLICKED));
-        Object.seal(AFrameRenderer);
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -805,7 +790,6 @@ class Player extends EventEmitter {
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
         this._playPauseButtonClicked();
-        AFrameRenderer.kickStart();
     }
 
     _playPauseButtonClicked() {

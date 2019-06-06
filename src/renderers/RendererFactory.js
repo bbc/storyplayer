@@ -7,10 +7,7 @@ import SimpleAVRenderer from './SimpleAVRenderer';
 import SimpleAudioRenderer from './SimpleAudioRenderer';
 import SimpleTextRenderer from './SimpleTextRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
-import AFrameRenderer from './AFrameRenderer';
-import AFrameImageRenderer from './AFrameImageRenderer';
 import ThreeJsVideoRenderer from './ThreeJsVideoRenderer';
-import AFrameFlatVideoRenderer from './AFrameFlatVideoRenderer';
 import Player from '../Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -31,7 +28,6 @@ export default function RendererFactory(
         'urn:x-object-based-media:representation-types:simple-text/v1.0': SimpleTextRenderer,
         'urn:x-object-based-media:representation-types:switchable/v1.0': SwitchableRenderer,
         'urn:x-object-based-media:representation-types:immersive/v1.0': ThreeJsVideoRenderer,
-        'urn:x-object-based-media:representation-types:image360/v1.0': AFrameImageRenderer,
     };
 
     let currentRenderer;

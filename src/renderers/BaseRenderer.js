@@ -11,7 +11,6 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
-import AFrameRenderer from './AFrameRenderer';
 
 
 export default class BaseRenderer extends EventEmitter {
@@ -120,7 +119,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     willStart() {
-        AFrameRenderer.hideVRButton(!this.isVRViewable());
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -234,9 +232,6 @@ export default class BaseRenderer extends EventEmitter {
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
             this._player.enterCompleteBehavourPhase();
-            if (this.isVRViewable) {
-                AFrameRenderer.clearPlayPause();
-            }
             this.emit(RendererEvents.STARTED_COMPLETE_BEHAVIOURS);
             if (!this._behaviourRunner ||
                 !this._behaviourRunner.runBehaviours(
@@ -379,7 +374,6 @@ export default class BaseRenderer extends EventEmitter {
             // go through asset collections and render icons
             return iconSrcPromises.then((iconObjects) => {
                 this._player.clearLinkChoices();
-                AFrameRenderer.clearLinkIcons();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
                     this._buildLinkIcon(iconSpecObject);
@@ -606,13 +600,6 @@ export default class BaseRenderer extends EventEmitter {
                 icon.style.height = `${height}%`;
             }
         }
-        if (this.isVRViewable()) {
-            AFrameRenderer.addLinkIcon(
-                targetId,
-                iconObject.resolvedUrl,
-                iconObject,
-            );
-        }
     }
 
     // tell the player to show the icons
@@ -636,10 +623,6 @@ export default class BaseRenderer extends EventEmitter {
         }
         if (countdown) {
             this._player.startChoiceCountdown(this);
-        }
-
-        if (this.isVRViewable()) {
-            AFrameRenderer.showLinkIcons();
         }
     }
 
@@ -748,9 +731,6 @@ export default class BaseRenderer extends EventEmitter {
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
-        if (this.isVRViewable()) {
-            AFrameRenderer.clearLinkIcons();
-        }
         this._player._linkChoice.overlay.classList.add('fade');
         setTimeout(() => {
             this._player._linkChoice.overlay.classList.remove('fade');
