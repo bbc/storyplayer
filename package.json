@@ -70,7 +70,8 @@
     "webpack-cli": "^3.3.2"
   },
   "dependencies": {
-    "browser-bunyan": "^1.2.2",
+    "browser-bunyan": "^1.5.2",
+    "browserify-css": "^0.15.0",
     "dashjs": "^2.9.3",
     "express": "^4.17.1",
     "hls.js": "^0.12.4",
