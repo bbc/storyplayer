@@ -1167,7 +1167,6 @@ class Player extends EventEmitter {
     }
 
     _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
-        console.log('ANDY adding link choice', id, label, text, src);
         this._numChoices += 1;
 
         if (this._numChoices > 4) {
@@ -1176,18 +1175,15 @@ class Player extends EventEmitter {
             this._linkChoice.overlay.classList.remove('tworow');
         }
 
-        const linkChoiceControl = document.createElement('div');
-        linkChoiceControl.classList.add('romper-link-control');
-        linkChoiceControl.classList.add(`romper-link-choice-${id}`);
-        linkChoiceControl.setAttribute('title', label);
-        linkChoiceControl.setAttribute('aria-label', label);
-
-        console.log('ANDY Building promise for ', id);
         const containerPromise = new Promise((resolve) => {
+            const linkChoiceControl = document.createElement('div');
+            linkChoiceControl.classList.add('romper-link-control');
+            linkChoiceControl.classList.add(`romper-link-choice-${id}`);
+            linkChoiceControl.setAttribute('title', label);
+            linkChoiceControl.setAttribute('aria-label', label);
+
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-                // set classes to show which is selected
-                this._linkChoice.setActive(id);
                 this.emit(PlayerEvents.LINK_CHOSEN, { id });
                 this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
             };
@@ -1229,18 +1225,19 @@ class Player extends EventEmitter {
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
             }
-            resolve(iconContainer);
+            resolve({
+                icon: linkChoiceControl,
+                uuid: id,
+            });
         });
 
         this._choiceIconSet[id] = containerPromise;
-        return linkChoiceControl;
     }
 
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
-        console.log('ANDY show choice icons', this._choiceIconSet);
         this._linkChoice.overlay.classList.remove('romper-inactive');
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
@@ -1251,11 +1248,16 @@ class Player extends EventEmitter {
             this._linkChoice.overlay.classList.add(overlayClass);
         }
         return Promise.all(promisesArray).then((icons) => {
-            icons.forEach((icon, id) => {
-                console.log('ANDY adding icon', icon);
-                if (activeLinkId && id === activeLinkId) {
+            icons.forEach((iconObj, id) => {
+                const { icon, uuid } = iconObj;
+                if (activeLinkId && uuid === activeLinkId) {
                     icon.classList.add('default');
                 }
+                const clickHandler = () => {
+                    // set classes to show which is selected
+                    this._linkChoice.setActive(`${id}`);
+                };
+                icon.onclick = clickHandler;
                 this._linkChoice.add(id, icon);
             });
         });
