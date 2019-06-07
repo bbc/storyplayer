@@ -335,7 +335,7 @@ class Player extends EventEmitter {
 
     resetRepeatBackButton: Function;
 
-    _choiceIconSet: { [key: string]: HTMLDivElement };
+    _choiceIconSet: { [key: string]: Promise<HTMLDivElement> };
 
     _choiceCountdownTimeout: ?TimeoutID;
 
@@ -555,15 +555,15 @@ class Player extends EventEmitter {
         this._countdowner.classList.add('romper-ux-countdown');
         this._countdownContainer.appendChild(this._countdowner);
 
-        this._timeFeedback = document.createElement('div');
-        this._timeFeedback.classList.add('romper-timer');
-        this._currentTime = document.createElement('span');
-        this._currentTime.innerHTML = '0:00';
-        this._totalTime = document.createElement('span');
-        this._totalTime.innerHTML = '0:00';
-        this._timeFeedback.appendChild(this._currentTime);
-        const divider = document.createElement('span');
-        divider.innerHTML = ' &#47; ';
+        // this._timeFeedback = document.createElement('div');
+        // this._timeFeedback.classList.add('romper-timer');
+        // this._currentTime = document.createElement('span');
+        // this._currentTime.innerHTML = '0:00';
+        // this._totalTime = document.createElement('span');
+        // this._totalTime.innerHTML = '0:00';
+        // this._timeFeedback.appendChild(this._currentTime);
+        // const divider = document.createElement('span');
+        // divider.innerHTML = ' &#47; ';
         // this._timeFeedback.appendChild(divider);
         // this._timeFeedback.appendChild(this._totalTime);
         // this._mediaTransport.appendChild(this._timeFeedback);
@@ -1167,6 +1167,7 @@ class Player extends EventEmitter {
     }
 
     _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
+        console.log('ANDY adding link choice', id, label, text, src);
         this._numChoices += 1;
 
         if (this._numChoices > 4) {
@@ -1181,53 +1182,57 @@ class Player extends EventEmitter {
         linkChoiceControl.setAttribute('title', label);
         linkChoiceControl.setAttribute('aria-label', label);
 
-        const iconContainer = document.createElement('div');
-        if (text && src) {
-            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-            const iconElement = document.createElement('div');
-            iconElement.className = 'romper-link-icon-container';
-            iconContainer.appendChild(iconElement);
-            const { style } = iconElement;
-            // @flowignore
-            style.backgroundImage = `url(${linkChoiceIconSrc})`;
-            style.backgroundSize = 'contain';
-            style.backgroundRepeat = 'no-repeat';
-            style.backgroundPosition = 'center';
-            const iconTextPar = document.createElement('p');
-            iconTextPar.textContent = text;
-            iconTextPar.className = 'romper-link-text-icon';
-            iconContainer.appendChild(iconTextPar);
-        } else if (text) {
-            iconContainer.className = 'romper-text-link-container';
-            const iconTextPar = document.createElement('p');
-            iconTextPar.textContent = text;
-            iconTextPar.className = 'romper-link-text-icon';
-            iconContainer.appendChild(iconTextPar);
-        } else {
-            iconContainer.className = 'romper-link-icon-container';
-            const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-            const { style } = iconContainer;
-            // @flowignore
-            style.backgroundImage = `url(${linkChoiceIconSrc})`;
-            style.backgroundSize = 'contain';
-            style.backgroundRepeat = 'no-repeat';
-            style.backgroundPosition = 'center';
-        }
+        console.log('ANDY Building promise for ', id);
+        const containerPromise = new Promise((resolve) => {
+            const iconContainer = document.createElement('div');
+            const choiceClick = () => {
+                // set classes to show which is selected
+                this._linkChoice.setActive(id);
+                this.emit(PlayerEvents.LINK_CHOSEN, { id });
+                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+            };
+            iconContainer.onclick = choiceClick;
+            iconContainer.addEventListener(
+                'touchend',
+                handleButtonTouchEvent(choiceClick),
+            );
 
-        const choiceClick = () => {
-            // set classes to show which is selected
-            this._linkChoice.setActive(id);
-            this.emit(PlayerEvents.LINK_CHOSEN, { id });
-            this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
-        };
-        iconContainer.onclick = choiceClick;
-        iconContainer.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(choiceClick),
-        );
+            linkChoiceControl.appendChild(iconContainer);
+            if (text && src) {
+                const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+                const iconElement = document.createElement('div');
+                iconElement.className = 'romper-link-icon-container';
+                iconContainer.appendChild(iconElement);
+                const { style } = iconElement;
+                // @flowignore
+                style.backgroundImage = `url(${linkChoiceIconSrc})`;
+                style.backgroundSize = 'contain';
+                style.backgroundRepeat = 'no-repeat';
+                style.backgroundPosition = 'center';
+                const iconTextPar = document.createElement('p');
+                iconTextPar.textContent = text;
+                iconTextPar.className = 'romper-link-text-icon';
+                iconContainer.appendChild(iconTextPar);
+            } else if (text) {
+                iconContainer.className = 'romper-text-link-container';
+                const iconTextPar = document.createElement('p');
+                iconTextPar.textContent = text;
+                iconTextPar.className = 'romper-link-text-icon';
+                iconContainer.appendChild(iconTextPar);
+            } else {
+                iconContainer.className = 'romper-link-icon-container';
+                const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
+                const { style } = iconContainer;
+                // @flowignore
+                style.backgroundImage = `url(${linkChoiceIconSrc})`;
+                style.backgroundSize = 'contain';
+                style.backgroundRepeat = 'no-repeat';
+                style.backgroundPosition = 'center';
+            }
+            resolve(iconContainer);
+        });
 
-        linkChoiceControl.appendChild(iconContainer);
-        this._choiceIconSet[id] = linkChoiceControl;
+        this._choiceIconSet[id] = containerPromise;
         return linkChoiceControl;
     }
 
@@ -1235,17 +1240,25 @@ class Player extends EventEmitter {
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+        console.log('ANDY show choice icons', this._choiceIconSet);
         this._linkChoice.overlay.classList.remove('romper-inactive');
+        const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
-            this._linkChoice.add(id, this._choiceIconSet[id]);
-            if (activeLinkId && id === activeLinkId) {
-                this._choiceIconSet[id].classList.add('default');
-            }
+            promisesArray.push(this._choiceIconSet[id]);
         });
         if (overlayClass
             && !(overlayClass in this._linkChoice.overlay.classList)) {
             this._linkChoice.overlay.classList.add(overlayClass);
         }
+        return Promise.all(promisesArray).then((icons) => {
+            icons.forEach((icon, id) => {
+                console.log('ANDY adding icon', icon);
+                if (activeLinkId && id === activeLinkId) {
+                    icon.classList.add('default');
+                }
+                this._linkChoice.add(id, icon);
+            });
+        });
     }
 
     getActiveChoiceIcon(): ?HTMLDivElement {

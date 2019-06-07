@@ -58,6 +58,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _preloadedBehaviourAssets: Array<Image>;
 
+    _preloadedIconAssets: Array<Image>;
+
     _savedLinkConditions: Object;
 
     _linkBehaviour: Object;
@@ -124,6 +126,7 @@ export default class BaseRenderer extends EventEmitter {
         this._savedLinkConditions = {};
         this._preloadedBehaviourAssets = [];
         this._preloadBehaviourAssets();
+        this._preloadIconAssets();
     }
 
     willStart() {
@@ -292,7 +295,7 @@ export default class BaseRenderer extends EventEmitter {
         this.end();
     }
 
-    // prepare rendere so it can be switched to quickly and in sync
+    // prepare renderer so it can be switched to quickly and in sync
     cueUp() { }
 
     switchTo() {
@@ -319,6 +322,36 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
         });
+    }
+
+    _preloadIconAssets() {
+        this._preloadedIconAssets = [];
+        const assetCollectionIds = [];
+        if (this._representation.asset_collections.icon) {
+            if (this._representation.asset_collections.icon.default_id) {
+                assetCollectionIds.push(this._representation.asset_collections.icon.default_id);
+            }
+            if (this._representation.asset_collections.icon.active_id) {
+                assetCollectionIds.push(this._representation.asset_collections.icon.active_id);
+            }
+        }
+        return Promise.all(assetCollectionIds.map((iconAssetCollection) => {
+            return this._fetchAssetCollection(iconAssetCollection)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        const image = new Image();
+                        image.src = imageUrl;
+                        logger.info(`Preloading icon ${imageUrl}`);
+                        this._preloadedIconAssets.push(image);
+                    }
+                });
+        }));
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
@@ -562,6 +595,8 @@ export default class BaseRenderer extends EventEmitter {
             } else {
                 iconObjectPromises.push(Promise.resolve(iconSpecObject));
             }
+
+            iconObjectPromises.push(Promise.resolve(iconSpecObject));
         });
 
         return Promise.all(iconObjectPromises).then((iconSpecObjects) => {
@@ -622,14 +657,16 @@ export default class BaseRenderer extends EventEmitter {
                 iconObject.iconText,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
-        } else {
+        } else if (iconObject.resolvedUrl) {
             icon = this._player.addLinkChoiceControl(
                 targetId,
                 iconObject.resolvedUrl,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
+        } else {
+            logger.warn(`No icon specified for link to ${targetId} - not rendering`);
         }
-        if (iconObject.position && iconObject.position.two_d) {
+        if (icon && iconObject.position && iconObject.position.two_d) {
             const {
                 left,
                 top,
