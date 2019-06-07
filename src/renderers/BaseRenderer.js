@@ -535,27 +535,7 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
             }
-            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
-                // if not specified - get default icon...
-                iconObjectPromises.push(this._controller
-                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
-                    .then((representation) => {
-                        let defaultSrcAcId = null;
-                        if (representation && representation.asset_collections.icon
-                            && representation.asset_collections.icon.default_id) {
-                            defaultSrcAcId = representation.asset_collections.icon.default_id;
-                        }
-                        return Promise.resolve({
-                            choiceId: i,
-                            acId: defaultSrcAcId,
-                            ac: null,
-                            resolvedUrl: null,
-                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
-                        });
-                    }));
-            } else {
-                iconObjectPromises.push(Promise.resolve(iconSpecObject));
-            }
+            iconObjectPromises.push(Promise.resolve(iconSpecObject));
         });
 
         return Promise.all(iconObjectPromises).then((iconSpecObjects) => {
@@ -609,14 +589,16 @@ export default class BaseRenderer extends EventEmitter {
                 iconObject.iconText,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
-        } else {
+        } else if (iconObject.resolvedUrl) {
             icon = this._player.addLinkChoiceControl(
                 targetId,
                 iconObject.resolvedUrl,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
+        } else {
+            logger.warn(`No icon specified for link to ${targetId} - not rendering`);
         }
-        if (iconObject.position && iconObject.position.two_d) {
+        if (icon && iconObject.position && iconObject.position.two_d) {
             const {
                 left,
                 top,
