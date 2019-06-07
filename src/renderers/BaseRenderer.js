@@ -13,6 +13,7 @@ import Controller from '../Controller';
 import logger from '../logger';
 import AFrameRenderer from './AFrameRenderer';
 
+const SEEK_TIME = 10;
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
@@ -40,6 +41,10 @@ export default class BaseRenderer extends EventEmitter {
     _applyShowChoiceBehaviour: Function;
 
     _handleLinkChoiceEvent: Function;
+
+    _seekForward: Function;
+
+    _seekBack: Function;
 
     _behaviourElements: Array<HTMLElement>;
 
@@ -98,6 +103,8 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
+        this._seekBack = this._seekBack.bind(this);
+        this._seekForward = this._seekForward.bind(this);
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -138,6 +145,8 @@ export default class BaseRenderer extends EventEmitter {
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
     }
 
     /**
@@ -165,6 +174,8 @@ export default class BaseRenderer extends EventEmitter {
     end() {
         this._reapplyLinkConditions();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
     }
 
     hasEnded(): boolean {
@@ -230,6 +241,33 @@ export default class BaseRenderer extends EventEmitter {
 
     setCurrentTime(time: number) {
         logger.warn(`ignoring setting time on BaseRenderer ${time}`);
+    }
+
+    _seekBack() {
+        const { timeBased, currentTime } = this.getCurrentTime();
+        if (timeBased) {
+            let targetTime = currentTime - SEEK_TIME;
+            if (targetTime < 0) {
+                targetTime = 0;
+            }
+            this.logUserInteraction(AnalyticEvents.names.SEEK_BACKWARD_BUTTON_CLICKED,
+                currentTime,
+                `${targetTime}`,
+            );
+            this.setCurrentTime(targetTime);
+        }
+    }
+
+    _seekForward() {
+        const { timeBased, currentTime } = this.getCurrentTime();
+        if (timeBased) {
+            const targetTime = currentTime + SEEK_TIME;
+            this.setCurrentTime(targetTime);
+            this.logUserInteraction(AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
+                currentTime,
+                `${targetTime}`,
+            );
+        }
     }
 
     complete() {
@@ -529,12 +567,35 @@ export default class BaseRenderer extends EventEmitter {
                                     iconSpecObject[key] = linkIconObject[key];
                                 }
                             });
-                        } else if (linkIconObject.text) {
+                        }
+                        if (linkIconObject.text) {
                             iconSpecObject.iconText = linkIconObject.text;
                         }
                     }
                 });
             }
+            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
+                // if not specified - get default icon...
+                iconObjectPromises.push(this._controller
+                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
+                    .then((representation) => {
+                        let defaultSrcAcId = null;
+                        if (representation && representation.asset_collections.icon
+                            && representation.asset_collections.icon.default_id) {
+                            defaultSrcAcId = representation.asset_collections.icon.default_id;
+                        }
+                        return Promise.resolve({
+                            choiceId: i,
+                            acId: defaultSrcAcId,
+                            ac: null,
+                            resolvedUrl: null,
+                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
+                        });
+                    }));
+            } else {
+                iconObjectPromises.push(Promise.resolve(iconSpecObject));
+            }
+
             iconObjectPromises.push(Promise.resolve(iconSpecObject));
         });
 
@@ -583,7 +644,14 @@ export default class BaseRenderer extends EventEmitter {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
         let icon;
-        if (iconObject.iconText) {
+        if (iconObject.iconText && iconObject.resolvedUrl) {
+            icon = this._player.addTextLinkIconChoice(
+                targetId,
+                iconObject.iconText,
+                iconObject.resolvedUrl,
+                `Option ${(iconObject.choiceId + 1)}`,
+            );
+        } else if (iconObject.iconText) {
             icon = this._player.addTextLinkChoice(
                 targetId,
                 iconObject.iconText,
@@ -645,9 +713,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
-            this._player.disablePlayButton();
-            this._player.disableScrubBar();
-            this._player.setNextAvailable(false);
+            this._player.disableControls();
         }
         if (countdown) {
             this._player.startChoiceCountdown(this);
@@ -814,65 +880,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// variables panel choice behaviour
 
-    // an input for selecting the value for a boolean variable
-    _getBooleanVariableSetter(varName: string) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        // yes label
-        const yesLabelSpan = document.createElement('span');
-        yesLabelSpan.className = 'romper-var-form-radio-div yes';
-        const yesLabel = document.createElement('div');
-        yesLabel.innerHTML = 'Yes';
-        yesLabelSpan.appendChild(yesLabel);
-
-        // checkbox (hidden by toggle)
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-
-        yesLabelSpan.onclick = () => {
-            checkbox.checked = true;
-            this._setVariableValue(varName, true);
-        };
-
-        const switchel = document.createElement('label');
-        switchel.classList.add('switch');
-        switchel.classList.add('romper-var-form-boolean-toggle');
-        switchel.appendChild(checkbox);
-
-        const slider = document.createElement('span');
-        slider.classList.add('slider');
-        switchel.appendChild(slider);
-
-        switchel.onclick = () => {
-            checkbox.checked = !checkbox.checked;
-            this._setVariableValue(varName, checkbox.checked);
-        };
-
-        // no button & label
-        const noLabelSpan = document.createElement('span');
-        noLabelSpan.className = 'romper-var-form-radio-div no';
-        const noLabel = document.createElement('div');
-        noLabel.innerHTML = 'No';
-        noLabelSpan.appendChild(noLabel);
-
-        noLabelSpan.onclick = () => {
-            checkbox.checked = false;
-            this._setVariableValue(varName, false);
-        };
-
-        varInput.appendChild(yesLabelSpan);
-        varInput.appendChild(switchel);
-        varInput.appendChild(noLabelSpan);
-
-        this._controller.getVariableValue(varName)
-            .then((varValue) => {
-                checkbox.checked = varValue;
-            });
-
-        return varInput;
-    }
-
     // an input for selecting the value for a list variable
     _getListVariableSetter(varName: string, variableDecl: Object) {
         if (variableDecl.values.length > 3) {
@@ -904,6 +911,48 @@ export default class BaseRenderer extends EventEmitter {
 
         varInputSelect.onchange = () =>
             this._setVariableValue(varName, varInputSelect.value);
+
+        return varInput;
+    }
+
+    // an input for selecting the value for a list variable
+    _getBooleanVariableSetter(varName: string) {
+        const varInput = document.createElement('div');
+        varInput.classList.add('romper-var-form-input-container');
+
+        const varInputSelect = document.createElement('div');
+        varInputSelect.classList.add('romper-var-form-button-div');
+
+        const yesElement = document.createElement('button');
+        const noElement = document.createElement('button');
+
+        const setSelected = (varVal) => {
+            if (varVal) {
+                yesElement.classList.add('selected');
+                noElement.classList.remove('selected');
+            } else {
+                yesElement.classList.remove('selected');
+                noElement.classList.add('selected');
+            }
+        };
+
+        yesElement.textContent = 'Yes';
+        yesElement.onclick = () => {
+            this._setVariableValue(varName, true);
+            setSelected(true);
+        };
+        varInputSelect.appendChild(yesElement);
+        noElement.textContent = 'No';
+        noElement.onclick = () => {
+            this._setVariableValue(varName, false);
+            setSelected(false);
+        };
+        varInputSelect.appendChild(noElement);
+
+        varInput.appendChild(varInputSelect);
+
+        this._controller.getVariableValue(varName)
+            .then(varValue => setSelected(varValue));
 
         return varInput;
     }
@@ -965,17 +1014,25 @@ export default class BaseRenderer extends EventEmitter {
         return varInput;
     }
 
-    _getNumberRangeVariableSetter(varName: string, range: Object) {
+    _getNumberRangeVariableSetter(varName: string, range: Object, behaviourVar: Object) {
         const varInput = document.createElement('div');
         varInput.classList.add('romper-var-form-input-container');
 
         const sliderDiv = document.createElement('div');
         const minSpan = document.createElement('span');
         minSpan.classList.add('min');
-        minSpan.textContent = range.min_val;
+        if (behaviourVar.hasOwnProperty('min_label')) {
+            minSpan.textContent = behaviourVar.min_label === null ? '' : behaviourVar.min_label;
+        } else {
+            minSpan.textContent = range.min_val;
+        }
         const maxSpan = document.createElement('span');
         maxSpan.classList.add('max');
-        maxSpan.textContent = range.max_val;
+        if (behaviourVar.hasOwnProperty('max_label')) {
+            maxSpan.textContent = behaviourVar.max_label === null ? '' : behaviourVar.max_label;
+        } else {
+            maxSpan.textContent = range.max_val;
+        }
 
 
         const slider = document.createElement('input');
@@ -984,6 +1041,7 @@ export default class BaseRenderer extends EventEmitter {
         slider.id = `variable-input-${varName}`;
 
         sliderDiv.appendChild(minSpan);
+        sliderDiv.appendChild(slider);
         sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
@@ -1017,8 +1075,10 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         varInput.appendChild(sliderDiv);
-        varInput.appendChild(slider);
-        varInput.appendChild(numberInput);
+        // varInput.appendChild(slider);
+        if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
+            varInput.appendChild(numberInput);
+        }
 
         return varInput;
     }
@@ -1063,7 +1123,7 @@ export default class BaseRenderer extends EventEmitter {
             const boolDiv = this._getBooleanVariableSetter(variableName);
             answerContainer.append(boolDiv);
         } else if (variableType === 'list') {
-            const listDiv = this._getListVariableSetter(
+            const listDiv = this._getLongListVariableSetter(
                 behaviourVar.variable_name,
                 variableDecl,
             );
@@ -1072,7 +1132,11 @@ export default class BaseRenderer extends EventEmitter {
         } else if (variableType === 'number') {
             let numDiv;
             if (variableDecl.hasOwnProperty('range')) {
-                numDiv = this._getNumberRangeVariableSetter(variableName, variableDecl.range);
+                numDiv = this._getNumberRangeVariableSetter(
+                    variableName,
+                    variableDecl.range,
+                    behaviourVar,
+                );
             } else {
                 numDiv = this._getIntegerVariableSetter(variableName);
             }
@@ -1131,16 +1195,12 @@ export default class BaseRenderer extends EventEmitter {
                 // submit button
                 const okButtonContainer = document.createElement('div');
 
-                // number of questions
-                const feedbackPar = document.createElement('p');
-                feedbackPar.textContent = `Question 1 of ${variableFields.length}`;
-                feedbackPar.classList.add('romper-var-form-feedback');
-
                 okButtonContainer.className = 'romper-var-form-button-container';
                 const okButton = document.createElement('input');
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
-                okButton.value = behaviourVariables.length > 1 ? 'Next' : 'OK!';
+                okButton.classList.add('var-next');
+                okButton.value = 'Next'; // behaviourVariables.length > 1 ? 'Next' : 'OK!';
 
                 // back button
                 const backButton = document.createElement('input');
@@ -1148,6 +1208,11 @@ export default class BaseRenderer extends EventEmitter {
                 backButton.value = 'Back';
                 backButton.classList.add('var-back');
                 backButton.classList.add('romper-var-form-button');
+
+                const statusSpan = document.createElement('span');
+                statusSpan.classList.add('var-count');
+                let statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
+                statusSpan.textContent = statusText;
 
                 const changeSlide = (fwd: boolean) => {
                     const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
@@ -1180,26 +1245,22 @@ export default class BaseRenderer extends EventEmitter {
                     });
 
                     currentQuestion = targetId;
-                    // set feedback and button texts
                     if (currentQuestion > 0) {
                         backButton.classList.add('active');
                     } else {
                         backButton.classList.remove('active');
                     }
-                    okButton.value = currentQuestion < (behaviourVariables.length - 1)
-                        ? 'Next' : 'OK!';
-                    feedbackPar.textContent =
-                        `Question ${currentQuestion + 1}
-                         of ${behaviourVariables.length}`;
+                    statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
+                    statusSpan.textContent = statusText;
                     return false;
                 };
 
                 backButton.onclick = () => { changeSlide(false); };
                 okButton.onclick = () => { changeSlide(true); };
 
-                okButtonContainer.appendChild(okButton);
                 okButtonContainer.appendChild(backButton);
-                okButtonContainer.appendChild(feedbackPar);
+                okButtonContainer.appendChild(statusSpan);
+                okButtonContainer.appendChild(okButton);
 
                 overlayImageElement.appendChild(okButtonContainer);
 
