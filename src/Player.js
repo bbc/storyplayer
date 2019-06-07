@@ -335,7 +335,7 @@ class Player extends EventEmitter {
 
     resetRepeatBackButton: Function;
 
-    _choiceIconSet: { [key: string]: Promise<HTMLDivElement> };
+    _choiceIconSet: { [key: string]: Promise<Object> };
 
     _choiceCountdownTimeout: ?TimeoutID;
 
@@ -554,19 +554,6 @@ class Player extends EventEmitter {
         this._countdowner = document.createElement('div');
         this._countdowner.classList.add('romper-ux-countdown');
         this._countdownContainer.appendChild(this._countdowner);
-
-        // this._timeFeedback = document.createElement('div');
-        // this._timeFeedback.classList.add('romper-timer');
-        // this._currentTime = document.createElement('span');
-        // this._currentTime.innerHTML = '0:00';
-        // this._totalTime = document.createElement('span');
-        // this._totalTime.innerHTML = '0:00';
-        // this._timeFeedback.appendChild(this._currentTime);
-        // const divider = document.createElement('span');
-        // divider.innerHTML = ' &#47; ';
-        // this._timeFeedback.appendChild(divider);
-        // this._timeFeedback.appendChild(this._totalTime);
-        // this._mediaTransport.appendChild(this._timeFeedback);
 
         this._subtitlesButton = document.createElement('button');
         this._subtitlesButton.classList.add('romper-button');
@@ -1175,8 +1162,8 @@ class Player extends EventEmitter {
             this._linkChoice.overlay.classList.remove('tworow');
         }
 
+        const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {
-            const linkChoiceControl = document.createElement('div');
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
             linkChoiceControl.setAttribute('title', label);
@@ -1232,6 +1219,7 @@ class Player extends EventEmitter {
         });
 
         this._choiceIconSet[id] = containerPromise;
+        return linkChoiceControl;
     }
 
     // show the choice icons
@@ -1536,9 +1524,6 @@ class Player extends EventEmitter {
 
             // Update the slider value
             scrubBar.value = value.toString();
-            // update timer feedback
-            this._totalTime.innerHTML = Player._formatTime(media.duration);
-            this._currentTime.innerHTML = Player._formatTime(media.currentTime);
         });
     }
 
