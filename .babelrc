@@ -1,5 +1,13 @@
 {
-    "presets": ["@babel/env"],
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "useBuiltIns": "usage",
+                "corejs": 3
+            }
+        ],
+    ],
     "plugins": [
         "@babel/transform-flow-strip-types",
         ["@babel/plugin-transform-modules-commonjs", {
