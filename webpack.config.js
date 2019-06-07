@@ -1,7 +1,6 @@
 /* eslint-disable comma-dangle */
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-require('@babel/polyfill');
 
 const productionBuild = process.env.NODE_ENV === 'production';
 

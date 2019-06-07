@@ -8,3 +8,6 @@ spec/decls/
 
 [options]
 suppress_comment= \\(.\\|\n\\)*\\@flowignore
+
+[lints]
+deprecated-utility=off
