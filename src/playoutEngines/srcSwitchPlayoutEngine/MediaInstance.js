@@ -1,7 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
-import dashjs from 'dashjs';
+import shaka from 'shaka-player';
 import logger from '../../logger';
 
 const MediaTypesArray = [
@@ -31,7 +31,7 @@ const getMediaType = (src: string) => {
 export default class HlsInstance {
     _hls: Object
 
-    _dashjs: Object
+    _shaka: Object
 
     _mountedMediaElement: HTMLMediaElement
 
@@ -261,12 +261,13 @@ export default class HlsInstance {
             }
             break;
         case MediaTypes.DASH:
-            this._dashjs = dashjs.MediaPlayer().create();
-            this._dashjs.initialize(null, this._mediaSrc, false);
-            if (!this._debug) {
-                this._dashjs.getDebug().setLogToBrowserConsole(false);
-            }
-
+            this._shaka = new shaka.Player(this._mediaElement);
+            this._shaka.load(this._mediaSrc).then(() => {
+                logger.info(`Loaded ${this._mediaSrc}`);
+            })
+                .catch((err) => {
+                    logger.fatal(`Could not load manifest ${this._mediaSrc}`, err)
+                })
             break;
         case MediaTypes.OTHER:
             this._mediaElement.src = this._mediaSrc;
@@ -300,7 +301,7 @@ export default class HlsInstance {
                 break;
             case MediaTypes.DASH:
                 try {
-                    this._dashjs.attachView(element);
+                    this._shaka.attach(element);
                 } catch (err) {
                     logger.warning(err, 'attachMedia Failed');
                 }
@@ -328,10 +329,7 @@ export default class HlsInstance {
                 }
                 break;
             case MediaTypes.DASH:
-                this._dashjs.reset();
-                if (this._mediaSrc && this._mediaSrc !== '') {
-                    this._dashjs.attachSource(this._mediaSrc);
-                }
+                this._shaka.unload();
                 break;
             case MediaTypes.OTHER:
                 if (this._mountedMediaElement &&
@@ -426,7 +424,8 @@ export default class HlsInstance {
             case MediaTypes.OTHER:
                 break;
             case MediaTypes.DASH:
-                this._dashjs.reset();
+                this._shaka.unload();
+                this._shaka.destroy();
                 break;
             default:
                 logger.error('Cannot handle this mediaType (attachMedia)');

@@ -45,7 +45,7 @@ export const allHlsEvents = [
     "KEY_LOADING",
     "KEY_LOADED",
     "STREAM_STATE_TRANSITION"
-]
+];
 
 export const allDashEvents = [
     "CAN_PLAY",
@@ -66,4 +66,30 @@ export const allDashEvents = [
     "STREAM_INITIALIZED",
     "SOURCE_INITIALIZED",
     "STREAM_TEARDOWN_COMPLETE"
-]
+];
+
+export const allShakaEvents = [
+    "abrstatuschanged",
+    "adaptation",
+    "buffering",
+    "drmsessionupdate",
+    "emsg",
+    "error",
+    "expirationupdated",
+    "largegap",
+    "loading",
+    "manifestparsed",
+    "onstatechange",
+    "onstateidle",
+    "streaming",
+    "textchanged",
+    "texttrackvisibility",
+    "timelineregionadded",
+    "timelineregionenter",
+    "timelineregionexit",
+    "trackschanged",
+    "unloading",
+    "variantchanged",
+    "retry",
+    "caststatuschanged"
+];

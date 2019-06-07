@@ -1,8 +1,8 @@
 @import './colours';
 
-$romper-button-height: 50px;
-$romper-button-width: 50px;
-$romper-buttons-max-height: 60px;
+$romper-button-height: 56px;
+$romper-button-width: 56px;
+$romper-buttons-max-height: 64px;
 $romper-hover-text-size: 25px;
 
 .romper-media-element-queued {
@@ -10,17 +10,18 @@ $romper-hover-text-size: 25px;
 }
 
 @mixin button {
-  background-color: $backing-colour;
+  background-color: $transparent;
   border: 0;
   height: 100%;
   margin: 0;
   outline: none;
-  padding: 4px 0;
+  padding: 4px;
   vertical-align: top;
   width: $romper-button-width;
 
   &:hover {
-    background-color: $backing-colour-dark;
+    background-color: $highlight-invert;
+    filter: invert(100%);
   }
 
   &.romper-button-selected {
@@ -49,7 +50,7 @@ $romper-hover-text-size: 25px;
   max-width: 60%;
   opacity: 0.9;
   overflow-y: auto;
-  padding: 5px;
+  padding: 13px;
   z-index: 4;
 
   & > * {
@@ -112,6 +113,10 @@ $romper-hover-text-size: 25px;
   justify-content: flex-end;
   position: relative;
   width: 800px;
+
+  * {
+    box-sizing: content-box;
+  }
 
   &.romper-player-fullscreen {
     height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
@@ -182,7 +187,7 @@ $romper-hover-text-size: 25px;
 
   .a-enter-vr {
     &.embedded {
-      height: $romper-button-width;
+      height: $romper-button-height;
       top: 0;
       width: $romper-button-height;
     }
@@ -220,6 +225,11 @@ $romper-hover-text-size: 25px;
     visibility: collapse !important;
   }
 
+  .romper-unavailable {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
   .romper-control-selected > .romper-icon {
     background-color: $highlight;
   }
@@ -234,23 +244,41 @@ $romper-hover-text-size: 25px;
 
   .romper-play-button {
     @include button;
-    margin-right: 20px;
 
     div {
       @include button-icon('../images/media-play.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
   .romper-pause-button {
     @include button;
-    margin-right: 20px;
 
     div {
       @include button-icon('../images/media-pause.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
+    }
+  }
+
+  .romper-seek-fwd-button {
+    @include button;
+
+    div {
+      @include button-icon('../images/seek-forward-40.svg');
+      height: $romper-button-height;
+      width: $romper-button-width;
+    }
+  }
+
+  .romper-seek-back-button {
+    @include button;
+
+    div {
+      @include button-icon('../images/seek-back-40.svg');
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -260,8 +288,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/volume-high.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -272,8 +300,6 @@ $romper-hover-text-size: 25px;
 
     .romper-button-icon-div {
       @include button-icon('../images/media-play.svg');
-      height: 50%;
-      width: 50%;
     }
   }
 
@@ -281,9 +307,9 @@ $romper-hover-text-size: 25px;
     @include button;
 
     div {
-      @include button-icon('../images/reload.svg');
-      height: 40px;
-      width: 40px;
+      @include button-icon('../images/media-step-backward.svg');
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -292,8 +318,8 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/layers.svg');
-      height: 50%;
-      width: 50%;
+      height: 60%;
+      width: 60%;
     }
   }
 
@@ -302,19 +328,18 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/list.svg');
-      height: 50%;
-      width: 50%;
+      height: 60%;
+      width: 60%;
     }
   }
 
   .romper-fullscreen-button {
     @include button;
-    margin-left: 20px;
 
     div {
       @include button-icon('../images/fullscreen-enter.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -322,8 +347,8 @@ $romper-hover-text-size: 25px;
     .romper-fullscreen-button {
       div {
         @include button-icon('../images/fullscreen-exit.svg');
-        height: 50%;
-        width: 50%;
+        height: $romper-button-height;
+        width: $romper-button-width;
       }
     }
   }
@@ -333,18 +358,19 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/media-step-backward.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
   .romper-next-button {
     @include button;
+    margin-right: auto;
 
     div {
       @include button-icon('../images/media-step-forward.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
     }
   }
 
@@ -361,27 +387,68 @@ $romper-hover-text-size: 25px;
 
     div {
       @include button-icon('../images/subtitles.svg');
-      height: 50%;
-      width: 50%;
+      height: $romper-button-height;
+      width: $romper-button-width;
+    }
+  }
+
+  .romper-mute-button {
+    @include button;
+    height: 50px;
+    margin-right: auto;
+    padding: 0;
+
+    div {
+      @include button-icon('../images/volume-high.svg');
+      width: 80%;
+    }
+  }
+
+  .romper-muted-button {
+    @include button;
+    height: 50px;
+    margin-right: auto;
+    padding: 0;
+
+    div {
+      @include button-icon('../images/volume-off.svg');
+      width: 80%;
     }
   }
 
   .romper-volume-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-direction: column;
+    left: 10%;
+    max-height: unset;
+    position: absolute;
+    z-index: 14;
 
     .romper-volume-control {
       align-items: center;
-      display: flex;
+      display: block;
       flex: none;
       flex-direction: row;
       font-size: smaller;
       justify-content: center;
       width: 100%;
 
+      .romper-control-line {
+        display: inline-flex;
+      }
+
+      .romper-volume-level {
+        align-self: center;
+        padding-left: 15px;
+        width: 1.2em;
+      }
+
       .romper-volume-label {
         margin-right: 1em;
         overflow-x: hidden;
+        padding-bottom: 10px;
         text-align: left;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -389,6 +456,7 @@ $romper-hover-text-size: 25px;
       }
 
       .romper-volume-range {
+        margin-top: 5px;
         width: 100%;
       }
     }
@@ -396,8 +464,14 @@ $romper-hover-text-size: 25px;
 
   .romper-representation-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-wrap: wrap;
     justify-content: center;
+    max-height: unset;
+    position: absolute;
+    right: 10%;
+    z-index: 14;
 
     .romper-representation-icon {
       width: 3em;
@@ -406,8 +480,14 @@ $romper-hover-text-size: 25px;
 
   .romper-icon-overlay {
     @include overlay;
+    background-color: $black;
+    bottom: 104px;
     flex-wrap: wrap;
     justify-content: center;
+    max-height: unset;
+    position: absolute;
+    right: 10%;
+    z-index: 14;
 
     .romper-icon {
       width: 3em;
@@ -443,68 +523,66 @@ $romper-hover-text-size: 25px;
   }
 
   .romper-link-choice-overlay {
-    border-bottom-color: transparent;
-    border-bottom-style: solid;
-    border-bottom-width: 13px;
-    display: grid;
-    grid-auto-flow: column;
-    height: calc(100% - 13px);
-    min-height: 0;
+    background: linear-gradient($transparent 0%, $forty-percent-black 20%, $ninety-percent-black 100%);
+    bottom: 0;
+    display: flex;
+    min-height: 10%;
     min-width: 0;
+    padding: 3% 10%;
     pointer-events: none;
-    width: 100%;
-    z-index: 5;
-
-    &.icon-bar {
-      // add this class to overlay for small low icons
-      opacity: 1;
-
-      >.romper-link-control {
-        align-self: end;
-        height: 80px;
-        pointer-events: all;
-      }
-
-      &.romper-inactive {
-        opacity: 0;
-      }
-    }
-
-    &.tworow {
-      grid-template-rows: 1fr 1fr;
-
-      // only have one row in compact mode
-      &.icon-bar {
-        grid-template-rows: unset;
-      }
-    }
+    position: absolute;
+    width: 80%;
+    z-index: 15;
 
     &.fade {
       opacity: 0;
     }
 
     .romper-link-control {
+      border-bottom-color: $transparent;
+      border-bottom-style: solid;
+      border-bottom-width: 5px;
+      flex: 1 1 0;
+      height: 100%;
+      margin-bottom: 1%;
       pointer-events: all;
+      width: 100%;
     }
 
     .romper-control-selected {
-      border-image: $white;
-      border-style: solid;
-      border-width: 1px;
-      margin: 3px;
+      border-bottom: 4px solid $highlight;
+
+      .romper-link-icon-container {
+        border: 1px solid $highlight;
+      }
     }
 
     .romper-control-unselected {
-      border: 1px transparent;
-      margin: 3px;
+      border-bottom: 4px solid $transparent;
+
+      &.default {
+        border-bottom: 4px solid $backing-colour;
+      }
+
+      .romper-link-icon-container {
+        border: 1px solid $transparent;
+      }
     }
 
   }
 
   .romper-link-choice-grid-cell {
-    animation: appear 0.8s;
+    // animation: appear 0.8s;
     opacity: 1;
   }
+}
+
+.romper-link-icon-container {
+  border-radius: 50%;
+  height: 8em;
+  margin-left: auto;
+  margin-right: auto;
+  width: 8em;
 }
 
 .romper-text-link-container {
@@ -515,16 +593,16 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-link-text-icon {
-  font-size: 300%;
+  font-size: 200%;
+  margin: 10px;
   text-align: center;
 }
 
 .romper-player > .romper-gui {
 
   >.romper-start-button {
-    background-color: $start-button-colour;
-    bottom: 30%;
-    display: flex;
+    bottom: 50%;
+    display: grid;
     height: $romper-button-height;
     left: 50%;
     margin-right: -50%;
@@ -534,45 +612,82 @@ $romper-hover-text-size: 25px;
     width: 170px;
     z-index: 101;
 
+    &:hover {
+      background-color: $transparent;
+
+      >div {
+        background-color: $highlight-invert;
+      }
+    }
+
+    .romper-start-button-icon {
+      background-color: $transparent;
+      border: 1px solid $white;
+      border-radius: 50%;
+      height: 100px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100px;
+    }
+
     .romper-start-button-icon-div {
-      display: flex;
-      flex: 0 0 auto;
-      height: $romper-button-height;
-      margin-left: 0;
-      margin-right: 0;
-      width: $romper-button-height;
+      height: 100px; // 40px;
+      margin-left: 15px; // 37px;
+      margin-top: 0; //30px;
+      width: 80px; // 33px;
     }
 
     .romper-start-button-text-div {
       color: $white;
-      display: flex;
-      flex: 1 1 auto;
-      font-size: $romper-hover-text-size;
+      font-size: 48px;
       font-weight: bold;
       line-height: $romper-button-height;
-      margin-left: 10px;
-    }
-
-    &:hover {
-      background-color: $start-button-colour-dark;
+      margin-top: 10px;
+      text-align: center;
     }
   }
 
   >.romper-buttons {
-
-    background-color: $backing-colour;
+    background: linear-gradient($transparent 0, $black 70%, $black 100%);
     bottom: 0;
     display: flex;
     height: 100%;
-    max-height: $romper-buttons-max-height;
+    max-height: 180px;
     opacity: 0;
+    padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
     width: 100%;
     z-index: 10;
 
+    .left,
+    .right {
+      flex-grow: 1;
+      max-width: 200px;
+      padding-top: 10px;
+      width: 200px;
+    }
+
+    .center {
+      flex-grow: 1;
+      padding-top: 10px;
+    }
+
+    .right {
+      display: flex;
+    }
+
     >.romper-media-transport {
-      width: 100%;
+      display: flex;
+      flex-direction: row;
+      height: 74px;
+      margin-left: 10%;
+      padding-top: 120px;
+      width: 80%;
+
+      >div {
+        border-top: 1px solid $white;
+      }
    }
 
     &.show {
@@ -581,50 +696,23 @@ $romper-hover-text-size: 25px;
 
   }
 
-  >.romper-narrative-element-transport {
+  .romper-narrative-element-transport {
     bottom: $romper-buttons-max-height;
     display: flex;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
     opacity: 1; // set to 0 to hide with rest of buttons
-    position: absolute;
     transition: all 1s ease;
-    width: 100%;
+    width: 340px;
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
       opacity: 1;
     }
 
-    >.romper-repeat-button {
-      background-color: $backing-colour;
-      bottom: 0;
-      height: $romper-button-height;
-      left: 50%;
-      margin-right: -50%;
-      position: absolute;
-      transform: translate(-50%, 0%);
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
-    }
-
-    >.romper-back-button {
-      background-color: $backing-colour;
-      height: $romper-button-height;
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
-    }
-
-    >.romper-next-button {
-      background-color: $backing-colour;
-      height: $romper-button-height;
-      margin-left: auto;
-
-      &:hover {
-        background-color: $backing-colour-dark;
-      }
+    .romper-button {
+      margin: 0 5px;
     }
   }
 
@@ -642,37 +730,11 @@ $romper-hover-text-size: 25px;
     }
   }
 
-  >.romper-overlay-controls {
-    >.romper-icon-button {
-      background-color: $backing-colour;
-      border: 0;
-      bottom: $romper-buttons-max-height;
-      height: $romper-button-height;
-      padding: 0 0 4px;
-      position: absolute;
-      right: 70px;
-      transition: opacity 1s 1s ease;
-      z-index: 51;
-    }
-
-    >.romper-representation-button {
-      background-color: $backing-colour;
-      border: 0;
-      height: $romper-button-height;
-      left: 0;
-      padding: 0 0 4px;
-      position: absolute;
-      top: 0;
-      transition: opacity 1s 1s ease;
-      z-index: 51;
-    }
-  }
-
   >.romper-buttons-activate-area {
     bottom: 0;
     display: block;
     height: 13%;
-    max-height: $romper-buttons-max-height;
+    max-height: 120px;
     opacity: 0;
     position: absolute;
     width: 100%;
@@ -683,7 +745,15 @@ $romper-hover-text-size: 25px;
       height: 0%;
       width: 0%;
     }
+
+    &.disabled {
+      pointer-events: none;
+    }
   }
+}
+
+.romper-overlay-controls {
+  margin-left: auto;
 }
 
 .romper-control-disabled {
@@ -691,11 +761,18 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-scrub-bar {
-  display: flex;
-  height: 100%;
-  margin-left: 10px;
-  margin-right: 10px;
-  width: 100%;
+  bottom: 100px;
+  display: none;
+  height: 10px;
+  left: 10%;
+  margin: 0;
+  position: absolute;
+  right: 0;
+  width: 80%;
+
+  &.debug {
+    display: block;
+  }
 }
 
 .romper-image-overlay {
@@ -721,32 +798,32 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-variable-panel {
-  background-color: $var-panel-background;
-  border: 1px solid $half-white;
-  bottom: 120px;
+  background: linear-gradient($transparent 0%, $forty-percent-black 20%, $ninety-percent-black 100%);
+  bottom: 0;
+  color: $transparent-white;
   display: flex;
   flex-direction: column;
   font-size: 2vw;
-  left: 10%;
+  left: 0;
   opacity: 0;
+  padding-bottom: $romper-buttons-max-height;
   position: absolute;
+  right: 0;
   text-align: center;
-  top: 5%;
+  top: 40%;
   transition: opacity 0.5s ease;
-  width: 80%;
   z-index: 2;
 
   &.active {
     opacity: 1;
     transition: opacity 0.7s ease;
+    z-index: 12;
   }
 }
 
 .romper-var-form-title {
-  border-bottom: 1px solid $var-panel-border;
   font-size: 120%;
-  font-weight: bold;
-  padding: 2% 25px 1%;
+  padding: 5% 25px 1%;
 }
 
 .romper-var-form-var-containers {
@@ -762,7 +839,7 @@ $romper-hover-text-size: 25px;
 
 .romper-variable-form-item {
   display: flex;
-  height: 60%;
+  height: 30%;
   margin: 0.5%;
   opacity: 1;
   padding-left: 10%;
@@ -788,24 +865,26 @@ $romper-hover-text-size: 25px;
 
 .romper-var-form-input-container {
   display: flex;
-  padding-left: 5vw;
+  width: 100%;
 }
 
 .romper-var-form-button-div {
+  display: inline-flex;
+  padding-left: 10vw;
+  width: 100%;
+
   button {
-    background-color: $backing-colour-dark;
+    background-color: $transparent;
     border: 0;
-    border-left: 5px solid transparent;
-    border-radius: 3px;
-    color: $white;
+    color: $transparent-white;
     cursor: pointer;
     font-size: 80%;
     margin-bottom: 2%;
     margin-right: 10%;
-    min-width: 10vw;
+    min-width: 2em;
 
     &.selected {
-      border-left: 5px solid $white;
+      border-bottom: 2px solid $white;
     }
   }
 }
@@ -817,6 +896,8 @@ $romper-hover-text-size: 25px;
 .romper-var-form-answer-cont {
   display: table;
   height: 100%;
+  padding: 0 2%;
+  width: 50%;
 }
 
 .romper-var-form-answer-cont-inner {
@@ -837,57 +918,6 @@ $romper-hover-text-size: 25px;
   }
 }
 
-.romper-var-form-boolean-toggle {
-  display: flex;
-  flex-grow: 1;
-  height: 2vw;
-  margin-left: 1vw;
-  margin-right: 1vw;
-  position: relative;
-  width: 4.4vw;
-
-  input {
-    height: 0;
-    opacity: 0;
-    width: 0;
-
-    &:checked + .slider {
-      background-color: $dark-grey-blue;
-    }
-
-    &:checked + .slider::before {
-      -ms-transform: translateX(-3vw);
-      -webkit-transform: translateX(-3vw);
-      transform: translateX(-3vw);
-    }
-  }
-
-  .slider {
-    background-color: $romper-background-color;
-    border-radius: 1vw;
-    bottom: 0;
-    cursor: pointer;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    transition: all .4s ease;
-  }
-
-  .slider::before {
-    background-color: $white;
-    border-radius: 50%;
-    bottom: 0.25vw;
-    content: '';
-    height: 1.46667vw;
-    left: 3vw;
-    margin-left: 0.25vw;
-    position: absolute;
-    transition: all .4s ease;
-    width: 1.46667vw;
-  }
-}
-
 .romper-var-form-list-input {
   select {
     border: 0;
@@ -895,6 +925,7 @@ $romper-hover-text-size: 25px;
     font-size: 2vw;
     height: 3vw;
     text-align: left;
+    width: 80%;
   }
 }
 
@@ -910,7 +941,6 @@ $romper-hover-text-size: 25px;
     border: 0;
     border-radius: 5px;
     color: $dark-grey-blue;
-    font-size: 1.5vw;
     height: 2.5vw;
     text-align: center;
 
@@ -924,13 +954,14 @@ $romper-hover-text-size: 25px;
     &.romper-var-form-slider {
       margin-left: 1vw;
       margin-right: 1vw;
-      width: 90%;
+      width: 12vw;
     }
   }
 
   span {
     color: $romper-background-color;
     font-size: 1.5vw;
+    line-height: 2.5vw;
     margin-bottom: -1vw;
     width: 50%;
 
@@ -945,37 +976,75 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-button-container {
-  border-top: 1px solid $var-panel-border;
+  display: inline-flex;
+  margin-left: 10%;
   padding: 2% 0;
+  position: relative;
   text-align: center;
-  width: 100%;
+  width: 80%;
 
   .var-back {
-    left: 2vw;
-    position: absolute;
+    background: url('../images/media-step-backward.svg') no-repeat left;
+    background-size: contain;
+    margin-right: auto;
+    text-align: right;
     visibility: hidden;
 
     &.active {
       visibility: visible;
     }
   }
+
+  .var-count {
+    font-size: 80%;
+    line-height: $romper-button-height;
+  }
+
+  .var-next {
+    background: url('../images/media-step-forward.svg') no-repeat right;
+    background-size: contain;
+    margin-left: auto;
+    text-align: left;
+  }
 }
 
 .romper-var-form-button {
-  background-color: $backing-colour-dark;
-  border: 0;
+  background-color: $transparent;
   border-radius: 3px;
-  color: $white;
+  color: $transparent-white;
   cursor: pointer;
   font-size: 80%;
-  padding: 2% 1%;
-  width: 10%;
+  padding: 1%;
+  width: 15%;
 }
 
 .romper-var-form-feedback {
-  bottom: 2%;
+  bottom: ($romper-buttons-max-height + 20px);
   font-size: 80%;
   margin: 0;
   position: absolute;
   right: 2%;
+}
+
+.romper-ux-divider {
+  border-bottom: 1px solid $white;
+  display: none;
+  height: 2px;
+  left: 10%;
+  pointer-events: none;
+  position: absolute;
+  top: 20px;
+  width: 80%;
+  z-index: 16;
+
+  &.show {
+    display: initial;
+  }
+}
+
+.romper-ux-countdown {
+  background: $highlight;
+  height: 2px;
+  margin-left: 49%;
+  width: 2%;
 }
