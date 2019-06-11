@@ -52,6 +52,7 @@ export default class ImageRenderer extends BaseRenderer {
         this._setVisibility(true);
 
         this._disablePlayButton();
+        this._player.disableRepeatButton();
         this._disableScrubBar();
     }
 
@@ -72,6 +73,7 @@ export default class ImageRenderer extends BaseRenderer {
             }
         }, 100);
         this._enablePlayButton();
+        this._player.resetRepeatBackButton();
         this._enableScrubBar();
     }
 
