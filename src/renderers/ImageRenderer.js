@@ -44,8 +44,8 @@ export default class ImageRenderer extends BaseRenderer {
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
     }
 
-    start() {
-        super.start();
+    willStart() {
+        super.willStart();
         if (!this._imageElement) this.renderImageElement();
 
         this._visible = true;
@@ -53,6 +53,10 @@ export default class ImageRenderer extends BaseRenderer {
 
         this._disablePlayButton();
         this._disableScrubBar();
+    }
+
+    start() {
+        super.start();
         this._hasEnded = true;
     }
 
