@@ -1158,7 +1158,7 @@ class Player extends EventEmitter {
         this._numChoices += 1;
         this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
-        if (this._numChoices > 4) {
+        if (this._numChoices >= 4) {
             this._linkChoice.overlay.classList.add('tworow');
         } else {
             this._linkChoice.overlay.classList.remove('tworow');
