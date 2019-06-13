@@ -1154,13 +1154,9 @@ class Player extends EventEmitter {
     }
 
     _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
+        this._linkChoice.overlay.classList.remove(`choices-${this._numChoices}`);
         this._numChoices += 1;
-
-        if (this._numChoices > 4) {
-            this._linkChoice.overlay.classList.add('tworow');
-        } else {
-            this._linkChoice.overlay.classList.remove('tworow');
-        }
+        this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
         const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {
