@@ -7,7 +7,7 @@ import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
-const TIMER_INTERVAL = 10;
+const TIMER_INTERVAL = 100;
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
@@ -24,7 +24,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _imageTimer: ?IntervalID;
 
-    _currentTime: number;
+    _timeRemaining: number;
 
     constructor(
         representation: Representation,
@@ -47,7 +47,7 @@ export default class ImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this._currentTime = 0;
+        this._timeRemaining = 0;
     }
 
     willStart() {
@@ -66,7 +66,7 @@ export default class ImageRenderer extends BaseRenderer {
         super.start();
         this._hasEnded = true;
         if (this._representation.duration && this._representation.duration > 0){
-            this._currentTime = this._representation.duration * 1000;
+            this._timeRemaining = this._representation.duration * 1000;
             // eslint-disable-next-line max-len
             logger.info(`Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
             this._startTimer();
@@ -77,15 +77,15 @@ export default class ImageRenderer extends BaseRenderer {
 
     pause() {
         // if timed image, pause timeout
-        if (this._currentTime > 0) {
+        if (this._timeRemaining > 0) {
             clearInterval(this._imageTimer);
         }
     }
 
     _startTimer() {
         this._imageTimer = setInterval(() => {
-            this._currentTime -= TIMER_INTERVAL;
-            if (this._currentTime <= 0) {
+            this._timeRemaining -= TIMER_INTERVAL;
+            if (this._timeRemaining <= 0) {
                 // eslint-disable-next-line max-len
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
@@ -95,7 +95,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     play(){
         // if timed image, resume timeout
-        if (this._currentTime > 0){
+        if (this._timeRemaining > 0){
             this._startTimer();
         }
     }
