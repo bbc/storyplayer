@@ -101,6 +101,10 @@ $romper-hover-text-size: 25px;
   }
 }
 
+.romper-threejs {
+  position: absolute;
+}
+
 .romper-player {
   color: $accent-colour;
   display: flex;
