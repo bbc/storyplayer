@@ -883,8 +883,7 @@ class Player extends EventEmitter {
 
     _repeatButtonClicked() {
         // reveal back button and hide this
-        this._backButton.classList.remove('romper-inactive');
-        this._repeatButton.classList.add('romper-inactive');
+        this._disableRepeatButton();
         // set timer
         if (this._backRepeatTimeout) {
             clearTimeout(this._backRepeatTimeout);
@@ -895,9 +894,26 @@ class Player extends EventEmitter {
         this._logUserInteraction(AnalyticEvents.names.REPEAT_BUTTON_CLICKED);
     }
 
+    // hide the repeat button, and show the back button
     resetRepeatBackButton() {
         this._backButton.classList.add('romper-inactive');
         this._repeatButton.classList.remove('romper-inactive');
+    }
+
+    // hide the repeat button, and show the back button, AMD make sure repeat doesn't reappear
+    // as result of timeout
+    disableRepeatButton() {
+        // disable repeat, and clear timeout so it stays disabled
+        if (this._backRepeatTimeout) {
+            clearTimeout(this._backRepeatTimeout);
+        }
+        this._disableRepeatButton();
+    }
+
+    // hide the back button, and show the repeat button
+    _disableRepeatButton() {
+        this._backButton.classList.remove('romper-inactive');
+        this._repeatButton.classList.add('romper-inactive');
     }
 
     _backButtonClicked() {
@@ -1138,13 +1154,9 @@ class Player extends EventEmitter {
     }
 
     _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
+        this._linkChoice.overlay.classList.remove(`choices-${this._numChoices}`);
         this._numChoices += 1;
-
-        if (this._numChoices > 4) {
-            this._linkChoice.overlay.classList.add('tworow');
-        } else {
-            this._linkChoice.overlay.classList.remove('tworow');
-        }
+        this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
         const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {

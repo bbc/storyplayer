@@ -444,6 +444,7 @@ export default class BaseRenderer extends EventEmitter {
 
             // go through asset collections and render icons
             return iconSrcPromises.then((iconObjects) => {
+
                 this._player.clearLinkChoices();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
@@ -586,8 +587,6 @@ export default class BaseRenderer extends EventEmitter {
                             targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
                         });
                     }));
-            } else {
-                iconObjectPromises.push(Promise.resolve(iconSpecObject));
             }
 
             iconObjectPromises.push(Promise.resolve(iconSpecObject));

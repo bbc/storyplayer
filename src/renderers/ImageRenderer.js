@@ -7,6 +7,8 @@ import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
+const TIMER_INTERVAL = 100;
+
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImageElement;
 
@@ -20,6 +22,9 @@ export default class ImageRenderer extends BaseRenderer {
 
     _visible: boolean;
 
+    _imageTimer: ?IntervalID;
+
+    _timeRemaining: number;
 
     constructor(
         representation: Representation,
@@ -42,18 +47,57 @@ export default class ImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
+        this._timeRemaining = 0;
     }
 
-    start() {
-        super.start();
+    willStart() {
+        super.willStart();
         if (!this._imageElement) this.renderImageElement();
 
         this._visible = true;
         this._setVisibility(true);
 
         this._disablePlayButton();
+        this._player.disableRepeatButton();
         this._disableScrubBar();
+    }
+
+    start() {
+        super.start();
         this._hasEnded = true;
+        if (this._representation.duration && this._representation.duration > 0){
+            this._timeRemaining = this._representation.duration * 1000;
+            // eslint-disable-next-line max-len
+            logger.info(`Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
+            this._startTimer();
+        } else if (this._representation.duration && this._representation.duration === 0) {
+            this.complete();
+        }
+    }
+
+    pause() {
+        // if timed image, pause timeout
+        if (this._timeRemaining > 0) {
+            clearInterval(this._imageTimer);
+        }
+    }
+
+    _startTimer() {
+        this._imageTimer = setInterval(() => {
+            this._timeRemaining -= TIMER_INTERVAL;
+            if (this._timeRemaining <= 0) {
+                // eslint-disable-next-line max-len
+                logger.info(`Image representation ${this._representation.id} completed timeout`);
+                this.complete();
+            }
+        }, TIMER_INTERVAL);
+    }
+
+    play(){
+        // if timed image, resume timeout
+        if (this._timeRemaining > 0){
+            this._startTimer();
+        }
     }
 
     end() {
@@ -67,7 +111,11 @@ export default class ImageRenderer extends BaseRenderer {
                 this._setVisibility(false);
             }
         }, 100);
+        if (this._imageTimer){
+            clearInterval(this._imageTimer);
+        }
         this._enablePlayButton();
+        this._player.resetRepeatBackButton();
         this._enableScrubBar();
     }
 

@@ -111,7 +111,7 @@ export default class Controller extends EventEmitter {
         let nextNarrativeElement = null;
         return this.getValidNextSteps()
             .then((nextNarrativeElementObjects) => {
-                if (nextNarrativeElementObjects.length === 1) {
+                if (nextNarrativeElementObjects.length >= 1) {
                     // eslint-disable-next-line prefer-destructuring
                     nextNarrativeElement = nextNarrativeElementObjects[0].ne;
                 }

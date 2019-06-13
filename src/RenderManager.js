@@ -20,6 +20,7 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
+import ImageRenderer from './renderers/ImageRenderer';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -171,6 +172,9 @@ export default class RenderManager extends EventEmitter {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             this._player.playoutEngine.pause();
             this._player.playoutEngine.pauseBackgrounds();
+            if (this._currentRenderer instanceof ImageRenderer) {
+                this._currentRenderer.pause();
+            }
         } else {
             this._isVisible = true;
             if (this._isPlaying) {
@@ -185,6 +189,9 @@ export default class RenderManager extends EventEmitter {
             if (this._player._choiceCountdownTimeout && this._currentRenderer) {
                 // restart countdown
                 this._player.startChoiceCountdown(this._currentRenderer);
+            }
+            if (this._currentRenderer instanceof ImageRenderer) {
+                this._currentRenderer.play();
             }
         }
         this._analytics({
