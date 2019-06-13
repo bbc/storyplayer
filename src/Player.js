@@ -1174,6 +1174,12 @@ class Player extends EventEmitter {
         this._numChoices += 1;
         this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
+        if (this._numChoices > 4) {
+            this._linkChoice.overlay.classList.add('tworow');
+        } else {
+            this._linkChoice.overlay.classList.remove('tworow');
+        }
+
         const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');

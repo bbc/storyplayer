@@ -530,6 +530,26 @@ $romper-hover-text-size: 25px;
     width: 80%;
     z-index: 15;
 
+    &.fullscreen-icons {
+      background: none;
+      display: grid;
+      grid-auto-flow: column;
+      height: 100%;
+      opacity: 0;
+      padding: 0;
+      width: 100%;
+
+      &.tworow {
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .romper-link-icon-container {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+      }
+    }
+
     &.fade {
       opacity: 0;
     }
