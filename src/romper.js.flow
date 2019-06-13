@@ -89,6 +89,7 @@ export type Representation = {
             asset_collection_id: string
         }>
     },
+    duration?: number,
     meta?: Object,
     choices?: Array<RepresentationChoice>,
     behaviours?: {
