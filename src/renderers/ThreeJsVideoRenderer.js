@@ -1,7 +1,7 @@
 // @flow
-import AFrameRenderer from './AFrameRenderer';
+
 import Player, { PlayerEvents } from '../Player';
-import BaseRenderer from './BaseRenderer';
+import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -9,9 +9,9 @@ import Controller from '../Controller';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
-const ORIENTATION_POLL_INTERVAL = 2000;
+const THREE = require('three');
 
-export default class AFrameFlatVideoRenderer extends BaseRenderer {
+export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
@@ -24,22 +24,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
     _handlePlayPauseButtonClicked: Function;
 
-    _setOrientationVariable: Function;
-
-    _orientationWatcher: ?IntervalID;
-
-    _videoDivId: string;
-
-    _videoAssetElement: HTMLVideoElement;
-
-    _initialRotation: string;
-
-    _videoTypeString: string;
-
-    _sceneElements: Array<HTMLElement>;
-
-    _ambisonic: string;
-
     _lastSetTime: number;
 
     _inTime: number;
@@ -49,14 +33,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
     _setOutTime: Function;
 
     _setInTime: Function;
-
-    _hasEnded: boolean;
-
-    _started: boolean;
-
-    _rendered: boolean;
-
-    _afr: typeof AFrameRenderer;
 
     constructor(
         representation: Representation,
@@ -77,8 +53,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
-        this._setOrientationVariable = this._setOrientationVariable.bind(this);
-        this._orientationWatcher = null;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
@@ -90,16 +64,11 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         this._outTime = -1;
         this._lastSetTime = 0;
 
-        // this is what we refer to
-        this._videoDivId = `flatvideo-${this._rendererId}`;
-
-        this._rendered = false;
-
-        this.collectElementsToRender();
+        this.renderVideoElement();
     }
 
     _endedEventListener() {
-        logger.info('flat video in 360 ended');
+        logger.info('360 video ended');
         if (!this._hasEnded) {
             this._hasEnded = true;
             this._player.getLinkChoiceElement().style.visibility = 'visible';
@@ -119,22 +88,33 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        logger.info(`Started: ${this._representation.id}`);
-        if (this._rendered) {
-            this._startFlatVideo();
-        }
+        this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
-        this._hasEnded = false;
-        this._started = true;
     }
 
-    collectElementsToRender() {
+    _startThreeSixtyVideo() {
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        const texture = new THREE.VideoTexture(videoElement);
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+
+        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+
+        const mesh = new THREE.Mesh(geometry, material);
+        this._scene.add(mesh);
+
+        this._playoutEngine.setPlayoutActive(this._rendererId);
+        videoElement.style.visibility = 'hidden';
+        this._animate();
+    }
+
+    renderVideoElement() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.av_src) {
-                        // get meta
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                             this._setInTime(parseFloat(fg.meta.romper.in));
                         }
@@ -151,7 +131,7 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
-                                this._buildAframeVideoScene(appendedUrl);
+                                this.populateVideoElement(appendedUrl);
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -161,89 +141,14 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
         }
     }
 
-    _buildAframeVideoScene(mediaUrl: string) {
+    populateVideoElement(mediaUrl: string) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
-            return;
+        } else {
+            this._playoutEngine.queuePlayout(this._rendererId, {
+                url: mediaUrl,
+            });
         }
-
-        this._playoutEngine.queuePlayout(this._rendererId, {
-            url: mediaUrl,
-        });
-
-        this._sceneElements = [];
-
-        // test how we might add other aFrame components specified in DM
-        if (this._representation.meta
-            && this._representation.meta.romper
-            && this._representation.meta.romper.aframe
-            && this._representation.meta.romper.aframe.extras) {
-            this._sceneElements.push(AFrameRenderer
-                .buildAframeComponents(this._representation.meta.romper.aframe.extras));
-        }
-
-        this._playoutEngine.getMediaElement(this._rendererId).id = this._videoDivId;
-        AFrameRenderer.addAsset(this._playoutEngine.getMediaElement(this._rendererId));
-
-        // all done - start playing if start has been called
-        // if not, we're ready
-        this._rendered = true;
-        if (this._started) {
-            this._startFlatVideo();
-        }
-    }
-
-
-    _startFlatVideo() {
-        // add elements
-        this._sceneElements.forEach(el => AFrameRenderer.addElementToScene(el));
-
-        // make sure AFrame is in romper target
-        AFrameRenderer.addAFrameToRenderTarget(this._target, this._player, this._analytics);
-
-        this._player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-
-        // poll for direction of view, and save as variable
-        this._orientationWatcher = setInterval(
-            this._setOrientationVariable,
-            ORIENTATION_POLL_INTERVAL,
-        );
-
-        const cameraContainer = document.getElementById('romper-camera-entity');
-        if (cameraContainer) {
-            cameraContainer.setAttribute('rotation', '0 0 0');
-        }
-
-        // automatically move on at video end
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._playoutEngine.setPlayoutActive(this._rendererId);
-
-        AFrameRenderer.setControlBarPosition(0);
-
-        AFrameRenderer._showFlatVideo(this._videoDivId);
-        // show aFrame content
-        AFrameRenderer.setSceneHidden(false);
-    }
-
-    _setOrientationVariable(): void {
-        const orientation = AFrameRenderer.getOrientation();
-        this._controller.setVariables({
-            _aframe_orientation_phi: orientation.phi,
-            _aframe_orientation_theta: orientation.theta,
-        });
-
-        // and log analytics
-        const logData = {
-            type: AnalyticEvents.types.USER_ACTION,
-            name: AnalyticEvents.names.VR_ORIENTATION_CHANGED,
-            from: 'not_set',
-            to: `${orientation.phi} ${orientation.theta}`,
-        };
-        this._analytics(logData);
     }
 
     _handlePlayPauseButtonClicked(): void {
@@ -255,7 +160,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             }
-            AFrameRenderer.togglePlayPause(videoElement.paused);
         }
     }
 
@@ -297,25 +201,19 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this.end();
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
     }
 
     switchTo() {
-        this.start();
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    isVRViewable(): boolean {
-        return true;
+        if (this._started) {
+            this._playoutEngine.setPlayoutActive(this._rendererId);
+        } else {
+            this.start();
+        }
     }
 
     end() {
-        // put video element back
-        this._target.appendChild(this._playoutEngine.getMediaElement(this._rendererId));
-
-        if (this._started) {
-            this._player.getLinkChoiceElement().style.visibility = 'visible';
-        }
+        super.end();
 
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
@@ -324,15 +222,6 @@ export default class AFrameFlatVideoRenderer extends BaseRenderer {
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
-
-        if (this._orientationWatcher) {
-            clearInterval(this._orientationWatcher);
-        }
-
-        this._started = false;
-        this._rendered = false;
-
-        // AFrameRenderer._aFrameSceneElement.exitVR();
     }
 
     destroy() {
