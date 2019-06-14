@@ -1424,7 +1424,8 @@ class Player extends EventEmitter {
             this._countdownTotal = 0;
             this._countdownContainer.classList.remove('show');
         }
-        this._linkChoice.overlay.classList.add('romper-inactive');
+        this._linkChoice.overlay.className =
+            'romper-overlay romper-link-choice-overlay romper-inactive';
         this._linkChoice.overlay.style.setProperty('animation', 'none');
     }
 
