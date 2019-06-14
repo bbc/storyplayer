@@ -546,6 +546,10 @@ $romper-hover-text-size: 25px;
         grid-template-rows: 1fr 1fr;
       }
 
+      &.threerow {
+        grid-template-rows: 1fr 1fr 1fr;
+      }
+
       .romper-link-icon-container {
         height: 100%;
         margin: 0;
