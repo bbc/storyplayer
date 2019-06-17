@@ -92,6 +92,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._hasEnded = false;
         this._started = true;
         this._createScene();
+        this.addIcon('https://rdux.files.bbci.co.uk/romper/startimage.jpg', 0, 20);
     }
 
     _createScene() {
@@ -105,17 +106,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         const webGlRenderer = new THREE.WebGLRenderer();
         webGlRenderer.setPixelRatio(window.devicePixelRatio);
 
-        // const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        // const texture = new THREE.VideoTexture(videoElement);
-        // const material = new THREE.MeshBasicMaterial({ map: texture });
-
-        // const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
-        // // invert the geometry on the x-axis so that all of the faces point inward
-        // geometry.scale(-1, 1, 1);
-
-        // const mesh = new THREE.Mesh(geometry, material);
-        // scene.add(mesh);
-
         this._domElement = webGlRenderer.domElement;
         this._domElement.classList.add('romper-threejs');
 
@@ -123,6 +113,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
         uiLayer.addEventListener('mouseup', this._onMouseUp, false);
         uiLayer.addEventListener('mousemove', this._onMouseMove, false);
+        uiLayer.addEventListener('mouseout', this._onMouseUp, false);
 
         target.appendChild(this._domElement);
         webGlRenderer.setSize(1600, 900);
@@ -133,10 +124,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             const lat = Math.max(-85, Math.min(85, this._view.lat));
             const phi = THREE.Math.degToRad(90 - lat);
             const theta = THREE.Math.degToRad(this._view.lon);
-            camera.position.x = this._view.distance * Math.sin(phi) * Math.cos(theta);
-            camera.position.y = this._view.distance * Math.cos(phi);
-            camera.position.z = this._view.distance * Math.sin(phi) * Math.sin(theta);
-            camera.lookAt( camera.target );
+            const viewTarget = new THREE.Vector3(
+                this._view.distance * Math.sin(phi) * Math.cos(theta),
+                this._view.distance * Math.cos(phi),
+                this._view.distance * Math.sin(phi) * Math.sin(theta),
+            );
+            camera.lookAt( viewTarget );
 
             webGlRenderer.render( this._scene, camera );
         };
@@ -191,6 +184,16 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             theta,
         };
 
+        const vlat = Math.max(-85, Math.min(85, this._view.lat));
+        const vphi = THREE.Math.degToRad(90 - vlat);
+        const vtheta = THREE.Math.degToRad(this._view.lon);
+        const viewTarget = new THREE.Vector3(
+            this._view.distance * Math.sin(vphi) * Math.cos(vtheta),
+            this._view.distance * Math.cos(vphi),
+            this._view.distance * Math.sin(vphi) * Math.sin(vtheta),
+        );
+        console.log('ANDY view', viewTarget);
+
         this._controller.setVariables({
             _threejs_orientation_lon: phi,
             _threejs_orientation_lat: theta,
@@ -204,6 +207,27 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             to: `${phi} ${theta}`,
         };
         this._analytics(logData);
+    }
+
+    addIcon(iconSrc: string, lat: number, long: number) {
+        const distance = 0.7 * this._view.distance;
+        const vphi = THREE.Math.degToRad(90 - lat);
+        const vtheta = THREE.Math.degToRad(long);
+        const xpos = distance * Math.sin(vphi) * Math.cos(vtheta);
+        const ypos = distance * Math.cos(vphi);
+        const zpos = distance * Math.sin(vphi) * Math.sin(vtheta);
+
+        const bmLoader = new THREE.ImageBitmapLoader();
+        const geometry = new THREE.PlaneGeometry( 16, 9 );
+        bmLoader.load(iconSrc, (imageBitmap) => {
+            const imTexture = new THREE.CanvasTexture( imageBitmap );
+            const imMaterial = new THREE.MeshBasicMaterial( { map: imTexture } );
+            const cube = new THREE.Mesh( geometry, imMaterial );
+            cube.position.set(xpos, ypos, zpos);
+            cube.rotation.set( 0, vtheta+Math.PI+0.5, 0);
+            this._scene.add(cube);
+            console.log('ANDY added cube to scene', cube.position, vtheta);
+        });
     }
 
     end() {
