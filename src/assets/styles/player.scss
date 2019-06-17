@@ -558,7 +558,16 @@ $romper-hover-text-size: 25px;
     }
 
     &.fade {
-      opacity: 0;
+
+      .romper-control-selected {
+        opacity: 0;
+        transition: opacity 0.7s 0.3s ease;
+      }
+
+      .romper-control-unselected {
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
     }
 
     .romper-link-control {
