@@ -69,6 +69,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
 
+    _linkFadeTimeout: TimeoutID;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -171,6 +173,7 @@ export default class BaseRenderer extends EventEmitter {
 
     end() {
         this._reapplyLinkConditions();
+        clearTimeout(this._linkFadeTimeout);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -812,7 +815,7 @@ export default class BaseRenderer extends EventEmitter {
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         this._player._linkChoice.overlay.classList.add('fade');
-        setTimeout(() => {
+        this._linkFadeTimeout = setTimeout(() => {
             this._player._linkChoice.overlay.classList.remove('fade');
             this._player.clearLinkChoices();
             if (narrativeElementId) {
