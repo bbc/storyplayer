@@ -1158,6 +1158,17 @@ class Player extends EventEmitter {
         this._numChoices += 1;
         this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
+        if (this._numChoices > 8) {
+            this._linkChoice.overlay.classList.remove('tworow');
+            this._linkChoice.overlay.classList.add('threerow');
+        } else if (this._numChoices >= 4) {
+            this._linkChoice.overlay.classList.remove('threerow');
+            this._linkChoice.overlay.classList.add('tworow');
+        } else {
+            this._linkChoice.overlay.classList.remove('tworow');
+            this._linkChoice.overlay.classList.remove('threerow');
+        }
+
         const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
@@ -1418,7 +1429,8 @@ class Player extends EventEmitter {
             this._countdownTotal = 0;
             this._countdownContainer.classList.remove('show');
         }
-        this._linkChoice.overlay.classList.add('romper-inactive');
+        this._linkChoice.overlay.className =
+            'romper-overlay romper-link-choice-overlay romper-inactive';
         this._linkChoice.overlay.style.setProperty('animation', 'none');
     }
 
