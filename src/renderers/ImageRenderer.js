@@ -93,6 +93,18 @@ export default class ImageRenderer extends BaseRenderer {
         }, TIMER_INTERVAL);
     }
 
+    getCurrentTime(): Object {
+        if (this._representation.duration && this._representation.duration > 0) {
+            const timeObject = {
+                timeBased: true,
+                currentTime: this._representation.duration,
+                remainingTime: this._timeRemaining,
+            };
+            return timeObject;
+        }
+        return super.getCurrentTime();
+    }
+
     play(){
         // if timed image, resume timeout
         if (this._timeRemaining > 0){
