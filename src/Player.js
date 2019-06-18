@@ -942,9 +942,6 @@ class Player extends EventEmitter {
         if (this._icon) {
             this._icon.deactivateOverlay();
         }
-        if (this._linkChoice) {
-            this._linkChoice.deactivateOverlay();
-        }
     }
 
     _subtitlesButtonClicked() {
@@ -1196,7 +1193,7 @@ class Player extends EventEmitter {
                 const { style } = iconElement;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
                 const iconTextPar = document.createElement('p');
@@ -1215,7 +1212,7 @@ class Player extends EventEmitter {
                 const { style } = iconContainer;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
             }
@@ -1296,7 +1293,7 @@ class Player extends EventEmitter {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
             this._countdownTotal = 0;
-            style.width = '2%';
+            style.width = '0';
             style.marginLeft = '49%';
         }
     }

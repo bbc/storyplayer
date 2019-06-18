@@ -558,7 +558,16 @@ $romper-hover-text-size: 25px;
     }
 
     &.fade {
-      opacity: 0;
+
+      .romper-control-selected {
+        opacity: 0;
+        transition: opacity 1s 0.5s ease;
+      }
+
+      .romper-control-unselected {
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
     }
 
     .romper-link-control {
@@ -603,6 +612,7 @@ $romper-hover-text-size: 25px;
 .romper-link-icon-container {
   border-radius: 50%;
   height: 8em;
+  margin-bottom: 5px;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
@@ -611,8 +621,9 @@ $romper-hover-text-size: 25px;
 .romper-text-link-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 8em;
   justify-content: center;
+  margin-bottom: 7px;
 }
 
 .romper-link-text-icon {
