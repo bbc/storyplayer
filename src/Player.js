@@ -1193,7 +1193,7 @@ class Player extends EventEmitter {
                 const { style } = iconElement;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
                 const iconTextPar = document.createElement('p');
@@ -1212,7 +1212,7 @@ class Player extends EventEmitter {
                 const { style } = iconContainer;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
             }
