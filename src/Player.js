@@ -942,9 +942,6 @@ class Player extends EventEmitter {
         if (this._icon) {
             this._icon.deactivateOverlay();
         }
-        if (this._linkChoice) {
-            this._linkChoice.deactivateOverlay();
-        }
     }
 
     _subtitlesButtonClicked() {
