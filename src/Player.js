@@ -1296,7 +1296,7 @@ class Player extends EventEmitter {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
             this._countdownTotal = 0;
-            style.width = '2%';
+            style.width = '0';
             style.marginLeft = '49%';
         }
     }

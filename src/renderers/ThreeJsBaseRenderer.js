@@ -43,6 +43,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _update: Function;
 
+    _icons: Array<THREE.Mesh>;
+
+    _readyToShowIcons: boolean;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -84,6 +88,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         };
 
         this._userInteracting = false;
+
+        this._icons = [];
+        this._readyToShowIcons = false;
     }
 
     start() {
@@ -92,7 +99,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._hasEnded = false;
         this._started = true;
         this._createScene();
-        this.addIcon('https://rdux.files.bbci.co.uk/romper/startimage.jpg', 0, 20);
     }
 
     _createScene() {
@@ -209,25 +215,49 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._analytics(logData);
     }
 
-    addIcon(iconSrc: string, lat: number, long: number) {
-        const distance = 0.7 * this._view.distance;
+    _addIcon(iconSrc: string, position: Object, size: Object) {
+        const { lat, long, radius } = position;
+        const { width, height } = size;
+        logger.info(`adding threejs icon ${iconSrc}, at (${lat}, ${long})`);
+
         const vphi = THREE.Math.degToRad(90 - lat);
         const vtheta = THREE.Math.degToRad(long);
-        const xpos = distance * Math.sin(vphi) * Math.cos(vtheta);
-        const ypos = distance * Math.cos(vphi);
-        const zpos = distance * Math.sin(vphi) * Math.sin(vtheta);
+        const xpos = radius * Math.sin(vphi) * Math.cos(vtheta);
+        const ypos = radius * Math.cos(vphi);
+        const zpos = radius * Math.sin(vphi) * Math.sin(vtheta);
 
         const bmLoader = new THREE.ImageBitmapLoader();
-        const geometry = new THREE.PlaneGeometry( 16, 9 );
+        const geometry = new THREE.PlaneGeometry( width, height );
         bmLoader.load(iconSrc, (imageBitmap) => {
             const imTexture = new THREE.CanvasTexture( imageBitmap );
             const imMaterial = new THREE.MeshBasicMaterial( { map: imTexture } );
-            const cube = new THREE.Mesh( geometry, imMaterial );
-            cube.position.set(xpos, ypos, zpos);
-            cube.rotation.set( 0, vtheta+Math.PI+0.5, 0);
-            this._scene.add(cube);
-            console.log('ANDY added cube to scene', cube.position, vtheta);
+            const iconPlane = new THREE.Mesh( geometry, imMaterial );
+            iconPlane.rotateY((1.5*Math.PI)-vtheta);
+            iconPlane.position.set(xpos, ypos, zpos);
+            if(this._readyToShowIcons) {
+                this._scene.add(iconPlane);
+            } else {
+                this._icons.push(iconPlane);
+            }
         });
+    }
+
+    _buildLinkIcon(iconObject: Object) {
+        super._buildLinkIcon(iconObject);
+        if (iconObject.position.three_d) {
+            const { phi, theta, radius, width, height } = iconObject.position.three_d;
+            const position = { lat: theta, long: phi, radius };
+            const size = { width, height };
+            if (iconObject.resolvedUrl) {
+                this._addIcon(iconObject.resolvedUrl, position, size);
+            }
+        }
+    }
+
+    _showChoiceIcons(iconDataObject: Object) {
+        super._showChoiceIcons(iconDataObject);
+        this._readyToShowIcons = true;
+        this._icons.forEach(iconPlane => this._scene.add(iconPlane));
     }
 
     end() {
@@ -239,6 +269,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
         }
+
+        this._icons = [];
+        this._readyToShowIcons = false;
 
         // remove drag view handler
         const uiLayer = this._player._overlays;
