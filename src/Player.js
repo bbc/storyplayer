@@ -402,6 +402,7 @@ class Player extends EventEmitter {
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
+        this._overlays.classList.add('buttons-hidden');
         /*
                 <narrativeElementTransport>
                     <previous, repeat, next />
@@ -766,6 +767,7 @@ class Player extends EventEmitter {
         this._buttons.classList.add('show');
         this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
+        this._overlays.classList.remove('buttons-hidden');
     }
 
     _hideRomperButtons() {
@@ -775,6 +777,7 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('show');
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
+        this._overlays.classList.add('buttons-hidden');
     }
 
     addExperienceStartButtonAndImage(options: Object) {
