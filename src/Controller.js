@@ -663,30 +663,19 @@ export default class Controller extends EventEmitter {
                         // only return those which have valid representations
                             .then((neArrayArray) => {
                                 const nes = [].concat(...neArrayArray);
-                                const nesWithValidReps = [];
-                                const repPromises = [];
-                                nes.forEach((narrativeEl) => {
-                                    const { ne } = narrativeEl;
-                                    repPromises.push(
-                                        this._fetchers
-                                            .representationCollectionFetcher(ne.body
-                                                .representation_collection_target_id)
-                                            .then(representationCollection =>
-                                                // eslint-disable-next-line max-len
-                                                this._representationReasoner(representationCollection))
-                                            .then(() => narrativeEl)
-                                            .catch(() => null)
-                                    );
-                                });
-                                return Promise.all(repPromises).then((reps) => {
-                                    reps.forEach((rep) => {
-                                        if (rep !== null) {
-                                            nesWithValidReps.push(rep);
-                                        }
-                                    });
-                                    return nesWithValidReps;
-                                });
-                            });
+                                const repPromises = nes.map(narrativeEl =>
+                                    this._fetchers
+                                        .representationCollectionFetcher(narrativeEl.ne.body
+                                            .representation_collection_target_id)
+                                        .then(representationCollection =>
+                                            // eslint-disable-next-line max-len
+                                            this._representationReasoner(representationCollection))
+                                        .then(() => narrativeEl)
+                                        .catch(() => null));
+                                return Promise.all(repPromises);
+                            })
+                            .then((reps) =>
+                                reps.filter((rep) => rep !== null));
                     });
             }
         }
