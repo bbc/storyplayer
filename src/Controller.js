@@ -606,6 +606,7 @@ export default class Controller extends EventEmitter {
     // the first is the link, the second is the actual NE when
     // first is a story ne (it resolves into substory)
     // eslint-disable-next-line max-len
+    // this looks into NEs to make sure that they also have valid representations
     getValidNextSteps(narrativeElementId: ?string = null): Promise<Array<Object>> {
         let neId = narrativeElementId;
         if (neId === null && this._currentNarrativeElement) {
@@ -658,7 +659,34 @@ export default class Controller extends EventEmitter {
                             }
                         });
                         return Promise.all(promiseList)
-                            .then(neArrayArray => [].concat(...neArrayArray));
+                        // now we have valid NEs, test reprensentations
+                        // only return those which have valid representations
+                            .then((neArrayArray) => {
+                                const nes = [].concat(...neArrayArray);
+                                const nesWithValidReps = [];
+                                const repPromises = [];
+                                nes.forEach((narrativeEl) => {
+                                    const { ne } = narrativeEl;
+                                    repPromises.push(
+                                        this._fetchers
+                                            .representationCollectionFetcher(ne.body
+                                                .representation_collection_target_id)
+                                            .then(representationCollection =>
+                                                // eslint-disable-next-line max-len
+                                                this._representationReasoner(representationCollection))
+                                            .then(() => narrativeEl)
+                                            .catch(() => null)
+                                    );
+                                });
+                                return Promise.all(repPromises).then((reps) => {
+                                    reps.forEach((rep) => {
+                                        if (rep !== null) {
+                                            nesWithValidReps.push(rep);
+                                        }
+                                    });
+                                    return nesWithValidReps;
+                                });
+                            });
                     });
             }
         }
