@@ -471,6 +471,7 @@ $romper-hover-text-size: 25px;
     max-height: unset;
     position: absolute;
     right: 10%;
+    transition: opacity 1s ease;
     z-index: 14;
 
     .romper-representation-icon {
@@ -487,6 +488,7 @@ $romper-hover-text-size: 25px;
     max-height: unset;
     position: absolute;
     right: 10%;
+    transition: opacity 1s ease;
     z-index: 14;
 
     .romper-icon {
@@ -761,6 +763,14 @@ $romper-hover-text-size: 25px;
 
     .romper-icon-label {
       display: none;
+    }
+
+    &.buttons-hidden {
+      .romper-representation-overlay,
+      .romper-icon-overlay {
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
     }
   }
 
