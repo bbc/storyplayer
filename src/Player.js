@@ -348,6 +348,8 @@ class Player extends EventEmitter {
 
     _debugDisplay: boolean;
 
+    _controlsDisabled: boolean;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -358,6 +360,7 @@ class Player extends EventEmitter {
         this._countdownTotal = 0;
 
         this._userInteractionStarted = false;
+        this._controlsDisabled = false;
 
         this.showingSubtitles = false;
 
@@ -593,7 +596,7 @@ class Player extends EventEmitter {
         this.backgroundTarget = this._backgroundLayer;
 
         // Event Listeners
-        this._overlays.onclick = this._hideAllOverlays.bind(this);
+        this._overlays.onclick = this._handleOverlayClick.bind(this);
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
         this._backButton.addEventListener(
@@ -753,11 +756,18 @@ class Player extends EventEmitter {
         if (event.code === 'Escape') {
             if (this._RomperButtonsShowing) this._hideRomperButtons();
         } else if (!this._RomperButtonsShowing) {
-            this._showRomperButtons();
-            this._showRomperButtonsTimeout = setTimeout(() => {
-                this._hideRomperButtons();
-            }, 5000);
+            this._activateRomperButtons();
         }
+    }
+
+    _activateRomperButtons() {
+        if (this._controlsDisabled) {
+            return;
+        }
+        this._showRomperButtons();
+        this._showRomperButtonsTimeout = setTimeout(() => {
+            this._hideRomperButtons();
+        }, 5000);
     }
 
     _showRomperButtons() {
@@ -930,6 +940,15 @@ class Player extends EventEmitter {
         this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
         this.resetRepeatBackButton();
+    }
+
+    _handleOverlayClick() {
+        if (this._RomperButtonsShowing) {
+            this._hideRomperButtons();
+        } else {
+            this._activateRomperButtons();
+        }
+        this._hideAllOverlays();
     }
 
     _hideAllOverlays() {
@@ -1446,11 +1465,11 @@ class Player extends EventEmitter {
     }
 
     disableControls() {
-        this._buttonsActivateArea.classList.add('disabled');
+        this._controlsDisabled = true;
     }
 
     enableControls() {
-        this._buttonsActivateArea.classList.remove('disabled');
+        this._controlsDisabled = false;
     }
 
     enableScrubBar() {
