@@ -658,9 +658,9 @@ export default class Controller extends EventEmitter {
                                     }));
                             }
                         });
-                        return Promise.all(promiseList)
                         // now we have valid NEs, test reprensentations
                         // only return those which have valid representations
+                        return Promise.all(promiseList)
                             .then((neArrayArray) => {
                                 const nes = [].concat(...neArrayArray);
                                 const repPromises = nes.map(narrativeEl =>
@@ -674,8 +674,7 @@ export default class Controller extends EventEmitter {
                                         .catch(() => null));
                                 return Promise.all(repPromises);
                             })
-                            .then((reps) =>
-                                reps.filter((rep) => rep !== null));
+                            .then(reps => reps.filter((rep) => rep !== null));
                     });
             }
         }
