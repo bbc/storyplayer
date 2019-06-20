@@ -606,6 +606,7 @@ export default class Controller extends EventEmitter {
     // the first is the link, the second is the actual NE when
     // first is a story ne (it resolves into substory)
     // eslint-disable-next-line max-len
+    // this looks into NEs to make sure that they also have valid representations
     getValidNextSteps(narrativeElementId: ?string = null): Promise<Array<Object>> {
         let neId = narrativeElementId;
         if (neId === null && this._currentNarrativeElement) {
@@ -657,8 +658,23 @@ export default class Controller extends EventEmitter {
                                     }));
                             }
                         });
+                        // now we have valid NEs, test reprensentations
+                        // only return those which have valid representations
                         return Promise.all(promiseList)
-                            .then(neArrayArray => [].concat(...neArrayArray));
+                            .then((neArrayArray) => {
+                                const nes = [].concat(...neArrayArray);
+                                const repPromises = nes.map(narrativeEl =>
+                                    this._fetchers
+                                        .representationCollectionFetcher(narrativeEl.ne.body
+                                            .representation_collection_target_id)
+                                        .then(representationCollection =>
+                                            // eslint-disable-next-line max-len
+                                            this._representationReasoner(representationCollection))
+                                        .then(() => narrativeEl)
+                                        .catch(() => null));
+                                return Promise.all(repPromises);
+                            })
+                            .then(reps => reps.filter((rep) => rep !== null));
                     });
             }
         }

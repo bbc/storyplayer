@@ -471,6 +471,7 @@ $romper-hover-text-size: 25px;
     max-height: unset;
     position: absolute;
     right: 10%;
+    transition: opacity 1s ease;
     z-index: 14;
 
     .romper-representation-icon {
@@ -487,6 +488,7 @@ $romper-hover-text-size: 25px;
     max-height: unset;
     position: absolute;
     right: 10%;
+    transition: opacity 1s ease;
     z-index: 14;
 
     .romper-icon {
@@ -561,7 +563,7 @@ $romper-hover-text-size: 25px;
 
       .romper-control-selected {
         opacity: 0;
-        transition: opacity 0.7s 0.3s ease;
+        transition: opacity 1s 0.5s ease;
       }
 
       .romper-control-unselected {
@@ -612,6 +614,7 @@ $romper-hover-text-size: 25px;
 .romper-link-icon-container {
   border-radius: 50%;
   height: 8em;
+  margin-bottom: 5px;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
@@ -622,6 +625,7 @@ $romper-hover-text-size: 25px;
   flex-direction: column;
   height: 8em;
   justify-content: center;
+  margin-bottom: 7px;
 }
 
 .romper-link-text-icon {
@@ -759,6 +763,14 @@ $romper-hover-text-size: 25px;
 
     .romper-icon-label {
       display: none;
+    }
+
+    &.buttons-hidden {
+      .romper-representation-overlay,
+      .romper-icon-overlay {
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
     }
   }
 

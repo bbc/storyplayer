@@ -823,7 +823,7 @@ export default class BaseRenderer extends EventEmitter {
             } else {
                 this._linkBehaviour.callback();
             }
-        }, 1000);
+        }, 1500);
     }
 
     // //////////// end of show link choice behaviour

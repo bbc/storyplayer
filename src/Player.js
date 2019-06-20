@@ -348,6 +348,8 @@ class Player extends EventEmitter {
 
     _debugDisplay: boolean;
 
+    _controlsDisabled: boolean;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -358,6 +360,7 @@ class Player extends EventEmitter {
         this._countdownTotal = 0;
 
         this._userInteractionStarted = false;
+        this._controlsDisabled = false;
 
         this.showingSubtitles = false;
 
@@ -402,6 +405,7 @@ class Player extends EventEmitter {
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
+        this._overlays.classList.add('buttons-hidden');
         /*
                 <narrativeElementTransport>
                     <previous, repeat, next />
@@ -593,7 +597,7 @@ class Player extends EventEmitter {
         this.backgroundTarget = this._backgroundLayer;
 
         // Event Listeners
-        this._overlays.onclick = this._hideAllOverlays.bind(this);
+        this._overlays.onclick = this._handleOverlayClick.bind(this);
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
         this._backButton.addEventListener(
@@ -753,11 +757,18 @@ class Player extends EventEmitter {
         if (event.code === 'Escape') {
             if (this._RomperButtonsShowing) this._hideRomperButtons();
         } else if (!this._RomperButtonsShowing) {
-            this._showRomperButtons();
-            this._showRomperButtonsTimeout = setTimeout(() => {
-                this._hideRomperButtons();
-            }, 5000);
+            this._activateRomperButtons();
         }
+    }
+
+    _activateRomperButtons() {
+        if (this._controlsDisabled) {
+            return;
+        }
+        this._showRomperButtons();
+        this._showRomperButtonsTimeout = setTimeout(() => {
+            this._hideRomperButtons();
+        }, 5000);
     }
 
     _showRomperButtons() {
@@ -766,6 +777,7 @@ class Player extends EventEmitter {
         this._buttons.classList.add('show');
         this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
+        this._overlays.classList.remove('buttons-hidden');
     }
 
     _hideRomperButtons() {
@@ -775,6 +787,7 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('show');
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
+        this._overlays.classList.add('buttons-hidden');
     }
 
     addExperienceStartButtonAndImage(options: Object) {
@@ -932,6 +945,15 @@ class Player extends EventEmitter {
         this.resetRepeatBackButton();
     }
 
+    _handleOverlayClick() {
+        if (this._RomperButtonsShowing) {
+            this._hideRomperButtons();
+        } else {
+            this._activateRomperButtons();
+        }
+        this._hideAllOverlays();
+    }
+
     _hideAllOverlays() {
         if (this._representation) {
             this._representation.deactivateOverlay();
@@ -941,9 +963,6 @@ class Player extends EventEmitter {
         }
         if (this._icon) {
             this._icon.deactivateOverlay();
-        }
-        if (this._linkChoice) {
-            this._linkChoice.deactivateOverlay();
         }
     }
 
@@ -1196,7 +1215,7 @@ class Player extends EventEmitter {
                 const { style } = iconElement;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
                 const iconTextPar = document.createElement('p');
@@ -1215,7 +1234,7 @@ class Player extends EventEmitter {
                 const { style } = iconContainer;
                 // @flowignore
                 style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'contain';
+                style.backgroundSize = 'cover';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = 'center';
             }
@@ -1449,11 +1468,11 @@ class Player extends EventEmitter {
     }
 
     disableControls() {
-        this._buttonsActivateArea.classList.add('disabled');
+        this._controlsDisabled = true;
     }
 
     enableControls() {
-        this._buttonsActivateArea.classList.remove('disabled');
+        this._controlsDisabled = false;
     }
 
     enableScrubBar() {
