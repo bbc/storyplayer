@@ -29,6 +29,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _userInteracting: boolean;
 
+    _userDragging: boolean;
+
     _hasEnded: boolean;
 
     _started: boolean;
@@ -92,6 +94,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         };
 
         this._userInteracting = false;
+        this._userDragging = false;
 
         this._icons = {};
         this._readyToShowIcons = false;
@@ -165,6 +168,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _onMouseDown(event: MouseEvent) {
         this._userInteracting = true;
+        this._userDragging = false;
         this._view.onPointerDownPointerX = event.clientX;
         this._view.onPointerDownPointerY = event.clientY;
         this._view.onPointerDownLon = this._view.lon;
@@ -173,13 +177,38 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _onMouseMove(event: MouseEvent) {
         if (this._userInteracting) {
+            this._userDragging = true;
             this._view.lon = (this._view.onPointerDownPointerX - event.clientX) * 0.1 + this._view.onPointerDownLon; // eslint-disable-line max-len
             this._view.lat = (event.clientY - this._view.onPointerDownPointerY) * 0.1 + this._view.onPointerDownLat; // eslint-disable-line max-len
         }
     }
 
-    _onMouseUp() {
+    _onMouseUp(event: MouseEvent) {
         this._userInteracting = false;
+        if (this._userDragging) {
+            return;
+        }
+        const vector = new THREE.Vector3(
+            (event.offsetX/this._domElement.width) * 2 - 1,
+            -(event.offsetY/this._domElement.height) * 2 + 1,
+            0.5,
+        );
+        const raycaster = new THREE.Raycaster();
+        const icons = Object.values(this._icons).map(i => i.iconPlane);
+        raycaster.setFromCamera(vector, this._camera);
+
+        const intersects = raycaster.intersectObjects(icons);
+        if (intersects.length > 0) {
+            const firstIntersectObject = intersects[0].object;
+            Object.keys(this._icons).forEach((targetId) => {
+                const iconObj = this._icons[targetId];
+                // const { iconPlane } = iconObj;
+                if (iconObj && firstIntersectObject === iconObj.iconPlane) {
+                    logger.info(`User has clicked icon for ${targetId} - following link`);
+                    this._followLink(targetId);
+                }
+            });
+        }
     }
 
     _testIfViewingIcon() {
@@ -296,15 +325,15 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         });
     }
 
-    _hideChoiceIcons() {
-        super._hideChoiceIcons();
+    _hideChoiceIcons(narrativeElementId: ?string) {
+        super._hideChoiceIcons(narrativeElementId);
         Object.keys(this._icons).forEach((targetId) => {
             const { iconPlane } = this._icons[targetId];
             if (this._scene.children.includes(iconPlane)) {
                 this._scene.remove(iconPlane);
             }
         });
-
+        this._icons = {};
     }
 
     end() {
