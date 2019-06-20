@@ -43,9 +43,13 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _update: Function;
 
-    _icons: Array<THREE.Mesh>;
+    _icons: {[key:string]: THREE.Mesh};
 
     _readyToShowIcons: boolean;
+
+    _raycaster: THREE.Raycaster;
+
+    _camera: THREE.PerspectiveCamera;
 
     constructor(
         representation: Representation,
@@ -89,8 +93,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._userInteracting = false;
 
-        this._icons = [];
+        this._icons = {};
         this._readyToShowIcons = false;
+        this._raycaster = new THREE.Raycaster();
     }
 
     start() {
@@ -105,9 +110,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         const target = this._player.mediaTarget;
         logger.info('Starting 3js video scene');
         this._scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 16/9, 1, 1000);
-        camera.layers.enable(1); // render left view when no stereo available
-        camera.target = new THREE.Vector3(0, 0, 0);
+        this._camera = new THREE.PerspectiveCamera(75, 16/9, 1, 1000);
+        this._camera.layers.enable(1); // render left view when no stereo available
+        this._camera.target = new THREE.Vector3(0, 0, 0);
 
         const webGlRenderer = new THREE.WebGLRenderer();
         webGlRenderer.setPixelRatio(window.devicePixelRatio);
@@ -135,9 +140,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 this._view.distance * Math.cos(phi),
                 this._view.distance * Math.sin(phi) * Math.sin(theta),
             );
-            camera.lookAt( viewTarget );
+            this._camera.lookAt( viewTarget );
 
-            webGlRenderer.render( this._scene, camera );
+            webGlRenderer.render( this._scene, this._camera );
+            this._testIfViewingIcon();
         };
     }
 
@@ -176,6 +182,33 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._userInteracting = false;
     }
 
+    _testIfViewingIcon() {
+        const origin = new THREE.Vector3(0, 0, 0);
+        const target = new THREE.Vector3(0, 0, 0);
+        this._camera.getWorldDirection(target);
+        this._raycaster.set(origin, target);
+
+        const icons = Object.values(this._icons).map(i => i.iconPlane);
+        const intersects = this._raycaster.intersectObjects(icons);
+        if (intersects.length > 0) {
+            const intersectObjects = intersects.map(i => i.object);
+            Object.keys(this._icons).forEach((targetId) => {
+                const iconObj = this._icons[targetId];
+                const { iconPlane } = iconObj;
+                if (intersectObjects.includes(iconPlane)) {
+                    iconObj.viewCount += 1;
+                } else {
+                    iconObj.viewCount = 0;
+                }
+                if (iconObj.viewCount > 50) {
+                    logger.info(`User has viewed icon for ${targetId} for 2s - following link`);
+                    this._followLink(targetId);
+                    iconObj.viewCount = 0;
+                }
+            });
+        }
+    }
+
     _setOrientationVariable(): void {
         const { lat, lon } = this._view;
         const phi = parseInt(lon, 10);
@@ -185,20 +218,11 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             return;
         }
 
+        const oldOrientationString = `${this._oldOrientation.phi}, ${this._oldOrientation.theta}`;
         this._oldOrientation = {
             phi,
             theta,
         };
-
-        const vlat = Math.max(-85, Math.min(85, this._view.lat));
-        const vphi = THREE.Math.degToRad(90 - vlat);
-        const vtheta = THREE.Math.degToRad(this._view.lon);
-        const viewTarget = new THREE.Vector3(
-            this._view.distance * Math.sin(vphi) * Math.cos(vtheta),
-            this._view.distance * Math.cos(vphi),
-            this._view.distance * Math.sin(vphi) * Math.sin(vtheta),
-        );
-        console.log('ANDY view', viewTarget);
 
         this._controller.setVariables({
             _threejs_orientation_lon: phi,
@@ -209,16 +233,16 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names.VR_ORIENTATION_CHANGED,
-            from: 'not_set',
+            from: oldOrientationString,
             to: `${phi} ${theta}`,
         };
         this._analytics(logData);
     }
 
-    _addIcon(iconSrc: string, position: Object, size: Object) {
+    _addIcon(iconSrc: string, position: Object, size: Object, targetId: string) {
         const { lat, long, radius } = position;
         const { width, height } = size;
-        logger.info(`adding threejs icon ${iconSrc}, at (${lat}, ${long})`);
+        logger.info(`Adding threejs icon for ${targetId}, src ${iconSrc}, at (${lat}, ${long})`);
 
         const vphi = THREE.Math.degToRad(90 - lat);
         const vtheta = THREE.Math.degToRad(long);
@@ -234,10 +258,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             const iconPlane = new THREE.Mesh( geometry, imMaterial );
             iconPlane.rotateY((1.5*Math.PI)-vtheta);
             iconPlane.position.set(xpos, ypos, zpos);
+            this._icons[targetId] = {
+                iconPlane,
+                viewCount: 0,
+            };
             if(this._readyToShowIcons) {
                 this._scene.add(iconPlane);
-            } else {
-                this._icons.push(iconPlane);
             }
         });
     }
@@ -249,7 +275,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             const position = { lat: theta, long: phi, radius };
             const size = { width, height };
             if (iconObject.resolvedUrl) {
-                this._addIcon(iconObject.resolvedUrl, position, size);
+                this._addIcon(
+                    iconObject.resolvedUrl,
+                    position,
+                    size,
+                    iconObject.targetNarrativeElementId,
+                );
             }
         }
     }
@@ -257,7 +288,23 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     _showChoiceIcons(iconDataObject: Object) {
         super._showChoiceIcons(iconDataObject);
         this._readyToShowIcons = true;
-        this._icons.forEach(iconPlane => this._scene.add(iconPlane));
+        Object.keys(this._icons).forEach((targetId) => {
+            const { iconPlane } = this._icons[targetId];
+            if (!this._scene.children.includes(iconPlane)) {
+                this._scene.add(iconPlane);
+            }
+        });
+    }
+
+    _hideChoiceIcons() {
+        super._hideChoiceIcons();
+        Object.keys(this._icons).forEach((targetId) => {
+            const { iconPlane } = this._icons[targetId];
+            if (this._scene.children.includes(iconPlane)) {
+                this._scene.remove(iconPlane);
+            }
+        });
+
     }
 
     end() {
@@ -270,7 +317,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             this._domElement.parentNode.removeChild(this._domElement);
         }
 
-        this._icons = [];
+        this._icons = {};
         this._readyToShowIcons = false;
 
         // remove drag view handler
