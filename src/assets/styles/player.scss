@@ -298,6 +298,7 @@ $romper-hover-text-size: 25px;
     margin-right: 20px;
     padding: 0;
 
+
     .romper-button-icon-div {
       @include button-icon('../images/media-play.svg');
     }
@@ -639,12 +640,12 @@ $romper-hover-text-size: 25px;
   >.romper-start-button {
     bottom: 50%;
     display: grid;
-    height: $romper-button-height;
+    height: 170px;
     left: 50%;
     margin-right: -50%;
     margin-top: -30%;
     position: absolute;
-    transform: translate(-50%, 0%);
+    transform: translate(-50%, 50%);
     width: 170px;
     z-index: 101;
 
