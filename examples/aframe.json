@@ -273,8 +273,8 @@
                     {
                         "behaviour": {
                             "type": "urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0",
-                            "show_ne_to_end": true,
-                            "one_shot": false,
+                            "show_ne_to_end": false,
+                            "one_shot": true,
                             "disable_controls": true,
                             "show_time_remaining": true,
                             "overlay_class": "icon-bar",
@@ -287,9 +287,9 @@
                                         "three_d": {
                                             "phi": 0,
                                             "theta": 0,
-                                            "radius": 8,
-                                            "width": 2,
-                                            "height": 2
+                                            "radius": 18,
+                                            "width": 6,
+                                            "height": 6
                                         }
                                     }
                                 },
@@ -300,15 +300,15 @@
                                         "three_d": {
                                             "phi": 20,
                                             "theta": 0,
-                                            "radius": 8,
-                                            "width": 2,
-                                            "height": 2
+                                            "radius": 18,
+                                            "width": 6,
+                                            "height": 6
                                         }
                                     }
                                 }
                             ]
                         },
-                        "start_time": 150.0
+                        "start_time": 2.0
                     }
                 ]
             }
