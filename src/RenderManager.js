@@ -350,7 +350,12 @@ export default class RenderManager extends EventEmitter {
             // remove dead backgrounds
             Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
                 if (newBackgroundSrcs.filter(srcObj => srcObj.src === rendererSrc).length === 0) {
-                    this._backgroundRenderers[rendererSrc].destroy();
+                    if (Object.values(this._upcomingBackgroundRenderers)
+                        .includes(this._backgroundRenderers[rendererSrc])) {
+                        this._backgroundRenderers[rendererSrc].end();
+                    } else {
+                        this._backgroundRenderers[rendererSrc].destroy();
+                    }
                     delete this._backgroundRenderers[rendererSrc];
                 }
             });
