@@ -487,7 +487,7 @@ export default class BaseRenderer extends EventEmitter {
     _getLinkChoiceBehaviours(behaviour: Object): Object {
         // set default behaviours if not specified in data model
         let countdown = false;
-        const disableControls = true; // default to disable if counting down
+        const disableControls = true; // always disable controls
         let iconOverlayClass = null;
         let forceChoice = false;
         let oneShot = false;
