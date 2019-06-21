@@ -37,6 +37,8 @@ export default class BackgroundRenderer extends EventEmitter {
 
     start() { }
 
+    end() { }
+
     cancelFade() { }
 
     fadeOut(duration: number) { }
