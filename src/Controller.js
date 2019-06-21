@@ -679,7 +679,11 @@ export default class Controller extends EventEmitter {
                                             // eslint-disable-next-line max-len
                                             this._representationReasoner(representationCollection))
                                         .then(() => narrativeEl)
-                                        .catch(() => null);
+                                        .catch(() => {
+                                            // eslint-disable-next-line max-len
+                                            logger.warn(`No representations currently valid for NE ${narrativeEl.id}`);
+                                            return null;
+                                        });
                                 });
                                 return Promise.all(repPromises);
                             })
