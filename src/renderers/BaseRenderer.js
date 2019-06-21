@@ -556,7 +556,7 @@ export default class BaseRenderer extends EventEmitter {
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
-                    if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
+                    if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.targetNeId) {
                         if (linkIconObject.image) {
                             // map representation to asset
                             iconSpecObject.acId =
