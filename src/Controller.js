@@ -655,6 +655,11 @@ export default class Controller extends EventEmitter {
                                                 }));
                                                 return startNeObjs;
                                             });
+                                    })
+                                    .catch((err) => {
+                                        // eslint-disable-next-line max-len
+                                        logger.error(`Controller finding next steps, but cannot get substory: ${err}`);
+                                        return Promise.resolve([null]);
                                     }));
                             }
                         });
@@ -663,15 +668,19 @@ export default class Controller extends EventEmitter {
                         return Promise.all(promiseList)
                             .then((neArrayArray) => {
                                 const nes = [].concat(...neArrayArray);
-                                const repPromises = nes.map(narrativeEl =>
-                                    this._fetchers
+                                const repPromises = nes.map(narrativeEl => {
+                                    if (narrativeEl === null) {
+                                        return Promise.resolve(null);
+                                    }
+                                    return this._fetchers
                                         .representationCollectionFetcher(narrativeEl.ne.body
                                             .representation_collection_target_id)
                                         .then(representationCollection =>
                                             // eslint-disable-next-line max-len
                                             this._representationReasoner(representationCollection))
                                         .then(() => narrativeEl)
-                                        .catch(() => null));
+                                        .catch(() => null);
+                                });
                                 return Promise.all(repPromises);
                             })
                             .then(reps => reps.filter((rep) => rep !== null));
