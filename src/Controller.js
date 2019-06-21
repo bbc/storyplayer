@@ -681,10 +681,9 @@ export default class Controller extends EventEmitter {
                                         .then(() => narrativeEl)
                                         .catch(() => {
                                             // eslint-disable-next-line max-len
-                                            logger.warn(`No representations currently valid for NE ${narrativeEl.id}`);
-                                            return null;
-                                        });
-                                });
+                                            logger.warn(`No representations are currently valid for Narrative Element ${narrativeEl.id}`)
+                                            return null
+                                        }));
                                 return Promise.all(repPromises);
                             })
                             .then(reps => reps.filter((rep) => rep !== null));
