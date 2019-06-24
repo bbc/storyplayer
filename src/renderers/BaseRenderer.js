@@ -487,7 +487,7 @@ export default class BaseRenderer extends EventEmitter {
     _getLinkChoiceBehaviours(behaviour: Object): Object {
         // set default behaviours if not specified in data model
         let countdown = false;
-        let disableControls = countdown; // default to disable if counting down
+        const disableControls = true; // always disable controls
         let iconOverlayClass = null;
         let forceChoice = false;
         let oneShot = false;
@@ -511,7 +511,9 @@ export default class BaseRenderer extends EventEmitter {
         }
         // do we disable controls while choosing
         if (behaviour.hasOwnProperty('disable_controls')) {
-            disableControls = behaviour.disable_controls;
+            if (!behaviour.disable_controls) {
+                logger.warn('StoryPlayer ignoring data model: controls disabled during choices');
+            }
         }
         // do we apply any special css classes to the overlay
         if (behaviour.hasOwnProperty('overlay_class')) {
@@ -554,7 +556,7 @@ export default class BaseRenderer extends EventEmitter {
             if (behaviour.link_icons) {
                 behaviour.link_icons.forEach((linkIconObject) => {
                     // eslint-disable-next-line max-len
-                    if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.ne.id) {
+                    if (linkIconObject.target_narrative_element_id === choiceNarrativeElementObj.targetNeId) {
                         if (linkIconObject.image) {
                             // map representation to asset
                             iconSpecObject.acId =

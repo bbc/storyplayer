@@ -652,8 +652,8 @@ class Player extends EventEmitter {
         document.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
 
-        this._buttonsActivateArea.onmouseenter = this._showRomperButtons.bind(this);
-        this._buttonsActivateArea.onmousemove = this._showRomperButtons.bind(this);
+        this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
+        this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
         this.removeExperienceStartButtonAndImage =
