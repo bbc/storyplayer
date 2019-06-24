@@ -1210,7 +1210,9 @@ class Player extends EventEmitter {
             if (text && src) {
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const iconElement = document.createElement('div');
-                iconElement.className = 'romper-link-icon-container';
+                iconElement.className = 'romper-link-icon-container'
+                linkChoiceControl.classList.add('icon');
+                linkChoiceControl.classList.add('text');
                 iconContainer.appendChild(iconElement);
                 const { style } = iconElement;
                 // @flowignore
@@ -1224,12 +1226,14 @@ class Player extends EventEmitter {
                 iconContainer.appendChild(iconTextPar);
             } else if (text) {
                 iconContainer.className = 'romper-text-link-container';
+                linkChoiceControl.classList.add('text');
                 const iconTextPar = document.createElement('p');
                 iconTextPar.textContent = text;
                 iconTextPar.className = 'romper-link-text-icon';
                 iconContainer.appendChild(iconTextPar);
             } else {
                 iconContainer.className = 'romper-link-icon-container';
+                linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const { style } = iconContainer;
                 // @flowignore
