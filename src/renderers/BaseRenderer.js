@@ -1201,7 +1201,7 @@ export default class BaseRenderer extends EventEmitter {
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
                 okButton.classList.add('var-next');
-                okButton.value = 'Next'; // behaviourVariables.length > 1 ? 'Next' : 'OK!';
+                okButton.value = 'Next';
 
                 // back button
                 const backButton = document.createElement('input');
@@ -1234,10 +1234,8 @@ export default class BaseRenderer extends EventEmitter {
                         if (i === targetId) {
                             varDiv.classList.remove('left');
                             varDiv.classList.remove('right');
-                            // varDiv.classList.add('active');
                         } else if (i < targetId) {
                             varDiv.classList.add('left');
-                            // varDiv.classList.remove('active');
                             varDiv.classList.remove('right');
                         } else {
                             varDiv.classList.remove('left');

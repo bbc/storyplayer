@@ -576,7 +576,7 @@ $romper-hover-text-size: 25px;
     .romper-link-control {
       border-bottom-color: $transparent;
       border-bottom-style: solid;
-      border-bottom-width: 5px;
+      border-bottom-width: 4px;
       flex: 1 1 0;
       height: 100%;
       margin-bottom: 1%;
@@ -585,25 +585,28 @@ $romper-hover-text-size: 25px;
     }
 
     .romper-control-selected {
-      border-bottom: 4px solid $highlight;
+
+      &.text {
+        border-bottom: 4px solid $highlight;
+      }
 
       .romper-link-icon-container {
-        border: 1px solid $highlight;
+        border: 4px solid $highlight;
       }
     }
 
     .romper-control-unselected {
-      border-bottom: 4px solid $transparent;
 
       &.default {
-        border-bottom: 4px solid $backing-colour;
-      }
+        &.text {
+          border-bottom: 4px solid $backing-colour;
+        }
 
-      .romper-link-icon-container {
-        border: 1px solid $transparent;
+        .romper-link-icon-container {
+          border: 4px solid $backing-colour;
+        }
       }
     }
-
   }
 
   .romper-link-choice-grid-cell {
@@ -613,6 +616,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-link-icon-container {
+  border: 4px solid $transparent;
   border-radius: 50%;
   height: 8em;
   margin-bottom: 5px;
@@ -626,7 +630,7 @@ $romper-hover-text-size: 25px;
   flex-direction: column;
   height: 8em;
   justify-content: center;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 
 .romper-link-text-icon {
