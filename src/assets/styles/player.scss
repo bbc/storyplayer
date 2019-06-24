@@ -934,8 +934,20 @@ $romper-hover-text-size: 25px;
   }
 }
 
-.romper-var-form-slider-output {
+.romper-var-form-slider-input {
   margin-left: 10%;
+}
+
+.romper-var-form-range-output {
+  background: $backing-colour;
+  border: 1px solid $white;
+  border-radius: 3px;
+  font-size: 1.3vw;
+  left: 7vw;
+  opacity: 0.8;
+  padding: 0 5px;
+  position: absolute;
+  top: -1.5vw;
 }
 
 .romper-var-form-answer-cont {
@@ -989,7 +1001,7 @@ $romper-hover-text-size: 25px;
     height: 2.5vw;
     text-align: center;
 
-    &.romper-var-form-slider-output {
+    &.romper-var-form-slider-input {
       background: $romper-background-color;
       margin-left: 0;
       margin-top: 1vw;
