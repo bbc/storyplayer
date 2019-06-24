@@ -952,6 +952,20 @@ $romper-hover-text-size: 25px;
   padding: 0 5px;
   position: absolute;
   top: -1.5vw;
+
+  &::after {
+    border-left: 5px solid $transparent;
+    border-right: 5px solid $transparent;
+    border-top: 10px solid $white;
+    content: '';
+    height: 0;
+    left: 50%;
+    margin-left: -5px;
+    margin-top: 0;
+    position: absolute;
+    top: 100%;
+    width: 0;
+  }
 }
 
 .romper-var-form-answer-cont {
