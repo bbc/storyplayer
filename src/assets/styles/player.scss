@@ -634,7 +634,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-link-text-icon {
-  font-size: 200%;
+  font-size: 180%;
   margin: 10px;
   text-align: center;
 }
@@ -852,7 +852,7 @@ $romper-hover-text-size: 25px;
   color: $transparent-white;
   display: flex;
   flex-direction: column;
-  font-size: 2vw;
+  font-size: 1.8vw;
   left: 0;
   opacity: 0;
   padding-bottom: $romper-buttons-max-height;
@@ -946,7 +946,7 @@ $romper-hover-text-size: 25px;
   background: $backing-colour;
   border: 1px solid $white;
   border-radius: 3px;
-  font-size: 1.3vw;
+  font-size: 65%;
   left: 7vw;
   opacity: 0.8;
   padding: 0 5px;
@@ -983,7 +983,7 @@ $romper-hover-text-size: 25px;
   select {
     border: 0;
     color: $dark-grey-blue;
-    font-size: 2vw;
+    font-size: 100%;
     height: 3vw;
     text-align: left;
     width: 80%;
@@ -1021,7 +1021,7 @@ $romper-hover-text-size: 25px;
 
   span {
     color: $romper-background-color;
-    font-size: 1.5vw;
+    font-size: 75%;
     line-height: 2.5vw;
     margin-bottom: -1vw;
     width: 50%;
