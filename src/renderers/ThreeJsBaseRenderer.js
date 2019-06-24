@@ -12,6 +12,11 @@ const THREE = require('three');
 
 const ORIENTATION_POLL_INTERVAL = 2000;
 
+export type ThreeIcon = {
+    iconPlane: THREE.Mesh,
+    viewCount: number,
+};
+
 export default class ThreeJsBaseRenderer extends BaseRenderer {
     _setOrientationVariable: Function;
 
@@ -39,13 +44,15 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _domElement: HTMLElement;
 
+    _reticle: HTMLDivElement;
+
     _oldOrientation: Object;
 
     _scene: THREE.Scene;
 
     _update: Function;
 
-    _icons: {[key:string]: THREE.Mesh};
+    _icons: {[key:string]: ThreeIcon};
 
     _readyToShowIcons: boolean;
 
@@ -123,6 +130,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._domElement = webGlRenderer.domElement;
         this._domElement.classList.add('romper-threejs');
 
+        this._reticle = document.createElement('div');
+        this._reticle.className = 'threejs-reticle';
+        target.appendChild(this._reticle);
+
         const uiLayer = this._player._overlays;
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
         uiLayer.addEventListener('mouseup', this._onMouseUp, false);
@@ -189,11 +200,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             return;
         }
         const vector = new THREE.Vector3(
-            (event.offsetX/this._domElement.width) * 2 - 1,
-            -(event.offsetY/this._domElement.height) * 2 + 1,
+            (event.offsetX/this._domElement.clientWidth) * 2 - 1,
+            -(event.offsetY/this._domElement.clientHeight) * 2 + 1,
             0.5,
         );
         const raycaster = new THREE.Raycaster();
+        // @flowignore
         const icons = Object.values(this._icons).map(i => i.iconPlane);
         raycaster.setFromCamera(vector, this._camera);
 
@@ -217,9 +229,11 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._camera.getWorldDirection(target);
         this._raycaster.set(origin, target);
 
+        // @flowignore
         const icons = Object.values(this._icons).map(i => i.iconPlane);
         const intersects = this._raycaster.intersectObjects(icons);
         if (intersects.length > 0) {
+            this._reticle.classList.add('active');
             const intersectObjects = intersects.map(i => i.object);
             Object.keys(this._icons).forEach((targetId) => {
                 const iconObj = this._icons[targetId];
@@ -234,6 +248,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                     this._followLink(targetId);
                     iconObj.viewCount = 0;
                 }
+            });
+        } else {
+            this._reticle.classList.remove('active');
+            Object.keys(this._icons).forEach((targetId) => {
+                const iconObj = this._icons[targetId];
+                iconObj.viewCount = 0;
             });
         }
     }
