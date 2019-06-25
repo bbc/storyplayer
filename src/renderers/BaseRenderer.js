@@ -1076,7 +1076,10 @@ export default class BaseRenderer extends EventEmitter {
         varInput.appendChild(sliderDiv);
         if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
             varInput.appendChild(numberInput);
-        } else {
+        } else if (!(behaviourVar.hasOwnProperty('min_label')
+            || behaviourVar.hasOwnProperty('max_label'))) {
+            // if precise, or user has specified labels, don't show
+            // otherwise give number feedback
             sliderDiv.appendChild(outputTest);
             window.onresize = () => setOutputPosition();
         }
