@@ -561,16 +561,18 @@ $romper-hover-text-size: 25px;
       }
     }
 
-    &.fade {
+    &.romper-icon-fade {
 
       .romper-control-selected {
         opacity: 0;
-        transition: opacity 1s 0.5s ease;
+        pointer-events: none;
+        transition: opacity 0.2s 1.3s ease;
       }
 
       .romper-control-unselected {
         opacity: 0;
-        transition: opacity 1s ease;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
       }
     }
 
