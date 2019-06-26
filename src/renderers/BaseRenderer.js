@@ -816,9 +816,9 @@ export default class BaseRenderer extends EventEmitter {
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
-        this._player._linkChoice.overlay.classList.add('fade');
+        this._player._linkChoice.overlay.classList.add('romper-icon-fade');
         this._linkFadeTimeout = setTimeout(() => {
-            this._player._linkChoice.overlay.classList.remove('fade');
+            this._player._linkChoice.overlay.classList.remove('romper-icon-fade');
             this._player.clearLinkChoices();
             if (narrativeElementId) {
                 this._controller.followLink(narrativeElementId);
