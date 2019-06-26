@@ -245,6 +245,7 @@ $romper-hover-text-size: 25px;
   .romper-unavailable {
     cursor: not-allowed;
     opacity: 0.5;
+    pointer-events: none;
   }
 
   .romper-control-selected > .romper-icon {
@@ -577,16 +578,18 @@ $romper-hover-text-size: 25px;
       }
     }
 
-    &.fade {
+    &.romper-icon-fade {
 
       .romper-control-selected {
         opacity: 0;
-        transition: opacity 1s 0.5s ease;
+        pointer-events: none;
+        transition: opacity 0.2s 1.3s ease;
       }
 
       .romper-control-unselected {
         opacity: 0;
-        transition: opacity 1s ease;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
       }
     }
 
@@ -825,17 +828,13 @@ $romper-hover-text-size: 25px;
 
 .romper-scrub-bar {
   bottom: 100px;
-  display: none;
+  display: block;
   height: 10px;
   left: 10%;
   margin: 0;
   position: absolute;
   right: 0;
   width: 80%;
-
-  &.debug {
-    display: block;
-  }
 }
 
 .romper-image-overlay {
