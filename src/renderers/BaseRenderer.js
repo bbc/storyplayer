@@ -167,6 +167,11 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
+        if (this.hasShowIconBehaviour()) {
+            // disable all interraction
+            logger.info('Entering element with choice icons - disabling controls');
+            this._player.disableControls();
+        }
         this._clearBehaviourElements();
         this._runDuringBehaviours();
     }
