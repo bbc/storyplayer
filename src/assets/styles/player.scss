@@ -181,10 +181,6 @@ $romper-hover-text-size: 25px;
     width: 100%;
   }
 
-  .romper-aframe-scene {
-    z-index: 4;
-  }
-
   .a-enter-vr {
     &.embedded {
       height: $romper-button-height;

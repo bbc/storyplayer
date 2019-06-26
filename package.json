@@ -79,8 +79,5 @@
     "three": "^0.105.1",
     "shaka-player": "^2.5.1",
     "uuid": "^3.3.2"
-  },
-  "resolutions": {
-    "aframe/**/browserify-css": "^0.14.0"
   }
 }

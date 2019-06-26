@@ -3,7 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "name": "An ambisonic 360 test Story",
+            "name": "A 360 test Story",
             "description": "A story with a beginning, two middle sections and an end.  Step 2 branches - follow the orkney flag to see part 3, follow the step 2 icon to jump to the end.",
             "beginnings": [
                 {
@@ -27,7 +27,7 @@
                                     false
                                 ]
                             },
-                            "errorMsg": "aFrame is not compatible with iOS"
+                            "errorMsg": "threejs is not compatible with iOS"
                         }
                     ]
                 }
