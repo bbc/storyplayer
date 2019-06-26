@@ -808,15 +808,12 @@ class Player extends EventEmitter {
         this._startExperienceImage.src = options.background_art;
 
         if (options.privacy_notice !== null) {
-            logger.info(`Rendering privacy notice "${options.privacy_notice}"`);
             const privacyPar = document.createElement('p');
             privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
             const privacyDiv = document.createElement('div');
             privacyDiv.className = 'romper-privacy-notice';
             privacyDiv.appendChild(privacyPar);
             this._mediaLayer.appendChild(privacyDiv);
-        } else {
-            logger.info('No privacy notice for this experience');
         }
 
         this._guiLayer.appendChild(this._startExperienceButton);
