@@ -808,17 +808,13 @@ $romper-hover-text-size: 25px;
 
 .romper-scrub-bar {
   bottom: 100px;
-  display: none;
+  display: block;
   height: 10px;
   left: 10%;
   margin: 0;
   position: absolute;
   right: 0;
   width: 80%;
-
-  &.debug {
-    display: block;
-  }
 }
 
 .romper-image-overlay {
