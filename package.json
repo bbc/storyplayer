@@ -1,10 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-<<<<<<< HEAD
   "version": "0.2.68",
-=======
-  "version": "0.2.67",
->>>>>>> master
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
