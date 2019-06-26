@@ -11,6 +11,7 @@ import logger from '../logger';
 const THREE = require('three');
 
 const ORIENTATION_POLL_INTERVAL = 2000;
+const RETICLE_RADIUS = 15;
 
 export type ThreeIcon = {
     iconPlane: THREE.Mesh,
@@ -44,7 +45,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _domElement: HTMLElement;
 
-    _reticle: HTMLDivElement;
+    _sceneReticle: THREE.Mesh;
 
     _oldOrientation: Object;
 
@@ -116,6 +117,34 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._createScene();
     }
 
+    _addReticle() {
+        const reticleGeometry = new THREE.CircleGeometry( 1, 32 );
+        const materialSpec = {
+            color: 0x37566a,
+            transparent: true,
+            opacity: 0.8,
+        };
+        const material = new THREE.MeshBasicMaterial(materialSpec);
+
+        this._sceneReticle = new THREE.Mesh(reticleGeometry, material);
+        const vphi = Math.PI / 2;
+        const vtheta = 0;
+        const xpos = RETICLE_RADIUS * Math.sin(vphi) * Math.cos(vtheta);
+        const ypos = RETICLE_RADIUS * Math.cos(vphi);
+        const zpos = RETICLE_RADIUS * Math.sin(vphi) * Math.sin(vtheta);
+        this._sceneReticle.rotateY((1.5 * Math.PI) - vtheta);
+        this._sceneReticle.position.set(xpos, ypos, zpos);
+        this._scene.add( this._sceneReticle );
+    }
+
+    _positionReticle(phi: number, theta: number) {
+        const xpos = RETICLE_RADIUS * Math.sin(phi) * Math.cos(theta);
+        const ypos = RETICLE_RADIUS * Math.cos(phi);
+        const zpos = RETICLE_RADIUS * Math.sin(phi) * Math.sin(theta);
+        this._sceneReticle.rotation.y = (1.5 * Math.PI) - theta;
+        this._sceneReticle.position.set(xpos, ypos, zpos);
+    }
+
     _createScene() {
         const target = this._player.mediaTarget;
         logger.info('Starting 3js video scene');
@@ -130,9 +159,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._domElement = webGlRenderer.domElement;
         this._domElement.classList.add('romper-threejs');
 
-        this._reticle = document.createElement('div');
-        this._reticle.className = 'threejs-reticle';
-        target.appendChild(this._reticle);
+        this._addReticle();
 
         const uiLayer = this._player._overlays;
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
@@ -154,8 +181,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 this._view.distance * Math.cos(phi),
                 this._view.distance * Math.sin(phi) * Math.sin(theta),
             );
+            this._positionReticle(phi, theta);
             this._camera.lookAt( viewTarget );
-
             webGlRenderer.render( this._scene, this._camera );
             this._testIfViewingIcon();
         };
@@ -233,13 +260,15 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         const icons = Object.values(this._icons).map(i => i.iconPlane);
         const intersects = this._raycaster.intersectObjects(icons);
         if (intersects.length > 0) {
-            this._reticle.classList.add('active');
+            this._sceneReticle.visible = true;
             const intersectObjects = intersects.map(i => i.object);
             Object.keys(this._icons).forEach((targetId) => {
                 const iconObj = this._icons[targetId];
                 const { iconPlane } = iconObj;
                 if (intersectObjects.includes(iconPlane)) {
                     iconObj.viewCount += 1;
+                    const scale = 1 - (iconObj.viewCount / 50);
+                    this._sceneReticle.scale.set(scale, scale, scale);
                 } else {
                     iconObj.viewCount = 0;
                 }
@@ -250,7 +279,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 }
             });
         } else {
-            this._reticle.classList.remove('active');
+            this._sceneReticle.visible = false;
+            this._sceneReticle.scale.set(1, 1, 1);
             Object.keys(this._icons).forEach((targetId) => {
                 const iconObj = this._icons[targetId];
                 iconObj.viewCount = 0;
