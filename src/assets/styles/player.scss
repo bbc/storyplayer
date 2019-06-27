@@ -856,7 +856,7 @@ $romper-hover-text-size: 25px;
   font-size: 1.8vw;
   left: 0;
   opacity: 0;
-  padding-bottom: $romper-buttons-max-height;
+  padding-bottom: 0;
   position: absolute;
   right: 0;
   text-align: center;
@@ -952,7 +952,7 @@ $romper-hover-text-size: 25px;
   opacity: 0.8;
   padding: 0 5px;
   position: absolute;
-  top: -1.5vw;
+  top: -20px;
 
   &::after {
     border-left: 5px solid $transparent;
@@ -1073,7 +1073,7 @@ $romper-hover-text-size: 25px;
 
   .var-count {
     font-size: 80%;
-    line-height: $romper-button-height;
+    line-height: 40px;
   }
 
   .var-next {
@@ -1090,6 +1090,7 @@ $romper-hover-text-size: 25px;
   color: $transparent-white;
   cursor: pointer;
   font-size: 80%;
+  max-height: 40px;
   padding: 1%;
   width: 15%;
 }
