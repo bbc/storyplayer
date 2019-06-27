@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = {
         }
     },
     staticImageBaseUrl: '/dist/images',
+    privacyNotice: null,
 };
 
 module.exports = {
@@ -86,6 +87,7 @@ module.exports = {
             fetchers,
             mergedSettings.analyticsLogger,
             assetUrls,
+            mergedSettings.privacyNotice,
         );
     },
 };

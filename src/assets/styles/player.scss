@@ -155,6 +155,23 @@ $romper-hover-text-size: 25px;
       div {
         visibility: hidden;
       }
+
+      .romper-privacy-notice {
+        bottom: 0;
+        height: 100px;
+        left: 0;
+        padding: 5% 20%;
+        position: absolute;
+        right: 0;
+        visibility: visible;
+        z-index: 10;
+
+        >p {
+          background-color: $var-panel-background;
+          padding: 15px;
+          text-align: center;
+        }
+      }
     }
   }
 

@@ -25,6 +25,7 @@ export default class Controller extends EventEmitter {
         fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
+        privacyNotice: ?string,
     ) {
         super();
         this._storyId = null;
@@ -36,6 +37,7 @@ export default class Controller extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+        this._privacyNotice = privacyNotice;
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -186,6 +188,7 @@ export default class Controller extends EventEmitter {
             this._fetchers,
             this._analytics,
             this._assetUrls,
+            this._privacyNotice,
         );
     }
 
@@ -807,6 +810,8 @@ export default class Controller extends EventEmitter {
     _storyReasonerFactory: StoryReasonerFactory;
 
     _fetchers: ExperienceFetchers;
+
+    _privacyNotice: ?string;
 
     _representationReasoner: RepresentationReasoner;
 
