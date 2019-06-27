@@ -575,6 +575,11 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
+        const disableLookahead
+            = new URLSearchParams(window.location.search).get('disableLookahead');
+        if(disableLookahead === 'true') {
+            return Promise.resolve();
+        }
         return Promise.all([
             this._controller.getIdOfPreviousNode(),
             this._controller.getIdsOfNextNodes(narrativeElement),

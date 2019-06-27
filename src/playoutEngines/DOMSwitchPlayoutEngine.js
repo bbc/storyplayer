@@ -26,36 +26,6 @@ const getMediaType = (src: string) => {
     return MediaTypes.OTHER;
 };
 
-const printActiveMSEBuffers = () => {
-    if(window.activeDashPlayer && window.activeDashPlayer.mediaElement) {
-        const videoElement = window.activeDashPlayer.mediaElement;
-        const bufferRanges = videoElement.buffered.length;
-        const { currentTime } = videoElement;
-        let i;
-        let validPlayback = false
-        for (i = 0; i < bufferRanges; i+=1) {
-            const start = videoElement.buffered.start(i)
-            const end = videoElement.buffered.end(i)
-            // eslint-disable-next-line no-console
-            console.log(`BUFFER: Buffer Range ${i}: `
-              + `${start} - `
-              + `${end}`)
-            if(currentTime > start && currentTime < end) {
-                validPlayback = true
-            }
-        }
-        // eslint-disable-next-line no-console
-        console.log(`BUFFER: Current Time: ${currentTime}`)
-        if(validPlayback !== true) {
-            // eslint-disable-next-line no-console
-            console.log("BUFFER WARNING: current playback time outside of buffered range")
-        }
-        // eslint-disable-next-line no-console
-        console.log("BUFFER ---------")
-    }
-    setTimeout(printActiveMSEBuffers, 1000)
-}
-
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
 
@@ -77,11 +47,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function
 
+    _printActiveMSEBuffers: Function 
+
+    _activePlayer: Object;
+
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
 
         if(this._debugPlayout) {
-            printActiveMSEBuffers()
+            this._printActiveMSEBuffers()
         }
 
         if (Hls.isSupported()) {
@@ -156,6 +130,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
         this._queueSubtitleAttach = this._queueSubtitleAttach.bind(this);
+        this._printActiveMSEBuffers = this._printActiveMSEBuffers.bind(this);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
@@ -171,6 +146,54 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+    }
+
+    _printActiveMSEBuffers() {
+        if(this._activePlayer && this._activePlayer.mediaElement) {
+            const videoElement = this._activePlayer.mediaElement;
+            const bufferRanges = videoElement.buffered.length;
+            const { currentTime } = videoElement;
+            let i;
+            let validPlayback = false
+            for (i = 0; i < bufferRanges; i+=1) {
+                const start = videoElement.buffered.start(i)
+                const end = videoElement.buffered.end(i)
+                // eslint-disable-next-line no-console
+                console.log(`BUFFER: Buffer Range ${i}: `
+                  + `${start} - `
+                  + `${end}`)
+                if(currentTime > start && currentTime < end) {
+                    validPlayback = true
+                }
+            }
+            switch (this._activePlayer.mediaType) {
+            case MediaTypes.DASH: {
+                const activeReps = this._activePlayer._shaka.getVariantTracks()
+                const activeRep = activeReps.find((representation) => representation.active)
+                if(this._activePlayer._shakaRep !== `${activeRep.width}x${activeRep.height}`) {
+                    this._activePlayer._shakaRep = `${activeRep.width}x${activeRep.height}`
+                    // eslint-disable-next-line no-console
+                    console.log(
+                        `Active shaka is using representation: `
+                        + `${activeRep.width}x${activeRep.height}`
+                    )
+                }
+                break;
+            }
+            default:
+                logger.error('Cannot handle this mediaType (_printActiveMSEBuffers)');
+            }
+
+            // eslint-disable-next-line no-console
+            console.log(`BUFFER: Current Time: ${currentTime}`)
+            if(validPlayback !== true) {
+                // eslint-disable-next-line no-console
+                console.log("BUFFER WARNING: current playback time outside of buffered range")
+            }
+            // eslint-disable-next-line no-console
+            console.log("BUFFER ---------")
+        }
+        setTimeout(() => {this._printActiveMSEBuffers()}, 1000)
     }
 
     // mediaObj = {
@@ -240,6 +263,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj._shaka.configure(
                 'streaming.bufferingGoal',
                 this._inactiveConfig.dash.bufferingGoal
+            );
+            rendererPlayoutObj._shaka.configure(
+                'abr.defaultBandwidthEstimate',
+                1000000000 // bits/second (Set to 1gbps connection to get highest adaptation)
             );
             rendererPlayoutObj._shaka.load(url)
                 .then(() => {
@@ -349,7 +376,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
 
             if(this._debugPlayout) {
-                window.activeDashPlayer = rendererPlayoutObj;
+                this._activePlayer = rendererPlayoutObj;
+                window.activePlayer = rendererPlayoutObj;
             }
 
             if (this._playing && rendererPlayoutObj.media && rendererPlayoutObj.media.url) {
@@ -392,6 +420,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._inactiveConfig.hls,
                         );
+
                     }
                     break;
                 case MediaTypes.DASH:
