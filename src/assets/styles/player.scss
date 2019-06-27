@@ -155,6 +155,23 @@ $romper-hover-text-size: 25px;
       div {
         visibility: hidden;
       }
+
+      .romper-privacy-notice {
+        bottom: 0;
+        height: 100px;
+        left: 0;
+        padding: 5% 20%;
+        position: absolute;
+        right: 0;
+        visibility: visible;
+        z-index: 10;
+
+        >p {
+          background-color: $var-panel-background;
+          padding: 15px;
+          text-align: center;
+        }
+      }
     }
   }
 
@@ -179,10 +196,6 @@ $romper-hover-text-size: 25px;
     height: 100%;
     position: absolute;
     width: 100%;
-  }
-
-  .romper-aframe-scene {
-    z-index: 4;
   }
 
   .a-enter-vr {
@@ -228,6 +241,7 @@ $romper-hover-text-size: 25px;
   .romper-unavailable {
     cursor: not-allowed;
     opacity: 0.5;
+    pointer-events: none;
   }
 
   .romper-control-selected > .romper-icon {
@@ -560,16 +574,18 @@ $romper-hover-text-size: 25px;
       }
     }
 
-    &.fade {
+    &.romper-icon-fade {
 
       .romper-control-selected {
         opacity: 0;
-        transition: opacity 1s 0.5s ease;
+        pointer-events: none;
+        transition: opacity 0.2s 1.3s ease;
       }
 
       .romper-control-unselected {
         opacity: 0;
-        transition: opacity 1s ease;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
       }
     }
 
