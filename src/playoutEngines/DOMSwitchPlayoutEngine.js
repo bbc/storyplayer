@@ -29,6 +29,7 @@ const getMediaType = (src: string) => {
 const DEBUG_BUFFER_CHECK_TIME = 1000
 const HLS_BUFFER_CHECK_TIME = 2000
 const HLS_BUFFER_ERROR_MARGIN = 0.1
+const SHAKKA_BANDWIDTH_CHECK_TIME = 1000
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _playing: boolean;
@@ -54,6 +55,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     _printActiveMSEBuffers: Function
 
     _activePlayer: Object;
+
+    _estimatedBandwidth: number;
 
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
@@ -101,6 +104,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 bufferingGoal: 2,
             }
         };
+
+        // bits/second (Set to 1gbps connection to get highest adaptation)
+        this._estimatedBandwidth = 1000000000
 
         const inactiveBufferingOverride = new URLSearchParams(window.location.search)
             .get('inactiveBufferingOverride');
@@ -150,6 +156,48 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+    }
+
+    _shakaUpdateBandwidth(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if(!rendererPlayoutObj) {
+            return
+        }
+        if(rendererPlayoutObj._shaka) {
+            const newBandwidth = rendererPlayoutObj._shaka.getStats().estimatedBandwidth;
+            if(newBandwidth) {
+                this._estimatedBandwidth = newBandwidth
+                if(this._debugPlayout) {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                        "DASH Shaka Bandwidth Update: ",
+                        this._estimatedBandwidth.toFixed(2),
+                        " ",
+                        (this._estimatedBandwidth/1000000).toFixed(2)
+                    )
+                }
+            }
+        }
+    }
+
+    _ShakaAdaptationHandler(rendererId: string) {
+        return () => {
+            const rendererPlayoutObj = this._media[rendererId];
+            if (!rendererPlayoutObj) {
+                return;
+            }
+            this._shakaUpdateBandwidth(rendererId)
+        }
+    }
+
+    _shakaCheckBandwidth(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if(!rendererPlayoutObj) {
+            return
+        }
+        this._shakaUpdateBandwidth(rendererId)
+        rendererPlayoutObj._shakaCheckBandwidthTimeout
+            = setTimeout(() => {this._shakaCheckBandwidth(rendererId)}, SHAKKA_BANDWIDTH_CHECK_TIME)
     }
 
     _hlsCheckBuffers(rendererId: string) {
@@ -216,12 +264,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._activePlayer._shakaRep = `${activeRep.width}x${activeRep.height}`
                     // eslint-disable-next-line no-console
                     console.log(
-                        `Active shaka is using representation: `
+                        `Active DASH shaka is using representation: `
                         + `${activeRep.width}x${activeRep.height}`
                     )
                 }
                 break;
             }
+            case MediaTypes.HLS:
+                break;
             default:
                 logger.error('Cannot handle this mediaType (_printActiveMSEBuffers)');
             }
@@ -309,7 +359,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             );
             rendererPlayoutObj._shaka.configure(
                 'abr.defaultBandwidthEstimate',
-                1000000000 // bits/second (Set to 1gbps connection to get highest adaptation)
+                this._estimatedBandwidth
+            );
+            rendererPlayoutObj._shaka.configure(
+                'abr.bandwidthDowngradeTarget',
+                0.90
+            );
+            rendererPlayoutObj._shaka.configure(
+                'abr.bandwidthUpgradeTarget',
+                0.80
             );
             rendererPlayoutObj._shaka.load(url)
                 .then(() => {
@@ -398,6 +456,21 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         'streaming.bufferingGoal',
                         this._activeConfig.dash.bufferingGoal
                     );
+                    rendererPlayoutObj._shaka.configure(
+                        'streaming.rebufferingGoal',
+                        5
+                    );
+
+                    // Check bandwidth calculations and update the initial estimated
+                    // bandwidth of new videos
+                    this._shakaCheckBandwidth(rendererId)
+                    rendererPlayoutObj._shakaAdaptationHandler
+                        = this._ShakaAdaptationHandler(rendererId);
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'adaptation',
+                        rendererPlayoutObj._shakaAdaptationHandler
+                    )
+
                     if(this._debugPlayout) {
                         allShakaEvents.forEach((e) => {
                             rendererPlayoutObj._shaka.addEventListener(
@@ -474,6 +547,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         'streaming.bufferingGoal',
                         this._inactiveConfig.dash.bufferingGoal
                     );
+
+                    // Remove bandwidth calculations timeout and adaptation handler
+                    rendererPlayoutObj._shaka.removeEventListener(
+                        'adaptation',
+                        rendererPlayoutObj._shakaAdaptationHandler
+                    )
+                    if(rendererPlayoutObj._shakaCheckBandwidthTimeout) {
+                        clearTimeout(rendererPlayoutObj._shakaCheckBandwidthTimeout)
+                    }
                     break;
                 case MediaTypes.OTHER:
                     break;
