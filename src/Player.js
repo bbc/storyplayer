@@ -1418,7 +1418,6 @@ class Player extends EventEmitter {
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this._currentRenderer = renderer;
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
-        // this.hideRepeatButton();
     }
 
     exitStartBehaviourPhase() {
