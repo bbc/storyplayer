@@ -334,7 +334,7 @@ export default class Controller extends EventEmitter {
             }
 
             const _shadowHandleStoryEnd = () => {
-                logger.warn('reached story end without meeting target node');
+                logger.warn('shadow reasoner reached story end without meeting target node');
             };
             shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
 
@@ -347,10 +347,18 @@ export default class Controller extends EventEmitter {
             };
             shadowReasoner.on('error', _handleError);
 
+            const visitedArray = [];
+
             // run straight through the graph until we hit the target
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                if (visitedArray.includes(narrativeElement.id)) {
+                    logger.warn('shadow reasoner looping - exiting without meeting target node');
+                    _shadowHandleStoryEnd();
+                    return;
+                }
+                visitedArray.push(narrativeElement.id);
                 if (narrativeElement.id === targetNeId) {
                     // remove event listeners for the original reasoner
                     this.reset();
