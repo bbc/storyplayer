@@ -507,9 +507,9 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
-        if (this._debugDisplay) {
-            this._scrubBar.classList.add('debug');
-        }
+        // if (this._debugDisplay) {
+        this._scrubBar.classList.add('debug');
+        // }
         this._buttons.appendChild(this._scrubBar);
 
         this._mediaTransport = document.createElement('div');
@@ -541,11 +541,11 @@ class Player extends EventEmitter {
         mediaTransportLeft.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
-        this._overlays.appendChild(this._representation.overlay);
+        mediaTransportRight.appendChild(this._representation.overlay);
         this._overlayToggleButtons.appendChild(this._representation.button);
 
         this._icon = createOverlay('icon', this._logUserInteraction);
-        this._overlays.appendChild(this._icon.overlay);
+        mediaTransportRight.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
 
         this._linkChoice = createOverlay('link-choice', this._logUserInteraction);

@@ -425,7 +425,6 @@ $romper-hover-text-size: 25px;
     left: 10%;
     max-height: unset;
     position: absolute;
-    z-index: 14;
 
     .romper-volume-control {
       align-items: center;
@@ -473,7 +472,6 @@ $romper-hover-text-size: 25px;
     position: absolute;
     right: 10%;
     transition: opacity 1s ease;
-    z-index: 14;
 
     .romper-representation-icon {
       width: 3em;
@@ -490,7 +488,6 @@ $romper-hover-text-size: 25px;
     position: absolute;
     right: 10%;
     transition: opacity 1s ease;
-    z-index: 14;
 
     .romper-icon {
       width: 3em;
@@ -736,6 +733,9 @@ $romper-hover-text-size: 25px;
       opacity: 1;
     }
 
+    .romper-icon-label {
+      display: none;
+    }
   }
 
   .romper-narrative-element-transport {
@@ -766,10 +766,6 @@ $romper-hover-text-size: 25px;
     height: calc(100% - 120px);
     justify-content: center;
     width: 100%;
-
-    .romper-icon-label {
-      display: none;
-    }
 
     &.buttons-hidden {
       .romper-representation-overlay,
@@ -819,6 +815,7 @@ $romper-hover-text-size: 25px;
   position: absolute;
   right: 0;
   width: 80%;
+  z-index: 5;
 
   &.debug {
     display: block;
