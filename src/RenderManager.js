@@ -41,6 +41,8 @@ export default class RenderManager extends EventEmitter {
 
     _analytics: AnalyticsLogger;
 
+    _privacyNotice: ?string;
+
     _renderStory: StoryIconRenderer;
 
     _neTarget: HTMLDivElement;
@@ -83,6 +85,7 @@ export default class RenderManager extends EventEmitter {
         fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
+        privacyNotice: ?string,
     ) {
         super();
 
@@ -94,6 +97,7 @@ export default class RenderManager extends EventEmitter {
         this._assetUrls = assetUrls;
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
         this._isVisible = true;
+        this._privacyNotice = privacyNotice;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -209,6 +213,7 @@ export default class RenderManager extends EventEmitter {
             text: 'Start',
             hide_narrative_buttons: true,
             background_art: this._assetUrls.noBackgroundAssetUrl,
+            privacy_notice: this._privacyNotice,
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
@@ -570,6 +575,11 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
+        const disableLookahead
+            = new URLSearchParams(window.location.search).get('disableLookahead');
+        if(disableLookahead === 'true') {
+            return Promise.resolve();
+        }
         return Promise.all([
             this._controller.getIdOfPreviousNode(),
             this._controller.getIdsOfNextNodes(narrativeElement),

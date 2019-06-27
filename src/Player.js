@@ -346,8 +346,6 @@ class Player extends EventEmitter {
 
     _dogImage: HTMLImageElement;
 
-    _debugDisplay: boolean;
-
     _controlsDisabled: boolean;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
@@ -366,14 +364,6 @@ class Player extends EventEmitter {
 
         this._analytics = analytics;
         this._assetUrls = assetUrls;
-
-        const debugDisplay = new URLSearchParams(window.location.search).get('debugPlayout');
-        if (debugDisplay) {
-            this._debugDisplay = true;
-            logger.info('Player display in debug mode');
-        } else {
-            this._debugDisplay = false;
-        }
 
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this.resetRepeatBackButton = this.resetRepeatBackButton.bind(this);
@@ -507,9 +497,6 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
-        // if (this._debugDisplay) {
-        this._scrubBar.classList.add('debug');
-        // }
         this._buttons.appendChild(this._scrubBar);
 
         this._mediaTransport = document.createElement('div');
@@ -806,6 +793,15 @@ class Player extends EventEmitter {
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';
         this._startExperienceImage.src = options.background_art;
+
+        if (options.privacy_notice !== null) {
+            const privacyPar = document.createElement('p');
+            privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
+            const privacyDiv = document.createElement('div');
+            privacyDiv.className = 'romper-privacy-notice';
+            privacyDiv.appendChild(privacyPar);
+            this._mediaLayer.appendChild(privacyDiv);
+        }
 
         this._guiLayer.appendChild(this._startExperienceButton);
         this._mediaLayer.appendChild(this._startExperienceImage);
