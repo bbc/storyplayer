@@ -1,7 +1,7 @@
 @import './colours';
 
-$romper-button-height: 56px;
-$romper-button-width: 56px;
+$romper-button-height: 40px;
+$romper-button-width: 40px;
 $romper-buttons-max-height: 64px;
 $romper-hover-text-size: 25px;
 
@@ -85,7 +85,7 @@ $romper-hover-text-size: 25px;
 
 .romper-target {
   height: 100%;
-  min-width: 500px;
+  min-width: 768px;
   width: 100%;
 
   &.romper-target-fullscreen {
@@ -240,6 +240,12 @@ $romper-hover-text-size: 25px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+  }
+
+  .romper-button-icon-div {
+    // width: 40px;
+    opacity: 1;
+    // height: 40px;
   }
 
   .romper-play-button {
@@ -692,7 +698,7 @@ $romper-hover-text-size: 25px;
     display: flex;
     height: 100%;
     max-height: 180px;
-    opacity: 0;
+    opacity: 1;
     padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
@@ -702,9 +708,8 @@ $romper-hover-text-size: 25px;
     .left,
     .right {
       flex-grow: 1;
-      max-width: 200px;
       padding-top: 10px;
-      width: 200px;
+      width: calc((#{$romper-button-width} + 16px) * 4);
     }
 
     .center {
@@ -746,7 +751,7 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
     opacity: 1; // set to 0 to hide with rest of buttons
     transition: all 1s ease;
-    width: 340px;
+    width: calc((#{$romper-button-width} + 16px) * 5);
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
@@ -799,6 +804,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-overlay-controls {
+  display: inherit;
   margin-left: auto;
 }
 
