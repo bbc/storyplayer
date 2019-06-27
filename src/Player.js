@@ -348,6 +348,8 @@ class Player extends EventEmitter {
 
     _controlsDisabled: boolean;
 
+    _currentRenderer: ?BaseRenderer;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -1417,9 +1419,9 @@ class Player extends EventEmitter {
         this.disableRepresentationControl();
     }
 
-    enterStartBehaviourPhase() {
+    enterStartBehaviourPhase(renderer: BaseRenderer) {
+        this._currentRenderer = renderer;
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
-        // this.hideRepeatButton();
     }
 
     exitStartBehaviourPhase() {
@@ -1501,9 +1503,13 @@ class Player extends EventEmitter {
         const scrubBarChangeFunc = () => {
             // Calculate the new time
             const time = media.duration * (parseInt(scrubBar.value, 10) / 100);
-            // Update the media time
-            // eslint-disable-next-line no-param-reassign
-            media.currentTime = time;
+            if (this._currentRenderer) {
+                this._currentRenderer.setCurrentTime(time);
+            } else {
+                // Update the media time
+                // eslint-disable-next-line no-param-reassign
+                media.currentTime = time;
+            }
 
             // Don't spam analtics with lots of volume changes
             // Wait 1 second after volume stops changing before sending analytics

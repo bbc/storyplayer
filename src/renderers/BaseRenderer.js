@@ -135,7 +135,7 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
-        this._player.enterStartBehaviourPhase();
+        this._player.enterStartBehaviourPhase(this);
         this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
@@ -167,11 +167,6 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
-        if (this.hasShowIconBehaviour()) {
-            // disable all interraction
-            logger.info('Entering element with choice icons - disabling controls');
-            this._player.disableControls();
-        }
         this._clearBehaviourElements();
         this._runDuringBehaviours();
     }
@@ -267,13 +262,33 @@ export default class BaseRenderer extends EventEmitter {
     _seekForward() {
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
-            const targetTime = currentTime + SEEK_TIME;
+            let targetTime = currentTime + SEEK_TIME;
+            const choiceTime = this._getChoiceTime();
+            if (choiceTime > 0 && choiceTime < targetTime) {
+                targetTime = choiceTime;
+            }
             this.setCurrentTime(targetTime);
             this.logUserInteraction(AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
                 currentTime,
                 `${targetTime}`,
             );
         }
+    }
+
+    // get the time of the first choice in the element
+    // returns -1 if no such behaviours
+    _getChoiceTime(): number {
+        if (this._representation.behaviours) {
+            if (this._representation.behaviours.during) {
+                const matches = this._representation.behaviours.during.filter(behave =>
+                    behave.behaviour.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0') // eslint-disable-line max-len
+                    .sort((a, b) => a.start_time - b.start_time);
+                if (matches.length > 0) {
+                    return matches[0].start_time;
+                }
+            }
+        }
+        return -1;
     }
 
     complete() {
