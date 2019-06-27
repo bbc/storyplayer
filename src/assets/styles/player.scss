@@ -257,9 +257,7 @@ $romper-hover-text-size: 25px;
   }
 
   .romper-button-icon-div {
-    // width: 40px;
     opacity: 1;
-    // height: 40px;
   }
 
   .romper-play-button {
@@ -630,7 +628,6 @@ $romper-hover-text-size: 25px;
   }
 
   .romper-link-choice-grid-cell {
-    // animation: appear 0.8s;
     opacity: 1;
   }
 }
@@ -787,14 +784,6 @@ $romper-hover-text-size: 25px;
     height: calc(100% - 120px);
     justify-content: center;
     width: 100%;
-
-    &.buttons-hidden {
-      .romper-representation-overlay,
-      .romper-icon-overlay {
-        opacity: 0;
-        transition: opacity 1s ease;
-      }
-    }
   }
 
   >.romper-buttons-activate-area {
