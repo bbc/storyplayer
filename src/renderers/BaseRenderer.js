@@ -1023,6 +1023,7 @@ export default class BaseRenderer extends EventEmitter {
         varInput.classList.add('romper-var-form-input-container');
 
         const sliderDiv = document.createElement('div');
+        sliderDiv.style.position = 'relative';
         const minSpan = document.createElement('span');
         minSpan.classList.add('min');
         if (behaviourVar.hasOwnProperty('min_label')) {
@@ -1038,6 +1039,8 @@ export default class BaseRenderer extends EventEmitter {
             maxSpan.textContent = range.max_val;
         }
 
+        const outputTest = document.createElement('div');
+        outputTest.className = 'romper-var-form-range-output';
 
         const slider = document.createElement('input');
         slider.type = 'range';
@@ -1049,8 +1052,16 @@ export default class BaseRenderer extends EventEmitter {
         sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
-        numberInput.classList.add('romper-var-form-slider-output');
+        numberInput.classList.add('romper-var-form-slider-input');
         numberInput.type = 'number';
+
+        const setOutputPosition = () => {
+            const proportion = parseFloat(slider.value)/parseFloat(slider.max);
+            let leftPos = minSpan.clientWidth; // minimum value element
+            leftPos += (1/12) * slider.clientWidth; // slider margin L
+            leftPos += (proportion * (10/12) * slider.clientWidth);
+            outputTest.style.left = `${leftPos}px`;
+        }
 
         slider.min = range.min_val;
         slider.max = range.max_val;
@@ -1058,6 +1069,8 @@ export default class BaseRenderer extends EventEmitter {
             .then((varValue) => {
                 slider.value = varValue;
                 numberInput.value = varValue;
+                outputTest.textContent = `${varValue}`;
+                setOutputPosition();
             });
 
         slider.onchange = () => {
@@ -1067,6 +1080,8 @@ export default class BaseRenderer extends EventEmitter {
 
         slider.oninput = () => {
             numberInput.value = slider.value;
+            outputTest.textContent = `${slider.value}`;
+            setOutputPosition();
         };
 
         numberInput.onchange = () => {
@@ -1079,9 +1094,14 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         varInput.appendChild(sliderDiv);
-        // varInput.appendChild(slider);
         if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
             varInput.appendChild(numberInput);
+        } else if (!(behaviourVar.hasOwnProperty('min_label')
+            || behaviourVar.hasOwnProperty('max_label'))) {
+            // if precise, or user has specified labels, don't show
+            // otherwise give number feedback
+            sliderDiv.appendChild(outputTest);
+            window.onresize = () => setOutputPosition();
         }
 
         return varInput;
@@ -1204,7 +1224,7 @@ export default class BaseRenderer extends EventEmitter {
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
                 okButton.classList.add('var-next');
-                okButton.value = 'Next'; // behaviourVariables.length > 1 ? 'Next' : 'OK!';
+                okButton.value = 'Next';
 
                 // back button
                 const backButton = document.createElement('input');
@@ -1237,10 +1257,8 @@ export default class BaseRenderer extends EventEmitter {
                         if (i === targetId) {
                             varDiv.classList.remove('left');
                             varDiv.classList.remove('right');
-                            // varDiv.classList.add('active');
                         } else if (i < targetId) {
                             varDiv.classList.add('left');
-                            // varDiv.classList.remove('active');
                             varDiv.classList.remove('right');
                         } else {
                             varDiv.classList.remove('left');

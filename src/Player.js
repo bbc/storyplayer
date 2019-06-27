@@ -530,11 +530,11 @@ class Player extends EventEmitter {
         mediaTransportLeft.appendChild(this._volume.button);
 
         this._representation = createOverlay('representation', this._logUserInteraction);
-        this._overlays.appendChild(this._representation.overlay);
+        mediaTransportRight.appendChild(this._representation.overlay);
         this._overlayToggleButtons.appendChild(this._representation.button);
 
         this._icon = createOverlay('icon', this._logUserInteraction);
-        this._overlays.appendChild(this._icon.overlay);
+        mediaTransportRight.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
 
         this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
@@ -643,6 +643,7 @@ class Player extends EventEmitter {
 
         this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
+        this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
         this.removeExperienceStartButtonAndImage =
@@ -1208,7 +1209,9 @@ class Player extends EventEmitter {
             if (text && src) {
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const iconElement = document.createElement('div');
-                iconElement.className = 'romper-link-icon-container';
+                iconElement.className = 'romper-link-icon-container'
+                linkChoiceControl.classList.add('icon');
+                linkChoiceControl.classList.add('text');
                 iconContainer.appendChild(iconElement);
                 const { style } = iconElement;
                 // @flowignore
@@ -1222,12 +1225,14 @@ class Player extends EventEmitter {
                 iconContainer.appendChild(iconTextPar);
             } else if (text) {
                 iconContainer.className = 'romper-text-link-container';
+                linkChoiceControl.classList.add('text');
                 const iconTextPar = document.createElement('p');
                 iconTextPar.textContent = text;
                 iconTextPar.className = 'romper-link-text-icon';
                 iconContainer.appendChild(iconTextPar);
             } else {
                 iconContainer.className = 'romper-link-icon-container';
+                linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const { style } = iconContainer;
                 // @flowignore
