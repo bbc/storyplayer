@@ -47,6 +47,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function
 
+    _printActiveMSEBuffers: Function 
+
     _activePlayer: Object;
 
     constructor(player: Player, debugPlayout: boolean) {
