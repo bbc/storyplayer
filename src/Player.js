@@ -643,6 +643,7 @@ class Player extends EventEmitter {
 
         this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
+        this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
         this.removeExperienceStartButtonAndImage =
