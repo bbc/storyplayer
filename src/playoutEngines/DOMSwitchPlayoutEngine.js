@@ -56,6 +56,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _activePlayer: Object;
 
+    _estimatedBandwidth: number;
+
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
 
