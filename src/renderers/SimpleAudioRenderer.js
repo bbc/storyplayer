@@ -202,8 +202,14 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     setCurrentTime(time: number) {
-        this._lastSetTime = time;
-        this._playoutEngine.setCurrentTime(this._rendererId, time);
+        let targetTime = time;
+        const choiceTime = this._getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
+        // convert to absolute time into video
+        this._lastSetTime = targetTime; // time into segment
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
     }
 
     switchFrom() {

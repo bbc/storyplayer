@@ -252,9 +252,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     // set how far into the segment this video should be (relative to in-point)
     setCurrentTime(time: number) {
-        this._lastSetTime = time; // time into segment
+        let targetTime = time;
+        const choiceTime = this._getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
         // convert to absolute time into video
-        this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
+        this._lastSetTime = targetTime; // time into segment
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
     }
 
     _setInTime(time: number) {
