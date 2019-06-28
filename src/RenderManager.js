@@ -222,9 +222,12 @@ export default class RenderManager extends EventEmitter {
                     this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
                         .then((fg) => {
                             if (fg.assets.image_src) {
-                                this._player.addDog(fg.assets.image_src, dog.position);
+                                return this._fetchers.mediaFetcher(fg.assets.image_src);
                             }
-                        });
+                            return Promise.reject();
+                        })
+                        .then(mediaurl => this._player.addDog(mediaurl, dog.position))
+                        .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));
                 }
                 if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
