@@ -1,5 +1,7 @@
 // @flow
 import EventEmitter from 'events';
+import screenfull from 'screenfull';
+
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
 import type { AssetUrls } from './romper';
@@ -1648,19 +1650,7 @@ class Player extends EventEmitter {
 
     static _isFullScreen() {
         let isFullScreen = false;
-        if ((document: any).fullscreenElement) {
-            isFullScreen = ((document: any).fullscreenElement != null);
-        }
-        if ((document: any).webkitFullscreenElement) {
-            isFullScreen = isFullScreen || ((document: any).webkitFullscreenElement != null);
-        }
-        if ((document: any).mozFullScreenElement) {
-            isFullScreen = isFullScreen || ((document: any).mozFullScreenElement != null);
-        }
-        if ((document: any).msFullscreenElement) {
-            isFullScreen = isFullScreen || ((document: any).msFullscreenElement != null);
-        }
-        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
+        if(screenfull.enabled && screenfull.isFullscreen) {
             isFullScreen = true;
         }
         return isFullScreen;
@@ -1670,25 +1660,12 @@ class Player extends EventEmitter {
         this._buttons.classList.add('romper-buttons-fullscreen');
         this._player.classList.add('romper-player-fullscreen');
 
-        if (this._playerParent.requestFullscreen) {
-            // @flowignore
-            this._playerParent.requestFullscreen();
-        } else if ((this._playerParent: any).mozRequestFullScreen) {
-            // @flowignore
-            this._playerParent.mozRequestFullScreen(); // Firefox
-        } else if ((this._playerParent: any).webkitRequestFullscreen) {
-            // @flowignore
-            this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
-        } else {
-            window.scrollTo(0, 1);
-            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
+        if(screenfull.enabled) {
+            screenfull.request(this._playerParent).then(() => {
+                this._inFullScreen = false;
+                screenfull.onchange(this._handleFullScreenChange);
+            });
         }
-
-        this._inFullScreen = false;
-        document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 
 
@@ -1704,27 +1681,12 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('romper-buttons-fullscreen');
         this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
-        if ((document: any).exitFullscreen) {
-            // @flowignore
-            document.exitFullscreen();
-        } else if ((document: any).mozCancelFullScreen) {
-            // @flowignore
-            document.mozCancelFullScreen(); // Firefox
-        } else if ((document: any).webkitExitFullscreen) {
-            // @flowignore
-            document.webkitExitFullscreen(); // Chrome and Safari
-        } else if ((document: any).msExitFullscreen) {
-            // @flowignore
-            document.msExitFullscreen(); // Chrome and Safari
-        } else {
-            this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
+        if(screenfull.enabled) {
+            screenfull.exit().then(() => {
+                screenfull.off('change', this._handleFullScreenChange);
+            });
         }
         scrollToTop();
-
-        document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 }
 
