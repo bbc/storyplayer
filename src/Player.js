@@ -1653,21 +1653,6 @@ class Player extends EventEmitter {
         if(screenfull.enabled && screenfull.isFullscreen) {
             isFullScreen = true;
         }
-        // if ((document: any).fullscreenElement) {
-        //     isFullScreen = ((document: any).fullscreenElement != null);
-        // }
-        // if ((document: any).webkitFullscreenElement) {
-        //     isFullScreen = isFullScreen || ((document: any).webkitFullscreenElement != null);
-        // }
-        // if ((document: any).mozFullScreenElement) {
-        //     isFullScreen = isFullScreen || ((document: any).mozFullScreenElement != null);
-        // }
-        // if ((document: any).msFullscreenElement) {
-        //     isFullScreen = isFullScreen || ((document: any).msFullscreenElement != null);
-        // }
-        // if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
-        //     isFullScreen = true;
-        // }
         return isFullScreen;
     }
 
@@ -1680,28 +1665,7 @@ class Player extends EventEmitter {
                 this._inFullScreen = false;
                 screenfull.onchange(this._handleFullScreenChange);
             });
-            return;
         }
-        if (this._playerParent.requestFullscreen) {
-            // @flowignore
-            this._playerParent.requestFullscreen();
-        } else if ((this._playerParent: any).mozRequestFullScreen) {
-            // @flowignore
-            this._playerParent.mozRequestFullScreen(); // Firefox
-        } else if ((this._playerParent: any).webkitRequestFullscreen) {
-            // @flowignore
-            this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
-        } else {
-            window.scrollTo(0, 1);
-            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
-        }
-
-        this._inFullScreen = false;
-        document.addEventListener('')
-        document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 
 
@@ -1722,28 +1686,7 @@ class Player extends EventEmitter {
                 screenfull.off('change', this._handleFullScreenChange);
             });
         }
-
-        if ((document: any).exitFullscreen) {
-            // @flowignore
-            document.exitFullscreen();
-        } else if ((document: any).mozCancelFullScreen) {
-            // @flowignore
-            document.mozCancelFullScreen(); // Firefox
-        } else if ((document: any).webkitExitFullscreen) {
-            // @flowignore
-            document.webkitExitFullscreen(); // Chrome and Safari
-        } else if ((document: any).msExitFullscreen) {
-            // @flowignore
-            document.msExitFullscreen(); // Chrome and Safari
-        } else {
-            this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
-        }
         scrollToTop();
-
-        document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 }
 
