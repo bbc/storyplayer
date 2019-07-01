@@ -58,8 +58,6 @@ export default class ImageRenderer extends BaseRenderer {
         this._setVisibility(true);
 
         this._disablePlayButton();
-        this._player.disableRepeatButton();
-        this._disableScrubBar();
     }
 
     start() {
@@ -127,7 +125,6 @@ export default class ImageRenderer extends BaseRenderer {
             clearInterval(this._imageTimer);
         }
         this._enablePlayButton();
-        this._player.resetRepeatBackButton();
         this._enableScrubBar();
     }
 

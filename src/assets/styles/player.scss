@@ -157,7 +157,7 @@ $romper-hover-text-size: 1.53em;
       }
 
       .romper-privacy-notice {
-        bottom: 0;
+        top: 0;
         height: 100px;
         left: 0;
         padding: 5% 20%;
@@ -319,16 +319,6 @@ $romper-hover-text-size: 1.53em;
 
     .romper-button-icon-div {
       @include button-icon('../images/media-play.svg');
-    }
-  }
-
-  .romper-repeat-button {
-    @include button;
-
-    div {
-      @include button-icon('../images/media-step-backward.svg');
-      height: $romper-button-height;
-      width: $romper-button-width;
     }
   }
 
