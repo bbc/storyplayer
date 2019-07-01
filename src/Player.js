@@ -623,6 +623,10 @@ class Player extends EventEmitter {
 
         this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
+        this._buttonsActivateArea.addEventListener(
+            'touchstart',
+            this._activateRomperButtons.bind(this),
+        );
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
@@ -852,6 +856,7 @@ class Player extends EventEmitter {
         this._overlays.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
+        this._buttonsActivateArea.classList.remove('hide');
         this._overlayToggleButtons.classList.remove('romper-inactive');
 
         this.playoutEngine.setPermissionToPlay(true);
