@@ -322,16 +322,6 @@ $romper-hover-text-size: 25px;
     }
   }
 
-  .romper-repeat-button {
-    @include button;
-
-    div {
-      @include button-icon('../images/media-step-backward.svg');
-      height: $romper-button-height;
-      width: $romper-button-width;
-    }
-  }
-
   .romper-representation-button {
     @include button;
 

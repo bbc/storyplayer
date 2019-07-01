@@ -276,8 +276,6 @@ class Player extends EventEmitter {
 
     _startExperienceImage: HTMLImageElement;
 
-    _repeatButton: HTMLButtonElement;
-
     _playPauseButton: HTMLButtonElement;
 
     _backButton: HTMLButtonElement;
@@ -322,8 +320,6 @@ class Player extends EventEmitter {
 
     _showRomperButtonsTimeout: TimeoutID;
 
-    _backRepeatTimeout: TimeoutID;
-
     _RomperButtonsShowing: boolean;
 
     _userInteractionStarted: boolean;
@@ -333,8 +329,6 @@ class Player extends EventEmitter {
     removeExperienceStartButtonAndImage: Function;
 
     _handleFullScreenChange: Function;
-
-    resetRepeatBackButton: Function;
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
@@ -373,7 +367,6 @@ class Player extends EventEmitter {
         this._assetUrls = assetUrls;
 
         this._logUserInteraction = this._logUserInteraction.bind(this);
-        this.resetRepeatBackButton = this.resetRepeatBackButton.bind(this);
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -434,18 +427,6 @@ class Player extends EventEmitter {
         backButtonIconDiv.classList.add('romper-back-button-icon-div');
         this._backButton.appendChild(backButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._backButton);
-
-        this._repeatButton = document.createElement('button');
-        this._repeatButton.classList.add('romper-button');
-        this._repeatButton.classList.add('romper-repeat-button');
-        // this._repeatButton.classList.add('romper-inactive');
-        this._repeatButton.setAttribute('title', 'Repeat Button');
-        this._repeatButton.setAttribute('aria-label', 'Repeat Button');
-        const repeatButtonIconDiv = document.createElement('div');
-        repeatButtonIconDiv.classList.add('romper-button-icon-div');
-        // repeatButtonIconDiv.classList.add('romper-repeat-button-icon-div');
-        this._repeatButton.appendChild(repeatButtonIconDiv);
-        // this._narrativeElementTransport.appendChild(this._repeatButton);
 
         this._seekBackButton = document.createElement('button');
         this._seekBackButton.classList.add('romper-button');
@@ -597,12 +578,6 @@ class Player extends EventEmitter {
         this._backButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._backButtonClicked.bind(this)),
-        );
-
-        this._repeatButton.onclick = this._repeatButtonClicked.bind(this);
-        this._repeatButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._repeatButtonClicked.bind(this)),
         );
 
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
@@ -906,50 +881,15 @@ class Player extends EventEmitter {
         }
     }
 
-    _repeatButtonClicked() {
-        // reveal back button and hide this
-        this._disableRepeatButton();
-        // set timer
-        if (this._backRepeatTimeout) {
-            clearTimeout(this._backRepeatTimeout);
-        }
-        // on timer end, hide back button and reveal this
-        this._backRepeatTimeout = setTimeout(this.resetRepeatBackButton, 2000);
-        this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
-        this._logUserInteraction(AnalyticEvents.names.REPEAT_BUTTON_CLICKED);
-    }
-
-    // hide the repeat button, and show the back button
-    resetRepeatBackButton() {
-        this._backButton.classList.add('romper-inactive');
-        this._repeatButton.classList.remove('romper-inactive');
-    }
-
-    // hide the repeat button, and show the back button, AMD make sure repeat doesn't reappear
-    // as result of timeout
-    disableRepeatButton() {
-        // disable repeat, and clear timeout so it stays disabled
-        if (this._backRepeatTimeout) {
-            clearTimeout(this._backRepeatTimeout);
-        }
-        this._disableRepeatButton();
-    }
-
-    // hide the back button, and show the repeat button
-    _disableRepeatButton() {
-        this._backButton.classList.remove('romper-inactive');
-        this._repeatButton.classList.add('romper-inactive');
-    }
-
     _backButtonClicked() {
         this._hideAllOverlays();
         if (!this._backNextWaiting) {
-            let currentTime = 0;
+            let currentSegmentTime = 0;
             if (this._currentRenderer) {
-                const rendererTime = this._currentRenderer.getCurrentTime();
-                currentTime = rendererTime.currentTime;
+                const { currentTime } = this._currentRenderer.getCurrentTime();
+                currentSegmentTime = currentTime;
             }
-            if (currentTime < 2) {
+            if (currentSegmentTime < 2) {
                 this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
             } else {
                 this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
@@ -971,7 +911,6 @@ class Player extends EventEmitter {
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
-        // this.resetRepeatBackButton();
     }
 
     _handleOverlayClick() {
@@ -1446,7 +1385,6 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
         this.disablePlayButton();
-        this.showRepeatButton();
         this.disableRepresentationControl();
     }
 
@@ -1607,17 +1545,9 @@ class Player extends EventEmitter {
         this._playPauseButton.setAttribute('disabled', 'true');
     }
 
-    hideRepeatButton() {
-        this._repeatButton.classList.add('romper-inactive');
-    }
-
     enablePlayButton() {
         this._playPauseButton.classList.remove('romper-control-disabled');
         this._playPauseButton.removeAttribute('disabled');
-    }
-
-    showRepeatButton() {
-        this._repeatButton.classList.remove('romper-inactive');
     }
 
     removeIconControl(id: string) {
