@@ -419,7 +419,6 @@ class Player extends EventEmitter {
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
-        // this._backButton.classList.add('romper-inactive');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
         const backButtonIconDiv = document.createElement('div');
@@ -431,12 +430,10 @@ class Player extends EventEmitter {
         this._seekBackButton = document.createElement('button');
         this._seekBackButton.classList.add('romper-button');
         this._seekBackButton.classList.add('romper-seek-back-button');
-        // this._seekBackButton.classList.add('romper-inactive');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
         this._seekBackButton.setAttribute('aria-label', 'Seek Back Button');
         const seekBackButtonIconDiv = document.createElement('div');
         seekBackButtonIconDiv.classList.add('romper-button-icon-div');
-        // seekBackButtonIconDiv.classList.add('romper-back-button-icon-div');
         this._seekBackButton.appendChild(seekBackButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._seekBackButton);
 
@@ -447,19 +444,16 @@ class Player extends EventEmitter {
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
         const playPauseButtonIconDiv = document.createElement('div');
         playPauseButtonIconDiv.classList.add('romper-button-icon-div');
-        // playPauseButtonIconDiv.classList.add('romper-play-button-icon-div');
         this._playPauseButton.appendChild(playPauseButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._playPauseButton);
 
         this._seekForwardButton = document.createElement('button');
         this._seekForwardButton.classList.add('romper-button');
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
-        // this._seekForwardButton.classList.add('romper-inactive');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
         this._seekForwardButton.setAttribute('aria-label', 'Seek Forward Button');
         const seekForwardButtonIconDiv = document.createElement('div');
         seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
-        // seekForwardButtonIconDiv.classList.add('romper-back-button-icon-div');
         this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
         this._narrativeElementTransport.appendChild(this._seekForwardButton);
 
@@ -471,11 +465,9 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._nextButton);
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
-        // nextButtonIconDiv.classList.add('romper-next-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
 
         this._guiLayer.appendChild(this._overlays);
-        // this._guiLayer.appendChild(this._narrativeElementTransport);
         this._guiLayer.appendChild(this._buttons);
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
@@ -507,11 +499,9 @@ class Player extends EventEmitter {
         this._overlayToggleButtons = document.createElement('div');
         this._overlayToggleButtons.classList.add('romper-overlay-controls');
         this._overlayToggleButtons.classList.add('romper-inactive');
-        // this._guiLayer.appendChild(this._overlayToggleButtons);
         mediaTransportRight.appendChild(this._overlayToggleButtons);
 
         this._volume = createOverlay('volume', this._logUserInteraction);
-        // this._overlays.appendChild(this._volume.overlay);
         mediaTransportLeft.appendChild(this._volume.overlay);
         mediaTransportLeft.appendChild(this._volume.button);
 
