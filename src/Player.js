@@ -342,6 +342,8 @@ class Player extends EventEmitter {
 
     _dogImage: HTMLImageElement;
 
+    _privacyDiv: ?HTMLDivElement;
+
     _controlsDisabled: boolean;
 
     _currentRenderer: ?BaseRenderer;
@@ -774,10 +776,10 @@ class Player extends EventEmitter {
         if (options.privacy_notice !== null) {
             const privacyPar = document.createElement('p');
             privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
-            const privacyDiv = document.createElement('div');
-            privacyDiv.className = 'romper-privacy-notice';
-            privacyDiv.appendChild(privacyPar);
-            this._mediaLayer.appendChild(privacyDiv);
+            this._privacyDiv = document.createElement('div');
+            this._privacyDiv.className = 'romper-privacy-notice';
+            this._privacyDiv.appendChild(privacyPar);
+            this._mediaLayer.appendChild(this._privacyDiv);
         }
 
         this._guiLayer.appendChild(this._startExperienceButton);
@@ -821,6 +823,9 @@ class Player extends EventEmitter {
         try {
             this._guiLayer.removeChild(this._startExperienceButton);
             this._mediaLayer.removeChild(this._startExperienceImage);
+            if (this._privacyDiv) {
+                this._mediaLayer.removeChild(this._privacyDiv);
+            }
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
             logger.warn('could not remove start button and/or image');
