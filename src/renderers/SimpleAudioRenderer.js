@@ -203,7 +203,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     setCurrentTime(time: number) {
         let targetTime = time;
-        const choiceTime = this._getChoiceTime();
+        const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < time) {
             targetTime = choiceTime;
         }

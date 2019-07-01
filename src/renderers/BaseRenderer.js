@@ -263,7 +263,7 @@ export default class BaseRenderer extends EventEmitter {
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime + SEEK_TIME;
-            const choiceTime = this._getChoiceTime();
+            const choiceTime = this.getChoiceTime();
             if (choiceTime > 0 && choiceTime < targetTime) {
                 targetTime = choiceTime;
             }
@@ -277,7 +277,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // get the time of the first choice in the element
     // returns -1 if no such behaviours
-    _getChoiceTime(): number {
+    getChoiceTime(): number {
         if (this._representation.behaviours) {
             if (this._representation.behaviours.during) {
                 const matches = this._representation.behaviours.during.filter(behave =>
@@ -475,7 +475,6 @@ export default class BaseRenderer extends EventEmitter {
                 });
 
                 if (iconObjects.length > 1 || showIfOneLink) {
-                    this._player.setNextAvailable(false);
                     this._showChoiceIcons({
                         defaultLinkId, // id for link to highlight at start
                         forceChoice, // do we highlight
