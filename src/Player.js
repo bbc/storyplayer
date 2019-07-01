@@ -891,11 +891,19 @@ class Player extends EventEmitter {
     }
 
     _seekForwardButtonClicked() {
-        this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
     }
 
     _seekBackwardButtonClicked() {
-        this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
     }
 
     _repeatButtonClicked() {
