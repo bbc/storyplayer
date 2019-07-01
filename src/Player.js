@@ -352,6 +352,8 @@ class Player extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
+    _backNextWaiting: boolean; // flag to stop spamming of buttons
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -363,6 +365,7 @@ class Player extends EventEmitter {
 
         this._userInteractionStarted = false;
         this._controlsDisabled = false;
+        this._backNextWaiting = false;
 
         this.showingSubtitles = false;
 
@@ -893,11 +896,19 @@ class Player extends EventEmitter {
     }
 
     _seekForwardButtonClicked() {
-        this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
     }
 
     _seekBackwardButtonClicked() {
-        this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
     }
 
     _repeatButtonClicked() {
@@ -937,7 +948,11 @@ class Player extends EventEmitter {
 
     _backButtonClicked() {
         this._hideAllOverlays();
-        this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
         this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
     }
 
@@ -945,8 +960,12 @@ class Player extends EventEmitter {
         if (!this._userInteractionStarted) {
             this._enableUserInteraction();
         }
-        this._hideAllOverlays();
-        this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+        if (!this._backNextWaiting) {
+            this._hideAllOverlays();
+            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+            this._backNextWaiting = true;
+            setTimeout(() => { this._backNextWaiting = false; }, 500);
+        }
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
         this.resetRepeatBackButton();
     }
