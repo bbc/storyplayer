@@ -779,7 +779,9 @@ class Player extends EventEmitter {
             this._privacyDiv = document.createElement('div');
             this._privacyDiv.className = 'romper-privacy-notice';
             this._privacyDiv.appendChild(privacyPar);
-            this._mediaLayer.appendChild(this._privacyDiv);
+            if (this._privacyDiv) {
+                this._mediaLayer.appendChild(this._privacyDiv);
+            }
         }
 
         this._guiLayer.appendChild(this._startExperienceButton);
