@@ -108,9 +108,13 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
-                if (rend.hasVariablePanelBehaviour()) {
+                if (rend.getChoiceTime() > 0) {
+                    const choiceTime = rend.getChoiceTime();
+                    logger.info('Next button clicked on element with choices, skip to them');
+                    rend.setCurrentTime(choiceTime - 0.25);
+                } else if (rend.hasVariablePanelBehaviour() || rend.hasShowIconBehaviour()) {
                     const representationId = rend.getRepresentation().id;
-                    logger.info('Next button ignored due to variable panel, skip to end');
+                    logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
                     if (this._player.playoutEngine.getCurrentTime(representationId)) {
@@ -535,14 +539,7 @@ export default class RenderManager extends EventEmitter {
     refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel) {
-            this._controller.getValidNextSteps().then((nextNodes) => {
-                // @flowignore
-                if (nextNodes.length === 1 || !this._currentRenderer.hasShowIconBehaviour()) {
-                    this._player.setNextAvailable(nextNodes.length > 0);
-                } else {
-                    this._player.setNextAvailable(false);
-                }
-            });
+            this._player.setNextAvailable(true);
         } else {
             this._player.setNextAvailable(false);
         }
