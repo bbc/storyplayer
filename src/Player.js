@@ -426,7 +426,7 @@ class Player extends EventEmitter {
         this._backButton = document.createElement('button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
-        this._backButton.classList.add('romper-inactive');
+        // this._backButton.classList.add('romper-inactive');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
         const backButtonIconDiv = document.createElement('div');
@@ -445,7 +445,7 @@ class Player extends EventEmitter {
         repeatButtonIconDiv.classList.add('romper-button-icon-div');
         // repeatButtonIconDiv.classList.add('romper-repeat-button-icon-div');
         this._repeatButton.appendChild(repeatButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._repeatButton);
+        // this._narrativeElementTransport.appendChild(this._repeatButton);
 
         this._seekBackButton = document.createElement('button');
         this._seekBackButton.classList.add('romper-button');
@@ -944,7 +944,16 @@ class Player extends EventEmitter {
     _backButtonClicked() {
         this._hideAllOverlays();
         if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+            let currentTime = 0;
+            if (this._currentRenderer) {
+                const rendererTime = this._currentRenderer.getCurrentTime();
+                currentTime = rendererTime.currentTime;
+            }
+            if (currentTime < 2) {
+                this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+            } else {
+                this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
+            }
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
@@ -962,7 +971,7 @@ class Player extends EventEmitter {
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
-        this.resetRepeatBackButton();
+        // this.resetRepeatBackButton();
     }
 
     _handleOverlayClick() {
