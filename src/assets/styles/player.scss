@@ -1,9 +1,9 @@
 @import './colours';
 
-$romper-button-height: 40px;
-$romper-button-width: 40px;
-$romper-buttons-max-height: 64px;
-$romper-hover-text-size: 25px;
+$romper-button-height: 2.5em;
+$romper-button-width: 2.5em;
+$romper-buttons-max-height: 4em;
+$romper-hover-text-size: 1.53em;
 
 .romper-media-element-queued {
   display: none;
@@ -656,6 +656,93 @@ $romper-hover-text-size: 25px;
   text-align: center;
 }
 
+
+/* 
+  ##Device = Desktops
+  ##Screen = 1281px to higher resolution desktops
+*/
+
+@media (min-width: 1281px) {
+  
+  //CSS
+  .romper-player > .romper-gui {
+    >.romper-buttons { 
+      width: 100%;
+    }
+
+  }
+
+  
+}
+
+/* 
+  ##Device = Laptops, Desktops
+  ##Screen = B/w 1025px to 1280px
+*/
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  
+  //CSS
+  .romper-player > .romper-gui {
+    >.romper-buttons { 
+      width: 100%;
+    }
+
+  }
+  
+}
+
+/* 
+  ##Device = Tablets, Ipads (portrait)
+  ##Screen = B/w 768px to 1024px
+*/
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  //CSS
+  .romper-player > .romper-gui {
+    >.romper-buttons { 
+      width: 100%;
+    }
+
+  }
+  
+}
+
+/* 
+  ##Device = Tablets, Ipads (landscape)
+  ##Screen = B/w 768px to 1024px
+*/
+
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  
+  //CSS
+  .romper-player > .romper-gui {
+    >.romper-buttons { 
+      width: 100vw;
+    }
+
+  }
+  
+}
+
+/* 
+  ##Device = Low Resolution Tablets, Mobiles (Landscape)
+  ##Screen = B/w 481px to 767px
+*/
+
+@media (min-width: 481px) and (max-width: 767px) {
+  
+  //CSS
+  .romper-player > .romper-gui {
+    >.romper-buttons { 
+      width: 100vw;
+    }
+
+  }
+  
+}
+
 .romper-player > .romper-gui {
 
   >.romper-start-button {
@@ -711,19 +798,20 @@ $romper-hover-text-size: 25px;
     display: flex;
     height: 100%;
     max-height: 180px;
-    opacity: 0;
+    opacity: 1;
     padding-bottom: 44px;
     position: absolute;
     transition: all 1s ease;
-    width: 100%;
+    // width: 100%;
     z-index: 10;
 
     .left,
     .right {
       flex-grow: 1;
       padding-top: 10px;
-      width: calc((#{$romper-button-width} + 16px) * 4);
+      width: calc((#{$romper-button-width} + 1em) * 4);
     }
+    
 
     .center {
       flex-grow: 1;
@@ -764,7 +852,7 @@ $romper-hover-text-size: 25px;
     margin-right: auto;
     opacity: 1; // set to 0 to hide with rest of buttons
     transition: all 1s ease;
-    width: calc((#{$romper-button-width} + 16px) * 5);
+    width: calc((#{$romper-button-width} + 1em) * 5);
     z-index: 30; // remove to hide with rest of buttons
 
     &.show {
@@ -1100,7 +1188,7 @@ $romper-hover-text-size: 25px;
 }
 
 .romper-var-form-feedback {
-  bottom: ($romper-buttons-max-height + 20px);
+  bottom: ($romper-buttons-max-height + 1.25em);
   font-size: 80%;
   margin: 0;
   position: absolute;
