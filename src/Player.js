@@ -1042,6 +1042,10 @@ class Player extends EventEmitter {
     }
 
     addVolumeControl(id: string, label: string) {
+        if(BrowserUserAgent.iOS()) {
+            return;
+        }
+
         const volumeControl = document.createElement('div');
         volumeControl.classList.add('romper-volume-control');
         volumeControl.classList.add(`romper-volume-label-${label.toLowerCase()}`);
