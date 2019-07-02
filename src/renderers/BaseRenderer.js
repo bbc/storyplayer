@@ -761,6 +761,7 @@ export default class BaseRenderer extends EventEmitter {
                 this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
+                this._player.enableControls();
             }
         } else {
             // or follow link now
