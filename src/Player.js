@@ -1472,12 +1472,21 @@ class Player extends EventEmitter {
         }
     }
 
-    connectScrubBar(media: HTMLMediaElement) {
+    connectScrubBar(media: HTMLMediaElement, timings: Object) {
+        const { inTime, outTime } = timings;
         const scrubBar = this._scrubBar;
+
+        const getTrimmedDuration = () => {
+            let trimmedDuration = media.duration - parseFloat(inTime);
+            if (parseFloat(outTime) > 0) {
+                trimmedDuration = parseFloat(outTime) - parseFloat(inTime);
+            }
+            return trimmedDuration;
+        };
 
         const scrubBarChangeFunc = () => {
             // Calculate the new time
-            const time = media.duration * (parseInt(scrubBar.value, 10) / 100);
+            const time = getTrimmedDuration() * (parseInt(scrubBar.value, 10) / 100);
             if (this._currentRenderer) {
                 this._currentRenderer.setCurrentTime(time);
             } else {
@@ -1528,7 +1537,7 @@ class Player extends EventEmitter {
         // Update the seek bar as the media plays
         media.addEventListener('timeupdate', () => {
             // Calculate the slider value
-            const value = (100 / media.duration) * media.currentTime;
+            const value = (100 / getTrimmedDuration()) * (media.currentTime - inTime);
 
             // Update the slider value
             scrubBar.value = value.toString();

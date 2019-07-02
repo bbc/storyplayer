@@ -514,7 +514,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (rendererPlayoutObj.mediaElement) {
                         const videoElement = rendererPlayoutObj.mediaElement;
                         this._player.disconnectScrubBar();
-                        this._player.connectScrubBar(videoElement);
+                        this.connectScrubBar(rendererId, videoElement);
                     }
                 } else {
                     this._player.addVolumeControl(rendererId, 'Background');
