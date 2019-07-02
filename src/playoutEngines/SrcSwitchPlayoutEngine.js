@@ -300,23 +300,46 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             const canPlayEventHandler = () => {
                 videoElement.currentTime = time;
                 videoElement.removeEventListener("canplay", canPlayEventHandler)
+                videoElement.removeEventListener("loadeddata", canPlayEventHandler)
             }
             videoElement.addEventListener("canplay", canPlayEventHandler)
+            videoElement.addEventListener("loadeddata", canPlayEventHandler)
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
             rendererPlayoutObj.mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
                 videoElement.currentTime = time;
+                const canPlayEventHandler = () => {
+                    videoElement.currentTime = time;
+                    videoElement.removeEventListener("canplay", canPlayEventHandler)
+                    videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                }
+                videoElement.addEventListener("canplay", canPlayEventHandler)
+                videoElement.addEventListener("loadeddata", canPlayEventHandler)
             });
         } else {
             let setTime = false;
             videoElement.addEventListener('loadeddata', () => {
                 if (!setTime) {
                     videoElement.currentTime = time;
+                    const canPlayEventHandler = () => {
+                        videoElement.currentTime = time;
+                        videoElement.removeEventListener("canplay", canPlayEventHandler)
+                        videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                    }
+                    videoElement.addEventListener("canplay", canPlayEventHandler)
+                    videoElement.addEventListener("loadeddata", canPlayEventHandler)
                     setTime = true;
                 }
             });
             videoElement.addEventListener('timeupdate', () => {
                 if (!setTime) {
                     videoElement.currentTime = time;
+                    const canPlayEventHandler = () => {
+                        videoElement.currentTime = time;
+                        videoElement.removeEventListener("canplay", canPlayEventHandler)
+                        videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                    }
+                    videoElement.addEventListener("canplay", canPlayEventHandler)
+                    videoElement.addEventListener("loadeddata", canPlayEventHandler)
                     setTime = true;
                 }
             });
