@@ -171,7 +171,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (rendererPlayoutObj.mediaInstance) {
                         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
                         this._player.disconnectScrubBar();
-                        this._player.connectScrubBar(videoElement);
+                        this.connectScrubBar(rendererId, videoElement);
                     }
                 } else {
                     this._player.addVolumeControl(rendererId, 'Background');
