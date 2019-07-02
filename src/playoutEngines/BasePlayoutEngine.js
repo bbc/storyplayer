@@ -52,6 +52,27 @@ export default class BasePlayoutEngine {
         }
     }
 
+    setTimings(rendererId: string, timings: Object) {
+        if (this._media[rendererId]) {
+            this._media[rendererId].timings = timings;
+            if (this._media[rendererId].awaiting_times) {
+                this.connectScrubBar(rendererId, this._media[rendererId].mediaElement);
+            }
+        }
+    }
+
+    connectScrubBar(rendererId: string, mediaElement: HTMLMediaElement) {
+        if (this._media[rendererId]) {
+            const mediaObj = this._media[rendererId];
+            if (mediaObj.timings) {
+                this._player.connectScrubBar(mediaElement, mediaObj.timings);
+                mediaObj.awaiting_times = false;
+            } else {
+                mediaObj.awaiting_times = true;
+            }
+        }
+    }
+
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
