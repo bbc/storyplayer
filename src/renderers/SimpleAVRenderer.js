@@ -122,6 +122,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     end() {
         super.end();
+        this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
