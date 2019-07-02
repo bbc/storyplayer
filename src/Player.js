@@ -759,7 +759,7 @@ class Player extends EventEmitter {
     addExperienceStartButtonAndImage(options: Object) {
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.classList.add(options.button_class);
-        this._startExperienceButton.setAttribute('title', 'Continue Button');
+        this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
         const continueButtonIconHolder = document.createElement('div');
         this._startExperienceButton.appendChild(continueButtonIconHolder);
@@ -768,6 +768,7 @@ class Player extends EventEmitter {
         continueButtonIconDiv.classList.add('romper-button-icon-div');
         continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
         continueButtonIconHolder.appendChild(continueButtonIconDiv);
+
 
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';
