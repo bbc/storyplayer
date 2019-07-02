@@ -293,7 +293,15 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
+            // Hack for iOS to get it to stop seeking to zero after setting currentTime
+            // eslint-disable-next-line
+            // https://stackoverflow.com/questions/18266437/html5-video-currenttime-not-setting-properly-on-iphone
             videoElement.currentTime = time;
+            const canPlayEventHandler = () => {
+                videoElement.currentTime = time;
+                videoElement.removeEventListener("canplay", canPlayEventHandler)
+            }
+            videoElement.addEventListener("canplay", canPlayEventHandler)
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
             rendererPlayoutObj.mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
                 videoElement.currentTime = time;
