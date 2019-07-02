@@ -4,6 +4,7 @@ import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import { BrowserUserAgent } from '../browserCapabilities';
+import logger from '../logger';
 
 // NOTE: This playout engine uses MediaManager and MediaInstance classes which are not very well
 //       written and a bit messy.
@@ -176,6 +177,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
             }
+            if(rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
+                logger.info(`Applying queued events for ${rendererId}`)
+                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                    videoElement.addEventListener(qe.event, qe.callback)
+                })
+                rendererPlayoutObj.queuedEvents = []
+            }
         }
     }
 
@@ -311,7 +320,22 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
             const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-            videoElement.addEventListener(event, callback);
+            if (rendererPlayoutObj.active) {
+                // This renderer is using the on screen video element
+                // so add event listener directly
+                videoElement.addEventListener(event, callback);
+            } else {
+                // This renderer is not using the on screen video element
+                // so add event listener to the queue so it can be applied in
+                // setPlayoutActive
+                if(!rendererPlayoutObj.queuedEvents) {
+                    rendererPlayoutObj.queuedEvents = []
+                }
+                rendererPlayoutObj.queuedEvents.push({
+                    event,
+                    callback,
+                })
+            }
         }
     }
 
@@ -319,7 +343,19 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
             const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-            videoElement.removeEventListener(event, callback);
+            if (rendererPlayoutObj.active) {
+                // This renderer is using the on screen video element
+                // so remove event listener
+                videoElement.removeEventListener(event, callback);
+            } else if(rendererPlayoutObj.queuedEvents) {
+                // This renderer is not using the on screen video element
+                // so remove event listener from queue
+                const index = rendererPlayoutObj.queuedEvents
+                    .findIndex((qe) => qe.event === event && qe.callback === callback)
+                if(index !== -1) {
+                    rendererPlayoutObj.queuedEvents.splice(index, 1);
+                }
+            }
         }
     }
 
