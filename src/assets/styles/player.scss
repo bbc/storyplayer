@@ -12,8 +12,8 @@ $romper-hover-text-size: 1.53em;
 @mixin button {
   background-color: $transparent;
   border: 0;
-  height: 100%;
-  margin: 0;
+  height: $romper-button-height;
+  margin: 1em 0 0;
   outline: none;
   padding: 4px;
   vertical-align: top;
@@ -857,7 +857,7 @@ $romper-hover-text-size: 1.53em;
     }
 
     .romper-button {
-      margin: 0 5px;
+      margin: 1em 5px;
     }
   }
 
