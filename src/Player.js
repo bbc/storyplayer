@@ -1162,7 +1162,6 @@ class Player extends EventEmitter {
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
-            linkChoiceControl.setAttribute('title', label);
             linkChoiceControl.setAttribute('aria-label', label);
 
             const iconContainer = document.createElement('div');
