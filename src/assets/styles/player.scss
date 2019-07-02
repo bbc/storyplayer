@@ -157,18 +157,26 @@ $romper-hover-text-size: 1.53em;
       }
 
       .romper-privacy-notice {
-        height: 100px;
+        background: linear-gradient($transparent 0%, $var-panel-background 30%, $var-panel-background 100%);
+        bottom: 0;
+        height: 150px;
         left: 0;
-        padding: 5% 20%;
         position: absolute;
         right: 0;
-        top: 0;
         visibility: visible;
         z-index: 10;
 
+        a {
+          color: $highlight;
+        }
+
         >p {
-          background-color: $var-panel-background;
-          padding: 15px;
+          bottom: 30px;
+          left: 0;
+          margin-top: 50px;
+          padding: 0 10%;
+          position: absolute;
+          right: 0;
           text-align: center;
         }
       }
@@ -647,90 +655,90 @@ $romper-hover-text-size: 1.53em;
 }
 
 
-/* 
+/*
   ##Device = Desktops
   ##Screen = 1281px to higher resolution desktops
 */
 
 @media (min-width: 1281px) {
-  
+
   //CSS
   .romper-player > .romper-gui {
-    >.romper-buttons { 
+    >.romper-buttons {
       width: 100%;
     }
 
   }
 
-  
+
 }
 
-/* 
+/*
   ##Device = Laptops, Desktops
   ##Screen = B/w 1025px to 1280px
 */
 
 @media (min-width: 1025px) and (max-width: 1280px) {
-  
+
   //CSS
   .romper-player > .romper-gui {
-    >.romper-buttons { 
+    >.romper-buttons {
       width: 100%;
     }
 
   }
-  
+
 }
 
-/* 
+/*
   ##Device = Tablets, Ipads (portrait)
   ##Screen = B/w 768px to 1024px
 */
 
 @media (min-width: 768px) and (max-width: 1024px) {
-  
+
   //CSS
   .romper-player > .romper-gui {
-    >.romper-buttons { 
+    >.romper-buttons {
       width: 100%;
     }
 
   }
-  
+
 }
 
-/* 
+/*
   ##Device = Tablets, Ipads (landscape)
   ##Screen = B/w 768px to 1024px
 */
 
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-  
+
   //CSS
   .romper-player > .romper-gui {
-    >.romper-buttons { 
+    >.romper-buttons {
       width: 100vw;
     }
 
   }
-  
+
 }
 
-/* 
+/*
   ##Device = Low Resolution Tablets, Mobiles (Landscape)
   ##Screen = B/w 481px to 767px
 */
 
 @media (min-width: 481px) and (max-width: 767px) {
-  
+
   //CSS
   .romper-player > .romper-gui {
-    >.romper-buttons { 
+    >.romper-buttons {
       width: 100vw;
     }
 
   }
-  
+
 }
 
 .romper-player > .romper-gui {
@@ -800,7 +808,7 @@ $romper-hover-text-size: 1.53em;
       padding-top: 10px;
       width: calc((#{$romper-button-width} + 1em) * 4);
     }
-    
+
 
     .center {
       flex-grow: 1;
