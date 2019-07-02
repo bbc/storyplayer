@@ -122,7 +122,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._mediaManager.getMediaInstance('background');
                 const audioElement = document.createElement('audio');
                 audioElement.className = 'romper-audio-element romper-media-element-queued';
-                audioElement.crossfOrigin = 'anonymous';
+                audioElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaInstance.attachMedia(audioElement);
             }
         }
