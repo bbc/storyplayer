@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "0.3.22",
+  "version": "0.3.23",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -63,7 +63,6 @@
     "regenerator-runtime": "^0.13.2",
     "sass-lint": "^1.13.1",
     "sass-loader": "^7.1.0",
-    "screenfull": "^4.2.0",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0",
     "style-loader": "^0.23.1",
