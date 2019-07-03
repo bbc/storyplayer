@@ -17,6 +17,8 @@ import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
+const IOS_WARNING = 'Due to technical limitations on the iOS platform, the performance of this experience is degraded; to get the best experience please use another operating system';
+
 export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
@@ -181,6 +183,14 @@ export default class Controller extends EventEmitter {
 
     // create a manager to handle the rendering
     _createRenderManager() {
+        if (BrowserUserAgent.iOS()) {
+            if (!this._privacyNotice) {
+                this._privacyNotice = IOS_WARNING;
+            } else {
+                const appendedNotice = `${this._privacyNotice}\n${IOS_WARNING}`;
+                this._privacyNotice = appendedNotice;
+            }
+        }
         this._renderManager = new RenderManager(
             this,
             this._target,
