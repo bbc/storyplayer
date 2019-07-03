@@ -701,7 +701,7 @@ $romper-hover-text-size: 1.53em;
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
   .romper-player > .romper-gui {
     >.romper-buttons {
-      width: 100vw;
+      width: 100%;
     }
   }
 }
@@ -711,7 +711,7 @@ $romper-hover-text-size: 1.53em;
 @media (min-width: 481px) and (max-width: 767px) {
   .romper-player > .romper-gui {
     >.romper-buttons {
-      width: 100vw;
+      width: 100%;
     }
   }
 }
