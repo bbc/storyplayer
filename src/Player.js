@@ -563,6 +563,10 @@ class Player extends EventEmitter {
 
         // Event Listeners
         this._overlays.onclick = this._handleOverlayClick.bind(this);
+        this._overlays.addEventListener(
+            'touchend',
+            this._handleOverlayClick.bind(this),
+        );
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
         this._backButton.addEventListener(
@@ -795,6 +799,10 @@ class Player extends EventEmitter {
         };
 
         this._startExperienceButton.onclick = buttonClickHandler;
+        this._startExperienceButton.addEventListener(
+            'touchend',
+            buttonClickHandler,
+        );
 
         if (options.hide_narrative_buttons) {
             // can't use player.setNextAvailable
@@ -1071,11 +1079,13 @@ class Player extends EventEmitter {
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 
-        muteDiv.onclick = () => {
+        const muteClickHandler = () => {
             volumeRange.value = '0';
             this._setVolumeCallback(id, label, levelSpan, muteDiv)
                 .bind(this)({ target: { value: 0 }});
-        }
+        };
+        muteDiv.onclick = muteClickHandler;
+        muteDiv.addEventListener('touchend', muteClickHandler);
 
         controlDiv.appendChild(muteDiv);
         controlDiv.appendChild(volumeRange);
@@ -1176,7 +1186,7 @@ class Player extends EventEmitter {
             iconContainer.onclick = choiceClick;
             iconContainer.addEventListener(
                 'touchend',
-                handleButtonTouchEvent(choiceClick),
+                choiceClick,
             );
 
             linkChoiceControl.appendChild(iconContainer);
@@ -1249,6 +1259,7 @@ class Player extends EventEmitter {
                     this._linkChoice.setActive(`${id}`);
                 };
                 icon.onclick = clickHandler;
+                icon.addEventListener('touchend', clickHandler);
                 this._linkChoice.add(id, icon);
             });
         });
