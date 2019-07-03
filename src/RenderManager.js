@@ -108,11 +108,14 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
-                if (rend.getChoiceTime() > 0) {
-                    const choiceTime = rend.getChoiceTime();
+                const choiceTime = rend.getChoiceTime();
+                const { currentTime } = rend.getCurrentTime();
+                if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
                     rend.setCurrentTime(choiceTime - 0.25);
-                } else if (rend.hasVariablePanelBehaviour() || rend.hasShowIconBehaviour()) {
+                } else if (rend.hasVariablePanelBehaviour()
+                    || (rend.hasShowIconBehaviour() && choiceTime < 0)) {
+                    // choices or var panel as end behaviour
                     const representationId = rend.getRepresentation().id;
                     logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
