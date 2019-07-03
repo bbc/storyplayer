@@ -29,6 +29,8 @@ export default class RenderManager extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
+    _handleOrientationChange: Function;
+
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
 
     _target: HTMLElement;
@@ -96,6 +98,7 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
+        this._handleOrientationChange = this._handleOrientationChange.bind(this)
         this._isVisible = true;
         this._privacyNotice = privacyNotice;
 
@@ -169,8 +172,23 @@ export default class RenderManager extends EventEmitter {
             visibilityChange = 'webkitvisibilitychange';
         }
         document.addEventListener(visibilityChange, this._handleVisibilityChange, false);
+        window.addEventListener('orientationchange', this._handleOrientationChange, false);
 
         this._initialise();
+    }
+
+
+    _handleOrientationChange() {
+        logger.info(`Window Orientation change to ${window.orientation}`);
+        if (Player._isFullScreen()) {
+            this._player._exitFullScreen();
+        }
+        this._analytics({
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.WINDOW_ORIENTATION_CHANGE,
+            from: 'unset',
+            to: window.orientation,
+        });
     }
 
     prepareForRestart() {
