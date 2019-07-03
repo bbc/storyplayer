@@ -43,6 +43,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (BrowserUserAgent.iOS()) {
             this._foregroundMediaElement.autoplay = true;
             this._backgroundMediaElement.autoplay = true;
+            this._foregroundMediaElement.disablePictureInPicture = true;
         }
 
         this._player.mediaTarget.appendChild(this._foregroundMediaElement);
