@@ -44,10 +44,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (BrowserUserAgent.iOS()) {
             this._foregroundMediaElement.autoplay = true;
             this._backgroundMediaElement.autoplay = true;
+            this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");
             this._foregroundMediaElement.setAttribute("playsinline", "true");
-            this._backgroundMediaElement.setAttribute("playsinline", "true")
-            this._foregroundMediaElement.setAttribute("webkit-playsinline", "true")
-            this._backgroundMediaElement.setAttribute("webkit-playsinline", "true")
+            this._backgroundMediaElement.setAttribute("playsinline", "true");
+            this._foregroundMediaElement.setAttribute("webkit-playsinline", "true");
+            this._backgroundMediaElement.setAttribute("webkit-playsinline", "true");
         }
 
         this._player.mediaTarget.appendChild(this._foregroundMediaElement);
@@ -137,6 +138,15 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
+            if (
+                rendererPlayoutObj.media && rendererPlayoutObj.media.type &&
+                rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV &&
+                rendererPlayoutObj.mediaInstance
+            ) {
+                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                this._player.disconnectScrubBar();
+                this.connectScrubBar(rendererId, videoElement);
+            }
         }
     }
 
