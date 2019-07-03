@@ -250,6 +250,8 @@ class Player extends EventEmitter {
 
     _guiLayer: HTMLDivElement;
 
+    _errorLayer: HTMLDivElement;
+
     backgroundTarget: HTMLDivElement;
 
     mediaTarget: HTMLDivElement;
@@ -398,6 +400,11 @@ class Player extends EventEmitter {
 
         this._guiLayer = document.createElement('div');
         this._guiLayer.classList.add('romper-gui');
+
+        this._errorLayer = document.createElement('div');
+        const errorMessage = document.createTextNode("Issue retrieving media");
+        this._errorLayer.appendChild(errorMessage);
+        this._errorLayer.classList.add('romper-error');
 
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
@@ -788,6 +795,20 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
         this._overlays.classList.add('buttons-hidden');
+    }
+
+    _showErrorLayer() {
+        const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
+        if (!errorLayer) {
+            this._mediaLayer.insertBefore(this._errorLayer, this._mediaLayer.childNodes[0]);
+        }
+    }
+
+    _removeErrorLayer() {
+        const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
+        if (errorLayer) {
+            errorLayer.remove()
+        }
     }
 
     addExperienceStartButtonAndImage(options: Object) {

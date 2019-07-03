@@ -144,6 +144,17 @@ $romper-hover-text-size: 25px;
     z-index: 101;
   }
 
+  .romper-error {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    &.hide {
+      display: hidden;
+      height: 0%;
+      width: 0%;
+    }
+  }
+
   .romper-media {
     background-color: $romper-background-color;
 
