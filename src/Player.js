@@ -1164,6 +1164,7 @@ class Player extends EventEmitter {
         const linkChoiceControl = document.createElement('div');
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
+            linkChoiceControl.classList.add('noselect');
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
             linkChoiceControl.setAttribute('aria-label', label);
 
@@ -1669,7 +1670,7 @@ class Player extends EventEmitter {
         if (!Player._isFullScreen()) {
             this._buttons.classList.remove('romper-buttons-fullscreen');
             this._player.classList.remove('romper-player-fullscreen');
-            
+
             document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
             document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
             document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
