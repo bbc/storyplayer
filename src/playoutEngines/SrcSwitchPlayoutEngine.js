@@ -137,6 +137,15 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
+            if (
+                rendererPlayoutObj.media && rendererPlayoutObj.media.type &&
+                rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV &&
+                rendererPlayoutObj.mediaInstance
+            ) {
+                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                this._player.disconnectScrubBar();
+                this.connectScrubBar(rendererId, videoElement);
+            }
         }
     }
 
