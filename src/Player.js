@@ -1239,6 +1239,7 @@ class Player extends EventEmitter {
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+        this._hideRomperButtons();
         this._linkChoice.overlay.classList.remove('romper-inactive');
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
