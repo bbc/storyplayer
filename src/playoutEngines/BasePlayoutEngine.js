@@ -56,7 +56,7 @@ export default class BasePlayoutEngine {
         if (this._media[rendererId]) {
             this._media[rendererId].timings = timings;
             if (this._media[rendererId].awaiting_times) {
-                this.connectScrubBar(rendererId, this._media[rendererId].mediaElement);
+                this.connectScrubBar(rendererId, this.getMediaElement(rendererId));
             }
         }
     }
@@ -76,7 +76,7 @@ export default class BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
-            rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+            this.getMediaElement(rendererId).classList.remove('romper-media-element-queued');
         }
     }
 
