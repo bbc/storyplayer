@@ -17,7 +17,7 @@ import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
-const IOS_WARNING = 'Due to technical limitations on the iOS platform, the performance of this experience is degraded; to get the best experience please use another operating system';
+const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
 
 export default class Controller extends EventEmitter {
     constructor(
