@@ -46,9 +46,12 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this._backgroundMediaElement.autoplay = true;
             this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");
             this._foregroundMediaElement.setAttribute("playsinline", "true");
-            this._backgroundMediaElement.setAttribute("playsinline", "true");
             this._foregroundMediaElement.setAttribute("webkit-playsinline", "true");
+            this._foregroundMediaElement.setAttribute("controls", "false");
+            this._backgroundMediaElement.setAttribute("disablePictureInPicture", "true");
+            this._backgroundMediaElement.setAttribute("playsinline", "true");
             this._backgroundMediaElement.setAttribute("webkit-playsinline", "true");
+            this._backgroundMediaElement.setAttribute("controls", "false");
         }
 
         this._player.mediaTarget.appendChild(this._foregroundMediaElement);
