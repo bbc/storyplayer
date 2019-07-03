@@ -256,6 +256,18 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         default:
             logger.error('Cannot handle this mediaType (loadSource)');
         }
+
+        const registerError = (status) => {
+            rendererPlayoutObj.error = status
+        }
+
+        fetch(url)
+            .then(response => response.status)
+            .then(status => {
+                if (status !== 200 ) {
+                    registerError(true)
+                }
+            })
     }
 
     unqueuePlayout(rendererId: string) {
