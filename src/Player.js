@@ -618,7 +618,7 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.addEventListener(
-            'touchstart',
+            'touchend',
             this._activateRomperButtons.bind(this),
         );
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
@@ -729,7 +729,9 @@ class Player extends EventEmitter {
         }
     }
 
-    _activateRomperButtons() {
+    _activateRomperButtons(event: Object) {
+        event.stopPropagation();
+        event.preventDefault();
         if (this._controlsDisabled) {
             return;
         }
