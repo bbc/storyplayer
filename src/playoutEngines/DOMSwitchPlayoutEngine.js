@@ -354,6 +354,22 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         case MediaTypes.DASH: {
             rendererPlayoutObj._shaka = new shaka.Player(rendererPlayoutObj.mediaElement);
             rendererPlayoutObj._shaka.configure(
+                "manifest.retryParameters.maxAttempts",
+                10
+            )
+            rendererPlayoutObj._shaka.configure(
+                "manifest.retryParameters.backoffFactor",
+                1.5
+            )
+            rendererPlayoutObj._shaka.configure(
+                "streaming.retryParameters.maxAttempts",
+                10
+            )
+            rendererPlayoutObj._shaka.configure(
+                "streaming.retryParameters.backoffFactor",
+                1.5
+            )
+            rendererPlayoutObj._shaka.configure(
                 'streaming.bufferingGoal',
                 this._inactiveConfig.dash.bufferingGoal
             );
