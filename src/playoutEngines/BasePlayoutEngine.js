@@ -27,6 +27,11 @@ export default class BasePlayoutEngine {
         this._permissionToPlay = false;
         this._hasStarted = false;
         this._debugPlayout = debugPlayout;
+
+        if(this._debugPlayout) {
+            window.playoutMedia = this._media;
+            window.playout = this;
+        }
     }
 
     setPermissionToPlay(value: boolean) {
