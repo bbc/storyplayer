@@ -17,6 +17,7 @@ import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
+// eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
 
 export default class Controller extends EventEmitter {
