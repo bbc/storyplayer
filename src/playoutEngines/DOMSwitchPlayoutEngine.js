@@ -400,18 +400,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         default:
             logger.error('Cannot handle this mediaType (loadSource)');
         }
-
-        const registerError = (status) => {
-            rendererPlayoutObj.error = status
-        }
-
-        fetch(url)
-            .then(response => response.status)
-            .then(status => {
-                if (status !== 200 ) {
-                    registerError(true)
-                }
-            })
     }
 
     unqueuePlayout(rendererId: string) {
@@ -479,15 +467,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
                             })
                         }
-                        ['ERROR'].forEach((e) => {
-                            rendererPlayoutObj._hls.on(
-                                Hls.Events[e], () => {
-                                    // eslint-disable-next-line no-console
-                                    this._player._showErrorLayer();
-                                }
-                            );
 
-                        })
+                        // buffering
+                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
+                        rendererPlayoutObj._hls.on(Hls.Events.BUFFER_STALLED_ERROR, this._player._showBufferingLayer);
+
+                        // errors
+                        rendererPlayoutObj._hls.on(Hls.Events.ERROR, this._player._showErrorLayer);
+                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeErrorLayer);
+
                     }
                     break;
                 case MediaTypes.DASH: {
@@ -511,18 +499,19 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     );
 
                     // error handler
+                    // bufferiug errors
                     rendererPlayoutObj._shaka.addEventListener(
                         'buffering', this._player._showBufferingLayer
                     );
 
+                    // generic error
                     rendererPlayoutObj._shaka.addEventListener(
                         'error', this._player._showErrorLayer
                     );
 
+                    // resuming all good
                     rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeErrorLayer);
                     rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeBufferingLayer);
-
-
 
 
                     if(this._debugPlayout) {
@@ -593,6 +582,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._inactiveConfig.hls,
                         );
+                        // remove the event listeners
+                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.ERROR, this._player._showErrorLayer);
+                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.BUFFER_STALLED_ERROR, this._player._showBufferingLayer);
+                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
                     } 
                     break;
                 case MediaTypes.DASH:
@@ -610,6 +603,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         clearTimeout(rendererPlayoutObj._shakaCheckBandwidthTimeout)
                     }
 
+                    // remove the event listeners
                     rendererPlayoutObj._shaka.removeEventListener('error', this._player._showErrorLayer);
                     rendererPlayoutObj._shaka.removeEventListener('buffering', this._player._showBufferingLayer);
                     rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeBufferingLayer);
