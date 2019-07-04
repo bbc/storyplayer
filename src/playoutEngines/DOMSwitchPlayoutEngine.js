@@ -491,7 +491,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     // error handler
                     // bufferiug errors
                     rendererPlayoutObj._shaka.addEventListener(
-                        'buffering', this._player._showBufferingLayer
+                        'buffering', () => {
+                            if(rendererPlayoutObj.mediaElement.readyState < rendererPlayoutObj.mediaElement.HAVE_CURRENT_DATA || rendererPlayoutObj.mediaElement.playbackRate < 1) {
+                                this._player._showBufferingLayer();
+                            }
+                        }
                     );
 
                     // generic error
