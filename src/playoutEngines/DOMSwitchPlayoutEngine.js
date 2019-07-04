@@ -156,6 +156,63 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+
+        this._shakaStallDetector = this._shakaStallDetector.bind(this)
+        this._shakaStallDetectorLastPlaybackTime = -1
+        this._shakaStallDetectorLastActiveId = -1
+
+        this._shakaStallDetector();
+    }
+
+    _shakaStallDetector() {
+        if(this._debugPlayout) {
+            // eslint-disable-next-line
+            console.log("Stall Detector running")
+        }
+
+        const activeIds = Object.keys(this._media)
+            .filter(key => this._media[key].active)
+
+        if(activeIds.length > 1){
+            logger.warn("Invalid number of active elements")
+            return
+        }
+
+        if(activeIds.length === 0){
+            logger.info("No active elements")
+            return
+        }
+
+        const activeId = activeIds[0]
+        const { mediaElement } = this._media[activeId];
+
+        if(
+            mediaElement &&
+            this.isPlaying() &&
+            this._shakaStallDetectorLastActiveId !== -1 &&
+            this._shakaStallDetectorLastActiveId === activeId &&
+            this._shakaStallDetectorLastPlaybackTime !== -1
+        ) {
+            const {duration} = mediaElement
+            if(
+                mediaElement.currentTime > duration-1 &&
+                Math.abs(this._shakaStallDetectorLastPlaybackTime - mediaElement.currentTime) < 0.5
+            ) {
+                // Stalled near end
+                logger.warn("Stalled near end. Clicking Next")
+                this._player._nextButtonClicked()
+            } else if(
+                Math.abs(this._shakaStallDetectorLastPlaybackTime - mediaElement.currentTime) < 0.5
+            ) {
+                // Stalled in middle
+                logger.warn("Stalled in middle. Shifting forward by 2 seconds")
+                this.setCurrentTime(activeId, mediaElement.currentTime + 2)
+            }
+        }
+        this._shakaStallDetectorLastActiveId = activeId
+        this._shakaStallDetectorLastPlaybackTime = mediaElement.currentTime
+
+        setTimeout(() => this._shakaStallDetector(), 1000)
     }
 
     _shakaUpdateBandwidth(rendererId: string) {
