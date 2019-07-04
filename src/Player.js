@@ -412,6 +412,7 @@ class Player extends EventEmitter {
 
         this._buttons = document.createElement('div');
         this._buttons.classList.add('romper-buttons');
+        this._buttons.onmousemove = this._activateRomperButtons.bind(this);
 
         this._narrativeElementTransport = document.createElement('div');
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
@@ -735,7 +736,10 @@ class Player extends EventEmitter {
         if (this._controlsDisabled) {
             return;
         }
-        this._showRomperButtons();
+        if (!this._RomperButtonsShowing) {
+            this._showRomperButtons();
+        }
+        if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
         this._showRomperButtonsTimeout = setTimeout(() => {
             this._hideRomperButtons();
         }, 5000);
@@ -748,6 +752,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.add('show');
         this._buttonsActivateArea.classList.add('hide');
         this._overlays.classList.remove('buttons-hidden');
+        this._overlays.classList.add('buttons-showing');
     }
 
     _hideRomperButtons() {
@@ -758,6 +763,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('show');
         this._buttonsActivateArea.classList.remove('hide');
         this._overlays.classList.add('buttons-hidden');
+        this._overlays.classList.remove('buttons-showing');
     }
 
     addExperienceStartButtonAndImage(options: Object) {

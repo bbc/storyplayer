@@ -422,6 +422,26 @@ export default class BaseRenderer extends EventEmitter {
                         behaviourRunner(behaviourObject, () => {
                             logger.info(`started during behaviour ${behaviourObject.type}`);
                         }));
+
+                    // if we have choices, hide the controls before they appear
+                    if (behaviourObject.type
+                        === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
+                        && behaviourObject.hasOwnProperty('disable_controls')
+                        && behaviourObject.disable_controls) {
+                        const hideControls = () => {
+                            this._player.disableControls();
+                            this._player._hideRomperButtons();
+                        };
+                        if (startTime > 1) {
+                            this.addTimeEventListener(
+                                'prechoice-control-hide',
+                                startTime - 0.8,
+                                hideControls,
+                            );
+                        } else {
+                            hideControls();
+                        }
+                    }
                 }
                 // if there is a duration
                 if (behaviour.duration) {
