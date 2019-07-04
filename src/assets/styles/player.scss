@@ -187,6 +187,10 @@ $romper-hover-text-size: 1.53em;
     height: 100%;
     position: absolute;
     width: 100%;
+
+    &.show {
+      z-index: 1;
+    }
   }
 
   .romper-loading-inner {
@@ -784,6 +788,10 @@ $romper-hover-text-size: 1.53em;
     transition: all 1s ease;
     z-index: 10;
 
+    &.icons-showing {
+      background: linear-gradient($transparent 0, $black 30%, $black 100%);
+    }
+
     .left,
     .right {
       flex-grow: 1;
@@ -852,6 +860,13 @@ $romper-hover-text-size: 1.53em;
     height: calc(100% - 120px);
     justify-content: center;
     width: 100%;
+
+    &.buttons-showing {
+      .romper-link-choice-overlay {
+        bottom: 8em;
+        transition: all 0.5s ease;
+      }
+    }
   }
 
   >.romper-buttons-activate-area {
