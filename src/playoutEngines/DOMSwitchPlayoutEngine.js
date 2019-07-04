@@ -60,7 +60,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _shakaStallDetector: Function
 
-    _shakaStallDetectorLastActiveId: string
+    _shakaStallDetectorLastActiveId: any
 
     _shakaStallDetectorLastPlaybackTime: number
 
