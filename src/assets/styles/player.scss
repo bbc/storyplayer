@@ -187,6 +187,10 @@ $romper-hover-text-size: 1.53em;
     height: 100%;
     position: absolute;
     width: 100%;
+
+    &.show {
+      z-index: 1;
+    }
   }
 
   .romper-loading-inner {
