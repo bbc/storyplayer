@@ -379,6 +379,7 @@ class Player extends EventEmitter {
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
+        this._player.classList.add('noselect');
 
         this._playerParent = target;
 
