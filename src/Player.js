@@ -127,7 +127,10 @@ function createOverlay(name: string, logFunction: Function) {
     const labels = {};
     let activeIconId = null;
 
+    const getCount = () => Object.keys(elements).length;
+
     const add = (id: string, el: HTMLElement, label?: string) => {
+        overlay.classList.remove(`count-${getCount()}`);
         elements[id] = el;
         if (label) {
             labels[label] = id;
@@ -135,6 +138,7 @@ function createOverlay(name: string, logFunction: Function) {
         el.classList.add('romper-control-unselected');
         overlay.appendChild(el);
         button.classList.remove('romper-inactive');
+        overlay.classList.add(`count-${getCount()}`);
     };
 
     const get = (id: string) => elements[id];
@@ -147,6 +151,7 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const remove = (id: string) => {
+        overlay.classList.remove(`count-${getCount()}`);
         if (elements[id]) {
             overlay.removeChild(elements[id]);
             delete elements[id];
@@ -154,6 +159,7 @@ function createOverlay(name: string, logFunction: Function) {
                 button.classList.add('romper-inactive');
             }
         }
+        overlay.classList.add(`count-${getCount()}`);
     };
 
     const setActive = (id: string) => {
@@ -211,11 +217,13 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const clearAll = () => {
+        overlay.classList.remove(`count-${getCount()}`);
         Object.keys(elements).forEach((key) => {
             overlay.removeChild(elements[key]);
             delete elements[key];
             delete labels[key];
         });
+        overlay.classList.add(`count-${getCount()}`);
     };
 
     // Consider a set or select method.
@@ -234,6 +242,7 @@ function createOverlay(name: string, logFunction: Function) {
         getIdForLabel,
         setButtonClass,
         clearAll,
+        getCount,
     };
 }
 
@@ -733,7 +742,7 @@ class Player extends EventEmitter {
         if (event.code === 'Escape') {
             if (this._RomperButtonsShowing) this._hideRomperButtons();
         } else if (!this._RomperButtonsShowing) {
-            this._activateRomperButtons();
+            this._activateRomperButtons(event);
         }
     }
 
