@@ -40,6 +40,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener: Function;
 
+    _testEndStallTimeout: TimeoutID;
+
     _setOutTime: Function;
 
     _setInTime: Function;
@@ -95,6 +97,20 @@ export default class SimpleAVRenderer extends BaseRenderer {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
                 videoElement.pause();
                 this._endedEventListener();
+            }
+            if (videoElement.currentTime > (videoElement.duration - 1)) {
+                const nowTime = videoElement.currentTime;
+                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                    this._testEndStallTimeout = setTimeout(() => {
+                        // eslint-disable-next-line max-len
+                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
+                        if (videoElement.currentTime <= nowTime + 1.9) {
+                            logger.warn('Video end checker failed stall test');
+                            clearTimeout(this._testEndStallTimeout);
+                            this._endedEventListener();
+                        }
+                    }, 2000);
+                }
             }
         }
     }

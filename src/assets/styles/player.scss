@@ -144,6 +144,26 @@ $romper-hover-text-size: 1.53em;
     z-index: 101;
   }
 
+  .romper-error {
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    background-color: $forty-percent-black;
+    height: auto;
+    left: 50%;
+    padding: 10px;
+    position: absolute;
+    top: 25%;
+    transform: translateX(-50%) translateY(-50%);
+    width: auto;
+    z-index: 105;
+
+    &.hide {
+      display: none;
+      height: 0%;
+      width: 0%;
+    }
+  }
+
   .romper-media {
     background-color: $romper-background-color;
 
@@ -410,6 +430,10 @@ $romper-hover-text-size: 1.53em;
       @include button-icon('../images/subtitles.svg');
       height: $romper-button-height;
       width: $romper-button-width;
+    }
+
+    &.romper-control-disabled {
+      display: none;
     }
   }
 
