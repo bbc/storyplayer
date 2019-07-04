@@ -467,7 +467,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.on(
                                 Hls.Events[e], (ev) => {
                                     // eslint-disable-next-line no-console
-                                    alert("HLS EVENT: ",e, ev)
                                     this._player._showErrorLayer();
                                 }
                             );
