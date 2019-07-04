@@ -153,6 +153,7 @@ $romper-hover-text-size: 1.53em;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     width: auto;
+    z-index: 105;
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
     &.hide {
