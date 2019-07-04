@@ -351,6 +351,8 @@ class Player extends EventEmitter {
 
     _dogImage: HTMLImageElement;
 
+    _loadingLayer: HTMLElement
+
     _privacyDiv: ?HTMLDivElement;
 
     _controlsDisabled: boolean;
@@ -358,6 +360,14 @@ class Player extends EventEmitter {
     _currentRenderer: ?BaseRenderer;
 
     _backNextWaiting: boolean; // flag to stop spamming of buttons
+
+    _showErrorLayer: Function;
+
+    _removeErrorLayer: Function;
+
+    _showBufferingLayer: Function;
+    
+    _removeBufferingLayer: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
