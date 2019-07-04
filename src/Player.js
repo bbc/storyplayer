@@ -366,7 +366,7 @@ class Player extends EventEmitter {
     _removeErrorLayer: Function;
 
     _showBufferingLayer: Function;
-    
+
     _removeBufferingLayer: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
@@ -989,11 +989,11 @@ class Player extends EventEmitter {
         this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
     }
 
-    _handleOverlayClick() {
+    _handleOverlayClick(event: Object) {
         if (this._RomperButtonsShowing) {
             this._hideRomperButtons();
         } else {
-            this._activateRomperButtons();
+            this._activateRomperButtons(event);
         }
         this._hideAllOverlays();
     }
