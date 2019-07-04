@@ -122,7 +122,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     end() {
         super.end();
-        this._player._removeErrorLayer();
         this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
