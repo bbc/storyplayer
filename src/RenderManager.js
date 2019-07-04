@@ -152,8 +152,18 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
-        window.onfocus = () => this._handleVisibilityChange(true);
-        window.onblur = () => this._handleVisibilityChange(false);
+        if (typeof document.hidden !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                this._handleVisibilityChange(!document.hidden);
+            });
+        // @flowignore
+        } else if (typeof document.webkitHidden !== 'undefined') {
+            document.addEventListener('webkitvisibilitychange', () => {
+                // @flowignore
+                this._handleVisibilityChange(!document.webkitHidden);
+            });
+        }
+
         window.addEventListener('orientationchange', this._handleOrientationChange, false);
 
         this._initialise();
@@ -177,8 +187,8 @@ export default class RenderManager extends EventEmitter {
         this._player.prepareForRestart();
     }
 
-    _handleVisibilityChange(hasFocus: boolean) {
-        if (!hasFocus) {
+    _handleVisibilityChange(isVisible: boolean) {
+        if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             this._player.playoutEngine.pause();
             this._player.playoutEngine.pauseBackgrounds();
@@ -206,8 +216,8 @@ export default class RenderManager extends EventEmitter {
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,
-            from: hasFocus ? 'hidden' : 'visible',
-            to: hasFocus ? 'visible' : 'hidden',
+            from: isVisible ? 'hidden' : 'visible',
+            to: isVisible ? 'visible' : 'hidden',
         });
     }
 
