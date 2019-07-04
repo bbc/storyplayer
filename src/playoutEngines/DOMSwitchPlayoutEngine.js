@@ -58,6 +58,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _estimatedBandwidth: number;
 
+    _shakaStallDetector: Function
+
+    _shakaStallDetectorLastActiveId: string
+
+    _shakaStallDetectorLastPlaybackTime: number
+
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
 
@@ -621,7 +627,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             this._inactiveConfig.hls,
                         );
                         // remove the event listeners
-                    } 
+                    }
                     break;
                 case MediaTypes.DASH:
                     rendererPlayoutObj._shaka.configure(
