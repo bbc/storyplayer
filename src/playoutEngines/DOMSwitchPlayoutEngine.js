@@ -470,10 +470,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
                         // buffering
                         rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
-                        rendererPlayoutObj._hls.on(Hls.Events.BUFFER_STALLED_ERROR, this._player._showBufferingLayer);
 
                         // errors
-                        rendererPlayoutObj._hls.on(Hls.Events.ERROR, this._player._showErrorLayer);
+                        rendererPlayoutObj._hls.on(Hls.Events.ERROR, (event, { details }) => {
+                            // if the error is a buffering error show the buffering wheel
+                            if (details === window.Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+                                this._player._showBufferingLayer();
+                            }
+                            this._player._showErrorLayer();
+                        });
                         rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeErrorLayer);
 
                     }
@@ -584,7 +589,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         );
                         // remove the event listeners
                         rendererPlayoutObj._hls.removeEventListener(Hls.Events.ERROR, this._player._showErrorLayer);
-                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.BUFFER_STALLED_ERROR, this._player._showBufferingLayer);
                         rendererPlayoutObj._hls.removeEventListener(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
                     } 
                     break;
