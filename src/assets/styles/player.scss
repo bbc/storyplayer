@@ -145,9 +145,16 @@ $romper-hover-text-size: 1.53em;
   }
 
   .romper-error {
-    height: 100%;
+    background-color: $forty-percent-black;
+    height: auto;
+    left: 50%;
+    padding: 10px;
     position: absolute;
-    width: 100%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: auto;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
     &.hide {
       display: hidden;
       height: 0%;

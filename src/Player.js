@@ -778,12 +778,18 @@ class Player extends EventEmitter {
         if (!errorLayer) {
             this._mediaLayer.insertBefore(this._errorLayer, this._mediaLayer.childNodes[0]);
         }
+        if(!this._RomperButtonsShowing){
+            this._showRomperButtons();
+        }
     }
 
     _removeErrorLayer() {
         const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
         if (errorLayer) {
             errorLayer.remove()
+        }
+        if(this._RomperButtonsShowing) {
+            this._hideRomperButtons();
         }
     }
 
