@@ -350,6 +350,22 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 }
                             )
                         })
+                    } else {
+                        ["BUFFER_RESET",
+                            "BUFFER_CODECS",
+                            "BUFFER_CREATED",
+                            "BUFFER_APPENDING",
+                            "BUFFER_APPENDED",
+                            "BUFFER_EOS",
+                            "BUFFER_FLUSHING",
+                            "BUFFER_FLUSHED"].forEach((e) => {
+                            rendererPlayoutObj._hls.on(
+                                Hls.Events[e], () => {
+                                    this._player._showErrorLayer()
+                                }
+                            );
+
+                        })
                     }
                     break;
                 }
@@ -407,6 +423,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._inactiveConfig.hls,
                         );
+                    } else {
+                        ["buffering", "loading"].forEach((e) => {
+                            rendererPlayoutObj._shaka.addEventListener(
+                                e,
+                                () => {
+                                    this._player._showErrorLayer()
+                                }
+                            )
+                        })
                     }
                     break;
                 case MediaTypes.DASH:
