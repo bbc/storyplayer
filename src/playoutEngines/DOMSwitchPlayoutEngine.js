@@ -423,6 +423,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        if (this._media[rendererId].error === true) {
+            this._player._showErrorLayer()
+        }
         if (!rendererPlayoutObj) {
             return;
         }
@@ -449,6 +452,20 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             })
                         }
 
+                        // errors
+                        rendererPlayoutObj._hls.on(Hls.Events.ERROR, (event, { details }) => {
+                            // if the error is a buffering error show the buffering wheel
+                            if (details === window.Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+                                this._player._showBufferingLayer();
+                            } else {
+                                // otherwise assume it is a generic error
+                                this._player._showErrorLayer();
+                            }
+                        });
+
+                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeErrorLayer);
+                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
+
                     }
                     break;
                 case MediaTypes.DASH: {
@@ -469,7 +486,23 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.addEventListener(
                         'adaptation',
                         rendererPlayoutObj._shakaAdaptationHandler
-                    )
+                    );
+
+                    // error handler
+                    // bufferiug errors
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'buffering', this._player._showBufferingLayer
+                    );
+
+                    // generic error
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'error', this._player._showErrorLayer
+                    );
+
+                    // resuming all good
+                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeErrorLayer);
+                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeBufferingLayer);
+
 
                     if(this._debugPlayout) {
                         allShakaEvents.forEach((e) => {
@@ -539,8 +572,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._inactiveConfig.hls,
                         );
-
-                    }
+                        // remove the event listeners
+                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.ERROR, this._player._showErrorLayer);
+                        rendererPlayoutObj._hls.removeEventListener(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
+                    } 
                     break;
                 case MediaTypes.DASH:
                     rendererPlayoutObj._shaka.configure(
@@ -556,6 +591,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if(rendererPlayoutObj._shakaCheckBandwidthTimeout) {
                         clearTimeout(rendererPlayoutObj._shakaCheckBandwidthTimeout)
                     }
+
+                    // remove the event listeners
+                    rendererPlayoutObj._shaka.removeEventListener('error', this._player._showErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('buffering', this._player._showBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeErrorLayer);
+
                     break;
                 case MediaTypes.OTHER:
                     break;
