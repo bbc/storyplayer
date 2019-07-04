@@ -493,7 +493,19 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.addEventListener(
                         'adaptation',
                         rendererPlayoutObj._shakaAdaptationHandler
-                    )
+                    );
+
+                    // error handler
+                    ['buffering', 'loading','retry'].forEach(e => {
+                        rendererPlayoutObj._shaka.addEventListener(
+                            e, this._player._showErrorLayer
+                        );
+                    });
+
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'error', this._player._showErrorLayer
+                    );
+
 
                     if(this._debugPlayout) {
                         allShakaEvents.forEach((e) => {
@@ -505,13 +517,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 }
                             )
                         })
-                    } 
-                    ['buffering', 'loading', 'error'].forEach((e) => {
-                        rendererPlayoutObj._shaka.addEventListener(e, (ev) => {
-                            logger.warn(ev);
-                            this._player._showErrorLayer()
-                        })
-                    });
+                    }
                     break;
                 }
                 case MediaTypes.OTHER:
