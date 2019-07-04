@@ -369,6 +369,8 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
+    _stallHandler: Function;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -696,6 +698,7 @@ class Player extends EventEmitter {
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
+        this._stallHandler = this._stallHandler.bind(this);
     }
 
     addDog(src: string, position: Object) {
@@ -996,6 +999,14 @@ class Player extends EventEmitter {
             this._activateRomperButtons(event);
         }
         this._hideAllOverlays();
+    }
+
+
+    _stallHandler() {
+        logger.info('Player stalled')
+        if(this._currentRenderer) {
+            this._currentRenderer.complete();
+        }
     }
 
     _hideAllOverlays() {

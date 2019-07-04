@@ -533,9 +533,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
 
-            rendererPlayoutObj.mediaElement.addEventListener('stalled', (event) => {
-                console.log('Failed to fetch data, but trying.', event);
-            });
+            rendererPlayoutObj.mediaElement.addEventListener('stalled', this._player._stallHandler);
 
             if(this._debugPlayout) {
                 this._activePlayer = rendererPlayoutObj;
