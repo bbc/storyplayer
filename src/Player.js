@@ -412,7 +412,7 @@ class Player extends EventEmitter {
         this._guiLayer.classList.add('romper-gui');
 
         this._errorLayer = document.createElement('div');
-        const errorMessage = document.createTextNode("Issue retrieving media");
+        const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
         this._errorLayer.appendChild(errorMessage);
         this._errorLayer.classList.add('romper-error');
         this._errorLayer.classList.add('hide');
