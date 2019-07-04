@@ -76,8 +76,6 @@ export default class RenderManager extends EventEmitter {
 
     _handleVisibilityChange: Function;
 
-    _isVisible: boolean;
-
     _isPlaying: boolean;
 
     constructor(
@@ -99,7 +97,6 @@ export default class RenderManager extends EventEmitter {
         this._assetUrls = assetUrls;
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
         this._handleOrientationChange = this._handleOrientationChange.bind(this)
-        this._isVisible = true;
         this._privacyNotice = privacyNotice;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
@@ -155,23 +152,8 @@ export default class RenderManager extends EventEmitter {
             }
         });
 
-        // make sure playback toggles correctly when user goes away from tab/browser
-        // Set the name of the hidden property and the change event for visibility
-        // cross-browser hackery
-        let visibilityChange = 'visibilitychange';
-        if (typeof document.hidden !== 'undefined') {
-            visibilityChange = 'visibilitychange';
-        // @flowignore
-        } else if (typeof document.msHidden !== 'undefined') {
-            visibilityChange = 'msvisibilitychange';
-        // @flowignore
-        } else if (typeof document.mozHidden !== 'undefined') {
-            visibilityChange = 'mozvisibilitychange';
-        // @flowignore
-        } else if (typeof document.webkitHidden !== 'undefined') {
-            visibilityChange = 'webkitvisibilitychange';
-        }
-        document.addEventListener(visibilityChange, this._handleVisibilityChange, false);
+        window.onfocus = () => this._handleVisibilityChange(true);
+        window.onblur = () => this._handleVisibilityChange(false);
         window.addEventListener('orientationchange', this._handleOrientationChange, false);
 
         this._initialise();
@@ -195,9 +177,8 @@ export default class RenderManager extends EventEmitter {
         this._player.prepareForRestart();
     }
 
-    _handleVisibilityChange() {
-        if (this._isVisible) {
-            this._isVisible = false;
+    _handleVisibilityChange(hasFocus: boolean) {
+        if (!hasFocus) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             this._player.playoutEngine.pause();
             this._player.playoutEngine.pauseBackgrounds();
@@ -205,7 +186,6 @@ export default class RenderManager extends EventEmitter {
                 this._currentRenderer.pause();
             }
         } else {
-            this._isVisible = true;
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasEnded()) {
@@ -226,8 +206,8 @@ export default class RenderManager extends EventEmitter {
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,
-            from: this._isVisible ? 'hidden' : 'visible',
-            to: this._isVisible ? 'visible' : 'hidden',
+            from: hasFocus ? 'hidden' : 'visible',
+            to: hasFocus ? 'visible' : 'hidden',
         });
     }
 
