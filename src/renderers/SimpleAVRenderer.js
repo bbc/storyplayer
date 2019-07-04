@@ -123,6 +123,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     end() {
         super.end();
         this._player._removeErrorLayer();
+        this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
@@ -171,6 +172,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl);
+                                this._playoutEngine.setTimings(this._rendererId, {
+                                    inTime: this._inTime,
+                                    outTime: this._outTime,
+                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -253,9 +258,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     // set how far into the segment this video should be (relative to in-point)
     setCurrentTime(time: number) {
-        this._lastSetTime = time; // time into segment
+        let targetTime = time;
+        const choiceTime = this.getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
         // convert to absolute time into video
-        this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
+        this._lastSetTime = targetTime; // time into segment
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
     }
 
     _setInTime(time: number) {

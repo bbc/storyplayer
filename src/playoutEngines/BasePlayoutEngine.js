@@ -27,6 +27,11 @@ export default class BasePlayoutEngine {
         this._permissionToPlay = false;
         this._hasStarted = false;
         this._debugPlayout = debugPlayout;
+
+        if(this._debugPlayout) {
+            window.playoutMedia = this._media;
+            window.playout = this;
+        }
     }
 
     setPermissionToPlay(value: boolean) {
@@ -52,10 +57,31 @@ export default class BasePlayoutEngine {
         }
     }
 
+    setTimings(rendererId: string, timings: Object) {
+        if (this._media[rendererId]) {
+            this._media[rendererId].timings = timings;
+            if (this._media[rendererId].awaiting_times) {
+                this.connectScrubBar(rendererId, this.getMediaElement(rendererId));
+            }
+        }
+    }
+
+    connectScrubBar(rendererId: string, mediaElement: HTMLMediaElement) {
+        if (this._media[rendererId]) {
+            const mediaObj = this._media[rendererId];
+            if (mediaObj.timings) {
+                this._player.connectScrubBar(mediaElement, mediaObj.timings);
+                mediaObj.awaiting_times = false;
+            } else {
+                mediaObj.awaiting_times = true;
+            }
+        }
+    }
+
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
-            rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+            this.getMediaElement(rendererId).classList.remove('romper-media-element-queued');
         }
     }
 

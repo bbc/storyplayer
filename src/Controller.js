@@ -17,6 +17,9 @@ import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
+// eslint-disable-next-line max-len
+const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
+
 export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
@@ -25,6 +28,7 @@ export default class Controller extends EventEmitter {
         fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
+        privacyNotice: ?string,
     ) {
         super();
         this._storyId = null;
@@ -36,6 +40,8 @@ export default class Controller extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+        this._privacyNotice = privacyNotice;
+        this._warnIosUsers();
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -177,6 +183,17 @@ export default class Controller extends EventEmitter {
         return 0;
     }
 
+    _warnIosUsers() {
+        if (BrowserUserAgent.iOS()) {
+            if (!this._privacyNotice) {
+                this._privacyNotice = IOS_WARNING;
+            } else {
+                const appendedNotice = `${this._privacyNotice}\n${IOS_WARNING}`;
+                this._privacyNotice = appendedNotice;
+            }
+        }
+    }
+
     // create a manager to handle the rendering
     _createRenderManager() {
         this._renderManager = new RenderManager(
@@ -186,6 +203,7 @@ export default class Controller extends EventEmitter {
             this._fetchers,
             this._analytics,
             this._assetUrls,
+            this._privacyNotice,
         );
     }
 
@@ -331,7 +349,7 @@ export default class Controller extends EventEmitter {
             }
 
             const _shadowHandleStoryEnd = () => {
-                logger.warn('reached story end without meeting target node');
+                logger.warn('shadow reasoner reached story end without meeting target node');
             };
             shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
 
@@ -344,10 +362,18 @@ export default class Controller extends EventEmitter {
             };
             shadowReasoner.on('error', _handleError);
 
+            const visitedArray = [];
+
             // run straight through the graph until we hit the target
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                if (visitedArray.includes(narrativeElement.id)) {
+                    logger.warn('shadow reasoner looping - exiting without meeting target node');
+                    _shadowHandleStoryEnd();
+                    return;
+                }
+                visitedArray.push(narrativeElement.id);
                 if (narrativeElement.id === targetNeId) {
                     // remove event listeners for the original reasoner
                     this.reset();
@@ -807,6 +833,8 @@ export default class Controller extends EventEmitter {
     _storyReasonerFactory: StoryReasonerFactory;
 
     _fetchers: ExperienceFetchers;
+
+    _privacyNotice: ?string;
 
     _representationReasoner: RepresentationReasoner;
 

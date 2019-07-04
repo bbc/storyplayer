@@ -135,7 +135,7 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
             : null;
-        this._player.enterStartBehaviourPhase();
+        this._player.enterStartBehaviourPhase(this);
         this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
@@ -262,13 +262,33 @@ export default class BaseRenderer extends EventEmitter {
     _seekForward() {
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
-            const targetTime = currentTime + SEEK_TIME;
+            let targetTime = currentTime + SEEK_TIME;
+            const choiceTime = this.getChoiceTime();
+            if (choiceTime > 0 && choiceTime < targetTime) {
+                targetTime = choiceTime;
+            }
             this.setCurrentTime(targetTime);
             this.logUserInteraction(AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
                 currentTime,
                 `${targetTime}`,
             );
         }
+    }
+
+    // get the time of the first choice in the element
+    // returns -1 if no such behaviours
+    getChoiceTime(): number {
+        if (this._representation.behaviours) {
+            if (this._representation.behaviours.during) {
+                const matches = this._representation.behaviours.during.filter(behave =>
+                    behave.behaviour.type === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0') // eslint-disable-line max-len
+                    .sort((a, b) => a.start_time - b.start_time);
+                if (matches.length > 0) {
+                    return matches[0].start_time;
+                }
+            }
+        }
+        return -1;
     }
 
     complete() {
@@ -402,6 +422,26 @@ export default class BaseRenderer extends EventEmitter {
                         behaviourRunner(behaviourObject, () => {
                             logger.info(`started during behaviour ${behaviourObject.type}`);
                         }));
+
+                    // if we have choices, hide the controls before they appear
+                    if (behaviourObject.type
+                        === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
+                        && behaviourObject.hasOwnProperty('disable_controls')
+                        && behaviourObject.disable_controls) {
+                        const hideControls = () => {
+                            this._player.disableControls();
+                            this._player._hideRomperButtons();
+                        };
+                        if (startTime > 1) {
+                            this.addTimeEventListener(
+                                'prechoice-control-hide',
+                                startTime - 0.8,
+                                hideControls,
+                            );
+                        } else {
+                            hideControls();
+                        }
+                    }
                 }
                 // if there is a duration
                 if (behaviour.duration) {
@@ -455,7 +495,6 @@ export default class BaseRenderer extends EventEmitter {
                 });
 
                 if (iconObjects.length > 1 || showIfOneLink) {
-                    this._player.setNextAvailable(false);
                     this._showChoiceIcons({
                         defaultLinkId, // id for link to highlight at start
                         forceChoice, // do we highlight
@@ -742,6 +781,7 @@ export default class BaseRenderer extends EventEmitter {
                 this._hideChoiceIcons(null);
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
+                this._player.enableControls();
             }
         } else {
             // or follow link now
@@ -816,9 +856,9 @@ export default class BaseRenderer extends EventEmitter {
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
-        this._player._linkChoice.overlay.classList.add('fade');
+        this._player._linkChoice.overlay.classList.add('romper-icon-fade');
         this._linkFadeTimeout = setTimeout(() => {
-            this._player._linkChoice.overlay.classList.remove('fade');
+            this._player._linkChoice.overlay.classList.remove('romper-icon-fade');
             this._player.clearLinkChoices();
             if (narrativeElementId) {
                 this._controller.followLink(narrativeElementId);
@@ -1003,6 +1043,7 @@ export default class BaseRenderer extends EventEmitter {
         varInput.classList.add('romper-var-form-input-container');
 
         const sliderDiv = document.createElement('div');
+        sliderDiv.style.position = 'relative';
         const minSpan = document.createElement('span');
         minSpan.classList.add('min');
         if (behaviourVar.hasOwnProperty('min_label')) {
@@ -1018,6 +1059,8 @@ export default class BaseRenderer extends EventEmitter {
             maxSpan.textContent = range.max_val;
         }
 
+        const outputTest = document.createElement('div');
+        outputTest.className = 'romper-var-form-range-output';
 
         const slider = document.createElement('input');
         slider.type = 'range';
@@ -1029,8 +1072,16 @@ export default class BaseRenderer extends EventEmitter {
         sliderDiv.appendChild(maxSpan);
 
         const numberInput = document.createElement('input');
-        numberInput.classList.add('romper-var-form-slider-output');
+        numberInput.classList.add('romper-var-form-slider-input');
         numberInput.type = 'number';
+
+        const setOutputPosition = () => {
+            const proportion = parseFloat(slider.value)/parseFloat(slider.max);
+            let leftPos = minSpan.clientWidth; // minimum value element
+            leftPos += (1/12) * slider.clientWidth; // slider margin L
+            leftPos += (proportion * (10/12) * slider.clientWidth);
+            outputTest.style.left = `${leftPos}px`;
+        }
 
         slider.min = range.min_val;
         slider.max = range.max_val;
@@ -1038,6 +1089,8 @@ export default class BaseRenderer extends EventEmitter {
             .then((varValue) => {
                 slider.value = varValue;
                 numberInput.value = varValue;
+                outputTest.textContent = `${varValue}`;
+                setOutputPosition();
             });
 
         slider.onchange = () => {
@@ -1047,6 +1100,8 @@ export default class BaseRenderer extends EventEmitter {
 
         slider.oninput = () => {
             numberInput.value = slider.value;
+            outputTest.textContent = `${slider.value}`;
+            setOutputPosition();
         };
 
         numberInput.onchange = () => {
@@ -1059,9 +1114,14 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         varInput.appendChild(sliderDiv);
-        // varInput.appendChild(slider);
         if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
             varInput.appendChild(numberInput);
+        } else if (!(behaviourVar.hasOwnProperty('min_label')
+            || behaviourVar.hasOwnProperty('max_label'))) {
+            // if precise, or user has specified labels, don't show
+            // otherwise give number feedback
+            sliderDiv.appendChild(outputTest);
+            window.onresize = () => setOutputPosition();
         }
 
         return varInput;
@@ -1184,7 +1244,7 @@ export default class BaseRenderer extends EventEmitter {
                 okButton.className = 'romper-var-form-button';
                 okButton.type = 'button';
                 okButton.classList.add('var-next');
-                okButton.value = 'Next'; // behaviourVariables.length > 1 ? 'Next' : 'OK!';
+                okButton.value = 'Next';
 
                 // back button
                 const backButton = document.createElement('input');
@@ -1217,10 +1277,8 @@ export default class BaseRenderer extends EventEmitter {
                         if (i === targetId) {
                             varDiv.classList.remove('left');
                             varDiv.classList.remove('right');
-                            // varDiv.classList.add('active');
                         } else if (i < targetId) {
                             varDiv.classList.add('left');
-                            // varDiv.classList.remove('active');
                             varDiv.classList.remove('right');
                         } else {
                             varDiv.classList.remove('left');

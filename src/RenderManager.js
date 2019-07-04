@@ -29,6 +29,8 @@ export default class RenderManager extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
+    _handleOrientationChange: Function;
+
     _backgroundRenderers: { [key: string]: BackgroundRenderer };
 
     _target: HTMLElement;
@@ -40,6 +42,8 @@ export default class RenderManager extends EventEmitter {
     _fetchers: ExperienceFetchers;
 
     _analytics: AnalyticsLogger;
+
+    _privacyNotice: ?string;
 
     _renderStory: StoryIconRenderer;
 
@@ -83,6 +87,7 @@ export default class RenderManager extends EventEmitter {
         fetchers: ExperienceFetchers,
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
+        privacyNotice: ?string,
     ) {
         super();
 
@@ -93,7 +98,9 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
+        this._handleOrientationChange = this._handleOrientationChange.bind(this)
         this._isVisible = true;
+        this._privacyNotice = privacyNotice;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
@@ -104,9 +111,16 @@ export default class RenderManager extends EventEmitter {
         this._player.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
-                if (rend.hasVariablePanelBehaviour()) {
+                const choiceTime = rend.getChoiceTime();
+                const { currentTime } = rend.getCurrentTime();
+                if (choiceTime > 0 && currentTime < choiceTime) {
+                    logger.info('Next button clicked on element with choices, skip to them');
+                    rend.setCurrentTime(choiceTime - 0.25);
+                } else if (rend.hasVariablePanelBehaviour()
+                    || (rend.hasShowIconBehaviour() && choiceTime < 0)) {
+                    // choices or var panel as end behaviour
                     const representationId = rend.getRepresentation().id;
-                    logger.info('Next button ignored due to variable panel, skip to end');
+                    logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
                     if (this._player.playoutEngine.getCurrentTime(representationId)) {
@@ -158,8 +172,23 @@ export default class RenderManager extends EventEmitter {
             visibilityChange = 'webkitvisibilitychange';
         }
         document.addEventListener(visibilityChange, this._handleVisibilityChange, false);
+        window.addEventListener('orientationchange', this._handleOrientationChange, false);
 
         this._initialise();
+    }
+
+
+    _handleOrientationChange() {
+        logger.info(`Window Orientation change to ${window.orientation}`);
+        if (Player._isFullScreen()) {
+            this._player._exitFullScreen();
+        }
+        this._analytics({
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.WINDOW_ORIENTATION_CHANGE,
+            from: 'unset',
+            to: window.orientation,
+        });
     }
 
     prepareForRestart() {
@@ -209,6 +238,7 @@ export default class RenderManager extends EventEmitter {
             text: 'Start',
             hide_narrative_buttons: true,
             background_art: this._assetUrls.noBackgroundAssetUrl,
+            privacy_notice: this._privacyNotice,
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
@@ -217,9 +247,12 @@ export default class RenderManager extends EventEmitter {
                     this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
                         .then((fg) => {
                             if (fg.assets.image_src) {
-                                this._player.addDog(fg.assets.image_src, dog.position);
+                                return this._fetchers.mediaFetcher(fg.assets.image_src);
                             }
-                        });
+                            return Promise.reject();
+                        })
+                        .then(mediaurl => this._player.addDog(mediaurl, dog.position))
+                        .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));
                 }
                 if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
@@ -527,14 +560,7 @@ export default class RenderManager extends EventEmitter {
     refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel) {
-            this._controller.getValidNextSteps().then((nextNodes) => {
-                // @flowignore
-                if (nextNodes.length === 1 || !this._currentRenderer.hasShowIconBehaviour()) {
-                    this._player.setNextAvailable(nextNodes.length > 0);
-                } else {
-                    this._player.setNextAvailable(false);
-                }
-            });
+            this._player.setNextAvailable(true);
         } else {
             this._player.setNextAvailable(false);
         }
@@ -570,6 +596,11 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
+        const disableLookahead
+            = new URLSearchParams(window.location.search).get('disableLookahead');
+        if(disableLookahead === 'true') {
+            return Promise.resolve();
+        }
         return Promise.all([
             this._controller.getIdOfPreviousNode(),
             this._controller.getIdsOfNextNodes(narrativeElement),

@@ -4,6 +4,7 @@ import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import { BrowserUserAgent } from '../browserCapabilities';
+import logger from '../logger';
 
 // NOTE: This playout engine uses MediaManager and MediaInstance classes which are not very well
 //       written and a bit messy.
@@ -43,6 +44,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (BrowserUserAgent.iOS()) {
             this._foregroundMediaElement.autoplay = true;
             this._backgroundMediaElement.autoplay = true;
+            this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");
+            this._foregroundMediaElement.setAttribute("playsinline", "true");
+            this._foregroundMediaElement.setAttribute("webkit-playsinline", "true");
+            this._foregroundMediaElement.setAttribute("controls", "false");
+            this._backgroundMediaElement.setAttribute("disablePictureInPicture", "true");
+            this._backgroundMediaElement.setAttribute("playsinline", "true");
+            this._backgroundMediaElement.setAttribute("webkit-playsinline", "true");
+            this._backgroundMediaElement.setAttribute("controls", "false");
         }
 
         this._player.mediaTarget.appendChild(this._foregroundMediaElement);
@@ -132,6 +141,15 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
+            if (
+                rendererPlayoutObj.media && rendererPlayoutObj.media.type &&
+                rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV &&
+                rendererPlayoutObj.mediaInstance
+            ) {
+                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                this._player.disconnectScrubBar();
+                this.connectScrubBar(rendererId, videoElement);
+            }
         }
     }
 
@@ -166,11 +184,19 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (rendererPlayoutObj.mediaInstance) {
                         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
                         this._player.disconnectScrubBar();
-                        this._player.connectScrubBar(videoElement);
+                        this.connectScrubBar(rendererId, videoElement);
                     }
                 } else {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
+            }
+            if(rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
+                logger.info(`Applying queued events for ${rendererId}`)
+                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                    videoElement.addEventListener(qe.event, qe.callback)
+                })
+                rendererPlayoutObj.queuedEvents = []
             }
         }
     }
@@ -280,22 +306,53 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
         if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
+            // Hack for iOS to get it to stop seeking to zero after setting currentTime
+            // eslint-disable-next-line
+            // https://stackoverflow.com/questions/18266437/html5-video-currenttime-not-setting-properly-on-iphone
             videoElement.currentTime = time;
+            const canPlayEventHandler = () => {
+                videoElement.currentTime = time;
+                videoElement.removeEventListener("canplay", canPlayEventHandler)
+                videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+            }
+            videoElement.addEventListener("canplay", canPlayEventHandler)
+            videoElement.addEventListener("loadeddata", canPlayEventHandler)
         } else if (videoElement.src.indexOf('m3u8') !== -1) {
             rendererPlayoutObj.mediaInstance.on(MediaManager.Events.MANIFEST_PARSED, () => {
                 videoElement.currentTime = time;
+                const canPlayEventHandler = () => {
+                    videoElement.currentTime = time;
+                    videoElement.removeEventListener("canplay", canPlayEventHandler)
+                    videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                }
+                videoElement.addEventListener("canplay", canPlayEventHandler)
+                videoElement.addEventListener("loadeddata", canPlayEventHandler)
             });
         } else {
             let setTime = false;
             videoElement.addEventListener('loadeddata', () => {
                 if (!setTime) {
                     videoElement.currentTime = time;
+                    const canPlayEventHandler = () => {
+                        videoElement.currentTime = time;
+                        videoElement.removeEventListener("canplay", canPlayEventHandler)
+                        videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                    }
+                    videoElement.addEventListener("canplay", canPlayEventHandler)
+                    videoElement.addEventListener("loadeddata", canPlayEventHandler)
                     setTime = true;
                 }
             });
             videoElement.addEventListener('timeupdate', () => {
                 if (!setTime) {
                     videoElement.currentTime = time;
+                    const canPlayEventHandler = () => {
+                        videoElement.currentTime = time;
+                        videoElement.removeEventListener("canplay", canPlayEventHandler)
+                        videoElement.removeEventListener("loadeddata", canPlayEventHandler)
+                    }
+                    videoElement.addEventListener("canplay", canPlayEventHandler)
+                    videoElement.addEventListener("loadeddata", canPlayEventHandler)
                     setTime = true;
                 }
             });
@@ -307,7 +364,22 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
             const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-            videoElement.addEventListener(event, callback);
+            if (rendererPlayoutObj.active) {
+                // This renderer is using the on screen video element
+                // so add event listener directly
+                videoElement.addEventListener(event, callback);
+            } else {
+                // This renderer is not using the on screen video element
+                // so add event listener to the queue so it can be applied in
+                // setPlayoutActive
+                if(!rendererPlayoutObj.queuedEvents) {
+                    rendererPlayoutObj.queuedEvents = []
+                }
+                rendererPlayoutObj.queuedEvents.push({
+                    event,
+                    callback,
+                })
+            }
         }
     }
 
@@ -315,7 +387,19 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
             const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-            videoElement.removeEventListener(event, callback);
+            if (rendererPlayoutObj.active) {
+                // This renderer is using the on screen video element
+                // so remove event listener
+                videoElement.removeEventListener(event, callback);
+            } else if(rendererPlayoutObj.queuedEvents) {
+                // This renderer is not using the on screen video element
+                // so remove event listener from queue
+                const index = rendererPlayoutObj.queuedEvents
+                    .findIndex((qe) => qe.event === event && qe.callback === callback)
+                if(index !== -1) {
+                    rendererPlayoutObj.queuedEvents.splice(index, 1);
+                }
+            }
         }
     }
 
