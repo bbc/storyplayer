@@ -369,6 +369,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 'abr.bandwidthUpgradeTarget',
                 0.80
             );
+            rendererPlayoutObj._shaka.configure(
+                'streaming.jumpLargeGaps',
+                true
+            );
             rendererPlayoutObj._shaka.load(url)
                 .then(() => {
                     logger.info(`Loaded ${url}`);

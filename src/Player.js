@@ -1303,6 +1303,7 @@ class Player extends EventEmitter {
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
         this._hideRomperButtons();
+        this._buttons.classList.add('icons-showing');
         this._linkChoice.overlay.classList.remove('romper-inactive');
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
@@ -1502,6 +1503,7 @@ class Player extends EventEmitter {
         this._linkChoice.overlay.className =
             'romper-overlay romper-link-choice-overlay romper-inactive';
         this._linkChoice.overlay.style.setProperty('animation', 'none');
+        this._buttons.classList.remove('icons-showing');
     }
 
     getLinkChoiceElement(): HTMLElement {
