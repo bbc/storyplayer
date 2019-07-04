@@ -479,7 +479,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
                             })
                         }
-
                     }
                     break;
                 case MediaTypes.DASH: {
@@ -512,23 +511,17 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 }
                             )
                         })
-                    } else {
-                        ["BUFFER_RESET",
-                            "BUFFER_CODECS",
-                            "BUFFER_CREATED",
-                            "BUFFER_APPENDING",
-                            "BUFFER_APPENDED",
-                            "BUFFER_EOS",
-                            "BUFFER_FLUSHING",
-                            "BUFFER_FLUSHED"].forEach((e) => {
-                            rendererPlayoutObj._hls.on(
-                                Hls.Events[e], () => {
-                                    this._player._showErrorLayer()
-                                }
-                            );
-
-                        })
-                    }
+                    } 
+                    ['buffering', 'loading', 'error'].forEach((e) => {
+                        rendererPlayoutObj._shaka.addEventListener(
+                            e,
+                            () => {
+                                console.log("andy gets in here");
+                                alert('error');
+                                this._player._showErrorLayer()
+                            }
+                        )
+                    });
                     break;
                 }
                 case MediaTypes.OTHER:
@@ -586,17 +579,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.config,
                             this._inactiveConfig.hls,
                         );
-                    } else {
-                        ['buffering', 'loading', 'error'].forEach((e) => {
-                            rendererPlayoutObj._shaka.addEventListener(
-                                e,
-                                () => {
-                                    this._player._showErrorLayer()
-                                }
-                            )
-                        });
-
-                    }
+                    } 
                     break;
                 case MediaTypes.DASH:
                     rendererPlayoutObj._shaka.configure(
@@ -612,6 +595,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if(rendererPlayoutObj._shakaCheckBandwidthTimeout) {
                         clearTimeout(rendererPlayoutObj._shakaCheckBandwidthTimeout)
                     }
+
+                    ['buffering', 'loading', 'error'].forEach((e) => {
+                        rendererPlayoutObj._shaka.removeEventListener(e, this._player._showErrorLayer)
+                    })
+
                     break;
                 case MediaTypes.OTHER:
                     break;
