@@ -202,6 +202,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 rendererPlayoutObj.queuedEvents = []
             }
         }
+
+        rendererPlayoutObj.mediaInstance.getMediaElement().addEventListener('stalled', this._player._stallHandler);
     }
 
     setPlayoutInactive(rendererId: string) {
