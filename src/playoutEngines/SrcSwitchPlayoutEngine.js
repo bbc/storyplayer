@@ -86,9 +86,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
-
-        this._player.on('error', this._player._showErrorLayer());
-        this._player.on('playing', this._player._removeErrorLayer());
     }
 
     setPermissionToPlay(value: boolean) {
