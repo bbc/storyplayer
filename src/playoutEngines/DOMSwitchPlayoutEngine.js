@@ -369,10 +369,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 'abr.bandwidthUpgradeTarget',
                 0.80
             );
-            rendererPlayoutObj._shaka.configure(
-                'streaming.jumpLargeGaps',
-                true
-            );
             rendererPlayoutObj._shaka.load(url)
                 .then(() => {
                     logger.info(`Loaded ${url}`);
@@ -469,7 +465,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         }
                         ['ERROR'].forEach((e) => {
                             rendererPlayoutObj._hls.on(
-                                Hls.Events[e], (ev) => {
+                                Hls.Events[e], () => {
                                     // eslint-disable-next-line no-console
                                     this._player._showErrorLayer();
                                 }
@@ -507,12 +503,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         'error', this._player._showErrorLayer
                     );
 
-                    rendererPlayoutObj._shaka.addEventListener(
-                        'streaming', () => {
-                            this._player._removeErrorLayer()
-                            this._player._removeBufferingLayer();
-                        }
-                    );
+                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeErrorLayer);
+                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeBufferingLayer);
+
 
 
 
@@ -601,9 +594,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         clearTimeout(rendererPlayoutObj._shakaCheckBandwidthTimeout)
                     }
 
-                    ['buffering', 'loading', 'error'].forEach((e) => {
-                        rendererPlayoutObj._shaka.removeEventListener(e, this._player._showErrorLayer)
-                    })
+                    rendererPlayoutObj._shaka.removeEventListener('error', this._player._showErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('buffering', this._player._showBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeErrorLayer);
 
                     break;
                 case MediaTypes.OTHER:

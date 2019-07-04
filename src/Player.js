@@ -790,11 +790,8 @@ class Player extends EventEmitter {
     }
 
     _showErrorLayer() {
-        const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
-        if (!errorLayer) {
-            this._errorLayer.classList.add('show');
-            this._errorLayer.classList.remove('hide');
-        }
+        this._errorLayer.classList.add('show');
+        this._errorLayer.classList.remove('hide');
         if(!this._RomperButtonsShowing){
             this._showRomperButtons();
         }
@@ -802,20 +799,16 @@ class Player extends EventEmitter {
 
     _showBufferingLayer() {
         this._loadingLayer.classList.add('show');
-        this._loadingLayer.classList.remove('hide');
     }
 
     _removeBufferingLayer() {
-        this._loadingLayer.classList.add('hide');
         this._loadingLayer.classList.remove('show');
     }
 
     _removeErrorLayer() {
-        const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
-        if (errorLayer) {
-            this._errorLayer.classList.remove('show');
-            this._errorLayer.classList.add('hide');
-        }
+        this._errorLayer.classList.remove('show');
+        this._errorLayer.classList.add('hide');
+
         if(this._RomperButtonsShowing) {
             this._hideRomperButtons();
         }
