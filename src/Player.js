@@ -390,12 +390,12 @@ class Player extends EventEmitter {
         this._mediaLayer = document.createElement('div');
         this._mediaLayer.classList.add('romper-media');
 
-        const loadingLayer = document.createElement('div');
-        loadingLayer.classList.add('romper-loading');
+        this._loadingLayer = document.createElement('div');
+        this._loadingLayer.classList.add('romper-loading');
         const loadingLayerInner = document.createElement('div');
         loadingLayerInner.classList.add('romper-loading-inner');
-        loadingLayer.appendChild(loadingLayerInner);
-        this._mediaLayer.appendChild(loadingLayer);
+        this._loadingLayer.appendChild(loadingLayerInner);
+        this._mediaLayer.appendChild(this._loadingLayer);
 
         this._guiLayer = document.createElement('div');
         this._guiLayer.classList.add('romper-gui');
@@ -404,10 +404,12 @@ class Player extends EventEmitter {
         const errorMessage = document.createTextNode("Issue retrieving media");
         this._errorLayer.appendChild(errorMessage);
         this._errorLayer.classList.add('romper-error');
+        this._errorLayer.classList.add('hide');
 
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
+        this._player.appendChild(this._errorLayer);
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
@@ -678,6 +680,11 @@ class Player extends EventEmitter {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
+
+        this._showErrorLayer = this._showErrorLayer.bind(this);
+        this._removeErrorLayer = this._removeErrorLayer.bind(this);
+        this._showBufferingLayer = this._showBufferingLayer.bind(this);
+        this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
     }
 
     addDog(src: string, position: Object) {
@@ -785,17 +792,29 @@ class Player extends EventEmitter {
     _showErrorLayer() {
         const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
         if (!errorLayer) {
-            this._mediaLayer.insertBefore(this._errorLayer, this._mediaLayer.childNodes[0]);
+            this._errorLayer.classList.add('show');
+            this._errorLayer.classList.remove('hide');
         }
         if(!this._RomperButtonsShowing){
             this._showRomperButtons();
         }
     }
 
+    _showBufferingLayer() {
+        this._loadingLayer.classList.add('show');
+        this._loadingLayer.classList.remove('hide');
+    }
+
+    _removeBufferingLayer() {
+        this._loadingLayer.classList.add('hide');
+        this._loadingLayer.classList.remove('show');
+    }
+
     _removeErrorLayer() {
         const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
         if (errorLayer) {
-            errorLayer.remove()
+            this._errorLayer.classList.remove('show');
+            this._errorLayer.classList.add('hide');
         }
         if(this._RomperButtonsShowing) {
             this._hideRomperButtons();
