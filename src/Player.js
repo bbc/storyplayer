@@ -774,6 +774,7 @@ class Player extends EventEmitter {
     }
 
     _showErrorLayer() {
+        alert('error');
         const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
         if (!errorLayer) {
             this._mediaLayer.insertBefore(this._errorLayer, this._mediaLayer.childNodes[0]);
@@ -781,6 +782,7 @@ class Player extends EventEmitter {
     }
 
     _removeErrorLayer() {
+        alert('removing error');
         const errorLayer = this._mediaLayer.getElementsByClassName('romper-error')[0];
         if (errorLayer) {
             errorLayer.remove()

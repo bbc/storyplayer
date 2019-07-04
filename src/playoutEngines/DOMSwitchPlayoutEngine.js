@@ -522,10 +522,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             )
                         })
                     } 
-                    ['error'].forEach((e) => {
+                    ['buffering', 'loading', 'error'].forEach((e) => {
                         rendererPlayoutObj._shaka.addEventListener(e, (ev) => {
                             logger.warn(ev);
-                            alert('error');
                             this._player._showErrorLayer()
                         })
                     });
