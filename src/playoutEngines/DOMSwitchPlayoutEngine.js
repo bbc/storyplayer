@@ -445,7 +445,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 rendererPlayoutObj._hls.on(
                                     Hls.Events[e], (ev) => {
                                         // eslint-disable-next-line no-console
-                                        console.log("HLS EVENT: ",e, ev)
+                                        console.log("HLS EVENT: ", ev)
                                     }
                                 );
 
@@ -510,7 +510,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 e,
                                 (ev) => {
                                     // eslint-disable-next-line no-console
-                                    console.log("DASH SHAKA EVENT: ", e, ev)
+                                    console.log("DASH SHAKA EVENT: ", ev)
                                 }
                             )
                         })
