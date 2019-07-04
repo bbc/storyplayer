@@ -354,22 +354,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         case MediaTypes.DASH: {
             rendererPlayoutObj._shaka = new shaka.Player(rendererPlayoutObj.mediaElement);
             rendererPlayoutObj._shaka.configure(
-                "manifest.retryParameters.maxAttempts",
-                10
-            )
-            rendererPlayoutObj._shaka.configure(
-                "manifest.retryParameters.backoffFactor",
-                1.5
-            )
-            rendererPlayoutObj._shaka.configure(
-                "streaming.retryParameters.maxAttempts",
-                10
-            )
-            rendererPlayoutObj._shaka.configure(
-                "streaming.retryParameters.backoffFactor",
-                1.5
-            )
-            rendererPlayoutObj._shaka.configure(
                 'streaming.bufferingGoal',
                 this._inactiveConfig.dash.bufferingGoal
             );
@@ -483,7 +467,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             rendererPlayoutObj._hls.on(
                                 Hls.Events[e], (ev) => {
                                     // eslint-disable-next-line no-console
-                                    alert("HLS EVENT: ",e, ev)
                                     this._player._showErrorLayer();
                                 }
                             );
@@ -509,7 +492,19 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.addEventListener(
                         'adaptation',
                         rendererPlayoutObj._shakaAdaptationHandler
-                    )
+                    );
+
+                    // error handler
+                    ['buffering', 'loading','retry'].forEach(e => {
+                        rendererPlayoutObj._shaka.addEventListener(
+                            e, this._player._showErrorLayer
+                        );
+                    });
+
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'error', this._player._showErrorLayer
+                    );
+
 
                     if(this._debugPlayout) {
                         allShakaEvents.forEach((e) => {
@@ -521,14 +516,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 }
                             )
                         })
-                    } 
-                    ['error'].forEach((e) => {
-                        rendererPlayoutObj._shaka.addEventListener(e, (ev) => {
-                            logger.warn(ev);
-                            alert('error');
-                            this._player._showErrorLayer()
-                        })
-                    });
+                    }
                     break;
                 }
                 case MediaTypes.OTHER:

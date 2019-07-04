@@ -506,6 +506,12 @@ $romper-hover-text-size: 1.53em;
         width: 100%;
       }
     }
+
+    &.count-1 {
+      .romper-volume-label {
+        display: none;
+      }
+    }
   }
 
   .romper-representation-overlay {
