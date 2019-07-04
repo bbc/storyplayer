@@ -429,6 +429,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
+
+
         if (!rendererPlayoutObj.active) {
             if (rendererPlayoutObj.mediaType) {
                 switch (rendererPlayoutObj.mediaType) {
@@ -530,6 +532,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
+
+            rendererPlayoutObj.mediaElement.addEventListener('stalled', (event) => {
+                console.log('Failed to fetch data, but trying.', event);
+            });
 
             if(this._debugPlayout) {
                 this._activePlayer = rendererPlayoutObj;
