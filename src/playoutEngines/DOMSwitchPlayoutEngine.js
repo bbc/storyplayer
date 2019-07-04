@@ -468,18 +468,19 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             })
                         }
 
-                        // buffering
-                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
-
                         // errors
                         rendererPlayoutObj._hls.on(Hls.Events.ERROR, (event, { details }) => {
                             // if the error is a buffering error show the buffering wheel
                             if (details === window.Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
                                 this._player._showBufferingLayer();
+                            } else {
+                                // otherwise assume it is a generic error
+                                this._player._showErrorLayer();
                             }
-                            this._player._showErrorLayer();
                         });
+
                         rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeErrorLayer);
+                        rendererPlayoutObj._hls.on(Hls.Events.FRAG_BUFFERED, this._player._removeBufferingLayer);
 
                     }
                     break;
