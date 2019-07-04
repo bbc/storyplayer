@@ -181,11 +181,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
         if(activeIds.length > 1){
             logger.warn("Invalid number of active elements")
+            setTimeout(() => this._shakaStallDetector(), 1000)
             return
         }
 
         if(activeIds.length === 0){
             logger.info("No active elements")
+            setTimeout(() => this._shakaStallDetector(), 1000)
             return
         }
 
@@ -793,6 +795,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setCurrentTime(rendererId: string, time: number) {
+        this._shakaStallDetectorLastPlaybackTime = -1
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return false;
