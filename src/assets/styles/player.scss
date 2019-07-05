@@ -864,6 +864,10 @@ $romper-hover-text-size: 1.53em;
     width: calc((#{$romper-button-width} + 1em) * 5);
     z-index: 30; // remove to hide with rest of buttons
 
+    &.play-only {
+      width: calc(#{$romper-button-width} + 1em);
+    }
+
     &.show {
       opacity: 1;
     }

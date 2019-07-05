@@ -412,6 +412,7 @@ class Player extends EventEmitter {
         this._guiLayer.classList.add('romper-gui');
 
         this._errorLayer = document.createElement('div');
+        // eslint-disable-next-line max-len
         const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
         this._errorLayer.appendChild(errorMessage);
         this._errorLayer.classList.add('romper-error');
@@ -504,7 +505,7 @@ class Player extends EventEmitter {
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
 
-        // ios  we don't append scrub bar back, seek back, next, seek next 
+        // ios  we don't append scrub bar back, seek back, next, seek next
         if (!BrowserUserAgent.iOS()) {
             this._buttons.appendChild(this._scrubBar);
             this._narrativeElementTransport.appendChild(this._backButton);
@@ -514,6 +515,7 @@ class Player extends EventEmitter {
             this._narrativeElementTransport.appendChild(this._nextButton);
         } else {
             this._narrativeElementTransport.appendChild(this._playPauseButton);
+            this._narrativeElementTransport.classList.add('play-only');
         }
 
         this._mediaTransport = document.createElement('div');
