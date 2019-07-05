@@ -194,8 +194,12 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 setTimeout(() => {
                     logger.info(`Applying queued events for ${rendererId}`)
                     const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                    if(!rendererPlayoutObj.activeEvents) {
+                        rendererPlayoutObj.activeEvents = []
+                    }
                     rendererPlayoutObj.queuedEvents.forEach((qe) => {
                         videoElement.addEventListener(qe.event, qe.callback)
+                        rendererPlayoutObj.activeEvents.push(qe)
                     })
                     rendererPlayoutObj.queuedEvents = []
                 }, 1000)
@@ -215,6 +219,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             super.setPlayoutInactive(rendererId);
             this._player.removeVolumeControl(rendererId);
         }
+        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+        rendererPlayoutObj.activeEvents.forEach((qe) => {
+            videoElement.removeEventListener(qe.event, qe.callback)
+        })
+        rendererPlayoutObj.activeEvents = []
     }
 
     // nothing to do here - only one media element that is always visible
@@ -370,6 +379,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 // This renderer is using the on screen video element
                 // so add event listener directly
                 videoElement.addEventListener(event, callback);
+                if(!rendererPlayoutObj.activeEvents) {
+                    rendererPlayoutObj.activeEvents = []
+                }
+                rendererPlayoutObj.activeEvents.push({
+                    event,
+                    callback,
+                })
             } else {
                 // This renderer is not using the on screen video element
                 // so add event listener to the queue so it can be applied in

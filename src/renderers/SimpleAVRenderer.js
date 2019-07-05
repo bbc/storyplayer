@@ -105,7 +105,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 const nowTime = videoElement.currentTime;
                 if (this._playoutEngine.isPlaying()
                     && !this._testEndStallTimeout
-                    && videoElement.duration > 5
                     && this._playoutEngine instanceof DOMSwitchPlayoutEngine) {
                     if (this._playoutEngine._debugPlayout){
                         logger.info(`Running stall test at ${nowTime}`);
