@@ -187,7 +187,7 @@ export default class Controller extends EventEmitter {
     _logBrowserToAnalytics() {
         const logData = {
             type: AnalyticEvents.types.USER_DATA,
-            name: AnalyticEvents.types.USER_AGENT,
+            name: AnalyticEvents.names.USER_AGENT,
             from: window.navigator.platform,
             to: window.navigator.userAgent,
         };
