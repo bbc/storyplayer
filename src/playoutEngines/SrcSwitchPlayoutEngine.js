@@ -308,15 +308,12 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             return;
         }
         const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-        if(
-            videoElement.readyState < videoElement.HAVE_CURRENT_DATA ||
-            videoElement.currentTime < 0
-        ) {
-            setTimeout(() => this.currentTimeTimeout(rendererId, time, attempts), 100)
-        }
         if(Math.abs(videoElement.currentTime - time) > 0.5 ) {
             videoElement.currentTime = time;
             setTimeout(() => this.currentTimeTimeout(rendererId, time, attempts + 1), 100)
+        }
+        if(videoElement.readyState < videoElement.HAVE_CURRENT_DATA) {
+            setTimeout(() => this.currentTimeTimeout(rendererId, time, attempts), 100)
         }
     }
 
