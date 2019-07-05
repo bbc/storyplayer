@@ -87,6 +87,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        logger.info(`Received ended event for renderer id ${this._rendererId}`);
         if (!this._hasEnded) {
             super.complete();
         }
@@ -97,6 +98,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
                 videoElement.pause();
+                logger.info(`Reached out time for renderer id ${this._rendererId} - ending`);
                 this._endedEventListener();
             }
             if (videoElement.currentTime > (videoElement.duration - 1)) {
@@ -114,7 +116,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
                         }
                         if (videoElement.currentTime <= nowTime + 1.9) {
-                            logger.warn('Video end checker failed stall test');
+                            // eslint-disable-next-line max-len
+                            logger.warn(`Video end checker failed stall test - ending renderer ${this._rendererId}`);
                             clearTimeout(this._testEndStallTimeout);
                             this._endedEventListener();
                         }
