@@ -507,7 +507,9 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
-        this._buttons.appendChild(this._scrubBar);
+        if(!BrowserUserAgent.iOS()) {
+            this._buttons.appendChild(this._scrubBar);
+        }
 
         this._mediaTransport = document.createElement('div');
         this._mediaTransport.classList.add('romper-media-transport');
