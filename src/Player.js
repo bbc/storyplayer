@@ -1596,8 +1596,13 @@ class Player extends EventEmitter {
         // allow clicking the scrub bar to seek to a media position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
             const percent = e.offsetX / scrubBar.offsetWidth;
-            // eslint-disable-next-line no-param-reassign
-            media.currentTime = percent * media.duration;
+            if (this._currentRenderer) {
+                this._currentRenderer.setCurrentTime(percent * media.duration);
+            } else {
+                // Update the media time
+                // eslint-disable-next-line no-param-reassign
+                media.currentTime = percent * media.duration;
+            }
         });
 
         let wasPlaying = false;

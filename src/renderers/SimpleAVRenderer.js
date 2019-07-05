@@ -11,6 +11,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 
 import logger from '../logger';
+import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -86,6 +87,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        logger.info(`Received ended event for renderer id ${this._rendererId}`);
         if (!this._hasEnded) {
             super.complete();
         }
@@ -96,16 +98,26 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (videoElement) {
             if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
                 videoElement.pause();
+                logger.info(`Reached out time for renderer id ${this._rendererId} - ending`);
                 this._endedEventListener();
             }
             if (videoElement.currentTime > (videoElement.duration - 1)) {
                 const nowTime = videoElement.currentTime;
-                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                if (this._playoutEngine.isPlaying()
+                    && !this._testEndStallTimeout
+                    && videoElement.duration > 5
+                    && this._playoutEngine instanceof DOMSwitchPlayoutEngine) {
+                    if (this._playoutEngine._debugPlayout){
+                        logger.info(`Running stall test at ${nowTime}`);
+                    }
                     this._testEndStallTimeout = setTimeout(() => {
-                        // eslint-disable-next-line max-len
-                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
+                        if (this._playoutEngine._debugPlayout){
+                            // eslint-disable-next-line max-len
+                            logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
+                        }
                         if (videoElement.currentTime <= nowTime + 1.9) {
-                            logger.warn('Video end checker failed stall test');
+                            // eslint-disable-next-line max-len
+                            logger.warn(`Video end checker failed stall test - ending renderer ${this._rendererId}`);
                             clearTimeout(this._testEndStallTimeout);
                             this._endedEventListener();
                         }
