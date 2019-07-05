@@ -11,6 +11,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 
 import logger from '../logger';
+import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -100,10 +101,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
             }
             if (videoElement.currentTime > (videoElement.duration - 1)) {
                 const nowTime = videoElement.currentTime;
-                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                if (this._playoutEngine.isPlaying()
+                    && !this._testEndStallTimeout
+                    && videoElement.duration > 5
+                    && this._playoutEngine instanceof DOMSwitchPlayoutEngine) {
+                    if (this._playoutEngine._debugPlayout){
+                        logger.info(`Running stall test at ${nowTime}`);
+                    }
                     this._testEndStallTimeout = setTimeout(() => {
-                        // eslint-disable-next-line max-len
-                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
+                        if (this._playoutEngine._debugPlayout){
+                            // eslint-disable-next-line max-len
+                            logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
+                        }
                         if (videoElement.currentTime <= nowTime + 1.9) {
                             logger.warn('Video end checker failed stall test');
                             clearTimeout(this._testEndStallTimeout);
