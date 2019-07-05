@@ -4,6 +4,7 @@ const types = [
     'STORY_NAVIGATION',
     'RENDERER_ACTION',
     'USER_ACTION',
+    'USER_DATA',
 ];
 
 const names = [
@@ -43,6 +44,7 @@ const names = [
     'BROWSER_VISIBILITY_CHANGE',
     'WINDOW_ORIENTATION_CHANGE',
     'USER_SET_VARIABLE',
+    'USER_AGENT',
 ];
 
 const AnalyticEvents = {

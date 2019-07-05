@@ -45,6 +45,7 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
+        this._logBrowserToAnalytics();
     }
 
     restart(storyId: string, variableState?: Object = {}) {
@@ -181,6 +182,16 @@ export default class Controller extends EventEmitter {
         }
         logger.info(`All requirements satisfied: ${JSON.stringify(requirements)}`);
         return 0;
+    }
+
+    _logBrowserToAnalytics() {
+        const logData = {
+            type: AnalyticEvents.types.USER_DATA,
+            name: AnalyticEvents.types.USER_AGENT,
+            from: window.navigator.platform,
+            to: window.navigator.userAgent,
+        };
+        this._analytics(logData);
     }
 
     _warnIosUsers() {
