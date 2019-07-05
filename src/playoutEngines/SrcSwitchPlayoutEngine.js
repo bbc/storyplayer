@@ -312,9 +312,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             videoElement.currentTime = time;
             setTimeout(() => this.currentTimeTimeout(rendererId, time, attempts + 1), 100)
         }
-        if(videoElement.readyState < videoElement.HAVE_CURRENT_DATA) {
-            setTimeout(() => this.currentTimeTimeout(rendererId, time, attempts), 100)
-        }
     }
 
     setCurrentTime(rendererId: string, time: number) {
