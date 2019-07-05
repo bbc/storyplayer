@@ -455,7 +455,6 @@ class Player extends EventEmitter {
         backButtonIconDiv.classList.add('romper-button-icon-div');
         backButtonIconDiv.classList.add('romper-back-button-icon-div');
         this._backButton.appendChild(backButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._backButton);
 
         this._seekBackButton = document.createElement('button');
         this._seekBackButton.classList.add('romper-button');
@@ -465,7 +464,6 @@ class Player extends EventEmitter {
         const seekBackButtonIconDiv = document.createElement('div');
         seekBackButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekBackButton.appendChild(seekBackButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._seekBackButton);
 
         this._playPauseButton = document.createElement('button');
         this._playPauseButton.classList.add('romper-button');
@@ -485,14 +483,13 @@ class Player extends EventEmitter {
         const seekForwardButtonIconDiv = document.createElement('div');
         seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._seekForwardButton);
 
         this._nextButton = document.createElement('button');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
         this._nextButton.setAttribute('aria-label', 'Next Button');
-        this._narrativeElementTransport.appendChild(this._nextButton);
+
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
@@ -507,7 +504,15 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
-        this._buttons.appendChild(this._scrubBar);
+
+        // ios  we don't append scrub bar back, seek back, next, seek next 
+        if (!BrowserUserAgent.iOS()) {
+            this._buttons.appendChild(this._scrubBar);
+            this._narrativeElementTransport.appendChild(this._backButton);
+            this._narrativeElementTransport.appendChild(this._seekBackButton);
+            this._narrativeElementTransport.appendChild(this._seekForwardButton);
+            this._narrativeElementTransport.appendChild(this._nextButton);
+        }
 
         this._mediaTransport = document.createElement('div');
         this._mediaTransport.classList.add('romper-media-transport');
