@@ -1731,15 +1731,19 @@ class Player extends EventEmitter {
         this._player.classList.add('romper-player-fullscreen');
 
         if (this._playerParent.requestFullscreen) {
+            logger.info("Entering fullscreen using requestFullscreen")
             // @flowignore
             this._playerParent.requestFullscreen();
         } else if ((this._playerParent: any).mozRequestFullScreen) {
+            logger.info("Entering fullscreen using mozRequestFullScreen")
             // @flowignore
             this._playerParent.mozRequestFullScreen(); // Firefox
         } else if ((this._playerParent: any).webkitRequestFullscreen) {
+            logger.info("Entering fullscreen using webkitRequestFullscreen")
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
+            logger.info("Entering fullscreen using class")
             window.scrollTo(0, 1);
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
@@ -1769,18 +1773,23 @@ class Player extends EventEmitter {
         this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
         if ((document: any).exitFullscreen) {
+            logger.info("Exiting fullscreen using exitFullscreen")
             // @flowignore
             document.exitFullscreen();
         } else if ((document: any).mozCancelFullScreen) {
+            logger.info("Exiting fullscreen using mozCancelFullScreen")
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
         } else if ((document: any).webkitExitFullscreen) {
+            logger.info("Exiting fullscreen using webkitExitFullscreen")
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
         } else if ((document: any).msExitFullscreen) {
+            logger.info("Exiting fullscreen using msExitFullscreen")
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
         } else {
+            logger.info("Exiting fullscreen using class")
             this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
         }
         scrollToTop();
