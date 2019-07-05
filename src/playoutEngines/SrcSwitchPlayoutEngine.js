@@ -191,12 +191,14 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 }
             }
             if(rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
-                logger.info(`Applying queued events for ${rendererId}`)
-                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-                rendererPlayoutObj.queuedEvents.forEach((qe) => {
-                    videoElement.addEventListener(qe.event, qe.callback)
-                })
-                rendererPlayoutObj.queuedEvents = []
+                setTimeout(() => {
+                    logger.info(`Applying queued events for ${rendererId}`)
+                    const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+                    rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                        videoElement.addEventListener(qe.event, qe.callback)
+                    })
+                    rendererPlayoutObj.queuedEvents = []
+                }, 1000)
             }
         }
     }
