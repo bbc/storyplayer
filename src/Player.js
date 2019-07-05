@@ -473,7 +473,6 @@ class Player extends EventEmitter {
         const playPauseButtonIconDiv = document.createElement('div');
         playPauseButtonIconDiv.classList.add('romper-button-icon-div');
         this._playPauseButton.appendChild(playPauseButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._playPauseButton);
 
         this._seekForwardButton = document.createElement('button');
         this._seekForwardButton.classList.add('romper-button');
@@ -510,8 +509,11 @@ class Player extends EventEmitter {
             this._buttons.appendChild(this._scrubBar);
             this._narrativeElementTransport.appendChild(this._backButton);
             this._narrativeElementTransport.appendChild(this._seekBackButton);
+            this._narrativeElementTransport.appendChild(this._playPauseButton);
             this._narrativeElementTransport.appendChild(this._seekForwardButton);
             this._narrativeElementTransport.appendChild(this._nextButton);
+        } else {
+            this._narrativeElementTransport.appendChild(this._playPauseButton);
         }
 
         this._mediaTransport = document.createElement('div');
