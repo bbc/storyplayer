@@ -172,9 +172,17 @@ export default class RenderManager extends EventEmitter {
 
     _handleOrientationChange() {
         logger.info(`Window Orientation change to ${window.orientation}`);
+        // pause when in portrait
+        if (window.orientation == 0) {
+            this._player.playoutEngine.pause();
+        } else {
+            this._player.playoutEngine.play();
+        }
+
         if (Player._isFullScreen()) {
             this._player._exitFullScreen();
         }
+        
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.WINDOW_ORIENTATION_CHANGE,
