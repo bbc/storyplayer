@@ -82,7 +82,9 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         if (currentTime) {
             if (this._outTime > 0 && currentTime >= this._outTime) {
                 // TODO: Is this needed?
-                videoElement.pause();
+                if(videoElement) {
+                    videoElement.pause();
+                }
                 this._endedEventListener();
             }
         }
@@ -107,7 +109,9 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._scene.add(mesh);
 
         this._playoutEngine.setPlayoutActive(this._rendererId);
-        videoElement.style.visibility = 'hidden';
+        if(videoElement) {
+            videoElement.style.visibility = 'hidden';
+        }
         this._animate();
     }
 

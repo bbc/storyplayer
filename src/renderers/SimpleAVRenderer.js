@@ -101,7 +101,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (currentTime) {
             if (this._outTime > 0 && currentTime >= this._outTime) {
                 // TODO Is this needed?
-                videoElement.pause();
+                if(videoElement) {
+                    videoElement.pause();
+                }
                 this._endedEventListener();
             }
             if (currentTime > (duration - 1)) {

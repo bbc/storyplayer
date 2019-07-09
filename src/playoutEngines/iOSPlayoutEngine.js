@@ -96,7 +96,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const mediaObj = this._media[rendererId].media
         if(mediaObj) {
             if(mediaObj.type) {
-                let mediaElement = null;
+                let mediaElement: HTMLMediaElement;
                 if(mediaObj.type === MEDIA_TYPES.FOREGROUND_AV) {
                     mediaElement = this._foregroundMediaElement
                     if(mediaObj.url) {
@@ -297,7 +297,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string): HTMLMediaElement {
+    getMediaElement(rendererId: string): ?HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.media || !rendererPlayoutObj.media.type) {
             return undefined;
@@ -336,7 +336,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj) {
             const mediaElement = this.getMediaElement(event.id);
             if(mediaElement) {
-                mediaElement.volume(event.value)
+                mediaElement.volume = event.value;
             }
         }
     }
