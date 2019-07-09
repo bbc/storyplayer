@@ -662,7 +662,7 @@ class Player extends EventEmitter {
         let playoutToUse = 'dom';
 
         if (BrowserUserAgent.iOS()) {
-            playoutToUse = 'src';
+            playoutToUse = 'ios';
         }
 
         const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');

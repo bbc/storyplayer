@@ -60,12 +60,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._playing = false;
         this._subtitlesShowing = false;
 
-        // this._mediaManager = new MediaManager(
-        //     this._foregroundMediaElement,
-        //     this._backgroundMediaElement,
-        //     this._debugPlayout,
-        // );
-
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
@@ -94,7 +88,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMediaElement.pause();
         this._foregroundMediaElement.pause();
 
-        // this._mediaManager.setPermissionToPlay(value);
         super.setPermissionToPlay(value);
     }
 
