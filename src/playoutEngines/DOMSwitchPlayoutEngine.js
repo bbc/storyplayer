@@ -564,7 +564,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             this._inactiveConfig.hls,
                         );
                         // remove the event listeners
-                    } 
+                    }
                     break;
                 case MediaTypes.DASH:
                     rendererPlayoutObj._shaka.configure(
@@ -725,6 +725,21 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             return undefined;
         }
         return videoElement.currentTime;
+    }
+
+    getDuration(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
+            return undefined;
+        }
+        const mediaElement = this.getMediaElement(rendererId);
+        if (
+            !mediaElement ||
+            mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
+        ) {
+            return undefined;
+        }
+        return mediaElement.duration;
     }
 
     setCurrentTime(rendererId: string, time: number) {

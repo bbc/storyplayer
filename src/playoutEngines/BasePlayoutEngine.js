@@ -129,9 +129,26 @@ export default class BasePlayoutEngine {
     }
 
     getCurrentTime(rendererId: string) {
-        return undefined;
+        const mediaElement = this.getMediaElement(rendererId);
+        if (
+            !mediaElement ||
+            mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
+        ) {
+            return undefined;
+        }
+        return mediaElement.currentTime;
     }
 
+    getDuration(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        if (
+            !mediaElement ||
+            mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
+        ) {
+            return undefined;
+        }
+        return mediaElement.duration;
+    }
 
     setCurrentTime(rendererId: string, time: number) {
         return false;

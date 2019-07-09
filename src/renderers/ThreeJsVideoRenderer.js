@@ -77,9 +77,11 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     _outTimeEventListener() {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
+        if (currentTime) {
+            if (this._outTime > 0 && currentTime >= this._outTime) {
+                // TODO: Is this needed?
                 videoElement.pause();
                 this._endedEventListener();
             }
@@ -153,9 +155,10 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     _handlePlayPauseButtonClicked(): void {
         this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            if (videoElement.paused === true) {
+        // TODO: This feels like it is a race condition with PlayoutEngine
+        // maybe have new event which is triggered from playoutengine
+        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
@@ -171,12 +174,15 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             // convert to time into segment
             videoTime -= this._inTime;
         }
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        let remaining = videoElement.duration;
+        let duration = this._playoutEngine.getDuration(this._rendererId)
+        if (duration === undefined) {
+            duration = Infinity;
+        }
+        let remaining = duration;
         if (this._outTime > 0) {
             remaining = this._outTime;
         }
-        remaining -= videoElement.currentTime;
+        remaining -= videoTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,
