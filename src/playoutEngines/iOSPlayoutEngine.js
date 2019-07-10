@@ -50,10 +50,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");
         this._backgroundMediaElement.setAttribute("disablePictureInPicture", "true");
 
-        // This doesn't work but maybe it will in the future to stop iOS controls being shown
-        this._foregroundMediaElement.setAttribute("controls", "false");
-        this._backgroundMediaElement.setAttribute("controls", "false");
-
         this._player.mediaTarget.appendChild(this._foregroundMediaElement);
         this._player.backgroundTarget.appendChild(this._backgroundMediaElement);
 
