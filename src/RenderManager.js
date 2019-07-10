@@ -120,11 +120,11 @@ export default class RenderManager extends EventEmitter {
                     logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
-                    if (this._player.playoutEngine.getCurrentTime(representationId)) {
+                    const duration = this._player.playoutEngine.getDuration(representationId)
+                    if (currentTime && duration) {
                         const playout = this._player.playoutEngine;
-                        const media = playout.getMediaElement(representationId);
                         // skip to 1/4 s before end
-                        playout.setCurrentTime(representationId, media.duration - 0.25);
+                        playout.setCurrentTime(representationId, duration - 0.25);
                     } else if (this._currentRenderer) {
                         this._currentRenderer.complete();
                     }
@@ -663,9 +663,7 @@ export default class RenderManager extends EventEmitter {
                         .filter(neid => allIds.indexOf(neid) === -1)
                         .forEach((neid) => {
                             if (narrativeElement.id !== neid) {
-                                if (narrativeElement.id !== this._currentNarrativeElement.id) {
-                                    this._upcomingRenderers[neid].destroy();
-                                }
+                                this._upcomingRenderers[neid].destroy();
                             }
                             delete this._upcomingRenderers[neid];
                         });

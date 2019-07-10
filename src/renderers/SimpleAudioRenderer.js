@@ -177,9 +177,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (audioElement) {
-            if (audioElement.paused === true) {
+        // TODO: This feels like it is a race condition with PlayoutEngine
+        // maybe have new event which is triggered from playoutengine
+        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
@@ -192,8 +193,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (videoTime === undefined) {
             videoTime = this._lastSetTime;
         }
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        const remainingTime = videoElement.duration - videoElement.currentTime;
+        let duration = this._playoutEngine.getDuration(this._rendererId)
+        if (duration === undefined) {
+            duration = Infinity;
+        }
+        const remainingTime = duration - videoTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,

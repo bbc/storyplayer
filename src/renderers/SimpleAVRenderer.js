@@ -92,19 +92,28 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _outTimeEventListener() {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        let duration = this._playoutEngine.getDuration(this._rendererId);
+        if(!duration) {
+            duration = Infinity;
+        }
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            if (this._outTime > 0 && videoElement.currentTime >= this._outTime) {
-                videoElement.pause();
+        if (currentTime) {
+            if (this._outTime > 0 && currentTime >= this._outTime) {
+                // TODO Is this needed?
+                if(videoElement) {
+                    videoElement.pause();
+                }
                 this._endedEventListener();
             }
-            if (videoElement.currentTime > (videoElement.duration - 1)) {
-                const nowTime = videoElement.currentTime;
+            if (currentTime > (duration - 1)) {
+                const nowTime = currentTime;
                 if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
                     this._testEndStallTimeout = setTimeout(() => {
+                        const time = this._playoutEngine.getCurrentTime(this._rendererId);
                         // eslint-disable-next-line max-len
-                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${videoElement.currentTime}`);
-                        if (videoElement.currentTime <= nowTime + 1.9) {
+                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
+                        if (time <= nowTime + 1.9) {
                             logger.warn('Video end checker failed stall test');
                             clearTimeout(this._testEndStallTimeout);
                             this._endedEventListener();
@@ -239,9 +248,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            if (videoElement.paused === true) {
+        // TODO: This feels like it is a race condition with PlayoutEngine
+        // maybe have new event which is triggered from playoutengine
+        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
             } else {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
@@ -257,12 +267,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
             // convert to time into segment
             videoTime -= this._inTime;
         }
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        let remaining = videoElement.duration;
+        let duration = this._playoutEngine.getDuration(this._rendererId)
+        if (duration === undefined) {
+            duration = Infinity;
+        }
+        let remaining = duration;
         if (this._outTime > 0) {
             remaining = this._outTime;
         }
-        remaining -= videoElement.currentTime;
+        remaining -= videoTime;
         const timeObject = {
             timeBased: true,
             currentTime: videoTime,

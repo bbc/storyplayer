@@ -61,7 +61,10 @@ export default class BasePlayoutEngine {
         if (this._media[rendererId]) {
             this._media[rendererId].timings = timings;
             if (this._media[rendererId].awaiting_times) {
-                this.connectScrubBar(rendererId, this.getMediaElement(rendererId));
+                const mediaElement = this.getMediaElement(rendererId)
+                if(mediaElement) {
+                    this.connectScrubBar(rendererId, mediaElement);
+                }
             }
         }
     }
@@ -81,7 +84,10 @@ export default class BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
-            this.getMediaElement(rendererId).classList.remove('romper-media-element-queued');
+            const mediaElement = this.getMediaElement(rendererId)
+            if(mediaElement) {
+                mediaElement.classList.remove('romper-media-element-queued');
+            }
         }
     }
 
@@ -129,9 +135,26 @@ export default class BasePlayoutEngine {
     }
 
     getCurrentTime(rendererId: string) {
-        return undefined;
+        const mediaElement = this.getMediaElement(rendererId);
+        if (
+            !mediaElement ||
+            mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
+        ) {
+            return undefined;
+        }
+        return mediaElement.currentTime;
     }
 
+    getDuration(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        if (
+            !mediaElement ||
+            mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
+        ) {
+            return undefined;
+        }
+        return mediaElement.duration;
+    }
 
     setCurrentTime(rendererId: string, time: number) {
         return false;
@@ -146,7 +169,7 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    getMediaElement(rendererId: string): HTMLMediaElement {
-        return document.createElement('video');
+    getMediaElement(rendererId: string): ?HTMLMediaElement {
+        return undefined;
     }
 }
