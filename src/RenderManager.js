@@ -655,9 +655,7 @@ export default class RenderManager extends EventEmitter {
                         .filter(neid => allIds.indexOf(neid) === -1)
                         .forEach((neid) => {
                             if (narrativeElement.id !== neid) {
-                                if (narrativeElement.id !== this._currentNarrativeElement.id) {
-                                    this._upcomingRenderers[neid].destroy();
-                                }
+                                this._upcomingRenderers[neid].destroy();
                             }
                             delete this._upcomingRenderers[neid];
                         });
