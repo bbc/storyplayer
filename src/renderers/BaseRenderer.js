@@ -1351,9 +1351,9 @@ export default class BaseRenderer extends EventEmitter {
     addTimeEventListener(listenerId: string, time: number, callback: Function) {
         this._timeEventListeners[listenerId] = callback;
         this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
-            const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-            if (mediaElement) {
-                if (time > 0 && mediaElement.currentTime >= time) {
+            const currentTime = this._playoutEngine.getCurrentTime(this._rendererId)
+            if (currentTime) {
+                if (time > 0 && currentTime >= time) {
                     if (listenerId in this._timeEventListeners) {
                         delete this._timeEventListeners[listenerId];
                         callback();

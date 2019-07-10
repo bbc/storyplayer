@@ -6,6 +6,7 @@ import type { AssetUrls } from './romper';
 import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
+import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -13,6 +14,7 @@ import BaseRenderer from './renderers/BaseRenderer';
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
     DOM_SWITCH_PLAYOUT: 'dom',
+    IOS_PLAYOUT: 'ios',
 };
 
 const PlayerEvents = [
@@ -660,7 +662,7 @@ class Player extends EventEmitter {
         let playoutToUse = 'dom';
 
         if (BrowserUserAgent.iOS()) {
-            playoutToUse = 'src';
+            playoutToUse = 'ios';
         }
 
         const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
@@ -686,6 +688,10 @@ class Player extends EventEmitter {
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
             this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
+            break;
+        case PLAYOUT_ENGINES.IOS_PLAYOUT:
+            // Refactored iOS playout engine
+            this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
             break;
         default:
             logger.fatal('Invalid Playout Engine');
