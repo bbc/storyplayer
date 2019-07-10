@@ -110,11 +110,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
                 if(rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
-                    logger.info(`Applying queued events for ${rendererId}`)
-                    rendererPlayoutObj.queuedEvents.forEach((qe) => {
-                        mediaElement.addEventListener(qe.event, qe.callback)
-                    })
-                    rendererPlayoutObj.queuedEvents = []
+                    setTimeout(() => {
+                        logger.info(`Applying queued events for ${rendererId}`)
+                        rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                            mediaElement.addEventListener(qe.event, qe.callback)
+                        })
+                        rendererPlayoutObj.queuedEvents = []
+                    }, 750)
                 }
             }
             if (mediaObj.subs_url) {
@@ -259,7 +261,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             if(mediaElement && rendererPlayoutObj.active) {
                 // This renderer is using the on screen video element
                 // so add event listener directly
-                mediaElement.addEventListener(event, callback);
+                setTimeout(() => {
+                    mediaElement.addEventListener(event, callback);
+                }, 750)
             } else {
                 // This renderer is not using the on screen video element
                 // so add event listener to the queue so it can be applied in

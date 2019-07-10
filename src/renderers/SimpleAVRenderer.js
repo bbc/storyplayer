@@ -126,6 +126,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -133,9 +138,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // set time to last set time (relative to click start)
         this.setCurrentTime(this._lastSetTime);
 
-        // automatically move on at video end
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
         const player = this._player;
 
