@@ -174,9 +174,20 @@ export default class RenderManager extends EventEmitter {
         logger.info(`Window Orientation change to ${window.orientation}`);
         // pause when in portrait
         if (window.orientation === 0) {
+            this._isPlaying = this._player.playoutEngine.isPlaying();
             this._player.playoutEngine.pause();
+            this._player.playoutEngine.pauseBackgrounds();
+            if (this._currentRenderer instanceof ImageRenderer) {
+                this._currentRenderer.pause();
+            }
         } else {
             this._player.playoutEngine.play();
+            if (this._player.playoutEngine.hasStarted()) {
+                this._player.playoutEngine.playBackgrounds();
+            }
+            if (this._currentRenderer instanceof ImageRenderer) {
+                this._currentRenderer.play();
+            }
         }
 
         if (Player._isFullScreen()) {
