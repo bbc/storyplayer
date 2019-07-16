@@ -1,6 +1,6 @@
 // @flow
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
@@ -56,6 +56,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
+            playPauseHandler: this._handlePlayPauseButtonClicked,
         });
 
         this._setInTime = this._setInTime.bind(this);
@@ -159,8 +160,6 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     _handlePlayPauseButtonClicked(): void {
         this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
-        // TODO: This feels like it is a race condition with PlayoutEngine
-        // maybe have new event which is triggered from playoutengine
         if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
@@ -228,20 +227,12 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
     }
 
     destroy() {
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
         super.destroy();
     }
 }

@@ -1,6 +1,6 @@
 // @flow
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
@@ -63,6 +63,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_A,
+            playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
@@ -85,13 +86,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         // automatically move on at audio end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
 
-        const player = this._player;
-
-        player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
-
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
             mediaElement.classList.add('romper-audio-element');
@@ -112,12 +106,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         } catch (e) {
             //
         }
-
-        const player = this._player;
-        player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
 
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
@@ -177,8 +165,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        // TODO: This feels like it is a race condition with PlayoutEngine
-        // maybe have new event which is triggered from playoutengine
         if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
