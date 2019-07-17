@@ -110,13 +110,11 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
                 if(rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
-                    setTimeout(() => {
-                        logger.info(`Applying queued events for ${rendererId}`)
-                        rendererPlayoutObj.queuedEvents.forEach((qe) => {
-                            mediaElement.addEventListener(qe.event, qe.callback)
-                        })
-                        rendererPlayoutObj.queuedEvents = []
-                    }, 750)
+                    logger.info(`Applying queued events for ${rendererId}`)
+                    rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                        mediaElement.addEventListener(qe.event, qe.callback)
+                    })
+                    rendererPlayoutObj.queuedEvents = []
                 }
             }
             if (mediaObj.subs_url) {
@@ -257,13 +255,27 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     on(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
+            const oldCallback = callback;
+            if (event === "ended") {
+                // Hack for iOS calling ended when video hasn't actually ended
+                // eslint-disable-next-line no-param-reassign
+                callback = (e) => {
+                    if(e !== undefined ){
+                        if(!e.target.duration) {
+                            logger.info(`Received ended event with no duration. `
+                                + `Assuming event is invalid`)
+                            return
+                        }
+                    }
+                    oldCallback(e)
+                }
+                rendererPlayoutObj._endedCallback = callback
+            }
             const mediaElement = this.getMediaElement(rendererId);
             if(mediaElement && rendererPlayoutObj.active) {
                 // This renderer is using the on screen video element
                 // so add event listener directly
-                setTimeout(() => {
-                    mediaElement.addEventListener(event, callback);
-                }, 750)
+                mediaElement.addEventListener(event, callback);
             } else {
                 // This renderer is not using the on screen video element
                 // so add event listener to the queue so it can be applied in
@@ -281,7 +293,12 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     off(rendererId: string, event: string, callback: Function) {
         const rendererPlayoutObj = this._media[rendererId];
+
         if (rendererPlayoutObj) {
+            if (event === "ended" && rendererPlayoutObj._endedCallback) {
+                // eslint-disable-next-line no-param-reassign
+                callback = rendererPlayoutObj._endedCallback;
+            }
             const mediaElement = this.getMediaElement(rendererId);
             if(mediaElement && rendererPlayoutObj.active) {
                 mediaElement.removeEventListener(event, callback);
