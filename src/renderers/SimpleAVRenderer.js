@@ -1,6 +1,6 @@
 // @flow
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
@@ -82,6 +82,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
+            playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
@@ -139,14 +140,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // set time to last set time (relative to click start)
         this.setCurrentTime(this._lastSetTime);
-
-
-        const player = this._player;
-
-        player.on(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
     }
 
     end() {
@@ -164,12 +157,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } catch (e) {
             //
         }
-
-        const player = this._player;
-        player.removeListener(
-            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            this._handlePlayPauseButtonClicked,
-        );
     }
 
     // allow for clip trimming
@@ -252,8 +239,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        // TODO: This feels like it is a race condition with PlayoutEngine
-        // maybe have new event which is triggered from playoutengine
         if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
