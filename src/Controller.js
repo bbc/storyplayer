@@ -11,7 +11,7 @@ import type { StoryPathItem } from './StoryPathWalker';
 import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
 import AnalyticEvents from './AnalyticEvents';
-import type { AnalyticsLogger } from './AnalyticEvents';
+import type { AnalyticsLogger, AnalyticsPayload } from './AnalyticEvents';
 import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
@@ -39,12 +39,35 @@ export default class Controller extends EventEmitter {
 
         this._fetchers = fetchers;
         this._analytics = analytics;
+        this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
+    }
+
+    _enhancedAnalytics(logData: AnalyticsPayload): mixed {
+        let repId = logData.current_representation;
+        const renderer = this.getCurrentRenderer();
+        if (repId === undefined && renderer && renderer.getRepresentation()){
+            repId = renderer.getRepresentation().id;
+        }
+        let neId = logData.current_narrative_element;
+        if (neId === undefined) {
+            neId = this.getCurrentNarrativeElement() ?
+                this.getCurrentNarrativeElement().id : 'null';
+        }
+        const appendedData: AnalyticsPayload = {
+            name: AnalyticEvents.names[logData.name],
+            type: AnalyticEvents.types[logData.type],
+            from: logData.from,
+            to: logData.to,
+            current_narrative_element: neId,
+            current_representation: repId,
+        };
+        this._analytics(appendedData);
     }
 
     restart(storyId: string, variableState?: Object = {}) {
@@ -66,7 +89,7 @@ export default class Controller extends EventEmitter {
                 type: AnalyticEvents.types.STORY_NAVIGATION,
                 name: AnalyticEvents.names.STORY_END,
             };
-            this._analytics(logData);
+            this._enhancedAnalytics(logData);
             logger.warn('Story Ended!');
         };
         const _handleError = (err) => {
@@ -201,7 +224,7 @@ export default class Controller extends EventEmitter {
             this._target,
             this._representationReasoner,
             this._fetchers,
-            this._analytics,
+            this._enhancedAnalytics,
             this._assetUrls,
             this._privacyNotice,
         );
@@ -320,7 +343,7 @@ export default class Controller extends EventEmitter {
             from: oldName,
             to: newNarrativeElement.name,
         };
-        this._analytics(logData);
+        this._enhancedAnalytics(logData);
     }
 
     // try to get the narrative element object with the given id
@@ -839,6 +862,8 @@ export default class Controller extends EventEmitter {
     _representationReasoner: RepresentationReasoner;
 
     _analytics: AnalyticsLogger;
+
+    _enhancedAnalytics: AnalyticsLogger
 
     _assetUrls: AssetUrls;
 

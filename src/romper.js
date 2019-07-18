@@ -27,9 +27,12 @@ import './assets/styles/player.scss';
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
     analyticsLogger: (logdata) => {
-        if (logdata.to && logdata.from) {
+        if (logdata.to
+            && logdata.from
+            && logdata.current_narrative_element
+            && logdata.current_representation) {
             // eslint-disable-next-line max-len
-            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}: ${logdata.from} - ${logdata.to}`);
+            logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}: ${logdata.from} - ${logdata.to}; NE: ${logdata.current_narrative_element}, Rep: ${logdata.current_representation}`);
         } else {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`);
         }

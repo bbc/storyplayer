@@ -61,6 +61,8 @@ export type AnalyticsPayload = {
     name: AnalyticEventName,
     from?: string,
     to?: string,
+    current_narrative_element?: string,
+    current_representation?: string,
 };
 
 export type AnalyticsLogger = (payload: AnalyticsPayload) => mixed;
