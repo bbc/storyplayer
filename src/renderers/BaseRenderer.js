@@ -1264,8 +1264,8 @@ export default class BaseRenderer extends EventEmitter {
                     const varName = currentBehaviour.variable_name;
                     this._controller.getVariableValue(varName).then((value) => {
                         const actionName = fwd ?
-                            AnalyticEvents.names.USER_VARIABLE_PANEL_NEXT :
-                            AnalyticEvents.names.USER_VARIABLE_PANEL_BACK;
+                            AnalyticEvents.names.VARIABLE_PANEL_NEXT_CLICKED :
+                            AnalyticEvents.names.VARIABLE_PANEL_BACK_CLICKED;
                         const logData = {
                             type: AnalyticEvents.types.USER_ACTION,
                             name: actionName,
