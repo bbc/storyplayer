@@ -170,8 +170,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         target.appendChild(this._domElement);
         webGlRenderer.setSize(1600, 900);
 
-        this._playoutEngine.setPlayoutActive(this._rendererId);
-
         this._update = () => {
             const lat = Math.max(-85, Math.min(85, this._view.lat));
             const phi = THREE.Math.degToRad(90 - lat);
