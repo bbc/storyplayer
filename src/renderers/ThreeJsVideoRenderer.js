@@ -139,6 +139,10 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl);
+                                this._playoutEngine.setTimings(this._rendererId, {
+                                    inTime: this._inTime,
+                                    outTime: this._outTime,
+                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
