@@ -22,7 +22,11 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     _disablePlayButton: Function;
 
+    _disableScrubBar: Function;
+
     _enablePlayButton: Function;
+
+    _enableScrubBar: Function;
 
     constructor(
         representation: Representation,
@@ -43,6 +47,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
         this._disablePlayButton = () => { this._player.disablePlayButton(); };
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
+        this._disableScrubBar = () => { this._player.disableScrubBar(); };
+        this._enableScrubBar = () => { this._player.enableScrubBar(); };
         this.renderImageElement();
     }
 
@@ -60,6 +66,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         } else if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
         }
+        this._disableScrubBar();
         this._disablePlayButton();
     }
 
@@ -106,9 +113,13 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             clearInterval(this._imageTimer);
         }
         this._enablePlayButton();
+        this._enableScrubBar();
     }
 
     _showImage() {
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('');
+        loader.load(this._imageElement.src);
         const texture = new THREE.TextureLoader().load(this._imageElement.src);
         const material = new THREE.MeshBasicMaterial({ map: texture });
 
@@ -143,6 +154,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     populateImageElement(mediaUrl: string) {
         this._imageElement = document.createElement('img');
         this._imageElement.src = mediaUrl;
+        this._imageElement.crossOrigin = 'Anonymous';
         this._rendered = true;
         if(this._started) {
             this._showImage();
