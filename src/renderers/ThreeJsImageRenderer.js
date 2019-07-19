@@ -129,12 +129,11 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                 .then((fg) => {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src)
-                            .then(mediaUrl => {
-                                this.populateImageElement(mediaUrl);
-                            }
+                            .then(mediaUrl =>
+                                this.populateImageElement(mediaUrl)
                             )
                             .catch((err) => {
-                                logger.error(err, 'Image not found', fg.assets.image_src);
+                                logger.error(err, 'Image not found');
                             });
                     }
                 });
