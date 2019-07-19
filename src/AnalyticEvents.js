@@ -43,6 +43,8 @@ const names = [
     'BROWSER_VISIBILITY_CHANGE',
     'WINDOW_ORIENTATION_CHANGE',
     'USER_SET_VARIABLE',
+    'USER_VARIABLE_PANEL_NEXT',
+    'USER_VARIABLE_PANEL_BACK'
 ];
 
 const AnalyticEvents = {
