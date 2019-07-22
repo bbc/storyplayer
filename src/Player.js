@@ -248,6 +248,10 @@ function createOverlay(name: string, logFunction: Function) {
     };
 }
 
+const preventEventDefault = (event: Event) => {
+    event.preventDefault();
+};
+
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
 
@@ -1752,6 +1756,10 @@ class Player extends EventEmitter {
         }
 
         this._inFullScreen = false;
+        // if we are an iphone capture these events;
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.addEventListener('touchmove', preventEventDefault);
+        }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('fullscreenchange', this._handleFullScreenChange);
@@ -1792,6 +1800,9 @@ class Player extends EventEmitter {
         }
         scrollToTop();
 
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.removeEventListener('touchmove', preventEventDefault);
+        }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
