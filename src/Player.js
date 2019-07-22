@@ -371,6 +371,8 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
+    _preventDefault: Function;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
 
@@ -702,6 +704,7 @@ class Player extends EventEmitter {
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
+        this._preventDefault = this._preventDefault.bind(this);
     }
 
     addDog(src: string, position: Object) {
@@ -716,6 +719,10 @@ class Player extends EventEmitter {
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
+    }
+
+    _preventDefault(event: Event) {
+        event.preventDefault();
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -1744,13 +1751,17 @@ class Player extends EventEmitter {
             this._playerParent.mozRequestFullScreen(); // Firefox
         } else if ((this._playerParent: any).webkitRequestFullscreen) {
             // @flowignore
-            this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
+            this._playerParent.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
 
         this._inFullScreen = false;
+        // if we are an iphone capture these events;
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.addEventListener('touchmove', this._preventDefault);
+        }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('fullscreenchange', this._handleFullScreenChange);
@@ -1791,6 +1802,9 @@ class Player extends EventEmitter {
         }
         scrollToTop();
 
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.removeEventListener('touchmove', this._preventDefault);
+        }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('fullscreenchange', this._handleFullScreenChange);

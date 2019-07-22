@@ -22,6 +22,21 @@ export class BrowserUserAgent {
         return false;
     }
 
+    static iPhone() {
+        const iDevices = [
+            'iPhone Simulator',
+            'iPod Simulator',
+            'iPhone',
+            'iPod',
+        ];
+        if (navigator.platform) {
+            while (iDevices.length) {
+                if (navigator.platform === iDevices.pop()) { return true; }
+            }
+        }
+        return false;
+    }
+
     static ie() {
         const ua = window.navigator.userAgent;
 
