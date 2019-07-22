@@ -416,6 +416,7 @@ class Player extends EventEmitter {
         this._guiLayer.classList.add('romper-gui');
 
         this._errorLayer = document.createElement('div');
+        // eslint-disable-next-line max-len
         const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
         this._errorLayer.appendChild(errorMessage);
         this._errorLayer.classList.add('romper-error');

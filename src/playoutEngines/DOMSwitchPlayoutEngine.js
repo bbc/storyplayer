@@ -801,6 +801,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         } else {
             this.pause();
         }
+        Object.keys(this._media)
+            .filter(key => this._media[key].active)
+            .forEach((key) => {
+                if(this._media[key].media && this._media[key].media.playPauseHandler){
+                    this._media[key].media.playPauseHandler()
+                }
+            })
     }
 
     _handleSubtitlesClicked(): void {
