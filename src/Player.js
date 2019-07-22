@@ -1752,7 +1752,7 @@ class Player extends EventEmitter {
             this._playerParent.mozRequestFullScreen(); // Firefox
         } else if ((this._playerParent: any).webkitRequestFullscreen) {
             // @flowignore
-            this._playerParent.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); // Chrome and Safari
+            this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
