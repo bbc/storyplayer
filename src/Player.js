@@ -248,6 +248,10 @@ function createOverlay(name: string, logFunction: Function) {
     };
 }
 
+const preventEventDefault = (event: Event) => {
+    event.preventDefault();
+};
+
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
 
@@ -370,8 +374,6 @@ class Player extends EventEmitter {
     _showBufferingLayer: Function;
 
     _removeBufferingLayer: Function;
-
-    _preventDefault: Function;
 
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
         super();
@@ -705,7 +707,6 @@ class Player extends EventEmitter {
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
-        this._preventDefault = this._preventDefault.bind(this);
     }
 
     addDog(src: string, position: Object) {
@@ -720,10 +721,6 @@ class Player extends EventEmitter {
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
-    }
-
-    _preventDefault(event: Event) {
-        event.preventDefault();
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -1761,7 +1758,7 @@ class Player extends EventEmitter {
         this._inFullScreen = false;
         // if we are an iphone capture these events;
         if(BrowserUserAgent.iOS()) {
-            this._playerParent.addEventListener('touchmove', this._preventDefault);
+            this._playerParent.addEventListener('touchmove', preventEventDefault);
         }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
@@ -1804,7 +1801,7 @@ class Player extends EventEmitter {
         scrollToTop();
 
         if(BrowserUserAgent.iOS()) {
-            this._playerParent.removeEventListener('touchmove', this._preventDefault);
+            this._playerParent.removeEventListener('touchmove', preventEventDefault);
         }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
