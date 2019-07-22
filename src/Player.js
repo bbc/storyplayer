@@ -17,6 +17,8 @@ const PLAYOUT_ENGINES = {
     IOS_PLAYOUT: 'ios',
 };
 
+const SCRUB_BAR_ID = 'scrub-bar';
+
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'ICON_CLICKED',
@@ -249,7 +251,10 @@ function createOverlay(name: string, logFunction: Function) {
 }
 
 const preventEventDefault = (event: Event) => {
-    event.preventDefault();
+    // if the event doesn't come from the scrub bar we suppress the touch moves
+    if(event.target.id !== SCRUB_BAR_ID) {
+        event.preventDefault();
+    }
 };
 
 class Player extends EventEmitter {
@@ -514,6 +519,7 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
+        this._scrubBar.id = SCRUB_BAR_ID;
         this._buttons.appendChild(this._scrubBar);
 
         this._mediaTransport = document.createElement('div');
@@ -618,6 +624,7 @@ class Player extends EventEmitter {
         );
 
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
+
         this._playPauseButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._playPauseButtonClicked.bind(this)),
@@ -772,6 +779,9 @@ class Player extends EventEmitter {
             if (this._RomperButtonsShowing) this._hideRomperButtons();
         } else if (!this._RomperButtonsShowing) {
             this._activateRomperButtons(event);
+        }
+        if(event.code === 32) {
+            this._playPauseButtonClicked();
         }
     }
 
