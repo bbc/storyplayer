@@ -24,7 +24,11 @@ export default class ImageRenderer extends BaseRenderer {
 
     _imageTimer: ?IntervalID;
 
-    _timeRemaining: number;
+    _timeElapsed: number;
+
+    _duration: number;
+
+    _timeIntervals: { [key: string]: IntervalID };
 
     constructor(
         representation: Representation,
@@ -47,7 +51,9 @@ export default class ImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this._timeRemaining = 0;
+        this._timeElapsed = 0;
+        this._duration = Infinity;
+        this._timeIntervals = {};
     }
 
     willStart() {
@@ -64,26 +70,29 @@ export default class ImageRenderer extends BaseRenderer {
         super.start();
         this._hasEnded = true;
         if (this._representation.duration && this._representation.duration > 0){
-            this._timeRemaining = this._representation.duration * 1000;
+            this._duration = this._representation.duration;
+            this._timeElapsed = 0;
             // eslint-disable-next-line max-len
             logger.info(`Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
-            this._startTimer();
-        } else if (this._representation.duration && this._representation.duration === 0) {
+        }
+        if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
+        } else {
+            this._startTimer();
         }
     }
 
     pause() {
         // if timed image, pause timeout
-        if (this._timeRemaining > 0) {
+        if (this._duration < Infinity) {
             clearInterval(this._imageTimer);
         }
     }
 
     _startTimer() {
         this._imageTimer = setInterval(() => {
-            this._timeRemaining -= TIMER_INTERVAL;
-            if (this._timeRemaining <= 0) {
+            this._timeElapsed += TIMER_INTERVAL/1000;
+            if (this._timeElapsed >= this._duration) {
                 // eslint-disable-next-line max-len
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
@@ -95,17 +104,45 @@ export default class ImageRenderer extends BaseRenderer {
         if (this._representation.duration && this._representation.duration > 0) {
             const timeObject = {
                 timeBased: true,
-                currentTime: this._representation.duration,
-                remainingTime: this._timeRemaining,
+                currentTime: this._timeElapsed,
+                remainingTime: this._duration - this._timeElapsed,
             };
             return timeObject;
         }
         return super.getCurrentTime();
     }
 
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
+        this._timeEventListeners[listenerId] = callback;
+        if (time > this._duration) {
+            logger.warn('Tried to adding time event listener to image after its completion time');
+            return;
+        }
+        this._timeIntervals[listenerId] = setInterval(() => {
+            if (time > 0 && this._timeElapsed >= time) {
+                if (listenerId in this._timeEventListeners) {
+                    delete this._timeEventListeners[listenerId];
+                    callback();
+                }
+                if (listenerId in this._timeIntervals) {
+                    clearInterval(this._timeIntervals[listenerId]);
+                }
+            }
+        }, 50);
+    }
+
+    deleteTimeEventListener(listenerId: string) {
+        if (listenerId in this._timeEventListeners) {
+            delete this._timeEventListeners[listenerId];
+        }
+        if (listenerId in this._timeIntervals) {
+            clearInterval(this._timeIntervals[listenerId]);
+        }
+    }
+
     play(){
         // if timed image, resume timeout
-        if (this._timeRemaining > 0){
+        if (this._duration < Infinity){
             this._startTimer();
         }
     }
