@@ -25,9 +25,13 @@ export default function (data: Object): DataResolver {
      *
      * @param {string} name The name of the variable to be stored and its value
      */
-    const set = (name: string, value: any) => {
+    const set = (name: string, value: any, saveLocal: ?boolean = false) => {
         // eslint-disable-next-line no-param-reassign
         data[name] = value;
+        console.log('DATA_STORE', data, saveLocal)
+        if(saveLocal) {
+            localStorage.setItem('DATA_STORE', JSON.stringify(data));
+        }
     };
 
     return { get, set };
