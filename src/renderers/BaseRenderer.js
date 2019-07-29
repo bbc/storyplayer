@@ -1129,7 +1129,9 @@ export default class BaseRenderer extends EventEmitter {
 
     _setVariableValue(varName: string, value: any) {
         this._controller.getVariableValue(varName).then((oldVal) => {
-            this._controller.setVariableValue(varName, value);
+            const saveLocal = true;
+            console.log('SAVE_LOCAL', saveLocal);
+            this._controller.setVariableValue(varName, value, saveLocal);
             const logData = {
                 type: AnalyticEvents.types.USER_ACTION,
                 name: AnalyticEvents.names.USER_SET_VARIABLE,

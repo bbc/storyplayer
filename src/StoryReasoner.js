@@ -273,9 +273,9 @@ export default class StoryReasoner extends EventEmitter {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any) {
-        logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
-        this._dataResolver.set(name, value);
+    setVariableValue(name: string, value: any, saveLocal: ?boolean) {
+        logger.info(`Reasoner Setting variable '${name}' to ${JSON.stringify(value)}`);
+        this._dataResolver.set(name, value, saveLocal);
     }
 
     /**
@@ -302,7 +302,8 @@ export default class StoryReasoner extends EventEmitter {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
-                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList);
+                const saveLocal = true;
+                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList, saveLocal);
             });
     }
 

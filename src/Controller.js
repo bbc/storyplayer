@@ -36,13 +36,13 @@ export default class Controller extends EventEmitter {
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._representationReasoner = representationReasoner;
-
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
+        this.resumeState = this.checkLocalStorage('DATA_STORE');
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -70,14 +70,23 @@ export default class Controller extends EventEmitter {
         this._analytics(appendedData);
     }
 
-    restart(storyId: string, variableState?: Object = {}) {
+    // eslint-disable-next-line class-methods-use-this
+    checkLocalStorage(key) {
+        const resumeState = localStorage.getItem(key);
+        if(resumeState && Object.keys(resumeState).length > 0) {
+            return JSON.parse(resumeState);
+        }
+        return null;
+    }
+
+    restart(storyId: string, initialState?: Object = {}) {
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        this.start(storyId, variableState);
+        this.start(storyId, initialState);
     }
 
-    start(storyId: string, variableState?: Object = {}) {
+    start(storyId: string, initialState?: Object = {}) {
         this._storyId = storyId;
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
@@ -123,7 +132,7 @@ export default class Controller extends EventEmitter {
                 reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
                 this._reasoner = reasoner;
-                this._reasoner.start(variableState);
+                this._reasoner.start(initialState);
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
@@ -227,6 +236,7 @@ export default class Controller extends EventEmitter {
             this._enhancedAnalytics,
             this._assetUrls,
             this._privacyNotice,
+            this.resumeState,
         );
     }
 
@@ -296,7 +306,8 @@ export default class Controller extends EventEmitter {
             history.pop();
             // set history variable directly in reasoner to avoid triggering lookahead
             if (this._reasoner) {
-                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history);
+                const saveLocal = true;
+                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history, saveLocal);
             }
 
             if (previous) {
@@ -454,9 +465,9 @@ export default class Controller extends EventEmitter {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any) {
+    setVariableValue(name: string, value: any, saveLocal: ?boolean) {
         if (this._reasoner) {
-            this._reasoner.setVariableValue(name, value);
+            this._reasoner.setVariableValue(name, value, saveLocal);
             logger.info(`Controller seting variable '${name}' to ${value}`);
             this._renderManager.refreshLookahead();
         } else {

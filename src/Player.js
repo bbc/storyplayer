@@ -380,9 +380,9 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, resumeState: Object) {
         super();
-
+        this._resumeState = resumeState;
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
@@ -410,9 +410,11 @@ class Player extends EventEmitter {
         this._backgroundLayer.classList.add('romper-background');
 
         this._mediaLayer = document.createElement('div');
+        this._mediaLayer.id = 'media-layer';
         this._mediaLayer.classList.add('romper-media');
 
         this._loadingLayer = document.createElement('div');
+        this._loadingLayer.id = 'loading-layer';
         this._loadingLayer.classList.add('romper-loading');
         const loadingLayerInner = document.createElement('div');
         loadingLayerInner.classList.add('romper-loading-inner');
@@ -420,6 +422,7 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._loadingLayer);
 
         this._guiLayer = document.createElement('div');
+        this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
 
         this._errorLayer = document.createElement('div');
@@ -850,15 +853,31 @@ class Player extends EventEmitter {
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
-        const continueButtonIconHolder = document.createElement('div');
-        this._startExperienceButton.appendChild(continueButtonIconHolder);
-        continueButtonIconHolder.classList.add('romper-start-button-icon');
-        const continueButtonIconDiv = document.createElement('div');
-        continueButtonIconDiv.classList.add('romper-button-icon-div');
-        continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
-        continueButtonIconHolder.appendChild(continueButtonIconDiv);
+        this._startExperienceButton.setAttribute('aria-label', 'Start Button');
 
+        const startButtonIconHolder = document.createElement('div');
+        this._startExperienceButton.appendChild(startButtonIconHolder);
+
+        startButtonIconHolder.classList.add('romper-start-button-icon');
+        const startButtonIconDiv = document.createElement('div');
+        startButtonIconDiv.classList.add('romper-button-icon-div');
+        startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+        startButtonIconHolder.appendChild(startButtonIconDiv);
+
+        if(this._resumeState) {
+            const continueButton = document.createElement('button')
+            continueButton.innerHTML = 'PLEASE CONTINUE';
+            continueButton.classList.add(options.button_class);
+            continueButton.setAttribute('title', 'Play and accept terms');
+            continueButton.setAttribute('aria-label', 'Start Button');
+            const continueButtonIconHolder = document.createElement('div');
+            this._startExperienceButton.appendChild(continueButtonIconHolder);
+            startButtonIconHolder.classList.add('romper-start-button-icon');
+            const continueButtonIconDiv = document.createElement('div');
+            continueButtonIconDiv.classList.add('romper-button-icon-div');
+            continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+            startButtonIconHolder.appendChild(continueButtonIconDiv);
+        }
 
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';

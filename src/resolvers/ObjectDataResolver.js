@@ -10,6 +10,22 @@ import type { DataResolver } from '../romper';
  */
 export default function (data: Object): DataResolver {
     /**
+     * 
+     * @param {string} name Name of variable
+     * @param {value} value Value of variable
+     * Saves the variable in local storage
+     */
+    const saveToStorage = (name: string, value: any) => {
+        let dataStore = {};
+        const dataString = localStorage.getItem('DATA_STORE');
+        if(dataString && dataString.length > 0) {
+            dataStore = JSON.parse(dataString);
+        }
+        dataStore[name] = value;
+        localStorage.setItem('DATA_STORE', JSON.stringify(dataStore));
+    }
+
+    /**
      * Fetches a piece of data from the pre-configured dictionary
      *
      * @param {string} name The name of the variable to be resolved, in the form of dot nations
@@ -25,14 +41,10 @@ export default function (data: Object): DataResolver {
      *
      * @param {string} name The name of the variable to be stored and its value
      */
-    const set = (name: string, value: any, saveLocal: ?boolean = false) => {
+    const set = (name: string, value: any) => {
         // eslint-disable-next-line no-param-reassign
         data[name] = value;
-        console.log('DATA_STORE', data, saveLocal)
-        if(saveLocal) {
-            localStorage.setItem('DATA_STORE', JSON.stringify(data));
-        }
     };
 
-    return { get, set };
+    return { get, set, saveToStorage };
 }
