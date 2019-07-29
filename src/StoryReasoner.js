@@ -275,7 +275,11 @@ export default class StoryReasoner extends EventEmitter {
      */
     setVariableValue(name: string, value: any, saveLocal: ?boolean) {
         logger.info(`Reasoner Setting variable '${name}' to ${JSON.stringify(value)}`);
-        this._dataResolver.set(name, value, saveLocal);
+        this._dataResolver.set(name, value);
+        console.log('setVariableValue', saveLocal);
+        if(saveLocal) {
+            this._dataResolver.saveToStorage(name, value);
+        }
     }
 
     /**

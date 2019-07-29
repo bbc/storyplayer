@@ -25,6 +25,10 @@ export default function (data: Object): DataResolver {
         localStorage.setItem('DATA_STORE', JSON.stringify(dataStore));
     }
 
+    const saveAllToStorage = () => {
+        localStorage.setItem('DATA_STORE', JSON.stringify(data));
+    }
+
     /**
      * Fetches a piece of data from the pre-configured dictionary
      *
@@ -46,5 +50,5 @@ export default function (data: Object): DataResolver {
         data[name] = value;
     };
 
-    return { get, set, saveToStorage };
+    return { get, set, saveToStorage, saveAllToStorage };
 }

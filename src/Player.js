@@ -380,6 +380,8 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
+    _resumeState: ?Object;
+
     constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, resumeState: Object) {
         super();
         this._resumeState = resumeState;
@@ -865,6 +867,7 @@ class Player extends EventEmitter {
         startButtonIconHolder.appendChild(startButtonIconDiv);
 
         if(this._resumeState) {
+            logger.info('this._resumeState', this._resumeState);
             const continueButton = document.createElement('button')
             continueButton.innerHTML = 'PLEASE CONTINUE';
             continueButton.classList.add(options.button_class);
