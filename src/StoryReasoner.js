@@ -122,12 +122,14 @@ export default class StoryReasoner extends EventEmitter {
 
     // Get the variables defined in this story, and store the default values in our dataresolver
     _fetchVariablesFromStory() {
+        console.log('_fetchVariablesFromStory')
         if (this._story.variables) {
             const variableTree = this._story.variables;
             Object.keys(variableTree).forEach((storyVariableName) => {
                 const storyVariableValue = variableTree[storyVariableName].default_value;
                 this.getVariableValue(storyVariableName)
                     .then((value) => {
+                        console.log('value', value);
                         if (value === null) {
                             this.setVariableValue(storyVariableName, storyVariableValue);
                         } else {
@@ -141,6 +143,7 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _applyInitialState(initialState: Object) {
+        console.log('_applyInitialState');
         Object.keys(initialState).forEach((varName) => {
             this.setVariableValue(varName, initialState[varName]);
         });
@@ -274,9 +277,10 @@ export default class StoryReasoner extends EventEmitter {
      * @param {any} value Its value
      */
     setVariableValue(name: string, value: any, saveLocal: ?boolean) {
-        logger.info(`Reasoner Setting variable '${name}' to ${JSON.stringify(value)}`);
+        console.log('setVariableValue key value', name, value);
+        this.emit('VARIABLE_CHANGED', { name, value });
+        logger.info(`Setting variable in story reasoner '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
-        console.log('setVariableValue', saveLocal);
         if(saveLocal) {
             this._dataResolver.saveToStorage(name, value);
         }
@@ -298,6 +302,7 @@ export default class StoryReasoner extends EventEmitter {
      * @param {string} narrativeElementId The id of the narrative element visited
      */
     appendToHistory(narrativeElementId: string) {
+        console.log('appendToHistory');
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get(InternalVariableNames.PATH_HISTORY)
             .then((value) => {
@@ -333,6 +338,10 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.on('error', errorCallback);
         subStoryReasoner.on('narrativeElementChanged', elementChangedCallback);
         subStoryReasoner.on('storyEnd', storyEndCallback);
+        subStoryReasoner.on('VARIABLE_CHANGED', (e) => {
+            this.emit('VARIABLE_CHANGED', e);
+        });
+
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         this._subStoryReasoner.setParent(this);

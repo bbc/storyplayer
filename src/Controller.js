@@ -131,12 +131,16 @@ export default class Controller extends EventEmitter {
 
                 reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
+                reasoner.on('VARIABLE_CHANGED', (e) => { this.emit('VARIABLE_CHANGED', e)});
+
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
                 this._renderManager.handleStoryStart(storyId);
+
+                
             })
             .catch((err) => {
                 logger.warn('Error starting story', err);
@@ -296,6 +300,7 @@ export default class Controller extends EventEmitter {
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
+        console.log('_goBackOneStepInStory');
         return Promise.all([
             this.getIdOfPreviousNode(),
             this.getVariableValue(InternalVariableNames.PATH_HISTORY),
@@ -466,6 +471,7 @@ export default class Controller extends EventEmitter {
      * @param {any} value Its value
      */
     setVariableValue(name: string, value: any, saveLocal: ?boolean) {
+        console.log('controller setVariableValue')
         if (this._reasoner) {
             this._reasoner.setVariableValue(name, value, saveLocal);
             logger.info(`Controller seting variable '${name}' to ${value}`);
@@ -586,6 +592,7 @@ export default class Controller extends EventEmitter {
      * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
      */
     setVariables(variables: Object) {
+        console.log('controller setVariables');
         Object.keys(variables).forEach((varName) => {
             if (this._reasoner) {
                 this._reasoner.setVariableValue(varName, variables[varName]);
