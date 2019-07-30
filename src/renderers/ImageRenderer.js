@@ -123,6 +123,7 @@ export default class ImageRenderer extends BaseRenderer {
                 }
                 if (listenerId in this._timeIntervals) {
                     clearInterval(this._timeIntervals[listenerId]);
+                    delete this._timeIntervals[listenerId];
                 }
             }
         }, 50);
@@ -134,6 +135,7 @@ export default class ImageRenderer extends BaseRenderer {
         }
         if (listenerId in this._timeIntervals) {
             clearInterval(this._timeIntervals[listenerId]);
+            delete this._timeIntervals[listenerId];
         }
     }
 
@@ -155,6 +157,10 @@ export default class ImageRenderer extends BaseRenderer {
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
+        Object.keys(this._timeIntervals).forEach((listenerId) => {
+            clearInterval(this._timeIntervals[listenerId]);
+        });
+        this._timeIntervals = {};
         this._enablePlayButton();
         this._enableScrubBar();
     }
