@@ -83,10 +83,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     pause() {
-        // if timed image, pause timeout
-        if (this._duration < Infinity) {
-            clearInterval(this._imageTimer);
-        }
+        clearInterval(this._imageTimer);
     }
 
     _startTimer() {
@@ -141,10 +138,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     play(){
-        // if timed image, resume timeout
-        if (this._duration < Infinity){
-            this._startTimer();
-        }
+        this._startTimer();
     }
 
     end() {
