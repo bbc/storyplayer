@@ -1258,7 +1258,26 @@ export default class BaseRenderer extends EventEmitter {
                 let statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
                 statusSpan.textContent = statusText;
 
+                // log var panel, value, even if user doesn't change it
+                const logSlideChange = (fwd: boolean) => {
+                    const currentBehaviour = behaviourVariables[currentQuestion];
+                    const varName = currentBehaviour.variable_name;
+                    this._controller.getVariableValue(varName).then((value) => {
+                        const actionName = fwd ?
+                            AnalyticEvents.names.VARIABLE_PANEL_NEXT_CLICKED :
+                            AnalyticEvents.names.VARIABLE_PANEL_BACK_CLICKED;
+                        const logData = {
+                            type: AnalyticEvents.types.USER_ACTION,
+                            name: actionName,
+                            from: 'unset',
+                            to: `${varName}: ${value}`,
+                        };
+                        this._analytics(logData);
+                    });
+                };
+
                 const changeSlide = (fwd: boolean) => {
+                    logSlideChange(fwd);
                     const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
 
                     if (fwd && currentQuestion >= behaviourVariables.length - 1) {
