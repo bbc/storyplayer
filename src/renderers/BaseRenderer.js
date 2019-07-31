@@ -1073,6 +1073,7 @@ export default class BaseRenderer extends EventEmitter {
 
         const numberInput = document.createElement('input');
         numberInput.classList.add('romper-var-form-slider-input');
+        numberInput.classList.add('slider-input');
         numberInput.type = 'number';
 
         const setOutputPosition = () => {
