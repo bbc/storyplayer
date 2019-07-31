@@ -7,7 +7,7 @@ import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
 import InternalVariables, { InternalVariableNames } from './InternalVariables';
-
+import { VARIABLE_CHANGED } from './constants';
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
  * structure of a story.
@@ -278,7 +278,7 @@ export default class StoryReasoner extends EventEmitter {
      */
     setVariableValue(name: string, value: any, saveLocal: ?boolean) {
         console.log('setVariableValue key value', name, value);
-        this.emit('VARIABLE_CHANGED', { name, value });
+        this.emit(VARIABLE_CHANGED, { name, value });
         logger.info(`Setting variable in story reasoner '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
         if(saveLocal) {
@@ -338,8 +338,8 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.on('error', errorCallback);
         subStoryReasoner.on('narrativeElementChanged', elementChangedCallback);
         subStoryReasoner.on('storyEnd', storyEndCallback);
-        subStoryReasoner.on('VARIABLE_CHANGED', (e) => {
-            this.emit('VARIABLE_CHANGED', e);
+        subStoryReasoner.on(VARIABLE_CHANGED, (event) => {
+            this.emit(VARIABLE_CHANGED, event);
         });
 
         this._subStoryReasoner = subStoryReasoner;

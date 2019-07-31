@@ -17,6 +17,9 @@ import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
+
+import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT} from './constants';
+
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
 
@@ -71,7 +74,7 @@ export default class Controller extends EventEmitter {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    checkLocalStorage(key) {
+    checkLocalStorage(key: stirng) {
         const resumeState = localStorage.getItem(key);
         if(resumeState && Object.keys(resumeState).length > 0) {
             return JSON.parse(resumeState);
@@ -131,7 +134,7 @@ export default class Controller extends EventEmitter {
 
                 reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
 
-                reasoner.on('VARIABLE_CHANGED', (e) => { this.emit('VARIABLE_CHANGED', e)});
+                reasoner.on(VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_CHANGED, e)});
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
@@ -360,6 +363,7 @@ export default class Controller extends EventEmitter {
             to: newNarrativeElement.name,
         };
         this._enhancedAnalytics(logData);
+        this.emit(CURRENT_NARRATIVE_ELEMENT, newNarrativeElement);
     }
 
     // try to get the narrative element object with the given id
@@ -680,8 +684,7 @@ export default class Controller extends EventEmitter {
             neId = this._currentNarrativeElement.id;
         }
         if (this._reasoner && neId) {
-            const subReasoner = this._reasoner
-                .getSubReasonerContainingNarrativeElement(neId);
+            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neId);
             if (subReasoner) {
                 return subReasoner.hasNextNode()
                     .then((links) => {
@@ -806,8 +809,12 @@ export default class Controller extends EventEmitter {
     // get an array of ids of the NarrativeElements that follow narrativeElement
     getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
         return this.getValidNextSteps(narrativeElement.id)
-            .then(nextNarrativeElementObjects =>
-                nextNarrativeElementObjects.map(neObj => neObj.ne.id));
+            .then((nextNarrativeElements) => {
+                if(nextNarrativeElements && nextNarrativeElements.length > 0) {
+                    this.emit(NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) });
+                }
+                return nextNarrativeElements.map(neObj => neObj.ne.id);;
+            });
     }
 
     // given the NE id, reason to find a representation

@@ -24,6 +24,8 @@ import './assets/images/no-asset.svg';
 // @flowignore
 import './assets/styles/player.scss';
 
+import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT} from './constants';
+
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
     analyticsLogger: (logdata) => {
@@ -48,6 +50,9 @@ module.exports = {
 
     BrowserUserAgent,
     BrowserCapabilities,
+    VARIABLE_CHANGED,
+    CURRENT_NARRATIVE_ELEMENT,
+    NEXT_ELEMENTS,
 
     init: (settings: Settings): ?Controller => {
         logger.info('StoryPlayer Version: ', Package.version);
