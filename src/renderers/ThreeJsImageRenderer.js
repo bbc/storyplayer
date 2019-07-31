@@ -22,7 +22,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     _duration: number;
 
-    _timeIntervals: { [key: string]: IntervalID };
+    _timedEvents: { [key: string]: Object };
 
     _disablePlayButton: Function;
 
@@ -56,7 +56,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this.renderImageElement();
         this._timeElapsed = 0;
         this._duration = Infinity;
-        this._timeIntervals = {};
+        this._timedEvents = {};
     }
 
     start() {
@@ -92,6 +92,13 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
             }
+            Object.keys(this._timedEvents).forEach((timeEventId) => {
+                const { time, callback } = this._timedEvents[timeEventId];
+                if (this._timeElapsed >= time){
+                    delete this._timedEvents[timeEventId];
+                    callback();
+                }
+            });
         }, TIMER_INTERVAL);
     }
 
@@ -111,14 +118,22 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._startTimer();
     }
 
+    addTimeEventListener(listenerId: string, time: number, callback: Function) {
+        this._timedEvents[listenerId] = { time, callback };
+    }
+
+    deleteTimeEventListener(listenerId: string) {
+        if (listenerId in this._timedEvents) {
+            delete this._timedEvents[listenerId];
+        }
+    }
+
     end() {
         super.end();
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
-        Object.keys(this._timeIntervals).forEach((listenerId) => {
-            clearInterval(this._timeIntervals[listenerId]);
-        });
+        this._timedEvents = {};
         this._enablePlayButton();
         this._enableScrubBar();
     }
