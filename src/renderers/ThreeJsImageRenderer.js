@@ -18,7 +18,11 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     _imageTimer: ?IntervalID;
 
-    _timeRemaining: number;
+    _timeElapsed: number;
+
+    _duration: number;
+
+    _timeIntervals: { [key: string]: IntervalID };
 
     _disablePlayButton: Function;
 
@@ -50,6 +54,9 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
         this.renderImageElement();
+        this._timeElapsed = 0;
+        this._duration = Infinity;
+        this._timeIntervals = {};
     }
 
     start() {
@@ -59,28 +66,28 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             this._showImage();
         }
         if (this._representation.duration && this._representation.duration > 0){
-            this._timeRemaining = this._representation.duration * 1000;
+            this._duration = this._representation.duration;
+            this._timeElapsed = 0;
             // eslint-disable-next-line max-len
-            logger.info(`Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
-            this._startTimer();
-        } else if (this._representation.duration && this._representation.duration === 0) {
+            logger.info(`360 Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
+        }
+        if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
+        } else {
+            this._startTimer();
         }
         this._disableScrubBar();
         this._disablePlayButton();
     }
 
     pause() {
-        // if timed image, pause timeout
-        if (this._timeRemaining > 0) {
-            clearInterval(this._imageTimer);
-        }
+        clearInterval(this._imageTimer);
     }
 
     _startTimer() {
         this._imageTimer = setInterval(() => {
-            this._timeRemaining -= TIMER_INTERVAL;
-            if (this._timeRemaining <= 0) {
+            this._timeElapsed += TIMER_INTERVAL/1000;
+            if (this._timeElapsed >= this._duration) {
                 // eslint-disable-next-line max-len
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
@@ -92,8 +99,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         if (this._representation.duration && this._representation.duration > 0) {
             const timeObject = {
                 timeBased: true,
-                currentTime: this._representation.duration,
-                remainingTime: this._timeRemaining,
+                currentTime: this._timeElapsed,
+                remainingTime: this._duration - this._timeElapsed,
             };
             return timeObject;
         }
@@ -101,10 +108,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     play(){
-        // if timed image, resume timeout
-        if (this._timeRemaining > 0){
-            this._startTimer();
-        }
+        this._startTimer();
     }
 
     end() {
@@ -112,6 +116,9 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
+        Object.keys(this._timeIntervals).forEach((listenerId) => {
+            clearInterval(this._timeIntervals[listenerId]);
+        });
         this._enablePlayButton();
         this._enableScrubBar();
     }
