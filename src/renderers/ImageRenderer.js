@@ -28,7 +28,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _duration: number;
 
-    _timeIntervals: { [key: string]: IntervalID };
+    _timeIntervals: { [key: string]: Object };
 
     constructor(
         representation: Representation,
@@ -94,6 +94,13 @@ export default class ImageRenderer extends BaseRenderer {
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
             }
+            Object.keys(this._timeIntervals).forEach((timeEventId) => {
+                const { time, callback } = this._timeIntervals[timeEventId];
+                if (this._timeElapsed >= time){
+                    delete this._timeIntervals[timeEventId];
+                    callback();
+                }
+            });
         }, TIMER_INTERVAL);
     }
 
@@ -110,23 +117,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timeEventListeners[listenerId] = callback;
-        if (time > this._duration) {
-            logger.warn('Tried to adding time event listener to image after its completion time');
-            return;
-        }
-        this._timeIntervals[listenerId] = setInterval(() => {
-            if (time > 0 && this._timeElapsed >= time) {
-                if (listenerId in this._timeEventListeners) {
-                    delete this._timeEventListeners[listenerId];
-                    callback();
-                }
-                if (listenerId in this._timeIntervals) {
-                    clearInterval(this._timeIntervals[listenerId]);
-                    delete this._timeIntervals[listenerId];
-                }
-            }
-        }, 50);
+        this._timeIntervals[listenerId] = { time, callback };
     }
 
     deleteTimeEventListener(listenerId: string) {
@@ -134,7 +125,7 @@ export default class ImageRenderer extends BaseRenderer {
             delete this._timeEventListeners[listenerId];
         }
         if (listenerId in this._timeIntervals) {
-            clearInterval(this._timeIntervals[listenerId]);
+            // clearInterval(this._timeIntervals[listenerId]);
             delete this._timeIntervals[listenerId];
         }
     }
