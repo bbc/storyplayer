@@ -28,7 +28,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _duration: number;
 
-    _timeIntervals: { [key: string]: Object };
+    _timedEvents: { [key: string]: Object };
 
     constructor(
         representation: Representation,
@@ -53,7 +53,7 @@ export default class ImageRenderer extends BaseRenderer {
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
         this._timeElapsed = 0;
         this._duration = Infinity;
-        this._timeIntervals = {};
+        this._timedEvents = {};
     }
 
     willStart() {
@@ -94,10 +94,10 @@ export default class ImageRenderer extends BaseRenderer {
                 logger.info(`Image representation ${this._representation.id} completed timeout`);
                 this.complete();
             }
-            Object.keys(this._timeIntervals).forEach((timeEventId) => {
-                const { time, callback } = this._timeIntervals[timeEventId];
+            Object.keys(this._timedEvents).forEach((timeEventId) => {
+                const { time, callback } = this._timedEvents[timeEventId];
                 if (this._timeElapsed >= time){
-                    delete this._timeIntervals[timeEventId];
+                    delete this._timedEvents[timeEventId];
                     callback();
                 }
             });
@@ -117,16 +117,12 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timeIntervals[listenerId] = { time, callback };
+        this._timedEvents[listenerId] = { time, callback };
     }
 
     deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timeEventListeners) {
-            delete this._timeEventListeners[listenerId];
-        }
-        if (listenerId in this._timeIntervals) {
-            // clearInterval(this._timeIntervals[listenerId]);
-            delete this._timeIntervals[listenerId];
+        if (listenerId in this._timedEvents) {
+            delete this._timedEvents[listenerId];
         }
     }
 
@@ -148,10 +144,7 @@ export default class ImageRenderer extends BaseRenderer {
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
-        Object.keys(this._timeIntervals).forEach((listenerId) => {
-            clearInterval(this._timeIntervals[listenerId]);
-        });
-        this._timeIntervals = {};
+        this._timedEvents = {};
         this._enablePlayButton();
         this._enableScrubBar();
     }
