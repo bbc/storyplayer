@@ -2,6 +2,7 @@
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
+import Controller from './Controller';
 import type { AssetUrls } from './romper';
 import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
@@ -272,6 +273,10 @@ class Player extends EventEmitter {
 
     _errorLayer: HTMLDivElement;
 
+    _continueModalLayer: HTMLDivElement;
+
+    _continueModalContent: HTMLDivElement;
+
     backgroundTarget: HTMLDivElement;
 
     mediaTarget: HTMLDivElement;
@@ -382,8 +387,13 @@ class Player extends EventEmitter {
 
     _resumeState: ?Object;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, resumeState: Object) {
+    _addContinueModal: Function;
+
+    _controller: Controller;
+
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, resumeState: Object, controller: Controller) {
         super();
+        this._controller = controller;
         this._resumeState = resumeState;
         this._numChoices = 0;
         this._choiceIconSet = {};
@@ -434,10 +444,18 @@ class Player extends EventEmitter {
         this._errorLayer.classList.add('romper-error');
         this._errorLayer.classList.add('hide');
 
+        this._continueModalLayer = document.createElement('div');
+        this._continueModalLayer.classList.add('continue-modal');
+
+        this._continueModalContent = document.createElement('div');
+        this._continueModalContent.classList.add('continue-modal-content');
+        this._continueModalLayer.appendChild(this._continueModalContent);
+        
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
         this._player.appendChild(this._errorLayer);
+        this._guiLayer.appendChild(this._continueModalLayer);
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
@@ -719,6 +737,7 @@ class Player extends EventEmitter {
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
+        this._addContinueModal = this._addContinueModal.bind(this);
     }
 
     addDog(src: string, position: Object) {
@@ -733,6 +752,75 @@ class Player extends EventEmitter {
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
+    }
+
+    _addContinueModal(options: Object) {
+        console.log('adding continue modal');
+        const _startExperienceButton = document.createElement('button');
+        _startExperienceButton.classList.add(options.button_class);
+        _startExperienceButton.classList.add('modal-inner-content');
+        // _startExperienceButton.classList.add();
+        _startExperienceButton.setAttribute('title', 'Play and accept terms');
+        _startExperienceButton.setAttribute('aria-label', 'Start Button');
+
+        const startButtonIconHolder = document.createElement('div');
+        _startExperienceButton.appendChild(startButtonIconHolder);
+
+        startButtonIconHolder.classList.add('romper-start-button-icon');
+        const startButtonIconDiv = document.createElement('div');
+        startButtonIconDiv.classList.add('romper-button-icon-div');
+        startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+        startButtonIconHolder.appendChild(startButtonIconDiv);
+
+        const continueModalInnerContent = document.createElement('div');
+        continueModalInnerContent.classList.add('modal-inner-content');
+        
+        const continueModalMessage = document.createElement('div');
+        continueModalMessage.innerHTML = 'you have a previous session, click continue to resume';
+        
+        continueModalInnerContent.appendChild(continueModalMessage);
+
+        const cancelButton = document.createElement('button');
+        cancelButton.classList.add('cancel-button');
+        cancelButton.innerHTML = 'X';
+    
+        const cancelButtonHandler = () => {
+            console.log('cancelling');
+            this._continueModalLayer.classList.add('hide');
+            this._continueModalLayer.classList.remove('show');
+            this._continueModalContent.classList.add('hide');
+            this._continueModalContent.classList.remove('show');
+        };
+        cancelButton.onclick = cancelButtonHandler;
+        cancelButton.addEventListener(
+            'touchend',
+            cancelButtonHandler,
+        );
+
+        const startExperienceButtonHandler = () => {
+            console.log('this._resumeState', this._resumeState);
+            this._controller.setVariables(this._resumeState);
+            setTimeout(() => {
+                this.removeExperienceStartButtonAndImage();
+                this._enableUserInteraction();
+                this._narrativeElementTransport.classList.remove('romper-inactive');
+                this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+                cancelButtonHandler();
+            }, 3000)
+            
+        };
+        _startExperienceButton.onclick = startExperienceButtonHandler;
+        _startExperienceButton.addEventListener(
+            'touchend',
+            startExperienceButtonHandler,
+        );
+
+        this._continueModalContent.appendChild(cancelButton);
+        this._continueModalContent.appendChild(continueModalInnerContent);
+        this._continueModalContent.appendChild(_startExperienceButton);
+
+        this._continueModalLayer.classList.add('show');
+        this._continueModalContent.classList.add('show');
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -784,9 +872,6 @@ class Player extends EventEmitter {
             if (this._RomperButtonsShowing) this._hideRomperButtons();
         } else if (!this._RomperButtonsShowing) {
             this._activateRomperButtons(event);
-        }
-        if(event.code === 32) {
-            this._playPauseButtonClicked();
         }
     }
 
@@ -866,22 +951,7 @@ class Player extends EventEmitter {
         startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
         startButtonIconHolder.appendChild(startButtonIconDiv);
 
-        if(this._resumeState) {
-            logger.info('this._resumeState', this._resumeState);
-            const continueButton = document.createElement('button')
-            continueButton.innerHTML = 'PLEASE CONTINUE';
-            continueButton.classList.add(options.button_class);
-            continueButton.setAttribute('title', 'Play and accept terms');
-            continueButton.setAttribute('aria-label', 'Start Button');
-            const continueButtonIconHolder = document.createElement('div');
-            this._startExperienceButton.appendChild(continueButtonIconHolder);
-            startButtonIconHolder.classList.add('romper-start-button-icon');
-            const continueButtonIconDiv = document.createElement('div');
-            continueButtonIconDiv.classList.add('romper-button-icon-div');
-            continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
-            startButtonIconHolder.appendChild(continueButtonIconDiv);
-        }
-
+    
         this._startExperienceImage = document.createElement('img');
         this._startExperienceImage.className = 'romper-start-image';
         this._startExperienceImage.src = options.background_art;
@@ -897,7 +967,13 @@ class Player extends EventEmitter {
             }
         }
 
-        this._guiLayer.appendChild(this._startExperienceButton);
+        if(this._resumeState) {
+            this._addContinueModal(options);
+        } 
+        // else {
+            this._guiLayer.appendChild(this._startExperienceButton);
+        // }
+
         this._mediaLayer.appendChild(this._startExperienceImage);
         this._mediaLayer.classList.add('romper-prestart');
 

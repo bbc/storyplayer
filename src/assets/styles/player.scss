@@ -749,7 +749,7 @@ $romper-hover-text-size: 1.53em;
 
 .romper-player > .romper-gui {
 
-  >.romper-start-button {
+  .romper-start-button {
     bottom: 50%;
     display: grid;
     height: 170px;
@@ -1266,4 +1266,62 @@ $romper-hover-text-size: 1.53em;
   -webkit-touch-callout: none; // iOS Safari
   -webkit-user-select: none; // Safari
   user-select: none; // Non-prefixed version, currently
+}
+
+.continue-modal {
+  background-color: rgba(0, 0, 0, 0.4);
+  display: none;
+  position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+
+  .continue-modal-content {
+    background-color: rgba(0, 0, 0, 0.9);
+    display: none;
+    max-height: calc(100% - 100px);
+    padding: 4em;
+    min-height: 30%;
+    position: fixed;
+      top: 40%;
+      left: 50%;
+      right: auto;
+      bottom: auto;
+    transform: translate(-50%, -50%);
+
+    &.show{
+      display: block;
+      z-index: 1010;
+    }
+    &.hide {
+      display: none;
+      height: 0%;
+      width: 0%;
+    }
+  }
+  &.show{
+    display: block;
+    z-index: 1010;
+  }
+  &.hide {
+    display: none;
+    height: 0%;
+    width: 0%;
+  }
+
+  
+
+  .modal-inner-content {
+  }
+
+}
+
+.cancel-button {
+  color: white;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: translate(-50%, 0%);
 }

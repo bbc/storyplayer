@@ -100,7 +100,7 @@ export default class RenderManager extends EventEmitter {
         this._handleOrientationChange = this._handleOrientationChange.bind(this)
         this._privacyNotice = privacyNotice;
 
-        this._player = new Player(this._target, this._analytics, this._assetUrls, resumeState);
+        this._player = new Player(this._target, this._analytics, this._assetUrls, resumeState, this._controller);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
