@@ -489,8 +489,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     );
 
                     // generic error
+                    // if the error status code is 404 - we can't find the segement then ignore the error as we shouldn't ever get in this situation.
                     rendererPlayoutObj._shaka.addEventListener(
-                        'error', this._player._showErrorLayer
+                        'error', (e) => {
+                            if(e.detail && e.detail.data) {
+                                if(e.detail.data[1] !== 404) {
+                                    this._player._showErrorLayer();
+                                } 
+                            }  
+                        }
                     );
 
                     // resuming all good
