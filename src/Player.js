@@ -780,9 +780,6 @@ class Player extends EventEmitter {
         } else if (!this._RomperButtonsShowing) {
             this._activateRomperButtons(event);
         }
-        if(event.code === 32) {
-            this._playPauseButtonClicked();
-        }
     }
 
     _activateRomperButtons(event: Object) {
