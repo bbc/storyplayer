@@ -17,6 +17,8 @@ const PLAYOUT_ENGINES = {
     IOS_PLAYOUT: 'ios',
 };
 
+const SLIDER_CLASS = 'slider-input';
+
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'ICON_CLICKED',
@@ -247,6 +249,13 @@ function createOverlay(name: string, logFunction: Function) {
         getCount,
     };
 }
+
+const preventEventDefault = (event: Event) => {
+    // if the event doesn't come from the scrub bar we suppress the touch moves
+    if(!event.target.classList.includes(SLIDER_CLASS)) {
+        event.preventDefault();
+    }
+};
 
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
@@ -510,6 +519,7 @@ class Player extends EventEmitter {
         this._scrubBar.type = 'range';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
+        this._scrubBar.classList.add(SLIDER_CLASS);
         this._buttons.appendChild(this._scrubBar);
 
         this._mediaTransport = document.createElement('div');
@@ -614,6 +624,7 @@ class Player extends EventEmitter {
         );
 
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
+
         this._playPauseButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._playPauseButtonClicked.bind(this)),
@@ -1752,6 +1763,10 @@ class Player extends EventEmitter {
         }
 
         this._inFullScreen = false;
+        // if we are an iphone capture these events;
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.addEventListener('touchmove', preventEventDefault);
+        }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('fullscreenchange', this._handleFullScreenChange);
@@ -1792,6 +1807,9 @@ class Player extends EventEmitter {
         }
         scrollToTop();
 
+        if(BrowserUserAgent.iOS()) {
+            this._playerParent.removeEventListener('touchmove', preventEventDefault);
+        }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
