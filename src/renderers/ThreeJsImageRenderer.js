@@ -142,7 +142,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         const loader = new THREE.TextureLoader();
         loader.setCrossOrigin('');
         loader.load(this._imageElement.src);
-        const texture = new THREE.TextureLoader().load(this._imageElement.src);
+        const texture = loader.load(this._imageElement.src);
         const material = new THREE.MeshBasicMaterial({ map: texture });
 
         const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
