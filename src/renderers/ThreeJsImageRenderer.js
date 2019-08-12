@@ -14,8 +14,6 @@ const TIMER_INTERVAL = 100;
 export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _fetchMedia: MediaFetcher;
 
-    _imageElement: HTMLImageElement;
-
     _imageTimer: ?IntervalID;
 
     _timeElapsed: number;
@@ -31,6 +29,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _enablePlayButton: Function;
 
     _enableScrubBar: Function;
+
+    _imageMesh: THREE.Mesh;
 
     constructor(
         representation: Representation,
@@ -139,19 +139,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     _showImage() {
-        const loader = new THREE.TextureLoader();
-        loader.setCrossOrigin('');
-        loader.load(this._imageElement.src);
-        const texture = loader.load(this._imageElement.src);
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-
-        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
-        // invert the geometry on the x-axis so that all of the faces point inward
-        geometry.scale(-1, 1, 1);
-
-        const mesh = new THREE.Mesh(geometry, material);
-        this._scene.add(mesh);
-
+        this._scene.add(this._imageMesh);
         this._animate();
     }
 
@@ -174,9 +162,16 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     populateImageElement(mediaUrl: string) {
-        this._imageElement = document.createElement('img');
-        this._imageElement.src = mediaUrl;
-        this._imageElement.crossOrigin = 'Anonymous';
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('');
+        const texture = loader.load(mediaUrl);
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+
+        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+
+        this._imageMesh = new THREE.Mesh(geometry, material);
         this._rendered = true;
         if(this._started) {
             this._showImage();
