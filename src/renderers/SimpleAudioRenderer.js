@@ -33,6 +33,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _lastSetTime: number
 
+    _inTime: number;
+
+    _outTime: number;
+
     _endedEventListener: Function;
 
     _hasEnded: boolean;
@@ -60,6 +64,9 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this.renderAudioElement();
 
         this._lastSetTime = 0;
+
+        this._inTime = 0;
+        this._outTime = -1;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_A,
@@ -122,6 +129,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._fetchMedia(fg.assets.audio_src)
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl);
+                                this._playoutEngine.setTimings(this._rendererId, {
+                                    inTime: this._inTime,
+                                    outTime: this._outTime,
+                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'audio not found');
