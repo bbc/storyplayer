@@ -496,15 +496,19 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 if(e.detail.code === 1001 && e.detail.data[1] === 404) {
                                     logger.info('404 error failed to fetch media')
                                     return;
-                                } 
+                                }
                                 this._player._showErrorLayer();
-                            }  
+                            }
                         }
                     );
 
                     // resuming all good
-                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeErrorLayer);
-                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'adaptation', this._player._removeErrorLayer
+                    );
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'adaptation', this._player._removeBufferingLayer
+                    );
 
 
                     if(this._debugPlayout) {
