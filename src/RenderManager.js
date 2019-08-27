@@ -556,11 +556,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     _showBackIcon() {
-        this._controller.getIdOfPreviousNode()
-            .then((id) => {
-                const showBack = id !== null;
-                this._player.setBackAvailable(showBack);
-            });
+        this._player.setBackAvailable(true);
     }
 
     // show next button, or icons if choice
