@@ -260,7 +260,7 @@ export default class Controller extends EventEmitter {
             this._fetchers.representationCollectionFetcher,
             this._storyReasonerFactory,
         );
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // handle our StoryPathWalker reaching the end of its travels:
             // get spw to resolve the list of presentations into representations
             // then (if story is linear) create and start a StoryIconRenderer
@@ -272,8 +272,12 @@ export default class Controller extends EventEmitter {
                     .then(() => {
                         resolve();
                     })
-                    .catch(() => {
-                        reject();
+                    .catch((err) => {
+                        // If we end up here, most likely due to there being representations
+                        // with false conditions on our linear graph
+                        logger.warn(err);
+                        this._linearStoryPath = [];
+                        resolve();
                     });
             };
 
@@ -728,9 +732,9 @@ export default class Controller extends EventEmitter {
                                             // eslint-disable-next-line max-len
                                             this._representationReasoner(representationCollection))
                                         .then(() => narrativeEl)
-                                        .catch(() => {
+                                        .catch((err) => {
                                             // eslint-disable-next-line max-len
-                                            logger.warn(`No representations are currently valid for Narrative Element ${narrativeEl.id}`);
+                                            logger.warn(`No representations are currently valid for Narrative Element ${narrativeEl.id}`, err);
                                             return null;
                                         });
                                 });

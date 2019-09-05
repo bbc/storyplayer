@@ -142,7 +142,7 @@ export default class StoryPathWalker extends EventEmitter {
                 const fullPathItem = convertPartialToFull(this._pathmap[i], repres);
                 this._storyItemMap.push(fullPathItem);
             });
-            return Promise.resolve(this._storyItemMap);
+            return this._storyItemMap;
         });
     }
 

@@ -117,6 +117,7 @@ export default class BaseRenderer extends EventEmitter {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': this._applyShowChoiceBehaviour,
         };
+
         this._behaviourElements = [];
 
         this._timeEventListeners = {};
@@ -168,7 +169,8 @@ export default class BaseRenderer extends EventEmitter {
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
-        this._runDuringBehaviours();
+        this._removeInvalidDuringBehaviours()
+            .then(() => this._runDuringBehaviours())
     }
 
     end() {
@@ -403,6 +405,20 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
+    _removeInvalidDuringBehaviours() {
+        return this._controller.getValidNextSteps()
+            .then((narrativeElementObjects) => {
+                if(narrativeElementObjects.length === 0) {
+                    logger.warn("Removing showlinkchoices behaviour due to no valid links");
+                    delete this._behaviourRendererMap[
+                        'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
+                    ];
+                }
+            })
+            // If this fails then we don't care
+            .catch(() => {})
+    }
+
     _runDuringBehaviours() {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             // for each behaviour
@@ -412,44 +428,50 @@ export default class BaseRenderer extends EventEmitter {
                 const behaviourObject = behaviour.behaviour;
                 // get function to handle behaviour
                 const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
-                if (startTime === 0) {
-                    behaviourRunner(behaviourObject, () => {
-                        logger.info(`started during behaviour ${behaviourObject.type}`);
-                    });
-                } else {
-                    // set up to run function at set time
-                    this.addTimeEventListener(behaviourObject.type, startTime, () =>
+
+                if(behaviourRunner) {
+                    if (startTime === 0) {
                         behaviourRunner(behaviourObject, () => {
                             logger.info(`started during behaviour ${behaviourObject.type}`);
-                        }));
+                        });
+                    } else {
+                        // set up to run function at set time
+                        this.addTimeEventListener(behaviourObject.type, startTime, () =>
+                            behaviourRunner(behaviourObject, () => {
+                                logger.info(`started during behaviour ${behaviourObject.type}`);
+                            }));
 
-                    // if we have choices, hide the controls before they appear
-                    if (behaviourObject.type
-                        === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
-                        && behaviourObject.hasOwnProperty('disable_controls')
-                        && behaviourObject.disable_controls) {
-                        const hideControls = () => {
-                            this._player.disableControls();
-                            this._player._hideRomperButtons();
-                        };
-                        if (startTime > 1) {
-                            this.addTimeEventListener(
-                                'prechoice-control-hide',
-                                startTime - 0.8,
-                                hideControls,
-                            );
-                        } else {
-                            hideControls();
+                        // if we have choices, hide the controls before they appear
+                        if (behaviourObject.type
+                            === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
+                            && behaviourObject.hasOwnProperty('disable_controls')
+                            && behaviourObject.disable_controls) {
+                            const hideControls = () => {
+                                this._player.disableControls();
+                                this._player._hideRomperButtons();
+                            };
+                            if (startTime > 1) {
+                                this.addTimeEventListener(
+                                    'prechoice-control-hide',
+                                    startTime - 0.8,
+                                    hideControls,
+                                );
+                            } else {
+                                hideControls();
+                            }
                         }
                     }
-                }
-                // if there is a duration
-                if (behaviour.duration) {
-                    const endTime = startTime + behaviour.duration;
-                    this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => {
-                        // tidy up...
-                        logger.error('StoryPlayer does not yet support duration on behaviours');
-                    });
+                    // if there is a duration
+                    if (behaviour.duration) {
+                        const endTime = startTime + behaviour.duration;
+                        this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => {
+                            // tidy up...
+                            logger.error('StoryPlayer does not yet support duration on behaviours');
+                        });
+                    }
+                } else {
+                    logger.warn(`${this.constructor.name} does not support ` +
+                        `${behaviourObject.type} - ignoring`)
                 }
             });
         }
@@ -481,6 +503,12 @@ export default class BaseRenderer extends EventEmitter {
 
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
+            if(narrativeElementObjects.length === 0) {
+                return Promise.reject(new Error(
+                    "Shouldn't be possible to get here as "
+                    + "_removeInvalidDuringBehaviours should remove this rep"
+                ));
+            }
             // build icons
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
             const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);

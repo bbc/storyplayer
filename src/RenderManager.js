@@ -257,7 +257,7 @@ export default class RenderManager extends EventEmitter {
                             if (fg.assets.image_src) {
                                 return this._fetchers.mediaFetcher(fg.assets.image_src);
                             }
-                            return Promise.reject();
+                            return Promise.reject(new Error("Failed to fetch AC with image_src"));
                         })
                         .then(mediaurl => this._player.addDog(mediaurl, dog.position))
                         .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));

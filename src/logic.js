@@ -66,9 +66,11 @@ export default function evaluateConditions<T>(
     candidates.forEach(candidate =>
         JsonLogic.uses_data(candidate.condition).forEach(cv => interestingVars.push(cv)));
 
-    return Promise.all(interestingVars.map(interestingVar => dataResolver.get(interestingVar)
-        .catch(() => null)
-        .then(value => ({ key: interestingVar, value }))))
+    return Promise.all(interestingVars.map(interestingVar =>
+        dataResolver.get(interestingVar)
+            .catch(() => null)
+            .then(value => ({ key: interestingVar, value })))
+    )
         .then(convertDotNotationToNestedObjects)
         .then((resolvedVars) => {
             const evaluatedCandidates = candidates
