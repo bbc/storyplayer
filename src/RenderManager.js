@@ -569,7 +569,10 @@ export default class RenderManager extends EventEmitter {
                     const hasNext = nextSteps.length > 0;
                     this._player.setNextAvailable(hasNext);
                 })
-                .catch(() => this._player.setNextAvailable(false));
+                .catch(() => {
+                    logger.error('Could not get valid next steps to set next button availability'); // eslint-disable-line max-len
+                    this._player.setNextAvailable(false);
+                });
         } else {
             this._player.setNextAvailable(false);
         }
