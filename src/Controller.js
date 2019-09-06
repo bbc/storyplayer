@@ -95,6 +95,9 @@ export default class Controller extends EventEmitter {
             || appendedData.name === AnalyticEvents.names.STORY_END) {
             // work out and save summary data
             this._segmentSummaryData.duration = Date.now() - this._segmentSummaryData.startTime;
+            if (!this._segmentSummaryData.chapter) {
+                this._segmentSummaryData.chapter = appendedData.from;
+            }
             const summaryData = {
                 type: AnalyticEvents.types.SEGMENT_COMPLETION,
                 name: appendedData.name,
@@ -107,6 +110,7 @@ export default class Controller extends EventEmitter {
             }
             this._segmentSummaryData = {
                 startTime: Date.now(),
+                chapter: appendedData.to,
             };
         }
 
