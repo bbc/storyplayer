@@ -46,6 +46,7 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
+        this._segmentSummaryData = {};
     }
 
     _enhancedAnalytics(logData: AnalyticsPayload): mixed {
@@ -67,7 +68,48 @@ export default class Controller extends EventEmitter {
             current_narrative_element: neId,
             current_representation: repId,
         };
+
+        this._handleSegmentSummaries(appendedData);
         this._analytics(appendedData);
+    }
+     
+    _handleSegmentSummaries(appendedData: Object) {
+        if (appendedData.type === AnalyticEvents.types.USER_ACTION) {
+            if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
+                this._segmentSummaryData[appendedData.name] += 1;
+            } else {
+                this._segmentSummaryData[appendedData.name] = 1;
+            }
+        }
+
+        if (appendedData.name === AnalyticEvents.names.START_BUTTON_CLICKED) {
+            // log start time and first ne
+            this._segmentSummaryData = {
+                startTime: Date.now(),
+                current_narrative_element: appendedData.current_narrative_element,
+                current_representation: appendedData.current_representation,
+            };
+        }
+
+        if (appendedData.name === AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE
+            || appendedData.name === AnalyticEvents.names.STORY_END) {
+            // work out and save summary data
+            this._segmentSummaryData.duration = Date.now() - this._segmentSummaryData.startTime;
+            const summaryData = {
+                type: AnalyticEvents.types.SEGMENT_COMPLETION,
+                name: appendedData.name,
+                data: this._segmentSummaryData,
+                current_narrative_element: appendedData.current_narrative_element,
+                current_representation: appendedData.current_representation,
+            };
+            if (summaryData.current_representation) {
+                this._analytics(summaryData);
+            }
+            this._segmentSummaryData = {
+                startTime: Date.now(),
+            };
+        }
+
     }
 
     restart(storyId: string, variableState?: Object = {}) {
@@ -888,4 +930,6 @@ export default class Controller extends EventEmitter {
     _storyIconRendererCreated: boolean;
 
     _allNarrativeElements: ?Array<NarrativeElement>;
+
+    _segmentSummaryData: Object;
 }

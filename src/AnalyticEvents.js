@@ -4,6 +4,7 @@ const types = [
     'STORY_NAVIGATION',
     'RENDERER_ACTION',
     'USER_ACTION',
+    'SEGMENT_COMPLETION',
 ];
 
 const names = [
