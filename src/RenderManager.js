@@ -564,7 +564,12 @@ export default class RenderManager extends EventEmitter {
     refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel) {
-            this._player.setNextAvailable(true);
+            this._controller.getValidNextSteps()
+                .then((nextSteps) => {
+                    const hasNext = nextSteps.length > 0;
+                    this._player.setNextAvailable(hasNext);
+                })
+                .catch(() => this._player.setNextAvailable(false));
         } else {
             this._player.setNextAvailable(false);
         }
