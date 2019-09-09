@@ -564,18 +564,18 @@ export default class RenderManager extends EventEmitter {
     refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel) {
-            this._controller.getValidNextSteps()
+            return this._controller.getValidNextSteps()
                 .then((nextSteps) => {
                     const hasNext = nextSteps.length > 0;
                     this._player.setNextAvailable(hasNext);
                 })
-                .catch(() => {
-                    logger.error('Could not get valid next steps to set next button availability'); // eslint-disable-line max-len
+                .catch((err) => {
+                    logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
                     this._player.setNextAvailable(false);
                 });
-        } else {
-            this._player.setNextAvailable(false);
         }
+        this._player.setNextAvailable(false);
+        return Promise.resolve();
     }
 
     // get a renderer for the given NE, and its Representation
