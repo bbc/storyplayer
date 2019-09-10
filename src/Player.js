@@ -716,6 +716,10 @@ class Player extends EventEmitter {
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
     }
 
+    setCurrentRenderer(renderer: BaseRenderer) {
+        this._currentRenderer = renderer;
+    }
+
     addDog(src: string, position: Object) {
         if (this._dogImage === undefined) {
             this._dogImage = document.createElement('img');
@@ -1492,7 +1496,7 @@ class Player extends EventEmitter {
     }
 
     enterStartBehaviourPhase(renderer: BaseRenderer) {
-        this._currentRenderer = renderer;
+        this.setCurrentRenderer(renderer);
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
 
