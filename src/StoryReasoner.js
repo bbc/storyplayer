@@ -110,47 +110,58 @@ export default class StoryReasoner extends EventEmitter {
      * @return {void}
      */
     start(initialState?: Object = {}, restarting) {
+        let variableState = initialState;
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
-        this._fetchVariablesFromStory();
         if(!restarting) {
-            this._applyInitialState(initialState);
+            variableState = this._fetchVariablesFromStory();
+            this._applyInitialState(variableState);
         } else {
-            this._applyResumeState(initialState);
+            this._applyResumeState(variableState);
         }
         this._chooseBeginning();
     }
 
-    // Get the variables defined in this story, and store the default values in our dataresolver
+    // Get the variables defined in this story
     _fetchVariablesFromStory() {
         console.log('_fetchVariablesFromStory')
         if (this._story.variables) {
             const variableTree = this._story.variables;
-            Object.keys(variableTree).forEach((storyVariableName) => {
+            const variables = Object.keys(variableTree).map((storyVariableName) => {
                 const storyVariableValue = variableTree[storyVariableName].default_value;
-                this.getVariableValue(storyVariableName)
+                return this.getVariableValue(storyVariableName)
                     .then((value) => {
                         console.log('value', value);
                         if (value === null) {
-                            this.setVariableAndSaveLocal(storyVariableName, storyVariableValue);
-                        } else {
-                            logger.info(`Variable ${storyVariableName} already has value ${value}`);
+                            return {
+                                name: storyVariableName,
+                                value: storyVariableValue
+                            };
                         }
+                        logger.info(`Variable ${storyVariableName} already has value ${value}`);
+                        return null;
                     });
-            });
-        } else {
-            logger.info('No variables in story');
-        }
+            }).filter(Boolean).reduce((variablesObject, variable) => {
+                // eslint-disable-next-line no-param-reassign
+                variablesObject[variable.name] = variable.value;
+                return variablesObject;
+            }, {});
+            return variables;
+        } 
+        logger.info('No variables in story');
+        return null;
     }
 
     _applyInitialState(initialState: Object) {
         console.log('_applyInitialState');
-        Object.keys(initialState).forEach((varName) => {
-            this.setVariableValue(varName, initialState[varName]);
-        });
+        if(initialState) {
+            Object.keys(initialState).forEach((varName) => {
+                this.setVariableValue(varName, initialState[varName]);
+            });
+        }
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
     }
