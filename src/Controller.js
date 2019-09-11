@@ -55,7 +55,7 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
-        this._segmentSummaryData = {};        
+        this._segmentSummaryData = {};
     }
 
     _enhancedAnalytics(logData: AnalyticsPayload): mixed {
@@ -967,6 +967,4 @@ export default class Controller extends EventEmitter {
     _allNarrativeElements: ?Array<NarrativeElement>;
 
     _segmentSummaryData: Object;
-
-    PLACEHOLDER_REPRESENTATION: Object;
 }
