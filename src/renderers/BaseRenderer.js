@@ -443,7 +443,7 @@ export default class BaseRenderer extends EventEmitter {
 
                         // if we have choices, hide the controls before they appear
                         if (behaviourObject.type
-                            === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
+                            === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
                             && behaviourObject.hasOwnProperty('disable_controls')
                             && behaviourObject.disable_controls) {
                             const hideControls = () => {
@@ -464,7 +464,7 @@ export default class BaseRenderer extends EventEmitter {
                     // if there is a duration
                     if (behaviour.duration) {
                         const endTime = startTime + behaviour.duration;
-                        this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => {
+                        this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => { // eslint-disable-line max-len
                             // tidy up...
                             logger.error('StoryPlayer does not yet support duration on behaviours');
                         });

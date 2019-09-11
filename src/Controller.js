@@ -20,6 +20,15 @@ import { InternalVariableNames } from './InternalVariables';
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
 
+export const PLACEHOLDER_REPRESENTATION = {
+    object_class: 'REPRESENTATION',
+    version: '0:0',
+    tags: {},
+    name: 'Blank representation',
+    representation_type: 'urn:x-object-based-media:representation-types:placeholder/v1.0',
+    asset_collections: {}
+};
+
 export default class Controller extends EventEmitter {
     constructor(
         target: HTMLElement,
@@ -46,7 +55,7 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
-        this._segmentSummaryData = {};
+        this._segmentSummaryData = {};        
     }
 
     _enhancedAnalytics(logData: AnalyticsPayload): mixed {
@@ -774,9 +783,21 @@ export default class Controller extends EventEmitter {
                                     return this._fetchers
                                         .representationCollectionFetcher(narrativeEl.ne.body
                                             .representation_collection_target_id)
-                                        .then(representationCollection =>
-                                            // eslint-disable-next-line max-len
-                                            this._representationReasoner(representationCollection))
+                                        .then((representationCollection) => {
+                                            if (representationCollection.representations.length > 0) { // eslint-disable-line max-len
+                                                // if there are reps, reason over them
+                                                return this._representationReasoner(representationCollection); // eslint-disable-line max-len
+                                            }
+                                            // if empty - need to render description
+                                            logger.warn('Found NE with no representations - render description'); // eslint-disable-line max-len
+                                            // need to render description only as placeholder
+                                            const dummyRep = {
+                                                ...PLACEHOLDER_REPRESENTATION,
+                                                description: narrativeEl.ne.description,
+                                                id: narrativeEl.ne.id,
+                                            };
+                                            return Promise.resolve(dummyRep);
+                                        })
                                         .then(() => narrativeEl)
                                         .catch((err) => {
                                             // eslint-disable-next-line max-len
@@ -851,8 +872,18 @@ export default class Controller extends EventEmitter {
                     return this._fetchers
                         .representationCollectionFetcher(narrativeElement.body
                             .representation_collection_target_id)
-                        .then(representationCollection =>
-                            this._representationReasoner(representationCollection));
+                        .then((representationCollection) => {
+                            if (representationCollection.representations.length > 0) {
+                                return this._representationReasoner(representationCollection);
+                            }
+                            // need to render description only as placeholder
+                            const dummyRep = {
+                                ...PLACEHOLDER_REPRESENTATION,
+                                description: narrativeElement.description,
+                                id: narrativeElement.id,
+                            };
+                            return Promise.resolve(dummyRep);
+                        });
                 } if (this._reasoner
                     && narrativeElement
                     && narrativeElement.body.story_target_id) {
@@ -936,4 +967,6 @@ export default class Controller extends EventEmitter {
     _allNarrativeElements: ?Array<NarrativeElement>;
 
     _segmentSummaryData: Object;
+
+    PLACEHOLDER_REPRESENTATION: Object;
 }

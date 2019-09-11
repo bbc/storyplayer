@@ -13,7 +13,7 @@ import StoryIconRenderer from './renderers/StoryIconRenderer';
 import SwitchableRenderer from './renderers/SwitchableRenderer';
 import BackgroundRendererFactory from './renderers/BackgroundRendererFactory';
 import BackgroundRenderer from './renderers/BackgroundRenderer';
-import Controller from './Controller';
+import Controller, { PLACEHOLDER_REPRESENTATION } from './Controller';
 import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
@@ -296,8 +296,18 @@ export default class RenderManager extends EventEmitter {
         if (narrativeElement.body.representation_collection_target_id) {
             // eslint-disable-next-line max-len
             return this._fetchers.representationCollectionFetcher(narrativeElement.body.representation_collection_target_id)
-                .then(representationCollection =>
-                    this._representationReasoner(representationCollection))
+                .then((representationCollection) => {
+                    if (representationCollection.representations.length > 0) {
+                        return this._representationReasoner(representationCollection);
+                    }
+                    // need to render description only as placeholder
+                    const dummyRep = {
+                        ...PLACEHOLDER_REPRESENTATION,
+                        description: narrativeElement.description,
+                        id: narrativeElement.id,
+                    };
+                    return Promise.resolve(dummyRep);
+                })
                 .then((representation) => {
                     if (this._currentNarrativeElement
                             && this._currentNarrativeElement.id === narrativeElement.id
@@ -642,8 +652,18 @@ export default class RenderManager extends EventEmitter {
                             return this._fetchers
                                 // eslint-disable-next-line max-len
                                 .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                                .then(representationCollection =>
-                                    this._representationReasoner(representationCollection))
+                                .then((representationCollection) => {
+                                    if (representationCollection.representations.length > 0) {
+                                        return this._representationReasoner(representationCollection); // eslint-disable-line max-len
+                                    }
+                                    // need to render description only as placeholder
+                                    const dummyRep = {
+                                        ...PLACEHOLDER_REPRESENTATION,
+                                        description: narrativeElement.description,
+                                        id: narrativeElement.id,
+                                    };
+                                    return Promise.resolve(dummyRep);
+                                })
                                 .then((representation) => {
                                     // create the new Renderer
                                     if (this._upcomingRenderers[neid]) {

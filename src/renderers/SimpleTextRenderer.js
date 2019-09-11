@@ -51,6 +51,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._behaviourRendererMap = {};
     }
 
+    willStart() {
+        super.willStart();
+        this._player.disablePlayButton();
+        this._player.disableScrubBar();
+    }
+
     start() {
         super.start();
         this.renderTextElement();
@@ -64,13 +70,15 @@ export default class SimpleTextRenderer extends BaseRenderer {
         } catch (e) {
             logger.warn('could not remove text renderer element');
         }
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     renderTextElement() {
         this._textDiv = document.createElement('div');
         this._textDiv.classList.add('romper-text-element');
 
-        // set audio source
+        // set text source
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
@@ -86,6 +94,9 @@ export default class SimpleTextRenderer extends BaseRenderer {
                         logger.warn('No text content found');
                     }
                 });
+        } else if (this._representation.description) {
+            this.populateTextElement(this._representation.description);
+            logger.warn('Text Renderer has no asset collection - rendering description');
         }
     }
 
