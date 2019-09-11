@@ -181,6 +181,12 @@ export default class StoryPathWalker extends EventEmitter {
                     stories: parentStories,
                     ne: narrativeElement,
                 };
+                const previousVisits = path.find(pi => pi.ne.id === narrativeElement.id);
+                if (previousVisits !== undefined) {
+                    logger.info('Linearity checker returned to previously visited node; story not linear'); // eslint-disable-line max-len
+                    this._linear = false;
+                    this._walkComplete([]);
+                }
                 path.push(pathItem);
                 if (this._linear) linearReasoner.next();
             };
