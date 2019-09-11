@@ -73,15 +73,15 @@ export default class Controller extends EventEmitter {
     }
 
 
-    restart(storyId: string, initialState?: Object = {}) {
+    restart(storyId: string, initialState?: Object = {}, resatarting: boolean) {
         console.log('resatarting with', initialState);
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        this.start(storyId, initialState);
+        this.start(storyId, initialState, resatarting);
     }
 
-    start(storyId: string, initialState?: Object = {}) {
+    start(storyId: string, initialState?: Object = {}, restarting: boolean) {
         this._storyId = storyId;
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
@@ -129,7 +129,7 @@ export default class Controller extends EventEmitter {
                 reasoner.on(VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_CHANGED, e)});
 
                 this._reasoner = reasoner;
-                this._reasoner.start(initialState);
+                this._reasoner.start(initialState, restarting);
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
@@ -305,8 +305,7 @@ export default class Controller extends EventEmitter {
             history.pop();
             // set history variable directly in reasoner to avoid triggering lookahead
             if (this._reasoner) {
-                const saveLocal = true;
-                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history, saveLocal);
+                this._reasoner.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, history);
             }
 
             if (previous) {
@@ -321,6 +320,7 @@ export default class Controller extends EventEmitter {
     // repeat the current node in the current story, if we can
     //
     repeatStep() {
+        console.log('repeatStep')
         const current = this._currentNarrativeElement;
         if (this._reasoner && current) {
             this._handleNEChange(this._reasoner, current);
@@ -330,11 +330,12 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
-    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
+    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, restarting: boolean) {
+        console.log('_handleNEChange saving:', (this._reasoner && !restarting));
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
-        if (this._reasoner) {
+        if (this._reasoner && !restarting) {
             this._reasoner.appendToHistory(narrativeElement.id);
         }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
@@ -465,10 +466,10 @@ export default class Controller extends EventEmitter {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any, saveLocal: ?boolean) {
+    setVariableValue(name: string, value: any) {
         console.log('controller setVariableValue')
         if (this._reasoner) {
-            this._reasoner.setVariableValue(name, value, saveLocal);
+            this._reasoner.setVariableAndSaveLocal(name, value);
             logger.info(`Controller seting variable '${name}' to ${value}`);
             this._renderManager.refreshLookahead();
         } else {
@@ -590,7 +591,7 @@ export default class Controller extends EventEmitter {
         console.log('controller setVariables');
         Object.keys(variables).forEach((varName) => {
             if (this._reasoner) {
-                this._reasoner.setVariableValue(varName, variables[varName]);
+                this._reasoner.setVariableAndSaveLocal(varName, variables[varName]);
             } else {
                 logger.warn(`Controller cannot set variable '${varName}' - no reasoner`);
             }

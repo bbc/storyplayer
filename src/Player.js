@@ -809,7 +809,7 @@ class Player extends EventEmitter {
             if(experienceIdMeta ) {
                 const experienceId = experienceIdMeta.getAttribute('content');
                 if(experienceId) {
-                    this._controller.start(experienceId, resumeState);
+                    this._controller.restart(experienceId, resumeState, true);
                     this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
                    
                 };

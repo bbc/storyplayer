@@ -109,14 +109,18 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start(initialState?: Object = {}) {
+    start(initialState?: Object = {}, restarting) {
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
         this._fetchVariablesFromStory();
-        this._applyInitialState(initialState);
+        if(!restarting) {
+            this._applyInitialState(initialState);
+        } else {
+            this._applyResumeState(initialState);
+        }
         this._chooseBeginning();
     }
 
@@ -131,7 +135,7 @@ export default class StoryReasoner extends EventEmitter {
                     .then((value) => {
                         console.log('value', value);
                         if (value === null) {
-                            this.setVariableValue(storyVariableName, storyVariableValue);
+                            this.setVariableAndSaveLocal(storyVariableName, storyVariableValue);
                         } else {
                             logger.info(`Variable ${storyVariableName} already has value ${value}`);
                         }
@@ -146,6 +150,14 @@ export default class StoryReasoner extends EventEmitter {
         console.log('_applyInitialState');
         Object.keys(initialState).forEach((varName) => {
             this.setVariableValue(varName, initialState[varName]);
+        });
+        const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
+        internalVarSetter.setAllVariables();
+    }
+
+    _applyResumeState(resumeState: Object) {
+        Object.keys(resumeState).forEach((varName) => {
+            this.setVariableAndSaveLocal(varName, resumeState[varName]);
         });
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
@@ -286,6 +298,10 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
+    setVariableAndSaveLocal(name: string, value: any) {
+        this.setVariableValue(name, value, true);
+    }
+
     /**
      * Get the current value of a variable for the reasoner to use while reasoning
      *
@@ -311,8 +327,7 @@ export default class StoryReasoner extends EventEmitter {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
-                const saveLocal = true;
-                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList, saveLocal);
+                this.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, neList);
             });
     }
 
