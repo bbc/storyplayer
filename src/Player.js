@@ -42,6 +42,21 @@ const PlayerEvents = [
     return events;
 }, {});
 
+
+
+const checkExistingSession: ?Object = () => {
+    const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+    if (!experienceIdMeta) return false;
+    const experienceId = experienceIdMeta.getAttribute('content');
+    if (!experienceId) return false;
+    const dataString = localStorage.getItem(experienceId);
+    if (dataString && dataString.length > 0) {
+        const dataStore = JSON.parse(dataString);
+        return dataStore;
+    }
+    return false;
+};
+
 function scrollToTop() {
     window.setTimeout(() => {
         window.scrollTo(0, 0);
@@ -385,16 +400,14 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
-    _resumeState: ?Object;
 
     _addContinueModal: Function;
 
     _controller: Controller;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, resumeState: Object, controller: Controller) {
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, controller: Controller) {
         super();
         this._controller = controller;
-        this._resumeState = resumeState;
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
@@ -754,8 +767,8 @@ class Player extends EventEmitter {
         this._dogImage.style.height = `${height}%`;
     }
 
-    _addContinueModal(options: Object) {
-        console.log('adding continue modal');
+    _addContinueModal(options: Object, resumeState: Object) {
+        console.log('adding continue modal', resumeState);
         const _startExperienceButton = document.createElement('button');
         _startExperienceButton.classList.add(options.button_class);
         _startExperienceButton.classList.add('modal-inner-content');
@@ -784,13 +797,19 @@ class Player extends EventEmitter {
         cancelButton.classList.add('cancel-button');
         cancelButton.innerHTML = 'X';
     
-        const cancelButtonHandler = () => {
+        const cancelButtonHandler = (continuing: ?boolean) => {
             console.log('cancelling');
             this._continueModalLayer.classList.add('hide');
             this._continueModalLayer.classList.remove('show');
             this._continueModalContent.classList.add('hide');
             this._continueModalContent.classList.remove('show');
+            this._enableUserInteraction();
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            if(!continuing) {
+                this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
+            }
         };
+        
         cancelButton.onclick = cancelButtonHandler;
         cancelButton.addEventListener(
             'touchend',
@@ -798,16 +817,16 @@ class Player extends EventEmitter {
         );
 
         const startExperienceButtonHandler = () => {
-            console.log('this._resumeState', this._resumeState);
-            this._controller.setVariables(this._resumeState);
-            setTimeout(() => {
-                this.removeExperienceStartButtonAndImage();
-                this._enableUserInteraction();
-                this._narrativeElementTransport.classList.remove('romper-inactive');
-                this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-                cancelButtonHandler();
-            }, 3000)
-            
+            const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+            if(experienceIdMeta ) {
+                const experienceId = experienceIdMeta.getAttribute('content');
+                if(experienceId) {
+                    this._controller.start(experienceId, resumeState);
+                    this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+                   
+                };
+            };
+            cancelButtonHandler(true);
         };
         _startExperienceButton.onclick = startExperienceButtonHandler;
         _startExperienceButton.addEventListener(
@@ -966,13 +985,11 @@ class Player extends EventEmitter {
                 this._mediaLayer.appendChild(this._privacyDiv);
             }
         }
-
-        if(this._resumeState) {
-            this._addContinueModal(options);
+        const resumeState = checkExistingSession();
+        if(resumeState) {
+            this._addContinueModal(options, resumeState);
         } 
-        // else {
-            this._guiLayer.appendChild(this._startExperienceButton);
-        // }
+        this._guiLayer.appendChild(this._startExperienceButton);
 
         this._mediaLayer.appendChild(this._startExperienceImage);
         this._mediaLayer.classList.add('romper-prestart');
@@ -1023,6 +1040,7 @@ class Player extends EventEmitter {
             }
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
+            logger.warn(e);
             logger.warn('could not remove start button and/or image');
         }
     }

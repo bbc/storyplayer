@@ -17,16 +17,26 @@ export default function (data: Object): DataResolver {
      */
     const saveToStorage = (name: string, value: any) => {
         let dataStore = {};
-        const dataString = localStorage.getItem('DATA_STORE');
-        if(dataString && dataString.length > 0) {
-            dataStore = JSON.parse(dataString);
+        const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+        if(!experienceIdMeta ) return;
+        const experienceId = experienceIdMeta.getAttribute('content');
+        if(experienceId) {
+            const dataString = localStorage.getItem(experienceId);
+            if(dataString && dataString.length > 0) {
+                dataStore = JSON.parse(dataString);
+            }
+            dataStore[name] = value;
+            localStorage.setItem(experienceId, JSON.stringify(dataStore));
         }
-        dataStore[name] = value;
-        localStorage.setItem('DATA_STORE', JSON.stringify(dataStore));
     }
 
     const saveAllToStorage = () => {
-        localStorage.setItem('DATA_STORE', JSON.stringify(data));
+        const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+        if(!experienceIdMeta ) return;
+        const experienceId = experienceIdMeta.getAttribute('content')
+        if(experienceId) {
+            localStorage.setItem(experienceId, JSON.stringify(data));
+        }
     }
 
     /**

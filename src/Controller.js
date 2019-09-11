@@ -45,7 +45,6 @@ export default class Controller extends EventEmitter {
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
-        this.resumeState = this.checkLocalStorage('DATA_STORE');
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -73,16 +72,9 @@ export default class Controller extends EventEmitter {
         this._analytics(appendedData);
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    checkLocalStorage(key: stirng) {
-        const resumeState = localStorage.getItem(key);
-        if(resumeState && Object.keys(resumeState).length > 0) {
-            return JSON.parse(resumeState);
-        }
-        return null;
-    }
 
     restart(storyId: string, initialState?: Object = {}) {
+        console.log('resatarting with', initialState);
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
@@ -243,7 +235,6 @@ export default class Controller extends EventEmitter {
             this._enhancedAnalytics,
             this._assetUrls,
             this._privacyNotice,
-            this.resumeState,
         );
     }
 
@@ -909,4 +900,5 @@ export default class Controller extends EventEmitter {
     _storyIconRendererCreated: boolean;
 
     _allNarrativeElements: ?Array<NarrativeElement>;
+
 }
