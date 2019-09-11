@@ -264,6 +264,24 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
     }
 
+    setCurrentTime(time: number) {
+        const currentChoice = this._choiceRenderers[this._currentRendererIndex];
+        if (currentChoice) {
+            currentChoice.setCurrentTime(time);
+        } else {
+            logger.error('Setting time on switchable but no current choice');
+        }
+    }
+
+    getCurrentTime(): Object {
+        const currentChoice = this._choiceRenderers[this._currentRendererIndex];
+        if (currentChoice) {
+            return currentChoice.getCurrentTime();
+        }
+        logger.error('Getting time on switchable but no current choice');
+        return super.getCurrentTime();
+    }
+
     /**
      * Switch to the renderer for a given choice.  Has no effect if
      * index out of range
@@ -287,6 +305,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             }
             const newChoice = this._choiceRenderers[this._currentRendererIndex];
             if (newChoice) {
+                this._player.setCurrentRenderer(this);
                 this._logSwitch();
                 newChoice.switchTo();
                 if (this._representation.choices && this._representation.choices[choiceIndex]) {
