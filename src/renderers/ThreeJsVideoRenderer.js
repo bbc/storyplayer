@@ -109,6 +109,10 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         const mesh = new THREE.Mesh(geometry, material);
         this._scene.add(mesh);
 
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+
         this._playoutEngine.setPlayoutActive(this._rendererId);
         if(videoElement) {
             videoElement.style.visibility = 'hidden';
