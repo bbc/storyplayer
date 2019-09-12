@@ -19,6 +19,7 @@ import { InternalVariableNames } from './InternalVariables';
 
 
 import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT} from './constants';
+import SessionManager from './SessionManager';
 
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
@@ -36,6 +37,7 @@ export default class Controller extends EventEmitter {
         super();
         this._storyId = null;
         this._reasoner = null;
+        this._sessionManager = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._representationReasoner = representationReasoner;
@@ -86,6 +88,12 @@ export default class Controller extends EventEmitter {
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
         });
+
+        if(!this._sessionManager) {
+            this._createSessionManager(storyId);
+        }
+        window._sessionManager = this._sessionManager;
+        console.log('window._sessionManager',  this._sessionManager);
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -236,6 +244,10 @@ export default class Controller extends EventEmitter {
             this._assetUrls,
             this._privacyNotice,
         );
+    }
+
+    _createSessionManager(storyId) {
+        this._sessionManager = new SessionManager(storyId);
     }
 
     getCurrentRenderer(): ?BaseRenderer {
@@ -901,5 +913,7 @@ export default class Controller extends EventEmitter {
     _storyIconRendererCreated: boolean;
 
     _allNarrativeElements: ?Array<NarrativeElement>;
+
+    _sessionManager: SessionManager;
 
 }

@@ -256,6 +256,18 @@
             resizeWindow();
         }
 
+        function addMeta(storyId) {
+            const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+            if(!experienceIdMeta ) {
+                const meta = document.createElement('meta');
+                meta.name = 'experienceId';
+                meta.content = storyId;
+                document.getElementsByTagName('head')[0].appendChild(meta);
+            } else {
+                experienceIdMeta.setAttribute("content", storyId);
+            }
+        }
+
         // fetch a story, load and run it
         function loadStory(filepath) {
             showMessage(`Loading ${filepath}`);
@@ -270,9 +282,11 @@
                 .then((text) => {
                     showMessage('Story loaded');
                     const storyJson = JSON.parse(text);
+                    addMeta(storyJson.stories[0].id);
                     run(storyJson);
                 })
                 .catch((rejection) => {
+                    showMessage(rejection);
                     showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
                 });
         };

@@ -1,0 +1,580 @@
+{
+    "stories": [
+        {
+            "narrative_element_ids": [
+                "8f879cb0-3d63-4af7-8cfa-ffad8b3ca8b7",
+                "5b323240-6f91-4c5c-bf84-e240ed9b6eef",
+                "ad21f6e9-03ee-4ae6-b365-72549af806fd",
+                "a7082696-35c1-44ad-a5ba-dda407bed345"
+            ],
+            "beginnings": [
+                {
+                    "id": "d73c19ec-c634-49ee-987c-2f1330173527",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "narrative_element_id": "a7082696-35c1-44ad-a5ba-dda407bed345"
+                }
+            ],
+            "id": "6d9d36c0-548f-44ca-b2c7-c90900ef539d",
+            "object_class": "STORY",
+            "name": "Andy J test",
+            "description": "...",
+            "version": "1568200550:763000000",
+            "meta": {
+                "romper": {
+                    "onLaunch": {
+                        "background_art_asset_collection_id": "ea06bad8-0bae-4b29-8c84-4002b4d7f6b7"
+                    },
+                    "dog": {
+                        "position": {
+                            "top": 2,
+                            "left": 88,
+                            "width": 10,
+                            "height": 10
+                        },
+                        "asset_collection_id": "a138be88-ab40-486b-b6c6-15a2e6b1fdfd"
+                    }
+                }
+            },
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "variables": {
+                "list": {
+                    "variable_type": "list",
+                    "default_value": "3242",
+                    "values": [
+                        "§",
+                        "1",
+                        "2",
+                        "3242",
+                        "353535",
+                        "346343"
+                    ],
+                    "description": ""
+                },
+                "Image": {
+                    "variable_type": "list",
+                    "default_value": "image",
+                    "values": [
+                        "image",
+                        "video"
+                    ],
+                    "description": ""
+                }
+            },
+            "schema_version": "0.2.16"
+        }
+    ],
+    "narrative_elements": [
+        {
+            "id": "8f879cb0-3d63-4af7-8cfa-ffad8b3ca8b7",
+            "object_class": "NARRATIVE_ELEMENT",
+            "name": "ralph",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "45173fcf-40ad-460e-aa25-b495dbf74309"
+            },
+            "description": "",
+            "version": "1568198955:941000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {
+                "storygraph": {
+                    "xPos": -2621.777442068024,
+                    "yPos": -808.1326156334694,
+                    "colour": "#DB3E00"
+                }
+            },
+            "schema_version": "0.2.16",
+            "links": [
+                {
+                    "id": "affc9737-a64d-4618-a6c6-a88083335587",
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "description": "",
+                    "condition": {
+                        "==": [
+                            {
+                                "var": "Image"
+                            },
+                            "video"
+                        ]
+                    },
+                    "target_narrative_element_id": "5b323240-6f91-4c5c-bf84-e240ed9b6eef"
+                },
+                {
+                    "id": "bd1385dd-040e-4934-8cd6-b08f71de695f",
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "description": "",
+                    "condition": {
+                        "==": [
+                            {
+                                "var": "Image"
+                            },
+                            "image"
+                        ]
+                    },
+                    "target_narrative_element_id": "ad21f6e9-03ee-4ae6-b365-72549af806fd"
+                }
+            ]
+        },
+        {
+            "id": "5b323240-6f91-4c5c-bf84-e240ed9b6eef",
+            "object_class": "NARRATIVE_ELEMENT",
+            "name": "New Element",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "6ab2a592-5058-4d8c-bdb2-3b6119c41364"
+            },
+            "description": "",
+            "version": "1568198863:852000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {
+                "storygraph": {
+                    "xPos": -2086.777442068024,
+                    "yPos": -909.1326156334694,
+                    "colour": "#DB3E00"
+                }
+            },
+            "schema_version": "0.2.16",
+            "links": [
+                {
+                    "id": "47e22413-7d02-4ea0-a69e-80ff77563bbe",
+                    "link_type": "END_STORY",
+                    "description": "",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "ad21f6e9-03ee-4ae6-b365-72549af806fd",
+            "object_class": "NARRATIVE_ELEMENT",
+            "name": "New Element",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "a3e41159-a242-4e0f-98af-c5b3098d9252"
+            },
+            "description": "",
+            "version": "1568198865:533000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {
+                "storygraph": {
+                    "xPos": -2082.777442068024,
+                    "yPos": -527.1326156334694,
+                    "colour": "#DB3E00"
+                }
+            },
+            "schema_version": "0.2.16",
+            "links": [
+                {
+                    "id": "788fa8cd-e4c6-4ea0-9456-ff01cd041ec6",
+                    "link_type": "END_STORY",
+                    "description": "",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "a7082696-35c1-44ad-a5ba-dda407bed345",
+            "object_class": "NARRATIVE_ELEMENT",
+            "name": "New Element",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "c7209745-2e87-41e7-a0e1-8a432529adcf"
+            },
+            "description": "",
+            "version": "1568200029:522000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {
+                "storygraph": {
+                    "xPos": -3131.909278005524,
+                    "yPos": -791.5701156334694,
+                    "colour": "#DB3E00"
+                }
+            },
+            "schema_version": "0.2.16",
+            "links": [
+                {
+                    "id": "b2895304-c8d2-432f-9b9d-3a509b921aa1",
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "description": "",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "target_narrative_element_id": "8f879cb0-3d63-4af7-8cfa-ffad8b3ca8b7"
+                }
+            ]
+        }
+    ],
+    "representation_collections": [
+        {
+            "id": "c7209745-2e87-41e7-a0e1-8a432529adcf",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "name": "New Element Representation Collection",
+            "version": "1568126282:572000000",
+            "description": " Representation Collection",
+            "representations": [
+                {
+                    "representation_id": "b8852273-60a3-4183-b84b-9c2c05bfc298",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "id": "17a6c8bd-6e5b-4b26-8869-4752d5662906"
+                }
+            ],
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "schema_version": "0.2.16"
+        },
+        {
+            "id": "6ab2a592-5058-4d8c-bdb2-3b6119c41364",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "name": "New Element Representation Collection",
+            "version": "1568198819:120000000",
+            "description": " Representation Collection",
+            "representations": [
+                {
+                    "representation_id": "b04bd9a5-f36a-410e-935d-4d453af792c4",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "id": "9e7e8243-c290-4e55-826f-ffbd01cf8265"
+                }
+            ],
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "schema_version": "0.2.16"
+        },
+        {
+            "id": "a3e41159-a242-4e0f-98af-c5b3098d9252",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "name": "New Element Representation Collection",
+            "version": "1568198821:817000000",
+            "description": " Representation Collection",
+            "representations": [
+                {
+                    "representation_id": "527f7e4d-da83-4750-b2b4-3c29c1319c50",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "id": "255fc11e-5959-4af9-ab21-e1430dca6c4b"
+                }
+            ],
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "schema_version": "0.2.16"
+        },
+        {
+            "id": "45173fcf-40ad-460e-aa25-b495dbf74309",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "name": "ralph Representation Collection",
+            "version": "1568198909:986000000",
+            "description": " Representation Collection",
+            "representations": [
+                {
+                    "representation_id": "2333da74-25f0-4a79-8a95-5c01df6837a1",
+                    "condition": {
+                        "==": [
+                            1,
+                            1
+                        ]
+                    },
+                    "id": "fc72b06b-dc0f-46a0-a171-d95e76a85b9a"
+                }
+            ],
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "schema_version": "0.2.16"
+        }
+    ],
+    "representations": [
+        {
+            "id": "527f7e4d-da83-4750-b2b4-3c29c1319c50",
+            "object_class": "REPRESENTATION",
+            "name": "Screenshot from 2018-11-29 09-14-18.png",
+            "description": "",
+            "version": "1568198861:071000000",
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+            "behaviours": {},
+            "asset_collections": {
+                "foreground_id": "f9a8a9d7-f603-4a25-af73-31bddf94d9e8"
+            },
+            "schema_version": "0.2.16",
+            "duration": -1
+        },
+        {
+            "id": "b04bd9a5-f36a-410e-935d-4d453af792c4",
+            "object_class": "REPRESENTATION",
+            "name": "chase.mov_2019-02-01T09:56:33",
+            "description": "",
+            "version": "1568198865:172000000",
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
+            "behaviours": {},
+            "asset_collections": {
+                "foreground_id": "89381110-5b79-4d9d-9c84-6733aef6afb2"
+            },
+            "schema_version": "0.2.16",
+            "duration": null
+        },
+        {
+            "id": "b8852273-60a3-4183-b84b-9c2c05bfc298",
+            "object_class": "REPRESENTATION",
+            "name": "nyan_cat.gif",
+            "description": "",
+            "version": "1568200594:535000000",
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+            "behaviours": {
+                "started": [
+                    {
+                        "id": "6be0b1ae-d673-42a8-a6ba-e17f236b9a75",
+                        "type": "urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0",
+                        "variables": [
+                            {
+                                "label": "Do you want a image or video",
+                                "variable_name": "Image"
+                            }
+                        ],
+                        "panel_label": "Please provide the following information:"
+                    }
+                ]
+            },
+            "asset_collections": {
+                "foreground_id": "ce32b86f-3385-4a19-94d8-7e93d831f72e"
+            },
+            "schema_version": "0.2.16",
+            "duration": -1
+        },
+        {
+            "choices": [
+                {
+                    "id": "06c24ca9-1fd8-41cc-b9aa-3b889f15257e",
+                    "choice_representation_id": "1a2c8fa5-a433-4b4c-b37d-50174914d701",
+                    "label": ""
+                }
+            ],
+            "id": "2333da74-25f0-4a79-8a95-5c01df6837a1",
+            "object_class": "REPRESENTATION",
+            "name": "name",
+            "description": "",
+            "version": "1568205373:957000000",
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "representation_type": "urn:x-object-based-media:representation-types:switchable/v1.0",
+            "behaviours": {},
+            "asset_collections": {},
+            "schema_version": "0.2.16",
+            "duration": null
+        },
+        {
+            "id": "1a2c8fa5-a433-4b4c-b37d-50174914d701",
+            "object_class": "REPRESENTATION",
+            "name": "ralph",
+            "description": "",
+            "version": "1568198910:820000000",
+            "meta": {},
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+            "behaviours": {},
+            "asset_collections": {
+                "foreground_id": "dde48dfc-c2d6-4679-819a-c29c5329fd13"
+            },
+            "schema_version": "0.2.16",
+            "duration": -1
+        }
+    ],
+    "asset_collections": [
+        {
+            "id": "ea06bad8-0bae-4b29-8c84-4002b4d7f6b7",
+            "object_class": "ASSET_COLLECTION",
+            "name": "android-chrome-192x192.png",
+            "description": "",
+            "version": "1568125895:560000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "image_src": "urn:x-ipstudio:package:image:c266dc13-5883-444e-bdbd-62f29227e590"
+            }
+        },
+        {
+            "id": "a138be88-ab40-486b-b6c6-15a2e6b1fdfd",
+            "object_class": "ASSET_COLLECTION",
+            "name": "DSC08047.jpg",
+            "description": "",
+            "version": "1568126898:400000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "image_src": "urn:x-ipstudio:package:image:c6d0a493-7ceb-49ec-b6f9-4fff72c4732e"
+            }
+        },
+        {
+            "id": "f9a8a9d7-f603-4a25-af73-31bddf94d9e8",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Screenshot from 2018-11-29 09-14-18.png",
+            "description": "",
+            "version": "1568198860:282000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "image_src": "urn:x-ipstudio:package:image:5e69da8b-0120-4227-a81b-1656a586962b"
+            }
+        },
+        {
+            "id": "89381110-5b79-4d9d-9c84-6733aef6afb2",
+            "object_class": "ASSET_COLLECTION",
+            "name": "chase.mov_2019-02-01T09:56:33",
+            "description": "",
+            "version": "1568198862:547000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "av_src": "urn:x-ipstudio:package:av:6a4f889d-6a63-4d37-a1f9-c7495cfe0456"
+            }
+        },
+        {
+            "id": "dde48dfc-c2d6-4679-819a-c29c5329fd13",
+            "object_class": "ASSET_COLLECTION",
+            "name": "ralph.gif",
+            "description": "",
+            "version": "1568198909:790000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "image_src": "urn:x-ipstudio:package:image:2cf259c4-9727-47bc-bf06-3fb5d54ca838"
+            }
+        },
+        {
+            "id": "ce32b86f-3385-4a19-94d8-7e93d831f72e",
+            "object_class": "ASSET_COLLECTION",
+            "name": "nyan_cat.gif",
+            "description": "",
+            "version": "1568200520:910000000",
+            "tags": {
+                "project": [
+                    "dev"
+                ]
+            },
+            "meta": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "schema_version": "0.2.16",
+            "assets": {
+                "image_src": "urn:x-ipstudio:package:image:82b7c732-4560-4def-93b0-3342741b73c0"
+            }
+        }
+    ]
+}
