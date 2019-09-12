@@ -345,23 +345,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         });
     }
 
-    _buildLinkIcon(iconObject: Object) {
-        super._buildLinkIcon(iconObject);
-        if (iconObject.position.three_d) {
-            const { phi, theta, radius, width, height } = iconObject.position.three_d;
-            const position = { lat: theta, long: phi, radius };
-            const size = { width, height };
-            if (iconObject.resolvedUrl) {
-                this._addIcon(
-                    iconObject.resolvedUrl,
-                    position,
-                    size,
-                    iconObject.targetNarrativeElementId,
-                );
-            }
-        }
-    }
-
     _showChoiceIcons(iconDataObject: Object) {
         super._showChoiceIcons(iconDataObject);
         this._readyToShowIcons = true;
