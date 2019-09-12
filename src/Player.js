@@ -20,6 +20,8 @@ const PLAYOUT_ENGINES = {
 
 const SLIDER_CLASS = 'slider-input';
 
+const EXISTING_SESSIONS = 'EXISTING_SESSION'
+
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'ICON_CLICKED',
@@ -44,17 +46,51 @@ const PlayerEvents = [
 
 
 
-const checkExistingSession: ?Object = () => {
-    const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
-    if (!experienceIdMeta) return false;
-    const experienceId = experienceIdMeta.getAttribute('content');
-    if (!experienceId) return false;
+const fetchExistingSessionState: ?Object = (experienceId) => {
     const dataString = localStorage.getItem(experienceId);
     if (dataString && dataString.length > 0) {
         const dataStore = JSON.parse(dataString);
         return dataStore;
     }
     return false;
+};
+
+const checkExistingSession: boolean = (experienceId) => {
+    if(!experienceId) return false;
+    console.log('checking existing session');
+    const existingSession = localStorage.getItem(EXISTING_SESSIONS);
+    const existingSessions = JSON.parse(existingSession);
+    return existingSessions && existingSessions.includes(experienceId);
+};
+
+const setExistingSession = (experienceId) => {
+    if(!experienceId) return;
+    console.log('setting existing session', experienceId);
+    const existingSession = localStorage.getItem(EXISTING_SESSIONS);
+    const existingSessions = JSON.parse(existingSession);
+    if (!existingSessions ) {
+        localStorage.setItem(EXISTING_SESSIONS, JSON.stringify([experienceId]));
+        return;
+    } 
+    if(!existingSessions.includes(experienceId)) {
+        existingSessions.push(experienceId);
+        localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(existingSessions));
+    }
+};
+
+const deleteExistingSessions = (experienceId) => {
+    if(!experienceId) return;
+    console.log('deleting existing session');
+    localStorage.removeItem(experienceId);
+    const existingSession = localStorage.getItem(EXISTING_SESSIONS);
+    const existingSessions = JSON.parse(existingSession);
+    if (!existingSessions ) {
+        return;
+    }
+    if(existingSessions.includes(experienceId)) {
+        const filteredSessions = existingSessions.filter(sess => sess !== experienceId);
+        localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
+    }
 };
 
 function scrollToTop() {
@@ -782,20 +818,11 @@ class Player extends EventEmitter {
         cancelButton.innerHTML = 'X';
     
         const cancelButtonHandler = () => {
-            console.log('cancelling');
-            this._continueModalLayer.classList.add('hide');
-            this._continueModalLayer.classList.remove('show');
-            this._continueModalContent.classList.add('hide');
-            this._continueModalContent.classList.remove('show');
+            this._guiLayer.removeChild(this._continueModalLayer);
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
-
-
-            this._continueModalContent.removeChild(cancelButton);
-            this._continueModalContent.removeChild(continueModalInnerContent);
-            this._continueModalContent.removeChild(this._startExperienceButton);
-            const resuming = true;
-            startExperienceButtonHandler(resuming);
+            deleteExistingSessions(this._controller._storyId);
+            startExperienceButtonHandler();
         };
         
         cancelButton.onclick = cancelButtonHandler;
@@ -805,17 +832,13 @@ class Player extends EventEmitter {
         );
 
         const resumeExperienceButtonHandler = () => {
-            const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
-            if(experienceIdMeta ) {
-                const experienceId = experienceIdMeta.getAttribute('content');
-                if(experienceId) {
-                    this._controller.restart(experienceId, resumeState, true);
-                    this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-                   
-                };
-            };
-            const resuming = true;
-            startExperienceButtonHandler(resuming)
+            console.log('just click resume', this._controller._storyId);
+            this.removeExperienceStartButtonAndImage();
+            this._enableUserInteraction();
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+            this._guiLayer.removeChild(this._continueModalLayer);
+            this._controller.restart(this._controller._storyId, resumeState, true);
         };
 
         this._startExperienceButton.onclick = resumeExperienceButtonHandler;
@@ -976,17 +999,18 @@ class Player extends EventEmitter {
             }
         }
 
-        const startButtonHandler = (resuming) => {
-            console.log('just click start');
-            this.removeExperienceStartButtonAndImage(resuming);
+        const startButtonHandler = () => {
+            console.log('just click start', this._controller._storyId);
+            setExistingSession(this._controller._storyId);
+            this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         };
 
-        const resumeState = checkExistingSession();
-        if(resumeState) {
-            this._addContinueModal(options, resumeState, startButtonHandler);
+        const existingSession = checkExistingSession(this._controller._storyId);
+        if(existingSession) {
+            this._addContinueModal(options, fetchExistingSessionState(this._controller._storyId), startButtonHandler);
         } else {
             this._startExperienceButton.onclick = startButtonHandler;
             this._startExperienceButton.addEventListener(
@@ -1023,20 +1047,29 @@ class Player extends EventEmitter {
         logger.info('disabling experience before restart');
     }
 
-    removeExperienceStartButtonAndImage(resuming) {
+    removeExperienceStartButtonAndImage() {
+
         try {
-            if(!resuming) {
-                this._guiLayer.removeChild(this._startExperienceButton);
-            }
-            
-            this._mediaLayer.removeChild(this._startExperienceImage);
+            this._guiLayer.removeChild(this._startExperienceButton);
+        } catch (error) {
+            logger.warn('could not remove _startExperienceButton');
+        }
+
+        try {
             if (this._privacyDiv) {
                 this._mediaLayer.removeChild(this._privacyDiv);
             }
+        } catch (error) {
+            logger.warn('could not remove _privacyDiv');
+        }
+
+        try {
+            this._mediaLayer.removeChild(this._startExperienceImage);
+            
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
             logger.warn(e);
-            logger.warn('could not remove start button and/or image');
+            logger.warn('could not remove _startExperienceImage');
         }
     }
 

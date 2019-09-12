@@ -110,32 +110,34 @@ export default class StoryReasoner extends EventEmitter {
      * @return {void}
      */
     start(initialState?: Object = {}, restarting) {
-        let variableState = initialState;
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
         if(!restarting) {
-            variableState = this._fetchVariablesFromStory();
-            this._applyInitialState(variableState);
+            this._fetchVariablesFromStory().then(variableState => {
+                this._applyInitialState(variableState);
+            });
+            
         } else {
-            this._applyResumeState(variableState);
+            this._applyResumeState(initialState);
         }
         this._chooseBeginning();
     }
 
     // Get the variables defined in this story
     _fetchVariablesFromStory() {
-        console.log('_fetchVariablesFromStory')
+        console.log('_fetchVariablesFromStory', this._story.variables)
         if (this._story.variables) {
             const variableTree = this._story.variables;
-            const variables = Object.keys(variableTree).map((storyVariableName) => {
+            return Promise.all(Object.keys(variableTree).map((storyVariableName) => {
                 const storyVariableValue = variableTree[storyVariableName].default_value;
                 return this.getVariableValue(storyVariableName)
                     .then((value) => {
                         console.log('value', value);
-                        if (value === null) {
+                        console.log('variable', storyVariableName, storyVariableValue);
+                        if (value === undefined || value === null) {
                             return {
                                 name: storyVariableName,
                                 value: storyVariableValue
@@ -144,15 +146,16 @@ export default class StoryReasoner extends EventEmitter {
                         logger.info(`Variable ${storyVariableName} already has value ${value}`);
                         return null;
                     });
-            }).filter(Boolean).reduce((variablesObject, variable) => {
-                // eslint-disable-next-line no-param-reassign
-                variablesObject[variable.name] = variable.value;
-                return variablesObject;
-            }, {});
-            return variables;
+            })).then(foundVariables => foundVariables.filter(Boolean)
+                .reduce((variablesObject, variable) => {
+                    // eslint-disable-next-line no-param-reassign
+                    variablesObject[variable.name] = variable.value;
+                    return variablesObject;
+                }, {}),
+            );
         } 
         logger.info('No variables in story');
-        return null;
+        return Promise.resolve(null);
     }
 
     _applyInitialState(initialState: Object) {
