@@ -327,6 +327,7 @@ export default class StoryReasoner extends EventEmitter {
      * @param {string} narrativeElementId The id of the narrative element visited
      */
     appendToHistory(narrativeElementId: string) {
+        console.trace();
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get(InternalVariableNames.PATH_HISTORY)
             .then((value) => {

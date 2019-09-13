@@ -742,6 +742,7 @@ class Player extends EventEmitter {
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
         this._addContinueModal = this._addContinueModal.bind(this);
+        this._startButtonHandler = this._startButtonHandler.bind(this);
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -792,12 +793,13 @@ class Player extends EventEmitter {
         );
 
         const resumeExperienceButtonHandler = () => {
-            this._controller._sessionManager.setHasClickedResume();
             this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._controller._sessionManager.setHasClickedResume();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._controller.restart(this._controller._storyId, resumeState, true);
             this._hideModalLayer();
             this._enableUserInteraction();
+            
         };
 
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
@@ -990,15 +992,19 @@ class Player extends EventEmitter {
         const existingSession = this._controller._sessionManager.checkExistingSession(this._controller._storyId);
         if(existingSession && !this._controller._sessionManager._hasClickedResume) {
             this._createResumeOverlays(options);
-        }
-        if(!existingSession && !this._controller._sessionManager._hasClickedResume) {
+            if (options.hide_narrative_buttons) {
+                // can't use player.setNextAvailable
+                // as this may get reset after this by NE change handling
+                this._narrativeElementTransport.classList.add('romper-inactive');
+            }
+        } 
+        else if(!existingSession && !this._controller._sessionManager._hasClickedResume) {
             this._createStartOverlays(options);
-        }
-        
-        if (options.hide_narrative_buttons) {
-            // can't use player.setNextAvailable
-            // as this may get reset after this by NE change handling
-            this._narrativeElementTransport.classList.add('romper-inactive');
+            if (options.hide_narrative_buttons) {
+                // can't use player.setNextAvailable
+                // as this may get reset after this by NE change handling
+                this._narrativeElementTransport.classList.add('romper-inactive');
+            }
         }
     }
 
