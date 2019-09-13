@@ -84,7 +84,7 @@ export default class SessionManager extends EventEmitter {
     }
 
     setHasClickedResume() {
-        this._controller.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
+        // this._controller.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
         this._hasClickedResume = true;
     }
 

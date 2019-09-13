@@ -151,10 +151,6 @@
                 console.warn(`could not load GET story content`);
             });
             loadStory(getFilename);
-            const render = new URLSearchParams(window.location.search).get('render');
-            if(render) {
-                document.getElementById('rendertab').click('renderer');
-            }
         }
 
         // display a message to the user
@@ -288,6 +284,9 @@
                     const storyJson = JSON.parse(text);
                     addMeta(storyJson.stories[0].id);
                     run(storyJson);
+                    if(document.getElementById('rendertab').classList.contains('active')) {
+                        resizeWindow();
+                    }
                 })
                 .catch((rejection) => {
                     showMessage(rejection);
