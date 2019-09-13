@@ -2,6 +2,8 @@
 import { EventEmitter } from 'events';
 import Controller from './Controller';
 
+import { InternalVariableNames } from './InternalVariables';
+
 const EXISTING_SESSIONS = 'EXISTING_SESSION'
 
 export default class SessionManager extends EventEmitter {
@@ -82,6 +84,7 @@ export default class SessionManager extends EventEmitter {
     }
 
     setHasClickedResume() {
+        this._controller.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
         this._hasClickedResume = true;
     }
 

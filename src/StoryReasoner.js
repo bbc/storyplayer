@@ -333,9 +333,6 @@ export default class StoryReasoner extends EventEmitter {
             .then((value) => {
                 let neList = [];
                 if (value !== null) {
-                    if(neList.length === 1 && value === neList[neList.length - 1]) {
-                        logger.info(`Attempting to duplicate ${value} in last element of path_history at beginning`)
-                    }
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
