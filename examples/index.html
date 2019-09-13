@@ -15,18 +15,18 @@
 
     <!-- tab switcher -->
     <div class="tab">
-        <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
+        <button class="tablinks" onclick="openTab(event, 'chooser')">Select story</button>
         <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
-        <button class="tablinks" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
+        <button class="tablinks active" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
     </div>
 
     <!-- Select a story -->
-    <div id='chooser' class='tabcontent' style='display: block;'>
+    <div id='chooser' class='tabcontent'>
         <div id='choices' class='selection'></div>
     </div>
 
     <!-- View rendered content -->
-    <div id='renderer' class='tabcontent'>
+    <div id='renderer' class='tabcontent'  style='display: block;'>
         <h2 id='story-title' class='story-title'>No story selected</h2>
         <div class='romper-target' id="romper-target">
             <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>

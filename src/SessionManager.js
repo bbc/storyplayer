@@ -1,6 +1,7 @@
 // @flow
 import { EventEmitter } from 'events';
 import Controller from './Controller';
+import { InternalVariableNames } from './InternalVariables';
 
 const EXISTING_SESSIONS = 'EXISTING_SESSION'
 
@@ -79,6 +80,14 @@ export default class SessionManager extends EventEmitter {
             .then((storyVariables) => {
                 this._controller.setVariables(storyVariables);
             });
+    }
+
+    fetchLastVisitedElement() {
+        const resumeState = this.fetchExistingSessionState();
+        if(!resumeState) return null;
+        const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+        if(pathHistory.length === 0) return null;
+        return pathHistory[pathHistory.length -1];
     }
 
     setHasClickedResume() {

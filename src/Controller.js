@@ -121,11 +121,15 @@ export default class Controller extends EventEmitter {
     }
 
 
-    restart(storyId: string, initialState?: Object = {}, resatarting: boolean) {
+    restart(storyId: string, initialState?: Object = {}) {
+        let resumeState = initialState;
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        this.start(storyId, initialState, resatarting);
+        if(Object.keys(resumeState).length === 0) {
+            resumeState = this._sessionManager.fetchExistingSessionState(this._controller._storyId);
+        }
+        this.start(storyId, initialState, true);
     }
 
     start(storyId: string, initialState?: Object = {}, restarting: boolean) {

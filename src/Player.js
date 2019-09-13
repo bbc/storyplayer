@@ -795,7 +795,7 @@ class Player extends EventEmitter {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._controller._sessionManager.setHasClickedResume();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            this._controller.restart(this._controller._storyId, resumeState, true);
+            this._controller.restart(this._controller._storyId, resumeState);
             this._hideModalLayer();
             this._enableUserInteraction();
             
