@@ -763,7 +763,7 @@ class Player extends EventEmitter {
         this._dogImage.style.height = `${height}%`;
     }
 
-    _addContinueModal(options: Object) {
+    _addContinueModal(options: Object, resumeState: Object) {
         this._createResumeExperienceButton(options);
 
         const continueModalInnerContent = document.createElement('div');
@@ -795,7 +795,7 @@ class Player extends EventEmitter {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._controller._sessionManager.setHasClickedResume();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            this._controller.restart(this._controller._storyId);
+            this._controller.restart(this._controller._storyId, resumeState, true);
             this._hideModalLayer();
             this._enableUserInteraction();
             
@@ -1009,7 +1009,8 @@ class Player extends EventEmitter {
 
     _createResumeOverlays(options) {
         this._createStartImage(options);
-        this._addContinueModal(options);
+        const resumeState = this._controller._sessionManager.fetchExistingSessionState(this._controller._storyId);
+        this._addContinueModal(options, resumeState);
         this._mediaLayer.classList.add('romper-prestart');
     }
 

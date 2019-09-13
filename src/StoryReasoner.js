@@ -120,7 +120,7 @@ export default class StoryReasoner extends EventEmitter {
                 this._applyInitialState(variableState);
             });
             
-        } else if(Object.keys()) {
+        } else {
             this._applyResumeState(initialState);
         }
         this._chooseBeginning();
