@@ -1022,7 +1022,6 @@ class Player extends EventEmitter {
     }
 
     _startButtonHandler() {
-        console.log('just click start', this._controller._storyId);
         this._controller._sessionManager.setExistingSession(this._controller._storyId);
         this._removeExperienceOverlays();
         this._enableUserInteraction();

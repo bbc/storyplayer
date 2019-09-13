@@ -122,7 +122,6 @@ export default class Controller extends EventEmitter {
 
 
     restart(storyId: string, initialState?: Object = {}, resatarting: boolean) {
-        console.log('resatarting with', initialState);
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
@@ -139,7 +138,6 @@ export default class Controller extends EventEmitter {
             this._createSessionManager(storyId);
         }
         window._sessionManager = this._sessionManager;
-        console.log('window._sessionManager',  this._sessionManager);
 
         // event handling functions for StoryReasoner
         const _handleStoryEnd = () => {
@@ -356,7 +354,6 @@ export default class Controller extends EventEmitter {
     // go to previous node in the current story, if we can
     //
     _goBackOneStepInStory() {
-        console.log('_goBackOneStepInStory');
         return Promise.all([
             this.getIdOfPreviousNode(),
             this.getVariableValue(InternalVariableNames.PATH_HISTORY),
@@ -382,7 +379,6 @@ export default class Controller extends EventEmitter {
     // repeat the current node in the current story, if we can
     //
     repeatStep() {
-        console.log('repeatStep')
         const current = this._currentNarrativeElement;
         if (this._reasoner && current) {
             this._handleNEChange(this._reasoner, current);
@@ -393,7 +389,6 @@ export default class Controller extends EventEmitter {
 
     // respond to a change in the Narrative Element: update the renderers
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, restarting: boolean) {
-        console.log('_handleNEChange saving:', (this._reasoner && !restarting));
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
@@ -529,7 +524,6 @@ export default class Controller extends EventEmitter {
      * @param {any} value Its value
      */
     setVariableValue(name: string, value: any) {
-        console.log('controller setVariableValue')
         if (this._reasoner) {
             this._reasoner.setVariableAndSaveLocal(name, value);
             logger.info(`Controller seting variable '${name}' to ${value}`);
@@ -650,7 +644,6 @@ export default class Controller extends EventEmitter {
      * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
      */
     setVariables(variables: Object) {
-        console.log('controller setVariables');
         Object.keys(variables).forEach((varName) => {
             if (this._reasoner) {
                 this._reasoner.setVariableAndSaveLocal(varName, variables[varName]);

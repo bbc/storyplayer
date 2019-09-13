@@ -26,7 +26,6 @@ export default class SessionManager extends EventEmitter {
 
     deleteExistingSessions() {
         if (!this._storyId) return;
-        console.log('deleting existing session');
         localStorage.removeItem(!this._storyId);
         const existingSession = localStorage.getItem(EXISTING_SESSIONS);
         const existingSessions = JSON.parse(existingSession);
@@ -41,7 +40,6 @@ export default class SessionManager extends EventEmitter {
 
     setExistingSession() {
         if (!this._storyId) return;
-        console.log('setting existing session', this._storyId);
         const existingSession = localStorage.getItem(EXISTING_SESSIONS);
         const existingSessions = JSON.parse(existingSession);
         if (!existingSessions) {
@@ -60,7 +58,6 @@ export default class SessionManager extends EventEmitter {
         const existingSession = localStorage.getItem(EXISTING_SESSIONS);
         const existingSessions = JSON.parse(existingSession);
         const hasExistingSession = existingSessions && existingSessions.includes(this._storyId);  
-        console.log('checking existing session', hasExistingSession);
         return hasExistingSession || false;
     }
 
