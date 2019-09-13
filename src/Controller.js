@@ -121,11 +121,16 @@ export default class Controller extends EventEmitter {
     }
 
 
-    restart(storyId: string, initialState?: Object = {}, resatarting: boolean) {
+    restart(storyId: string, initialState?: Object = {}) {
+        let resumeState = initialState;
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        this.start(storyId, initialState, resatarting);
+        if(!initialState) {
+            resumeState = this._sessionManager.fetchExistingSessionState(this._controller._storyId);
+        }
+        
+        this.start(storyId, resumeState, true);
     }
 
     start(storyId: string, initialState?: Object = {}, restarting: boolean) {
@@ -388,11 +393,11 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
-    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, restarting: boolean) {
+    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
-        if (this._reasoner && !restarting) {
+        if (this._reasoner) {
             this._reasoner.appendToHistory(narrativeElement.id);
         }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
