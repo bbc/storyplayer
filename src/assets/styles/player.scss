@@ -1256,12 +1256,6 @@ $romper-hover-text-size: 1.53em;
     height: 0%;
     width: 0%;
   }
-
-  
-
-  .modal-inner-content {
-  }
-
 }
 
 .cancel-button {
@@ -1270,7 +1264,7 @@ $romper-hover-text-size: 1.53em;
   background-repeat: no-repeat;
   background-size: contain;
   transform: translate(-50%, 0%);
-
+}
 // ##Device = Desktops
 // ##Screen = 1281px to higher resolution desktops
 @media (min-width: 1281px) {

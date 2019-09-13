@@ -277,14 +277,14 @@ export default class RenderManager extends EventEmitter {
             })
             .then((mediaUrl) => {
                 logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                this._player.addExperienceStartButtonAndImage(Object.assign(
+                this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: mediaUrl },
                 ));
             })
             .catch((err) => {
                 logger.error(err, 'Could not get url from asset collection uuid');
-                this._player.addExperienceStartButtonAndImage(Object.assign(
+                this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
