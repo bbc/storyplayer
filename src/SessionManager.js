@@ -1,6 +1,6 @@
-import { EventEmitter } from "events";
-
 // @flow
+import { EventEmitter } from 'events';
+import Controller from './Controller';
 
 const EXISTING_SESSIONS = 'EXISTING_SESSION'
 
@@ -10,10 +10,13 @@ export default class SessionManager extends EventEmitter {
     _hasClickedResume: boolean;
     
     _existingSession: Boolean;
+
+    _controller: Controller;
     
-    constructor(storyId: string) {
+    constructor(storyId: string, controller: Controller) {
         super();
         this._storyId = storyId;
+        this._controller = controller;
         this._hasClickedResume = false;
         this._existingSession = this.checkExistingSession();
         this.deleteExistingSessions = this.deleteExistingSessions.bind(this);
@@ -36,6 +39,7 @@ export default class SessionManager extends EventEmitter {
             const filteredSessions = existingSessions.filter(sess => sess !== !this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
+        this.resetSessionState();
     }
 
     setExistingSession() {
@@ -68,6 +72,13 @@ export default class SessionManager extends EventEmitter {
             return dataStore;
         }
         return false;
+    }
+
+    resetSessionState() {
+        this._controller.getDefaultInitialState()
+            .then((storyVariables) => {
+                this._controller.setVariables(storyVariables);
+            });
     }
 
     setHasClickedResume() {

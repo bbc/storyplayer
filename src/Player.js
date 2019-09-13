@@ -781,7 +781,6 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller._sessionManager.deleteExistingSessions(this._controller._storyId);
             this._controller._sessionManager.unsetHasClickedResume();
-            
             this._hideModalLayer();
             this._startButtonHandler();
         };

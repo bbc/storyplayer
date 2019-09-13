@@ -291,7 +291,7 @@ export default class Controller extends EventEmitter {
     }
 
     _createSessionManager(storyId) {
-        this._sessionManager = new SessionManager(storyId);
+        this._sessionManager = new SessionManager(storyId, this);
     }
 
     getCurrentRenderer(): ?BaseRenderer {
@@ -574,6 +574,22 @@ export default class Controller extends EventEmitter {
                 });
         }
         return Promise.resolve({});
+    }
+
+    /**
+     * Sets initial state to be default
+     *  * @param {*} No parameters, it uses the story Id
+     */
+    getDefaultInitialState() {
+        return this.getVariables().then((allVariables) => {
+            return Object.keys(allVariables).map(variable => {
+                return {name: variable, value: allVariables[variable].default_value}
+            }).reduce((variablesObject, variable) => {
+                // eslint-disable-next-line no-param-reassign
+                variablesObject[variable.name] = variable.value;
+                return variablesObject;
+            }, {})
+        });
     }
 
     // get the ids of every story nested within the one given
