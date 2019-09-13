@@ -109,6 +109,10 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         const mesh = new THREE.Mesh(geometry, material);
         this._scene.add(mesh);
 
+        // automatically move on at video end
+        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+
         this._playoutEngine.setPlayoutActive(this._rendererId);
         if(videoElement) {
             videoElement.style.visibility = 'hidden';
@@ -139,6 +143,10 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl);
+                                this._playoutEngine.setTimings(this._rendererId, {
+                                    inTime: this._inTime,
+                                    outTime: this._outTime,
+                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');

@@ -20,7 +20,7 @@ export default function (params: Object) { // eslint-disable-line no-unused-vars
         if (uri) {
             resolve(uri);
         } else {
-            reject(uri);
+            reject(new Error("Invalid URI"));
         }
     });
 }

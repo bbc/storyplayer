@@ -257,7 +257,7 @@ export default class RenderManager extends EventEmitter {
                             if (fg.assets.image_src) {
                                 return this._fetchers.mediaFetcher(fg.assets.image_src);
                             }
-                            return Promise.reject();
+                            return Promise.reject(new Error("Failed to fetch AC with image_src"));
                         })
                         .then(mediaurl => this._player.addDog(mediaurl, dog.position))
                         .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));
@@ -556,11 +556,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     _showBackIcon() {
-        this._controller.getIdOfPreviousNode()
-            .then((id) => {
-                const showBack = id !== null;
-                this._player.setBackAvailable(showBack);
-            });
+        this._player.setBackAvailable(true);
     }
 
     // show next button, or icons if choice
@@ -568,10 +564,18 @@ export default class RenderManager extends EventEmitter {
     refreshOnwardIcons() {
         if (this._currentRenderer
             && !this._currentRenderer.inVariablePanel) {
-            this._player.setNextAvailable(true);
-        } else {
-            this._player.setNextAvailable(false);
+            return this._controller.getValidNextSteps()
+                .then((nextSteps) => {
+                    const hasNext = nextSteps.length > 0;
+                    this._player.setNextAvailable(hasNext);
+                })
+                .catch((err) => {
+                    logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
+                    this._player.setNextAvailable(false);
+                });
         }
+        this._player.setNextAvailable(false);
+        return Promise.resolve();
     }
 
     // get a renderer for the given NE, and its Representation

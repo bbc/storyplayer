@@ -112,12 +112,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
                     this._testEndStallTimeout = setTimeout(() => {
                         const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                        if(time) {
+                        if(time && !this._hasEnded) {
                             // eslint-disable-next-line max-len
                             logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
                             if (time <= nowTime + 1.9) {
                                 logger.warn('Video end checker failed stall test');
-                                clearTimeout(this._testEndStallTimeout);
+                                clearTimeout(this._testEndStallTimeout);                                
                                 this._endedEventListener();
                             }
                         }

@@ -170,8 +170,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         target.appendChild(this._domElement);
         webGlRenderer.setSize(1600, 900);
 
-        this._playoutEngine.setPlayoutActive(this._rendererId);
-
         this._update = () => {
             const lat = Math.max(-85, Math.min(85, this._view.lat));
             const phi = THREE.Math.degToRad(90 - lat);
@@ -345,23 +343,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 this._scene.add(iconPlane);
             }
         });
-    }
-
-    _buildLinkIcon(iconObject: Object) {
-        super._buildLinkIcon(iconObject);
-        if (iconObject.position.three_d) {
-            const { phi, theta, radius, width, height } = iconObject.position.three_d;
-            const position = { lat: theta, long: phi, radius };
-            const size = { width, height };
-            if (iconObject.resolvedUrl) {
-                this._addIcon(
-                    iconObject.resolvedUrl,
-                    position,
-                    size,
-                    iconObject.targetNarrativeElementId,
-                );
-            }
-        }
     }
 
     _showChoiceIcons(iconDataObject: Object) {

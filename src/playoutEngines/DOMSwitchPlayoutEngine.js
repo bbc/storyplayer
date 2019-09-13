@@ -489,13 +489,26 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     );
 
                     // generic error
+                    // if the error code is 1001 and http status is 404 - we can't find the segement so ignore the error as we shouldn't ever get in this situation.
                     rendererPlayoutObj._shaka.addEventListener(
-                        'error', this._player._showErrorLayer
+                        'error', (e) => {
+                            if(e.detail && e.detail.data) {
+                                if(e.detail.code === 1001 && e.detail.data[1] === 404) {
+                                    logger.info('404 error failed to fetch media')
+                                    return;
+                                }
+                                this._player._showErrorLayer();
+                            }
+                        }
                     );
 
                     // resuming all good
-                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeErrorLayer);
-                    rendererPlayoutObj._shaka.addEventListener('adaptation', this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'adaptation', this._player._removeErrorLayer
+                    );
+                    rendererPlayoutObj._shaka.addEventListener(
+                        'adaptation', this._player._removeBufferingLayer
+                    );
 
 
                     if(this._debugPlayout) {
