@@ -1196,6 +1196,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        console.trace();
         this._player.setNextAvailable(false);
         this.inVariablePanel = true;
 

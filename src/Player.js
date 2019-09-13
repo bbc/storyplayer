@@ -755,7 +755,6 @@ class Player extends EventEmitter {
     }
 
     _addContinueModal(options: Object, resumeState: Object, startExperienceButtonHandler: Function) {
-        console.log('adding continue modal', resumeState);
         this.createResumeExperienceButton(options);
 
         const continueModalInnerContent = document.createElement('div');
@@ -785,13 +784,11 @@ class Player extends EventEmitter {
         );
 
         const resumeExperienceButtonHandler = () => {
-            console.log('just click resume', this._controller._storyId);
             this._controller._sessionManager.setHasClickedResume();
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._controller.restart(this._controller._storyId, resumeState, true);
             this._hideModalLayer();
-            this.removeExperienceStartButtonAndImage();
             this._enableUserInteraction();
         };
 
