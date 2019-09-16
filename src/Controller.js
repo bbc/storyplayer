@@ -127,7 +127,7 @@ export default class Controller extends EventEmitter {
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
         if(Object.keys(resumeState).length === 0) {
-            resumeState = this._sessionManager.fetchExistingSessionState(this._controller._storyId);
+            resumeState = this._sessionManager.fetchExistingSessionState();
         }
         this.start(storyId, initialState, true);
     }
@@ -191,6 +191,11 @@ export default class Controller extends EventEmitter {
                 this.emit('romperstorystarted');
                 this._renderManager.handleStoryStart(storyId);
 
+                const lastVisitedElement = this._sessionManager.fetchLastVisitedElement()
+                if(lastVisitedElement){
+                    logger.info(`attempting to jump to ${lastVisitedElement}`);
+                    // this._jumpToNarrativeElement(lastVisitedElement);
+                }
                 
             })
             .catch((err) => {
@@ -392,11 +397,11 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
-    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, restarting: boolean) {
+    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
-        if (this._reasoner && !restarting) {
+        if (this._reasoner) {
             this._reasoner.appendToHistory(narrativeElement.id);
         }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
