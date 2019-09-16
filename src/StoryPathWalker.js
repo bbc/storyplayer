@@ -176,6 +176,7 @@ export default class StoryPathWalker extends EventEmitter {
             linearReasoner.on('choiceOfLinks', _nonLinear);
 
             const _handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                console.log('SPW');
                 const parentStories = [storyId].concat(this._getStoryArray(linearReasoner, []));
                 const pathItem = {
                     stories: parentStories,
@@ -192,7 +193,7 @@ export default class StoryPathWalker extends EventEmitter {
             };
             linearReasoner.on('narrativeElementChanged', _handleNarrativeElementChanged);
 
-            linearReasoner.start();
+            linearReasoner.start({}, true);
         });
     }
 }

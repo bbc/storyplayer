@@ -44,7 +44,6 @@ export default class Controller extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
-        this._getStoryDefaultVariableState = this._getStoryDefaultVariableState.bind(this);
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
@@ -130,7 +129,7 @@ export default class Controller extends EventEmitter {
         if(Object.keys(resumeState).length === 0) {
             resumeState = this._sessionManager.fetchExistingSessionState();
         }
-        this.startStory(storyId, initialState);
+        this.start(storyId, initialState);
     }
 
     start(storyId: string, initialState?: Object) {
@@ -138,12 +137,42 @@ export default class Controller extends EventEmitter {
         if(!this._sessionManager) {
             this._createSessionManager(storyId);
         }
-        if(this._sessionManager._existingSession) {
+        switch (this._sessionManager.sessionState) {
+        case 'RESUME':
+            this.resumeStoryFromState(storyId, initialState);
+            break;
+        case 'EXISTING':
+            this.resumeStoryFromState(storyId, initialState);
+            break;    
+        case 'RESET':
+            this.startFromDefaultState(storyId);
+            break;
+        case 'NEW':
+            this.startFromDefaultState(storyId, initialState);
+            break;    
+        default:
+            this.startFromDefaultState(storyId, initialState);
+            break;
+        }
+       
+    }
+
+    resumeStoryFromState(storyId: string, initialState?: Object) {
+        if (initialState && Object.keys(initialState).length > 0) {
+            this.startStory(storyId, initialState);
+        } else {
             const resumeState = this._sessionManager.fetchExistingSessionState();
             this.startStory(storyId, resumeState);
+        }
+        
+    }
+
+    startFromDefaultState(storyId: string, initialState?: Object) {
+        if (initialState && Object.keys(initialState).length > 0) {
+            this.startStory(storyId, initialState);
         } else {
             this.getDefaultInitialState().then(variableState => {
-                if(Object.keys(variableState).length > 0 ) {
+                if (Object.keys(variableState).length > 0) {
                     this.startStory(storyId, variableState);
                 }
                 else {
@@ -151,7 +180,6 @@ export default class Controller extends EventEmitter {
                 }
             });
         }
-       
     }
 
     startStory(storyId: string, initialState?: Object = {}) {
@@ -188,6 +216,7 @@ export default class Controller extends EventEmitter {
                 reasoner.on('error', _handleError);
 
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                    console.log('CONTROLLER')
                     this._handleNEChange(reasoner, narrativeElement)
                         .then(() => {
                             if (this._linearStoryPath && !this._storyIconRendererCreated) {
@@ -203,16 +232,7 @@ export default class Controller extends EventEmitter {
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
-                if (this._sessionManager._existingSession) {
-                    const lastVisitedElement = this._sessionManager.fetchLastVisitedElement()
-                    if (lastVisitedElement) {
-                        logger.info(`attempting to jump to ${lastVisitedElement}`);
-                        this._jumpToNarrativeElement(lastVisitedElement);
-                    }
-                } else {
-                    // this._reasoner._chooseBeginning();
-                }
-                
+                this.chooseBeginningElement();                
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
@@ -222,6 +242,42 @@ export default class Controller extends EventEmitter {
             .catch((err) => {
                 logger.warn('Error starting story', err);
             });
+    }
+
+    chooseBeginningElement() {
+
+        switch (this._sessionManager.sessionState) {
+        case 'RESUME':{
+            const lastVisitedElement = this._sessionManager.fetchLastVisitedElement();
+            if (lastVisitedElement) {
+                logger.info(`attempting to jump to ${lastVisitedElement}`);
+                this._jumpToNarrativeElement(lastVisitedElement);
+            } else {
+                this._reasoner._chooseBeginning();
+            }
+            break;
+        }
+        case 'RESET': {
+            this._reasoner._chooseBeginning();
+            break;
+        }
+        case 'EXISTING':{
+            const lastVisitedElement = this._sessionManager.fetchLastVisitedElement();
+            if (lastVisitedElement) {
+                logger.info(`attempting to jump to ${lastVisitedElement}`);
+                this._jumpToNarrativeElement(lastVisitedElement);
+            } else {
+                this._reasoner._chooseBeginning();
+            }
+            break;
+        }
+        case 'NEW':
+            this._reasoner._chooseBeginning();
+            break;
+        default:
+            this._reasoner._chooseBeginning();
+            break;
+        }
     }
 
     // get the current and next narrative elements
@@ -608,7 +664,7 @@ export default class Controller extends EventEmitter {
 
     getDefaultInitialState() {
         return this._getAllStories(this._storyId).then((storyIds) => {
-            return Promise.all(storyIds.map(this._getStoryDefaultVariableState))
+            return Promise.all(storyIds.map(id => this._getStoryDefaultVariableState(id)))
         }).then(allVariables => {
             const flattenedVariables = [].concat(...allVariables);
             return flattenedVariables.reduce((variablesObject, variable) => {

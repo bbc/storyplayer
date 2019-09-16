@@ -109,14 +109,17 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start(initialState?: Object = {}) {
+    start(initialState?: Object = {}, spw) {
+        console.trace('REASONER');
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
         this._applyInitialState(initialState);
-        this._chooseBeginning();
+        if(spw) {
+            this._chooseBeginning(); 
+        }
     }
 
     // Get the variables defined in this story
@@ -312,7 +315,7 @@ export default class StoryReasoner extends EventEmitter {
      * @param {string} narrativeElementId The id of the narrative element visited
      */
     appendToHistory(narrativeElementId: string) {
-        console.trace();
+        console.trace('HISTORY');
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get(InternalVariableNames.PATH_HISTORY)
             .then((value) => {

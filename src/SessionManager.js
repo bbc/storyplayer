@@ -12,25 +12,28 @@ const fetchStateFromStorage = (key: string, defaultValue: string) => {
 }
 
 
+const SESSION_STATE = {
+    RESUME: 'RESUME',
+    RESTART: 'RESTART',
+    NEW: 'NEW',
+    EXISTING: 'EXISTING',
+};
+
 export default class SessionManager extends EventEmitter {
     _storyId: string;
-    
-    _hasClickedResume: boolean;
     
     _existingSession: boolean;
 
     _controller: Controller;
 
-    emptyObject: string;
-
-    emptyArray: string;
+    sessionState: string;
     
     constructor(storyId?: string, controller: Controller) {
         super();
         this._storyId = storyId;
         this._controller = controller;
-        this._hasClickedResume = false;
         this._existingSession = this.checkExistingSession();
+        this.sessionState = this._existingSession ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
     deleteExistingSessions() {
@@ -41,6 +44,7 @@ export default class SessionManager extends EventEmitter {
             const filteredSessions = existingSessions.filter(sess => sess !== !this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
+        this._existingSession = false;
         this.resetSessionState();
     }
 
@@ -86,11 +90,7 @@ export default class SessionManager extends EventEmitter {
         return pathHistory[pathHistory.length -1];
     }
 
-    setHasClickedResume() {
-        this._hasClickedResume = true;
-    }
-
-    unsetHasClickedResume() {
-        this._hasClickedResume = false;
+    setSessionState(state: string) {
+        this.sessionState = SESSION_STATE[state];
     }
 }

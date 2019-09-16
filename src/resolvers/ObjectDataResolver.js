@@ -58,6 +58,7 @@ export default function (data: Object): DataResolver {
     const set = (name: string, value: any) => {
         // eslint-disable-next-line no-param-reassign
         data[name] = value;
+        console.log('DATA', data);
     };
 
     return { get, set, saveToStorage, saveAllToStorage };
