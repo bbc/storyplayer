@@ -12,7 +12,7 @@ const fetchStateFromStorage = (key: string, defaultValue: string) => {
 }
 
 
-const SESSION_STATE = {
+export const SESSION_STATE = {
     RESUME: 'RESUME',
     RESTART: 'RESTART',
     NEW: 'NEW',
@@ -45,7 +45,6 @@ export default class SessionManager extends EventEmitter {
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
         this._existingSession = false;
-        this.resetSessionState();
     }
 
     setExistingSession() {
@@ -75,19 +74,14 @@ export default class SessionManager extends EventEmitter {
         return {};
     }
 
-    resetSessionState() {
-        this._controller.getDefaultInitialState()
-            .then((storyVariables) => {
-                this._controller.setVariables(storyVariables);
-            });
-    }
-
     fetchLastVisitedElement() {
         const resumeState = this.fetchExistingSessionState();
         if(!resumeState) return null;
         const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+        if(!pathHistory) return null;
         if(pathHistory.length === 0) return null;
-        return pathHistory[pathHistory.length -1];
+        const lastVisited = pathHistory[pathHistory.length -1];
+        return lastVisited;
     }
 
     setSessionState(state: string) {

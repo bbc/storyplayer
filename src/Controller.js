@@ -131,6 +131,18 @@ export default class Controller extends EventEmitter {
         }
         this.start(storyId, initialState);
     }
+    
+    
+    /**
+     * Reset the story and keep the reasoner for it.
+     * @param  {string} storyId story to reset
+     */
+    resetStory(storyId: string){
+        // we're just resetting
+        this._renderManager.prepareForRestart();
+        this.start(storyId);
+    }
+
 
     start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
@@ -139,17 +151,11 @@ export default class Controller extends EventEmitter {
         }
         switch (this._sessionManager.sessionState) {
         case 'RESUME':
-            this.resumeStoryFromState(storyId, initialState);
-            break;
         case 'EXISTING':
             this.resumeStoryFromState(storyId, initialState);
             break;    
-        case 'RESET':
-            this.startFromDefaultState(storyId);
-            break;
-        case 'NEW':
-            this.startFromDefaultState(storyId, initialState);
-            break;    
+        case 'RESTART':
+        case 'NEW':   
         default:
             this.startFromDefaultState(storyId, initialState);
             break;
@@ -172,6 +178,7 @@ export default class Controller extends EventEmitter {
             this.startStory(storyId, initialState);
         } else {
             this.getDefaultInitialState().then(variableState => {
+                this.setDefaultState(variableState);
                 if (Object.keys(variableState).length > 0) {
                     this.startStory(storyId, variableState);
                 }
@@ -257,7 +264,7 @@ export default class Controller extends EventEmitter {
             }
             break;
         }
-        case 'RESET': {
+        case 'RESTART': {
             this._reasoner._chooseBeginning();
             break;
         }
@@ -272,8 +279,6 @@ export default class Controller extends EventEmitter {
             break;
         }
         case 'NEW':
-            this._reasoner._chooseBeginning();
-            break;
         default:
             this._reasoner._chooseBeginning();
             break;
@@ -749,6 +754,16 @@ export default class Controller extends EventEmitter {
                 }
                 return {};
             });
+    }
+
+
+    /**
+     * Sets the default variables if we have a reasoner
+     * @param  {} variables An object of form { name1: valuetring1, name2: valuestring2 }
+     */
+    setDefaultState(variables: Object) {
+        this.setVariables(variables);
+        this.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
     }
 
     /**

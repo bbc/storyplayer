@@ -11,6 +11,7 @@ import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
+import { SESSION_STATE } from './SessionManager';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -781,8 +782,9 @@ class Player extends EventEmitter {
         const cancelButtonHandler = () => {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
-            this._controller._sessionManager.setSessionState('RESTART');
+            this._controller._sessionManager.setSessionState(SESSION_STATE.RESTART);
             this._controller._sessionManager.deleteExistingSessions();
+            this._controller.resetStory(this._controller._storyId);
             this._hideModalLayer();
             this._startButtonHandler();
         };
@@ -794,10 +796,10 @@ class Player extends EventEmitter {
         );
 
         const resumeExperienceButtonHandler = () => {
-            this._narrativeElementTransport.classList.remove('romper-inactive');
-            this._controller._sessionManager.setSessionState('RESUME');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            this._controller.restart(this._controller._storyId, resumeState);
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._controller._sessionManager.setSessionState(SESSION_STATE.RESUME);
+            this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
             this._enableUserInteraction();
             
