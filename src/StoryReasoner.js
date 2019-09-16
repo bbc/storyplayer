@@ -115,14 +115,16 @@ export default class StoryReasoner extends EventEmitter {
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
-        if(!restarting) {
-            this._fetchVariablesFromStory().then(variableState => {
-                this._applyInitialState(variableState);
-            });
+        console.log('reasoner, restarting', restarting);
+        console.log('reasoner, initialstate', initialState);
+        // if(!restarting) {
+        //     this._fetchVariablesFromStory().then(variableState => {
+        //         this._applyInitialState(variableState);
+        //     });
             
-        } else {
-            this._applyResumeState(initialState);
-        }
+        // } else {
+        this._applyResumeState(initialState);
+        // }
         this._chooseBeginning();
     }
 

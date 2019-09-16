@@ -4,6 +4,13 @@ import Controller from './Controller';
 import { InternalVariableNames } from './InternalVariables';
 
 const EXISTING_SESSIONS = 'EXISTING_SESSION'
+const EMPTY_OBJECT = '{}';
+const EMPTY_ARRAY= '[]';
+
+const fetchStateFromStorage = (key: string, defaultValue: string) => {
+    return JSON.parse(localStorage.getItem(key) || defaultValue);
+}
+
 
 export default class SessionManager extends EventEmitter {
     _storyId: string;
@@ -13,6 +20,10 @@ export default class SessionManager extends EventEmitter {
     _existingSession: boolean;
 
     _controller: Controller;
+
+    emptyObject: string;
+
+    emptyArray: string;
     
     constructor(storyId?: string, controller: Controller) {
         super();
@@ -25,10 +36,9 @@ export default class SessionManager extends EventEmitter {
     deleteExistingSessions() {
         if (!this._storyId) return;
         localStorage.removeItem(this._storyId);
-        const existingSessionString = localStorage.getItem(EXISTING_SESSIONS) || '[]';
-        const existingSession = JSON.parse(existingSessionString);
-        if (existingSession.includes(!this._storyId)) {
-            const filteredSessions = existingSession.filter(sess => sess !== !this._storyId);
+        const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
+        if (existingSessions.includes(!this._storyId)) {
+            const filteredSessions = existingSessions.filter(sess => sess !== !this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
         this.resetSessionState();
@@ -36,8 +46,7 @@ export default class SessionManager extends EventEmitter {
 
     setExistingSession() {
         if (!this._storyId) return;
-        const existingSession = localStorage.getItem(EXISTING_SESSIONS) || '[]';
-        const existingSessions = JSON.parse(existingSession);
+        const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
         if (!existingSessions.includes(this._storyId)) {
             existingSessions.push(this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(existingSessions));
@@ -47,21 +56,19 @@ export default class SessionManager extends EventEmitter {
 
     checkExistingSession() {
         if (!this._storyId) return false;
-        const existingSession = localStorage.getItem(EXISTING_SESSIONS);
-        if(!existingSession) return false;
-        const existingSessions = JSON.parse(existingSession);
+        const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
+        if(!existingSessions) return false;
         const hasExistingSession = existingSessions.includes(this._storyId);  
         return hasExistingSession || false;
     }
 
     fetchExistingSessionState() {
-        if(!this._storyId) return false;
-        const dataString = localStorage.getItem(this._storyId);
-        if (dataString && dataString.length > 0) {
-            const dataStore = JSON.parse(dataString);
-            return dataStore;
+        if(!this._storyId) return {};
+        const existingSessionState = fetchStateFromStorage(this._storyId, EMPTY_OBJECT);
+        if (existingSessionState ) {
+            return existingSessionState;
         }
-        return false;
+        return {};
     }
 
     resetSessionState() {

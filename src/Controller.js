@@ -1,6 +1,5 @@
 // @flow
 import EventEmitter from 'events';
-
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
@@ -130,18 +129,27 @@ export default class Controller extends EventEmitter {
         if(Object.keys(resumeState).length === 0) {
             resumeState = this._sessionManager.fetchExistingSessionState();
         }
-        this.start(storyId, initialState, true);
+        this.start(storyId, initialState);
     }
 
-    start(storyId: string, initialState?: Object = {}, restarting: boolean) {
+    start(storyId: string, initialState?: Object) {
+        if(!this._sessionManager) {
+            this._createSessionManager(storyId);
+        }
+        if(!this._sessionManager._existingSession) {
+            const resumeState = this._sessionManager.fetchExistingSessionState();
+            this.startStory(storyId, resumeState);
+        } else {
+            this.startStory(storyId, initialState);
+        }
+       
+    }
+
+    startStory(storyId: string, initialState?: Object = {}) {
         this._storyId = storyId;
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
         });
-
-        if(!this._sessionManager) {
-            this._createSessionManager(storyId);
-        }
         window._sessionManager = this._sessionManager;
 
         // event handling functions for StoryReasoner
@@ -186,7 +194,7 @@ export default class Controller extends EventEmitter {
                 reasoner.on(VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_CHANGED, e)});
 
                 this._reasoner = reasoner;
-                this._reasoner.start(initialState, restarting);
+                this._reasoner.start(initialState);
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
