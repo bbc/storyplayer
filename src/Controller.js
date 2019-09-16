@@ -269,13 +269,7 @@ export default class Controller extends EventEmitter {
             break;
         }
         case 'EXISTING':{
-            const lastVisitedElement = this._sessionManager.fetchLastVisitedElement();
-            if (lastVisitedElement) {
-                logger.info(`attempting to jump to ${lastVisitedElement}`);
-                this._jumpToNarrativeElement(lastVisitedElement);
-            } else {
-                this._reasoner._chooseBeginning();
-            }
+            // we don't want to choose a beginning until the user selects one
             break;
         }
         case 'NEW':
