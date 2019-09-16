@@ -37,6 +37,7 @@ export default class Controller extends EventEmitter {
         super();
         this._storyId = null;
         this._reasoner = null;
+        // $FlowFixMe
         this._sessionManager = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
@@ -299,7 +300,7 @@ export default class Controller extends EventEmitter {
         );
     }
 
-    _createSessionManager(storyId) {
+    _createSessionManager(storyId: string) {
         this._sessionManager = new SessionManager(storyId, this);
     }
 

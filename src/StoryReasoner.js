@@ -109,7 +109,7 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start(initialState?: Object = {}, restarting: boolean) {
+    start(initialState?: Object = {}, restarting?: boolean) {
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
