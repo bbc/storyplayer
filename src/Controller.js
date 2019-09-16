@@ -129,14 +129,14 @@ export default class Controller extends EventEmitter {
         if(Object.keys(resumeState).length === 0) {
             resumeState = this._sessionManager.fetchExistingSessionState();
         }
-        this.start(storyId, initialState);
+        this.startStory(storyId, initialState);
     }
 
     start(storyId: string, initialState?: Object) {
         if(!this._sessionManager) {
             this._createSessionManager(storyId);
         }
-        if(!this._sessionManager._existingSession) {
+        if(this._sessionManager._existingSession) {
             const resumeState = this._sessionManager.fetchExistingSessionState();
             this.startStory(storyId, resumeState);
         } else {
