@@ -44,6 +44,7 @@ export default class Controller extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
+        this._getStoryDefaultVariableState = this._getStoryDefaultVariableState.bind(this);
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
@@ -133,6 +134,7 @@ export default class Controller extends EventEmitter {
     }
 
     start(storyId: string, initialState?: Object) {
+        this._storyId = storyId;
         if(!this._sessionManager) {
             this._createSessionManager(storyId);
         }
@@ -140,13 +142,19 @@ export default class Controller extends EventEmitter {
             const resumeState = this._sessionManager.fetchExistingSessionState();
             this.startStory(storyId, resumeState);
         } else {
-            this.startStory(storyId, initialState);
+            this.getDefaultInitialState().then(variableState => {
+                if(Object.keys(variableState).length > 0 ) {
+                    this.startStory(storyId, variableState);
+                }
+                else {
+                    this.startStory(storyId, initialState);
+                }
+            });
         }
        
     }
 
     startStory(storyId: string, initialState?: Object = {}) {
-        this._storyId = storyId;
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
         });
@@ -195,16 +203,20 @@ export default class Controller extends EventEmitter {
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
+                if (this._sessionManager._existingSession) {
+                    const lastVisitedElement = this._sessionManager.fetchLastVisitedElement()
+                    if (lastVisitedElement) {
+                        logger.info(`attempting to jump to ${lastVisitedElement}`);
+                        this._jumpToNarrativeElement(lastVisitedElement);
+                    }
+                } else {
+                    // this._reasoner._chooseBeginning();
+                }
+                
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
                 this._renderManager.handleStoryStart(storyId);
-
-                const lastVisitedElement = this._sessionManager.fetchLastVisitedElement()
-                if(lastVisitedElement){
-                    logger.info(`attempting to jump to ${lastVisitedElement}`);
-                    // this._jumpToNarrativeElement(lastVisitedElement);
-                }
                 
             })
             .catch((err) => {
@@ -566,18 +578,18 @@ export default class Controller extends EventEmitter {
     }
 
     /**
-     * Get the variables present in the story
+     * Get the variables and their state present in the story
      * @param {*} No parameters, it uses the story Id
      * recurses into substories
      */
-    getVariables(): Promise<Object> {
+    getVariableState(): Promise<Object> {
         const storyId = this._storyId;
         if (storyId) {
             return this._getAllStories(storyId)
                 .then((subStoryIds) => {
                     const subVarPromises = [];
                     subStoryIds.forEach((subid) => {
-                        subVarPromises.push(this._getVariablesForStory(subid));
+                        subVarPromises.push(this._getVariableStateForStory(subid));
                     });
                     return Promise.all(subVarPromises);
                 })
@@ -594,20 +606,30 @@ export default class Controller extends EventEmitter {
         return Promise.resolve({});
     }
 
-    /**
-     * Sets initial state to be default
-     *  * @param {*} No parameters, it uses the story Id
-     */
     getDefaultInitialState() {
-        return this.getVariables().then((allVariables) => {
-            return Object.keys(allVariables).map(variable => {
-                return {name: variable, value: allVariables[variable].default_value}
-            }).reduce((variablesObject, variable) => {
+        return this._getAllStories(this._storyId).then((storyIds) => {
+            return Promise.all(storyIds.map(this._getStoryDefaultVariableState))
+        }).then(allVariables => {
+            const flattenedVariables = [].concat(...allVariables);
+            return flattenedVariables.reduce((variablesObject, variable) => {
                 // eslint-disable-next-line no-param-reassign
                 variablesObject[variable.name] = variable.value;
                 return variablesObject;
-            }, {})
+            }, {});
         });
+    }
+
+    _getStoryDefaultVariableState(storyId: string) {
+        return this._fetchers.storyFetcher(storyId)
+            .then((story) => {
+                const { variables } = story;
+                if (variables) {
+                    return Object.keys(variables).map(variable => {
+                        return {name: variable, value: variables[variable].default_value}
+                    });
+                }
+                return Promise.resolve();
+            });
     }
 
     // get the ids of every story nested within the one given
@@ -643,7 +665,7 @@ export default class Controller extends EventEmitter {
     }
 
     // get all the variables for the story given
-    _getVariablesForStory(storyId: string) {
+    _getVariableStateForStory(storyId: string) {
         let variables;
         return this._fetchers.storyFetcher(storyId)
             .then((story) => {

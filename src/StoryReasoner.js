@@ -109,22 +109,13 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start(initialState?: Object = {}, restarting?: boolean) {
+    start(initialState?: Object = {}) {
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
-        console.log('reasoner, restarting', restarting);
-        console.log('reasoner, initialstate', initialState);
-        // if(!restarting) {
-        //     this._fetchVariablesFromStory().then(variableState => {
-        //         this._applyInitialState(variableState);
-        //     });
-            
-        // } else {
-        this._applyResumeState(initialState);
-        // }
+        this._applyInitialState(initialState);
         this._chooseBeginning();
     }
 
@@ -160,17 +151,9 @@ export default class StoryReasoner extends EventEmitter {
     _applyInitialState(initialState: Object) {
         if(initialState) {
             Object.keys(initialState).forEach((varName) => {
-                this.setVariableValue(varName, initialState[varName]);
+                this.setVariableAndSaveLocal(varName, initialState[varName]);
             });
         }
-        const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
-        internalVarSetter.setAllVariables();
-    }
-
-    _applyResumeState(resumeState: Object) {
-        Object.keys(resumeState).forEach((varName) => {
-            this.setVariableAndSaveLocal(varName, resumeState[varName]);
-        });
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
     }

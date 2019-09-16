@@ -296,7 +296,7 @@
 
         function addVariableControls() {
             const varPanel = document.getElementById('variables-generic');
-            romperInstance.getVariables()
+            romperInstance.getVariableState()
             .then((variableDeclaration) => {
                 if (variableDeclaration === undefined || variableDeclaration === {}) {
                     varPanel.innerHTML = 'There are no variables in this story';

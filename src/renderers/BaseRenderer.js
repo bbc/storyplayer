@@ -1240,7 +1240,7 @@ export default class BaseRenderer extends EventEmitter {
         titleDiv.className = 'romper-var-form-title';
         overlayImageElement.appendChild(titleDiv);
 
-        this._controller.getVariables()
+        this._controller.getVariableState()
             .then((storyVariables) => {
                 const variablesFormContainer = document.createElement('div');
                 variablesFormContainer.className = 'romper-var-form-var-containers';
