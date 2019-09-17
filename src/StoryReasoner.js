@@ -109,7 +109,7 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#choiceOfBeginnings
      * @return {void}
      */
-    start(initialState?: Object = {}, spw) {
+    start(initialState?: Object = {}) {
         console.trace('REASONER');
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
@@ -117,9 +117,6 @@ export default class StoryReasoner extends EventEmitter {
         }
         this._storyStarted = true;
         this._applyInitialState(initialState);
-        if(spw) {
-            this._chooseBeginning(); 
-        }
     }
 
     // Get the variables defined in this story
@@ -152,7 +149,7 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _applyInitialState(initialState: Object) {
-        if(initialState) {
+        if(initialState && Object.keys(initialState).length > 0) {
             Object.keys(initialState).forEach((varName) => {
                 this.setVariableAndSaveLocal(varName, initialState[varName]);
             });
@@ -274,9 +271,22 @@ export default class StoryReasoner extends EventEmitter {
                             this.emit('error', err);
                         });
                 }
-            } else {
+            }
+            else {
                 this.emit('narrativeElementChanged', this._currentNarrativeElement);
             }
+        }
+    }
+
+    createSubStoryReasoner(narrativeElementId: string) {
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+        this._resolving = true;
+        if (this._currentNarrativeElement.body.story_target_id) {
+            this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
+                .catch((err) => {
+                    this.emit('error', err);
+                });
         }
     }
 
@@ -358,6 +368,7 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = false;
         this._subStoryReasoner.setParent(this);
         subStoryReasoner.start();
+        subStoryReasoner._chooseBeginning();
     }
 
     setParent(parent: StoryReasoner) {

@@ -193,7 +193,8 @@ export default class StoryPathWalker extends EventEmitter {
             };
             linearReasoner.on('narrativeElementChanged', _handleNarrativeElementChanged);
 
-            linearReasoner.start({}, true);
+            linearReasoner.start();
+            linearReasoner._chooseBeginning();
         });
     }
 }

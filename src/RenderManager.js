@@ -244,7 +244,7 @@ export default class RenderManager extends EventEmitter {
             background_art_asset_collection_id: '',
             button_class: 'romper-start-button',
             text: 'Start',
-            hide_narrative_buttons: !this._controller._sessionManager._hasClickedResume,
+            hide_narrative_buttons: true,
             background_art: this._assetUrls.noBackgroundAssetUrl,
             privacy_notice: this._privacyNotice,
         };

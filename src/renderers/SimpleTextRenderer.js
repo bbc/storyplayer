@@ -95,7 +95,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
                 if (response.ok) {
                     return response.text();
                 }
-                return Promise.reject(new Error("Invalid response: ",response));
+                return Promise.reject(new Error(`Invalid response: ${response.toString()}`));
             })
             .then(text => this.populateTextElement(text))
             .catch((rejection) => {

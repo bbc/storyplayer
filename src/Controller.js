@@ -36,7 +36,6 @@ export default class Controller extends EventEmitter {
         super();
         this._storyId = null;
         this._reasoner = null;
-        // $FlowFixMe
         this._sessionManager = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
@@ -239,7 +238,7 @@ export default class Controller extends EventEmitter {
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
-                this.chooseBeginningElement();                
+                this.chooseBeginningElement(); 
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
@@ -251,6 +250,19 @@ export default class Controller extends EventEmitter {
             });
     }
 
+
+    chooseResumeElement(narrativeElement: string) {
+        // if the element is in the top level story we can jump to it
+        if(narrativeElement in this._reasoner._narrativeElements) {
+            this._jumpToNarrativeElement(narrativeElement);
+        } else {
+            // if it is in a sub story we need to create a reasoner
+            this._reasoner.createSubStoryReasoner(narrativeElement);
+            console.log(this._reasoner)
+        }
+       
+    }
+
     chooseBeginningElement() {
 
         switch (this._sessionManager.sessionState) {
@@ -258,7 +270,8 @@ export default class Controller extends EventEmitter {
             const lastVisitedElement = this._sessionManager.fetchLastVisitedElement();
             if (lastVisitedElement) {
                 logger.info(`attempting to jump to ${lastVisitedElement}`);
-                this._jumpToNarrativeElement(lastVisitedElement);
+                // need to jump to the correct narrative element here
+                this.chooseResumeElement(lastVisitedElement);
             } else {
                 this._reasoner._chooseBeginning();
             }
@@ -584,6 +597,7 @@ export default class Controller extends EventEmitter {
             shadowReasoner.on('narrativeElementChanged', shadowHandleNarrativeElementChanged);
 
             shadowReasoner.start();
+            shadowReasoner._chooseBeginning();
         });
     }
 
