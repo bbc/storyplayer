@@ -17,7 +17,7 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
 
-import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT} from './constants';
+import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT, REASONER_EVENTS } from './constants';
 import SessionManager from './SessionManager';
 
 // eslint-disable-next-line max-len
@@ -145,6 +145,7 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
+        window.controller = this;
         if(!this._sessionManager) {
             this._createSessionManager(storyId);
         }
@@ -159,7 +160,6 @@ export default class Controller extends EventEmitter {
             this.startFromDefaultState(storyId, initialState);
             break;
         }
-       
     }
 
     resumeStoryFromState(storyId: string, initialState?: Object) {
@@ -238,7 +238,8 @@ export default class Controller extends EventEmitter {
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
-                this.chooseBeginningElement(); 
+                
+                this._chooseBeginningElement();
 
                 this._addListenersToRenderManager();
                 this.emit('romperstorystarted');
@@ -251,34 +252,30 @@ export default class Controller extends EventEmitter {
     }
 
 
-    chooseResumeElement(narrativeElement: string) {
+    _chooseResumeElement() {
         // if the element is in the top level story we can jump to it
+        const narrativeElement = this._sessionManager.fetchLastVisitedElement();
+        if(!narrativeElement) {
+            this._reasoner.chooseBeginning();
+            return;
+        }
         if(narrativeElement in this._reasoner._narrativeElements) {
             this._jumpToNarrativeElement(narrativeElement);
         } else {
             // if it is in a sub story we need to create a reasoner
-            this._reasoner.createSubStoryReasoner(narrativeElement);
-            console.log(this._reasoner)
+            this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElement);
         }
-       
     }
 
-    chooseBeginningElement() {
+    _chooseBeginningElement() {
 
         switch (this._sessionManager.sessionState) {
         case 'RESUME':{
-            const lastVisitedElement = this._sessionManager.fetchLastVisitedElement();
-            if (lastVisitedElement) {
-                logger.info(`attempting to jump to ${lastVisitedElement}`);
-                // need to jump to the correct narrative element here
-                this.chooseResumeElement(lastVisitedElement);
-            } else {
-                this._reasoner._chooseBeginning();
-            }
+            this._chooseResumeElement();
             break;
         }
         case 'RESTART': {
-            this._reasoner._chooseBeginning();
+            this._reasoner.chooseBeginning();
             break;
         }
         case 'EXISTING':{
@@ -287,7 +284,7 @@ export default class Controller extends EventEmitter {
         }
         case 'NEW':
         default:
-            this._reasoner._chooseBeginning();
+            this._reasoner.chooseBeginning();
             break;
         }
     }
@@ -443,7 +440,7 @@ export default class Controller extends EventEmitter {
                     });
             };
 
-            spw.on('walkComplete', _handleWalkEnd);
+            spw.on(REASONER_EVENTS.WALK_COMPLETE, _handleWalkEnd);
             spw.parseStory(storyId);
         });
     }
@@ -486,11 +483,11 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
-    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
+    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, resuming?: boolean) {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
-        if (this._reasoner) {
+        if (this._reasoner && !resuming) {
             this._reasoner.appendToHistory(narrativeElement.id);
         }
         this._logNEChange(this._currentNarrativeElement, narrativeElement);
@@ -532,7 +529,7 @@ export default class Controller extends EventEmitter {
     // create a reasoner to do a shadow walk of the story graph
     // when it reaches a target node, it boots out the original reasoner
     // and takes its place (with suitable event listeners)
-    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string) {
+    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string, resuming?: boolean) {
         this._storyReasonerFactory(storyId).then((shadowReasoner) => {
             if (this._storyId !== storyId) {
                 return;
@@ -588,7 +585,7 @@ export default class Controller extends EventEmitter {
 
                     // now we've walked to the target, trigger the change event handler
                     // so that it calls the renderers etc.
-                    this._handleNEChange(shadowReasoner, narrativeElement);
+                    this._handleNEChange(shadowReasoner, narrativeElement, resuming);
                 } else {
                     // just keep on walking until we find it (or reach the end)
                     shadowReasoner.next();
@@ -597,7 +594,7 @@ export default class Controller extends EventEmitter {
             shadowReasoner.on('narrativeElementChanged', shadowHandleNarrativeElementChanged);
 
             shadowReasoner.start();
-            shadowReasoner._chooseBeginning();
+            shadowReasoner.chooseBeginning();
         });
     }
 
@@ -676,6 +673,8 @@ export default class Controller extends EventEmitter {
     }
 
     getDefaultInitialState() {
+        if (!this._storyId) return {};
+
         return this._getAllStories(this._storyId).then((storyIds) => {
             return Promise.all(storyIds.map(id => this._getStoryDefaultVariableState(id)))
         }).then(allVariables => {

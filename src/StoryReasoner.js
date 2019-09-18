@@ -189,7 +189,7 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
-    _chooseBeginning() {
+    chooseBeginning() {
         this._resolving = true;
         if (this._story.beginnings.length > 1) {
             this.emit('choiceOfBeginnings');
@@ -248,7 +248,7 @@ export default class StoryReasoner extends EventEmitter {
         ) {
             this._setCurrentNarrativeElement(nextElement.target_narrative_element_id);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
-            this._chooseBeginning();
+            this.chooseBeginning();
         } else {
             this.emit(
                 'error',
@@ -339,14 +339,21 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
+        this._addSubReasonerListeners(subStoryReasoner);
+        this._subStoryReasoner = subStoryReasoner;
+        this._resolving = false;
+        this._subStoryReasoner.setParent(this);
+        subStoryReasoner.start();
+        subStoryReasoner.chooseBeginning();
+    }
+
+    _addSubReasonerListeners(subStoryReasoner: StoryReasoner) {
         const errorCallback = err => this.emit('error', err);
         const branchBeginningCallback = () => this.emit('choiceOfBeginnings');
         const branchLinkCallback = () => this.emit('choiceOfLinks');
-
         const elementChangedCallback = (element) => {
             this.emit('narrativeElementChanged', element);
         };
-
         const storyEndCallback = () => {
             this._subStoryReasoner = null;
             this._chooseNextNode();
@@ -354,7 +361,6 @@ export default class StoryReasoner extends EventEmitter {
             subStoryReasoner.removeListener('narrativeElementChanged', elementChangedCallback);
             subStoryReasoner.removeListener('storyEnd', storyEndCallback);
         };
-
         subStoryReasoner.on('choiceOfBeginnings', branchBeginningCallback);
         subStoryReasoner.on('choiceOfLinks', branchLinkCallback);
         subStoryReasoner.on('error', errorCallback);
@@ -363,12 +369,6 @@ export default class StoryReasoner extends EventEmitter {
         subStoryReasoner.on(VARIABLE_CHANGED, (event) => {
             this.emit(VARIABLE_CHANGED, event);
         });
-
-        this._subStoryReasoner = subStoryReasoner;
-        this._resolving = false;
-        this._subStoryReasoner.setParent(this);
-        subStoryReasoner.start();
-        subStoryReasoner._chooseBeginning();
     }
 
     setParent(parent: StoryReasoner) {

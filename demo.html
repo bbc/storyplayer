@@ -50,6 +50,9 @@
                             config.narrative_elements
                                 .filter(narrativeElementObject => narrativeElementObject.id === id)[0]
                         ).then(narrativeElementObject => narrativeElementObject ? narrativeElementObject : Promise.reject('no such narrative element: ' + id)),
+                        subStoryFetcher: id => Promise.resolve(
+                            config.stories.find(s => s.narrative_elements.includes(id)[0]
+                            )).then(storyObject => storyObject ? storyObject : Promise.reject('no story for narrative element')),
                     });
 
                     romper.start(config.stories[0].id);

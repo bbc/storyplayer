@@ -9,6 +9,7 @@ import type {
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import logger from './logger';
+import { REASONER_EVENTS } from './constants';
 
 export type StoryPathItem = {
     stories: Array<string>,
@@ -118,7 +119,7 @@ export default class StoryPathWalker extends EventEmitter {
 
     // finished the walk - notify listeners
     _walkComplete(path: Array<PathGather>) {
-        this._getRepresentationCollections(path).then(() => this.emit('walkComplete'));
+        this._getRepresentationCollections(path).then(() => this.emit(REASONER_EVENTS.WALK_COMPLETE));
     }
 
     /**
@@ -164,7 +165,7 @@ export default class StoryPathWalker extends EventEmitter {
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
                 this._pathmap = [];
-                this.emit('walkComplete');
+                this.emit(REASONER_EVENTS.WALK_COMPLETE);
             };
             linearReasoner.on('error', _handleError);
 
@@ -194,7 +195,7 @@ export default class StoryPathWalker extends EventEmitter {
             linearReasoner.on('narrativeElementChanged', _handleNarrativeElementChanged);
 
             linearReasoner.start();
-            linearReasoner._chooseBeginning();
+            linearReasoner.chooseBeginning();
         });
     }
 }
