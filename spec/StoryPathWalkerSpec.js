@@ -9,10 +9,10 @@ import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 import ObjectDataResolverFactory from '../src/resolvers/ObjectDataResolver';
 
-import typeimportimportimport { REASONER_EVENTS } from '../src/constants';
- { REASONER_EVENTS } from '../src/constants';
- { REASONER_EVENTS } from '../src/constants';
- { Experience } from '../src/romper';
+import type { Experience } from '../src/romper';
+import { REASONER_EVENTS } from '../src/Events';
+
+
 
 const storyjson: Experience = require('./teststory.json');
 

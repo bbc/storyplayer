@@ -555,11 +555,14 @@ export default class Controller extends EventEmitter {
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
+                console.log('NEID', narrativeElement);
+                console.log('ARRAY', visitedArray);
                 if (visitedArray.includes(narrativeElement.id)) {
                     logger.warn('shadow reasoner looping - exiting without meeting target node');
                     _shadowHandleStoryEnd();
                     return;
                 }
+                
                 visitedArray.push(narrativeElement.id);
                 if (narrativeElement.id === targetNeId) {
                     // remove event listeners for the original reasoner

@@ -3,8 +3,9 @@
 import EventEmitter from 'events';
 import Player, { PlayerEvents } from '../Player';
 import type { AssetCollection, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import typeimport { REASONER_EVENTS } from '../constants';
- { StoryPathItem } from '../StoryPathWalker';
+import { REASONER_EVENTS } from '../Events';
+import type { StoryPathItem
+ } from '../StoryPathWalker';
 
 export type AssetCollectionPair = {
     default: ?AssetCollection,
