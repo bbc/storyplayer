@@ -21,6 +21,7 @@ import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import ImageRenderer from './renderers/ImageRenderer';
+import { REASONER_EVENTS } from './Events';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -349,7 +350,7 @@ export default class RenderManager extends EventEmitter {
             this._player,
         );
 
-        this._renderStory.on('jumpToNarrativeElement', (neid) => {
+        this._renderStory.on(REASONER_EVENTS.JUMP_TO_NARRATIVE_ELEMENT, (neid) => {
             this._controller._jumpToNarrativeElement(neid);
         });
 

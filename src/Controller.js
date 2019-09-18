@@ -17,7 +17,7 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
 
-import { NEXT_ELEMENTS, VARIABLE_CHANGED, CURRENT_NARRATIVE_ELEMENT, REASONER_EVENTS } from './constants';
+import { VARIABLE_CHANGED, REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager from './SessionManager';
 
 // eslint-disable-next-line max-len
@@ -218,8 +218,8 @@ export default class Controller extends EventEmitter {
                     return;
                 }
 
-                reasoner.on('storyEnd', _handleStoryEnd);
-                reasoner.on('error', _handleError);
+                reasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
+                reasoner.on(ERROR_EVENTS, _handleError);
 
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
                     console.log('CONTROLLER')
@@ -232,9 +232,9 @@ export default class Controller extends EventEmitter {
                         });
                 };
 
-                reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
+                reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
 
-                reasoner.on(VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_CHANGED, e)});
+                reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, e)});
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
@@ -242,7 +242,7 @@ export default class Controller extends EventEmitter {
                 this._chooseBeginningElement();
 
                 this._addListenersToRenderManager();
-                this.emit('romperstorystarted');
+                this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
                 this._renderManager.handleStoryStart(storyId);
                 
             })
@@ -507,7 +507,7 @@ export default class Controller extends EventEmitter {
             to: newNarrativeElement.name,
         };
         this._enhancedAnalytics(logData);
-        this.emit(CURRENT_NARRATIVE_ELEMENT, newNarrativeElement);
+        this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     }
 
     // try to get the narrative element object with the given id
@@ -538,7 +538,7 @@ export default class Controller extends EventEmitter {
             const _shadowHandleStoryEnd = () => {
                 logger.warn('shadow reasoner reached story end without meeting target node');
             };
-            shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
+            shadowReasoner.on(REASONER_EVENTS.STORY_END, _shadowHandleStoryEnd);
 
             // the 'normal' event listeners
             const _handleStoryEnd = () => {
@@ -547,7 +547,7 @@ export default class Controller extends EventEmitter {
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
             };
-            shadowReasoner.on('error', _handleError);
+            shadowReasoner.on(ERROR_EVENTS, _handleError);
 
             const visitedArray = [];
 
@@ -567,16 +567,16 @@ export default class Controller extends EventEmitter {
 
                     // apply appropriate listeners to this reasoner
                     this._storyId = storyId;
-                    shadowReasoner.on('storyEnd', _handleStoryEnd);
+                    shadowReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
                     shadowReasoner.removeListener(
-                        'narrativeElementChanged',
+                        REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         shadowHandleNarrativeElementChanged,
                     );
                     this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
                         this._handleNEChange(shadowReasoner, ne);
                     };
                     shadowReasoner.on(
-                        'narrativeElementChanged',
+                        REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         this._handleNarrativeElementChanged,
                     );
 
@@ -591,7 +591,7 @@ export default class Controller extends EventEmitter {
                     shadowReasoner.next();
                 }
             };
-            shadowReasoner.on('narrativeElementChanged', shadowHandleNarrativeElementChanged);
+            shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged);
 
             shadowReasoner.start();
             shadowReasoner.chooseBeginning();
@@ -992,7 +992,7 @@ export default class Controller extends EventEmitter {
         return this.getValidNextSteps(narrativeElement.id)
             .then((nextNarrativeElements) => {
                 if(nextNarrativeElements && nextNarrativeElements.length > 0) {
-                    this.emit(NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) });
+                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) });
                 }
                 return nextNarrativeElements.map(neObj => neObj.ne.id);;
             });
@@ -1034,17 +1034,17 @@ export default class Controller extends EventEmitter {
     reset() {
         this._storyId = null;
         if (this._reasoner && this._handleStoryEnd) {
-            this._reasoner.removeListener('storyEnd', this._handleStoryEnd);
+            this._reasoner.removeListener(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
         }
         if (this._reasoner && this._handleLinkChoice) {
-            this._reasoner.removeListener('multipleValidLinks', this._handleLinkChoice);
+            this._reasoner.removeListener(REASONER_EVENTS.MULTIPLE_VALID_LINKS, this._handleLinkChoice);
         }
         if (this._reasoner && this._handleError) {
-            this._reasoner.removeListener('error', this._handleError);
+            this._reasoner.removeListener(ERROR_EVENTS, this._handleError);
         }
         if (this._reasoner && this._handleNarrativeElementChanged) {
             this._reasoner.removeListener(
-                'narrativeElementChanged',
+                REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                 this._handleNarrativeElementChanged,
             );
         }

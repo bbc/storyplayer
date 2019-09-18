@@ -9,7 +9,10 @@ import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 import ObjectDataResolverFactory from '../src/resolvers/ObjectDataResolver';
 
-import type { Experience } from '../src/romper';
+import typeimportimportimport { REASONER_EVENTS } from '../src/constants';
+ { REASONER_EVENTS } from '../src/constants';
+ { REASONER_EVENTS } from '../src/constants';
+ { Experience } from '../src/romper';
 
 const storyjson: Experience = require('./teststory.json');
 
@@ -61,7 +64,7 @@ describe('StoryPathWalker', () => {
                 .to.equal('d220a2f8-3df1-4a47-a710-4ec7ce394e90');
             done();
         };
-        spw.on('walkComplete', handleWalkEnd);
+        spw.on(REASONER_EVENTS.WALK_COMPLETE, handleWalkEnd);
         spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
     });
 
@@ -80,7 +83,7 @@ describe('StoryPathWalker', () => {
                 done();
             });
         };
-        spw.on('walkComplete', handleWalkEnd);
+        spw.on(REASONER_EVENTS.WALK_COMPLETE, handleWalkEnd);
         spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
     });
 
@@ -100,7 +103,7 @@ describe('StoryPathWalker', () => {
             expect(spw._linear).to.be.equal(false);
             done();
         };
-        spw.on('walkComplete', handleWalkEnd);
+        spw.on(REASONER_EVENTS.WALK_COMPLETE, handleWalkEnd);
         spw.parseStory('74ecc9ed-a4f8-4706-8762-779bd0430fd3');
     });
 });

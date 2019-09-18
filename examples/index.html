@@ -245,7 +245,7 @@
             });
 
             romperInstance.start(config.stories[0].id, getVariablesState());
-            romperInstance.on('romperstorystarted', () => {
+            romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
                 addVariableControls(config.stories[0].id);
             });
         }
