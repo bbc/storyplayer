@@ -758,13 +758,28 @@ class Player extends EventEmitter {
         }
         this._dogImage.className = 'romper-dog';
         this._dogImage.src = src;
-        this._player.appendChild(this._dogImage);
+        // this._player.appendChild(this._dogImage);
         const { top, left, width, height } = position;
         this._dogImage.style.top = `${top}%`;
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
     }
+
+
+    addDetails(name: string, id: string ) {
+        if (this._details === undefined) {
+            this._details = document.createElement('div');
+            this._player.appendChild(this._details);
+        }
+        this._details.innerHTML = `${name} - ${id}`
+        this._details.className = 'romper-dog';
+        this._details.style.top = `2%`;
+        this._details.style.left = `70%`;
+        this._details.style.width = `20%`;
+        this._details.style.height = `10%`;
+    }
+
 
     _addContinueModal(options: Object, resumeState: Object) {
         this._createResumeExperienceButton(options);

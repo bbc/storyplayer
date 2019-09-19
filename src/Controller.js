@@ -222,7 +222,7 @@ export default class Controller extends EventEmitter {
                 reasoner.on(ERROR_EVENTS, _handleError);
 
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                    console.log('CONTROLLER')
+                    console.log('narrative element changed event', narrativeElement);
                     this._handleNEChange(reasoner, narrativeElement)
                         .then(() => {
                             if (this._linearStoryPath && !this._storyIconRendererCreated) {
@@ -235,6 +235,10 @@ export default class Controller extends EventEmitter {
                 reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
 
                 reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, e)});
+
+                reasoner.on(ERROR_EVENTS, (e) => {
+                    console.log(e);
+                })
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
@@ -254,16 +258,21 @@ export default class Controller extends EventEmitter {
 
     _chooseResumeElement() {
         // if the element is in the top level story we can jump to it
-        const narrativeElement = this._sessionManager.fetchLastVisitedElement();
-        if(!narrativeElement) {
+        const lastVisited = this._sessionManager.fetchLastVisitedElement();
+        if (!lastVisited) {
             this._reasoner.chooseBeginning();
             return;
         }
-        if(narrativeElement in this._reasoner._narrativeElements) {
-            this._jumpToNarrativeElement(narrativeElement);
-        } else {
-            // if it is in a sub story we need to create a reasoner
-            this._jumpToNarrativeElementUsingShadowReasoner(this._storyId, narrativeElement);
+        if (lastVisited in this._reasoner._narrativeElements) {
+            this._jumpToNarrativeElement(lastVisited);
+        } 
+        else {
+            const pathHistory = this._sessionManager.fetchPathHistory();
+            if (pathHistory) {
+                this.walkPathHistory(this._storyId, lastVisited, pathHistory);
+            } else {
+                this._reasoner.chooseBeginning();
+            }
         }
     }
 
@@ -489,8 +498,8 @@ export default class Controller extends EventEmitter {
         }, 'Narrative Element');
         if (this._reasoner && !resuming) {
             this._reasoner.appendToHistory(narrativeElement.id);
+            this._logNEChange(this._currentNarrativeElement, narrativeElement);
         }
-        this._logNEChange(this._currentNarrativeElement, narrativeElement);
         this._currentNarrativeElement = narrativeElement;
         return this._renderManager.handleNEChange(narrativeElement);
     }
@@ -529,7 +538,8 @@ export default class Controller extends EventEmitter {
     // create a reasoner to do a shadow walk of the story graph
     // when it reaches a target node, it boots out the original reasoner
     // and takes its place (with suitable event listeners)
-    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string, resuming?: boolean) {
+    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string, resuming?: boolean, pathHistory: [string]) {
+        console.log('targetNeId', targetNeId);
         this._storyReasonerFactory(storyId).then((shadowReasoner) => {
             if (this._storyId !== storyId) {
                 return;
@@ -555,7 +565,8 @@ export default class Controller extends EventEmitter {
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                console.log('NEID', narrativeElement);
+
+                console.log('NEID', narrativeElement.id, narrativeElement.name);
                 console.log('ARRAY', visitedArray);
                 if (visitedArray.includes(narrativeElement.id)) {
                     logger.warn('shadow reasoner looping - exiting without meeting target node');
@@ -589,10 +600,9 @@ export default class Controller extends EventEmitter {
                     // now we've walked to the target, trigger the change event handler
                     // so that it calls the renderers etc.
                     this._handleNEChange(shadowReasoner, narrativeElement, resuming);
-                } else {
-                    // just keep on walking until we find it (or reach the end)
-                    shadowReasoner.next();
+                    return;
                 }
+                shadowReasoner.next();
             };
             shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged);
 
@@ -1054,6 +1064,51 @@ export default class Controller extends EventEmitter {
         this._reasoner = null;
 
         this._renderManager.reset();
+    }
+
+    walkPathHistory(storyId: string, lastVisited: string, pathHistory: [string]) {
+        this._storyReasonerFactory(storyId).then((newReasoner)=> {
+            if(this._storyId !== storyId) {
+                return;
+            }
+
+            // the 'normal' event listeners
+            const _handleStoryEnd = () => {
+                    logger.warn('Story ended!');
+                };
+                const _handleError = (err) => {
+                    logger.warn(`Error: ${err}`);
+                };
+
+            newReasoner.on('ELEMENT_FOUND', (element) => {
+                this.reset();
+
+          
+                newReasoner.on(ERROR_EVENTS, _handleError);
+                // apply appropriate listeners to this reasoner
+                this._storyId = storyId;
+                newReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
+                this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
+                    this._handleNEChange(newReasoner, ne);
+                };
+                newReasoner.on(
+                    REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                    this._handleNarrativeElementChanged,
+                );
+
+                // swap out the original reasoner for this one
+                this._reasoner = newReasoner;
+
+                // now we've walked to the target, trigger the change event handler
+                // so that it calls the renderers etc.
+                this._handleNEChange(newReasoner, element, true);
+            })
+
+            newReasoner.start();
+            for(let i = 0; i < pathHistory.length; i++) {
+                newReasoner._shadowWalkPath(pathHistory[i], pathHistory);
+            }
+        });
     }
 
     _storyId: ?string;

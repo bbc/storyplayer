@@ -131,7 +131,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadIconAssets();
     }
 
-    willStart() {
+    willStart(name, id) {
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -148,6 +148,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._player.addDetails(name, id)
     }
 
     /**

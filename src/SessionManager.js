@@ -84,6 +84,15 @@ export default class SessionManager extends EventEmitter {
         return lastVisited;
     }
 
+    fetchPathHistory() {
+        const resumeState = this.fetchExistingSessionState();
+        if(!resumeState) return null;
+        const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+        if(!pathHistory) return null;
+        if(pathHistory.length === 0) return null;
+        return pathHistory;
+    }
+
     setSessionState(state: string) {
         this.sessionState = SESSION_STATE[state];
     }

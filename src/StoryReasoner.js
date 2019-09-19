@@ -110,7 +110,6 @@ export default class StoryReasoner extends EventEmitter {
      * @return {void}
      */
     start(initialState?: Object = {}) {
-        console.trace('REASONER');
         if (this._storyStarted) {
             logger.warn('Calling reasoner start on story that has already started');
             // throw new Error('InvalidState: this story has already been');
@@ -189,6 +188,8 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
+
+
     chooseBeginning() {
         this._resolving = true;
         if (this._story.beginnings.length > 1) {
@@ -260,7 +261,10 @@ export default class StoryReasoner extends EventEmitter {
             this.emit(ERROR_EVENTS, new Error('Link is to an narrative object not in the graph'));
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+            console.log('this._currentNarrativeElement', this._currentNarrativeElement);
             if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
+                console.log('STORY ELEMENT');
+                this.appendToHistory(narrativeElementId);
                 this._resolving = true;
                 if (this._currentNarrativeElement.body.story_target_id) {
                     this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
@@ -275,6 +279,8 @@ export default class StoryReasoner extends EventEmitter {
             }
         }
     }
+
+
 
     createSubStoryReasoner(narrativeElementId: string) {
         this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
@@ -323,7 +329,6 @@ export default class StoryReasoner extends EventEmitter {
      * @param {string} narrativeElementId The id of the narrative element visited
      */
     appendToHistory(narrativeElementId: string) {
-        console.trace('HISTORY');
         logger.info(`Storing ${narrativeElementId} in history`);
         this._dataResolver.get(InternalVariableNames.PATH_HISTORY)
             .then((value) => {
@@ -332,11 +337,14 @@ export default class StoryReasoner extends EventEmitter {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
+                this.emit('PATH_HISTORY', this._story.id, narrativeElementId);
                 this.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, neList);
+                return value;
             });
     }
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
+        console.log('created sub story reasoner');
         this._addSubReasonerListeners(subStoryReasoner);
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
@@ -489,5 +497,56 @@ export default class StoryReasoner extends EventEmitter {
             //
         }
         return previousNodeId;
+    }
+
+    _shadowWalkPath(narrativeElementId: string, pathHistory: [string]) {
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+        if(!(narrativeElementId in this._narrativeElements)) {
+            // this.emit('ERROR', new Error(`Where is this element ${narrativeElementId}`));
+            return;
+        }
+        
+        if(narrativeElementId === pathHistory[pathHistory.length -1]) {
+            this.emit('ELEMENT_FOUND', this._currentNarrativeElement);
+            return;
+        }
+        if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
+            this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                .then(subStoryReasoner => {
+                    this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
+                }).catch((err) => {
+                    this.emit(ERROR_EVENTS, err);
+                });
+        }
+    }
+
+
+    findNextElement(narrativeElementId: string) {
+        if (!this._storyStarted) {
+            throw new Error('InvalidState: this story has not yet started');x
+        }
+        if (this._storyEnded) {
+            throw new Error('InvalidState: this story has ended');
+        }
+        if (this._resolving) {
+            throw new Error('InvalidState: currently resolving an action');
+        }
+        if (this._subStoryReasoner) {
+            this._subStoryReasoner._setCurrentNarrativeElement(narrativeElementId);
+        } else {
+            this._setCurrentNarrativeElement(narrativeElementId);
+        }
+    }
+
+    _initShadowSubStoryReasoner(subStoryReasoner: StoryReasoner, narrativeElement: string, pathHistory: [string]) {
+        this._addSubReasonerListeners(subStoryReasoner);
+        subStoryReasoner.on('ELEMENT_FOUND', (narrativeElement) => this.emit('ELEMENT_FOUND', narrativeElement));
+        this._subStoryReasoner = subStoryReasoner;
+        this._resolving = false;
+        this._subStoryReasoner.setParent(this);
+        subStoryReasoner.start();
+        for(let i = 0; i < pathHistory.length; i++) {
+            this._subStoryReasoner._shadowWalkPath(pathHistory[i], pathHistory);
+        }
     }
 }

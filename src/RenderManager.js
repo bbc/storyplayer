@@ -546,7 +546,7 @@ export default class RenderManager extends EventEmitter {
         this._showBackIcon();
         this.refreshOnwardIcons();
 
-        newRenderer.willStart();
+        newRenderer.willStart(newNarrativeElement.name, newNarrativeElement.id);
 
         // ensure volume persistence
         Object.keys(this._rendererState.volumes).forEach((label) => {
