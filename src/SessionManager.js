@@ -32,13 +32,13 @@ export default class SessionManager extends EventEmitter {
 
     setExistingSession: Function; // set a new session
 
-    checkExistingSession: () => boolean; // check we have existing sessions
+    checkExistingSession: Function; // check we have existing sessions
 
-    fetchExistingSessionState: () => Promise<?Object>; // fetch the existing session state
+    fetchExistingSessionState: Function; // fetch the existing session state
 
-    fetchLastVisitedElement: () => Promise<?string>; // fetch the last visited element
+    fetchLastVisitedElement: Function; // fetch the last visited element
 
-    fetchPathHistory: () => Promise<?[string]>; // fetch the path history for the existing session
+    fetchPathHistory: Function; // fetch the path history for the existing session
 
     setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
 
