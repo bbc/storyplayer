@@ -2,6 +2,7 @@
 import EventEmitter from 'events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
+import Controller from './Controller';
 import type { AssetUrls } from './romper';
 import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
@@ -10,6 +11,8 @@ import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
+import { SESSION_STATE } from './SessionManager';
+import { fetchOverridePlayout, checkDebugPlayout } from './utils';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -40,6 +43,7 @@ const PlayerEvents = [
     events[eventName] = eventName;
     return events;
 }, {});
+
 
 function scrollToTop() {
     window.setTimeout(() => {
@@ -272,6 +276,10 @@ class Player extends EventEmitter {
 
     _errorLayer: HTMLDivElement;
 
+    _continueModalLayer: HTMLDivElement;
+
+    _continueModalContent: HTMLDivElement;
+
     backgroundTarget: HTMLDivElement;
 
     mediaTarget: HTMLDivElement;
@@ -293,6 +301,8 @@ class Player extends EventEmitter {
     _mediaTransport: HTMLDivElement;
 
     _startExperienceButton: HTMLButtonElement;
+
+    _resumeExperienceButton: HTMLButtonElement;
 
     _startExperienceImage: HTMLImageElement;
 
@@ -346,7 +356,9 @@ class Player extends EventEmitter {
 
     _numChoices: number;
 
-    removeExperienceStartButtonAndImage: Function;
+    _removeExperienceOverlays: Function;
+
+    setupExperienceOverlays: Function;
 
     _handleFullScreenChange: Function;
 
@@ -361,6 +373,8 @@ class Player extends EventEmitter {
     _countdownTotal: number;
 
     _dogImage: HTMLImageElement;
+
+    _details: ?HTMLDivElement
 
     _loadingLayer: HTMLElement
 
@@ -380,9 +394,17 @@ class Player extends EventEmitter {
 
     _removeBufferingLayer: Function;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls) {
-        super();
+    _addContinueModal: Function;
 
+    _hideModalLayer: Function;
+
+    _startButtonHandler: Function;
+
+    _controller: Controller;
+
+    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, controller: Controller) {
+        super();
+        this._controller = controller;
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._volumeEventTimeouts = {};
@@ -410,9 +432,11 @@ class Player extends EventEmitter {
         this._backgroundLayer.classList.add('romper-background');
 
         this._mediaLayer = document.createElement('div');
+        this._mediaLayer.id = 'media-layer';
         this._mediaLayer.classList.add('romper-media');
 
         this._loadingLayer = document.createElement('div');
+        this._loadingLayer.id = 'loading-layer';
         this._loadingLayer.classList.add('romper-loading');
         const loadingLayerInner = document.createElement('div');
         loadingLayerInner.classList.add('romper-loading-inner');
@@ -420,6 +444,7 @@ class Player extends EventEmitter {
         this._mediaLayer.appendChild(this._loadingLayer);
 
         this._guiLayer = document.createElement('div');
+        this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
 
         this._errorLayer = document.createElement('div');
@@ -429,10 +454,19 @@ class Player extends EventEmitter {
         this._errorLayer.classList.add('romper-error');
         this._errorLayer.classList.add('hide');
 
+        this._continueModalLayer = document.createElement('div');
+        this._continueModalLayer.id = 'continue-modal';
+        this._continueModalLayer.classList.add('continue-modal');
+
+        this._continueModalContent = document.createElement('div');
+        this._continueModalContent.classList.add('continue-modal-content');
+        this._continueModalLayer.appendChild(this._continueModalContent);
+        
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
         this._player.appendChild(this._errorLayer);
+        this._guiLayer.appendChild(this._continueModalLayer);
 
         this._overlays = document.createElement('div');
         this._overlays.classList.add('romper-overlays');
@@ -668,8 +702,7 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
 
-        this.removeExperienceStartButtonAndImage =
-            this.removeExperienceStartButtonAndImage.bind(this);
+        this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
 
         let playoutToUse = 'dom';
 
@@ -677,16 +710,14 @@ class Player extends EventEmitter {
             playoutToUse = 'ios';
         }
 
-        const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
+        const overridePlayout = fetchOverridePlayout();
         if (overridePlayout) {
             playoutToUse = overridePlayout;
             logger.info("Overriding playout engine: ",playoutToUse)
         }
 
-        let debugPlayout = false
-        const overrideDebug = new URLSearchParams(window.location.search).get('debugPlayout');
-        if (overrideDebug && overrideDebug === "true") {
-            debugPlayout = true
+        const debugPlayout = checkDebugPlayout();
+        if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }
 
@@ -714,6 +745,8 @@ class Player extends EventEmitter {
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
+        this._addContinueModal = this._addContinueModal.bind(this);
+        this._startButtonHandler = this._startButtonHandler.bind(this);
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -732,6 +765,69 @@ class Player extends EventEmitter {
         this._dogImage.style.left = `${left}%`;
         this._dogImage.style.width = `${width}%`;
         this._dogImage.style.height = `${height}%`;
+    }
+
+
+    addDetails(elementName: string, elementId: string, name: string, id: string) {
+        if (this._details === undefined) {
+            this._details = document.createElement('div');
+            this._player.appendChild(this._details);
+        }
+        this._details.innerHTML = `NE: ${elementName} - ${elementId} <br> REP: ${name} ${id}`
+        this._details.className = 'details-overlay';
+    }
+
+
+    _addContinueModal(options: Object) {
+        this._createResumeExperienceButton(options);
+
+        const continueModalInnerContent = document.createElement('div');
+        continueModalInnerContent.classList.add('modal-inner-content');
+        const continueModalMessage = document.createElement('div');
+        continueModalMessage.innerHTML = 'you have a previous session, click continue to resume';
+        continueModalInnerContent.appendChild(continueModalMessage);
+
+        const cancelButton = document.createElement('button');
+        cancelButton.classList.add('cancel-button');
+        cancelButton.innerHTML = 'X';
+    
+        const cancelButtonHandler = () => {
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
+            this._controller._sessionManager.setSessionState(SESSION_STATE.RESTART);
+            this._controller._sessionManager.deleteExistingSessions();
+            this._controller.resetStory(this._controller._storyId);
+            this._hideModalLayer();
+            this._startButtonHandler();
+        };
+        
+        cancelButton.onclick = cancelButtonHandler;
+        cancelButton.addEventListener('touchend', cancelButtonHandler);
+
+        const resumeExperienceButtonHandler = () => {
+            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._controller._sessionManager.setSessionState(SESSION_STATE.RESUME);
+            this._controller.restart(this._controller._storyId);
+            this._hideModalLayer();
+            this._enableUserInteraction();
+            
+        };
+
+        this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
+        this._resumeExperienceButton.addEventListener(
+            'touchend',
+            resumeExperienceButtonHandler,
+        );
+
+        this._continueModalContent.appendChild(cancelButton);
+        this._continueModalContent.appendChild(continueModalInnerContent);
+        this._continueModalContent.appendChild(this._resumeExperienceButton);
+
+        if(this._continueModalLayer) {
+            this._continueModalLayer.classList.add('show');
+            this._continueModalContent.classList.add('show');
+        }
     }
 
     _handleTouchEndEvent(event: Object) {
@@ -822,6 +918,13 @@ class Player extends EventEmitter {
         this._overlays.classList.remove('buttons-showing');
     }
 
+    _hideModalLayer() {
+        if(this._continueModalLayer) {
+            this._guiLayer.removeChild(this._continueModalLayer);
+            this._continueModalLayer = null;
+        }
+    }
+
     _showErrorLayer() {
         this._errorLayer.classList.add('show');
         this._errorLayer.classList.remove('hide');
@@ -847,24 +950,78 @@ class Player extends EventEmitter {
         }
     }
 
-    addExperienceStartButtonAndImage(options: Object) {
+    _createStartExperienceButton(options: Object) {
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._startExperienceButton.setAttribute('aria-label', 'Continue Button');
-        const continueButtonIconHolder = document.createElement('div');
-        this._startExperienceButton.appendChild(continueButtonIconHolder);
-        continueButtonIconHolder.classList.add('romper-start-button-icon');
-        const continueButtonIconDiv = document.createElement('div');
-        continueButtonIconDiv.classList.add('romper-button-icon-div');
-        continueButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
-        continueButtonIconHolder.appendChild(continueButtonIconDiv);
+        this._startExperienceButton.setAttribute('aria-label', 'Start Button');
 
+        const startButtonIconHolder = document.createElement('div');
+        this._startExperienceButton.appendChild(startButtonIconHolder);
 
-        this._startExperienceImage = document.createElement('img');
-        this._startExperienceImage.className = 'romper-start-image';
-        this._startExperienceImage.src = options.background_art;
+        startButtonIconHolder.classList.add('romper-start-button-icon');
+        const startButtonIconDiv = document.createElement('div');
+        startButtonIconDiv.classList.add('romper-button-icon-div');
+        startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
+        startButtonIconHolder.appendChild(startButtonIconDiv);
+    }
 
+    _createStartImage(options: Object) {
+        if(!this._startExperienceImage) {
+            this._startExperienceImage = document.createElement('img');
+            this._startExperienceImage.className = 'romper-start-image';
+            this._startExperienceImage.src = options.background_art;
+            this._mediaLayer.appendChild(this._startExperienceImage);
+        }
+    }
+
+    _createResumeExperienceButton(options: Object) {
+        this._resumeExperienceButton = document.createElement('button');
+        this._resumeExperienceButton.classList.add(options.button_class);
+        this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
+        this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
+
+        const resumeButtonHolder = document.createElement('div');
+        this._resumeExperienceButton.appendChild(resumeButtonHolder);
+        resumeButtonHolder.classList.add('romper-start-button-icon');
+
+        const resumeButtonDiv = document.createElement('div');
+        resumeButtonDiv.classList.add('romper-button-icon-div');
+        resumeButtonDiv.classList.add(`${options.button_class}-icon-div`);
+        resumeButtonHolder.appendChild(resumeButtonDiv);
+    }
+
+    setupExperienceOverlays(options: Object) {
+        switch (this._controller._sessionManager.sessionState) {
+        case SESSION_STATE.RESUME:
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            break;
+        case SESSION_STATE.EXISTING:
+            this._createResumeOverlays(options);
+            if (options.hide_narrative_buttons) {
+                // can't use player.setNextAvailable
+                // as this may get reset after this by NE change handling
+                this._narrativeElementTransport.classList.add('romper-inactive');
+            }
+            break; 
+        case SESSION_STATE.RESTART:
+            this._narrativeElementTransport.classList.remove('romper-inactive');
+            break
+        case SESSION_STATE.NEW:
+            this._createStartOverlays(options);
+            break;
+        default: 
+            if (options.hide_narrative_buttons) {
+                // can't use player.setNextAvailable
+                // as this may get reset after this by NE change handling
+                this._narrativeElementTransport.classList.add('romper-inactive');
+            }
+            this._createStartOverlays(options);
+            break;
+        }
+    }
+
+    _createPrivacyNotice(options: Object) {
         if (options.privacy_notice !== null) {
             const privacyPar = document.createElement('p');
             privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
@@ -875,29 +1032,36 @@ class Player extends EventEmitter {
                 this._mediaLayer.appendChild(this._privacyDiv);
             }
         }
+    }
 
-        this._guiLayer.appendChild(this._startExperienceButton);
-        this._mediaLayer.appendChild(this._startExperienceImage);
+    _createSharedOverlays(options:Object) {
+        this._createPrivacyNotice(options);
+        this._createStartImage(options);
         this._mediaLayer.classList.add('romper-prestart');
+    }
 
-        const buttonClickHandler = () => {
-            this.removeExperienceStartButtonAndImage();
-            this._enableUserInteraction();
-            this._narrativeElementTransport.classList.remove('romper-inactive');
-            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-        };
+    _createResumeOverlays(options: Object) {
+        this._createSharedOverlays(options);
+        this._addContinueModal(options);
+    }
 
-        this._startExperienceButton.onclick = buttonClickHandler;
+    _createStartOverlays(options: Object) {
+        this._createSharedOverlays(options);
+        this._createStartExperienceButton(options);
+        this._guiLayer.appendChild(this._startExperienceButton);
+        this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
             'touchend',
-            buttonClickHandler,
+            this._startButtonHandler,
         );
+    }
 
-        if (options.hide_narrative_buttons) {
-            // can't use player.setNextAvailable
-            // as this may get reset after this by NE change handling
-            this._narrativeElementTransport.classList.add('romper-inactive');
-        }
+    _startButtonHandler() {
+        this._removeExperienceOverlays();
+        this._enableUserInteraction();
+        this._narrativeElementTransport.classList.remove('romper-inactive');
+        this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
+        this._controller._sessionManager.setExistingSession();
     }
 
     _clearOverlays() {
@@ -909,7 +1073,7 @@ class Player extends EventEmitter {
 
     prepareForRestart() {
         if (this._startExperienceButton || this._startExperienceImage) {
-            this.removeExperienceStartButtonAndImage();
+            this._removeExperienceOverlays();
         }
         this.playoutEngine.pause();
         this._clearOverlays();
@@ -917,16 +1081,23 @@ class Player extends EventEmitter {
         logger.info('disabling experience before restart');
     }
 
-    removeExperienceStartButtonAndImage() {
+    _removeExperienceOverlays() { 
         try {
-            this._guiLayer.removeChild(this._startExperienceButton);
-            this._mediaLayer.removeChild(this._startExperienceImage);
+            if(this._startExperienceButton) {
+                this._guiLayer.removeChild(this._startExperienceButton);
+                // this._startExperienceButton = null;
+            }
             if (this._privacyDiv) {
                 this._mediaLayer.removeChild(this._privacyDiv);
             }
+            if(this._startExperienceImage) {
+                this._mediaLayer.removeChild(this._startExperienceImage);
+                // this._startExperienceImage = null; 
+            }
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
-            logger.warn('could not remove start button and/or image');
+            logger.warn(e);
+            logger.warn('could not remove _startExperienceImage');
         }
     }
 

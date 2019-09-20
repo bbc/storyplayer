@@ -9,6 +9,7 @@ import type {
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import logger from './logger';
+import { REASONER_EVENTS, ERROR_EVENTS } from './Events';
 
 export type StoryPathItem = {
     stories: Array<string>,
@@ -118,7 +119,7 @@ export default class StoryPathWalker extends EventEmitter {
 
     // finished the walk - notify listeners
     _walkComplete(path: Array<PathGather>) {
-        this._getRepresentationCollections(path).then(() => this.emit('walkComplete'));
+        this._getRepresentationCollections(path).then(() => this.emit(REASONER_EVENTS.WALK_COMPLETE));
     }
 
     /**
@@ -159,21 +160,21 @@ export default class StoryPathWalker extends EventEmitter {
             const _handleEnd = () => {
                 this._walkComplete(path);
             };
-            linearReasoner.on('storyEnd', _handleEnd);
+            linearReasoner.on(REASONER_EVENTS.STORY_END, _handleEnd);
 
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
                 this._pathmap = [];
-                this.emit('walkComplete');
+                this.emit(REASONER_EVENTS.WALK_COMPLETE);
             };
-            linearReasoner.on('error', _handleError);
+            linearReasoner.on(ERROR_EVENTS, _handleError);
 
             const _nonLinear = () => {
                 this._linear = false;
                 this._walkComplete([]);
             };
-            linearReasoner.on('choiceOfBeginnings', _nonLinear);
-            linearReasoner.on('choiceOfLinks', _nonLinear);
+            linearReasoner.on(REASONER_EVENTS.CHOICE_OF_BEGINNINGS, _nonLinear);
+            linearReasoner.on(REASONER_EVENTS.CHOICE_OF_LINKS, _nonLinear);
 
             const _handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
                 const parentStories = [storyId].concat(this._getStoryArray(linearReasoner, []));
@@ -190,9 +191,10 @@ export default class StoryPathWalker extends EventEmitter {
                 path.push(pathItem);
                 if (this._linear) linearReasoner.next();
             };
-            linearReasoner.on('narrativeElementChanged', _handleNarrativeElementChanged);
+            linearReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, _handleNarrativeElementChanged);
 
             linearReasoner.start();
+            linearReasoner.chooseBeginning();
         });
     }
 }

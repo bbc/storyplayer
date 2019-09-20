@@ -4,6 +4,7 @@ import Hls from 'hls.js';
 import shaka from 'shaka-player';
 import logger from '../../logger';
 import MediaInstance from './MediaInstance';
+import { fetchShakaDebugLevel } from '../../utils';
 
 export default class MediaManager {
     _mediaInstancePool: Array<Object>
@@ -60,8 +61,7 @@ export default class MediaManager {
 
         this._getPermissionToPlay = this._getPermissionToPlay.bind(this);
 
-        const shakaDebugLevel
-            = new URLSearchParams(window.location.search).get('shakaDebugLevel');
+        const shakaDebugLevel = fetchShakaDebugLevel();
         if (shaka.log && this._debug && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);

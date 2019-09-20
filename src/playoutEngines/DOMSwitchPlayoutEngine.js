@@ -7,6 +7,8 @@ import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
+import { SHAKA_EVENTS } from '../Events';
+import { fetchShakaDebugLevel, fetchActiveBufferingOverride, fetchInactiveBufferingOverride } from '../utils';
 
 const MediaTypesArray = [
     'HLS',
@@ -85,8 +87,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
         };
 
-        const activeBufferingOverride = new URLSearchParams(window.location.search)
-            .get('activeBufferingOverride');
+        const activeBufferingOverride = fetchActiveBufferingOverride();
         if (activeBufferingOverride) {
             logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
             this._activeConfig.dash.bufferingGoal = parseInt(activeBufferingOverride, 10)
@@ -108,16 +109,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         // bits/second (Set to 1gbps connection to get highest adaptation)
         this._estimatedBandwidth = 1000000000
 
-        const inactiveBufferingOverride = new URLSearchParams(window.location.search)
-            .get('inactiveBufferingOverride');
+        const inactiveBufferingOverride = fetchInactiveBufferingOverride();
         if (inactiveBufferingOverride) {
             logger.info(`inactiveBufferingOverride: ${inactiveBufferingOverride}`)
             this._inactiveConfig.dash.bufferingGoal = parseInt(inactiveBufferingOverride, 10)
         }
 
         // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
-        const shakaDebugLevel
-            = new URLSearchParams(window.location.search).get('shakaDebugLevel');
+        const shakaDebugLevel = fetchShakaDebugLevel();
         if (shaka.log && this._debugPlayout && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);
@@ -491,7 +490,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     // generic error
                     // if the error code is 1001 and http status is 404 - we can't find the segement so ignore the error as we shouldn't ever get in this situation.
                     rendererPlayoutObj._shaka.addEventListener(
-                        'error', (e) => {
+                        SHAKA_EVENTS.error, (e) => {
                             if(e.detail && e.detail.data) {
                                 if(e.detail.code === 1001 && e.detail.data[1] === 404) {
                                     logger.info('404 error failed to fetch media')
@@ -598,10 +597,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
 
                     // remove the event listeners
-                    rendererPlayoutObj._shaka.removeEventListener('error', this._player._showErrorLayer);
-                    rendererPlayoutObj._shaka.removeEventListener('buffering', this._player._showBufferingLayer);
-                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeBufferingLayer);
-                    rendererPlayoutObj._shaka.removeEventListener('adaptation', this._player._removeErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.error, this._player._showErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.buffering, this._player._showBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation, this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation, this._player._removeErrorLayer);
 
                     break;
                 case MediaTypes.OTHER:
