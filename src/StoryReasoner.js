@@ -500,14 +500,13 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _shadowWalkPath(narrativeElementId: string, pathHistory: [string]) {
-        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
         if(!(narrativeElementId in this._narrativeElements)) {
             // this.emit('ERROR', new Error(`Where is this element ${narrativeElementId}`));
             return;
         }
-        
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
         if(narrativeElementId === pathHistory[pathHistory.length -1]) {
-            this.emit('ELEMENT_FOUND', this._currentNarrativeElement);
+            this.emit(REASONER_EVENTS.ELEMENT_FOUND, this._currentNarrativeElement);
             return;
         }
         if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
@@ -521,32 +520,15 @@ export default class StoryReasoner extends EventEmitter {
     }
 
 
-    findNextElement(narrativeElementId: string) {
-        if (!this._storyStarted) {
-            throw new Error('InvalidState: this story has not yet started');x
-        }
-        if (this._storyEnded) {
-            throw new Error('InvalidState: this story has ended');
-        }
-        if (this._resolving) {
-            throw new Error('InvalidState: currently resolving an action');
-        }
-        if (this._subStoryReasoner) {
-            this._subStoryReasoner._setCurrentNarrativeElement(narrativeElementId);
-        } else {
-            this._setCurrentNarrativeElement(narrativeElementId);
-        }
-    }
-
     _initShadowSubStoryReasoner(subStoryReasoner: StoryReasoner, narrativeElement: string, pathHistory: [string]) {
         this._addSubReasonerListeners(subStoryReasoner);
-        subStoryReasoner.on('ELEMENT_FOUND', (narrativeElement) => this.emit('ELEMENT_FOUND', narrativeElement));
+        subStoryReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (foundElement) => this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement));
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         this._subStoryReasoner.setParent(this);
         subStoryReasoner.start();
-        for(let i = 0; i < pathHistory.length; i++) {
-            this._subStoryReasoner._shadowWalkPath(pathHistory[i], pathHistory);
-        }
+        pathHistory.forEach(element => {
+            subStoryReasoner._shadowWalkPath(element, pathHistory);
+        });
     }
 }

@@ -194,19 +194,6 @@ export default class Controller extends EventEmitter {
         });
         window._sessionManager = this._sessionManager;
 
-        // event handling functions for StoryReasoner
-        const _handleStoryEnd = () => {
-            const logData = {
-                type: AnalyticEvents.types.STORY_NAVIGATION,
-                name: AnalyticEvents.names.STORY_END,
-            };
-            this._enhancedAnalytics(logData);
-            logger.warn('Story Ended!');
-        };
-        const _handleError = (err) => {
-            logger.warn(`Error: ${err}`);
-        };
-
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId)
             .then(() => this._storyReasonerFactory(storyId))
@@ -218,8 +205,8 @@ export default class Controller extends EventEmitter {
                     return;
                 }
 
-                reasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
-                reasoner.on(ERROR_EVENTS, _handleError);
+                reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
+                reasoner.on(ERROR_EVENTS, this._handleError);
 
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
                     console.log('narrative element changed event', narrativeElement);
@@ -1066,36 +1053,41 @@ export default class Controller extends EventEmitter {
         this._renderManager.reset();
     }
 
+
+    _handleStoryEnd() {
+        const logData = {
+            type: AnalyticEvents.types.STORY_NAVIGATION,
+            name: AnalyticEvents.names.STORY_END,
+        };
+        this._enhancedAnalytics(logData);
+        logger.warn('Story Ended!');
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _handleError(err: Error) {
+        logger.warn(err);
+    }
+
     walkPathHistory(storyId: string, lastVisited: string, pathHistory: [string]) {
         this._storyReasonerFactory(storyId).then((newReasoner)=> {
             if(this._storyId !== storyId) {
                 return;
             }
-
-            // the 'normal' event listeners
-            const _handleStoryEnd = () => {
-                    logger.warn('Story ended!');
-                };
-                const _handleError = (err) => {
-                    logger.warn(`Error: ${err}`);
-                };
-
-            newReasoner.on('ELEMENT_FOUND', (element) => {
+            newReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (element) => {
                 this.reset();
 
-          
-                newReasoner.on(ERROR_EVENTS, _handleError);
-                // apply appropriate listeners to this reasoner
                 this._storyId = storyId;
-                newReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
+                // apply appropriate listeners to this reasoner                
                 this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
                     this._handleNEChange(newReasoner, ne);
                 };
+
                 newReasoner.on(
                     REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                     this._handleNarrativeElementChanged,
                 );
-
+                newReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
+                newReasoner.on(ERROR_EVENTS, this._handleError);
                 // swap out the original reasoner for this one
                 this._reasoner = newReasoner;
 
@@ -1105,9 +1097,10 @@ export default class Controller extends EventEmitter {
             })
 
             newReasoner.start();
-            for(let i = 0; i < pathHistory.length; i++) {
-                newReasoner._shadowWalkPath(pathHistory[i], pathHistory);
-            }
+            pathHistory.forEach(element => {
+                newReasoner._shadowWalkPath(element, pathHistory);
+            });
+           
         });
     }
 
@@ -1131,9 +1124,9 @@ export default class Controller extends EventEmitter {
 
     _assetUrls: AssetUrls;
 
-    _handleError: ?Function;
+    _handleError: Function;
 
-    _handleStoryEnd: ?Function;
+    _handleStoryEnd: Function;
 
     _handleNarrativeElementChanged: ?Function;
 
@@ -1152,4 +1145,5 @@ export default class Controller extends EventEmitter {
     _sessionManager: SessionManager;
 
     _segmentSummaryData: Object;
+
 }
