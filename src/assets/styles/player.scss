@@ -142,6 +142,18 @@ $romper-hover-text-size: 1.53em;
     z-index: 101;
   }
 
+  .details-overlay {
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 2em;
+    left: 60%;
+    pointer-events: none;
+    position: absolute;
+    top: 2%;
+    width: 50%;
+    z-index: 110;
+  }
+
   .romper-error {
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);

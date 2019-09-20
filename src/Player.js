@@ -759,7 +759,7 @@ class Player extends EventEmitter {
         }
         this._dogImage.className = 'romper-dog';
         this._dogImage.src = src;
-        // this._player.appendChild(this._dogImage);
+        this._player.appendChild(this._dogImage);
         const { top, left, width, height } = position;
         this._dogImage.style.top = `${top}%`;
         this._dogImage.style.left = `${left}%`;
@@ -768,21 +768,17 @@ class Player extends EventEmitter {
     }
 
 
-    addDetails(elementName: string, id: string, name: string, id: string) {
+    addDetails(elementName: string, elementId: string, name: string, id: string) {
         if (this._details === undefined) {
             this._details = document.createElement('div');
             this._player.appendChild(this._details);
         }
-        this._details.innerHTML = `NE: ${elementName} - ${id} <br> REP: ${name} = ${id}`
-        this._details.className = 'romper-dog';
-        this._details.style.top = `2%`;
-        this._details.style.left = `70%`;
-        this._details.style.width = `20%`;
-        this._details.style.height = `10%`;
+        this._details.innerHTML = `NE: ${elementName} - ${elementId} <br> REP: ${name} ${id}`
+        this._details.className = 'details-overlay';
     }
 
 
-    _addContinueModal(options: Object, resumeState: Object) {
+    _addContinueModal(options: Object) {
         this._createResumeExperienceButton(options);
 
         const continueModalInnerContent = document.createElement('div');
@@ -1040,8 +1036,7 @@ class Player extends EventEmitter {
 
     _createResumeOverlays(options: Object) {
         this._createStartImage(options);
-        const resumeState = this._controller._sessionManager.fetchExistingSessionState();
-        this._addContinueModal(options, resumeState);
+        this._addContinueModal(options);
         this._mediaLayer.classList.add('romper-prestart');
     }
 

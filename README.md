@@ -100,5 +100,5 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer
 - inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
 - activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
 - shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
-- disableLookahead - Stops preloading of next/previous elements
+- disableLookahead - 'true' Stops preloading of next/previous elements
 - addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
