@@ -802,10 +802,7 @@ class Player extends EventEmitter {
         };
         
         cancelButton.onclick = cancelButtonHandler;
-        cancelButton.addEventListener(
-            'touchend',
-            cancelButtonHandler,
-        );
+        cancelButton.addEventListener('touchend', cancelButtonHandler);
 
         const resumeExperienceButtonHandler = () => {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
@@ -995,16 +992,6 @@ class Player extends EventEmitter {
     }
 
     setupExperienceOverlays(options: Object) {
-        if (options.privacy_notice !== null) {
-            const privacyPar = document.createElement('p');
-            privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
-            this._privacyDiv = document.createElement('div');
-            this._privacyDiv.className = 'romper-privacy-notice';
-            this._privacyDiv.appendChild(privacyPar);
-            if (this._privacyDiv) {
-                this._mediaLayer.appendChild(this._privacyDiv);
-            }
-        }
         switch (this._controller._sessionManager.sessionState) {
         case SESSION_STATE.RESUME:
             this._narrativeElementTransport.classList.remove('romper-inactive');
@@ -1034,14 +1021,32 @@ class Player extends EventEmitter {
         }
     }
 
-    _createResumeOverlays(options: Object) {
+    _createPrivacyNotice(options: Object) {
+        if (options.privacy_notice !== null) {
+            const privacyPar = document.createElement('p');
+            privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
+            this._privacyDiv = document.createElement('div');
+            this._privacyDiv.className = 'romper-privacy-notice';
+            this._privacyDiv.appendChild(privacyPar);
+            if (this._privacyDiv) {
+                this._mediaLayer.appendChild(this._privacyDiv);
+            }
+        }
+    }
+
+    _createSharedOverlays(options:Object) {
+        this._createPrivacyNotice(options);
         this._createStartImage(options);
-        this._addContinueModal(options);
         this._mediaLayer.classList.add('romper-prestart');
     }
 
+    _createResumeOverlays(options: Object) {
+        this._createSharedOverlays(options);
+        this._addContinueModal(options);
+    }
+
     _createStartOverlays(options: Object) {
-        this._createStartImage(options);
+        this._createSharedOverlays(options);
         this._createStartExperienceButton(options);
         this._guiLayer.appendChild(this._startExperienceButton);
         this._startExperienceButton.onclick = this._startButtonHandler;
@@ -1049,7 +1054,6 @@ class Player extends EventEmitter {
             'touchend',
             this._startButtonHandler,
         );
-        this._mediaLayer.classList.add('romper-prestart');  
     }
 
     _startButtonHandler() {
@@ -1081,14 +1085,14 @@ class Player extends EventEmitter {
         try {
             if(this._startExperienceButton) {
                 this._guiLayer.removeChild(this._startExperienceButton);
-                this._startExperienceButton = null;
+                // this._startExperienceButton = null;
             }
             if (this._privacyDiv) {
                 this._mediaLayer.removeChild(this._privacyDiv);
             }
             if(this._startExperienceImage) {
                 this._mediaLayer.removeChild(this._startExperienceImage);
-                this._startExperienceImage = null; 
+                // this._startExperienceImage = null; 
             }
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
