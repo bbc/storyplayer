@@ -22,21 +22,30 @@ export const SESSION_STATE = [
 }, {});
 export type SessionState = typeof SESSION_STATE;
 
+
 export default class SessionManager extends EventEmitter {
-    _storyId: string;
-    
-    _existingSession: boolean;
+    _storyId: string; // storyId for the top level story
 
-    sessionState: string;
+    sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
 
-    state: SessionState;
-    
+    deleteExistingSessions: Function; // delete the existing session
+
+    setExistingSession: Function; // set a new session
+
+    checkExistingSession: () => boolean; // check we have existing sessions
+
+    fetchExistingSessionState: () => Promise<?Object>; // fetch the existing session state
+
+    fetchLastVisitedElement: () => Promise<?string>; // fetch the last visited element
+
+    fetchPathHistory: () => Promise<?[string]>; // fetch the path history for the existing session
+
+    setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
+
     constructor(storyId: string) {
         super();
         this._storyId = storyId;
-        this._existingSession = this.checkExistingSession();
-        this.state = SESSION_STATE;
-        this.sessionState = this._existingSession ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
+        this.sessionState = this.checkExistingSession() ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
     deleteExistingSessions() {
@@ -47,7 +56,8 @@ export default class SessionManager extends EventEmitter {
             const filteredSessions = existingSessions.filter(sess => sess !== !this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
-        this._existingSession = false;
+
+        this.setSessionState(SESSION_STATE.NEW);
     }
 
     setExistingSession() {
@@ -57,7 +67,7 @@ export default class SessionManager extends EventEmitter {
             existingSessions.push(this._storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(existingSessions));
         }
-        this._existingSession = true;
+        this.setSessionState(SESSION_STATE.RESUME);
     }
 
     checkExistingSession(): boolean {
