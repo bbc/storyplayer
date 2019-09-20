@@ -12,6 +12,7 @@ import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
+import { fetchOverridePlayout, checkDebugPlayout } from './utils';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -373,6 +374,8 @@ class Player extends EventEmitter {
 
     _dogImage: HTMLImageElement;
 
+    _details: ?HTMLDivElement
+
     _loadingLayer: HTMLElement
 
     _privacyDiv: ?HTMLDivElement;
@@ -707,16 +710,14 @@ class Player extends EventEmitter {
             playoutToUse = 'ios';
         }
 
-        const overridePlayout = new URLSearchParams(window.location.search).get('overridePlayout');
+        const overridePlayout = fetchOverridePlayout();
         if (overridePlayout) {
             playoutToUse = overridePlayout;
             logger.info("Overriding playout engine: ",playoutToUse)
         }
 
-        let debugPlayout = false
-        const overrideDebug = new URLSearchParams(window.location.search).get('debugPlayout');
-        if (overrideDebug && overrideDebug === "true") {
-            debugPlayout = true
+        const debugPlayout = checkDebugPlayout();
+        if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }
 
@@ -767,12 +768,12 @@ class Player extends EventEmitter {
     }
 
 
-    addDetails(name: string, id: string ) {
+    addDetails(elementName: string, id: string, name: string, id: string) {
         if (this._details === undefined) {
             this._details = document.createElement('div');
             this._player.appendChild(this._details);
         }
-        this._details.innerHTML = `${name} - ${id}`
+        this._details.innerHTML = `NE: ${elementName} - ${id} <br> REP: ${name} = ${id}`
         this._details.className = 'romper-dog';
         this._details.style.top = `2%`;
         this._details.style.left = `70%`;
@@ -1009,10 +1010,10 @@ class Player extends EventEmitter {
             }
         }
         switch (this._controller._sessionManager.sessionState) {
-        case 'RESUME':
+        case SESSION_STATE.RESUME:
             this._narrativeElementTransport.classList.remove('romper-inactive');
             break;
-        case 'EXISTING':
+        case SESSION_STATE.EXISTING:
             this._createResumeOverlays(options);
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
@@ -1020,10 +1021,10 @@ class Player extends EventEmitter {
                 this._narrativeElementTransport.classList.add('romper-inactive');
             }
             break; 
-        case 'RESTART':
+        case SESSION_STATE.RESTART:
             this._narrativeElementTransport.classList.remove('romper-inactive');
             break
-        case 'NEW':
+        case SESSION_STATE.NEW:
             this._createStartOverlays(options);
             break;
         default: 

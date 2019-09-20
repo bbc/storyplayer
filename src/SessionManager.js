@@ -1,6 +1,5 @@
 // @flow
 import EventEmitter  from 'events';
-import Controller from './Controller';
 import { InternalVariableNames } from './InternalVariables';
 
 const EXISTING_SESSIONS = 'EXISTING_SESSION'
@@ -12,27 +11,32 @@ const fetchStateFromStorage = (key: string, defaultValue: string) => {
 }
 
 
-export const SESSION_STATE = {
-    RESUME: 'RESUME',
-    RESTART: 'RESTART',
-    NEW: 'NEW',
-    EXISTING: 'EXISTING',
-};
+export const SESSION_STATE = [
+    'RESUME',
+    'RESTART',
+    'NEW',
+    'EXISTING',
+].reduce((state, name) => {
+    // eslint-disable-next-line no-param-reassign
+    state[name] = name;
+    return state;
+}, {});
+export type SessionState = typeof SESSION_STATE;
 
 export default class SessionManager extends EventEmitter {
     _storyId: string;
     
     _existingSession: boolean;
 
-    _controller: Controller;
-
     sessionState: string;
+
+    state: SessionState;
     
-    constructor(storyId?: string, controller: Controller) {
+    constructor(storyId: string) {
         super();
         this._storyId = storyId;
-        this._controller = controller;
         this._existingSession = this.checkExistingSession();
+        this.state = SESSION_STATE;
         this.sessionState = this._existingSession ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 

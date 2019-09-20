@@ -17,8 +17,8 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
 
-import { VARIABLE_CHANGED, REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
-import SessionManager from './SessionManager';
+import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import SessionManager, { SESSION_STATE } from './SessionManager';
 
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
@@ -145,17 +145,16 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
-        window.controller = this;
         if(!this._sessionManager) {
             this._createSessionManager(storyId);
         }
         switch (this._sessionManager.sessionState) {
-        case 'RESUME':
-        case 'EXISTING':
+        case SESSION_STATE.RESUME:
+        case SESSION_STATE.EXISTING:
             this.resumeStoryFromState(storyId, initialState);
             break;    
-        case 'RESTART':
-        case 'NEW':   
+        case SESSION_STATE.RESTART:
+        case SESSION_STATE.NEW:   
         default:
             this.startFromDefaultState(storyId, initialState);
             break;
@@ -205,11 +204,7 @@ export default class Controller extends EventEmitter {
                     return;
                 }
 
-                reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
-                reasoner.on(ERROR_EVENTS, this._handleError);
-
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-                    console.log('narrative element changed event', narrativeElement);
                     this._handleNEChange(reasoner, narrativeElement)
                         .then(() => {
                             if (this._linearStoryPath && !this._storyIconRendererCreated) {
@@ -219,13 +214,10 @@ export default class Controller extends EventEmitter {
                         });
                 };
 
+                reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd)
                 reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
-
                 reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, e)});
-
-                reasoner.on(ERROR_EVENTS, (e) => {
-                    console.log(e);
-                })
+                reasoner.on(ERROR_EVENTS, this._handleError)
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
@@ -266,19 +258,14 @@ export default class Controller extends EventEmitter {
     _chooseBeginningElement() {
 
         switch (this._sessionManager.sessionState) {
-        case 'RESUME':{
+        case SESSION_STATE.RESUME:
             this._chooseResumeElement();
             break;
-        }
-        case 'RESTART': {
-            this._reasoner.chooseBeginning();
-            break;
-        }
-        case 'EXISTING':{
+        case SESSION_STATE.EXISTING:
             // we don't want to choose a beginning until the user selects one
             break;
-        }
-        case 'NEW':
+        case SESSION_STATE.RESTART:
+        case SESSION_STATE.NEW:
         default:
             this._reasoner.chooseBeginning();
             break;
@@ -304,21 +291,6 @@ export default class Controller extends EventEmitter {
                 return statusObject;
             });
     }
-    /*
-    requirements:[
-        // First Requirement
-        {
-            logic: {//json logic here}
-            errorMsg: "Error to show to user"
-        },
-        // Second Requirement
-        {
-            logic: {//json logic here}
-            errorMsg: "Error to show to user"
-        },
-        ...
-    ]
-    */
 
     _checkStoryPlayable(requirements: Array<Object>) {
         const data = {
@@ -382,7 +354,7 @@ export default class Controller extends EventEmitter {
     }
 
     _createSessionManager(storyId: string) {
-        this._sessionManager = new SessionManager(storyId, this);
+        this._sessionManager = new SessionManager(storyId);
     }
 
     getCurrentRenderer(): ?BaseRenderer {
@@ -525,8 +497,7 @@ export default class Controller extends EventEmitter {
     // create a reasoner to do a shadow walk of the story graph
     // when it reaches a target node, it boots out the original reasoner
     // and takes its place (with suitable event listeners)
-    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string, resuming?: boolean, pathHistory: [string]) {
-        console.log('targetNeId', targetNeId);
+    _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string) {
         this._storyReasonerFactory(storyId).then((shadowReasoner) => {
             if (this._storyId !== storyId) {
                 return;
@@ -552,9 +523,6 @@ export default class Controller extends EventEmitter {
             // when we do, change our event listeners to the normal ones
             // and take the place of the original _reasoner
             const shadowHandleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
-
-                console.log('NEID', narrativeElement.id, narrativeElement.name);
-                console.log('ARRAY', visitedArray);
                 if (visitedArray.includes(narrativeElement.id)) {
                     logger.warn('shadow reasoner looping - exiting without meeting target node');
                     _shadowHandleStoryEnd();
@@ -586,13 +554,12 @@ export default class Controller extends EventEmitter {
 
                     // now we've walked to the target, trigger the change event handler
                     // so that it calls the renderers etc.
-                    this._handleNEChange(shadowReasoner, narrativeElement, resuming);
+                    this._handleNEChange(shadowReasoner, narrativeElement);
                     return;
                 }
                 shadowReasoner.next();
             };
             shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged);
-
             shadowReasoner.start();
             shadowReasoner.chooseBeginning();
         });
@@ -688,16 +655,20 @@ export default class Controller extends EventEmitter {
     }
 
     _getStoryDefaultVariableState(storyId: string) {
-        return this._fetchers.storyFetcher(storyId)
-            .then((story) => {
-                const { variables } = story;
-                if (variables) {
-                    return Object.keys(variables).map(variable => {
-                        return {name: variable, value: variables[variable].default_value}
-                    });
-                }
-                return Promise.resolve();
-            });
+        return this._fetchers.storyFetcher(storyId).then((story) => {
+            const {
+                variables
+            } = story;
+            if (variables) {
+                return Object.keys(variables).map(variable => {
+                    return {
+                        name: variable,
+                        value: variables[variable].default_value
+                    }
+                });
+            }
+            return Promise.resolve({});
+        });
     }
 
     // get the ids of every story nested within the one given

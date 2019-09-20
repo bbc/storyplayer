@@ -11,6 +11,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import { checkAddDetailsOverride } from '../utils';
 
 const SEEK_TIME = 10;
 
@@ -131,7 +132,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadIconAssets();
     }
 
-    willStart(name, id) {
+    willStart(elementName: string, elementId: string) {
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -148,7 +149,11 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._player.addDetails(name, id)
+        if(checkAddDetailsOverride()) {
+            const { name, id } = this._representation;
+            this._player.addDetails(elementName, elementId, name, id)
+        }
+        
     }
 
     /**

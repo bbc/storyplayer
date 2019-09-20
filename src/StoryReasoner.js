@@ -7,7 +7,7 @@ import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
 import InternalVariables, { InternalVariableNames } from './InternalVariables';
-import { VARIABLE_CHANGED, REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import {REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
  * structure of a story.
@@ -510,12 +510,17 @@ export default class StoryReasoner extends EventEmitter {
             return;
         }
         if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
-            this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
-                .then(subStoryReasoner => {
-                    this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
-                }).catch((err) => {
-                    this.emit(ERROR_EVENTS, err);
-                });
+            if (this._currentNarrativeElement.body.story_target_id) {
+                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                    .then(subStoryReasoner => {
+                        this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
+                    }).catch((err) => {
+                        this.emit(ERROR_EVENTS, err);
+                    });
+            } else {
+                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`));
+            }
+            
         }
     }
 
