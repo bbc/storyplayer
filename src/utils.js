@@ -1,8 +1,6 @@
 export const checkAddDetailsOverride = () => {
     const override = new URLSearchParams(window.location.search).get('addDetails');
-    const retObj = (override === 'true');
-    console.log('OVERRIDE', retObj)
-    return retObj;
+    return (override === 'true');
 };
 
 export const fetchOverridePlayout = () => {
@@ -11,9 +9,7 @@ export const fetchOverridePlayout = () => {
 
 export const checkDebugPlayout = () => {
     const override = new URLSearchParams(window.location.search).get('debugPlayout');
-    const retObj = (override === 'true');
-    console.log('OVERRIDE', retObj)
-    return retObj;
+    return (override === 'true');
 };
 
 export const fetchShakaDebugLevel = () => {
@@ -30,7 +26,5 @@ export const fetchInactiveBufferingOverride = () => {
 
 export const checkDisableLookahead = () => {
     const disableLookahead = new URLSearchParams(window.location.search).get('disableLookahead');
-    const retObj = (disableLookahead === 'true');
-    console.log('OVERRIDE', retObj)
-    return retObj;
-}
+    return (disableLookahead === 'true');;
+};
