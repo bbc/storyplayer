@@ -261,9 +261,7 @@ export default class StoryReasoner extends EventEmitter {
             this.emit(ERROR_EVENTS, new Error('Link is to an narrative object not in the graph'));
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
-            console.log('this._currentNarrativeElement', this._currentNarrativeElement);
             if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
-                console.log('STORY ELEMENT');
                 this.appendToHistory(narrativeElementId);
                 this._resolving = true;
                 if (this._currentNarrativeElement.body.story_target_id) {
@@ -344,7 +342,6 @@ export default class StoryReasoner extends EventEmitter {
     }
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
-        console.log('created sub story reasoner');
         this._addSubReasonerListeners(subStoryReasoner);
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
