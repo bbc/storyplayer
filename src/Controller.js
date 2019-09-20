@@ -121,12 +121,13 @@ export default class Controller extends EventEmitter {
 
 
     restart(storyId: string, initialState?: Object = {}) {
-        let resumeState = initialState;
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        if(Object.keys(resumeState).length === 0) {
-            resumeState = this._sessionManager.fetchExistingSessionState();
+        if(Object.keys(initialState).length === 0) {
+            this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                this.start(storyId, resumeState);
+            });
         }
         this.start(storyId, initialState);
     }
@@ -165,10 +166,10 @@ export default class Controller extends EventEmitter {
         if (initialState && Object.keys(initialState).length > 0) {
             this.startStory(storyId, initialState);
         } else {
-            const resumeState = this._sessionManager.fetchExistingSessionState();
-            this.startStory(storyId, resumeState);
+            this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                this.startStory(storyId, resumeState);
+            }); 
         }
-        
     }
 
     startFromDefaultState(storyId: string, initialState?: Object) {
@@ -236,23 +237,18 @@ export default class Controller extends EventEmitter {
 
 
     _chooseResumeElement() {
-        // if the element is in the top level story we can jump to it
-        const lastVisited = this._sessionManager.fetchLastVisitedElement();
-        if (!lastVisited) {
-            this._reasoner.chooseBeginning();
-            return;
-        }
-        if (lastVisited in this._reasoner._narrativeElements) {
-            this._jumpToNarrativeElement(lastVisited);
-        } 
-        else {
-            const pathHistory = this._sessionManager.fetchPathHistory();
-            if (pathHistory) {
-                this.walkPathHistory(this._storyId, lastVisited, pathHistory);
-            } else {
+        this._sessionManager.fetchPathHistory().then(pathHistory => {
+            if(!pathHistory) {
                 this._reasoner.chooseBeginning();
-            }
-        }
+            } else {
+                const lastVisited = pathHistory[pathHistory.length -1]
+                if(lastVisited && lastVisited in this._reasoner._narrativeElements) {
+                    this._jumpToNarrativeElement(lastVisited);
+                } else {
+                    this.walkPathHistory(this._storyId, lastVisited, pathHistory);
+                }
+            } 
+        });
     }
 
     _chooseBeginningElement() {

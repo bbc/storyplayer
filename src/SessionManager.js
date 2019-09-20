@@ -10,7 +10,6 @@ const fetchStateFromStorage = (key: string, defaultValue: string) => {
     return JSON.parse(localStorage.getItem(key) || defaultValue);
 }
 
-
 export const SESSION_STATE = [
     'RESUME',
     'RESTART',
@@ -61,7 +60,7 @@ export default class SessionManager extends EventEmitter {
         this._existingSession = true;
     }
 
-    checkExistingSession() {
+    checkExistingSession(): boolean {
         if (!this._storyId) return false;
         const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
         if(!existingSessions) return false;
@@ -69,32 +68,34 @@ export default class SessionManager extends EventEmitter {
         return hasExistingSession || false;
     }
 
-    fetchExistingSessionState() {
-        if(!this._storyId) return {};
+    fetchExistingSessionState(): Promise<Object> {
+        if(!this._storyId) return Promise.resolve({});
         const existingSessionState = fetchStateFromStorage(this._storyId, EMPTY_OBJECT);
         if (existingSessionState ) {
-            return existingSessionState;
+            return Promise.resolve(existingSessionState);
         }
-        return {};
+        return Promise.resolve({});
     }
 
-    fetchLastVisitedElement() {
-        const resumeState = this.fetchExistingSessionState();
-        if(!resumeState) return null;
-        const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
-        if(!pathHistory) return null;
-        if(pathHistory.length === 0) return null;
-        const lastVisited = pathHistory[pathHistory.length -1];
-        return lastVisited;
+    fetchLastVisitedElement(): Promise<?string> {
+        return this.fetchExistingSessionState().then(resumeState => {
+            if (!resumeState) return null;
+            const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+            if (!pathHistory) return null;
+            if (pathHistory.length === 0) return null;
+            const lastVisited = pathHistory[pathHistory.length - 1];
+            return lastVisited;
+        });
     }
 
-    fetchPathHistory() {
-        const resumeState = this.fetchExistingSessionState();
-        if(!resumeState) return null;
-        const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
-        if(!pathHistory) return null;
-        if(pathHistory.length === 0) return null;
-        return pathHistory;
+    fetchPathHistory(): Promise<?[string]> {
+        return this.fetchExistingSessionState().then(resumeState => {
+            if (!resumeState) return null;
+            const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+            if (!pathHistory) return null;
+            if (pathHistory.length === 0) return null;
+            return pathHistory;
+        });
     }
 
     setSessionState(state: string) {
