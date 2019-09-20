@@ -1026,14 +1026,14 @@ class Player extends EventEmitter {
         case 'NEW':
             this._createStartOverlays(options);
             break;
-        default: {
+        default: 
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
                 this._narrativeElementTransport.classList.add('romper-inactive');
             }
             this._createStartOverlays(options);
-            break;}
+            break;
         }
     }
 

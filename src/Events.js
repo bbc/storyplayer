@@ -17,7 +17,8 @@ export const REASONER_EVENTS = [
     'choiceOfLinks',
     'CHOICE_OF_LINKS',
     'NEXT_ELEMENTS',
-    'MULTIPLE_VALID_LINKS'
+    'MULTIPLE_VALID_LINKS',
+    'ELEMENT_FOUND',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
