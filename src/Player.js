@@ -402,7 +402,12 @@ class Player extends EventEmitter {
 
     _controller: Controller;
 
-    constructor(target: HTMLElement, analytics: AnalyticsLogger, assetUrls: AssetUrls, controller: Controller) {
+    constructor(
+        target: HTMLElement,
+        analytics: AnalyticsLogger,
+        assetUrls: AssetUrls,
+        controller: Controller,
+    ) {
         super();
         this._controller = controller;
         this._numChoices = 0;
@@ -781,15 +786,13 @@ class Player extends EventEmitter {
     _addContinueModal(options: Object) {
         this._createResumeExperienceButton(options);
 
-        const continueModalInnerContent = document.createElement('div');
-        continueModalInnerContent.classList.add('modal-inner-content');
         const continueModalMessage = document.createElement('div');
-        continueModalMessage.innerHTML = 'you have a previous session, click continue to resume';
-        continueModalInnerContent.appendChild(continueModalMessage);
+        continueModalMessage.classList.add('modal-inner-content');
+        continueModalMessage.textContent = 'You have a previous session';
 
         const cancelButton = document.createElement('button');
         cancelButton.classList.add('cancel-button');
-        cancelButton.innerHTML = 'X';
+        cancelButton.innerHTML = 'Start again';
     
         const cancelButtonHandler = () => {
             this._narrativeElementTransport.classList.remove('romper-inactive');
@@ -819,10 +822,23 @@ class Player extends EventEmitter {
             'touchend',
             resumeExperienceButtonHandler,
         );
-
-        this._continueModalContent.appendChild(cancelButton);
-        this._continueModalContent.appendChild(continueModalInnerContent);
+        
+        // resume
+        this._continueModalContent.appendChild(continueModalMessage);
+        const continueMessage = document.createElement('div');
+        continueMessage.textContent = 'Resume from where you were:';
+        this._continueModalContent.appendChild(continueMessage);
         this._continueModalContent.appendChild(this._resumeExperienceButton);
+               
+        // restart
+        const restartContainer = document.createElement('div');
+        restartContainer.className = 'restart-experience';
+        const restartMessage = document.createElement('div');
+        restartMessage.textContent = 'Or restart from the beginning:';
+        restartContainer.appendChild(restartMessage);
+        restartContainer.appendChild(cancelButton);
+        this._continueModalContent.appendChild(restartContainer);
+
 
         if(this._continueModalLayer) {
             this._continueModalLayer.classList.add('show');
