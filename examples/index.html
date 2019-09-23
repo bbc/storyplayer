@@ -15,18 +15,18 @@
 
     <!-- tab switcher -->
     <div class="tab">
-        <button class="tablinks active" onclick="openTab(event, 'chooser')">Select story</button>
+        <button class="tablinks" onclick="openTab(event, 'chooser')">Select story</button>
         <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
-        <button class="tablinks" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
+        <button class="tablinks active" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
     </div>
 
     <!-- Select a story -->
-    <div id='chooser' class='tabcontent' style='display: block;'>
+    <div id='chooser' class='tabcontent'>
         <div id='choices' class='selection'></div>
     </div>
 
     <!-- View rendered content -->
-    <div id='renderer' class='tabcontent'>
+    <div id='renderer' class='tabcontent'  style='display: block;'>
         <h2 id='story-title' class='story-title'>No story selected</h2>
         <div class='romper-target' id="romper-target">
             <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
@@ -245,7 +245,7 @@
             });
 
             romperInstance.start(config.stories[0].id, getVariablesState());
-            romperInstance.on('romperstorystarted', () => {
+            romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
                 addVariableControls(config.stories[0].id);
             });
         }
@@ -254,6 +254,18 @@
             showMessage('Story restarted');
             romperInstance.restart(loadedStoryJson.stories[0].id, getVariablesState());
             resizeWindow();
+        }
+
+        function addMeta(storyId) {
+            const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
+            if(!experienceIdMeta ) {
+                const meta = document.createElement('meta');
+                meta.name = 'experienceId';
+                meta.content = storyId;
+                document.getElementsByTagName('head')[0].appendChild(meta);
+            } else {
+                experienceIdMeta.setAttribute("content", storyId);
+            }
         }
 
         // fetch a story, load and run it
@@ -270,16 +282,21 @@
                 .then((text) => {
                     showMessage('Story loaded');
                     const storyJson = JSON.parse(text);
+                    addMeta(storyJson.stories[0].id);
                     run(storyJson);
+                    if(document.getElementById('rendertab').classList.contains('active')) {
+                        resizeWindow();
+                    }
                 })
                 .catch((rejection) => {
+                    showMessage(rejection);
                     showMessage(`could not load story content: ${rejection.status} ${rejection.statusText}`, true);
                 });
         };
 
         function addVariableControls() {
             const varPanel = document.getElementById('variables-generic');
-            romperInstance.getVariables()
+            romperInstance.getVariableState()
             .then((variableDeclaration) => {
                 if (variableDeclaration === undefined || variableDeclaration === {}) {
                     varPanel.innerHTML = 'There are no variables in this story';

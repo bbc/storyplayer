@@ -1,6 +1,5 @@
 // @flow
 import EventEmitter from 'events';
-
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner from './StoryReasoner';
@@ -16,6 +15,10 @@ import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
+
+
+import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import SessionManager, { SESSION_STATE } from './SessionManager';
 
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
@@ -42,10 +45,10 @@ export default class Controller extends EventEmitter {
         super();
         this._storyId = null;
         this._reasoner = null;
+        this._sessionManager = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
         this._representationReasoner = representationReasoner;
-
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
@@ -125,31 +128,80 @@ export default class Controller extends EventEmitter {
 
     }
 
-    restart(storyId: string, variableState?: Object = {}) {
+
+    restart(storyId: string, initialState?: Object = {}) {
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        this.start(storyId, variableState);
+        if(Object.keys(initialState).length === 0) {
+            this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                this.start(storyId, resumeState);
+            });
+        }
+        this.start(storyId, initialState);
+    }
+    
+    
+    /**
+     * Reset the story and keep the reasoner for it.
+     * @param  {string} storyId story to reset
+     */
+    resetStory(storyId: string){
+        // we're just resetting
+        this._renderManager.prepareForRestart();
+        this.start(storyId);
     }
 
-    start(storyId: string, variableState?: Object = {}) {
+
+    start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
+        if(!this._sessionManager) {
+            this._createSessionManager(storyId);
+        }
+        switch (this._sessionManager.sessionState) {
+        case SESSION_STATE.RESUME:
+        case SESSION_STATE.EXISTING:
+            this.resumeStoryFromState(storyId, initialState);
+            break;    
+        case SESSION_STATE.RESTART:
+        case SESSION_STATE.NEW:   
+        default:
+            this.startFromDefaultState(storyId, initialState);
+            break;
+        }
+    }
+
+    resumeStoryFromState(storyId: string, initialState?: Object) {
+        if (initialState && Object.keys(initialState).length > 0) {
+            this.startStory(storyId, initialState);
+        } else {
+            this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                this.startStory(storyId, resumeState);
+            }); 
+        }
+    }
+
+    startFromDefaultState(storyId: string, initialState?: Object) {
+        if (initialState && Object.keys(initialState).length > 0) {
+            this.startStory(storyId, initialState);
+        } else {
+            this.getDefaultInitialState().then(variableState => {
+                this.setDefaultState(variableState);
+                if (Object.keys(variableState).length > 0) {
+                    this.startStory(storyId, variableState);
+                }
+                else {
+                    this.startStory(storyId, initialState);
+                }
+            });
+        }
+    }
+
+    startStory(storyId: string, initialState?: Object = {}) {
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
         });
-
-        // event handling functions for StoryReasoner
-        const _handleStoryEnd = () => {
-            const logData = {
-                type: AnalyticEvents.types.STORY_NAVIGATION,
-                name: AnalyticEvents.names.STORY_END,
-            };
-            this._enhancedAnalytics(logData);
-            logger.warn('Story Ended!');
-        };
-        const _handleError = (err) => {
-            logger.warn(`Error: ${err}`);
-        };
+        window._sessionManager = this._sessionManager;
 
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId)
@@ -162,9 +214,6 @@ export default class Controller extends EventEmitter {
                     return;
                 }
 
-                reasoner.on('storyEnd', _handleStoryEnd);
-                reasoner.on('error', _handleError);
-
                 this._handleNarrativeElementChanged = (narrativeElement: NarrativeElement) => {
                     this._handleNEChange(reasoner, narrativeElement)
                         .then(() => {
@@ -175,18 +224,57 @@ export default class Controller extends EventEmitter {
                         });
                 };
 
-                reasoner.on('narrativeElementChanged', this._handleNarrativeElementChanged);
+                reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd)
+                reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
+                reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, e)});
+                reasoner.on(ERROR_EVENTS, this._handleError)
 
                 this._reasoner = reasoner;
-                this._reasoner.start(variableState);
+                this._reasoner.start(initialState);
+                
+                this._chooseBeginningElement();
 
                 this._addListenersToRenderManager();
-                this.emit('romperstorystarted');
+                this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
                 this._renderManager.handleStoryStart(storyId);
+                
             })
             .catch((err) => {
                 logger.warn('Error starting story', err);
             });
+    }
+
+
+    _chooseResumeElement() {
+        this._sessionManager.fetchPathHistory().then(pathHistory => {
+            if(!pathHistory) {
+                this._reasoner.chooseBeginning();
+            } else {
+                const lastVisited = pathHistory[pathHistory.length -1]
+                if(lastVisited && lastVisited in this._reasoner._narrativeElements) {
+                    this._jumpToNarrativeElement(lastVisited);
+                } else {
+                    this.walkPathHistory(this._storyId, lastVisited, pathHistory);
+                }
+            } 
+        });
+    }
+
+    _chooseBeginningElement() {
+
+        switch (this._sessionManager.sessionState) {
+        case SESSION_STATE.RESUME:
+            this._chooseResumeElement();
+            break;
+        case SESSION_STATE.EXISTING:
+            // we don't want to choose a beginning until the user selects one
+            break;
+        case SESSION_STATE.RESTART:
+        case SESSION_STATE.NEW:
+        default:
+            this._reasoner.chooseBeginning();
+            break;
+        }
     }
 
     // get the current and next narrative elements
@@ -208,21 +296,6 @@ export default class Controller extends EventEmitter {
                 return statusObject;
             });
     }
-    /*
-    requirements:[
-        // First Requirement
-        {
-            logic: {//json logic here}
-            errorMsg: "Error to show to user"
-        },
-        // Second Requirement
-        {
-            logic: {//json logic here}
-            errorMsg: "Error to show to user"
-        },
-        ...
-    ]
-    */
 
     _checkStoryPlayable(requirements: Array<Object>) {
         const data = {
@@ -285,6 +358,10 @@ export default class Controller extends EventEmitter {
         );
     }
 
+    _createSessionManager(storyId: string) {
+        this._sessionManager = new SessionManager(storyId);
+    }
+
     getCurrentRenderer(): ?BaseRenderer {
         return this._renderManager.getCurrentRenderer();
     }
@@ -336,7 +413,7 @@ export default class Controller extends EventEmitter {
                     });
             };
 
-            spw.on('walkComplete', _handleWalkEnd);
+            spw.on(REASONER_EVENTS.WALK_COMPLETE, _handleWalkEnd);
             spw.parseStory(storyId);
         });
     }
@@ -355,7 +432,7 @@ export default class Controller extends EventEmitter {
             history.pop();
             // set history variable directly in reasoner to avoid triggering lookahead
             if (this._reasoner) {
-                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history);
+                this._reasoner.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, history);
             }
 
             if (previous) {
@@ -379,14 +456,14 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
-    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement) {
+    _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, resuming?: boolean) {
         logger.info({
             obj: narrativeElement,
         }, 'Narrative Element');
-        if (this._reasoner) {
+        if (this._reasoner && !resuming) {
             this._reasoner.appendToHistory(narrativeElement.id);
+            this._logNEChange(this._currentNarrativeElement, narrativeElement);
         }
-        this._logNEChange(this._currentNarrativeElement, narrativeElement);
         this._currentNarrativeElement = narrativeElement;
         return this._renderManager.handleNEChange(narrativeElement);
     }
@@ -403,6 +480,7 @@ export default class Controller extends EventEmitter {
             to: newNarrativeElement.name,
         };
         this._enhancedAnalytics(logData);
+        this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     }
 
     // try to get the narrative element object with the given id
@@ -433,7 +511,7 @@ export default class Controller extends EventEmitter {
             const _shadowHandleStoryEnd = () => {
                 logger.warn('shadow reasoner reached story end without meeting target node');
             };
-            shadowReasoner.on('storyEnd', _shadowHandleStoryEnd);
+            shadowReasoner.on(REASONER_EVENTS.STORY_END, _shadowHandleStoryEnd);
 
             // the 'normal' event listeners
             const _handleStoryEnd = () => {
@@ -442,7 +520,7 @@ export default class Controller extends EventEmitter {
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
             };
-            shadowReasoner.on('error', _handleError);
+            shadowReasoner.on(ERROR_EVENTS, _handleError);
 
             const visitedArray = [];
 
@@ -455,6 +533,7 @@ export default class Controller extends EventEmitter {
                     _shadowHandleStoryEnd();
                     return;
                 }
+                
                 visitedArray.push(narrativeElement.id);
                 if (narrativeElement.id === targetNeId) {
                     // remove event listeners for the original reasoner
@@ -462,16 +541,16 @@ export default class Controller extends EventEmitter {
 
                     // apply appropriate listeners to this reasoner
                     this._storyId = storyId;
-                    shadowReasoner.on('storyEnd', _handleStoryEnd);
+                    shadowReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
                     shadowReasoner.removeListener(
-                        'narrativeElementChanged',
+                        REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         shadowHandleNarrativeElementChanged,
                     );
                     this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
                         this._handleNEChange(shadowReasoner, ne);
                     };
                     shadowReasoner.on(
-                        'narrativeElementChanged',
+                        REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         this._handleNarrativeElementChanged,
                     );
 
@@ -481,14 +560,13 @@ export default class Controller extends EventEmitter {
                     // now we've walked to the target, trigger the change event handler
                     // so that it calls the renderers etc.
                     this._handleNEChange(shadowReasoner, narrativeElement);
-                } else {
-                    // just keep on walking until we find it (or reach the end)
-                    shadowReasoner.next();
+                    return;
                 }
+                shadowReasoner.next();
             };
-            shadowReasoner.on('narrativeElementChanged', shadowHandleNarrativeElementChanged);
-
+            shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged);
             shadowReasoner.start();
+            shadowReasoner.chooseBeginning();
         });
     }
 
@@ -515,7 +593,7 @@ export default class Controller extends EventEmitter {
      */
     setVariableValue(name: string, value: any) {
         if (this._reasoner) {
-            this._reasoner.setVariableValue(name, value);
+            this._reasoner.setVariableAndSaveLocal(name, value);
             logger.info(`Controller seting variable '${name}' to ${value}`);
             this._renderManager.refreshLookahead();
         } else {
@@ -538,18 +616,18 @@ export default class Controller extends EventEmitter {
     }
 
     /**
-     * Get the variables present in the story
+     * Get the variables and their state present in the story
      * @param {*} No parameters, it uses the story Id
      * recurses into substories
      */
-    getVariables(): Promise<Object> {
+    getVariableState(): Promise<Object> {
         const storyId = this._storyId;
         if (storyId) {
             return this._getAllStories(storyId)
                 .then((subStoryIds) => {
                     const subVarPromises = [];
                     subStoryIds.forEach((subid) => {
-                        subVarPromises.push(this._getVariablesForStory(subid));
+                        subVarPromises.push(this._getVariableStateForStory(subid));
                     });
                     return Promise.all(subVarPromises);
                 })
@@ -564,6 +642,38 @@ export default class Controller extends EventEmitter {
                 });
         }
         return Promise.resolve({});
+    }
+
+    getDefaultInitialState() {
+        if (!this._storyId) return {};
+
+        return this._getAllStories(this._storyId).then((storyIds) => {
+            return Promise.all(storyIds.map(id => this._getStoryDefaultVariableState(id)))
+        }).then(allVariables => {
+            const flattenedVariables = [].concat(...allVariables);
+            return flattenedVariables.reduce((variablesObject, variable) => {
+                // eslint-disable-next-line no-param-reassign
+                variablesObject[variable.name] = variable.value;
+                return variablesObject;
+            }, {});
+        });
+    }
+
+    _getStoryDefaultVariableState(storyId: string) {
+        return this._fetchers.storyFetcher(storyId).then((story) => {
+            const {
+                variables
+            } = story;
+            if (variables) {
+                return Object.keys(variables).map(variable => {
+                    return {
+                        name: variable,
+                        value: variables[variable].default_value
+                    }
+                });
+            }
+            return Promise.resolve({});
+        });
     }
 
     // get the ids of every story nested within the one given
@@ -599,7 +709,7 @@ export default class Controller extends EventEmitter {
     }
 
     // get all the variables for the story given
-    _getVariablesForStory(storyId: string) {
+    _getVariableStateForStory(storyId: string) {
         let variables;
         return this._fetchers.storyFetcher(storyId)
             .then((story) => {
@@ -629,6 +739,16 @@ export default class Controller extends EventEmitter {
             });
     }
 
+
+    /**
+     * Sets the default variables if we have a reasoner
+     * @param  {} variables An object of form { name1: valuetring1, name2: valuestring2 }
+     */
+    setDefaultState(variables: Object) {
+        this.setVariables(variables);
+        this.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
+    }
+
     /**
      * Set a bunch of variables without doing renderer lookahead refresh in between
      * @param {*} variables An object of form { name1: valuetring1, name2: valuestring2 }
@@ -636,7 +756,7 @@ export default class Controller extends EventEmitter {
     setVariables(variables: Object) {
         Object.keys(variables).forEach((varName) => {
             if (this._reasoner) {
-                this._reasoner.setVariableValue(varName, variables[varName]);
+                this._reasoner.setVariableAndSaveLocal(varName, variables[varName]);
             } else {
                 logger.warn(`Controller cannot set variable '${varName}' - no reasoner`);
             }
@@ -721,8 +841,7 @@ export default class Controller extends EventEmitter {
             neId = this._currentNarrativeElement.id;
         }
         if (this._reasoner && neId) {
-            const subReasoner = this._reasoner
-                .getSubReasonerContainingNarrativeElement(neId);
+            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neId);
             if (subReasoner) {
                 return subReasoner.hasNextNode()
                     .then((links) => {
@@ -859,8 +978,12 @@ export default class Controller extends EventEmitter {
     // get an array of ids of the NarrativeElements that follow narrativeElement
     getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
         return this.getValidNextSteps(narrativeElement.id)
-            .then(nextNarrativeElementObjects =>
-                nextNarrativeElementObjects.map(neObj => neObj.ne.id));
+            .then((nextNarrativeElements) => {
+                if(nextNarrativeElements && nextNarrativeElements.length > 0) {
+                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) });
+                }
+                return nextNarrativeElements.map(neObj => neObj.ne.id);;
+            });
     }
 
     // given the NE id, reason to find a representation
@@ -909,23 +1032,74 @@ export default class Controller extends EventEmitter {
     reset() {
         this._storyId = null;
         if (this._reasoner && this._handleStoryEnd) {
-            this._reasoner.removeListener('storyEnd', this._handleStoryEnd);
+            this._reasoner.removeListener(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
         }
         if (this._reasoner && this._handleLinkChoice) {
-            this._reasoner.removeListener('multipleValidLinks', this._handleLinkChoice);
+            this._reasoner.removeListener(REASONER_EVENTS.MULTIPLE_VALID_LINKS, this._handleLinkChoice);
         }
         if (this._reasoner && this._handleError) {
-            this._reasoner.removeListener('error', this._handleError);
+            this._reasoner.removeListener(ERROR_EVENTS, this._handleError);
         }
         if (this._reasoner && this._handleNarrativeElementChanged) {
             this._reasoner.removeListener(
-                'narrativeElementChanged',
+                REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                 this._handleNarrativeElementChanged,
             );
         }
         this._reasoner = null;
 
         this._renderManager.reset();
+    }
+
+
+    _handleStoryEnd() {
+        const logData = {
+            type: AnalyticEvents.types.STORY_NAVIGATION,
+            name: AnalyticEvents.names.STORY_END,
+        };
+        this._enhancedAnalytics(logData);
+        logger.warn('Story Ended!');
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _handleError(err: Error) {
+        logger.warn(err);
+    }
+
+    walkPathHistory(storyId: string, lastVisited: string, pathHistory: [string]) {
+        this._storyReasonerFactory(storyId).then((newReasoner)=> {
+            if(this._storyId !== storyId) {
+                return;
+            }
+            newReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (element) => {
+                this.reset();
+
+                this._storyId = storyId;
+                // apply appropriate listeners to this reasoner                
+                this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
+                    this._handleNEChange(newReasoner, ne);
+                };
+
+                newReasoner.on(
+                    REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                    this._handleNarrativeElementChanged,
+                );
+                newReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
+                newReasoner.on(ERROR_EVENTS, this._handleError);
+                // swap out the original reasoner for this one
+                this._reasoner = newReasoner;
+
+                // now we've walked to the target, trigger the change event handler
+                // so that it calls the renderers etc.
+                this._handleNEChange(newReasoner, element, true);
+            })
+
+            newReasoner.start();
+            pathHistory.forEach(element => {
+                newReasoner._shadowWalkPath(element, pathHistory);
+            });
+           
+        });
     }
 
     _storyId: ?string;
@@ -948,9 +1122,9 @@ export default class Controller extends EventEmitter {
 
     _assetUrls: AssetUrls;
 
-    _handleError: ?Function;
+    _handleError: Function;
 
-    _handleStoryEnd: ?Function;
+    _handleStoryEnd: Function;
 
     _handleNarrativeElementChanged: ?Function;
 
@@ -966,5 +1140,8 @@ export default class Controller extends EventEmitter {
 
     _allNarrativeElements: ?Array<NarrativeElement>;
 
+    _sessionManager: SessionManager;
+
     _segmentSummaryData: Object;
+
 }

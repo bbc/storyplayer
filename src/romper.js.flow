@@ -184,6 +184,8 @@ export type Renderers = { [type: string]: Class<BaseRenderer> };
 export type DataResolver = {
     get: (name: string) => Promise<any>,
     set: (name: string, value: any) => any,
+    saveToStorage: (name: string, value: any) => any,
+    saveAllToStorage: () => any,
 }
 
 export type Settings = {

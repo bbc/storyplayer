@@ -21,6 +21,8 @@ import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import ImageRenderer from './renderers/ImageRenderer';
+import { REASONER_EVENTS } from './Events';
+import { checkDisableLookahead } from './utils';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -99,7 +101,7 @@ export default class RenderManager extends EventEmitter {
         this._handleOrientationChange = this._handleOrientationChange.bind(this)
         this._privacyNotice = privacyNotice;
 
-        this._player = new Player(this._target, this._analytics, this._assetUrls);
+        this._player = new Player(this._target, this._analytics, this._assetUrls, this._controller);
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);
@@ -277,14 +279,14 @@ export default class RenderManager extends EventEmitter {
             })
             .then((mediaUrl) => {
                 logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                this._player.addExperienceStartButtonAndImage(Object.assign(
+                this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: mediaUrl },
                 ));
             })
             .catch((err) => {
                 logger.error(err, 'Could not get url from asset collection uuid');
-                this._player.addExperienceStartButtonAndImage(Object.assign(
+                this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
@@ -359,7 +361,7 @@ export default class RenderManager extends EventEmitter {
             this._player,
         );
 
-        this._renderStory.on('jumpToNarrativeElement', (neid) => {
+        this._renderStory.on(REASONER_EVENTS.JUMP_TO_NARRATIVE_ELEMENT, (neid) => {
             this._controller._jumpToNarrativeElement(neid);
         });
 
@@ -555,7 +557,7 @@ export default class RenderManager extends EventEmitter {
         this._showBackIcon();
         this.refreshOnwardIcons();
 
-        newRenderer.willStart();
+        newRenderer.willStart(newNarrativeElement.name, newNarrativeElement.id);
 
         // ensure volume persistence
         Object.keys(this._rendererState.volumes).forEach((label) => {
@@ -618,9 +620,7 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
-        const disableLookahead
-            = new URLSearchParams(window.location.search).get('disableLookahead');
-        if(disableLookahead === 'true') {
+        if(checkDisableLookahead()) {
             return Promise.resolve();
         }
         return Promise.all([

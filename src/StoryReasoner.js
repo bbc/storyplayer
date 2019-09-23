@@ -7,7 +7,7 @@ import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
 import InternalVariables, { InternalVariableNames } from './InternalVariables';
-
+import {REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
  * structure of a story.
@@ -106,7 +106,7 @@ export default class StoryReasoner extends EventEmitter {
      * @throws when the story has already started
      * @fires StoryReasoner#error
      * @fires StoryReasoner#narrativeElementChanged
-     * @fires StoryReasoner#choiceOfBeginnings
+     * @fires StoryReasoner#CHOICE_OF_BEGINNINGS
      * @return {void}
      */
     start(initialState?: Object = {}) {
@@ -115,35 +115,44 @@ export default class StoryReasoner extends EventEmitter {
             // throw new Error('InvalidState: this story has already been');
         }
         this._storyStarted = true;
-        this._fetchVariablesFromStory();
         this._applyInitialState(initialState);
-        this._chooseBeginning();
     }
 
-    // Get the variables defined in this story, and store the default values in our dataresolver
+    // Get the variables defined in this story
     _fetchVariablesFromStory() {
         if (this._story.variables) {
             const variableTree = this._story.variables;
-            Object.keys(variableTree).forEach((storyVariableName) => {
+            return Promise.all(Object.keys(variableTree).map((storyVariableName) => {
                 const storyVariableValue = variableTree[storyVariableName].default_value;
-                this.getVariableValue(storyVariableName)
+                return this.getVariableValue(storyVariableName)
                     .then((value) => {
-                        if (value === null) {
-                            this.setVariableValue(storyVariableName, storyVariableValue);
-                        } else {
-                            logger.info(`Variable ${storyVariableName} already has value ${value}`);
+                        if (value === undefined || value === null) {
+                            return {
+                                name: storyVariableName,
+                                value: storyVariableValue
+                            };
                         }
+                        logger.info(`Variable ${storyVariableName} already has value ${value}`);
+                        return null;
                     });
-            });
-        } else {
-            logger.info('No variables in story');
-        }
+            })).then(foundVariables => foundVariables.filter(Boolean)
+                .reduce((variablesObject, variable) => {
+                    // eslint-disable-next-line no-param-reassign
+                    variablesObject[variable.name] = variable.value;
+                    return variablesObject;
+                }, {}),
+            );
+        } 
+        logger.info('No variables in story');
+        return Promise.resolve(null);
     }
 
     _applyInitialState(initialState: Object) {
-        Object.keys(initialState).forEach((varName) => {
-            this.setVariableValue(varName, initialState[varName]);
-        });
+        if(initialState && Object.keys(initialState).length > 0) {
+            Object.keys(initialState).forEach((varName) => {
+                this.setVariableAndSaveLocal(varName, initialState[varName]);
+            });
+        }
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
     }
@@ -155,7 +164,7 @@ export default class StoryReasoner extends EventEmitter {
      * @fires StoryReasoner#error
      * @fires StoryReasoner#narrativeElementChanged
      * @fires StoryReasoner#storyEnd
-     * @fires StoryReasoner#choiceOfLinks
+     * @fires StoryReasoner#CHOICE_OF_LINKS
      * @throws when the story has not yet started, or has already ended
      * @throws if the reasoner is currently reasoning something
      *         (e.g,. next() has been called but a new narrative
@@ -179,10 +188,12 @@ export default class StoryReasoner extends EventEmitter {
         }
     }
 
-    _chooseBeginning() {
+
+
+    chooseBeginning() {
         this._resolving = true;
         if (this._story.beginnings.length > 1) {
-            this.emit('choiceOfBeginnings');
+            this.emit(REASONER_EVENTS.CHOICE_OF_BEGINNINGS);
         }
         evaluateConditions(this._story.beginnings, this._dataResolver)
             .then((startElement) => {
@@ -190,7 +201,7 @@ export default class StoryReasoner extends EventEmitter {
                 if (startElement) {
                     this._setCurrentNarrativeElement(startElement[0].narrative_element_id);
                 } else {
-                    this.emit('error', new Error('Unable to choose a valid beginning'));
+                    this.emit(ERROR_EVENTS, new Error('Unable to choose a valid beginning'));
                 }
             });
     }
@@ -209,21 +220,21 @@ export default class StoryReasoner extends EventEmitter {
         this._resolving = true;
         if (this._currentNarrativeElement.links.length === 0) {
             logger.info('Reasoner has found NE with no links - story end');
-            this.emit('storyEnd');
+            this.emit(REASONER_EVENTS.STORY_END);
         } else if (this._currentNarrativeElement.links.length > 1) {
-            this.emit('choiceOfLinks');
+            this.emit(REASONER_EVENTS.CHOICE_OF_LINKS);
         }
         evaluateConditions(this._currentNarrativeElement.links, this._dataResolver)
             .then((nextElementChoices) => {
                 this._resolving = false;
                 if (nextElementChoices) {
                     if (nextElementChoices.length > 1) {
-                        this.emit('multipleValidLinks', nextElementChoices);
+                        this.emit(REASONER_EVENTS.MULTIPLE_VALID_LINKS, nextElementChoices);
                         logger.info('StoryReasoner: multiple valid paths');
                     }
                     this._followLink(nextElementChoices[0]);
                 } else {
-                    this.emit('error', new Error('There are no possible links'));
+                    this.emit(ERROR_EVENTS, new Error('There are no possible links'));
                 }
             });
     }
@@ -231,39 +242,53 @@ export default class StoryReasoner extends EventEmitter {
     _followLink(nextElement: Link) {
         if (nextElement.link_type === 'END_STORY') {
             this._storyEnded = true;
-            this.emit('storyEnd');
+            this.emit(REASONER_EVENTS.STORY_END);
         } else if (
             nextElement.link_type === 'NARRATIVE_ELEMENT' &&
             nextElement.target_narrative_element_id
         ) {
             this._setCurrentNarrativeElement(nextElement.target_narrative_element_id);
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
-            this._chooseBeginning();
+            this.chooseBeginning();
         } else {
-            this.emit(
-                'error',
-                new Error(`Unable to follow a link of type ${nextElement.link_type}`),
+            this.emit(ERROR_EVENTS, new Error(`Unable to follow a link of type ${nextElement.link_type}`),
             );
         }
     }
 
     _setCurrentNarrativeElement(narrativeElementId: string) {
         if (!(narrativeElementId in this._narrativeElements)) {
-            this.emit('error', new Error('Link is to an narrative object not in the graph'));
+            this.emit(ERROR_EVENTS, new Error('Link is to an narrative object not in the graph'));
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
             if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
+                this.appendToHistory(narrativeElementId);
                 this._resolving = true;
                 if (this._currentNarrativeElement.body.story_target_id) {
                     this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
                         .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
                         .catch((err) => {
-                            this.emit('error', err);
+                            this.emit(ERROR_EVENTS, err);
                         });
                 }
-            } else {
-                this.emit('narrativeElementChanged', this._currentNarrativeElement);
             }
+            else {
+                this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._currentNarrativeElement);
+            }
+        }
+    }
+
+
+
+    createSubStoryReasoner(narrativeElementId: string) {
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+        this._resolving = true;
+        if (this._currentNarrativeElement.body.story_target_id) {
+            this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
+                .catch((err) => {
+                    this.emit(ERROR_EVENTS, err);
+                });
         }
     }
 
@@ -273,9 +298,17 @@ export default class StoryReasoner extends EventEmitter {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any) {
-        logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
+    setVariableValue(name: string, value: any, saveLocal: ?boolean) {
+        this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, { name, value });
+        logger.info(`Setting variable in story reasoner '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
+        if(saveLocal) {
+            this._dataResolver.saveToStorage(name, value);
+        }
+    }
+
+    setVariableAndSaveLocal(name: string, value: any) {
+        this.setVariableValue(name, value, true);
     }
 
     /**
@@ -302,36 +335,43 @@ export default class StoryReasoner extends EventEmitter {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
-                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList);
+                this.emit('PATH_HISTORY', this._story.id, narrativeElementId);
+                this.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, neList);
+                return value;
             });
     }
 
     _initSubStoryReasoner(subStoryReasoner: StoryReasoner) {
-        const errorCallback = err => this.emit('error', err);
-        const branchBeginningCallback = () => this.emit('choiceOfBeginnings');
-        const branchLinkCallback = () => this.emit('choiceOfLinks');
-
-        const elementChangedCallback = (element) => {
-            this.emit('narrativeElementChanged', element);
-        };
-
-        const storyEndCallback = () => {
-            this._subStoryReasoner = null;
-            this._chooseNextNode();
-            subStoryReasoner.removeListener('error', errorCallback);
-            subStoryReasoner.removeListener('narrativeElementChanged', elementChangedCallback);
-            subStoryReasoner.removeListener('storyEnd', storyEndCallback);
-        };
-
-        subStoryReasoner.on('choiceOfBeginnings', branchBeginningCallback);
-        subStoryReasoner.on('choiceOfLinks', branchLinkCallback);
-        subStoryReasoner.on('error', errorCallback);
-        subStoryReasoner.on('narrativeElementChanged', elementChangedCallback);
-        subStoryReasoner.on('storyEnd', storyEndCallback);
+        this._addSubReasonerListeners(subStoryReasoner);
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         this._subStoryReasoner.setParent(this);
         subStoryReasoner.start();
+        subStoryReasoner.chooseBeginning();
+    }
+
+    _addSubReasonerListeners(subStoryReasoner: StoryReasoner) {
+        const errorCallback = err => this.emit(ERROR_EVENTS, err);
+        const branchBeginningCallback = () => this.emit(REASONER_EVENTS.CHOICE_OF_BEGINNINGS);
+        const branchLinkCallback = () => this.emit(REASONER_EVENTS.CHOICE_OF_LINKS);
+        const elementChangedCallback = (element) => {
+            this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, element);
+        };
+        const storyEndCallback = () => {
+            this._subStoryReasoner = null;
+            this._chooseNextNode();
+            subStoryReasoner.removeListener(ERROR_EVENTS, errorCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, elementChangedCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END, storyEndCallback);
+        };
+        subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_BEGINNINGS, branchBeginningCallback);
+        subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_LINKS, branchLinkCallback);
+        subStoryReasoner.on(ERROR_EVENTS, errorCallback);
+        subStoryReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, elementChangedCallback);
+        subStoryReasoner.on(REASONER_EVENTS.STORY_END, storyEndCallback);
+        subStoryReasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (event) => {
+            this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, event);
+        });
     }
 
     setParent(parent: StoryReasoner) {
@@ -454,5 +494,43 @@ export default class StoryReasoner extends EventEmitter {
             //
         }
         return previousNodeId;
+    }
+
+    _shadowWalkPath(narrativeElementId: string, pathHistory: [string]) {
+        if(!(narrativeElementId in this._narrativeElements)) {
+            // this.emit('ERROR', new Error(`Where is this element ${narrativeElementId}`));
+            return;
+        }
+        this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
+        if(narrativeElementId === pathHistory[pathHistory.length -1]) {
+            this.emit(REASONER_EVENTS.ELEMENT_FOUND, this._currentNarrativeElement);
+            return;
+        }
+        if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
+            if (this._currentNarrativeElement.body.story_target_id) {
+                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                    .then(subStoryReasoner => {
+                        this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
+                    }).catch((err) => {
+                        this.emit(ERROR_EVENTS, err);
+                    });
+            } else {
+                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`));
+            }
+            
+        }
+    }
+
+
+    _initShadowSubStoryReasoner(subStoryReasoner: StoryReasoner, narrativeElement: string, pathHistory: [string]) {
+        this._addSubReasonerListeners(subStoryReasoner);
+        subStoryReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (foundElement) => this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement));
+        this._subStoryReasoner = subStoryReasoner;
+        this._resolving = false;
+        this._subStoryReasoner.setParent(this);
+        subStoryReasoner.start();
+        pathHistory.forEach(element => {
+            subStoryReasoner._shadowWalkPath(element, pathHistory);
+        });
     }
 }

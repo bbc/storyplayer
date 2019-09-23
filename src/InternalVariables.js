@@ -42,7 +42,7 @@ export default class InternalVariables {
      * @param {any} value Its value
      */
     _setVariableValue(name: string, value: any) {
-        logger.info(`Setting variable '${name}' to ${JSON.stringify(value)}`);
+        logger.info(`Setting internal variable '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
     }
 

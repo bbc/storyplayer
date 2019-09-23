@@ -3,6 +3,7 @@
 import EventEmitter from 'events';
 import Player, { PlayerEvents } from '../Player';
 import type { AssetCollection, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import { REASONER_EVENTS } from '../Events';
 import type { StoryPathItem } from '../StoryPathWalker';
 
 export type AssetCollectionPair = {
@@ -113,7 +114,7 @@ export default class StoryIconRenderer extends EventEmitter {
         const pathItem = this._pathItemList
             .find(i => i.representation && i.representation.id === event.id);
         if (pathItem) {
-            this.emit('jumpToNarrativeElement', pathItem.narrative_element.id);
+            this.emit(REASONER_EVENTS.JUMP_TO_NARRATIVE_ELEMENT, pathItem.narrative_element.id);
         }
     }
 
