@@ -143,8 +143,8 @@ $romper-hover-text-size: 1.53em;
   }
 
   .details-overlay {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: $black;
+    color: $white;
     font-size: 2em;
     left: 60%;
     pointer-events: none;
@@ -784,10 +784,6 @@ $romper-hover-text-size: 1.53em;
       padding-top: 10px;
     }
 
-    .right {
-
-    }
-
     >.romper-media-transport {
       display: flex;
       flex-direction: row;
@@ -1227,42 +1223,60 @@ $romper-hover-text-size: 1.53em;
 }
 
 .continue-modal {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: $forty-percent-black;
+  bottom: 0;
   display: none;
-  position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  left: 0;
+  position: inherit;
+  right: 0;
+  top: 0;
 
+  .continue-experience {
+    height: 170px;
+  }
+
+  .modal-inner-content {
+    border-bottom: 1px solid $white;
+    margin-bottom: 20%;
+    padding-bottom: 10%;
+  }
 
   .continue-modal-content {
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: $ninety-percent-black;
+    bottom: auto;
     display: none;
+    left: 30%;
     max-height: calc(100% - 100px);
-    padding: 4em;
-    min-height: 30%;
-    position: fixed;
-      top: 40%;
-      left: 50%;
-      right: auto;
-      bottom: auto;
-    transform: translate(-50%, -50%);
+    min-height: 350px;
+    padding: 5%;
+    position: relative;
+    right: auto;
+    text-align: center;
+    top: 5%;
+    width: 30%;
 
-    &.show{
+    &.show {
       display: block;
       z-index: 1010;
     }
+
     &.hide {
       display: none;
       height: 0%;
       width: 0%;
     }
+
+    .romper-start-button {
+      height: 150px;
+      margin-top: -150px;
+    }
   }
-  &.show{
+
+  &.show {
     display: block;
     z-index: 1010;
   }
+
   &.hide {
     display: none;
     height: 0%;
@@ -1270,12 +1284,22 @@ $romper-hover-text-size: 1.53em;
   }
 }
 
-.cancel-button {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  transform: translate(-50%, 0%);
+.cancel-resume-button {
+  background-color: $ninety-percent-black;
+  border: 1px solid $white;
+  border-radius: 0;
+  color: $white;
+  font: inherit;
+  margin: 10% 0;
+  padding: 5%;
+
+  &:hover {
+    background-color: $highlight;
+    border-color: $black;
+    color: $black;
+  }
 }
+
 // ##Device = Desktops
 // ##Screen = 1281px to higher resolution desktops
 @media (min-width: 1281px) {
@@ -1323,16 +1347,13 @@ $romper-hover-text-size: 1.53em;
     .romper-seek-back-button {
       display: none;
     }
+
     .romper-seek-fwd-button {
       display: none;
     }
   }
-  .romper-player > .romper-gui .romper-narrative-element-transport {
-    //width: calc((2.5em + 1em) * 3)
-  }
-  .romper-player > .romper-gui {
-    >.romper-buttons {
-      width: 100%;
-    }
+
+  .romper-player > .romper-gui >.romper-buttons {
+    width: 100%;
   }
 }
