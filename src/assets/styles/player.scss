@@ -917,7 +917,8 @@ $romper-hover-text-size: 1.53em;
   }
 }
 
-.romper-image-overlay {
+.romper-image-overlay,
+.romper-behaviour-modal {
   position: absolute;
 }
 
@@ -928,6 +929,19 @@ $romper-hover-text-size: 1.53em;
   position: absolute;
   top: 0;
   width: 100%;
+}
+
+.romper-behaviour-modal {
+  background-color: $var-panel-background;
+  color: $white;
+  padding: 1%;
+  z-index: 5;
+}
+
+.romper-close-button {
+  position: absolute;
+  right: 1%;
+  top: 1%;
 }
 
 .romper-start-image {

@@ -40,6 +40,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowChoiceBehaviour: Function;
 
+    _applyHtmlModalBehaviour: Function;
+
     _handleLinkChoiceEvent: Function;
 
     _seekForward: Function;
@@ -105,6 +107,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
+        this._applyHtmlModalBehaviour = this._applyHtmlModalBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
 
@@ -117,6 +120,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': this._applyShowChoiceBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:showhtmlmodal/v1.0': this._applyHtmlModalBehaviour,
         };
 
         this._behaviourElements = [];
@@ -934,6 +939,29 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+    }
+
+    _applyHtmlModalBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = document.createElement('div');
+        modalElement.className = 'romper-behaviour-modal';
+        modalElement.innerHTML = behaviour.html_content;
+        const { top, left, width, height } = behaviour.position;
+        modalElement.style.top = `${top}%`;
+        modalElement.style.left = `${left}%`;
+        modalElement.style.width = `${width}%`;
+        modalElement.style.height = `${height}%`;
+
+        const closeButton = document.createElement('div');
+        closeButton.className= 'romper-close-button';
+        closeButton.textContent = 'X';
+        const closeModal = () => {
+            this._target.removeChild(modalElement);
+        };
+        closeButton.onclick = closeModal;
+        modalElement.appendChild(closeButton);
+
+        this._target.appendChild(modalElement);
+        this._behaviourElements.push(modalElement);
     }
 
     // //////////// variables panel choice behaviour
