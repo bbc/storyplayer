@@ -1227,13 +1227,12 @@ $romper-hover-text-size: 1.53em;
   bottom: 0;
   display: none;
   left: 0;
-  position: absolute;
+  position: inherit;
   right: 0;
   top: 0;
 
-  .restart-experience {
-    bottom: 10%;
-    position: absolute;
+  .continue-experience {
+    height: 170px;
   }
 
   .modal-inner-content {
@@ -1246,15 +1245,15 @@ $romper-hover-text-size: 1.53em;
     background-color: $ninety-percent-black;
     bottom: auto;
     display: none;
-    left: 50%;
+    left: 30%;
     max-height: calc(100% - 100px);
-    min-height: 30%;
-    padding: 4em;
-    position: fixed;
+    min-height: 350px;
+    padding: 5%;
+    position: relative;
     right: auto;
     text-align: center;
-    top: 40%;
-    transform: translate(-50%, -50%);
+    top: 5%;
+    width: 30%;
 
     &.show {
       display: block;
@@ -1268,7 +1267,8 @@ $romper-hover-text-size: 1.53em;
     }
 
     .romper-start-button {
-      transform: translate(-50%, 50%);
+      height: 150px;
+      margin-top: -150px;
     }
   }
 
@@ -1284,7 +1284,7 @@ $romper-hover-text-size: 1.53em;
   }
 }
 
-.cancel-button {
+.cancel-resume-button {
   background-color: $ninety-percent-black;
   border: 1px solid $white;
   border-radius: 0;

@@ -791,7 +791,7 @@ class Player extends EventEmitter {
         continueModalMessage.textContent = 'You have a previous session';
 
         const cancelButton = document.createElement('button');
-        cancelButton.classList.add('cancel-button');
+        cancelButton.classList.add('cancel-resume-button');
         cancelButton.innerHTML = 'Start again';
     
         const cancelButtonHandler = () => {
@@ -826,6 +826,7 @@ class Player extends EventEmitter {
         // resume
         this._continueModalContent.appendChild(continueModalMessage);
         const continueMessage = document.createElement('div');
+        continueMessage.className = 'continue-experience';
         continueMessage.textContent = 'Resume from where you were:';
         this._continueModalContent.appendChild(continueMessage);
         this._continueModalContent.appendChild(this._resumeExperienceButton);
