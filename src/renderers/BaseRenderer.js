@@ -13,6 +13,8 @@ import Controller from '../Controller';
 import logger from '../logger';
 import { checkAddDetailsOverride } from '../utils';
 
+import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
+
 const SEEK_TIME = 10;
 
 export default class BaseRenderer extends EventEmitter {
@@ -40,7 +42,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowChoiceBehaviour: Function;
 
-    _applyHtmlModalBehaviour: Function;
+    _applySocialSharePanelBehaviour: Function;
 
     _handleLinkChoiceEvent: Function;
 
@@ -107,7 +109,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
-        this._applyHtmlModalBehaviour = this._applyHtmlModalBehaviour.bind(this);
+        this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
 
@@ -121,7 +123,7 @@ export default class BaseRenderer extends EventEmitter {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': this._applyShowChoiceBehaviour,
             // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:showhtmlmodal/v1.0': this._applyHtmlModalBehaviour,
+            'urn:x-object-based-media:representation-behaviour:socialmodal/v1.0': this._applySocialSharePanelBehaviour,
         };
 
         this._behaviourElements = [];
@@ -941,26 +943,8 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourElements.push(overlayImageElement);
     }
 
-    _applyHtmlModalBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = document.createElement('div');
-        modalElement.className = 'romper-behaviour-modal';
-        modalElement.innerHTML = behaviour.html_content;
-        const { top, left, width, height } = behaviour.position;
-        modalElement.style.top = `${top}%`;
-        modalElement.style.left = `${left}%`;
-        modalElement.style.width = `${width}%`;
-        modalElement.style.height = `${height}%`;
-
-        const closeButton = document.createElement('div');
-        closeButton.className= 'romper-close-button';
-        closeButton.textContent = 'X';
-        const closeModal = () => {
-            this._target.removeChild(modalElement);
-        };
-        closeButton.onclick = closeModal;
-        modalElement.appendChild(closeButton);
-
-        this._target.appendChild(modalElement);
+    _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderSocialPopup(behaviour, this._target, callback);
         this._behaviourElements.push(modalElement);
     }
 
