@@ -27,7 +27,7 @@
             ],
             "variables": {
                 "  bandwidth": {
-                    "default_value": 2,
+                    "default_value": 1,
                     "description": "How much bandwidth does the user have? (2 or more gives video, less gives images)",
                     "variable_type": "integer"
                 }
@@ -279,9 +279,9 @@
                             "title": "Share your demon:",
                             "position": {
                                 "top": 5,
-                                "left": 85,
-                                "width": 10,
-                                "height": 8
+                                "left": 82,
+                                "width": 13,
+                                "height": 10
                             },
                             "css_class": "share_modal",
                             "share_text": "Look at my great demon!",
