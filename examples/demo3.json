@@ -4,7 +4,7 @@
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
             "name": "A multiple representation story",
-            "description": "A simple linear story with multiple representations - image or video",
+            "description": "A simple linear story with multiple representations - image or video.  The last image representation has a share behaviour.",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -271,7 +271,34 @@
             },
             "behaviours": {
                 "started": [],
-                "completed": []
+                "completed": [],
+                "during": [
+                    {
+                        "behaviour": {
+                            "type": "urn:x-object-based-media:representation-behaviour:socialmodal/v1.0",
+                            "title": "Share your demon:",
+                            "position": {
+                                "top": 5,
+                                "left": 85,
+                                "width": 10,
+                                "height": 8
+                            },
+                            "css_class": "share_modal",
+                            "share_text": "Look at my great demon!",
+                            "share_url": "http://www.bbc.co.uk/rd",
+                            "platforms": [ "twitter", "facebook", "email" ]
+                        },
+                        "start_time": 2
+                    },
+                    {
+                        "behaviour": {
+                            "type": "urn:x-object-based-media:representation-behaviour:pause/v1.0",
+                            "pauseTime": 3
+                        },
+                        "start_time": 1
+                    }
+
+                ]
             }
         }
     ],

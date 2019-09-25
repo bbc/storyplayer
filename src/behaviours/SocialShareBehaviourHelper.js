@@ -62,7 +62,6 @@ export const renderSocialPopup = (behaviour, target, callback) => {
 
     const closeButton = document.createElement('div');
     closeButton.className= 'romper-close-button';
-    closeButton.textContent = 'X';
     const closeModal = () => {
         target.removeChild(modalElement);
         callback();
