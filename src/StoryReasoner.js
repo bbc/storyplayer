@@ -150,7 +150,7 @@ export default class StoryReasoner extends EventEmitter {
     _applyInitialState(initialState: Object) {
         if(initialState && Object.keys(initialState).length > 0) {
             Object.keys(initialState).forEach((varName) => {
-                this.setVariableAndSaveLocal(varName, initialState[varName]);
+                this.setVariableValue(varName, initialState[varName]);
             });
         }
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
@@ -298,17 +298,10 @@ export default class StoryReasoner extends EventEmitter {
      * @param {String} name The name of the variable to set
      * @param {any} value Its value
      */
-    setVariableValue(name: string, value: any, saveLocal: ?boolean) {
+    setVariableValue(name: string, value: any) {
         this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, { name, value });
         logger.info(`Setting variable in story reasoner '${name}' to ${JSON.stringify(value)}`);
         this._dataResolver.set(name, value);
-        if(saveLocal) {
-            this._dataResolver.saveToStorage(name, value);
-        }
-    }
-
-    setVariableAndSaveLocal(name: string, value: any) {
-        this.setVariableValue(name, value, true);
     }
 
     /**
@@ -335,8 +328,7 @@ export default class StoryReasoner extends EventEmitter {
                     neList = neList.concat(value);
                 }
                 neList.push(narrativeElementId);
-                this.emit('PATH_HISTORY', this._story.id, narrativeElementId);
-                this.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, neList);
+                this.setVariableValue(InternalVariableNames.PATH_HISTORY, neList);
                 return value;
             });
     }

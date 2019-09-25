@@ -794,8 +794,8 @@ class Player extends EventEmitter {
         const cancelButtonHandler = () => {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
-            this._controller._sessionManager.setSessionState(SESSION_STATE.RESTART);
-            this._controller._sessionManager.deleteExistingSessions();
+            this._controller.setSessionState(SESSION_STATE.RESTART);
+            this._controller.deleteExistingSessions();
             this._controller.resetStory(this._controller._storyId);
             this._hideModalLayer();
             this._startButtonHandler();
@@ -807,7 +807,7 @@ class Player extends EventEmitter {
         const resumeExperienceButtonHandler = () => {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._narrativeElementTransport.classList.remove('romper-inactive');
-            this._controller._sessionManager.setSessionState(SESSION_STATE.RESUME);
+            this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
             this._enableUserInteraction();
@@ -992,7 +992,7 @@ class Player extends EventEmitter {
     }
 
     setupExperienceOverlays(options: Object) {
-        switch (this._controller._sessionManager.sessionState) {
+        switch (this._controller.getSessionState()) {
         case SESSION_STATE.RESUME:
             this._narrativeElementTransport.classList.remove('romper-inactive');
             break;
@@ -1061,7 +1061,7 @@ class Player extends EventEmitter {
         this._enableUserInteraction();
         this._narrativeElementTransport.classList.remove('romper-inactive');
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-        this._controller._sessionManager.setExistingSession();
+        this._controller.setExistingSession();
     }
 
     _clearOverlays() {

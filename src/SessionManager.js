@@ -42,6 +42,11 @@ export default class SessionManager extends EventEmitter {
 
     setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
 
+    setVariable: Function;
+
+    setPathHistory: Function;
+
+
     constructor(storyId: string) {
         super();
         this._storyId = storyId;
@@ -111,4 +116,29 @@ export default class SessionManager extends EventEmitter {
     setSessionState(state: string) {
         this.sessionState = SESSION_STATE[state];
     }
+
+    setVariable(variable: Object) {
+        this.fetchExistingSessionState().then(resumeState => {
+            // eslint-disable-next-line no-param-reassign
+            resumeState[variable.name] = variable.value;
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        });
+    }
+
+    appendPathHistory(elementId: string) {
+        this.fetchExistingSessionState().then(resumeState => {
+            const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+            let neArray = []
+            if (pathHistory && pathHistory.length > 0) {
+                pathHistory.push(elementId);
+                neArray = pathHistory.concat(elementId);
+            } else {
+                neArray = [elementId]
+            }
+            // eslint-disable-next-line no-param-reassign
+            resumeState[InternalVariableNames.PATH_HISTORY] = neArray;
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        });
+    }
+
 }

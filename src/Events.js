@@ -27,7 +27,7 @@ export const REASONER_EVENTS = [
 export type RendererEvent = $Keys<typeof REASONER_EVENTS>;
 
 export const VARIABLE_EVENTS = [
-    'VARIABLE_CHANGED'
+    'VARIABLE_CHANGED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;

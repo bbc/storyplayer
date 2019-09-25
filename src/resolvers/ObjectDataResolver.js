@@ -10,36 +10,6 @@ import type { DataResolver } from '../romper';
  */
 export default function (data: Object): DataResolver {
     /**
-     * 
-     * @param {string} name Name of variable
-     * @param {value} value Value of variable
-     * Saves the variable in local storage
-     */
-    const saveToStorage = (name: string, value: any) => {
-        let dataStore = {};
-        const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
-        if(!experienceIdMeta ) return;
-        const experienceId = experienceIdMeta.getAttribute('content');
-        if(experienceId) {
-            const dataString = localStorage.getItem(experienceId);
-            if(dataString && dataString.length > 0) {
-                dataStore = JSON.parse(dataString);
-            }
-            dataStore[name] = value;
-            localStorage.setItem(experienceId, JSON.stringify(dataStore));
-        }
-    }
-
-    const saveAllToStorage = () => {
-        const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
-        if(!experienceIdMeta ) return;
-        const experienceId = experienceIdMeta.getAttribute('content')
-        if(experienceId) {
-            localStorage.setItem(experienceId, JSON.stringify(data));
-        }
-    }
-
-    /**
      * Fetches a piece of data from the pre-configured dictionary
      *
      * @param {string} name The name of the variable to be resolved, in the form of dot nations
@@ -60,5 +30,5 @@ export default function (data: Object): DataResolver {
         data[name] = value;
     };
 
-    return { get, set, saveToStorage, saveAllToStorage };
+    return { get, set };
 }
