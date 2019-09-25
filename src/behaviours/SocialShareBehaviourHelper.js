@@ -28,6 +28,7 @@ const createEmailIcon = (shareText, shareUrl) => {
 const createFacebookIcon = (shareText, shareUrl) => {
     const facebookLi = document.createElement('li');
     const facebookDiv = document.createElement('div');
+    // TODO: uses app id scraped from BBC news website
     const facebookAction = () => window.open(
         `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup`,
         '_blank',
