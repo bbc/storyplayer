@@ -284,8 +284,8 @@
                                 "height": 10
                             },
                             "css_class": "share_modal",
-                            "share_text": "Look at this great expderience!",
-                            "_share_url": "http://www.bbc.co.uk/rd",
+                            "share_text": "Look at this great experience!",
+                            "share_url": "http://www.bbc.co.uk/rd",
                             "platforms": [ "twitter", "facebook", "email" ]
                         },
                         "start_time": 2
