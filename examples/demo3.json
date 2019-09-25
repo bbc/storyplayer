@@ -288,16 +288,26 @@
                             "share_url": "http://www.bbc.co.uk/rd",
                             "platforms": [ "twitter", "facebook", "email" ]
                         },
-                        "start_time": 2
+                        "start_time": 1
                     },
                     {
                         "behaviour": {
-                            "type": "urn:x-object-based-media:representation-behaviour:pause/v1.0",
-                            "pauseTime": 3
+                            "type": "urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0",
+                            "title": "Learn more:",
+                            "position": {
+                                "top": 25,
+                                "left": 72,
+                                "width": 23,
+                                "height": 10
+                            },
+                            "open_in_new_tab": false,
+                            "before_text": "Come and ",
+                            "link_text": "visit our website!",
+                            "link_url": "http://www.bbc.co.uk/rd",
+                            "after_text": " It's great!"
                         },
-                        "start_time": 1
+                        "start_time": 3
                     }
-
                 ]
             }
         }
