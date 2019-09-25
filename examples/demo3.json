@@ -276,7 +276,7 @@
                     {
                         "behaviour": {
                             "type": "urn:x-object-based-media:representation-behaviour:socialmodal/v1.0",
-                            "title": "Share your demon:",
+                            "title": "Share your fun:",
                             "position": {
                                 "top": 5,
                                 "left": 82,
@@ -284,8 +284,8 @@
                                 "height": 10
                             },
                             "css_class": "share_modal",
-                            "share_text": "Look at my great demon!",
-                            "share_url": "http://www.bbc.co.uk/rd",
+                            "share_text": "Look at this great expderience!",
+                            "_share_url": "http://www.bbc.co.uk/rd",
                             "platforms": [ "twitter", "facebook", "email" ]
                         },
                         "start_time": 2
