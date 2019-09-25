@@ -119,8 +119,11 @@ export default class SessionManager extends EventEmitter {
 
     setVariable(variable: Object) {
         this.fetchExistingSessionState().then(resumeState => {
-            // eslint-disable-next-line no-param-reassign
-            resumeState[variable.name] = variable.value;
+            // only update when there is a change
+            if(resumeState[variable.name] !== variable.value) {
+                // eslint-disable-next-line no-param-reassign
+                resumeState[variable.name] = variable.value;
+            }
             localStorage.setItem(this._storyId, JSON.stringify(resumeState));
         });
     }
@@ -139,6 +142,19 @@ export default class SessionManager extends EventEmitter {
             resumeState[InternalVariableNames.PATH_HISTORY] = neArray;
             localStorage.setItem(this._storyId, JSON.stringify(resumeState));
         });
+    }
+
+    setDefaultState(variables: Object) {
+        this.fetchExistingSessionState().then(resumeState => {
+            Object.keys(variables).forEach(varName => {
+                // only update when there is a change
+                if(resumeState[varName] !== variables[varName]) {
+                    // eslint-disable-next-line no-param-reassign
+                    resumeState[varName] = variables[varName];
+                }
+            });
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        })
     }
 
 }

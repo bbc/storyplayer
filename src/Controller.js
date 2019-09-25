@@ -191,6 +191,8 @@ export default class Controller extends EventEmitter {
             if (this._sessionManager) {
                 this._sessionManager.fetchExistingSessionState().then(resumeState => {
                     this.startStory(storyId, resumeState);
+                    if(this._reasoner) {
+                    }
                 });
             } else {
                 this.startStory(storyId, initialState);
@@ -203,7 +205,7 @@ export default class Controller extends EventEmitter {
             this.startStory(storyId, initialState);
         } else {
             this.getDefaultInitialState().then(variableState => {
-                // this.setDefaultState(variableState);
+                this.setDefaultState(variableState);
                 if (Object.keys(variableState).length > 0) {
                     this.startStory(storyId, variableState);
                 }
@@ -772,8 +774,14 @@ export default class Controller extends EventEmitter {
      * @param  {} variables An object of form { name1: valuetring1, name2: valuestring2 }
      */
     setDefaultState(variables: Object) {
-        this.setVariables(variables);
-        this.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
+        // eslint-disable-next-line no-param-reassign
+        variables[InternalVariableNames.PATH_HISTORY] = [];
+        if(this._sessionManager) {
+            this._sessionManager.setDefaultState(variables);
+        } else {
+            this.setVariables(variables, true);
+        }
+
     }
 
     /**

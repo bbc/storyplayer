@@ -111,7 +111,7 @@ The resume state is stored in local storage. The controller creates a session ma
 
     sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
 
-    deleteExistingSessions: Function; // delete the existing session
+    deleteExistingSession: Function; // delete the existing session
 
     setExistingSession: Function; // set a new session
 
