@@ -191,8 +191,6 @@ export default class Controller extends EventEmitter {
             if (this._sessionManager) {
                 this._sessionManager.fetchExistingSessionState().then(resumeState => {
                     this.startStory(storyId, resumeState);
-                    if(this._reasoner) {
-                    }
                 });
             } else {
                 this.startStory(storyId, initialState);
@@ -779,7 +777,7 @@ export default class Controller extends EventEmitter {
         if(this._sessionManager) {
             this._sessionManager.setDefaultState(variables);
         } else {
-            this.setVariables(variables, true);
+            this.setVariables(variables);
         }
 
     }
