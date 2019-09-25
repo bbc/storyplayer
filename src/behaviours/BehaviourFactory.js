@@ -17,6 +17,8 @@ export default function BehaviourFactory(
         'urn:x-object-based-media:representation-behaviour:showimage/v1.0': BaseBehaviour,
         'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': BaseBehaviour,
         'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:socialmodal/v1.0': BaseBehaviour,
+        'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0': BaseBehaviour,
     };
 
     let currentBehaviour;

@@ -4,7 +4,7 @@
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
             "name": "A multiple representation story",
-            "description": "A simple linear story with multiple representations - image or video",
+            "description": "A simple linear story with multiple representations - image or video.  The last image representation has a share behaviour.",
             "beginnings": [
                 {
                     "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
@@ -27,7 +27,7 @@
             ],
             "variables": {
                 "  bandwidth": {
-                    "default_value": 2,
+                    "default_value": 1,
                     "description": "How much bandwidth does the user have? (2 or more gives video, less gives images)",
                     "variable_type": "integer"
                 }
@@ -271,7 +271,44 @@
             },
             "behaviours": {
                 "started": [],
-                "completed": []
+                "completed": [],
+                "during": [
+                    {
+                        "behaviour": {
+                            "type": "urn:x-object-based-media:representation-behaviour:socialmodal/v1.0",
+                            "title": "Share your fun:",
+                            "position": {
+                                "top": 5,
+                                "left": 82,
+                                "width": 13,
+                                "height": 10
+                            },
+                            "css_class": "share_modal",
+                            "share_text": "Look at this great experience!",
+                            "share_url": "http://www.bbc.co.uk/rd",
+                            "platforms": [ "twitter", "facebook", "email" ]
+                        },
+                        "start_time": 1
+                    },
+                    {
+                        "behaviour": {
+                            "type": "urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0",
+                            "title": "Learn more:",
+                            "position": {
+                                "top": 25,
+                                "left": 72,
+                                "width": 23,
+                                "height": 10
+                            },
+                            "open_in_new_tab": false,
+                            "before_text": "Come and ",
+                            "link_text": "visit our website!",
+                            "link_url": "http://www.bbc.co.uk/rd",
+                            "after_text": " It's great!"
+                        },
+                        "start_time": 3
+                    }
+                ]
             }
         }
     ],
