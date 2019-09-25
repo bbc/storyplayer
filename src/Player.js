@@ -798,7 +798,7 @@ class Player extends EventEmitter {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
-            this._controller.deleteExistingSessions();
+            this._controller.deleteExistingSession();
             this._controller.resetStory(this._controller._storyId);
             this._hideModalLayer();
             this._startButtonHandler();

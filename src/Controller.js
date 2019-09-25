@@ -1141,7 +1141,7 @@ export default class Controller extends EventEmitter {
 
     deleteExistingSession() {
         if(this._sessionManager) {
-            this._sessionManager.deleteExistingSessions();
+            this._sessionManager.deleteExistingSession();
         }
     }
 

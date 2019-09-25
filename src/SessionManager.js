@@ -28,7 +28,7 @@ export default class SessionManager extends EventEmitter {
 
     sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
 
-    deleteExistingSessions: Function; // delete the existing session
+    deleteExistingSession: Function; // delete the existing session
 
     setExistingSession: Function; // set a new session
 
@@ -53,7 +53,7 @@ export default class SessionManager extends EventEmitter {
         this.sessionState = this.checkExistingSession() ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
-    deleteExistingSessions() {
+    deleteExistingSession() {
         if (!this._storyId) return;
         localStorage.removeItem(this._storyId);
         const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
