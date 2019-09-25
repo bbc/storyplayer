@@ -13,6 +13,9 @@ import Controller from '../Controller';
 import logger from '../logger';
 import { checkAddDetailsOverride } from '../utils';
 
+import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
+import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
+
 const SEEK_TIME = 10;
 
 export default class BaseRenderer extends EventEmitter {
@@ -39,6 +42,10 @@ export default class BaseRenderer extends EventEmitter {
     _applyShowVariablePanelBehaviour: Function;
 
     _applyShowChoiceBehaviour: Function;
+
+    _applySocialSharePanelBehaviour: Function;
+
+    _applyLinkOutBehaviour: Function;
 
     _handleLinkChoiceEvent: Function;
 
@@ -105,6 +112,8 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
+        this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
+        this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
 
@@ -117,6 +126,10 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:showvariablepanel/v1.0': this._applyShowVariablePanelBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0': this._applyShowChoiceBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:socialmodal/v1.0': this._applySocialSharePanelBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
         };
 
         this._behaviourElements = [];
@@ -934,6 +947,16 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+    }
+
+    _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderSocialPopup(behaviour, this._target, callback);
+        this._behaviourElements.push(modalElement);
+    }
+
+    _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderLinkoutPopup(behaviour, this._target, callback);
+        this._behaviourElements.push(modalElement);
     }
 
     // //////////// variables panel choice behaviour

@@ -1,0 +1,49 @@
+$facebook-blue: #3b5998;
+
+.romper-share-list {
+  display: inline-flex;
+  margin-top: 0;
+  padding-left: 0;
+
+  li {
+    border: 1px solid $transparent;
+    list-style: none;
+    padding: 0.5em;
+
+    &:hover {
+      border: 1px solid $white;
+    }
+
+    div {
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      height: 3em;
+      width: 3em;
+    }
+
+    &.email {
+      div {
+        background-image: url('../images/envelope-closed.svg');
+      }
+    }
+
+    &.twitter {
+      div {
+        background-image: url('../images/Twitter_Social_Icon_Circle_Color.svg');
+      }
+    }
+
+    &.facebook {
+      div {
+        background-color: $facebook-blue;
+        background-image: url('../images/facebook.svg');
+      }
+    }
+  }
+}
+
+.social-share {
+  display: inline;
+}
+  
