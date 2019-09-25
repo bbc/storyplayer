@@ -39,6 +39,27 @@ const createFacebookIcon = (shareText, shareUrl) => {
     return facebookLi;    
 };
 
+const getPosition = (behaviour) => {
+    const w = behaviour.platforms.length > 2 ? behaviour.platforms.length * 4 : 12;
+    let position = {
+        width: `${w}em`,
+        top: '5%',
+        left: `calc(95% - ${w}em)`,
+        height: '6em',
+    };
+
+    if (behaviour.position) {
+        const { top, left, width, height } = behaviour.position;
+        position = {
+            top: `${top}%`,
+            left: `${left}%`,
+            width: `${width}em`,
+            height: `${height}%`,
+        };
+    }
+    return position;
+};
+
 // eslint-disable-next-line import/prefer-default-export
 export const renderSocialPopup = (behaviour, target, callback) => { 
     const modalElement = document.createElement('div');
@@ -54,11 +75,11 @@ export const renderSocialPopup = (behaviour, target, callback) => {
         modalElement.appendChild(titleSpan);
     }
 
-    const { top, left, width, height } = behaviour.position;
-    modalElement.style.top = `${top}%`;
-    modalElement.style.left = `${left}%`;
-    modalElement.style.width = `${width}%`;
-    modalElement.style.height = `${height}%`;
+    const { top, left, width, height } = getPosition(behaviour);
+    modalElement.style.top = top;
+    modalElement.style.left = left;
+    modalElement.style.width = width;
+    modalElement.style.height = height;
 
     const closeButton = document.createElement('div');
     closeButton.className= 'romper-close-button';
