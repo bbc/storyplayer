@@ -41,6 +41,7 @@ const DEFAULT_SETTINGS = {
     },
     staticImageBaseUrl: '/dist/images',
     privacyNotice: null,
+    saveSession: true,
 };
 
 module.exports = {
@@ -94,6 +95,7 @@ module.exports = {
             mergedSettings.analyticsLogger,
             assetUrls,
             mergedSettings.privacyNotice,
+            mergedSettings.saveSession,
         );
     },
 };

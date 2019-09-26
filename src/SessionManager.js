@@ -28,7 +28,7 @@ export default class SessionManager extends EventEmitter {
 
     sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
 
-    deleteExistingSessions: Function; // delete the existing session
+    deleteExistingSession: Function; // delete the existing session
 
     setExistingSession: Function; // set a new session
 
@@ -42,13 +42,18 @@ export default class SessionManager extends EventEmitter {
 
     setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
 
+    setVariable: Function;
+
+    setPathHistory: Function;
+
+
     constructor(storyId: string) {
         super();
         this._storyId = storyId;
         this.sessionState = this.checkExistingSession() ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
-    deleteExistingSessions() {
+    deleteExistingSession() {
         if (!this._storyId) return;
         localStorage.removeItem(this._storyId);
         const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
@@ -111,4 +116,45 @@ export default class SessionManager extends EventEmitter {
     setSessionState(state: string) {
         this.sessionState = SESSION_STATE[state];
     }
+
+    setVariable(variable: Object) {
+        this.fetchExistingSessionState().then(resumeState => {
+            // only update when there is a change
+            if(resumeState[variable.name] !== variable.value) {
+                // eslint-disable-next-line no-param-reassign
+                resumeState[variable.name] = variable.value;
+            }
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        });
+    }
+
+    appendPathHistory(elementId: string) {
+        this.fetchExistingSessionState().then(resumeState => {
+            const pathHistory = resumeState[InternalVariableNames.PATH_HISTORY];
+            let neArray = []
+            if (pathHistory && pathHistory.length > 0) {
+                pathHistory.push(elementId);
+                neArray = pathHistory.concat(elementId);
+            } else {
+                neArray = [elementId]
+            }
+            // eslint-disable-next-line no-param-reassign
+            resumeState[InternalVariableNames.PATH_HISTORY] = neArray;
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        });
+    }
+
+    setDefaultState(variables: Object) {
+        this.fetchExistingSessionState().then(resumeState => {
+            Object.keys(variables).forEach(varName => {
+                // only update when there is a change
+                if(resumeState[varName] !== variables[varName]) {
+                    // eslint-disable-next-line no-param-reassign
+                    resumeState[varName] = variables[varName];
+                }
+            });
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        })
+    }
+
 }

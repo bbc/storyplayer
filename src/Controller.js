@@ -41,10 +41,12 @@ export default class Controller extends EventEmitter {
         analytics: AnalyticsLogger,
         assetUrls: AssetUrls,
         privacyNotice: ?string,
+        saveSession: ?boolean,
     ) {
         super();
         this._storyId = null;
         this._reasoner = null;
+        this._saveSession = saveSession;
         this._sessionManager = null;
         this._target = target;
         this._storyReasonerFactory = storyReasonerFactory;
@@ -52,6 +54,7 @@ export default class Controller extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
+        this._handleVariableChanged = this._handleVariableChanged.bind(this);
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
@@ -133,12 +136,15 @@ export default class Controller extends EventEmitter {
         this._reasoner = null;
         // get render manager to tidy up
         this._renderManager.prepareForRestart();
-        if(Object.keys(initialState).length === 0) {
-            this._sessionManager.fetchExistingSessionState().then(resumeState => {
-                this.start(storyId, resumeState);
-            });
-        }
-        this.start(storyId, initialState);
+        if(this._sessionManager) {
+            if(Object.keys(initialState).length === 0) {
+                this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                    this.start(storyId, resumeState);
+                });
+            }
+        } else {
+            this.start(storyId, initialState);
+        }        
     }
     
     
@@ -155,29 +161,40 @@ export default class Controller extends EventEmitter {
 
     start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
-        if(!this._sessionManager) {
-            this._createSessionManager(storyId);
-        }
-        switch (this._sessionManager.sessionState) {
-        case SESSION_STATE.RESUME:
-        case SESSION_STATE.EXISTING:
-            this.resumeStoryFromState(storyId, initialState);
-            break;    
-        case SESSION_STATE.RESTART:
-        case SESSION_STATE.NEW:   
-        default:
+        if (this._saveSession) {
+            if(!this._sessionManager) {
+                this._createSessionManager(storyId);
+            }
+
+            switch (this._sessionManager.sessionState) {
+            case SESSION_STATE.RESUME:
+            case SESSION_STATE.EXISTING:
+                this.resumeStoryFromState(storyId, initialState);
+                break;
+            case SESSION_STATE.RESTART:
+            case SESSION_STATE.NEW:
+            default:
+                this.startFromDefaultState(storyId, initialState);
+                break;
+            }
+        } else {
             this.startFromDefaultState(storyId, initialState);
-            break;
         }
+        
     }
 
     resumeStoryFromState(storyId: string, initialState?: Object) {
         if (initialState && Object.keys(initialState).length > 0) {
             this.startStory(storyId, initialState);
         } else {
-            this._sessionManager.fetchExistingSessionState().then(resumeState => {
-                this.startStory(storyId, resumeState);
-            }); 
+            // eslint-disable-next-line no-lonely-if
+            if (this._sessionManager) {
+                this._sessionManager.fetchExistingSessionState().then(resumeState => {
+                    this.startStory(storyId, resumeState);
+                });
+            } else {
+                this.startStory(storyId, initialState);
+            }
         }
     }
 
@@ -226,8 +243,8 @@ export default class Controller extends EventEmitter {
 
                 reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd)
                 reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
-                reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, (e) => { this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, e)});
-                reasoner.on(ERROR_EVENTS, this._handleError)
+                reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._handleVariableChanged);
+                reasoner.on(ERROR_EVENTS, this._handleError);
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
@@ -261,6 +278,12 @@ export default class Controller extends EventEmitter {
     }
 
     _chooseBeginningElement() {
+
+        // if we don't have a session manager get the beginning and return
+        if(!this._sessionManager) {
+            this._reasoner.chooseBeginning();
+            return;
+        }
 
         switch (this._sessionManager.sessionState) {
         case SESSION_STATE.RESUME:
@@ -412,7 +435,6 @@ export default class Controller extends EventEmitter {
                         resolve();
                     });
             };
-
             spw.on(REASONER_EVENTS.WALK_COMPLETE, _handleWalkEnd);
             spw.parseStory(storyId);
         });
@@ -432,7 +454,10 @@ export default class Controller extends EventEmitter {
             history.pop();
             // set history variable directly in reasoner to avoid triggering lookahead
             if (this._reasoner) {
-                this._reasoner.setVariableAndSaveLocal(InternalVariableNames.PATH_HISTORY, history);
+                this._reasoner.setVariableValue(InternalVariableNames.PATH_HISTORY, history);
+            }
+            if(this._sessionManager) {
+                this._sessionManager.setVariable(InternalVariableNames.PATH_HISTORY, history);
             }
 
             if (previous) {
@@ -593,7 +618,7 @@ export default class Controller extends EventEmitter {
      */
     setVariableValue(name: string, value: any) {
         if (this._reasoner) {
-            this._reasoner.setVariableAndSaveLocal(name, value);
+            this._reasoner.setVariableValue(name, value);
             logger.info(`Controller seting variable '${name}' to ${value}`);
             this._renderManager.refreshLookahead();
         } else {
@@ -745,8 +770,14 @@ export default class Controller extends EventEmitter {
      * @param  {} variables An object of form { name1: valuetring1, name2: valuestring2 }
      */
     setDefaultState(variables: Object) {
-        this.setVariables(variables);
-        this.setVariableValue(InternalVariableNames.PATH_HISTORY, []);
+        // eslint-disable-next-line no-param-reassign
+        variables[InternalVariableNames.PATH_HISTORY] = [];
+        if(this._sessionManager) {
+            this._sessionManager.setDefaultState(variables);
+        } else {
+            this.setVariables(variables);
+        }
+
     }
 
     /**
@@ -756,7 +787,7 @@ export default class Controller extends EventEmitter {
     setVariables(variables: Object) {
         Object.keys(variables).forEach((varName) => {
             if (this._reasoner) {
-                this._reasoner.setVariableAndSaveLocal(varName, variables[varName]);
+                this._reasoner.setVariableValue(varName, variables[varName]);
             } else {
                 logger.warn(`Controller cannot set variable '${varName}' - no reasoner`);
             }
@@ -1080,15 +1111,12 @@ export default class Controller extends EventEmitter {
                     this._handleNEChange(newReasoner, ne);
                 };
 
-                newReasoner.on(
-                    REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
-                    this._handleNarrativeElementChanged,
-                );
+                newReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
+                newReasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._handleVariableChanged);
                 newReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
                 newReasoner.on(ERROR_EVENTS, this._handleError);
                 // swap out the original reasoner for this one
                 this._reasoner = newReasoner;
-
                 // now we've walked to the target, trigger the change event handler
                 // so that it calls the renderers etc.
                 this._handleNEChange(newReasoner, element, true);
@@ -1102,6 +1130,42 @@ export default class Controller extends EventEmitter {
         });
     }
 
+    setSessionState(state: string) {
+        if(this._sessionManager) {
+            this._sessionManager.setSessionState(state);
+        }
+    }
+
+    getSessionState() {
+        if(this._sessionManager) {
+            return this._sessionManager.sessionState;
+        }
+        return null;
+    }
+
+    deleteExistingSession() {
+        if(this._sessionManager) {
+            this._sessionManager.deleteExistingSession();
+        }
+    }
+
+    setExistingSession() {
+        if(this._sessionManager) {
+            this._sessionManager.setExistingSession();
+        }
+    }
+
+    _handleVariableChanged(variable: Object) {
+        if (this._sessionManager) {
+            logger.info('Variable stored in session state', variable);
+            this._sessionManager.setVariable(variable)
+        } else {
+            logger.info('Variable not stored in session state', variable);
+        }
+        this.emit(VARIABLE_EVENTS.VARIABLE_CHANGED, variable);
+    }
+
+
     _storyId: ?string;
 
     _reasoner: ?StoryReasoner;
@@ -1113,6 +1177,8 @@ export default class Controller extends EventEmitter {
     _fetchers: ExperienceFetchers;
 
     _privacyNotice: ?string;
+
+    _saveSession: ?boolean;
 
     _representationReasoner: RepresentationReasoner;
 
