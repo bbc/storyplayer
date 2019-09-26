@@ -63,10 +63,21 @@
 
         let romperInstance;
         let loadedStoryJson;
+        let aspect = 16 / 9;
 
         function resizeWindow() {
             const romperTarget = document.getElementById('romper-target');
-            romperTarget.firstChild.style.height = `${(romperTarget.offsetWidth/16)*9}px`;
+            const calcH = (romperTarget.offsetWidth / aspect);
+            if (romperTarget.offsetHeight === 0 || romperTarget.offsetWidth === 0) {
+                romperTarget.firstChild.style.width = `${(600 * aspect)}px`;
+                romperTarget.firstChild.style.height = `600px`;
+            } else if (calcH > 0.8 * window.innerHeight) {
+                romperTarget.firstChild.style.width = `${(romperTarget.offsetHeight * aspect)}px`;
+                romperTarget.firstChild.style.height = `${romperTarget.offsetHeight}px`;
+            } else {
+                romperTarget.firstChild.style.height = `${(romperTarget.offsetWidth / aspect)}px`;
+                romperTarget.firstChild.style.width = `${(romperTarget.offsetWidth)}px`;
+            }
         }
 
         // load demo stories
@@ -210,6 +221,9 @@
         function run(config) {
             document.getElementById('romper-target').innerHTML = '';
             loadedStoryJson = config;
+            if (config.stories[0].meta.romper && config.stories[0].meta.romper.aspect_ratio) {
+                aspect = config.stories[0].meta.romper.aspect_ratio;
+            }
             document.getElementById('runjson').removeAttribute('disabled');
             document.getElementById('runjson').classList.add('active');
             document.getElementById('restart-button').classList.add('active');
@@ -247,6 +261,7 @@
             romperInstance.start(config.stories[0].id, getVariablesState());
             romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
                 addVariableControls(config.stories[0].id);
+                // resizeWindow();
             });
         }
 

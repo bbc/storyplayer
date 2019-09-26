@@ -159,6 +159,7 @@ export default class ImageRenderer extends BaseRenderer {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
                             logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                            this._player.scaleImageToAspectRatio(this._imageElement, mediaUrl);
                             this._imageElement.src = mediaUrl;
                         }).catch((err) => { logger.error(err, 'Notfound'); });
                     }

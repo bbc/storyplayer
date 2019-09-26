@@ -944,6 +944,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _overlayImage(imageSrc: string) {
         const overlayImageElement = document.createElement('img');
+        this._player.scaleImageToAspectRatio(overlayImageElement, imageSrc);
         overlayImageElement.src = imageSrc;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);

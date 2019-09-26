@@ -402,6 +402,8 @@ class Player extends EventEmitter {
 
     _controller: Controller;
 
+    _aspectRatio: number;
+
     constructor(
         target: HTMLElement,
         analytics: AnalyticsLogger,
@@ -415,6 +417,7 @@ class Player extends EventEmitter {
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
         this._countdownTotal = 0;
+        this._aspectRatio = 16 / 9;
 
         this._userInteractionStarted = false;
         this._controlsDisabled = false;
@@ -758,6 +761,10 @@ class Player extends EventEmitter {
         this._currentRenderer = renderer;
     }
 
+    setAspectRatio(aspectRatio: number) {
+        this._aspectRatio = aspectRatio;
+    }
+
     addDog(src: string, position: Object) {
         if (this._dogImage === undefined) {
             this._dogImage = document.createElement('img');
@@ -983,10 +990,33 @@ class Player extends EventEmitter {
         startButtonIconHolder.appendChild(startButtonIconDiv);
     }
 
+    /* eslint-disable no-param-reassign */
+    scaleImageToAspectRatio(imageElement: HTMLImageElement, imageSrc: string) {
+        const startImg = new Image();
+        startImg.onload = () => {
+            const w = startImg.width;
+            const h = startImg.height;
+            if (w/h > this._aspectRatio) {
+                imageElement.style.width = '100%'; 
+                const delta = 100 * (1 - (this._aspectRatio / (w/h)))/2;
+                if (delta > 20) {
+                    imageElement.style.top = '10%';
+                }
+            } else {
+                imageElement.style.height = '100%';
+                const delta = 100 * (1 - ((w/h) / this._aspectRatio))/2;
+                imageElement.style.left = `${delta}%`;
+            }
+        };
+        startImg.src = imageSrc;
+    }
+    /* eslint-enable no-param-reassign */
+
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
             this._startExperienceImage = document.createElement('img');
             this._startExperienceImage.className = 'romper-start-image';
+            this.scaleImageToAspectRatio(this._startExperienceImage, options.background_art);
             this._startExperienceImage.src = options.background_art;
             this._mediaLayer.appendChild(this._startExperienceImage);
         }

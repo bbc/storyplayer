@@ -215,6 +215,7 @@ $romper-hover-text-size: 1.53em;
   }
 
   .romper-loading {
+    background-color: $romper-background-color;
     height: 100%;
     position: absolute;
     width: 100%;
@@ -234,6 +235,7 @@ $romper-hover-text-size: 1.53em;
   .romper-video-element {
     height: 100%;
     position: absolute;
+    top: 0;
     width: 100%;
   }
 
@@ -921,11 +923,11 @@ $romper-hover-text-size: 1.53em;
 
 .romper-image-overlay,
 .romper-render-image {
-  height: 100%;
   left: 0;
+  max-height: 100%;
+  max-width: 100%;
   position: absolute;
   top: 0;
-  width: 100%;
 }
 
 .romper-modal-container {
@@ -976,11 +978,11 @@ $romper-hover-text-size: 1.53em;
 }
 
 .romper-start-image {
-  height: 100%;
   left: 0;
+  max-height: 100%;
+  max-width: 100%;
   position: absolute;
   top: 0;
-  width: 100%;
   z-index: 2;
 }
 
@@ -1280,14 +1282,10 @@ $romper-hover-text-size: 1.53em;
   right: 0;
   top: 0;
 
-  .continue-experience {
-    height: 170px;
-  }
-
   .modal-inner-content {
     border-bottom: 1px solid $white;
-    margin-bottom: 20%;
-    padding-bottom: 10%;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
   }
 
   .continue-modal-content {
@@ -1316,8 +1314,12 @@ $romper-hover-text-size: 1.53em;
     }
 
     .romper-start-button {
-      height: 150px;
-      margin-top: -150px;
+      display: grid;
+      height: unset;
+      margin: 1em auto;
+      position: unset;
+      transform: none;
+      width: unset;
     }
   }
 
