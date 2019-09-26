@@ -25,5 +25,4 @@ const createContainer = (target) => {
     return modalContainer;
 };
 
-
 export { createContainer, setDefinedPosition };
