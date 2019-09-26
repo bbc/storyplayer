@@ -428,7 +428,6 @@ export default class Controller extends EventEmitter {
                         resolve();
                     })
                     .catch((err) => {
-                        console.trace('ERROR_SPW');
                         // If we end up here, most likely due to there being representations
                         // with false conditions on our linear graph
                         logger.warn(err);
