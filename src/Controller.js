@@ -435,7 +435,6 @@ export default class Controller extends EventEmitter {
                         resolve();
                     });
             };
-
             spw.on(REASONER_EVENTS.WALK_COMPLETE, _handleWalkEnd);
             spw.parseStory(storyId);
         });
