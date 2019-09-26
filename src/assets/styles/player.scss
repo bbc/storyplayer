@@ -917,6 +917,29 @@ $romper-hover-text-size: 1.53em;
 .romper-image-overlay,
 .romper-behaviour-modal {
   position: absolute;
+}
+
+.romper-image-overlay,
+.romper-render-image {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.romper-modal-container {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.romper-behaviour-modal {
+  background-color: $var-panel-background;
+  border-radius: 0.5em;
+  color: $white;
+  padding: 1%;
+  z-index: 5;
 
   .title {
     font-size: 120%;
@@ -929,22 +952,6 @@ $romper-hover-text-size: 1.53em;
       color: inherit;
     }
   }
-}
-
-.romper-image-overlay,
-.romper-render-image {
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-.romper-behaviour-modal {
-  background-color: $var-panel-background;
-  color: $white;
-  padding: 1%;
-  z-index: 5;
 }
 
 .romper-close-button {

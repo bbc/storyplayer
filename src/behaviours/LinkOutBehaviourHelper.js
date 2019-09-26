@@ -1,24 +1,18 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
+import { setDefinedPosition, createContainer } from './ModalHelper';
 
-const getPosition = (behaviour) => {
-    let position = {
-        width: '40%',
-        top: '15%',
-        left: `30%`,
-        height: '6em',
-    };
-
+/* eslint-disable no-param-reassign */
+const setPosition = (modalElement, behaviour) => {
     if (behaviour.position) {
-        const { top, left, width, height } = behaviour.position;
-        position = {
-            top: `${top}%`,
-            left: `${left}%`,
-            width: `${width}em`,
-            height: `${height}%`,
-        };
+        setDefinedPosition(modalElement, behaviour);
+    } else {
+        modalElement.style.top = '30%';
+        modalElement.style.left = '30%';
+        modalElement.style.width = `40%`;
+        modalElement.style.height = '6em';
     }
-    return position;
 };
+/* eslint-enable no-param-reassign */
 
 const createLink = (behaviour) => {
     const linkText = behaviour.link_text;
@@ -34,8 +28,11 @@ const createLink = (behaviour) => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const renderLinkoutPopup = (behaviour, target, callback) => { 
+export const renderLinkoutPopup = (behaviour, target, callback) => {
     const modalElement = document.createElement('div');
+    const modalContainer = createContainer(target);
+    modalContainer.appendChild(modalElement);
+
     modalElement.className = 'romper-behaviour-modal link-out';
     if (behaviour.css_class) {
         modalElement.classList.add(behaviour.css_class);
@@ -48,26 +45,20 @@ export const renderLinkoutPopup = (behaviour, target, callback) => {
         modalElement.appendChild(titleSpan);
     }
 
-    const { top, left, width, height } = getPosition(behaviour);
-    modalElement.style.top = top;
-    modalElement.style.left = left;
-    modalElement.style.width = width;
-    modalElement.style.height = height;
+    setPosition(modalElement, behaviour);
 
     const closeButton = document.createElement('div');
     closeButton.className= 'romper-close-button';
     const closeModal = () => {
-        target.removeChild(modalElement);
+        modalContainer.removeChild(modalElement);
         callback();
     };
     closeButton.onclick = closeModal;
     modalElement.appendChild(closeButton);
 
-    target.appendChild(modalElement);
-
     const link = createLink(behaviour);
     const sentenceDiv = document.createElement('div');
-
+    
     if (behaviour.before_text) {
         const beforeSpan = document.createElement('span');
         beforeSpan.textContent = behaviour.before_text;
@@ -79,7 +70,8 @@ export const renderLinkoutPopup = (behaviour, target, callback) => {
         afterSpan.textContent = behaviour.after_text;
         sentenceDiv.appendChild(afterSpan);
     }
-
+    
     modalElement.appendChild(sentenceDiv);
+
     return modalElement;
 };

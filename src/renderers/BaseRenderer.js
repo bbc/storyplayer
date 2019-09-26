@@ -449,16 +449,17 @@ export default class BaseRenderer extends EventEmitter {
                 const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
 
                 if(behaviourRunner) {
+                    logger.info(`started during behaviour ${behaviourObject.type}`);
                     if (startTime === 0) {
-                        behaviourRunner(behaviourObject, () => {
-                            logger.info(`started during behaviour ${behaviourObject.type}`);
-                        });
+                        behaviourRunner(behaviourObject, () => 
+                            logger.info(`completed during behaviour ${behaviourObject.type}`));
                     } else {
                         // set up to run function at set time
-                        this.addTimeEventListener(behaviourObject.type, startTime, () =>
-                            behaviourRunner(behaviourObject, () => {
-                                logger.info(`started during behaviour ${behaviourObject.type}`);
-                            }));
+                        this.addTimeEventListener(behaviourObject.type, startTime, () => {
+                            logger.info(`started during behaviour ${behaviourObject.type}`);
+                            behaviourRunner(behaviourObject, () =>
+                                logger.info(`completed during behaviour ${behaviourObject.type}`));
+                        });
 
                         // if we have choices, hide the controls before they appear
                         if (behaviourObject.type

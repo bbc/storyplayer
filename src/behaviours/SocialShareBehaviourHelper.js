@@ -1,4 +1,5 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
+import { setDefinedPosition, createContainer } from './ModalHelper';
 
 const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
@@ -40,30 +41,23 @@ const createFacebookIcon = (shareText, shareUrl) => {
     return facebookLi;    
 };
 
-const getPosition = (behaviour) => {
-    const w = behaviour.platforms.length > 2 ? behaviour.platforms.length * 4 : 12;
-    let position = {
-        width: `${w}em`,
-        top: '5%',
-        left: `calc(95% - ${w}em)`,
-        height: '6em',
-    };
-
+/* eslint-disable no-param-reassign */
+const setPosition = (modalElement, behaviour) => {
     if (behaviour.position) {
-        const { top, left, width, height } = behaviour.position;
-        position = {
-            top: `${top}%`,
-            left: `${left}%`,
-            width: `${width}em`,
-            height: `${height}%`,
-        };
+        setDefinedPosition(modalElement, behaviour);
+    } else {
+        modalElement.style.top = '5%';
+        modalElement.style.right = '5%';
     }
-    return position;
 };
+/* eslint-enable no-param-reassign */
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderSocialPopup = (behaviour, target, callback) => { 
     const modalElement = document.createElement('div');
+    const modalContainer = createContainer(target);
+    modalContainer.appendChild(modalElement);
+
     modalElement.className = 'romper-behaviour-modal social-share';
     if (behaviour.css_class) {
         modalElement.classList.add(behaviour.css_class);
@@ -76,22 +70,16 @@ export const renderSocialPopup = (behaviour, target, callback) => {
         modalElement.appendChild(titleSpan);
     }
 
-    const { top, left, width, height } = getPosition(behaviour);
-    modalElement.style.top = top;
-    modalElement.style.left = left;
-    modalElement.style.width = width;
-    modalElement.style.height = height;
+    setPosition(modalElement, behaviour);
 
     const closeButton = document.createElement('div');
     closeButton.className= 'romper-close-button';
     const closeModal = () => {
-        target.removeChild(modalElement);
+        modalContainer.removeChild(modalElement);
         callback();
     };
     closeButton.onclick = closeModal;
     modalElement.appendChild(closeButton);
-
-    target.appendChild(modalElement);
 
     const shareText = behaviour.share_text;
     let shareUrl = window.location.href;
@@ -114,5 +102,6 @@ export const renderSocialPopup = (behaviour, target, callback) => {
         }
     });
     modalElement.appendChild(platformList);
+
     return modalElement;
 };
