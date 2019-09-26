@@ -55,6 +55,10 @@ export default class Controller extends EventEmitter {
         this._analytics = analytics;
         this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
         this._handleVariableChanged = this._handleVariableChanged.bind(this);
+        this._handleRendererCompletedEvent = this._handleRendererCompletedEvent.bind(this);
+        this._handleRendererNextButtonEvent = this._handleRendererNextButtonEvent.bind(this);
+        this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
+    
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
@@ -134,8 +138,7 @@ export default class Controller extends EventEmitter {
 
     restart(storyId: string, initialState?: Object = {}) {
         this._reasoner = null;
-        // get render manager to tidy up
-        this._renderManager.prepareForRestart();
+        this._prepareRenderManagerForRestart();
         if(this._sessionManager) {
             if(Object.keys(initialState).length === 0) {
                 this._sessionManager.fetchExistingSessionState().then(resumeState => {
@@ -147,6 +150,11 @@ export default class Controller extends EventEmitter {
         }        
     }
     
+    // get render manager to tidy up
+    _prepareRenderManagerForRestart() {
+        this._removeListenersFromRenderManager();
+        this._renderManager.prepareForRestart();
+    }
     
     /**
      * Reset the story and keep the reasoner for it.
@@ -154,7 +162,7 @@ export default class Controller extends EventEmitter {
      */
     resetStory(storyId: string){
         // we're just resetting
-        this._renderManager.prepareForRestart();
+        this._prepareRenderManagerForRestart();
         this.start(storyId);
     }
 
@@ -242,7 +250,7 @@ export default class Controller extends EventEmitter {
                 };
 
                 reasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd)
-                reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
+                reasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged); // eslint-disable-line max-len
                 reasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._handleVariableChanged);
                 reasoner.on(ERROR_EVENTS, this._handleError);
 
@@ -393,18 +401,33 @@ export default class Controller extends EventEmitter {
         return this._currentNarrativeElement;
     }
 
+    _handleRendererCompletedEvent() {
+        if (this._reasoner) this._reasoner.next();
+    }
+
+    _handleRendererNextButtonEvent() {
+        if (this._reasoner) this._reasoner.next();
+    }
+
+    _handleRendererPreviousButtonEvent() {
+        this._goBackOneStepInStory();
+    }
+
+    /* eslint-disable max-len */
     // add event listeners to manager
     _addListenersToRenderManager() {
-        this._renderManager.on(RendererEvents.COMPLETED, () => {
-            if (this._reasoner) this._reasoner.next();
-        });
-        this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, () => {
-            if (this._reasoner) this._reasoner.next();
-        });
-        this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
-            this._goBackOneStepInStory();
-        });
+        this._renderManager.on(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
+        this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
+        this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
     }
+
+    // remove event listeners to manager
+    _removeListenersFromRenderManager() {
+        this._renderManager.off(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
+        this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
+        this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
+    }
+    /* eslint-enable max-len */
 
     // see if we have a linear story
     // and if we do, create a StoryIconRenderer
@@ -481,6 +504,7 @@ export default class Controller extends EventEmitter {
     }
 
     // respond to a change in the Narrative Element: update the renderers
+    // eslint-disable-next-line max-len
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, resuming?: boolean) {
         logger.info({
             obj: narrativeElement,
@@ -589,7 +613,7 @@ export default class Controller extends EventEmitter {
                 }
                 shadowReasoner.next();
             };
-            shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged);
+            shadowReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, shadowHandleNarrativeElementChanged); // eslint-disable-line max-len
             shadowReasoner.start();
             shadowReasoner.chooseBeginning();
         });
@@ -1011,7 +1035,7 @@ export default class Controller extends EventEmitter {
         return this.getValidNextSteps(narrativeElement.id)
             .then((nextNarrativeElements) => {
                 if(nextNarrativeElements && nextNarrativeElements.length > 0) {
-                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) });
+                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) }); // eslint-disable-line max-len
                 }
                 return nextNarrativeElements.map(neObj => neObj.ne.id);;
             });
@@ -1066,7 +1090,10 @@ export default class Controller extends EventEmitter {
             this._reasoner.removeListener(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
         }
         if (this._reasoner && this._handleLinkChoice) {
-            this._reasoner.removeListener(REASONER_EVENTS.MULTIPLE_VALID_LINKS, this._handleLinkChoice);
+            this._reasoner.removeListener(
+                REASONER_EVENTS.MULTIPLE_VALID_LINKS,
+                this._handleLinkChoice,
+            );
         }
         if (this._reasoner && this._handleError) {
             this._reasoner.removeListener(ERROR_EVENTS, this._handleError);
@@ -1078,7 +1105,6 @@ export default class Controller extends EventEmitter {
             );
         }
         this._reasoner = null;
-
         this._renderManager.reset();
     }
 
@@ -1111,7 +1137,7 @@ export default class Controller extends EventEmitter {
                     this._handleNEChange(newReasoner, ne);
                 };
 
-                newReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged);
+                newReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._handleNarrativeElementChanged); // eslint-disable-line max-len
                 newReasoner.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._handleVariableChanged);
                 newReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
                 newReasoner.on(ERROR_EVENTS, this._handleError);
@@ -1210,4 +1236,9 @@ export default class Controller extends EventEmitter {
 
     _segmentSummaryData: Object;
 
+    _handleRendererCompletedEvent: Function;
+
+    _handleRendererNextButtonEvent: Function;
+
+    _handleRendererPreviousButtonEvent: Function;
 }
