@@ -659,8 +659,8 @@ export default class RenderManager extends EventEmitter {
                                     // need to render description only as placeholder
                                     const dummyRep = {
                                         ...PLACEHOLDER_REPRESENTATION,
-                                        description: narrativeElement.description,
-                                        id: narrativeElement.id,
+                                        description: neObj.description,
+                                        id: neObj.id,
                                     };
                                     return Promise.resolve(dummyRep);
                                 })
