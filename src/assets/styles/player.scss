@@ -711,14 +711,12 @@ $romper-hover-text-size: 1.53em;
 .romper-player > .romper-gui {
 
   .romper-start-button {
-    bottom: 50%;
+    bottom: calc(50% - 85px);
     display: grid;
     height: 170px;
-    left: 50%;
-    margin-right: -50%;
-    margin-top: -30%;
+    left: calc(50% - 85px);
+    margin: 0;
     position: absolute;
-    transform: translate(-50%, 50%);
     width: 170px;
     z-index: 101;
 
