@@ -922,12 +922,18 @@ $romper-hover-text-size: 1.53em;
 }
 
 .romper-image-overlay,
+.romper-start-image,
 .romper-render-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  height: 100%;
   left: 0;
   max-height: 100%;
   max-width: 100%;
   position: absolute;
   top: 0;
+  width: 100%;
 }
 
 .romper-modal-container {

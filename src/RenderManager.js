@@ -252,9 +252,6 @@ export default class RenderManager extends EventEmitter {
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
-                if (story.meta && story.meta.romper && story.meta.romper.aspect_ratio) {
-                    this._player.setAspectRatio(story.meta.romper.aspect_ratio);
-                }
                 if (story.meta && story.meta.romper && story.meta.romper.dog) {
                     const dog = Object.assign(story.meta.romper.dog);
                     this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
