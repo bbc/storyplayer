@@ -761,7 +761,7 @@ $romper-hover-text-size: 1.53em;
     display: flex;
     height: 100%;
     max-height: 11.25em;
-    opacity: 0;
+    opacity: 1; // FIX!!! 0;
     padding-bottom: 1em;
     pointer-events: none;
     position: absolute;
@@ -1399,17 +1399,42 @@ $romper-hover-text-size: 1.53em;
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
 @media (min-width: 320px) and (max-width: 767px) {
-  .romper-player {
-    .romper-seek-back-button {
-      display: none;
-    }
-
-    .romper-seek-fwd-button {
-      display: none;
-    }
+  .romper-scrub-bar {
+    bottom: (2 * ($romper-button-height + 1em));
+    font-size: 100%;
+    left: 0;
+    width: 100%;
   }
 
   .romper-player > .romper-gui >.romper-buttons {
+    padding-bottom: 0;
     width: 100%;
+
+    .romper-media-transport {
+      height: $romper-button-height + 1em;
+      width: 100%;
+
+      >div {
+        border: 0;
+      }
+
+      >.center {
+        border-top: 1px solid $white;
+        bottom: $romper-button-height + 1em;
+        height: $romper-button-height + 1em;
+        padding: 5px 0 0;
+        position: absolute;
+        width: 100%;
+
+        .romper-narrative-element-transport {
+          display: table;
+        }
+      }
+
+      >.left,
+      .right {
+        padding-top: 0;
+      }
+    }
   }
 }
