@@ -118,13 +118,11 @@ $romper-hover-text-size: 1.53em;
   }
 
   &.romper-player-fullscreen {
-    height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
+    height: 100%;
     left: 0;
-    // Center Video Box
-    margin-top: -28.125vw; // height/2
     position: absolute;
-    top: 50vh;
-    width: 100vw;
+    top: 0;
+    width: 100%;
   }
 
   .romper-background,
