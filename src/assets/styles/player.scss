@@ -1,8 +1,8 @@
 @import './colours';
 @import './social';
 
-$romper-button-height: 2.5em;
-$romper-button-width: 2.5em;
+$romper-button-height: 25px;
+$romper-button-width: 25px;
 $romper-buttons-max-height: 4em;
 $romper-hover-text-size: 1.53em;
 
@@ -14,7 +14,7 @@ $romper-hover-text-size: 1.53em;
   background-color: $transparent;
   border: 0;
   height: $romper-button-height;
-  margin: 1em 0 0;
+  margin: 5px 0 0;
   outline: none;
   padding: 4px;
   vertical-align: top;
@@ -825,10 +825,10 @@ $romper-hover-text-size: 1.53em;
     &.show {
       opacity: 1;
     }
+  }
 
-    .romper-button {
-      margin: 1em 5px;
-    }
+  .romper-button {
+    margin: 10px 5px;
   }
 
   >.romper-overlays {
@@ -1403,7 +1403,7 @@ $romper-hover-text-size: 1.53em;
 // ##Screen = B/w 481px to 767px
 @media (min-width: 320px) and (max-width: 767px) {
   .romper-scrub-bar {
-    bottom: (2 * ($romper-button-height + 1em));
+    bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;
     left: 0;
     width: 100%;
@@ -1413,8 +1413,12 @@ $romper-hover-text-size: 1.53em;
     padding-bottom: 0;
     width: 100%;
 
+    .romper-button {
+      margin: 0;
+    }
+
     .romper-media-transport {
-      height: $romper-button-height + 1em;
+      height: $romper-button-height + 15px;
       width: 100%;
 
       >div {
@@ -1423,9 +1427,9 @@ $romper-hover-text-size: 1.53em;
 
       >.center {
         border-top: 1px solid $white;
-        bottom: $romper-button-height + 1em;
-        height: $romper-button-height + 1em;
-        padding: 5px 0 0;
+        bottom: $romper-button-height + 15px;
+        height: $romper-button-height + 15px;
+        padding: 10px 0 0;
         position: absolute;
         width: 100%;
 
