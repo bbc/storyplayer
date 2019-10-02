@@ -438,6 +438,11 @@ export default class BaseRenderer extends EventEmitter {
             .catch(() => {})
     }
 
+    _clearDuringBehaviours() {
+        this._removeInvalidDuringBehaviours()
+            .then(() => this._runDuringBehaviours())
+    }
+
     _runDuringBehaviours() {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             // for each behaviour

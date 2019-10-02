@@ -108,20 +108,25 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 this._endedEventListener();
             }
             if (currentTime > (duration - 1)) {
-                const nowTime = currentTime;
-                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
-                    this._testEndStallTimeout = setTimeout(() => {
-                        const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                        if(time && !this._hasEnded) {
-                            // eslint-disable-next-line max-len
-                            logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
-                            if (time <= nowTime + 1.9) {
-                                logger.warn('Video end checker failed stall test');
-                                clearTimeout(this._testEndStallTimeout);                                
-                                this._endedEventListener();
+                // if we are looping then return to start
+                if(this._checkIsLooping()) {
+                    this.setCurrentTime(0);
+                } else {
+                    const nowTime = currentTime;
+                    if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                        this._testEndStallTimeout = setTimeout(() => {
+                            const time = this._playoutEngine.getCurrentTime(this._rendererId);
+                            if(time && !this._hasEnded) {
+                                // eslint-disable-next-line max-len
+                                logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
+                                if (time <= nowTime + 1.9) {
+                                    logger.warn('Video end checker failed stall test');
+                                    clearTimeout(this._testEndStallTimeout);                                
+                                    this._endedEventListener();
+                                }
                             }
-                        }
-                    }, 2000);
+                        }, 2000);
+                    }
                 }
             }
         }
@@ -133,6 +138,17 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+
+        if(this._checkIsLooping()) {
+            this._playoutEngine.on(this._rendererId, 'seeked', () => {
+                console.log('LOOPING')
+                if(this._playoutEngine.getCurrentTime(this._rendererId) === 0) {
+                    console.log('LOOPING BACK TO START')
+                    // this._clearBehaviourElements();
+                    super._clearDuringBehaviours();
+                }
+            },);
+        }
 
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
@@ -316,5 +332,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.unqueuePlayout(this._rendererId);
 
         super.destroy();
+    }
+
+    _checkIsLooping() {
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        return videoElement && videoElement.hasAttribute('loop');
     }
 }

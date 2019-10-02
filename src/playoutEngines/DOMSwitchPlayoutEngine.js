@@ -300,10 +300,18 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 const videoElement = document.createElement('video');
                 videoElement.className = 'romper-video-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
+                videoElement.loop = true;
+                // videoElement.addEventListener('seeked', (event) => {
+                //     if (videoElement.currentTime === 0) {
+                //         // do what you want to do on relax
+                //         console.log('LOOP');
+                //     }
+                // }, false);
                 rendererPlayoutObj.mediaElement = videoElement;
                 this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A) {
                 const videoElement = document.createElement('video');
+                videoElement.loop = true;
                 videoElement.className = 'romper-audio-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = videoElement;
