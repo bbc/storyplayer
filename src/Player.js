@@ -983,8 +983,7 @@ class Player extends EventEmitter {
 
         startButtonIconHolder.classList.add('romper-start-button-icon');
         const startButtonIconDiv = document.createElement('div');
-        startButtonIconDiv.classList.add('romper-button-icon-div');        this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
+        startButtonIconDiv.classList.add('romper-button-icon-div');
         startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
         startButtonIconHolder.appendChild(startButtonIconDiv);
     }
