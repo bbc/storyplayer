@@ -103,5 +103,5 @@ export const renderSocialPopup = (behaviour, target, callback) => {
     });
     modalElement.appendChild(platformList);
 
-    return modalElement;
+    return modalContainer;
 };
