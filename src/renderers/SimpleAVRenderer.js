@@ -94,6 +94,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        console.log('CURRENT TIME', currentTime);
         let duration = this._playoutEngine.getDuration(this._rendererId);
         if(!duration) {
             duration = Infinity;
@@ -109,24 +110,27 @@ export default class SimpleAVRenderer extends BaseRenderer {
             }
             if (currentTime > (duration - 1)) {
                 // if we are looping then return to start
-                if(this._checkIsLooping()) {
-                    this.setCurrentTime(0);
-                } else {
-                    const nowTime = currentTime;
-                    if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
-                        this._testEndStallTimeout = setTimeout(() => {
-                            const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                            if(time && !this._hasEnded) {
-                                // eslint-disable-next-line max-len
-                                logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
-                                if (time <= nowTime + 1.9) {
-                                    logger.warn('Video end checker failed stall test');
-                                    clearTimeout(this._testEndStallTimeout);                                
+                const nowTime = currentTime;
+                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                    this._testEndStallTimeout = setTimeout(() => {
+                        const time = this._playoutEngine.getCurrentTime(this._rendererId);
+                        if (time && !this._hasEnded) {
+                            // eslint-disable-next-line max-len
+                            logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
+                            if (time <= nowTime + 1.9) {
+                                logger.warn('Video end checker failed stall test');
+                                clearTimeout(this._testEndStallTimeout);
+                                // if we are looping just go back to start
+                                if(this._checkIsLooping()) {
+                                    this.setCurrentTime(0);
+                                } else {
+                                    // otherwise carry on to next element
                                     this._endedEventListener();
                                 }
                             }
-                        }, 2000);
-                    }
+                        }
+                    }, 2000);
+
                 }
             }
         }
@@ -141,11 +145,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         if(this._checkIsLooping()) {
             this._playoutEngine.on(this._rendererId, 'seeked', () => {
-                console.log('LOOPING')
-                if(this._playoutEngine.getCurrentTime(this._rendererId) === 0) {
+                const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+                console.log('LOOPING', currentTime)
+                if(currentTime <= 0.002) {
                     console.log('LOOPING BACK TO START')
                     // this._clearBehaviourElements();
-                    super._clearDuringBehaviours();
+                    super.resetDuringBehaviours();
                 }
             },);
         }
@@ -172,6 +177,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._clearBehaviourElements();
         } catch (e) {
             //
+            console.log('_clearBehaviourElements', e);
         }
     }
 

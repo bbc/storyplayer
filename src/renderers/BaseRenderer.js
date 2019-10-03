@@ -435,12 +435,16 @@ export default class BaseRenderer extends EventEmitter {
                 }
             })
             // If this fails then we don't care
-            .catch(() => {})
+            .catch((err) => {
+                console.log(err);
+            })
     }
 
-    _clearDuringBehaviours() {
-        this._removeInvalidDuringBehaviours()
-            .then(() => this._runDuringBehaviours())
+    resetDuringBehaviours() {
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._player.resetControls();
+        this._clearBehaviourElements();
+        this._runDuringBehaviours();
     }
 
     _runDuringBehaviours() {
@@ -547,7 +551,7 @@ export default class BaseRenderer extends EventEmitter {
                     this._buildLinkIcon(iconSpecObject);
                 });
 
-                if (iconObjects.length > 1 || showIfOneLink) {
+                // if (iconObjects.length > 1 || showIfOneLink) {
                     this._showChoiceIcons({
                         defaultLinkId, // id for link to highlight at start
                         forceChoice, // do we highlight
@@ -561,11 +565,11 @@ export default class BaseRenderer extends EventEmitter {
                     if (!forceChoice) {
                         callback();
                     }
-                } else {
-                    logger.info('Link Choice behaviour ignored - only one link');
-                    this._linkBehaviour.forceChoice = false;
-                    callback();
-                }
+                // } else {
+                    // logger.info('Link Choice behaviour ignored - only one link');
+                    // this._linkBehaviour.forceChoice = false;
+                    // callback();
+                // }
             });
         });
     }
@@ -1398,6 +1402,7 @@ export default class BaseRenderer extends EventEmitter {
     // //////////// end of variables panel choice behaviour
 
     _clearBehaviourElements() {
+        console.log('BEHAVIOUR ELEMENTS', this._behaviourElements);
         this._behaviourElements.forEach((be) => {
             try {
                 this._target.removeChild(be);
