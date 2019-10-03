@@ -466,7 +466,7 @@ class Player extends EventEmitter {
         this._continueModalContent = document.createElement('div');
         this._continueModalContent.classList.add('continue-modal-content');
         this._continueModalLayer.appendChild(this._continueModalContent);
-        
+
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
@@ -786,14 +786,23 @@ class Player extends EventEmitter {
     _addContinueModal(options: Object) {
         this._createResumeExperienceButton(options);
 
-        const continueModalMessage = document.createElement('div');
-        continueModalMessage.classList.add('modal-inner-content');
-        continueModalMessage.textContent = 'You have a previous session';
+        this._resumeExperienceButton.setAttribute('title', 'Resume and accept terms');
+        this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
 
         const cancelButton = document.createElement('button');
-        cancelButton.classList.add('cancel-resume-button');
-        cancelButton.innerHTML = 'Start again';
-    
+        cancelButton.classList.add('romper-reset-button');
+        cancelButton.setAttribute('title', 'Restart and accept terms');
+        cancelButton.setAttribute('aria-label', 'Restart Button');
+
+        const cancelButtonHolder = document.createElement('div');
+        cancelButton.appendChild(cancelButtonHolder);
+        cancelButtonHolder.classList.add('romper-reset-button-icon');
+
+        const cancelButtonDiv = document.createElement('div');
+        cancelButtonDiv.classList.add('romper-button-icon-div');
+        cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
+        cancelButtonHolder.appendChild(cancelButtonDiv);
+
         const cancelButtonHandler = () => {
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
@@ -803,7 +812,7 @@ class Player extends EventEmitter {
             this._hideModalLayer();
             this._startButtonHandler();
         };
-        
+
         cancelButton.onclick = cancelButtonHandler;
         cancelButton.addEventListener('touchend', cancelButtonHandler);
 
@@ -814,7 +823,7 @@ class Player extends EventEmitter {
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
             this._enableUserInteraction();
-            
+
         };
 
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
@@ -822,23 +831,19 @@ class Player extends EventEmitter {
             'touchend',
             resumeExperienceButtonHandler,
         );
-        
+
         // resume
-        this._continueModalContent.appendChild(continueModalMessage);
         const continueMessage = document.createElement('div');
         continueMessage.className = 'continue-experience';
-        continueMessage.textContent = 'Resume from where you were:';
+        continueMessage.textContent = 'Restart or Resume?';
+        continueMessage.classList.add('modal-inner-content');
+
         this._continueModalContent.appendChild(continueMessage);
-        this._continueModalContent.appendChild(this._resumeExperienceButton);
-               
         // restart
-        const restartContainer = document.createElement('div');
-        restartContainer.className = 'restart-experience';
-        const restartMessage = document.createElement('div');
-        restartMessage.textContent = 'Or restart from the beginning:';
-        restartContainer.appendChild(restartMessage);
-        restartContainer.appendChild(cancelButton);
-        this._continueModalContent.appendChild(restartContainer);
+        this._continueModalContent.appendChild(cancelButton);
+        // continue
+        this._continueModalContent.appendChild(this._resumeExperienceButton);
+
 
 
         if(this._continueModalLayer) {
@@ -978,7 +983,8 @@ class Player extends EventEmitter {
 
         startButtonIconHolder.classList.add('romper-start-button-icon');
         const startButtonIconDiv = document.createElement('div');
-        startButtonIconDiv.classList.add('romper-button-icon-div');
+        startButtonIconDiv.classList.add('romper-button-icon-div');        this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
+        this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
         startButtonIconDiv.classList.add(`${options.button_class}-icon-div`);
         startButtonIconHolder.appendChild(startButtonIconDiv);
     }
@@ -1020,14 +1026,14 @@ class Player extends EventEmitter {
                 // as this may get reset after this by NE change handling
                 this._narrativeElementTransport.classList.add('romper-inactive');
             }
-            break; 
+            break;
         case SESSION_STATE.RESTART:
             this._narrativeElementTransport.classList.remove('romper-inactive');
             break
         case SESSION_STATE.NEW:
             this._createStartOverlays(options);
             break;
-        default: 
+        default:
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
@@ -1098,7 +1104,7 @@ class Player extends EventEmitter {
         logger.info('disabling experience before restart');
     }
 
-    _removeExperienceOverlays() { 
+    _removeExperienceOverlays() {
         try {
             if(this._startExperienceButton) {
                 this._guiLayer.removeChild(this._startExperienceButton);
@@ -1109,7 +1115,7 @@ class Player extends EventEmitter {
             }
             if(this._startExperienceImage) {
                 this._mediaLayer.removeChild(this._startExperienceImage);
-                // this._startExperienceImage = null; 
+                // this._startExperienceImage = null;
             }
             this._mediaLayer.classList.remove('romper-prestart');
         } catch (e) {
