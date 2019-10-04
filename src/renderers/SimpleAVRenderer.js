@@ -121,7 +121,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                 logger.warn('Video end checker failed stall test');
                                 clearTimeout(this._testEndStallTimeout);
                                 // if we are looping just go back to start
-                                if(this._checkIsLooping()) {
+                                if(super.checkIsLooping()) {
+                                    const currentTimeInLoop = this._playoutEngine.getCurrentTime(this._rendererId);
+                                    console.log('stall current time', currentTimeInLoop);
                                     this.setCurrentTime(0);
                                 } else {
                                     // otherwise carry on to next element
@@ -143,13 +145,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
-        if(this._checkIsLooping()) {
+        if(super.checkIsLooping()) {
             this._playoutEngine.on(this._rendererId, 'seeked', () => {
                 const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-                console.log('LOOPING', currentTime)
                 if(currentTime <= 0.002) {
-                    console.log('LOOPING BACK TO START')
-                    // this._clearBehaviourElements();
                     super.resetDuringBehaviours();
                 }
             },);
@@ -176,8 +175,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         try {
             this._clearBehaviourElements();
         } catch (e) {
-            //
-            console.log('_clearBehaviourElements', e);
+            logger.info(e);
         }
     }
 
@@ -209,6 +207,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl);
+
+                                this._setLoopAttribute(fg.loop);
+
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
                                     outTime: this._outTime,
@@ -332,16 +333,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    _setLoopAttribute(loop: ?boolean) {
+        const element = this._playoutEngine.getMediaElement(this._rendererId);
+        if (element && loop) {
+            element.loop = true;
+        }
+    }
+
     destroy() {
         this.end();
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
 
         super.destroy();
-    }
-
-    _checkIsLooping() {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        return videoElement && videoElement.hasAttribute('loop');
     }
 }

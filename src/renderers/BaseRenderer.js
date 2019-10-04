@@ -443,7 +443,6 @@ export default class BaseRenderer extends EventEmitter {
     resetDuringBehaviours() {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.resetControls();
-        this._clearBehaviourElements();
         this._runDuringBehaviours();
     }
 
@@ -540,7 +539,12 @@ export default class BaseRenderer extends EventEmitter {
             }
             // build icons
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
-            const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
+
+            // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
+            if(!this.checkIsLooping()) {
+                this._applyDefaultLink(narrativeElementObjects);
+            }
+            const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
             return iconSrcPromises.then((iconObjects) => {
@@ -551,7 +555,7 @@ export default class BaseRenderer extends EventEmitter {
                     this._buildLinkIcon(iconSpecObject);
                 });
 
-                // if (iconObjects.length > 1 || showIfOneLink) {
+                if (iconObjects.length > 1 || showIfOneLink) {
                     this._showChoiceIcons({
                         defaultLinkId, // id for link to highlight at start
                         forceChoice, // do we highlight
@@ -565,11 +569,11 @@ export default class BaseRenderer extends EventEmitter {
                     if (!forceChoice) {
                         callback();
                     }
-                // } else {
-                    // logger.info('Link Choice behaviour ignored - only one link');
-                    // this._linkBehaviour.forceChoice = false;
-                    // callback();
-                // }
+                } else {
+                    logger.info('Link Choice behaviour ignored - only one link');
+                    this._linkBehaviour.forceChoice = false;
+                    callback();
+                }
             });
         });
     }
@@ -809,6 +813,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        console.trace('FOLLOWING')
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -846,11 +851,23 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    _getDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        const validLinks = currentNarrativeElement.links.filter(link =>
+            narrativeElementObjects.filter(ne =>
+                ne.targetNeId === link.target_narrative_element_id).length > 0);
+
+        const defaultLink = validLinks[0];
+        
+        return defaultLink && defaultLink.target_narrative_element_id;
+    }
+
     // set the link conditions so only the default is valid
     // returns the id of the NE of the default link or null if
     // there isn't one
     // takes an array of objects for all currently valid links
     _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        console.trace("FOLLOWING")
         // filter links to ones amongst the valid links
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         const validLinks = currentNarrativeElement.links.filter(link =>
@@ -1402,7 +1419,6 @@ export default class BaseRenderer extends EventEmitter {
     // //////////// end of variables panel choice behaviour
 
     _clearBehaviourElements() {
-        console.log('BEHAVIOUR ELEMENTS', this._behaviourElements);
         this._behaviourElements.forEach((be) => {
             try {
                 this._target.removeChild(be);
@@ -1455,6 +1471,11 @@ export default class BaseRenderer extends EventEmitter {
         if (listenerId in this._timeEventListeners) {
             delete this._timeEventListeners[listenerId];
         }
+    }
+
+    checkIsLooping() {
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        return videoElement && videoElement.hasAttribute('loop');
     }
 
     /**
