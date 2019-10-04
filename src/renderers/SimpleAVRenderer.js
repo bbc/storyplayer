@@ -206,9 +206,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
-                                this.populateVideoElement(appendedUrl);
+                                this.populateVideoElement(appendedUrl, fg.loop);
 
-                                this._setLoopAttribute(fg.loop);
+                                super._setLoopAttribute(fg.loop);
 
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
@@ -232,12 +232,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string) {
+    populateVideoElement(mediaUrl: string, loop :?boolean) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
+                loop,
             });
         }
     }
@@ -330,13 +331,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (videoElement) {
             videoElement.style.filter = '';
-        }
-    }
-
-    _setLoopAttribute(loop: ?boolean) {
-        const element = this._playoutEngine.getMediaElement(this._rendererId);
-        if (element && loop) {
-            element.loop = true;
         }
     }
 

@@ -146,6 +146,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj.active) {
             this.attachEverythingToActive(rendererId)
         }
+        if(mediaObj.loop) {
+            super._setLoopAttribute(rendererId, mediaObj.loop);
+        }
     }
 
     unqueuePlayout(rendererId: string) {

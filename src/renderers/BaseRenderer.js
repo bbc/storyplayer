@@ -813,7 +813,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
-        console.trace('FOLLOWING')
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -867,7 +866,6 @@ export default class BaseRenderer extends EventEmitter {
     // there isn't one
     // takes an array of objects for all currently valid links
     _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
-        console.trace("FOLLOWING")
         // filter links to ones amongst the valid links
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         const validLinks = currentNarrativeElement.links.filter(link =>
@@ -1476,6 +1474,19 @@ export default class BaseRenderer extends EventEmitter {
     checkIsLooping() {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         return videoElement && videoElement.hasAttribute('loop');
+    }
+
+
+    _setLoopAttribute(loop: ?boolean) {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            if(loop) {
+                mediaElement.loop = true;
+            }
+            else {
+                mediaElement.removeAttribute('loop');
+            }
+        }
     }
 
     /**

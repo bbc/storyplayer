@@ -172,4 +172,16 @@ export default class BasePlayoutEngine {
     getMediaElement(rendererId: string): ?HTMLMediaElement {
         return undefined;
     }
+
+    _setLoopAttribute(rendererId: string, loop: ?boolean) {
+        const mediaElement = this.getMediaElement(rendererId);
+        if (mediaElement) {
+            if(loop) {
+                mediaElement.loop = true;
+            }
+            else {
+                mediaElement.removeAttribute('loop');
+            }
+        }
+    }
 }

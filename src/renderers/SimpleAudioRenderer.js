@@ -128,7 +128,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                     if (fg.assets.audio_src) {
                         this._fetchMedia(fg.assets.audio_src)
                             .then((mediaUrl) => {
-                                this.populateAudioElement(mediaUrl);
+                                this.populateAudioElement(mediaUrl, fg.loop);
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
                                     outTime: this._outTime,
@@ -154,12 +154,13 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
-    populateAudioElement(mediaUrl: string) {
+    populateAudioElement(mediaUrl: string, loop: ?boolean) {
         if (this._destroyed) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
+                loop,
             });
         }
     }

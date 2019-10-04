@@ -133,6 +133,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (mediaObj.url) {
             rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
         }
+        if(mediaObj.loop) {
+            super._setLoopAttribute(rendererId, mediaObj.loop);
+        }
         if (mediaObj.subs_url) {
             this._player.enableSubtitlesControl();
             if (rendererPlayoutObj.active) {

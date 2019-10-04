@@ -293,7 +293,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     //    sub_url: [URL],
     // }
     queuePlayout(rendererId: string, mediaObj: Object) {
-        console.log('mediaObj', mediaObj);
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaElement) {
@@ -323,6 +322,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (mediaObj.subs_url) {
             this._queueSubtitleAttach(rendererId);
             this._player.enableSubtitlesControl();
+        }
+        if(mediaObj.loop) {
+            super._setLoopAttribute(rendererId, mediaObj.loop);
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();

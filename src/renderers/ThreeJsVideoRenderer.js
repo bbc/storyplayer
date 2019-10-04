@@ -142,7 +142,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
-                                this.populateVideoElement(appendedUrl);
+                                this.populateVideoElement(appendedUrl, fg.loop);
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
                                     outTime: this._outTime,
@@ -156,12 +156,13 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string) {
+    populateVideoElement(mediaUrl: string, loop: ?boolean) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
+                loop,
             });
         }
     }
