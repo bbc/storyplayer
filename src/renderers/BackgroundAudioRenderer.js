@@ -127,12 +127,13 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
     }
 
-    _populateAudioElement(mediaUrl: string) {
+    _populateAudioElement(mediaUrl: string, loop: ?boolean) {
         if (this._disabled) {
             logger.warn('trying to populate audio element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
+                loop,
             });
         }
     }
