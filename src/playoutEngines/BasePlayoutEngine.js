@@ -173,7 +173,7 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    _setLoopAttribute(rendererId: string, loop: ?boolean) {
+    setLoopAttribute(rendererId: string, loop: ?boolean) {
         const mediaElement = this.getMediaElement(rendererId);
         if (mediaElement) {
             if(loop) {
@@ -182,6 +182,13 @@ export default class BasePlayoutEngine {
             else {
                 mediaElement.removeAttribute('loop');
             }
+        }
+    }
+
+    removeLoopAttribute(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.removeAttribute('loop');
         }
     }
 }

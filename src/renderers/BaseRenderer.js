@@ -1476,19 +1476,6 @@ export default class BaseRenderer extends EventEmitter {
         return videoElement && videoElement.hasAttribute('loop');
     }
 
-
-    _setLoopAttribute(loop: ?boolean) {
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            if(loop) {
-                mediaElement.loop = true;
-            }
-            else {
-                mediaElement.removeAttribute('loop');
-            }
-        }
-    }
-
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.
