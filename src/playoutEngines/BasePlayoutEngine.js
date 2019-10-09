@@ -21,6 +21,12 @@ export default class BasePlayoutEngine {
 
     _hasStarted: boolean;
 
+    checkIsLooping: Function;
+
+    setLoopAttribute: Function;
+
+    removeLoopAttribute: Function;
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
@@ -190,5 +196,10 @@ export default class BasePlayoutEngine {
         if (mediaElement) {
             mediaElement.removeAttribute('loop');
         }
+    }
+
+    checkIsLooping(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
     }
 }

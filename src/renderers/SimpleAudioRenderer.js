@@ -75,6 +75,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        console.trace('END EVENT');
         if (!this._hasEnded) {
             this._hasEnded = true;
             super.complete();

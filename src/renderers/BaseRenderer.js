@@ -436,7 +436,7 @@ export default class BaseRenderer extends EventEmitter {
             })
             // If this fails then we don't care
             .catch((err) => {
-                console.log(err);
+                logger.warn(err);
             })
     }
 
@@ -541,7 +541,7 @@ export default class BaseRenderer extends EventEmitter {
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
 
             // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
-            if(!this.checkIsLooping()) {
+            if(!this._playoutEngine.checkIsLooping(this._rendererId)) {
                 this._applyDefaultLink(narrativeElementObjects);
             }
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
@@ -580,6 +580,10 @@ export default class BaseRenderer extends EventEmitter {
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
+        console.trace('link choice')
+        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
+            this._playoutEngine.removeLoopAttribute(this._rendererId);
+        }
         this._followLink(eventObject.id);
     }
 
@@ -813,6 +817,9 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
+            this._playoutEngine.removeLoopAttribute(this._rendererId);
+        }
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -927,6 +934,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
+        console.trace('LOOPING _hideChoiceIcons')
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         this._player._linkChoice.overlay.classList.add('romper-icon-fade');
         this._linkFadeTimeout = setTimeout(() => {
@@ -1469,11 +1477,6 @@ export default class BaseRenderer extends EventEmitter {
         if (listenerId in this._timeEventListeners) {
             delete this._timeEventListeners[listenerId];
         }
-    }
-
-    checkIsLooping() {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        return videoElement && videoElement.hasAttribute('loop');
     }
 
     /**

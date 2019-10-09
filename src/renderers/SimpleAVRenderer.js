@@ -94,7 +94,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        console.log('CURRENT TIME', currentTime);
         let duration = this._playoutEngine.getDuration(this._rendererId);
         if(!duration) {
             duration = Infinity;
@@ -117,13 +116,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
                         if (time && !this._hasEnded) {
                             // eslint-disable-next-line max-len
                             logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
-                            if (time <= nowTime + 1.9) {
+                            if (time >= nowTime && time <= nowTime + 1.9) {
                                 logger.warn('Video end checker failed stall test');
                                 clearTimeout(this._testEndStallTimeout);
                                 // if we are looping just go back to start
-                                if(super.checkIsLooping()) {
-                                    const currentTimeInLoop = this._playoutEngine.getCurrentTime(this._rendererId);
-                                    console.log('stall current time', currentTimeInLoop);
+                                if(this._playoutEngine.checkIsLooping(this._rendererId)) {
                                     this.setCurrentTime(0);
                                 } else {
                                     // otherwise carry on to next element
@@ -145,11 +142,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
-        if(super.checkIsLooping()) {
+        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
             this._playoutEngine.on(this._rendererId, 'seeked', () => {
                 const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
                 if(currentTime <= 0.002) {
                     super.resetDuringBehaviours();
+
                 }
             },);
         }
@@ -207,8 +205,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl, fg.loop);
-
-                                super._setLoopAttribute(fg.loop);
 
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,

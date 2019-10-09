@@ -1720,7 +1720,6 @@ class Player extends EventEmitter {
     resetControls() {
         this.enableControls();
         this._hideAllOverlays();
-        // this._activateRomperButtons();
         this._hideLinkChoices();
     }
 
