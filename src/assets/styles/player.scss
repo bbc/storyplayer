@@ -1,8 +1,8 @@
 @import './colours';
 @import './social';
 
-$romper-button-height: 2.5em;
-$romper-button-width: 2.5em;
+$romper-button-height: 25px;
+$romper-button-width: 25px;
 $romper-buttons-max-height: 4em;
 $romper-hover-text-size: 1.53em;
 
@@ -14,7 +14,7 @@ $romper-hover-text-size: 1.53em;
   background-color: $transparent;
   border: 0;
   height: $romper-button-height;
-  margin: 1em 0 0;
+  margin: 5px 0 0;
   outline: none;
   padding: 4px;
   vertical-align: top;
@@ -118,13 +118,11 @@ $romper-hover-text-size: 1.53em;
   }
 
   &.romper-player-fullscreen {
-    height: 56.25vw; // 100 viewport width divided by video aspect ratio (16/9)
+    height: 100%;
     left: 0;
-    // Center Video Box
-    margin-top: -28.125vw; // height/2
     position: absolute;
-    top: 50vh;
-    width: 100vw;
+    top: 0;
+    width: 100%;
   }
 
   .romper-background,
@@ -215,6 +213,7 @@ $romper-hover-text-size: 1.53em;
   }
 
   .romper-loading {
+    background-color: $romper-background-color;
     height: 100%;
     position: absolute;
     width: 100%;
@@ -225,15 +224,19 @@ $romper-hover-text-size: 1.53em;
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
 
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 50px;
-    width: 20%;
+    height: 2.5em;
+    left: calc(50% - 1.25em);
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: calc(50% - 1.25em);
+    width: 2.5em;
   }
 
   .romper-video-element {
     height: 100%;
     position: absolute;
+    top: 0;
     width: 100%;
   }
 
@@ -357,6 +360,17 @@ $romper-hover-text-size: 1.53em;
 
     .romper-button-icon-div {
       @include button-icon('../images/media-play.svg');
+    }
+  }
+
+  .romper-reset-button {
+    @include button;
+    margin-right: 20px;
+    padding: 0;
+
+
+    .romper-button-icon-div {
+      @include button-icon('../images/reload.svg');
     }
   }
 
@@ -709,14 +723,12 @@ $romper-hover-text-size: 1.53em;
 .romper-player > .romper-gui {
 
   .romper-start-button {
-    bottom: 50%;
+    bottom: calc(50% - 85px);
     display: grid;
     height: 170px;
-    left: 50%;
-    margin-right: -50%;
-    margin-top: -30%;
+    left: calc(50% - 85px);
+    margin: 0;
     position: absolute;
-    transform: translate(-50%, 50%);
     width: 170px;
     z-index: 101;
 
@@ -746,6 +758,50 @@ $romper-hover-text-size: 1.53em;
     }
 
     .romper-start-button-text-div {
+      color: $white;
+      font-size: 48px;
+      font-weight: bold;
+      line-height: $romper-button-height;
+      margin-top: 10px;
+      text-align: center;
+    }
+  }
+
+  .romper-reset-button {
+    bottom: calc(50% - 85px);
+    display: grid;
+    height: 170px;
+    left: calc(50% - 85px);
+    margin: 0;
+    position: absolute;
+    width: 170px;
+    z-index: 101;
+
+    &:hover {
+      background-color: $transparent;
+
+      >div {
+        background-color: $highlight-invert;
+      }
+    }
+
+    .romper-reset-button-icon {
+      background-color: $transparent;
+      border: 1px solid $white;
+      border-radius: 50%;
+      height: 100px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100px;
+    }
+
+    .romper-reset-button-icon-div {
+      height: 100px; // 40px;
+      margin-top: 0; //30px;
+      width: 80px; // 33px;
+    }
+
+    .romper-reset-button-text-div {
       color: $white;
       font-size: 48px;
       font-weight: bold;
@@ -822,10 +878,10 @@ $romper-hover-text-size: 1.53em;
     &.show {
       opacity: 1;
     }
+  }
 
-    .romper-button {
-      margin: 1em 5px;
-    }
+  .romper-button {
+    margin: 10px 5px;
   }
 
   >.romper-overlays {
@@ -920,9 +976,15 @@ $romper-hover-text-size: 1.53em;
 }
 
 .romper-image-overlay,
+.romper-start-image,
 .romper-render-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   height: 100%;
   left: 0;
+  max-height: 100%;
+  max-width: 100%;
   position: absolute;
   top: 0;
   width: 100%;
@@ -976,11 +1038,12 @@ $romper-hover-text-size: 1.53em;
 }
 
 .romper-start-image {
-  height: 100%;
+  background-color: $romper-background-color;
   left: 0;
+  max-height: 100%;
+  max-width: 100%;
   position: absolute;
   top: 0;
-  width: 100%;
   z-index: 2;
 }
 
@@ -1280,26 +1343,23 @@ $romper-hover-text-size: 1.53em;
   right: 0;
   top: 0;
 
-  .continue-experience {
-    height: 170px;
-  }
-
   .modal-inner-content {
     border-bottom: 1px solid $white;
-    margin-bottom: 20%;
-    padding-bottom: 10%;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
   }
 
   .continue-modal-content {
     background-color: $ninety-percent-black;
     bottom: auto;
     display: none;
-    left: 30%;
+    margin-left: auto;
+    margin-right: auto;
     max-height: calc(100% - 100px);
-    min-height: 350px;
+    min-height: 200px;
+    min-width: 300px;
     padding: 5%;
     position: relative;
-    right: auto;
     text-align: center;
     top: 5%;
     width: 30%;
@@ -1315,9 +1375,14 @@ $romper-hover-text-size: 1.53em;
       width: 0%;
     }
 
-    .romper-start-button {
-      height: 150px;
-      margin-top: -150px;
+    .romper-start-button,
+    .romper-reset-button {
+      display: inline-block;
+      height: unset;
+      margin: 1em;
+      position: unset;
+      transform: none;
+      width: unset;
     }
   }
 
@@ -1392,17 +1457,46 @@ $romper-hover-text-size: 1.53em;
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
 @media (min-width: 320px) and (max-width: 767px) {
-  .romper-player {
-    .romper-seek-back-button {
-      display: none;
-    }
-
-    .romper-seek-fwd-button {
-      display: none;
-    }
+  .romper-scrub-bar {
+    bottom: ((2 * ($romper-button-height + 15px)) + 5px);
+    font-size: 100%;
+    left: 0;
+    width: 100%;
   }
 
   .romper-player > .romper-gui >.romper-buttons {
+    padding-bottom: 0;
     width: 100%;
+
+    .romper-button {
+      margin: 0;
+    }
+
+    .romper-media-transport {
+      height: $romper-button-height + 15px;
+      width: 100%;
+
+      >div {
+        border: 0;
+      }
+
+      >.center {
+        border-top: 1px solid $white;
+        bottom: $romper-button-height + 15px;
+        height: $romper-button-height + 15px;
+        padding: 10px 0 0;
+        position: absolute;
+        width: 100%;
+
+        .romper-narrative-element-transport {
+          display: table;
+        }
+      }
+
+      >.left,
+      .right {
+        padding-top: 0;
+      }
+    }
   }
 }

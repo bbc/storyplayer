@@ -967,8 +967,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _overlayImage(imageSrc: string) {
-        const overlayImageElement = document.createElement('img');
-        overlayImageElement.src = imageSrc;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.style.backgroundImage = `url(${imageSrc})`;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);

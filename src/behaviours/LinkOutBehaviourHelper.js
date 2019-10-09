@@ -73,5 +73,5 @@ export const renderLinkoutPopup = (behaviour, target, callback) => {
     
     modalElement.appendChild(sentenceDiv);
 
-    return modalElement;
+    return modalContainer;
 };
