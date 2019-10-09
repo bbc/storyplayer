@@ -1718,6 +1718,7 @@ class Player extends EventEmitter {
 
 
     resetControls() {
+        console.trace('reset controls');
         this.enableControls();
         this._hideAllOverlays();
         this._hideLinkChoices();

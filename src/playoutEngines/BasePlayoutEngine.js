@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 
-import Player from '../Player';
+import Player, { PlayerEvents } from '../Player';
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
@@ -20,12 +20,6 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-
-    checkIsLooping: Function;
-
-    setLoopAttribute: Function;
-
-    removeLoopAttribute: Function;
 
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
@@ -179,27 +173,11 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    setLoopAttribute(rendererId: string, loop: ?boolean) {
-        const mediaElement = this.getMediaElement(rendererId);
-        if (mediaElement) {
-            if(loop) {
-                mediaElement.loop = true;
-            }
-            else {
-                mediaElement.removeAttribute('loop');
-            }
-        }
+    setLoopAttribute(loop: ?boolean) {
+        this._player._currentRenderer.setLoopAttribute(loop);
     }
 
     removeLoopAttribute(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
-        if (mediaElement) {
-            mediaElement.removeAttribute('loop');
-        }
-    }
-
-    checkIsLooping(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
-        return mediaElement && mediaElement.hasAttribute('loop');
+        this._player._currentRenderer.removeLoopAttribute();
     }
 }

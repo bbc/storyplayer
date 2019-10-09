@@ -120,7 +120,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                 logger.warn('Video end checker failed stall test');
                                 clearTimeout(this._testEndStallTimeout);
                                 // if we are looping just go back to start
-                                if(this._playoutEngine.checkIsLooping(this._rendererId)) {
+                                if(this.checkIsLooping()) {
                                     this.setCurrentTime(0);
                                 } else {
                                     // otherwise carry on to next element
@@ -136,22 +136,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
+        console.trace('renderer start')
         super.start();
-
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-
-        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
-            this._playoutEngine.on(this._rendererId, 'seeked', () => {
-                const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-                if(currentTime <= 0.002) {
-                    super.resetDuringBehaviours();
-
-                }
-            },);
-        }
-
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);

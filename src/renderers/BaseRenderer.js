@@ -79,6 +79,14 @@ export default class BaseRenderer extends EventEmitter {
 
     _linkFadeTimeout: TimeoutID;
 
+    seekEventHandler: Function;
+
+    setLoopAttribute: Function;
+
+    removeLoopAttribute: Function;
+
+    checkIsLooping: Function;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -116,6 +124,11 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
+        this.seekEventHandler = this.seekEventHandler.bind(this);
+        this.setLoopAttribute = this.setLoopAttribute.bind(this);
+        this.removeLoopAttribute = this.removeLoopAttribute.bind(this);
+        this.checkIsLooping = this.checkIsLooping.bind(this);
+
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -441,6 +454,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     resetDuringBehaviours() {
+        console.trace('removing behaviours')
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.resetControls();
         this._runDuringBehaviours();
@@ -541,7 +555,7 @@ export default class BaseRenderer extends EventEmitter {
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
 
             // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
-            if(!this._playoutEngine.checkIsLooping(this._rendererId)) {
+            if(!this.checkIsLooping()) {
                 this._applyDefaultLink(narrativeElementObjects);
             }
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
@@ -581,8 +595,8 @@ export default class BaseRenderer extends EventEmitter {
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         console.trace('link choice')
-        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
-            this._playoutEngine.removeLoopAttribute(this._rendererId);
+        if(this.checkIsLooping()) {
+            this.removeLoopAttribute();
         }
         this._followLink(eventObject.id);
     }
@@ -817,9 +831,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
-        if(this._playoutEngine.checkIsLooping(this._rendererId)) {
-            this._playoutEngine.removeLoopAttribute(this._rendererId);
-        }
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -1477,6 +1488,40 @@ export default class BaseRenderer extends EventEmitter {
         if (listenerId in this._timeEventListeners) {
             delete this._timeEventListeners[listenerId];
         }
+    }
+
+    seekEventHandler() {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (currentTime <= 0.002) {
+            this.resetDuringBehaviours();
+        }
+    }
+
+    setLoopAttribute(loop: ?boolean) {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            if(loop) {
+                mediaElement.loop = true;
+                this._playoutEngine.on(this._rendererId, 'seeked', this.seekEventHandler);
+            }
+            else {
+                mediaElement.removeAttribute('loop');
+                this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
+            }
+        }
+    }
+
+    removeLoopAttribute() {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.removeAttribute('loop');
+            this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
+        }
+    }
+
+    checkIsLooping() {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
     }
 
     /**

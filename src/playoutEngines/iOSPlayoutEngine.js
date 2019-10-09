@@ -147,7 +147,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this.attachEverythingToActive(rendererId)
         }
         if(mediaObj.loop) {
-            super.setLoopAttribute(rendererId, mediaObj.loop);
+            super.setLoopAttribute(mediaObj.loop);
         }
     }
 
