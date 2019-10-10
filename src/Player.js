@@ -1718,16 +1718,17 @@ class Player extends EventEmitter {
 
 
     resetControls() {
-        console.trace('reset controls');
+        this.clearLinkChoices();
+        this._hideLinkChoices();
         this.enableControls();
         this._hideAllOverlays();
-        this._hideLinkChoices();
     }
 
     _hideLinkChoices() {
+        this._linkChoice.overlay.style.removeProperty('animation');
+        this._linkChoice.overlay.classList.remove('romper-icon-fade');
         this._linkChoice.overlay.className =
             'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._countdownContainer.classList.remove('show');
     }
 

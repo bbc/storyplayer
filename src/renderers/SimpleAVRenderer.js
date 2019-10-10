@@ -136,7 +136,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     start() {
-        console.trace('renderer start')
         super.start();
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);

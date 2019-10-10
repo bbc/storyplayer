@@ -455,9 +455,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     resetDuringBehaviours() {
-        console.trace('removing behaviours')
-        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.resetControls();
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._runDuringBehaviours();
     }
 
@@ -595,7 +594,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
-        console.trace('link choice')
         if(this.checkIsLooping()) {
             this.removeLoopAttribute();
         }
@@ -946,7 +944,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string) {
-        console.trace('LOOPING _hideChoiceIcons')
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         this._player._linkChoice.overlay.classList.add('romper-icon-fade');
         this._linkFadeTimeout = setTimeout(() => {
