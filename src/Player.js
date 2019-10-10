@@ -1719,20 +1719,12 @@ class Player extends EventEmitter {
 
     resetControls() {
         this.clearLinkChoices();
-        this._hideLinkChoices();
         this.enableControls();
         this._hideAllOverlays();
     }
 
-    _hideLinkChoices() {
-        this._linkChoice.overlay.style.removeProperty('animation');
-        this._linkChoice.overlay.classList.remove('romper-icon-fade');
-        this._linkChoice.overlay.className =
-            'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._countdownContainer.classList.remove('show');
-    }
-
     clearLinkChoices() {
+        this._linkChoice.overlay.style.removeProperty('animation');
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._linkChoice.clearAll();
@@ -1744,7 +1736,6 @@ class Player extends EventEmitter {
         }
         this._linkChoice.overlay.className =
             'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._buttons.classList.remove('icons-showing');
     }
 
