@@ -214,7 +214,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this._player.disableSubtitlesControl();
             rendererPlayoutObj.mediaInstance.pause();
             super.setPlayoutInactive(rendererId);
-            super.removeLoopAttribute(rendererId);
+            super.removeLoopAttribute();
             this._player.removeVolumeControl(rendererId);
         }
     }
