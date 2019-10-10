@@ -14,8 +14,6 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { fetchOverridePlayout, checkDebugPlayout } from './utils';
 
-import type { AssetCollection } from '../romper';
-
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
     DOM_SWITCH_PLAYOUT: 'dom',
@@ -793,7 +791,7 @@ class Player extends EventEmitter {
         this._player.appendChild(this._details);
     }
 
-    addAssetCollectionDetails(assetCollection: AssetCollection) {
+    addAssetCollectionDetails(assetCollection: Object) {
         if(!assetCollection) return;
         if (!this._details) {
             this._details = document.createElement('div');
