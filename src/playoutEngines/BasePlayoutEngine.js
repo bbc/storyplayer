@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-vars */
 
 import Player from '../Player';
+import { checkAddDetailsOverride } from '../utils';
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
@@ -101,6 +102,12 @@ export default class BasePlayoutEngine {
     setPlayoutActive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = true;
+        }
+        if(checkAddDetailsOverride() && this._player._currentRenderer._representation.asset_collections.foreground_id) {
+            const id = this._player._currentRenderer._representation.asset_collections.foreground_id;
+            this._player._currentRenderer._fetchAssetCollection(id).then(fg => {
+                this._player.addAssetCollectionDetails(fg);
+            });
         }
     }
 

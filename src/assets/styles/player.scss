@@ -142,9 +142,11 @@ $romper-hover-text-size: 1.53em;
   }
 
   .details-overlay {
+    display: flex;
+    flex-direction: column;
     background-color: $black;
     color: $white;
-    font-size: 2em;
+    font-size: 1.25em;
     left: 60%;
     pointer-events: none;
     position: absolute;

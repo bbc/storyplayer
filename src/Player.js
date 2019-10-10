@@ -14,6 +14,8 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { fetchOverridePlayout, checkDebugPlayout } from './utils';
 
+import type { AssetCollection } from '../romper';
+
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
     DOM_SWITCH_PLAYOUT: 'dom',
@@ -774,14 +776,34 @@ class Player extends EventEmitter {
 
 
     addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
-        if (this._details === undefined) {
+        if (!this._details) {
+            this._details = document.createElement('div');
+        }
+        // clean up then redo
+        while (this._details.firstChild) {
+            this._details.removeChild(this._details.firstChild);
+        }
+        this._details.className = 'details-overlay';
+        const narrativeElement = document.createElement('div');
+        narrativeElement.innerText = `NE: ${elementName || ''} - ${elementId || ''}` 
+        this._details.appendChild(narrativeElement);
+        const representation = document.createElement('div');
+        representation.innerText = `REP: ${name || ''} ${id || ''}`;
+        this._details.appendChild(representation);
+        this._player.appendChild(this._details);
+    }
+
+    addAssetCollectionDetails(assetCollection: AssetCollection) {
+        if(!assetCollection) return;
+        if (!this._details) {
             this._details = document.createElement('div');
             this._player.appendChild(this._details);
         }
-        this._details.innerHTML = `NE: ${elementName} - ${elementId} <br> REP: ${name} ${id}`
         this._details.className = 'details-overlay';
+        const assetCollectionDiv = document.createElement('div');
+        assetCollectionDiv.innerText = `Asset: ${assetCollection.name} - ${assetCollection.id}`;
+        this._details.appendChild(assetCollectionDiv);
     }
-
 
     _addContinueModal(options: Object) {
         this._createResumeExperienceButton(options);
