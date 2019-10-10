@@ -175,13 +175,7 @@ export default class BasePlayoutEngine {
 
     setLoopAttribute(loop: ?boolean) {
         if(this._player._currentRenderer) {
-            if(loop === true) {
-                this._player._currentRenderer.setLoopAttribute(loop);
-            }
-            else {
-                // in case we don't have a loop property for safety
-                this._player._currentRenderer.removeLoopAttribute()
-            }
+            this._player._currentRenderer.setLoopAttribute(loop);
         }    
     }
 
