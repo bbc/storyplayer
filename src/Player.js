@@ -773,7 +773,7 @@ class Player extends EventEmitter {
     }
 
 
-    addDetails(elementName: string, elementId: string, name: string, id: string) {
+    addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
         if (this._details === undefined) {
             this._details = document.createElement('div');
             this._player.appendChild(this._details);
@@ -904,9 +904,11 @@ class Player extends EventEmitter {
         }
     }
 
-    _activateRomperButtons(event: Object) {
-        event.stopPropagation();
-        event.preventDefault();
+    _activateRomperButtons(event: ?Object) {
+        if(event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
         if (this._controlsDisabled) {
             return;
         }
@@ -1517,6 +1519,11 @@ class Player extends EventEmitter {
         return linkChoiceControl;
     }
 
+    hideChoiceIcons(){
+        this._buttons.classList.add('icons-showing');
+        this._overlays.classList.add('romper-inactive');
+    }
+
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
@@ -1709,7 +1716,15 @@ class Player extends EventEmitter {
         this._linkChoice.overlay.classList.add('romper-inactive');
     }
 
+
+    resetControls() {
+        this.clearLinkChoices();
+        this.enableControls();
+        this._hideAllOverlays();
+    }
+
     clearLinkChoices() {
+        this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._linkChoice.clearAll();
@@ -1721,7 +1736,6 @@ class Player extends EventEmitter {
         }
         this._linkChoice.overlay.className =
             'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._buttons.classList.remove('icons-showing');
     }
 

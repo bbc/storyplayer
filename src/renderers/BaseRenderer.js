@@ -79,6 +79,15 @@ export default class BaseRenderer extends EventEmitter {
 
     _linkFadeTimeout: TimeoutID;
 
+    seekEventHandler: Function;
+
+    setLoopAttribute: Function;
+
+    removeLoopAttribute: Function;
+
+    checkIsLooping: Function;
+
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -116,6 +125,11 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
+        this.seekEventHandler = this.seekEventHandler.bind(this);
+        this.setLoopAttribute = this.setLoopAttribute.bind(this);
+        this.removeLoopAttribute = this.removeLoopAttribute.bind(this);
+        this.checkIsLooping = this.checkIsLooping.bind(this);
+
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -145,7 +159,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadIconAssets();
     }
 
-    willStart(elementName: string, elementId: string) {
+    willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
@@ -435,7 +449,15 @@ export default class BaseRenderer extends EventEmitter {
                 }
             })
             // If this fails then we don't care
-            .catch(() => {})
+            .catch((err) => {
+                logger.warn(err);
+            })
+    }
+
+    resetDuringBehaviours() {
+        this._player.resetControls();
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._runDuringBehaviours();
     }
 
     _runDuringBehaviours() {
@@ -531,7 +553,12 @@ export default class BaseRenderer extends EventEmitter {
             }
             // build icons
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
-            const defaultLinkId = this._applyDefaultLink(narrativeElementObjects);
+
+            // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
+            if(!this.checkIsLooping()) {
+                this._applyDefaultLink(narrativeElementObjects);
+            }
+            const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
             return iconSrcPromises.then((iconObjects) => {
@@ -567,6 +594,9 @@ export default class BaseRenderer extends EventEmitter {
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
+        if(this.checkIsLooping()) {
+            this.removeLoopAttribute();
+        }
         this._followLink(eventObject.id);
     }
 
@@ -835,6 +865,17 @@ export default class BaseRenderer extends EventEmitter {
             // or follow link now
             this._hideChoiceIcons(narrativeElementId);
         }
+    }
+
+    _getDefaultLink(narrativeElementObjects: Array<Object>): ?string {
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        const validLinks = currentNarrativeElement.links.filter(link =>
+            narrativeElementObjects.filter(ne =>
+                ne.targetNeId === link.target_narrative_element_id).length > 0);
+
+        const defaultLink = validLinks[0];
+        
+        return defaultLink && defaultLink.target_narrative_element_id;
     }
 
     // set the link conditions so only the default is valid
@@ -1445,6 +1486,40 @@ export default class BaseRenderer extends EventEmitter {
         if (listenerId in this._timeEventListeners) {
             delete this._timeEventListeners[listenerId];
         }
+    }
+
+    seekEventHandler() {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (currentTime !== undefined && currentTime <= 0.002) {
+            this.resetDuringBehaviours();
+        }
+    }
+
+    setLoopAttribute(loop: ?boolean) {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            if(loop) {
+                mediaElement.loop = true;
+                this._playoutEngine.on(this._rendererId, 'seeked', this.seekEventHandler);
+            }
+            else {
+                mediaElement.removeAttribute('loop');
+                this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
+            }
+        }
+    }
+
+    removeLoopAttribute() {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            mediaElement.removeAttribute('loop');
+            this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
+        }
+    }
+
+    checkIsLooping() {
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
     }
 
     /**

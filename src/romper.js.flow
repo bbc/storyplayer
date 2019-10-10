@@ -141,6 +141,7 @@ export type AssetCollection = {
     version: string,
     name: string,
     tags: Tags,
+    loop: ?boolean,
     asset_collection_type: string,
     meta?: Object,
     assets: {

@@ -146,6 +146,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj.active) {
             this.attachEverythingToActive(rendererId)
         }
+        if(mediaObj.loop) {
+            super.setLoopAttribute(mediaObj.loop);
+        }
     }
 
     unqueuePlayout(rendererId: string) {
@@ -176,6 +179,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this.removeEverythingFromActive(rendererId)
         }
         super.setPlayoutInactive(rendererId);
+        super.removeLoopAttribute();
     }
 
     // nothing to do here - only one media element that is always visible

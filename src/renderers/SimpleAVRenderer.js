@@ -108,20 +108,28 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 this._endedEventListener();
             }
             if (currentTime > (duration - 1)) {
+                // if we are looping then return to start
                 const nowTime = currentTime;
                 if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
                     this._testEndStallTimeout = setTimeout(() => {
                         const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                        if(time && !this._hasEnded) {
+                        if (time && !this._hasEnded) {
                             // eslint-disable-next-line max-len
                             logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
-                            if (time <= nowTime + 1.9) {
+                            if (time >= nowTime && time <= nowTime + 1.9) {
                                 logger.warn('Video end checker failed stall test');
-                                clearTimeout(this._testEndStallTimeout);                                
-                                this._endedEventListener();
+                                clearTimeout(this._testEndStallTimeout);
+                                // if we are looping just go back to start
+                                if(this.checkIsLooping()) {
+                                    this.setCurrentTime(0);
+                                } else {
+                                    // otherwise carry on to next element
+                                    this._endedEventListener();
+                                }
                             }
                         }
                     }, 2000);
+
                 }
             }
         }
@@ -129,11 +137,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
-
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -155,7 +161,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         try {
             this._clearBehaviourElements();
         } catch (e) {
-            //
+            logger.info(e);
         }
     }
 
@@ -186,7 +192,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
-                                this.populateVideoElement(appendedUrl);
+                                this.populateVideoElement(appendedUrl, fg.loop);
+
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
                                     outTime: this._outTime,
@@ -209,12 +216,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string) {
+    populateVideoElement(mediaUrl: string, loop :?boolean) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
+                loop,
             });
         }
     }

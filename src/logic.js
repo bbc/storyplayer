@@ -65,7 +65,7 @@ export default function evaluateConditions<T>(
     const interestingVars = [];
     candidates.forEach(candidate =>
         JsonLogic.uses_data(candidate.condition).forEach(cv => interestingVars.push(cv)));
-
+        
     return Promise.all(interestingVars.map(interestingVar =>
         dataResolver.get(interestingVar)
             .catch(() => null)

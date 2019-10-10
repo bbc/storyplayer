@@ -133,6 +133,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         if (mediaObj.url) {
             rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
         }
+        if(mediaObj.loop) {
+            super.setLoopAttribute(mediaObj.loop);
+        }
         if (mediaObj.subs_url) {
             this._player.enableSubtitlesControl();
             if (rendererPlayoutObj.active) {
@@ -211,6 +214,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this._player.disableSubtitlesControl();
             rendererPlayoutObj.mediaInstance.pause();
             super.setPlayoutInactive(rendererId);
+            super.removeLoopAttribute();
             this._player.removeVolumeControl(rendererId);
         }
     }
