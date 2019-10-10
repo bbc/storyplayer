@@ -168,7 +168,6 @@ export default class Controller extends EventEmitter {
 
 
     start(storyId: string, initialState?: Object) {
-        window.controller = this;
         this._storyId = storyId;
         if (this._saveSession) {
             if(!this._sessionManager) {
