@@ -802,7 +802,6 @@ class Player extends EventEmitter {
         this._details.className = 'details-overlay';
         const assetCollectionDiv = document.createElement('div');
         assetCollectionDiv.innerText = `Asset: ${assetCollection.name} - ${assetCollection.id}`;
-        assetCollectionDiv.id = assetCollectionDiv
         this._details.appendChild(assetCollectionDiv);
     }
 
