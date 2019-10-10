@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 
-import Player, { PlayerEvents } from '../Player';
+import Player from '../Player';
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
@@ -175,10 +175,16 @@ export default class BasePlayoutEngine {
 
     setLoopAttribute(loop: ?boolean) {
         if(this._player._currentRenderer) {
-            this._player._currentRenderer.setLoopAttribute(loop);
+            if(loop === true) {
+                this._player._currentRenderer.setLoopAttribute(loop);
+            }
+            else {
+                // in case we don't have a loop property for safety
+                this._player._currentRenderer.removeLoopAttribute()
+            }
         }    
     }
-    
+
     removeLoopAttribute() {
         if(this._player._currentRenderer) {
             this._player._currentRenderer.removeLoopAttribute();

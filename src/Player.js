@@ -773,7 +773,7 @@ class Player extends EventEmitter {
     }
 
 
-    addDetails(elementName: string, elementId: string, name: string, id: string) {
+    addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
         if (this._details === undefined) {
             this._details = document.createElement('div');
             this._player.appendChild(this._details);
@@ -1724,7 +1724,7 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
-        this._linkChoice.overlay.style.removeProperty('animation');
+        this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._linkChoice.clearAll();

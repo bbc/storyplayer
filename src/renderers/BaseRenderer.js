@@ -159,7 +159,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadIconAssets();
     }
 
-    willStart(elementName: string, elementId: string) {
+    willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
         this._behaviourRunner = this._representation.behaviours
             ? new BehaviourRunner(this._representation.behaviours, this)
