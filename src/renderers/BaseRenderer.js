@@ -87,6 +87,7 @@ export default class BaseRenderer extends EventEmitter {
 
     checkIsLooping: Function;
 
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -1492,7 +1493,7 @@ export default class BaseRenderer extends EventEmitter {
 
     seekEventHandler() {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (currentTime <= 0.002) {
+        if (currentTime !== undefined && currentTime <= 0.002) {
             this.resetDuringBehaviours();
         }
     }

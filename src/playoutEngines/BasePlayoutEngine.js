@@ -174,10 +174,14 @@ export default class BasePlayoutEngine {
     }
 
     setLoopAttribute(loop: ?boolean) {
-        this._player._currentRenderer.setLoopAttribute(loop);
+        if(this._player._currentRenderer) {
+            this._player._currentRenderer.setLoopAttribute(loop);
+        }    
     }
-
-    removeLoopAttribute(rendererId: string) {
-        this._player._currentRenderer.removeLoopAttribute();
+    
+    removeLoopAttribute() {
+        if(this._player._currentRenderer) {
+            this._player._currentRenderer.removeLoopAttribute();
+        }
     }
 }
