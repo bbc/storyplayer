@@ -12,15 +12,13 @@ import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { fetchOverridePlayout, checkDebugPlayout } from './utils';
+import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
     DOM_SWITCH_PLAYOUT: 'dom',
     IOS_PLAYOUT: 'ios',
 };
-
-const SLIDER_CLASS = 'slider-input';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -43,35 +41,6 @@ const PlayerEvents = [
     events[eventName] = eventName;
     return events;
 }, {});
-
-
-function scrollToTop() {
-    window.setTimeout(() => {
-        window.scrollTo(0, 0);
-        if (
-            document.getElementsByClassName('taster-offsite-panel').length > 0 &&
-            document.getElementsByClassName('taster-offsite-panel')[0].scrollIntoView
-        ) {
-            document.getElementsByClassName('taster-offsite-panel')[0].scrollIntoView();
-        } else if (
-            document.getElementsByClassName('offsite-panel').length > 0 &&
-            document.getElementsByClassName('offsite-panel')[0].scrollIntoView
-        ) {
-            document.getElementsByClassName('offsite-panel')[0].scrollIntoView();
-        }
-    }, 100);
-}
-
-function handleButtonTouchEvent(callback: Function) {
-    return (event: Object) => {
-        // Stop propagation of touch event.
-        event.stopPropagation();
-        // Stop click events on tablets being fired off for this touch.
-        event.preventDefault();
-        // Call action for this event
-        callback();
-    };
-}
 
 const overlays = [];
 
@@ -254,12 +223,6 @@ function createOverlay(name: string, logFunction: Function) {
     };
 }
 
-const preventEventDefault = (event: Event) => {
-    // if the event doesn't come from the scrub bar we suppress the touch moves
-    if(!event.target.classList.includes(SLIDER_CLASS)) {
-        event.preventDefault();
-    }
-};
 
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
@@ -772,7 +735,6 @@ class Player extends EventEmitter {
         this._dogImage.style.height = `${height}%`;
     }
 
-
     addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
         if (!this._details) {
             this._details = document.createElement('div');
@@ -782,11 +744,10 @@ class Player extends EventEmitter {
             this._details.removeChild(this._details.firstChild);
         }
         this._details.className = 'details-overlay';
-        const narrativeElement = document.createElement('div');
-        narrativeElement.innerText = `NE: ${elementName || ''} - ${elementId || ''}` 
+        const narrativeElement = addDetail('NE', elementName, elementId);
         this._details.appendChild(narrativeElement);
-        const representation = document.createElement('div');
-        representation.innerText = `REP: ${name || ''} ${id || ''}`;
+
+        const representation = addDetail('REP', name, id);
         this._details.appendChild(representation);
         this._player.appendChild(this._details);
     }
@@ -798,9 +759,8 @@ class Player extends EventEmitter {
             this._player.appendChild(this._details);
         }
         this._details.className = 'details-overlay';
-        const assetCollectionDiv = document.createElement('div');
-        assetCollectionDiv.innerText = `Asset: ${assetCollection.name} - ${assetCollection.id}`;
-        this._details.appendChild(assetCollectionDiv);
+        const assetCollectionDetail = addDetail('Asset', assetCollection.name, assetCollection.id)
+        this._details.appendChild(assetCollectionDetail);
     }
 
     _addContinueModal(options: Object) {

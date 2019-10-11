@@ -141,20 +141,6 @@ $romper-hover-text-size: 1.53em;
     z-index: 101;
   }
 
-  .details-overlay {
-    display: flex;
-    flex-direction: column;
-    background-color: $black;
-    color: $white;
-    font-size: 1.25em;
-    left: 60%;
-    pointer-events: none;
-    position: absolute;
-    top: 2%;
-    width: 50%;
-    z-index: 110;
-  }
-
   .romper-error {
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
@@ -1500,5 +1486,26 @@ $romper-hover-text-size: 1.53em;
         padding-top: 0;
       }
     }
+  }
+}
+
+.details-overlay {
+  display: flex;
+  flex-direction: column;
+  background-color: $black;
+  color: $white;
+  font-size: 1.25em;
+  left: 70%;
+  position: absolute;
+  top: 2%;
+  width: 30%;
+  z-index: 2000;
+
+  .detail{
+    padding-left: 3%;
+    border: none;
+    color: $white;
+    background: $black;
+    width: 60%;
   }
 }
