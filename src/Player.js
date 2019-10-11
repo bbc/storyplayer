@@ -12,7 +12,7 @@ import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { fetchOverridePlayout, checkDebugPlayout } from './utils';
+import { fetchOverridePlayout, checkDebugPlayout, copySelection } from './utils';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -783,10 +783,24 @@ class Player extends EventEmitter {
         }
         this._details.className = 'details-overlay';
         const narrativeElement = document.createElement('div');
-        narrativeElement.innerText = `NE: ${elementName || ''} - ${elementId || ''}` 
+        narrativeElement.innerText = `NE: ${elementName || ''}`;
+        const neId = document.createElement('input');
+        neId.value = `${elementId || ''}`;
+        neId.readOnly = true;
+        neId.className = 'detail';
+        neId.onclick = copySelection;
+        narrativeElement.appendChild(neId);
         this._details.appendChild(narrativeElement);
+
+
         const representation = document.createElement('div');
-        representation.innerText = `REP: ${name || ''} ${id || ''}`;
+        representation.innerText = `REP: ${name || ''}`;
+        const repId = document.createElement('input');
+        repId.value = `${id || ''}`
+        repId.readOnly = true;
+        repId.className = 'detail';
+        repId.onclick = copySelection
+        representation.appendChild(repId);
         this._details.appendChild(representation);
         this._player.appendChild(this._details);
     }
@@ -798,8 +812,14 @@ class Player extends EventEmitter {
             this._player.appendChild(this._details);
         }
         this._details.className = 'details-overlay';
-        const assetCollectionDiv = document.createElement('div');
-        assetCollectionDiv.innerText = `Asset: ${assetCollection.name} - ${assetCollection.id}`;
+        const  assetCollectionDiv = document.createElement('div');
+        assetCollectionDiv.innerText = `Asset: ${assetCollection.name}`;
+        const assetId = document.createElement('input');
+        assetId.readOnly = true;
+        assetId.className = 'detail';
+        assetId.value = `${assetCollection.id}`;
+        assetId.onclick = copySelection;
+        assetCollectionDiv.appendChild(assetId);
         this._details.appendChild(assetCollectionDiv);
     }
 

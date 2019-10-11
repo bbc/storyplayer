@@ -28,3 +28,8 @@ export const checkDisableLookahead = () => {
     const disableLookahead = new URLSearchParams(window.location.search).get('disableLookahead');
     return (disableLookahead === 'true');;
 };
+export const copySelection = (e) => {
+    e.target.select();
+    document.execCommand('copy');
+    e.target.focus();
+}
