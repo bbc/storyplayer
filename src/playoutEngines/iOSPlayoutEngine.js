@@ -142,13 +142,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
     queuePlayout(rendererId: string, mediaObj: Object) {
         super.queuePlayout(rendererId, mediaObj);
         const rendererPlayoutObj = this._media[rendererId];
-
         if (rendererPlayoutObj.active) {
             this.attachEverythingToActive(rendererId)
-        }
-        if(mediaObj.loop) {
-            super.setLoopAttribute(mediaObj.loop);
-        }
+        }   
     }
 
     unqueuePlayout(rendererId: string) {

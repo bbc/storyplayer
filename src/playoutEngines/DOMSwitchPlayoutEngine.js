@@ -323,9 +323,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             this._queueSubtitleAttach(rendererId);
             this._player.enableSubtitlesControl();
         }
-        if(mediaObj.loop) {
-            super.setLoopAttribute(mediaObj.loop);
-        }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
         }

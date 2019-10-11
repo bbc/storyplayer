@@ -180,7 +180,6 @@ export default class BaseRenderer extends EventEmitter {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
         }
-        
     }
 
     /**
@@ -198,6 +197,13 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
+        if(this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+                .then((fgAsset) => {
+                    logger.info(`Setting loop on asset ${fgAsset.id}`)
+                    this.setLoopAttribute(fgAsset.loop);
+                });
+        }
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
