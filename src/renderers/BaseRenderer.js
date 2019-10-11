@@ -1499,7 +1499,7 @@ export default class BaseRenderer extends EventEmitter {
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
             if(loop) {
-                mediaElement.setAttribute('loop', loop.toString());
+                mediaElement.setAttribute('loop', 'true');
                 this._playoutEngine.on(this._rendererId, 'seeked', this.seekEventHandler);
             }
             else {
