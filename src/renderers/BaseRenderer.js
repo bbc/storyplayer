@@ -81,10 +81,6 @@ export default class BaseRenderer extends EventEmitter {
 
     seekEventHandler: Function;
 
-    setLoopAttribute: Function;
-
-    removeLoopAttribute: Function;
-
     checkIsLooping: Function;
 
 
@@ -126,8 +122,6 @@ export default class BaseRenderer extends EventEmitter {
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
-        this.setLoopAttribute = this.setLoopAttribute.bind(this);
-        this.removeLoopAttribute = this.removeLoopAttribute.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
 
 
@@ -197,13 +191,6 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
-        if(this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fgAsset) => {
-                    logger.info(`Setting loop on asset ${fgAsset.id}`)
-                    this.setLoopAttribute(fgAsset.loop);
-                });
-        }
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
@@ -601,7 +588,8 @@ export default class BaseRenderer extends EventEmitter {
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         if(this.checkIsLooping()) {
-            this.removeLoopAttribute();
+            // this.removeLoopAttribute();
+            this._playoutEngine.removeLoopAttribute(this._rendererId);
         }
         this._followLink(eventObject.id);
     }
@@ -1500,29 +1488,7 @@ export default class BaseRenderer extends EventEmitter {
             this.resetDuringBehaviours();
         }
     }
-
-    setLoopAttribute(loop: ?boolean) {
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            if(loop) {
-                mediaElement.setAttribute('loop', 'true');
-                this._playoutEngine.on(this._rendererId, 'seeked', this.seekEventHandler);
-            }
-            else {
-                mediaElement.removeAttribute('loop');
-                this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
-            }
-        }
-    }
-
-    removeLoopAttribute() {
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            mediaElement.removeAttribute('loop');
-            this._playoutEngine.off(this._rendererId, 'seeked', this.seekEventHandler);
-        }
-    }
-
+    
     checkIsLooping() {
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         return mediaElement && mediaElement.hasAttribute('loop');

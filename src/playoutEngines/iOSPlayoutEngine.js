@@ -121,6 +121,9 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 this._player.enableSubtitlesControl();
                 this._queueSubtitleAttach(rendererId);
             }
+            if(mediaObj.loop) {
+                super.setLoopAttribute(rendererId, mediaObj.loop);
+            }
             if (mediaObj.url && this._playing) {
                 this.play();
             }
@@ -144,7 +147,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj.active) {
             this.attachEverythingToActive(rendererId)
-        }   
+        }
     }
 
     unqueuePlayout(rendererId: string) {
@@ -175,7 +178,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this.removeEverythingFromActive(rendererId)
         }
         super.setPlayoutInactive(rendererId);
-        super.removeLoopAttribute();
+        super.removeLoopAttribute(rendererId);
     }
 
     // nothing to do here - only one media element that is always visible
