@@ -21,7 +21,7 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-
+    
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
@@ -180,15 +180,27 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    setLoopAttribute(loop: ?boolean) {
-        if(this._player._currentRenderer) {
-            this._player._currentRenderer.setLoopAttribute(loop);
-        }    
+    setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
+        const mediaElement = element || this.getMediaElement(rendererId);
+        if (mediaElement) {
+            if(loop) {
+                mediaElement.loop = true;
+            }
+            else {
+                mediaElement.removeAttribute('loop');
+            }
+        }
     }
 
-    removeLoopAttribute() {
-        if(this._player._currentRenderer) {
-            this._player._currentRenderer.removeLoopAttribute();
+    removeLoopAttribute(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.removeAttribute('loop');
         }
+    }
+
+    checkIsLooping(rendererId: string) {
+        const mediaElement = this.getMediaElement(rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
     }
 }

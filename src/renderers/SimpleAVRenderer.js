@@ -40,6 +40,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener: Function;
 
+    _seekEventHandler: Function;
+
     _testEndStallTimeout: TimeoutID;
 
     _setOutTime: Function;
@@ -65,6 +67,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
+        this._seekEventHandler = this._seekEventHandler.bind(this);
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
 
@@ -92,6 +95,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    _seekEventHandler() {
+        super.seekEventHandler(this._inTime);
+    }
+
     _outTimeEventListener() {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         let duration = this._playoutEngine.getDuration(this._rendererId);
@@ -102,10 +109,15 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (currentTime) {
             if (this._outTime > 0 && currentTime >= this._outTime) {
                 // TODO Is this needed?
-                if(videoElement) {
-                    videoElement.pause();
+                // AJ 14/10/19 Yes
+                if(this.checkIsLooping()) {
+                    this.setCurrentTime(this._inTime);
+                } else {
+                    if(videoElement) {
+                        videoElement.pause();
+                    }
+                    this._endedEventListener();
                 }
-                this._endedEventListener();
             }
             if (currentTime > (duration - 1)) {
                 // if we are looping then return to start
@@ -140,6 +152,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -157,6 +170,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
 
         try {
             this._clearBehaviourElements();
@@ -175,6 +189,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
+                    console.log('ASSET', fg);
                     if (fg.assets.av_src) {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                             this._setInTime(parseFloat(fg.meta.romper.in));
@@ -192,7 +207,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     }
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
-                                this.populateVideoElement(appendedUrl, fg.loop);
+                                this.populateVideoElement(appendedUrl, fg.loop, fg.id);
 
                                 this._playoutEngine.setTimings(this._rendererId, {
                                     inTime: this._inTime,
@@ -216,13 +231,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    populateVideoElement(mediaUrl: string, loop :?boolean) {
+    populateVideoElement(mediaUrl: string, loop :?boolean, id: ?string) {
         if (this._destroyed) {
             logger.warn('trying to populate video element that has been destroyed');
         } else {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
                 loop,
+                id
             });
         }
     }
