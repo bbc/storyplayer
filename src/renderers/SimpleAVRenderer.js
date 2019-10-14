@@ -111,7 +111,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                 // TODO Is this needed?
                 // AJ 14/10/19 Yes
                 if(this.checkIsLooping()) {
-                    this.setCurrentTime(0);
+                    this.setCurrentTime(this._inTime);
                 } else {
                     if(videoElement) {
                         videoElement.pause();
