@@ -192,7 +192,7 @@ export default class BasePlayoutEngine {
             }
             else {
                 mediaElement.removeAttribute('loop');
-                // this.off(rendererId, 'seeked', this.seekEventHandler);
+                this.off(rendererId, 'seeked',  () => this.seekEventHandler(rendererId));
             }
         }
     }
@@ -201,7 +201,7 @@ export default class BasePlayoutEngine {
         const mediaElement = this.getMediaElement(rendererId);
         if (mediaElement) {
             mediaElement.removeAttribute('loop');
-            // this.off(rendererId, 'seeked', this.seekEventHandler);
+            this.off(rendererId, 'seeked', () => this.seekEventHandler(rendererId));
         }
     }
 
