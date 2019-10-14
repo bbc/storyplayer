@@ -1482,9 +1482,12 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
-    seekEventHandler() {
+    seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (currentTime !== undefined && currentTime <= 0.002) {
+            if(inTime !== 0) {
+                this.setCurrentTime(inTime);
+            }
             this.resetDuringBehaviours();
         }
     }

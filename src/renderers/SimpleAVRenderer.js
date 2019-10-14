@@ -40,6 +40,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _outTimeEventListener: Function;
 
+    _seekEventHandler: Function;
+
     _testEndStallTimeout: TimeoutID;
 
     _setOutTime: Function;
@@ -65,6 +67,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
+        this._seekEventHandler = this._seekEventHandler.bind(this);
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
 
@@ -90,6 +93,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (!this._hasEnded) {
             super.complete();
         }
+    }
+
+    _seekEventHandler() {
+        super.seekEventHandler(this._inTime);
     }
 
     _outTimeEventListener() {
@@ -145,7 +152,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._playoutEngine.on(this._rendererId, 'seeked', this.seekEventHandler)
+        this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -163,6 +170,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
 
         try {
             this._clearBehaviourElements();

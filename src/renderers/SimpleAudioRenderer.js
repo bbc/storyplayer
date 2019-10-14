@@ -39,6 +39,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _endedEventListener: Function;
 
+    _seekEventHandler: Function;
+
     _hasEnded: boolean;
 
     constructor(
@@ -60,6 +62,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
         this._endedEventListener = this._endedEventListener.bind(this);
+        this._seekEventHandler = this._seekEventHandler.bind(this);
 
         this.renderAudioElement();
 
@@ -81,6 +84,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
+    _seekEventHandler() {
+        super.seekEventHandler(this._inTime);
+    }
+
     start() {
         super.start();
         this._hasEnded = false;
@@ -92,6 +99,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         // automatically move on at audio end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
 
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
@@ -107,6 +115,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         logger.info(`Ended: ${this._representation.id}`);
 
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
+        this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
 
         try {
             this._clearBehaviourElements();

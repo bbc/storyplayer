@@ -21,9 +21,7 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-
-    seekEventHandler: Function;
-
+    
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
@@ -35,7 +33,6 @@ export default class BasePlayoutEngine {
             window.playoutMedia = this._media;
             window.playout = this;
         }
-        this.seekEventHandler = this.seekEventHandler.bind(this);
     }
 
     setPermissionToPlay(value: boolean) {
@@ -188,11 +185,9 @@ export default class BasePlayoutEngine {
         if (mediaElement) {
             if(loop) {
                 mediaElement.loop = true;
-                this.on(rendererId, 'seeked', this.seekEventHandler);
             }
             else {
                 mediaElement.removeAttribute('loop');
-                this.off(rendererId, 'seeked',  () => this.seekEventHandler(rendererId));
             }
         }
     }
@@ -201,14 +196,6 @@ export default class BasePlayoutEngine {
         const mediaElement = this.getMediaElement(rendererId);
         if (mediaElement) {
             mediaElement.removeAttribute('loop');
-            this.off(rendererId, 'seeked', () => this.seekEventHandler(rendererId));
-        }
-    }
-
-    seekEventHandler(rendererId: string) {
-        const currentTime = this.getCurrentTime(rendererId);
-        if (currentTime !== undefined && currentTime <= 0.002) {
-            console.log('Looped');
         }
     }
 
