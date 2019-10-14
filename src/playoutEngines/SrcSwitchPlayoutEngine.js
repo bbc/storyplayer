@@ -131,7 +131,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             }
         }
         if (mediaObj.url) {
-            rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
+            rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url, rendererPlayoutObj.mediaInstance.getMediaElement());
         }
         if(mediaObj.loop) {
             super.setLoopAttribute(rendererId, mediaObj.loop);

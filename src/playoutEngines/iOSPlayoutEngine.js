@@ -116,13 +116,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                     })
                     rendererPlayoutObj.queuedEvents = []
                 }
+                if(mediaObj.loop) {
+                    super.setLoopAttribute(rendererId, mediaObj.loop, mediaElement);
+                }
             }
             if (mediaObj.subs_url) {
                 this._player.enableSubtitlesControl();
                 this._queueSubtitleAttach(rendererId);
-            }
-            if(mediaObj.loop) {
-                super.setLoopAttribute(rendererId, mediaObj.loop);
             }
             if (mediaObj.url && this._playing) {
                 this.play();
