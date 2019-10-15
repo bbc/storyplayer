@@ -15,6 +15,8 @@ import { checkAddDetailsOverride } from '../utils';
 
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
+import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
+import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 
 const SEEK_TIME = 10;
 
@@ -83,6 +85,7 @@ export default class BaseRenderer extends EventEmitter {
 
     checkIsLooping: Function;
 
+    _loopCounter: number;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -123,6 +126,7 @@ export default class BaseRenderer extends EventEmitter {
         this._seekForward = this._seekForward.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
+        this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
 
 
         this._behaviourRendererMap = {
@@ -151,6 +155,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadedBehaviourAssets = [];
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
+        this._loopCounter = 0;
     }
 
     willStart(elementName: ?string, elementId: ?string) {
@@ -205,6 +210,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._loopCounter = 0;
     }
 
     hasEnded(): boolean {
@@ -1484,11 +1490,20 @@ export default class BaseRenderer extends EventEmitter {
 
     seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (currentTime !== undefined && currentTime <= 0.002) {
-            if(inTime !== 0) {
-                this.setCurrentTime(inTime);
+        if(this.checkIsLooping()) {
+            if (currentTime !== undefined && currentTime <= 0.002) {
+                if(inTime !== 0) {
+                    this.setCurrentTime(inTime);
+                }
+                this.resetDuringBehaviours();
+
+                if(this.isSrcIosPlayoutEngine()) {
+                    if(this._playoutEngine._playing && this._playoutEngine._foregroundMediaElement.paused) {
+                        this._playoutEngine.play();
+                    }
+                }
             }
-            this.resetDuringBehaviours();
+            this._loopCounter +=1;
         }
     }
     
@@ -1512,5 +1527,10 @@ export default class BaseRenderer extends EventEmitter {
         // we didn't find any behaviours to run, so emit completion event
         this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
+    }
+
+    isSrcIosPlayoutEngine() {
+        return (this._playoutEngine instanceof iOSPlayoutEngine || 
+            this._playoutEngine instanceof SrcSwitchPlayoutEngine)
     }
 }

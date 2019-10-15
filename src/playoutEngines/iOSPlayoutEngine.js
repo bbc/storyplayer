@@ -5,7 +5,7 @@ import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
-export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
+export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
 
     _backgroundMediaElement: HTMLAudioElement
