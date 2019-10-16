@@ -1407,19 +1407,27 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addTextLinkIconChoice(id: string, text: string, src: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, text, src);
+    addBehaviourElementToOverlay(behaviourElement: HTMLElement) {
+        this._linkChoice.overlay.appendChild(behaviourElement);
     }
 
-    addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, null, src);
+    // addSingleBehaviour() {
+
+    // }
+
+    addTextLinkIconChoice(behaviourElement: HTMLElement, id: string, text: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, text, src);
     }
 
-    addTextLinkChoice(id: string, text: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, text, null);
+    addLinkChoiceControl(behaviourElement: HTMLElement, id: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, null, src);
     }
 
-    _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
+    addTextLinkChoice(behaviourElement: HTMLElement, id: string, text: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, text, null);
+    }
+
+    _addLinkChoiceContainer(behaviourElement: HTMLElement, id: string, label: string, text: ?string, src: ?string) {
         this._linkChoice.overlay.classList.remove(`choices-${this._numChoices}`);
         this._numChoices += 1;
         this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
@@ -1507,7 +1515,7 @@ class Player extends EventEmitter {
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
-    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourId) {
         this._hideRomperButtons();
         this._buttons.classList.add('icons-showing');
         this._linkChoice.overlay.classList.remove('romper-inactive');
@@ -1532,6 +1540,10 @@ class Player extends EventEmitter {
                 icon.onclick = clickHandler;
                 icon.addEventListener('touchend', clickHandler);
                 this._linkChoice.add(id, icon);
+                const behaviourElement = document.getElementById(behaviourId)
+                if(behaviourElement){
+                    behaviourElement.appendChild(icon);
+                }
             });
         });
     }

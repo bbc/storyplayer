@@ -596,8 +596,13 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
 
+    // this needs to be put in a div with an id if the behaviour id
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+
+        const behaviourElement = document.createElement('div');
+        behaviourElement.id = behaviour.id;
+        this._player.addBehaviourElementToOverlay(behaviourElement)
 
         logger.info('Rendering link icons for user choice');
         // get behaviours of links from data
@@ -639,10 +644,15 @@ export default class BaseRenderer extends EventEmitter {
             return iconSrcPromises.then((iconObjects) => {
 
                 this._player.clearLinkChoices();
-                iconObjects.forEach((iconSpecObject) => {
+                const linkElements = iconObjects.map((iconSpecObject) => {
                     // add the icon to the player
-                    this._buildLinkIcon(iconSpecObject);
+                    return this._buildLinkIcon(iconSpecObject, behaviourElement);
                 });
+
+                console.log(linkElements);
+                if(linkElements.length > 1 || showIfOneLink) {
+                    // add link elements to the div element for the behaviour
+                }
 
                 if (iconObjects.length > 1 || showIfOneLink) {
                     this._showChoiceIcons({
@@ -651,6 +661,7 @@ export default class BaseRenderer extends EventEmitter {
                         disableControls, // are controls disabled while icons shown
                         countdown, // do we animate countdown
                         iconOverlayClass, // css classes to apply to overlay
+                        behaviourId: behaviour.id,
                     });
 
                     // callback to say behaviour is done, but not if user can
@@ -831,12 +842,13 @@ export default class BaseRenderer extends EventEmitter {
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(iconObject: Object) {
+    _buildLinkIcon(iconObject: Object, behaviourElement: HTMLElement) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
         let icon;
         if (iconObject.iconText && iconObject.resolvedUrl) {
             icon = this._player.addTextLinkIconChoice(
+                behaviourElement,
                 targetId,
                 iconObject.iconText,
                 iconObject.resolvedUrl,
@@ -844,12 +856,14 @@ export default class BaseRenderer extends EventEmitter {
             );
         } else if (iconObject.iconText) {
             icon = this._player.addTextLinkChoice(
+                behaviourElement,
                 targetId,
                 iconObject.iconText,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
         } else if (iconObject.resolvedUrl) {
             icon = this._player.addLinkChoiceControl(
+                behaviourElement,
                 targetId,
                 iconObject.resolvedUrl,
                 `Option ${(iconObject.choiceId + 1)}`,
@@ -891,9 +905,10 @@ export default class BaseRenderer extends EventEmitter {
             disableControls, // are controls disabled while icons shown
             countdown, // do we animate countdown
             iconOverlayClass, // css classes to apply to overlay
+            id,
         } = iconDataObject;
 
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass);
+        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, id);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
