@@ -30,6 +30,7 @@ const createLink = (behaviour) => {
 // eslint-disable-next-line import/prefer-default-export
 export const renderLinkoutPopup = (behaviour, target, callback) => {
     const modalElement = document.createElement('div');
+    modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
     modalContainer.appendChild(modalElement);
 

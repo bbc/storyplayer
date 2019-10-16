@@ -17,6 +17,7 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
+import { switchCase } from '@babel/types';
 
 const SEEK_TIME = 10;
 
@@ -87,6 +88,10 @@ export default class BaseRenderer extends EventEmitter {
 
     _loopCounter: number;
 
+    _willHideControls: Function;
+
+    _hideControls: Function;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -127,6 +132,8 @@ export default class BaseRenderer extends EventEmitter {
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+        this._willHideControls = this._willHideControls.bind(this); 
+        this._hideControls = this._hideControls.bind(this);
 
 
         this._behaviourRendererMap = {
@@ -459,6 +466,93 @@ export default class BaseRenderer extends EventEmitter {
         this._runDuringBehaviours();
     }
 
+
+    _willHideControls(behaviour: Object) {
+        return behaviour.type ===
+            'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
+            &&
+            behaviour.hasOwnProperty('disable_controls') &&
+            behaviour.disable_controls
+    }
+
+    _hideControls(startTime: number) {
+        const hideControls = () => {
+            this._player.disableControls();
+            this._player._hideRomperButtons();
+        };
+        if (startTime > 1) {
+            this.addTimeEventListener(
+                'prechoice-control-hide',
+                startTime - 0.8,
+                hideControls,
+            );
+        } else {
+            hideControls();
+        }
+    }
+
+    _addToRunBehaviours(behaviour: Object) {
+        this._behaviours[behaviour.behaviour.id] = behaviour.behaviour.id;
+    }
+
+    _removeFromRunBehaviours(behaviour: Object) {
+        delete this._behaviours[behaviour.behaviour.id];
+    }
+
+    _shouldRunBehaviour(currentTime: number, time: number) {
+        return (time > 0 && currentTime >= time);
+    }
+
+    _shouldCleanupBehaviour(currentTime: number, startTime: number, duration: number) {
+        if(duration) {
+            return(startTime > 0 && currentTime >= startTime + duration);
+        }
+        return (startTime > 0 && currentTime <= startTime);
+    }
+
+    _hasRunBehaviour(behaviour: Object) {
+        return this._behaviours[behaviour.behaviour.id] !== undefined;
+    }
+
+    _timeUpdateHandler() {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        // run during behaviours
+        if(currentTime) {
+            if(this._representation.behaviours && this._representation.behaviours.during) {
+                const duringBehaviours = this._representation.behaviours.during;
+    
+                duringBehaviours.forEach((behaviour) => {
+                    // we have run the behaviour and need to clean up
+                    if(this._hasRunBehaviour(behaviour) && this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
+                        const behaviourElement = document.getElementById(behaviour.behaviour.id);
+                        if(behaviourElement && behaviourElement.parentNode) {
+                            behaviourElement.parentNode.removeChild(behaviourElement);
+                        }
+                        this._removeFromRunBehaviours(behaviour);
+                    }
+                    // we haven't run the behaviour
+                    if(!this._hasRunBehaviour(behaviour) && this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
+                        // run behaviour
+                        const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
+
+                        if(behaviourRunner) {
+                            behaviourRunner(behaviour.behaviour, () =>
+                                logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+                            // if we have choices, hide the controls before they appear
+                            if (this._willHideControls(behaviour.behaviour)) {
+                                this._hideControls(behaviour.start_time);
+                            }
+
+                        } else {
+                            logger.warn(`${this.constructor.name} does not support ` +
+                        `${behaviour.behaviour.type} - ignoring`)
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     _runDuringBehaviours() {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             // for each behaviour
@@ -482,25 +576,7 @@ export default class BaseRenderer extends EventEmitter {
                                 logger.info(`completed during behaviour ${behaviourObject.type}`));
                         });
 
-                        // if we have choices, hide the controls before they appear
-                        if (behaviourObject.type
-                            === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
-                            && behaviourObject.hasOwnProperty('disable_controls')
-                            && behaviourObject.disable_controls) {
-                            const hideControls = () => {
-                                this._player.disableControls();
-                                this._player._hideRomperButtons();
-                            };
-                            if (startTime > 1) {
-                                this.addTimeEventListener(
-                                    'prechoice-control-hide',
-                                    startTime - 0.8,
-                                    hideControls,
-                                );
-                            } else {
-                                hideControls();
-                            }
-                        }
+                       
                     }
                     // if there is a duration
                     if (behaviour.duration) {
@@ -976,15 +1052,16 @@ export default class BaseRenderer extends EventEmitter {
         if (assetCollectionId) {
             this._fetchAssetCollection(assetCollectionId).then((image) => {
                 if (image.assets.image_src) {
-                    this._overlayImage(image.assets.image_src);
+                    this._overlayImage(image.assets.image_src, behaviour.id);
                     callback();
                 }
             });
         }
     }
 
-    _overlayImage(imageSrc: string) {
+    _overlayImage(imageSrc: string, id: string) {
         const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
         overlayImageElement.style.backgroundImage = `url(${imageSrc})`;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
@@ -1481,6 +1558,22 @@ export default class BaseRenderer extends EventEmitter {
             }
         });
     }
+
+
+    // _timeEventHandler() {
+    //     if(this._representation.behaviour && this._representation.behaviours.during) {
+    //         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+    //         const { during } = this._representation.behaviours;
+    //         during.forEach(behaviour => {
+    //             if(currentTime) {
+    //                 if(currentTime <= behaviour.start_time) {
+    //                     // clean up behaviour
+    //                     this.clearLinkChoices();
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
 
     deleteTimeEventListener(listenerId: string) {
         if (listenerId in this._timeEventListeners) {

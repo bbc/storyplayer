@@ -153,6 +153,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', (event) => {
+            console.log('The currentTime attribute has been updated. Again.', event.target.currentTime);
+        });
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
