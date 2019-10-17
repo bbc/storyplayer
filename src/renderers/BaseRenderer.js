@@ -91,6 +91,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _hideControls: Function;
 
+    _behaviours: Object;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -467,7 +469,7 @@ export default class BaseRenderer extends EventEmitter {
     resetDuringBehaviours() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-        this._runDuringBehaviours();
+        // this._runDuringBehaviours();
     }
 
 
