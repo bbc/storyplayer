@@ -467,6 +467,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     resetDuringBehaviours() {
+        console.log(this._behaviours);
+        Object.keys(this._behaviours).forEach(behaviour => {
+            const behaviour = behaviours[behaviour]
+            // if behaviour has a property that is duration of infinity do not remove it;
+        });
         this._behaviours = {};
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
@@ -498,7 +503,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _addToRunBehaviours(behaviour: Object) {
-        this._behaviours[behaviour.behaviour.id] = behaviour.behaviour.id;
+        this._behaviours[behaviour.behaviour.id] = behaviour;
     }
 
     _removeFromRunBehaviours(behaviour: Object) {
