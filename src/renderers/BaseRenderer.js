@@ -469,7 +469,6 @@ export default class BaseRenderer extends EventEmitter {
     resetDuringBehaviours() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-        // this._runDuringBehaviours();
     }
 
 
