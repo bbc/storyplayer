@@ -13,7 +13,7 @@ const setDefinedPosition = (modalElement, behaviour) => {
 /* eslint-enable no-param-reassign */
 
 const createContainer = (target) => {
-    let modalOverlay = document.getElementById('romper-modal-container');
+    let modalOverlay = document.getElementById('modal-container');
     if (!modalOverlay) {
         modalOverlay = document.createElement('div');
         modalOverlay.id = 'modal-container'
