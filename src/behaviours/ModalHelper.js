@@ -13,16 +13,14 @@ const setDefinedPosition = (modalElement, behaviour) => {
 /* eslint-enable no-param-reassign */
 
 const createContainer = (target) => {
-    let modalContainer;
-    const containerel = document.getElementsByClassName('romper-modal-container');
-    if (containerel.length === 0) {
-        modalContainer = document.createElement('div');
-        modalContainer.className = 'romper-modal-container';
-        target.appendChild(modalContainer);
-    } else {
-        modalContainer = containerel[0]; // eslint-disable-line prefer-destructuring
+    let modalOverlay = document.getElementById('romper-modal-container');
+    if (!modalOverlay) {
+        modalOverlay = document.createElement('div');
+        modalOverlay.id = 'modal-container'
+        modalOverlay.className = 'romper-modal-container';
+        target.appendChild(modalOverlay);
     }
-    return modalContainer;
+    return modalOverlay;
 };
 
 export { createContainer, setDefinedPosition };

@@ -467,6 +467,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     resetDuringBehaviours() {
+        this._behaviours = {};
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
     }
@@ -512,6 +513,7 @@ export default class BaseRenderer extends EventEmitter {
         if(duration) {
             return(startTime > 0 && currentTime >= startTime + duration);
         }
+        console.log('starttime', startTime, 'currentTime', currentTime);
         return (startTime > 0 && currentTime <= startTime);
     }
 
@@ -528,74 +530,40 @@ export default class BaseRenderer extends EventEmitter {
     
                 duringBehaviours.forEach((behaviour) => {
                     // we have run the behaviour and need to clean up
-                    if(this._hasRunBehaviour(behaviour) && this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
-                        const behaviourElement = document.getElementById(behaviour.behaviour.id);
-                        if(behaviourElement && behaviourElement.parentNode) {
-                            behaviourElement.parentNode.removeChild(behaviourElement);
-                        }
-                        this._removeFromRunBehaviours(behaviour);
-                    }
-                    // we haven't run the behaviour
-                    if(!this._hasRunBehaviour(behaviour) && this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
-                        // run behaviour
-                        const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
-
-                        if(behaviourRunner) {
-                            behaviourRunner(behaviour.behaviour, () =>
-                                logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-                            // if we have choices, hide the controls before they appear
-                            if (this._willHideControls(behaviour.behaviour)) {
-                                this._hideControls(behaviour.start_time);
-                            }
-                            this._addToRunBehaviours(behaviour);
-                        } else {
-                            logger.warn(`${this.constructor.name} does not support ` +
-                        `${behaviour.behaviour.type} - ignoring`)
-                        }
-                    }
+                    this._runDuringBehaviour(currentTime, behaviour);
                 });
             }
         }
     }
 
-    _runDuringBehaviours() {
-        if (this._representation.behaviours && this._representation.behaviours.during) {
-            // for each behaviour
-            this._representation.behaviours.during.forEach((behaviour) => {
-                // get start time
-                const startTime = behaviour.start_time;
-                const behaviourObject = behaviour.behaviour;
-                // get function to handle behaviour
-                const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
+    _runDuringBehaviour(currentTime: number, behaviour: Object) {
+        if(this._hasRunBehaviour(behaviour)) {
+            if(this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
+                const behaviourElement = document.getElementById(behaviour.behaviour.id);
+                if(behaviourElement && behaviourElement.parentNode) {
+                    behaviourElement.parentNode.removeChild(behaviourElement);
+                }
+            }
+        }
+        // we haven't run the behaviour
+        if(!this._hasRunBehaviour(behaviour)) {
+            if(this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
+                // run behaviour
+                const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
 
                 if(behaviourRunner) {
-                    logger.info(`started during behaviour ${behaviourObject.type}`);
-                    if (startTime === 0) {
-                        behaviourRunner(behaviourObject, () => 
-                            logger.info(`completed during behaviour ${behaviourObject.type}`));
-                    } else {
-                        // set up to run function at set time
-                        this.addTimeEventListener(behaviourObject.type, startTime, () => {
-                            logger.info(`started during behaviour ${behaviourObject.type}`);
-                            behaviourRunner(behaviourObject, () =>
-                                logger.info(`completed during behaviour ${behaviourObject.type}`));
-                        });
-
-                       
+                    behaviourRunner(behaviour.behaviour, () =>
+                        logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+                    // if we have choices, hide the controls before they appear
+                    if (this._willHideControls(behaviour.behaviour)) {
+                        this._hideControls(behaviour.start_time);
                     }
-                    // if there is a duration
-                    if (behaviour.duration) {
-                        const endTime = startTime + behaviour.duration;
-                        this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => { // eslint-disable-line max-len
-                            // tidy up...
-                            logger.error('StoryPlayer does not yet support duration on behaviours');
-                        });
-                    }
+                    this._addToRunBehaviours(behaviour);
                 } else {
                     logger.warn(`${this.constructor.name} does not support ` +
-                        `${behaviourObject.type} - ignoring`)
+                `${behaviour.behaviour.type} - ignoring`)
                 }
-            });
+            }
         }
     }
 
@@ -1091,13 +1059,13 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderSocialPopup(behaviour, this._target, callback);
+        const modalElement = renderSocialPopup(behaviour, this._player._overlays, callback);
         this._setBehaviourElementAttribute(modalElement, 'social-share');
         this._behaviourElements.push(modalElement);
     }
 
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderLinkoutPopup(behaviour, this._target, callback);
+        const modalElement = renderLinkoutPopup(behaviour, this._player._overlays, callback);
         this._setBehaviourElementAttribute(modalElement, 'link-out');
         this._behaviourElements.push(modalElement);
     }
