@@ -17,7 +17,6 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
-import { switchCase } from '@babel/types';
 
 const SEEK_TIME = 10;
 
@@ -134,6 +133,7 @@ export default class BaseRenderer extends EventEmitter {
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
+        this._timeUpdateHandler = this._timeUpdateHandler.bind(this)
 
 
         this._behaviourRendererMap = {
@@ -152,6 +152,8 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         this._behaviourElements = [];
+
+        this._behaviours = {};
 
         this._timeEventListeners = {};
 
@@ -208,16 +210,18 @@ export default class BaseRenderer extends EventEmitter {
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
-            .then(() => this._runDuringBehaviours())
+            .then(() => {
+                this._playoutEngine.on(this._rendererId, 'timeupdate', this._timeUpdateHandler);
+            });
     }
 
     end() {
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._timeUpdateHandler);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._loopCounter = 0;
     }
 
     hasEnded(): boolean {
@@ -503,7 +507,7 @@ export default class BaseRenderer extends EventEmitter {
         return (time > 0 && currentTime >= time);
     }
 
-    _shouldCleanupBehaviour(currentTime: number, startTime: number, duration: number) {
+    _shouldCleanupBehaviour(currentTime: number, startTime: number, duration: ?number) {
         if(duration) {
             return(startTime > 0 && currentTime >= startTime + duration);
         }
@@ -542,7 +546,7 @@ export default class BaseRenderer extends EventEmitter {
                             if (this._willHideControls(behaviour.behaviour)) {
                                 this._hideControls(behaviour.start_time);
                             }
-
+                            this._addToRunBehaviours(behaviour);
                         } else {
                             logger.warn(`${this.constructor.name} does not support ` +
                         `${behaviour.behaviour.type} - ignoring`)
@@ -595,14 +599,13 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // //////////// show link choice behaviour
-
     // this needs to be put in a div with an id if the behaviour id
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
-        const behaviourElement = document.createElement('div');
-        behaviourElement.id = behaviour.id;
-        this._player.addBehaviourElementToOverlay(behaviourElement)
+        const behaviourElement = this._player.createBehaviourOverlay(behaviour);
+        this._setBehaviourElementAttribute(behaviourElement, 'link-choice');
+        console.log('behaviourElement renderer', behaviourElement);
 
         logger.info('Rendering link icons for user choice');
         // get behaviours of links from data
@@ -644,13 +647,13 @@ export default class BaseRenderer extends EventEmitter {
             return iconSrcPromises.then((iconObjects) => {
 
                 this._player.clearLinkChoices();
-                const linkElements = iconObjects.map((iconSpecObject) => {
+                iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
-                    return this._buildLinkIcon(iconSpecObject, behaviourElement);
+                    this._buildLinkIcon(iconSpecObject, behaviourElement);
                 });
 
-                console.log(linkElements);
-                if(linkElements.length > 1 || showIfOneLink) {
+                console.log(iconObjects);
+                if(iconObjects.length > 1 || showIfOneLink) {
                     // add link elements to the div element for the behaviour
                 }
 
@@ -661,7 +664,8 @@ export default class BaseRenderer extends EventEmitter {
                         disableControls, // are controls disabled while icons shown
                         countdown, // do we animate countdown
                         iconOverlayClass, // css classes to apply to overlay
-                        behaviourId: behaviour.id,
+                        behaviourElement,
+                        choiceCount: iconObjects.length,
                     });
 
                     // callback to say behaviour is done, but not if user can
@@ -684,7 +688,7 @@ export default class BaseRenderer extends EventEmitter {
             // this.removeLoopAttribute();
             this._playoutEngine.removeLoopAttribute(this._rendererId);
         }
-        this._followLink(eventObject.id);
+        this._followLink(eventObject.id, eventObject.behaviourId);
     }
 
     // get behaviours of links from behaviour meta data
@@ -905,10 +909,11 @@ export default class BaseRenderer extends EventEmitter {
             disableControls, // are controls disabled while icons shown
             countdown, // do we animate countdown
             iconOverlayClass, // css classes to apply to overlay
-            id,
+            behaviourElement,
+            choiceCount,
         } = iconDataObject;
-
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, id);
+        console.log('_showChoiceIcons', iconDataObject)
+        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourElement, choiceCount);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -920,7 +925,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // user has made a choice of link to follow - do it
-    _followLink(narrativeElementId: string) {
+    _followLink(narrativeElementId: string, behaviourId: string) {
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -943,18 +948,18 @@ export default class BaseRenderer extends EventEmitter {
 
             // if already ended, follow immediately
             if (this._hasEnded) {
-                this._hideChoiceIcons(narrativeElementId);
+                this._hideChoiceIcons(narrativeElementId, behaviourId);
             // do we keep the choice open?
             } else if (this._linkBehaviour && this._linkBehaviour.oneShot) {
                 // hide icons
-                this._hideChoiceIcons(null);
+                this._hideChoiceIcons(null, behaviourId);
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
                 this._player.enableControls();
             }
         } else {
             // or follow link now
-            this._hideChoiceIcons(narrativeElementId);
+            this._hideChoiceIcons(narrativeElementId, behaviourId);
         }
     }
 
@@ -1034,18 +1039,22 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // hide the choice icons, and optionally follow the link
-    _hideChoiceIcons(narrativeElementId: ?string) {
+    _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
-        this._player._linkChoice.overlay.classList.add('romper-icon-fade');
-        this._linkFadeTimeout = setTimeout(() => {
-            this._player._linkChoice.overlay.classList.remove('romper-icon-fade');
-            this._player.clearLinkChoices();
-            if (narrativeElementId) {
-                this._controller.followLink(narrativeElementId);
-            } else {
-                this._linkBehaviour.callback();
-            }
-        }, 1500);
+        const behaviourElement = document.getElementById(behaviourId);
+        if(behaviourElement) {
+            this._linkFadeTimeout = setTimeout(() => {
+                behaviourElement.classList.remove('romper-icon-fade');
+                this._player.clearLinkChoices();
+                if (narrativeElementId) {
+                    this._controller.followLink(narrativeElementId);
+                } else {
+                    this._linkBehaviour.callback();
+                }
+            }, 1500);
+            behaviourElement.classList.add('romper-icon-fade');
+            behaviourElement.parentNode.removeChild(behaviourElement);
+        }
     }
 
     // //////////// end of show link choice behaviour
@@ -1053,6 +1062,7 @@ export default class BaseRenderer extends EventEmitter {
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
         const { colour } = behaviour;
         const overlayImageElement = document.createElement('div');
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
@@ -1077,6 +1087,7 @@ export default class BaseRenderer extends EventEmitter {
     _overlayImage(imageSrc: string, id: string) {
         const overlayImageElement = document.createElement('div');
         overlayImageElement.id = id;
+        this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.style.backgroundImage = `url(${imageSrc})`;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
@@ -1085,12 +1096,19 @@ export default class BaseRenderer extends EventEmitter {
 
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderSocialPopup(behaviour, this._target, callback);
+        this._setBehaviourElementAttribute(modalElement, 'social-share');
         this._behaviourElements.push(modalElement);
     }
 
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderLinkoutPopup(behaviour, this._target, callback);
+        this._setBehaviourElementAttribute(modalElement, 'link-out');
         this._behaviourElements.push(modalElement);
+    }
+
+
+    _setBehaviourElementAttribute(element: HTMLElement, attributeValue: string) {
+        element.setAttribute('data-behaviour', attributeValue)
     }
 
     // //////////// variables panel choice behaviour
@@ -1390,17 +1408,18 @@ export default class BaseRenderer extends EventEmitter {
 
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
-        const overlayImageElement = document.createElement('div');
-        overlayImageElement.className = 'romper-variable-panel';
+        const vairablePannelElement = document.createElement('div');
+        this._setBehaviourElementAttribute(vairablePannelElement, 'variable-pannel');
+        vairablePannelElement.className = 'romper-variable-panel';
 
         if (behaviour.background_colour) {
-            overlayImageElement.style.background = behaviour.background_colour;
+            vairablePannelElement.style.background = behaviour.background_colour;
         }
 
         const titleDiv = document.createElement('div');
         titleDiv.innerHTML = formTitle;
         titleDiv.className = 'romper-var-form-title';
-        overlayImageElement.appendChild(titleDiv);
+        vairablePannelElement.appendChild(titleDiv);
 
         this._controller.getVariableState()
             .then((storyVariables) => {
@@ -1424,7 +1443,7 @@ export default class BaseRenderer extends EventEmitter {
                     carouselDiv.appendChild(variableDiv);
                 });
 
-                overlayImageElement.appendChild(carouselDiv);
+                vairablePannelElement.appendChild(carouselDiv);
                 // show first question
                 let currentQuestion = 0;
 
@@ -1474,7 +1493,7 @@ export default class BaseRenderer extends EventEmitter {
 
                     if (fwd && currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
-                        overlayImageElement.classList.remove('active');
+                        vairablePannelElement.classList.remove('active');
                         this.inVariablePanel = false;
                         // complete NE when fade out done
                         setTimeout(() => {
@@ -1515,20 +1534,21 @@ export default class BaseRenderer extends EventEmitter {
                 okButtonContainer.appendChild(statusSpan);
                 okButtonContainer.appendChild(okButton);
 
-                overlayImageElement.appendChild(okButtonContainer);
+                vairablePannelElement.appendChild(okButtonContainer);
 
-                this._target.appendChild(overlayImageElement);
-                setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
-                this._behaviourElements.push(overlayImageElement);
+                this._target.appendChild(vairablePannelElement);
+                setTimeout(() => { vairablePannelElement.classList.add('active'); }, 200);
+                this._behaviourElements.push(vairablePannelElement);
             });
     }
 
     // //////////// end of variables panel choice behaviour
 
     _clearBehaviourElements() {
-        this._behaviourElements.forEach((be) => {
+        const behaviourElements = document.querySelectorAll('[data-behaviour]');
+        behaviourElements.forEach((be) => {
             try {
-                this._target.removeChild(be);
+                be.parentNode.removeChild(be);
             } catch (e) {
                 logger.warn(`could not remove behaviour element ${be.id} from Renderer`);
             }

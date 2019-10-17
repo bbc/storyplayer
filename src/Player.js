@@ -560,10 +560,11 @@ class Player extends EventEmitter {
 
         this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
         this._overlays.appendChild(this._linkChoice.overlay);
+
+
         // no need for toggle button
         this._countdownContainer = document.createElement('div');
         this._countdownContainer.classList.add('romper-ux-divider');
-        this._linkChoice.overlay.appendChild(this._countdownContainer);
         this._countdowner = document.createElement('div');
         this._countdowner.classList.add('romper-ux-countdown');
         this._countdownContainer.appendChild(this._countdowner);
@@ -715,6 +716,9 @@ class Player extends EventEmitter {
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
         this._addContinueModal = this._addContinueModal.bind(this);
         this._startButtonHandler = this._startButtonHandler.bind(this);
+
+        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
+        this._addCountdownToElement = this._addCountdownToElement.bind(this);
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -1407,13 +1411,21 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addBehaviourElementToOverlay(behaviourElement: HTMLElement) {
-        this._linkChoice.overlay.appendChild(behaviourElement);
+    createBehaviourOverlay(behaviour: Object) {
+        const behaviourOverlay = createOverlay('link-choice', this._logUserInteraction);
+        console.log('behaviour', behaviour);
+        const behaviourElement = behaviourOverlay.overlay
+        behaviourElement.id = behaviour.id;
+        console.log('behaviourElement', behaviourElement);
+
+        this._addCountdownToElement(behaviourElement);
+        this._overlays.appendChild(behaviourElement);
+        return behaviourElement;
     }
 
-    // addSingleBehaviour() {
-
-    // }
+    _addCountdownToElement(element: HTMLElement) {
+        element.appendChild(this._countdownContainer);
+    }
 
     addTextLinkIconChoice(behaviourElement: HTMLElement, id: string, text: string, src: string, label: string): HTMLDivElement {
         return this._addLinkChoiceContainer(behaviourElement, id, label, text, src);
@@ -1428,9 +1440,7 @@ class Player extends EventEmitter {
     }
 
     _addLinkChoiceContainer(behaviourElement: HTMLElement, id: string, label: string, text: ?string, src: ?string) {
-        this._linkChoice.overlay.classList.remove(`choices-${this._numChoices}`);
         this._numChoices += 1;
-        this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
         if (this._numChoices > 8) {
             this._linkChoice.overlay.classList.remove('tworow');
@@ -1452,7 +1462,7 @@ class Player extends EventEmitter {
 
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-                this.emit(PlayerEvents.LINK_CHOSEN, { id });
+                this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
             };
             iconContainer.onclick = choiceClick;
@@ -1515,17 +1525,18 @@ class Player extends EventEmitter {
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
-    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourId) {
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourElement: HTMLElement, choiceCount: number) {
         this._hideRomperButtons();
         this._buttons.classList.add('icons-showing');
-        this._linkChoice.overlay.classList.remove('romper-inactive');
+        behaviourElement.classList.remove('romper-inactive');
+        behaviourElement.classList.add(`choices-${choiceCount}`);
+        behaviourElement.classList.add(`count-${choiceCount}`);
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
             promisesArray.push(this._choiceIconSet[id]);
         });
-        if (overlayClass
-            && !(overlayClass in this._linkChoice.overlay.classList)) {
-            this._linkChoice.overlay.classList.add(overlayClass);
+        if (overlayClass && !(overlayClass in behaviourElement.classList)) {
+            behaviourElement.classList.add(overlayClass);
         }
         return Promise.all(promisesArray).then((icons) => {
             icons.forEach((iconObj, id) => {
@@ -1540,7 +1551,6 @@ class Player extends EventEmitter {
                 icon.onclick = clickHandler;
                 icon.addEventListener('touchend', clickHandler);
                 this._linkChoice.add(id, icon);
-                const behaviourElement = document.getElementById(behaviourId)
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
                 }
@@ -1719,7 +1729,7 @@ class Player extends EventEmitter {
         this._linkChoice.overlay.style.setProperty('animation', 'none');
         this._numChoices = 0;
         this._choiceIconSet = {};
-        this._linkChoice.clearAll();
+        // this._linkChoice.clearAll();
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
