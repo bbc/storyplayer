@@ -558,8 +558,8 @@ class Player extends EventEmitter {
         mediaTransportRight.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
 
-        this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
-        this._overlays.appendChild(this._linkChoice.overlay);
+        // this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
+        // this._overlays.appendChild(this._linkChoice.overlay);
 
 
         // no need for toggle button
@@ -1076,7 +1076,6 @@ class Player extends EventEmitter {
         this._icon.clearAll();
         this._representation.clearAll();
         this._volume.clearAll();
-        this._linkChoice.clearAll();
     }
 
     prepareForRestart() {
@@ -1420,7 +1419,7 @@ class Player extends EventEmitter {
 
         this._addCountdownToElement(behaviourElement);
         this._overlays.appendChild(behaviourElement);
-        return behaviourElement;
+        return behaviourOverlay;
     }
 
     _addCountdownToElement(element: HTMLElement) {
@@ -1443,14 +1442,14 @@ class Player extends EventEmitter {
         this._numChoices += 1;
 
         if (this._numChoices > 8) {
-            this._linkChoice.overlay.classList.remove('tworow');
-            this._linkChoice.overlay.classList.add('threerow');
+            behaviourElement.classList.remove('tworow');
+            behaviourElement.classList.add('threerow');
         } else if (this._numChoices >= 4) {
-            this._linkChoice.overlay.classList.remove('threerow');
-            this._linkChoice.overlay.classList.add('tworow');
+            behaviourElement.classList.remove('threerow');
+            behaviourElement.overlay.classList.add('tworow');
         } else {
-            this._linkChoice.overlay.classList.remove('tworow');
-            this._linkChoice.overlay.classList.remove('threerow');
+            behaviourElement.classList.remove('tworow');
+            behaviourElement.classList.remove('threerow');
         }
 
         const linkChoiceControl = document.createElement('div');
@@ -1525,8 +1524,9 @@ class Player extends EventEmitter {
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
-    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourElement: HTMLElement, choiceCount: number) {
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourOverlay: Object, choiceCount: number) {
         this._hideRomperButtons();
+        const behaviourElement = behaviourOverlay.overlay
         this._buttons.classList.add('icons-showing');
         behaviourElement.classList.remove('romper-inactive');
         behaviourElement.classList.add(`choices-${choiceCount}`);
@@ -1546,11 +1546,11 @@ class Player extends EventEmitter {
                 }
                 const clickHandler = () => {
                     // set classes to show which is selected
-                    this._linkChoice.setActive(`${id}`);
+                    behaviourOverlay.setActive(`${id}`);
                 };
                 icon.onclick = clickHandler;
                 icon.addEventListener('touchend', clickHandler);
-                this._linkChoice.add(id, icon);
+                behaviourOverlay.add(id, icon);
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
                 }
@@ -1710,12 +1710,15 @@ class Player extends EventEmitter {
         this.enableRepresentationControl();
     }
 
+
     enableLinkChoiceControl() {
-        this._linkChoice.overlay.classList.remove('romper-inactive');
+        const linkChoice = this.getLinkChoiceElement()[0];
+        linkChoice.classList.remove('romper-inactive');
     }
 
     disableLinkChoiceControl() {
-        this._linkChoice.overlay.classList.add('romper-inactive');
+        const linkChoice = this.getLinkChoiceElement()[0];
+        linkChoice.classList.add('romper-inactive');
     }
 
 
@@ -1726,23 +1729,29 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
-        this._linkChoice.overlay.style.setProperty('animation', 'none');
-        this._numChoices = 0;
-        this._choiceIconSet = {};
-        // this._linkChoice.clearAll();
-        if (this._choiceCountdownTimeout) {
-            clearTimeout(this._choiceCountdownTimeout);
-            this._choiceCountdownTimeout = null;
-            this._countdownTotal = 0;
-            this._countdownContainer.classList.remove('show');
-        }
-        this._linkChoice.overlay.className =
-            'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._buttons.classList.remove('icons-showing');
+        const linkChoices = this.getLinkChoiceElement(true);
+        linkChoices.forEach((linkChoice) => {
+            linkChoice.style.setProperty('animation', 'none');
+            this._numChoices = 0;
+            this._choiceIconSet = {};
+            // this._linkChoice.clearAll();
+            if (this._choiceCountdownTimeout) {
+                clearTimeout(this._choiceCountdownTimeout);
+                this._choiceCountdownTimeout = null;
+                this._countdownTotal = 0;
+                this._countdownContainer.classList.remove('show');
+            }
+            // eslint-disable-next-line no-param-reassign
+            linkChoice.className =
+                'romper-overlay romper-link-choice-overlay romper-inactive';
+            this._buttons.classList.remove('icons-showing');
+        });
     }
 
-    getLinkChoiceElement(): HTMLElement {
-        return this._linkChoice.overlay;
+    // eslint-disable-next-line class-methods-use-this
+    getLinkChoiceElement(full: ?boolean): [HTMLElement] {
+        const linkChoices = document.querySelectorAll('[data-behaviour="link-choice"]');
+        return full? linkChoices : [linkChoices[0]];
     }
 
     enableRepresentationControl() {

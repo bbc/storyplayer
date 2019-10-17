@@ -603,10 +603,8 @@ export default class BaseRenderer extends EventEmitter {
     // this needs to be put in a div with an id if the behaviour id
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-
-        const behaviourElement = this._player.createBehaviourOverlay(behaviour);
-        this._setBehaviourElementAttribute(behaviourElement, 'link-choice');
-        console.log('behaviourElement renderer', behaviourElement);
+        const behaviourOverlay = this._player.createBehaviourOverlay(behaviour);
+        this._setBehaviourElementAttribute(behaviourOverlay.overlay, 'link-choice');
 
         logger.info('Rendering link icons for user choice');
         // get behaviours of links from data
@@ -650,10 +648,8 @@ export default class BaseRenderer extends EventEmitter {
                 this._player.clearLinkChoices();
                 iconObjects.forEach((iconSpecObject) => {
                     // add the icon to the player
-                    this._buildLinkIcon(iconSpecObject, behaviourElement);
+                    this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                 });
-
-                console.log(iconObjects);
                 if(iconObjects.length > 1 || showIfOneLink) {
                     // add link elements to the div element for the behaviour
                 }
@@ -665,7 +661,8 @@ export default class BaseRenderer extends EventEmitter {
                         disableControls, // are controls disabled while icons shown
                         countdown, // do we animate countdown
                         iconOverlayClass, // css classes to apply to overlay
-                        behaviourElement,
+                        // css classes to apply to overlay
+                        behaviourOverlay,
                         choiceCount: iconObjects.length,
                     });
 
@@ -910,11 +907,10 @@ export default class BaseRenderer extends EventEmitter {
             disableControls, // are controls disabled while icons shown
             countdown, // do we animate countdown
             iconOverlayClass, // css classes to apply to overlay
-            behaviourElement,
+            behaviourOverlay,
             choiceCount,
         } = iconDataObject;
-        console.log('_showChoiceIcons', iconDataObject)
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourElement, choiceCount);
+        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourOverlay, choiceCount);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -1054,7 +1050,6 @@ export default class BaseRenderer extends EventEmitter {
                 }
             }, 1500);
             behaviourElement.classList.add('romper-icon-fade');
-            behaviourElement.parentNode.removeChild(behaviourElement);
         }
     }
 
