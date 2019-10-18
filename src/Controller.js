@@ -19,7 +19,6 @@ import { InternalVariableNames } from './InternalVariables';
 
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
-import { PlayerEvents } from './Player';
 
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
@@ -60,6 +59,7 @@ export default class Controller extends EventEmitter {
         this._handleRendererNextButtonEvent = this._handleRendererNextButtonEvent.bind(this);
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
+        this._handleStoryEnd = this._handleStoryEnd.bind(this);
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;

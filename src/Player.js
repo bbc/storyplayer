@@ -1062,7 +1062,6 @@ class Player extends EventEmitter {
     }
 
     _startButtonHandler() {
-        alert('_startButtonHandler');
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
         this._enableUserInteraction();
