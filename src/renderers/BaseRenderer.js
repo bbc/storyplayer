@@ -135,7 +135,9 @@ export default class BaseRenderer extends EventEmitter {
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
-        this._runDuringBehaviourEventHandler = this._runDuringBehaviourEventHandler.bind(this)
+        this._runDuringBehaviourEventHandler = this._runDuringBehaviourEventHandler.bind(this);
+        this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
+        this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
 
 
         this._behaviourRendererMap = {
@@ -156,6 +158,7 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourElements = [];
 
         this._behaviours = {};
+        this._cleaning = false;
 
         this._timeEventListeners = {};
 
@@ -467,8 +470,7 @@ export default class BaseRenderer extends EventEmitter {
             })
     }
 
-    resetDuringBehaviours() {
-        this._behaviours = {};
+    resetPlayer() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
     }
@@ -506,16 +508,27 @@ export default class BaseRenderer extends EventEmitter {
         delete this._behaviours[behaviour.behaviour.id];
     }
 
-    _shouldRunBehaviour(currentTime: number, time: number) {
-        return (time > 0 && currentTime >= time);
+    _shouldRunBehaviour(currentTime: number, startTime: number, duration: ?number) {
+        if(duration) {
+            return this._isInBehaviourDuration(currentTime, startTime, duration);
+        }
+        return (startTime > 0 && currentTime >= startTime);
     }
 
-    _shouldCleanupBehaviour(currentTime: number, startTime: number, duration: ?number) {
-        if(duration) {
-            return(startTime > 0 && currentTime >= startTime + duration);
+    _shouldRemoveBehaviour(currentTime: number, startTime: number, duration: ?number) {
+        return (!this._cleaning && !this._shouldRunBehaviour(currentTime, startTime, duration));
+    }
+
+    _isInBehaviourDuration(currentTime: number, startTime: number, duration: number) {
+        let inBehaviour = false;
+        const endTime = startTime + duration;
+        if(currentTime >= startTime) {
+            inBehaviour = true;
         }
-        console.log('starttime', startTime, 'currentTime', currentTime);
-        return (startTime > 0 && currentTime < startTime);
+        if(currentTime >= endTime) {
+            inBehaviour = false;
+        }
+        return inBehaviour;
     }
 
     _hasRunBehaviour(behaviour: Object) {
@@ -531,26 +544,21 @@ export default class BaseRenderer extends EventEmitter {
                 if(behaviour.start_time === 0) {
                     this._runSingleDuringBehaviour(behaviour);
                 } else {
-                    this._playoutEngine.on(this._rendererId, 'timeupdate', this._runDuringBehaviourEventHandler(behaviour));
+                    this._playoutEngine.on(this._rendererId, 'timeupdate', () => {this._runDuringBehaviourEventHandler(behaviour)});
                 }
-                
             });
         }
-
     }
 
     _runDuringBehaviourEventHandler(behaviour: Object) {
-        console.log('run during event handler', behaviour)
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (currentTime) {
             if (this._hasRunBehaviour(behaviour)) {
-                if (!this._cleaning && this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
+                if (this._shouldRemoveBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
                     this._cleanupSingleDuringBehaviour(behaviour);
                 }
-            }
-            // we haven't run the behaviour
-            if (!this._hasRunBehaviour(behaviour)) {
-                if (this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
+            } else if (!this._hasRunBehaviour(behaviour)) {
+                if (this._shouldRunBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
                     // run behaviour
                     this._runSingleDuringBehaviour(behaviour);
                 }
@@ -564,7 +572,8 @@ export default class BaseRenderer extends EventEmitter {
         if (behaviourElement && behaviourElement.parentNode) {
             behaviourElement.parentNode.removeChild(behaviourElement);
         }
-        this.cleaning = false;
+        this._removeFromRunBehaviours(behaviour);
+        this._cleaning = false;
     }
 
     _runSingleDuringBehaviour(behaviour: Object) {
@@ -1574,27 +1583,13 @@ export default class BaseRenderer extends EventEmitter {
         });
     }
 
-
-    // _timeEventHandler() {
-    //     if(this._representation.behaviour && this._representation.behaviours.during) {
-    //         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-    //         const { during } = this._representation.behaviours;
-    //         during.forEach(behaviour => {
-    //             if(currentTime) {
-    //                 if(currentTime <= behaviour.start_time) {
-    //                     // clean up behaviour
-    //                     this.clearLinkChoices();
-    //                 }
-    //             }
-    //         });
-    //     }
-    // }
-
     deleteTimeEventListener(listenerId: string) {
         if (listenerId in this._timeEventListeners) {
             delete this._timeEventListeners[listenerId];
         }
     }
+
+
 
     seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
@@ -1602,16 +1597,14 @@ export default class BaseRenderer extends EventEmitter {
             if (currentTime !== undefined && currentTime <= 0.002) {
                 if(inTime !== 0) {
                     this.setCurrentTime(inTime);
-                }
-                this.resetDuringBehaviours();
-
+                } 
+                this.resetPlayer();
                 if(this.isSrcIosPlayoutEngine()) {
                     if(this._playoutEngine._playing && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
                     }
                 }
             }
-            this._loopCounter +=1;
         }
     }
     
