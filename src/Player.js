@@ -143,10 +143,12 @@ function createOverlay(name: string, logFunction: Function) {
         activeIconId = id;
         Object.keys(elements).forEach((key) => {
             if (key === id) {
+                elements[key].setAttribute('data-link-choice', 'active');
                 elements[key].classList.add('romper-control-selected');
                 elements[key].classList.remove('romper-control-unselected');
                 elements[key].classList.remove('default');
             } else {
+                elements[key].setAttribute('data-link-choice', 'inactive');
                 elements[key].classList.add('romper-control-unselected');
                 elements[key].classList.remove('romper-control-selected');
                 elements[key].classList.remove('default');
@@ -557,10 +559,6 @@ class Player extends EventEmitter {
         this._icon = createOverlay('icon', this._logUserInteraction);
         mediaTransportRight.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
-
-        // this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
-        // this._overlays.appendChild(this._linkChoice.overlay);
-
 
         // no need for toggle button
         this._countdownContainer = document.createElement('div');
@@ -1457,8 +1455,11 @@ class Player extends EventEmitter {
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
             linkChoiceControl.setAttribute('aria-label', label);
 
+            linkChoiceControl.setAttribute('data-link-choice', 'inactive');
+
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
+                
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
             };
@@ -1556,8 +1557,9 @@ class Player extends EventEmitter {
         });
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getActiveChoiceIcon(): ?HTMLDivElement {
-        return this._linkChoice.getActive();
+        return document.querySelectorAll('[data-link-choice="active"]')[0];
     }
 
     // start animation to reflect choice remaining
