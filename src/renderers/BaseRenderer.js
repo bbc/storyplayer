@@ -1432,7 +1432,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // //////////// end of variables panel choice behaviour
-
     _clearBehaviourElements() {
         this._behaviourElements.forEach((be) => {
             try {

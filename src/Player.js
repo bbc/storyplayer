@@ -13,6 +13,7 @@ import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils';
+import { REASONER_EVENTS } from './Events';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -797,13 +798,13 @@ class Player extends EventEmitter {
         cancelButton.addEventListener('touchend', cancelButtonHandler);
 
         const resumeExperienceButtonHandler = () => {
+            this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
             this._enableUserInteraction();
-
         };
 
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
@@ -1061,6 +1062,8 @@ class Player extends EventEmitter {
     }
 
     _startButtonHandler() {
+        alert('_startButtonHandler');
+        this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
         this._enableUserInteraction();
         this._narrativeElementTransport.classList.remove('romper-inactive');
