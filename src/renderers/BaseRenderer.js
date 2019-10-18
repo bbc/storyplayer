@@ -135,7 +135,7 @@ export default class BaseRenderer extends EventEmitter {
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
-        this._timeUpdateHandler = this._timeUpdateHandler.bind(this)
+        this._runDuringBehaviourEventHandler = this._runDuringBehaviourEventHandler.bind(this)
 
 
         this._behaviourRendererMap = {
@@ -212,17 +212,15 @@ export default class BaseRenderer extends EventEmitter {
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
-            .then(() => {
-                if(this._representation.behaviours && this._representation.behaviours.during) {
-                    this._playoutEngine.on(this._rendererId, 'timeupdate', this._timeUpdateHandler);
-                }
-            });
+            .then(() => this._runDuringBehaviours());
     }
 
     end() {
+        this._behaviours = {};
+        this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._timeUpdateHandler);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._runDuringBehaviourEventHandler);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -524,52 +522,64 @@ export default class BaseRenderer extends EventEmitter {
         return this._behaviours[behaviour.behaviour.id] !== undefined;
     }
 
-    _timeUpdateHandler() {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+    _runDuringBehaviours() {
         // run during behaviours
-        if(currentTime) {
-            console.log('currentTime', currentTime)
-            if(this._representation.behaviours && this._representation.behaviours.during) {
-                const duringBehaviours = this._representation.behaviours.during;
-    
-                duringBehaviours.forEach((behaviour) => {
-                    // we have run the behaviour and need to clean up
-                    this._runDuringBehaviour(currentTime, behaviour);
-                });
+        if (this._representation.behaviours && this._representation.behaviours.during) {
+            const duringBehaviours = this._representation.behaviours.during;
+            duringBehaviours.forEach((behaviour) => {
+                // we have run the behaviour and need to clean up
+                if(behaviour.start_time === 0) {
+                    this._runSingleDuringBehaviour(behaviour);
+                } else {
+                    this._playoutEngine.on(this._rendererId, 'timeupdate', this._runDuringBehaviourEventHandler(behaviour));
+                }
+                
+            });
+        }
+
+    }
+
+    _runDuringBehaviourEventHandler(behaviour: Object) {
+        console.log('run during event handler', behaviour)
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (currentTime) {
+            if (this._hasRunBehaviour(behaviour)) {
+                if (!this._cleaning && this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
+                    this._cleanupSingleDuringBehaviour(behaviour);
+                }
+            }
+            // we haven't run the behaviour
+            if (!this._hasRunBehaviour(behaviour)) {
+                if (this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
+                    // run behaviour
+                    this._runSingleDuringBehaviour(behaviour);
+                }
             }
         }
     }
 
-    _runDuringBehaviour(currentTime: number, behaviour: Object) {
-        if(this._hasRunBehaviour(behaviour)) {
-            if(this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
-                console.log('remove behaviour',currentTime, behaviour);
-                this._removeFromRunBehaviours(behaviour);
-                const behaviourElement = document.getElementById(behaviour.behaviour.id);
-                if(behaviourElement && behaviourElement.parentNode) {
-                    behaviourElement.parentNode.removeChild(behaviourElement);
-                }
-            }
+    _cleanupSingleDuringBehaviour(behaviour: Object) {
+        this._cleaning = true;
+        const behaviourElement = document.getElementById(behaviour.behaviour.id);
+        if (behaviourElement && behaviourElement.parentNode) {
+            behaviourElement.parentNode.removeChild(behaviourElement);
         }
-        // we haven't run the behaviour
-        if(!this._hasRunBehaviour(behaviour)) {
-            if(this._shouldRunBehaviour(currentTime, behaviour.start_time)) {
-                // run behaviour
-                const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
+        this.cleaning = false;
+    }
 
-                if(behaviourRunner) {
-                    behaviourRunner(behaviour.behaviour, () =>
-                        logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-                    // if we have choices, hide the controls before they appear
-                    if (this._willHideControls(behaviour.behaviour)) {
-                        this._hideControls(behaviour.start_time);
-                    }
-                    this._addToRunBehaviours(behaviour);
-                } else {
-                    logger.warn(`${this.constructor.name} does not support ` +
-                `${behaviour.behaviour.type} - ignoring`)
-                }
+    _runSingleDuringBehaviour(behaviour: Object) {
+        const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
+        if (behaviourRunner) {
+            behaviourRunner(behaviour.behaviour, () =>
+                logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+            // if we have choices, hide the controls before they appear
+            if (this._willHideControls(behaviour.behaviour)) {
+                this._hideControls(behaviour.start_time);
             }
+            this._addToRunBehaviours(behaviour);
+        } else {
+            logger.warn(`${this.constructor.name} does not support ` +
+                `${behaviour.behaviour.type} - ignoring`)
         }
     }
 
