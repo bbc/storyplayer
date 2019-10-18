@@ -213,7 +213,9 @@ export default class BaseRenderer extends EventEmitter {
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
             .then(() => {
-                this._playoutEngine.on(this._rendererId, 'timeupdate', this._timeUpdateHandler);
+                if(this._representation.behaviours && this._representation.behaviours.during) {
+                    this._playoutEngine.on(this._rendererId, 'timeupdate', this._timeUpdateHandler);
+                }
             });
     }
 
@@ -339,6 +341,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        console.trace('renderer, complete');
         this._hasEnded = true;
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
@@ -467,11 +470,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     resetDuringBehaviours() {
-        console.log(this._behaviours);
-        Object.keys(this._behaviours).forEach(behaviour => {
-            const behaviour = behaviours[behaviour]
-            // if behaviour has a property that is duration of infinity do not remove it;
-        });
         this._behaviours = {};
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
@@ -519,7 +517,7 @@ export default class BaseRenderer extends EventEmitter {
             return(startTime > 0 && currentTime >= startTime + duration);
         }
         console.log('starttime', startTime, 'currentTime', currentTime);
-        return (startTime > 0 && currentTime <= startTime);
+        return (startTime > 0 && currentTime < startTime);
     }
 
     _hasRunBehaviour(behaviour: Object) {
@@ -530,6 +528,7 @@ export default class BaseRenderer extends EventEmitter {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         // run during behaviours
         if(currentTime) {
+            console.log('currentTime', currentTime)
             if(this._representation.behaviours && this._representation.behaviours.during) {
                 const duringBehaviours = this._representation.behaviours.during;
     
@@ -544,6 +543,8 @@ export default class BaseRenderer extends EventEmitter {
     _runDuringBehaviour(currentTime: number, behaviour: Object) {
         if(this._hasRunBehaviour(behaviour)) {
             if(this._shouldCleanupBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
+                console.log('remove behaviour',currentTime, behaviour);
+                this._removeFromRunBehaviours(behaviour);
                 const behaviourElement = document.getElementById(behaviour.behaviour.id);
                 if(behaviourElement && behaviourElement.parentNode) {
                     behaviourElement.parentNode.removeChild(behaviourElement);
