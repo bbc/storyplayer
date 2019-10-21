@@ -139,7 +139,9 @@ export default class BaseRenderer extends EventEmitter {
         this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
-
+        this._removeDisableControlEventListeners = this._removeDisableControlEventListeners.bind(this);
+        this._showPlayPauseControls = this._showPlayPauseControls.bind(this);
+ 
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -228,6 +230,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._removeDisableControlEventListeners();
     }
 
     hasEnded(): boolean {
@@ -543,7 +546,59 @@ export default class BaseRenderer extends EventEmitter {
             duringBehaviours.forEach((behaviour) => {
                 // check each behaviour;
                 this._runDuringBehaviourEventHandler(behaviour);
+                if(behaviour.behaviour.disable_controls) {
+                    this._playoutEngine.on(this._rendererId, 'pause', () => {
+                        this._showPlayPauseControls(behaviour)
+                    });
+                    this._playoutEngine.on(this._rendererId, 'play', () => {
+                        this._hidePlayPauseControls(behaviour)
+                    });
+                }
             });
+        }
+    }
+
+    _removeDisableControlEventListeners() {
+        if (this._representation.behaviours && this._representation.behaviours.during) {
+            const duringBehaviours = this._representation.behaviours.during;
+            duringBehaviours.forEach((behaviour) => {
+                // check each behaviour;
+                if(behaviour.behaviour.disable_controls) {
+                    this._playoutEngine.off(this._rendererId, 'pause', () => {
+                        this._showPlayPauseControls(behaviour)
+                    });
+                    this._playoutEngine.off(this._rendererId, 'play', () => {
+                        this._hidePlayPauseControls(behaviour)
+                    });
+                }
+            });
+        }
+    }
+
+
+    _showPlayPauseControls(behaviour: Object) {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (this._isInBehaviourDuration(currentTime, behaviour.start_time, behaviour.duration)) {
+            const nonEssential = document.querySelectorAll('[data-required-controls="false"');
+            nonEssential.forEach(control => {
+                // eslint-disable-next-line no-param-reassign
+                control.style.display = 'none';
+            });
+            this._player._activateRomperButtons(null, true);
+        }
+    }
+
+    _hidePlayPauseControls(behaviour: Object) {
+        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (this._isInBehaviourDuration(currentTime, behaviour.start_time, behaviour.duration)) {
+            this._player._hideRomperButtons();
+            setTimeout(() => {
+                const nonEssential = document.querySelectorAll('[data-required-controls="false"');
+                nonEssential.forEach(control => {
+                    // eslint-disable-next-line no-param-reassign
+                    control.style.display = 'block';
+                })
+            }, 1000);
         }
     }
 
@@ -683,7 +738,7 @@ export default class BaseRenderer extends EventEmitter {
     _getLinkChoiceBehaviours(behaviour: Object): Object {
         // set default behaviours if not specified in data model
         let countdown = false;
-        const disableControls = true; // always disable controls
+        let disableControls = true;
         let iconOverlayClass = null;
         let forceChoice = false;
         let oneShot = false;
@@ -700,16 +755,13 @@ export default class BaseRenderer extends EventEmitter {
         if (behaviour.hasOwnProperty('show_if_one_choice')) {
             showIfOneLink = behaviour.show_if_one_choice;
         }
-
         // do we show countdown?
         if (behaviour.hasOwnProperty('show_time_remaining')) {
             countdown = behaviour.show_time_remaining;
         }
         // do we disable controls while choosing
         if (behaviour.hasOwnProperty('disable_controls')) {
-            if (!behaviour.disable_controls) {
-                logger.warn('StoryPlayer ignoring data model: controls disabled during choices');
-            }
+            disableControls = behaviour.disable_controls;
         }
         // do we apply any special css classes to the overlay
         if (behaviour.hasOwnProperty('overlay_class')) {
@@ -943,6 +995,7 @@ export default class BaseRenderer extends EventEmitter {
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
                 this._player.enableControls();
+                this._player.showSeekButtons();
             }
         } else {
             // or follow link now
@@ -1589,6 +1642,7 @@ export default class BaseRenderer extends EventEmitter {
 
 
     seekEventHandler(inTime: number) {
+        console.trace('SEEKING');
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if(this.checkIsLooping()) {
             if (currentTime !== undefined && currentTime <= 0.002) {
