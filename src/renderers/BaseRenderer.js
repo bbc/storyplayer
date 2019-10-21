@@ -138,6 +138,7 @@ export default class BaseRenderer extends EventEmitter {
         this._runDuringBehaviourEventHandler = this._runDuringBehaviourEventHandler.bind(this);
         this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
+        this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
 
 
         this._behaviourRendererMap = {
@@ -215,7 +216,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
-            .then(() => this._runDuringBehaviours());
+            .then(() => this._playoutEngine.on(this._rendererId, 'timeupdate', this._runDuringBehaviours));
     }
 
     end() {
@@ -223,7 +224,7 @@ export default class BaseRenderer extends EventEmitter {
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._runDuringBehaviourEventHandler);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._runDuringBehaviours);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -540,12 +541,8 @@ export default class BaseRenderer extends EventEmitter {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             const duringBehaviours = this._representation.behaviours.during;
             duringBehaviours.forEach((behaviour) => {
-                // we have run the behaviour and need to clean up
-                if(behaviour.start_time === 0) {
-                    this._runSingleDuringBehaviour(behaviour);
-                } else {
-                    this._playoutEngine.on(this._rendererId, 'timeupdate', () => {this._runDuringBehaviourEventHandler(behaviour)});
-                }
+                // check each behaviour;
+                this._runDuringBehaviourEventHandler(behaviour);
             });
         }
     }
