@@ -59,7 +59,6 @@ export default class TimeManager extends EventEmitter {
     }
 
     setTime(newTime: number) {
-        console.log('ANDY setting timer', this._timeElapsed, newTime);
         this._timeElapsed = newTime;
     }
 
