@@ -483,9 +483,7 @@ export default class BaseRenderer extends EventEmitter {
     _willHideControls(behaviour: Object) {
         return behaviour.type ===
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
-            &&
-            behaviour.hasOwnProperty('disable_controls') &&
-            behaviour.disable_controls
+            && behaviour.disable_controls && behaviour.show_if_one_choice;
     }
 
     _hideControls(startTime: number) {
@@ -546,7 +544,7 @@ export default class BaseRenderer extends EventEmitter {
             duringBehaviours.forEach((behaviour) => {
                 // check each behaviour;
                 this._runDuringBehaviourEventHandler(behaviour);
-                if(behaviour.behaviour.disable_controls) {
+                if(this._willHideControls(behaviour.behaviour)) {
                     this._playoutEngine.on(this._rendererId, 'pause', () => {
                         this._showPlayPauseControls(behaviour)
                     });
@@ -563,7 +561,7 @@ export default class BaseRenderer extends EventEmitter {
             const duringBehaviours = this._representation.behaviours.during;
             duringBehaviours.forEach((behaviour) => {
                 // check each behaviour;
-                if(behaviour.behaviour.disable_controls) {
+                if(this._willHideControls(behaviour.behaviour)) {
                     this._playoutEngine.off(this._rendererId, 'pause', () => {
                         this._showPlayPauseControls(behaviour)
                     });
@@ -634,6 +632,7 @@ export default class BaseRenderer extends EventEmitter {
             behaviourRunner(behaviour.behaviour, () =>
                 logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
             // if we have choices, hide the controls before they appear
+            // but only if we disable the controls and we have one link
             if (this._willHideControls(behaviour.behaviour)) {
                 this._hideControls(behaviour.start_time);
             }
