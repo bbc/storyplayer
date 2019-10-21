@@ -299,7 +299,9 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekBack() {
+        console.trace()
         const { timeBased, currentTime } = this.getCurrentTime();
+        console.log('currentTime', currentTime);
         if (timeBased) {
             let targetTime = currentTime - SEEK_TIME;
             if (targetTime < 0) {
@@ -1641,7 +1643,6 @@ export default class BaseRenderer extends EventEmitter {
 
 
     seekEventHandler(inTime: number) {
-        console.trace('SEEKING');
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if(this.checkIsLooping()) {
             if (currentTime !== undefined && currentTime <= 0.002) {
