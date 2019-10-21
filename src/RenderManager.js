@@ -212,9 +212,6 @@ export default class RenderManager extends EventEmitter {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             this._player.playoutEngine.pause();
             this._player.playoutEngine.pauseBackgrounds();
-            if (this._currentRenderer instanceof ImageRenderer) {
-                this._currentRenderer.pause();
-            }
         } else {
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
@@ -229,10 +226,10 @@ export default class RenderManager extends EventEmitter {
                 // restart countdown
                 this._player.startChoiceCountdown(this._currentRenderer);
             }
-            if (this._currentRenderer instanceof ImageRenderer) {
-                this._currentRenderer.play();
-            }
         }
+        // pause the timer for the current representation
+        if (this._currentRenderer) this._currentRenderer._togglePause();
+        
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,

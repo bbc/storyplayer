@@ -17,6 +17,7 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
+import TimeManager from '../TimeManager';
 
 const SEEK_TIME = 10;
 
@@ -55,6 +56,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _seekBack: Function;
 
+    _togglePause: Function;
+
     _behaviourElements: Array<HTMLElement>;
 
     _target: HTMLDivElement;
@@ -77,8 +80,6 @@ export default class BaseRenderer extends EventEmitter {
 
     inVariablePanel: boolean;
 
-    _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
-
     _linkFadeTimeout: TimeoutID;
 
     seekEventHandler: Function;
@@ -86,6 +87,8 @@ export default class BaseRenderer extends EventEmitter {
     checkIsLooping: Function;
 
     _loopCounter: number;
+
+    _timer: TimeManager;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -124,6 +127,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
+        this._togglePause = this._togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
@@ -146,7 +150,7 @@ export default class BaseRenderer extends EventEmitter {
 
         this._behaviourElements = [];
 
-        this._timeEventListeners = {};
+        this._timer = new TimeManager();
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -175,6 +179,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
         if(checkAddDetailsOverride()) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
@@ -198,6 +203,7 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
+        this._timer.start();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
@@ -207,9 +213,12 @@ export default class BaseRenderer extends EventEmitter {
     end() {
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
+        this._timer.clear();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
+
         this._loopCounter = 0;
     }
 
@@ -266,16 +275,33 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        logger.warn('getting time data from on BaseRenderer');
+        let  { duration } = this._representation;
+        let timeBased = false;
+        if (duration === undefined) {
+            duration = Infinity;
+        } else {
+            timeBased = true;
+        }
+        logger.warn('getting time data from BaseRenderer');
         const timeObject = {
-            timeBased: false,
-            currentTime: 0,
+            timeBased,
+            currentTime: this._timer.getTime(),
+            duration,
         };
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        logger.warn(`ignoring setting time on BaseRenderer ${time}`);
+        logger.warn(`setting time on BaseRenderer ${time}`);
+        this._timer.setTime(time);
+    }
+
+    _togglePause() {
+        if (this._playoutEngine.isPlaying()) {
+            this._timer.resume();
+        } else {
+            this._timer.pause();
+        }
     }
 
     _seekBack() {
@@ -327,6 +353,7 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         this._hasEnded = true;
+        this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
             this._player.enterCompleteBehavourPhase();
@@ -1468,24 +1495,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timeEventListeners[listenerId] = callback;
-        this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
-            const currentTime = this._playoutEngine.getCurrentTime(this._rendererId)
-            if (currentTime) {
-                if (time > 0 && currentTime >= time) {
-                    if (listenerId in this._timeEventListeners) {
-                        delete this._timeEventListeners[listenerId];
-                        callback();
-                    }
-                }
-            }
-        });
+        this._timer.addTimeEventListener(listenerId, time, callback);
     }
 
     deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timeEventListeners) {
-            delete this._timeEventListeners[listenerId];
-        }
+        this._timer.deleteTimeEventListener(listenerId);
     }
 
     seekEventHandler(inTime: number) {
