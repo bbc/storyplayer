@@ -7,8 +7,6 @@ const TIMER_INTERVAL = 100;
 
 export default class TimeManager extends EventEmitter {
 
-    _duration: number;
-
     _timedEvents: { [key: string]: Object };
 
     _timeElapsed: number;
@@ -23,9 +21,8 @@ export default class TimeManager extends EventEmitter {
         this._paused = false;
     }
 
-    start(duration: number = Infinity) {
+    start() {
         this.clear();
-        this._duration = duration;
         
         this._timer = setInterval(() => {
             if (!this._paused) {
@@ -60,7 +57,6 @@ export default class TimeManager extends EventEmitter {
             clearInterval(this._timer);
         }
 
-        this._duration = Infinity;
         this._timeElapsed = 0;
         this._timedEvents = {};
         this._paused = false;
