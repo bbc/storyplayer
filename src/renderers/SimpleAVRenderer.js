@@ -106,9 +106,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (!this.checkIsLooping()) {
-            // if looping use timer, else use video time to allow for buffering delays
+            // if not looping use video time to allow for buffering delays
             currentTime = playheadTime - this._inTime;
+            // and sync timer
+            this._timer.setTime(currentTime);
         } else if (this._outTime > 0 && videoElement) {
+            // if looping, use timer
             // if looping with in/out points, need to manually re-initiate loop
             if (playheadTime >= this._outTime) {
                 videoElement.currentTime = this._inTime;

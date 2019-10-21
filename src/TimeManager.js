@@ -48,10 +48,6 @@ export default class TimeManager extends EventEmitter {
         this._paused = false;
     }
 
-    setPause(paused: boolean) {
-        this._paused = paused;
-    }
-
     clear() {
         if (this._timer) { 
             clearInterval(this._timer);
@@ -63,6 +59,7 @@ export default class TimeManager extends EventEmitter {
     }
 
     setTime(newTime: number) {
+        console.log('ANDY setting timer', this._timeElapsed, newTime);
         this._timeElapsed = newTime;
     }
 

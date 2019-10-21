@@ -228,8 +228,8 @@ export default class RenderManager extends EventEmitter {
             }
         }
         // pause the timer for the current representation
-        if (this._currentRenderer) this._currentRenderer._togglePause();
-        
+        if (this._currentRenderer) this._currentRenderer.togglePause();
+
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,

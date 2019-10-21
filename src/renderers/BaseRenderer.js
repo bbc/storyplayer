@@ -56,7 +56,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _seekBack: Function;
 
-    _togglePause: Function;
+    togglePause: Function;
 
     _behaviourElements: Array<HTMLElement>;
 
@@ -127,7 +127,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
-        this._togglePause = this._togglePause.bind(this);
+        this.togglePause = this.togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
@@ -179,7 +179,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this.togglePause);
         if(checkAddDetailsOverride()) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
@@ -217,7 +217,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
+        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this.togglePause);
 
         this._loopCounter = 0;
     }
@@ -296,7 +296,7 @@ export default class BaseRenderer extends EventEmitter {
         this._timer.setTime(time);
     }
 
-    _togglePause() {
+    togglePause() {
         if (this._playoutEngine.isPlaying()) {
             this._timer.resume();
         } else {
