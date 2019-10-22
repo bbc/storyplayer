@@ -17,8 +17,17 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
+import TimeManager from '../TimeManager';
 
 const SEEK_TIME = 10;
+
+const getEndTime = (behaviour: Object) => {
+    if(behaviour.duration !== undefined) {
+        const endTime = behaviour.start_time + behaviour.duration;
+        return endTime;
+    }
+    return undefined;
+}
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
@@ -55,6 +64,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _seekBack: Function;
 
+    _togglePause: Function;
+
     _behaviourElements: Array<HTMLElement>;
 
     _target: HTMLDivElement;
@@ -77,8 +88,6 @@ export default class BaseRenderer extends EventEmitter {
 
     inVariablePanel: boolean;
 
-    _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
-
     _linkFadeTimeout: TimeoutID;
 
     seekEventHandler: Function;
@@ -92,6 +101,20 @@ export default class BaseRenderer extends EventEmitter {
     _hideControls: Function;
 
     _behaviours: Object;
+    
+    _timer: TimeManager;
+
+    isSrcIosPlayoutEngine: Function;
+
+    // _singleBehaviourCallback: Function;
+
+    // _cleanupSingleDuringBehaviour: Function;
+
+    _runSingleDuringBehaviour: Function;
+
+    _runDuringBehaviours: Function;
+
+    addTimeEventListener: Function;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -130,17 +153,19 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
+        this._togglePause = this._togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+
+
+        // this._singleBehaviourCallback = this._singleBehaviourCallback.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
-        this._runDuringBehaviourEventHandler = this._runDuringBehaviourEventHandler.bind(this);
-        this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
-        this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
+        // this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
-        this._removeDisableControlEventListeners = this._removeDisableControlEventListeners.bind(this);
-        this._showPlayPauseControls = this._showPlayPauseControls.bind(this);
+        this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
+        this.addTimeEventListener = this.addTimeEventListener.bind(this);
  
 
         this._behaviourRendererMap = {
@@ -164,6 +189,7 @@ export default class BaseRenderer extends EventEmitter {
         this._cleaning = false;
 
         this._timeEventListeners = {};
+        this._timer = new TimeManager();
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -192,6 +218,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
         if(checkAddDetailsOverride()) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
@@ -215,10 +242,11 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
+        this._timer.start();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
-            .then(() => this._playoutEngine.on(this._rendererId, 'timeupdate', this._runDuringBehaviours));
+            .then(() => this._runDuringBehaviours());
     }
 
     end() {
@@ -226,11 +254,16 @@ export default class BaseRenderer extends EventEmitter {
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._runDuringBehaviours);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._removeDisableControlEventListeners();
+        this._timer.clear();
+        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
+
+        this._loopCounter = 0;
     }
 
     hasEnded(): boolean {
@@ -286,16 +319,41 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        logger.warn('getting time data from on BaseRenderer');
+        let  { duration } = this._representation;
+        let timeBased = false;
+        if (duration === undefined) {
+            duration = Infinity;
+        } else {
+            timeBased = true;
+        }
+        logger.warn('getting time data from BaseRenderer');
         const timeObject = {
-            timeBased: false,
-            currentTime: 0,
+            timeBased,
+            currentTime: this._timer.getTime(),
+            duration,
         };
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        logger.warn(`ignoring setting time on BaseRenderer ${time}`);
+        logger.warn(`setting time on BaseRenderer ${time}`);
+        this._timer.setTime(time);
+    }
+
+    _togglePause() {
+        if (this._playoutEngine.isPlaying()) {
+            this._timer.resume();
+        } else {
+            this._timer.pause();
+        }
+    }
+
+    pause() {
+        this._timer.pause();
+    }
+
+    play() {
+        this._timer.resume();
     }
 
     _seekBack() {
@@ -350,6 +408,7 @@ export default class BaseRenderer extends EventEmitter {
     complete() {
         console.trace('renderer, complete');
         this._hasEnded = true;
+        this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
             this._player.enterCompleteBehavourPhase();
@@ -504,146 +563,70 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
-    _addToRunBehaviours(behaviour: Object) {
-        this._behaviours[behaviour.behaviour.id] = behaviour;
-    }
-
-    _removeFromRunBehaviours(behaviour: Object) {
-        delete this._behaviours[behaviour.behaviour.id];
-    }
-
-    _shouldRunBehaviour(currentTime: number, startTime: number, duration: ?number) {
-        if(duration) {
-            return this._isInBehaviourDuration(currentTime, startTime, duration);
-        }
-        return (startTime > 0 && currentTime >= startTime);
-    }
-
-    _shouldRemoveBehaviour(currentTime: number, startTime: number, duration: ?number) {
-        return (!this._cleaning && !this._shouldRunBehaviour(currentTime, startTime, duration));
-    }
-
-    _isInBehaviourDuration(currentTime: number, startTime: number, duration: number) {
-        let inBehaviour = false;
-        const endTime = startTime + duration;
-        if(currentTime >= startTime) {
-            inBehaviour = true;
-        }
-        if(currentTime >= endTime) {
-            inBehaviour = false;
-        }
-        return inBehaviour;
-    }
-
-    _hasRunBehaviour(behaviour: Object) {
-        return this._behaviours[behaviour.behaviour.id] !== undefined;
-    }
-
     _runDuringBehaviours() {
         // run during behaviours
         if (this._representation.behaviours && this._representation.behaviours.during) {
             const duringBehaviours = this._representation.behaviours.during;
             duringBehaviours.forEach((behaviour) => {
                 // check each behaviour;
-                this._runDuringBehaviourEventHandler(behaviour);
-                if(this._willHideControls(behaviour.behaviour)) {
-                    this._playoutEngine.on(this._rendererId, 'pause', () => {
-                        this._showPlayPauseControls(behaviour)
-                    });
-                    this._playoutEngine.on(this._rendererId, 'play', () => {
-                        this._hidePlayPauseControls(behaviour)
-                    });
-                }
+                this._runSingleDuringBehaviour(behaviour);
+
+                // if(this._willHideControls(behaviour.behaviour)) {
+                //     this._playoutEngine.on(this._rendererId, 'pause', () => {
+                //         this._showPlayPauseControls(behaviour)
+                //     });
+                //     this._playoutEngine.on(this._rendererId, 'play', () => {
+                //         this._hidePlayPauseControls(behaviour)
+                //     });
+                // }
             });
         }
     }
 
-    _removeDisableControlEventListeners() {
-        if (this._representation.behaviours && this._representation.behaviours.during) {
-            const duringBehaviours = this._representation.behaviours.during;
-            duringBehaviours.forEach((behaviour) => {
-                // check each behaviour;
-                if(this._willHideControls(behaviour.behaviour)) {
-                    this._playoutEngine.off(this._rendererId, 'pause', () => {
-                        this._showPlayPauseControls(behaviour)
-                    });
-                    this._playoutEngine.off(this._rendererId, 'play', () => {
-                        this._hidePlayPauseControls(behaviour)
-                    });
-                }
-            });
-        }
-    }
-
-
-    _showPlayPauseControls(behaviour: Object) {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (this._isInBehaviourDuration(currentTime, behaviour.start_time, behaviour.duration)) {
-            const nonEssential = document.querySelectorAll('[data-required-controls="false"');
-            nonEssential.forEach(control => {
-                // eslint-disable-next-line no-param-reassign
-                control.style.display = 'none';
-            });
-            this._player._activateRomperButtons(null, true);
-        }
-    }
-
-    _hidePlayPauseControls(behaviour: Object) {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (this._isInBehaviourDuration(currentTime, behaviour.start_time, behaviour.duration)) {
-            this._player._hideRomperButtons();
-            setTimeout(() => {
-                const nonEssential = document.querySelectorAll('[data-required-controls="false"');
-                nonEssential.forEach(control => {
-                    // eslint-disable-next-line no-param-reassign
-                    control.style.display = 'block';
-                })
-            }, 1000);
-        }
-    }
-
-    _runDuringBehaviourEventHandler(behaviour: Object) {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (currentTime) {
-            if (this._hasRunBehaviour(behaviour)) {
-                if (this._shouldRemoveBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
-                    this._cleanupSingleDuringBehaviour(behaviour);
-                }
-            } else if (!this._hasRunBehaviour(behaviour)) {
-                if (this._shouldRunBehaviour(currentTime, behaviour.start_time, behaviour.duration)) {
-                    // run behaviour
-                    this._runSingleDuringBehaviour(behaviour);
-                }
-            }
-        }
-    }
-
-    _cleanupSingleDuringBehaviour(behaviour: Object) {
-        this._cleaning = true;
-        const behaviourElement = document.getElementById(behaviour.behaviour.id);
-        if (behaviourElement && behaviourElement.parentNode) {
-            behaviourElement.parentNode.removeChild(behaviourElement);
-        }
-        this._removeFromRunBehaviours(behaviour);
-        this._cleaning = false;
-    }
+    // _cleanupSingleDuringBehaviour(behaviour: Object) {
+    //     const behaviourElement = document.getElementById(behaviour.behaviour.id);
+    //     if (behaviourElement && behaviourElement.parentNode) {
+    //         behaviourElement.parentNode.removeChild(behaviourElement);
+    //     }
+    // }
 
     _runSingleDuringBehaviour(behaviour: Object) {
         const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
         if (behaviourRunner) {
-            behaviourRunner(behaviour.behaviour, () =>
-                logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-            // if we have choices, hide the controls before they appear
-            // but only if we disable the controls and we have one link
-            if (this._willHideControls(behaviour.behaviour)) {
-                this._hideControls(behaviour.start_time);
+            const startCallback = () => {
+                logger.info(`started during behaviour ${behaviour.behaviour.type}`);
+                behaviourRunner(behaviour.behaviour, () =>
+                    logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+                if (this._willHideControls(behaviour.behaviour)) {
+                    this._hideControls(behaviour.start_time);
+                }
             }
-            this._addToRunBehaviours(behaviour);
+            const startTime = behaviour.start_time;
+            const endTime = getEndTime(behaviour);
+            const clearFunction = () => {
+                const behaviourElement = document.getElementById(behaviour.behaviour.id);
+                if (behaviourElement && behaviourElement.parentNode) {
+                    behaviourElement.parentNode.removeChild(behaviourElement);
+                }
+            };
+            console.log('why do i have an end tiume here', endTime);
+            console.log('callback?', clearFunction);
+            const listenerId = behaviour.behaviour.id;
+            this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
         } else {
             logger.warn(`${this.constructor.name} does not support ` +
                 `${behaviour.behaviour.type} - ignoring`)
         }
     }
+
+    // _singleBehaviourCallback(behaviourRunner: Function, behaviour: Object) {
+    //     logger.info(`started during behaviour ${behaviour.behaviour.type}`);
+    //     behaviourRunner(behaviour.behaviour, () =>
+    //         logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+    //     if (this._willHideControls(behaviour.behaviour)) {
+    //         this._hideControls(behaviour.start_time);
+    //     }    
+    // }
 
     // //////////// show link choice behaviour
     // this needs to be put in a div with an id if the behaviour id
@@ -1619,25 +1602,17 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timeEventListeners[listenerId] = callback;
-        this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
-            const currentTime = this._playoutEngine.getCurrentTime(this._rendererId)
-            if (currentTime) {
-                if (time > 0 && currentTime >= time) {
-                    if (listenerId in this._timeEventListeners) {
-                        delete this._timeEventListeners[listenerId];
-                        callback();
-                    }
-                }
-            }
-        });
+    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime, clearCallback) {
+        console.log('id', listenerId)
+        console.log('startTime', startTime)
+        console.log('startCallback', startCallback !== undefined);
+        console.log('endTime', endTime)
+        console.log('clear callback', clearCallback !== undefined);
+        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback);
     }
 
     deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timeEventListeners) {
-            delete this._timeEventListeners[listenerId];
-        }
+        this._timer.deleteTimeEventListener(listenerId);
     }
 
 
@@ -1649,7 +1624,7 @@ export default class BaseRenderer extends EventEmitter {
                 if(inTime !== 0) {
                     this.setCurrentTime(inTime);
                 } 
-                this.resetPlayer();
+                // this.resetPlayer();
                 if(this.isSrcIosPlayoutEngine()) {
                     if(this._playoutEngine._playing && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
