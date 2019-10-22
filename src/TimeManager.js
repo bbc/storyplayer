@@ -28,11 +28,25 @@ export default class TimeManager extends EventEmitter {
             if (!this._paused) {
                 this._timeElapsed += TIMER_INTERVAL/1000;
                 Object.keys(this._timedEvents).forEach((timeEventId) => {
-                    const { time, callback } = this._timedEvents[timeEventId];
-                    if (this._timeElapsed >= time){
-                        delete this._timedEvents[timeEventId];
+                    const { 
+                        startTime,
+                        startCallback,
+                        isRunning,
+                        endTime,
+                        clearCallback,
+                    } = this._timedEvents[timeEventId];
+                    // handle starting event
+                    if (this._timeElapsed >= startTime && this._timeElapsed < endTime
+                        && !isRunning){
                         logger.info(`timer running timed event ${timeEventId}`);
-                        callback();
+                        startCallback();
+                        this._timedEvents[timeEventId].isRunning = true;
+                    }
+                    // handle clearing event
+                    if ((this._timeElapsed <= startTime || this._timeElapsed > endTime)
+                        && isRunning) {
+                        if (clearCallback !== null) clearCallback();
+                        this._timedEvents[timeEventId].isRunning = false;
                     }
                 });
             }
@@ -66,8 +80,20 @@ export default class TimeManager extends EventEmitter {
         return this._timeElapsed;
     }
 
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timedEvents[listenerId] = { time, callback };
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number = Infinity,
+        clearCallback: ?Function,
+    ) {
+        this._timedEvents[listenerId] = { 
+            startTime,
+            endTime,
+            startCallback,
+            isRunning: false,
+            clearCallback,
+        };
     }
 
     deleteTimeEventListener(listenerId: string) {
