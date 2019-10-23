@@ -98,8 +98,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     if(mediaObj.url) {
                         mediaElement.src = mediaObj.url;
                     }
-                    this._player.disconnectScrubBar();
-                    this.connectScrubBar(rendererId, this._foregroundMediaElement);
                     this._player.addVolumeControl(rendererId, 'Foreground');
                 } else {
                     mediaElement = this._backgroundMediaElement

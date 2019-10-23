@@ -144,15 +144,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         }
         if (rendererPlayoutObj.active && this._playing) {
             this.play();
-            if (
-                rendererPlayoutObj.media && rendererPlayoutObj.media.type &&
-                rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV &&
-                rendererPlayoutObj.mediaInstance
-            ) {
-                const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-                this._player.disconnectScrubBar();
-                this.connectScrubBar(rendererId, videoElement);
-            }
         }
     }
 
@@ -184,11 +175,6 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             if (rendererPlayoutObj.media && rendererPlayoutObj.media.type) {
                 if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                     this._player.addVolumeControl(rendererId, 'Foreground');
-                    if (rendererPlayoutObj.mediaInstance) {
-                        const videoElement = rendererPlayoutObj.mediaInstance.getMediaElement();
-                        this._player.disconnectScrubBar();
-                        this.connectScrubBar(rendererId, videoElement);
-                    }
                 } else {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }

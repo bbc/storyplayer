@@ -28,8 +28,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour: Function;
 
-    _handlePlayPauseButtonClicked: Function;
-
     _lastSetTime: number;
 
     _inTime: number;
@@ -64,7 +62,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
@@ -85,7 +82,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
-            playPauseHandler: this._handlePlayPauseButtonClicked,
+            // playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
@@ -164,6 +161,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // set time to last set time (relative to click start)
         this.setCurrentTime(this._lastSetTime);
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     end() {
@@ -184,9 +183,27 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    pause() {
+        super.pause();
+        this._playoutEngine.pause();
+    }
+
+    play() {
+        super.play();
+        this._playoutEngine.play();
+    }
+
     // allow for clip trimming
-    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
-        super.addTimeEventListener(listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback);
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number,
+        clearCallback: ?Function,
+    ) {
+        super.addTimeEventListener(
+            listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback,
+        );
     }
 
     renderVideoElement() {
@@ -212,11 +229,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl, fg.loop, fg.id);
-
-                                this._playoutEngine.setTimings(this._rendererId, {
-                                    inTime: this._inTime,
-                                    outTime: this._outTime,
-                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -264,16 +276,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             videoElement.style.filter = `blur(${blur}px)`;
         }
         callback();
-    }
-
-    _handlePlayPauseButtonClicked(): void {
-        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            if (this._playoutEngine.isPlaying()) {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            } else {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            }
-        }
     }
 
     getCurrentTime(): Object {

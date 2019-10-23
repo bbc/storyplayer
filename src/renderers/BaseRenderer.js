@@ -116,6 +116,8 @@ export default class BaseRenderer extends EventEmitter {
     
     _removePauseHandlersForTimer: Function;
 
+    _handlePlayPauseButtonClicked: Function;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -157,6 +159,7 @@ export default class BaseRenderer extends EventEmitter {
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
 
         this._willHideControls = this._willHideControls.bind(this); 
@@ -242,9 +245,12 @@ export default class BaseRenderer extends EventEmitter {
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
             .then(() => this._runDuringBehaviours());
+        this._player.connectScrubBar(this);
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
     }
 
     end() {
+        this._player.disconnectScrubBar(this);
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
@@ -253,6 +259,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._timer.clear();
         this._loopCounter = 0;
+        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
     }
 
     hasEnded(): boolean {
@@ -312,10 +319,10 @@ export default class BaseRenderer extends EventEmitter {
         let timeBased = false;
         if (duration === undefined) {
             duration = Infinity;
+            logger.warn('getting time data from BaseRenderer without duration');
         } else {
             timeBased = true;
         }
-        logger.warn('getting time data from BaseRenderer');
         const timeObject = {
             timeBased,
             currentTime: this._timer.getTime(),
@@ -348,6 +355,21 @@ export default class BaseRenderer extends EventEmitter {
         if (this._timer) {
             this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
             this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
+        }
+    }
+
+    _handlePlayPauseButtonClicked(): void {
+        if (this._timer._paused) { 
+            this._timer.resume(); 
+        } else { 
+            this._timer.pause(); 
+        }
+        if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            if (this._playoutEngine.isPlaying()) {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
+            } else {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+            }
         }
     }
 
@@ -1581,8 +1603,6 @@ export default class BaseRenderer extends EventEmitter {
     deleteTimeEventListener(listenerId: string) {
         this._timer.deleteTimeEventListener(listenerId);
     }
-
-
 
     seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);

@@ -367,6 +367,8 @@ class Player extends EventEmitter {
 
     _controller: Controller;
 
+    _scrubTimePoller: ?IntervalID;
+
     constructor(
         target: HTMLElement,
         analytics: AnalyticsLogger,
@@ -1737,7 +1739,6 @@ class Player extends EventEmitter {
     }
 
     showScrubBar() {
-        console.trace()
         this._scrubBar.style.display = 'block';
     }
 
@@ -1811,7 +1812,10 @@ class Player extends EventEmitter {
         this._scrubBar.classList.add('romper-control-disabled');
     }
 
-    disconnectScrubBar() {
+    disconnectScrubBar(renderer: BaseRenderer) {
+        if (renderer !== this._currentRenderer) {
+            return;
+        }
         if (this._scrubBar) {
             const scrubBar = this._scrubBar;
             // Remove event listeners on scrub bar by cloning and replacing old scrubBar
@@ -1819,30 +1823,20 @@ class Player extends EventEmitter {
             this._buttons.replaceChild(newScrubBar, scrubBar);
             this._scrubBar = newScrubBar;
         }
+        if (this._scrubTimePoller) {
+            clearInterval(this._scrubTimePoller);
+            this._scrubTimePoller = null;
+        }
     }
 
-    connectScrubBar(media: HTMLMediaElement, timings: Object) {
-        const { inTime, outTime } = timings;
+    connectScrubBar(renderer: BaseRenderer) {
         const scrubBar = this._scrubBar;
-
-        const getTrimmedDuration = () => {
-            let trimmedDuration = media.duration - parseFloat(inTime);
-            if (parseFloat(outTime) > 0) {
-                trimmedDuration = parseFloat(outTime) - parseFloat(inTime);
-            }
-            return trimmedDuration;
-        };
 
         const scrubBarChangeFunc = () => {
             // Calculate the new time
-            const time = getTrimmedDuration() * (parseInt(scrubBar.value, 10) / 100);
-            if (this._currentRenderer) {
-                this._currentRenderer.setCurrentTime(time);
-            } else {
-                // Update the media time
-                // eslint-disable-next-line no-param-reassign
-                media.currentTime = time;
-            }
+            const { duration } = renderer.getCurrentTime();
+            const time = duration * (parseInt(scrubBar.value, 10) / 100);
+            renderer.setCurrentTime(time);
 
             // Don't spam analtics with lots of volume changes
             // Wait 1 second after volume stops changing before sending analytics
@@ -1865,37 +1859,41 @@ class Player extends EventEmitter {
         // allow clicking the scrub bar to seek to a media position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
             const percent = e.offsetX / scrubBar.offsetWidth;
-            if (this._currentRenderer) {
-                this._currentRenderer.setCurrentTime(percent * media.duration);
+            const { duration } = renderer.getCurrentTime();
+            if (renderer) {
+                renderer.setCurrentTime(percent * duration);
             } else {
                 // Update the media time
-                // eslint-disable-next-line no-param-reassign
-                media.currentTime = percent * media.duration;
+                const newTime = percent * duration;
+                renderer.setCurrentTime(newTime);
             }
         });
 
         let wasPlaying = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
-            wasPlaying = !media.paused;
-            media.pause();
+            wasPlaying = renderer._playoutEngine.isPlaying();
+            renderer.pause();
         });
 
         // Play the media when the slider handle is dropped (if it was previously playing)
         scrubBar.addEventListener('mouseup', () => {
             if (wasPlaying) {
-                media.play();
+                renderer.play();
             }
         });
 
         // Update the seek bar as the media plays
-        media.addEventListener('timeupdate', () => {
-            // Calculate the slider value
-            const value = (100 / getTrimmedDuration()) * (media.currentTime - inTime);
+        this._scrubTimePoller = setInterval(
+            () => {
+                const { currentTime, duration } = renderer.getCurrentTime();
+                const value = ((100 / duration) * currentTime);
 
-            // Update the slider value
-            scrubBar.value = value.toString();
-        });
+                // Update the slider value
+                scrubBar.value = value.toString();
+            },
+            200,
+        );
     }
 
     static _formatTime(time: number): string {

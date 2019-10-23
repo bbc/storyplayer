@@ -105,6 +105,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (mediaElement) {
             mediaElement.classList.add('romper-audio-element');
         }
+        this._player.enblePlayButton();
+        this._player.enableScrubBar();
     }
 
     end() {
@@ -138,10 +140,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._fetchMedia(fg.assets.audio_src)
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
-                                this._playoutEngine.setTimings(this._rendererId, {
-                                    inTime: this._inTime,
-                                    outTime: this._outTime,
-                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'audio not found');
@@ -193,6 +191,16 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
             }
         }
+    }
+
+    pause() {
+        super.pause();
+        this._playoutEngine.pause();
+    }
+
+    play() {
+        super.play();
+        this._playoutEngine.play();
     }
 
     getCurrentTime(): Object {
