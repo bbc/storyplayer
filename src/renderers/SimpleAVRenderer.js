@@ -160,7 +160,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.setPlayoutActive(this._rendererId);
-
         logger.info(`Started: ${this._representation.id}`);
 
         // set time to last set time (relative to click start)

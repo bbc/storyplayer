@@ -58,11 +58,15 @@ export default class TimeManager extends EventEmitter {
     }
 
     pause() {
-        this._paused = true;
+        if(!this._paused) {
+            this._paused = true;
+        }
     }
 
     resume() {
-        this._paused = false;
+        if(this._paused) {
+            this._paused = false;
+        }
     }
 
     clear() {

@@ -216,7 +216,6 @@ export default class BaseRenderer extends EventEmitter {
         }
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
         if(checkAddDetailsOverride()) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
@@ -259,7 +258,6 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._togglePause);
 
         this._loopCounter = 0;
     }
@@ -339,20 +337,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _togglePause() {
-        // if (this._playoutEngine.isPlaying()) {
-        //     this._timer.resume();
-        // } else {
-        //     this._timer.pause();
-        // }
+        if (this._playoutEngine.isPlaying()) {
+            this._timer.resume();
+        } else {
+            this._timer.pause();
+        }
     }
 
     _addPauseHandlersForTimer() {
         if (this._timer) {
             this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
             this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
-            this._playoutEngine.on(this._rendererId, 'waiting', () => { 
-                this._timer.pause();
-            });
         }
     }
 
@@ -360,9 +355,6 @@ export default class BaseRenderer extends EventEmitter {
         if (this._timer) {
             this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
             this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
-            this._playoutEngine.off(this._rendererId, 'waiting', () => { 
-                this._timer.pause();
-            });
         }
     }
 
