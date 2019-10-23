@@ -1549,7 +1549,7 @@ export default class BaseRenderer extends EventEmitter {
         const behaviourElements = document.querySelectorAll('[data-behaviour]');
         behaviourElements.forEach((be) => {
             try {
-                if(be) {
+                if(be && be.parentNode) {
                     be.parentNode.removeChild(be);
                 }
             } catch (e) {
