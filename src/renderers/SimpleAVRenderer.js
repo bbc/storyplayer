@@ -90,6 +90,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        this._timer.pause();
         if (!this._hasEnded) {
             super.complete();
         }
@@ -100,49 +101,54 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _outTimeEventListener() {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        let duration = this._playoutEngine.getDuration(this._rendererId);
-        if(!duration) {
-            duration = Infinity;
-        }
+        const { duration } = this.getCurrentTime();
+        let { currentTime } = this.getCurrentTime();
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (currentTime) {
-            if (this._outTime > 0 && currentTime >= this._outTime) {
-                // TODO Is this needed?
-                // AJ 14/10/19 Yes
-                if(this.checkIsLooping()) {
-                    this.setCurrentTime(this._inTime);
-                } else {
-                    if(videoElement) {
-                        videoElement.pause();
-                    }
-                    this._endedEventListener();
-                }
+        const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (!this.checkIsLooping()) {
+            // if not looping use video time to allow for buffering delays
+            currentTime = playheadTime - this._inTime;
+            // and sync timer
+            this._timer.setTime(currentTime);
+        } else if (this._outTime > 0 && videoElement) {
+            // if looping, use timer
+            // if looping with in/out points, need to manually re-initiate loop
+            if (playheadTime >= this._outTime) {
+                videoElement.currentTime = this._inTime;
+                videoElement.play();
             }
-            if (currentTime > (duration - 1)) {
-                // if we are looping then return to start
-                const nowTime = currentTime;
-                if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
-                    this._testEndStallTimeout = setTimeout(() => {
-                        const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                        if (time && !this._hasEnded) {
-                            // eslint-disable-next-line max-len
-                            logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
-                            if (time >= nowTime && time <= nowTime + 1.9) {
-                                logger.warn('Video end checker failed stall test');
-                                clearTimeout(this._testEndStallTimeout);
-                                // if we are looping just go back to start
-                                if(this.checkIsLooping()) {
-                                    this.setCurrentTime(0);
-                                } else {
-                                    // otherwise carry on to next element
-                                    this._endedEventListener();
-                                }
+        }
+        // have we reached the end?
+        // either timer past specified duration (for looping) 
+        // or video time past out time
+        if (currentTime > duration) {
+            if (videoElement) {
+                videoElement.pause();
+            }
+            this._endedEventListener();
+        }
+        if (currentTime > (duration - 1)) {
+            const nowTime = currentTime;
+            if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                this._testEndStallTimeout = setTimeout(() => {
+                    const time = this._playoutEngine.getCurrentTime(this._rendererId);
+                    if (time && !this._hasEnded) {
+                        // eslint-disable-next-line max-len
+                        logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
+                        if (time >= nowTime && time <= nowTime + 1.9) {
+                            logger.warn('Video end checker failed stall test');
+                            clearTimeout(this._testEndStallTimeout);
+                            // one more loop check
+                            if(this.checkIsLooping()) {
+                                this.setCurrentTime(this._inTime);
+                            } else {
+                                // otherwise carry on to next element
+                                this._endedEventListener();
                             }
                         }
-                    }, 2000);
+                    }
+                }, 2000);
 
-                }
             }
         }
     }
@@ -154,7 +160,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.setPlayoutActive(this._rendererId);
-
         logger.info(`Started: ${this._representation.id}`);
 
         // set time to last set time (relative to click start)
@@ -180,8 +185,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     // allow for clip trimming
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        super.addTimeEventListener(listenerId, (time + this._inTime), callback);
+    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
+        super.addTimeEventListener(listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback);
     }
 
     renderVideoElement() {
@@ -189,7 +194,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
-                    console.log('ASSET', fg);
                     if (fg.assets.av_src) {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                             this._setInTime(parseFloat(fg.meta.romper.in));
@@ -273,16 +277,21 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     getCurrentTime(): Object {
-        let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (videoTime === undefined) {
-            videoTime = this._lastSetTime;
-        } else {
-            // convert to time into segment
-            videoTime -= this._inTime;
-        }
-        let duration = this._playoutEngine.getDuration(this._rendererId)
+        const videoTime = this._timer.getTime();
+        let  { duration } = this._representation;
         if (duration === undefined) {
-            duration = Infinity;
+            if (this._outTime > 0) {
+                duration = this._outTime - this._inTime;
+            } else if (this.checkIsLooping()){
+                duration = Infinity;
+            } else {
+                duration = this._playoutEngine.getDuration(this._rendererId);
+                if (duration === undefined) {
+                    duration = Infinity;
+                } else {
+                    duration -= this._inTime;
+                }
+            }
         }
         let remaining = duration;
         if (this._outTime > 0) {
@@ -293,6 +302,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
             timeBased: true,
             currentTime: videoTime,
             remainingTime: remaining,
+            duration,
         };
         return timeObject;
     }
@@ -307,6 +317,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
         this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
+        this._timer.setTime(targetTime);
     }
 
     _setInTime(time: number) {

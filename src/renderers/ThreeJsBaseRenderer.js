@@ -370,7 +370,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     end() {
         // only if this is being rendered
         if (this._started) {
-            this._player.getLinkChoiceElement().style.visibility = 'visible';
+            this._player.getLinkChoiceElement()[0].style.visibility = 'visible';
         }
 
         if (this._domElement && this._domElement.parentNode) {
