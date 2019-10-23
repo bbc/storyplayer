@@ -254,8 +254,8 @@ $romper-hover-text-size: 1.53em;
   }
 
   .romper-text-element {
-    background: $white;
-    color: $text-colour;
+    background: $romper-background-color;
+    color: $white;
     height: 100%;
     margin: 0;
     padding: 10px;
