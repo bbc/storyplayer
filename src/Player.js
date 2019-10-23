@@ -527,6 +527,7 @@ class Player extends EventEmitter {
         this._scrubBar.setAttribute('aria-label', 'Seek bar');
         this._scrubBar.setAttribute('data-required-controls', 'false');
         this._scrubBar.type = 'range';
+        this._scrubBar.id = 'scrub-bar';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
         this._scrubBar.classList.add(SLIDER_CLASS);
@@ -1729,6 +1730,15 @@ class Player extends EventEmitter {
     disableLinkChoiceControl() {
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.add('romper-inactive');
+    }
+
+    hideScrubBar() {
+        this._scrubBar.style.display = 'none';
+    }
+
+    showScrubBar() {
+        console.trace()
+        this._scrubBar.style.display = 'block';
     }
 
 

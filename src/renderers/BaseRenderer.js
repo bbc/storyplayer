@@ -21,7 +21,7 @@ import TimeManager from '../TimeManager';
 
 const SEEK_TIME = 10;
 
-const getEndTime = (behaviour: Object) => {
+const getBehaviourEndTime = (behaviour: Object) => {
     if(behaviour.duration !== undefined) {
         const endTime = behaviour.start_time + behaviour.duration;
         return endTime;
@@ -104,8 +104,6 @@ export default class BaseRenderer extends EventEmitter {
 
     isSrcIosPlayoutEngine: Function;
 
-    // _singleBehaviourCallback: Function;
-
     _cleanupSingleDuringBehaviour: Function;
 
     _runSingleDuringBehaviour: Function;
@@ -161,7 +159,6 @@ export default class BaseRenderer extends EventEmitter {
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
 
 
-        // this._singleBehaviourCallback = this._singleBehaviourCallback.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
@@ -255,10 +252,6 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._timer.clear();
-        this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-        this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
-        this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-
         this._loopCounter = 0;
     }
 
@@ -592,7 +585,7 @@ export default class BaseRenderer extends EventEmitter {
                 }
             }
             const startTime = behaviour.start_time;
-            const endTime = getEndTime(behaviour);
+            const endTime = getBehaviourEndTime(behaviour);
             const clearFunction = () => {
                 const behaviourElement = document.getElementById(behaviour.behaviour.id);
                 if (behaviourElement && behaviourElement.parentNode) {
@@ -690,7 +683,6 @@ export default class BaseRenderer extends EventEmitter {
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         if(this.checkIsLooping()) {
-            // this.removeLoopAttribute();
             this._playoutEngine.removeLoopAttribute(this._rendererId);
         }
         this._followLink(eventObject.id, eventObject.behaviourId);
