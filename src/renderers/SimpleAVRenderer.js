@@ -186,8 +186,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     // allow for clip trimming
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        super.addTimeEventListener(listenerId, (time + this._inTime), callback);
+    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
+        super.addTimeEventListener(listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback);
     }
 
     renderVideoElement() {

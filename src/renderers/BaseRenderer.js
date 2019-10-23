@@ -100,21 +100,23 @@ export default class BaseRenderer extends EventEmitter {
 
     _hideControls: Function;
 
-    _behaviours: Object;
-    
     _timer: TimeManager;
 
     isSrcIosPlayoutEngine: Function;
 
     // _singleBehaviourCallback: Function;
 
-    // _cleanupSingleDuringBehaviour: Function;
+    _cleanupSingleDuringBehaviour: Function;
 
     _runSingleDuringBehaviour: Function;
 
     _runDuringBehaviours: Function;
 
     addTimeEventListener: Function;
+
+    _addPauseHandlersForTimer: Function;
+    
+    _removePauseHandlersForTimer: Function;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -162,10 +164,11 @@ export default class BaseRenderer extends EventEmitter {
         // this._singleBehaviourCallback = this._singleBehaviourCallback.bind(this);
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
-        // this._cleanupSingleDuringBehaviour = this._cleanupSingleDuringBehaviour.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
+        this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
+        this._removePauseHandlersForTimer = this._removePauseHandlersForTimer.bind(this);
  
 
         this._behaviourRendererMap = {
@@ -184,11 +187,6 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         this._behaviourElements = [];
-
-        this._behaviours = {};
-        this._cleaning = false;
-
-        this._timeEventListeners = {};
         this._timer = new TimeManager();
 
         this._destroyed = false;
@@ -243,6 +241,7 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
+        this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._removeInvalidDuringBehaviours()
@@ -250,7 +249,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
-        this._behaviours = {};
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
@@ -341,10 +339,28 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _togglePause() {
-        if (this._playoutEngine.isPlaying()) {
-            this._timer.resume();
-        } else {
-            this._timer.pause();
+        // if (this._playoutEngine.isPlaying()) {
+        //     this._timer.resume();
+        // } else {
+        //     this._timer.pause();
+        // }
+    }
+
+    _addPauseHandlersForTimer() {
+        if (this._timer) {
+            this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
+            this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.on(this._rendererId, 'waiting', () => { 
+                console.log('WAITING');
+                this._timer.pause();
+            });
+        }
+    }
+
+    _removePauseHandlersForTimer() {
+        if (this._timer) {
+            this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
+            this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
         }
     }
 
@@ -357,9 +373,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekBack() {
-        console.trace()
         const { timeBased, currentTime } = this.getCurrentTime();
-        console.log('currentTime', currentTime);
         if (timeBased) {
             let targetTime = currentTime - SEEK_TIME;
             if (targetTime < 0) {
@@ -406,7 +420,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        console.trace('renderer, complete');
         this._hasEnded = true;
         this._timer.pause();
         if (!this._linkBehaviour ||
@@ -568,27 +581,10 @@ export default class BaseRenderer extends EventEmitter {
         if (this._representation.behaviours && this._representation.behaviours.during) {
             const duringBehaviours = this._representation.behaviours.during;
             duringBehaviours.forEach((behaviour) => {
-                // check each behaviour;
                 this._runSingleDuringBehaviour(behaviour);
-
-                // if(this._willHideControls(behaviour.behaviour)) {
-                //     this._playoutEngine.on(this._rendererId, 'pause', () => {
-                //         this._showPlayPauseControls(behaviour)
-                //     });
-                //     this._playoutEngine.on(this._rendererId, 'play', () => {
-                //         this._hidePlayPauseControls(behaviour)
-                //     });
-                // }
             });
         }
     }
-
-    // _cleanupSingleDuringBehaviour(behaviour: Object) {
-    //     const behaviourElement = document.getElementById(behaviour.behaviour.id);
-    //     if (behaviourElement && behaviourElement.parentNode) {
-    //         behaviourElement.parentNode.removeChild(behaviourElement);
-    //     }
-    // }
 
     _runSingleDuringBehaviour(behaviour: Object) {
         const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
@@ -609,8 +605,6 @@ export default class BaseRenderer extends EventEmitter {
                     behaviourElement.parentNode.removeChild(behaviourElement);
                 }
             };
-            console.log('why do i have an end tiume here', endTime);
-            console.log('callback?', clearFunction);
             const listenerId = behaviour.behaviour.id;
             this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
         } else {
@@ -619,17 +613,7 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
-    // _singleBehaviourCallback(behaviourRunner: Function, behaviour: Object) {
-    //     logger.info(`started during behaviour ${behaviour.behaviour.type}`);
-    //     behaviourRunner(behaviour.behaviour, () =>
-    //         logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-    //     if (this._willHideControls(behaviour.behaviour)) {
-    //         this._hideControls(behaviour.start_time);
-    //     }    
-    // }
-
     // //////////// show link choice behaviour
-    // this needs to be put in a div with an id if the behaviour id
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         const behaviourOverlay = this._player.createBehaviourOverlay(behaviour);
@@ -1571,7 +1555,9 @@ export default class BaseRenderer extends EventEmitter {
         const behaviourElements = document.querySelectorAll('[data-behaviour]');
         behaviourElements.forEach((be) => {
             try {
-                be.parentNode.removeChild(be);
+                if(be) {
+                    be.parentNode.removeChild(be);
+                }
             } catch (e) {
                 logger.warn(`could not remove behaviour element ${be.id} from Renderer`);
             }
@@ -1602,12 +1588,7 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime, clearCallback) {
-        console.log('id', listenerId)
-        console.log('startTime', startTime)
-        console.log('startCallback', startCallback !== undefined);
-        console.log('endTime', endTime)
-        console.log('clear callback', clearCallback !== undefined);
+    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
         this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback);
     }
 

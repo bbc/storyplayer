@@ -44,8 +44,11 @@ export default class TimeManager extends EventEmitter {
                     }
                     // handle clearing event
                     if ((this._timeElapsed <= startTime || this._timeElapsed > endTime) && isRunning) {
-                        console.log('time elapsed', this._timeElapsed)
-                        if (clearCallback !== null) clearCallback();
+                        try {
+                            if (clearCallback) clearCallback();
+                        } catch (err) {
+                            logger.info(`couldnt clear up behaviour ${timeEventId}`);
+                        }
                         this._timedEvents[timeEventId].isRunning = false;
                     }
                 });
@@ -84,12 +87,12 @@ export default class TimeManager extends EventEmitter {
         listenerId: string,
         startTime: number,
         startCallback: Function,
-        endTime: ?number,
+        endTime: ?number = Infinity,
         clearCallback: ?Function,
     ) {
         this._timedEvents[listenerId] = { 
             startTime,
-            endTime: endTime || Infinity,
+            endTime,
             startCallback,
             isRunning: false,
             clearCallback,
