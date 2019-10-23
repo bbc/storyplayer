@@ -12,6 +12,7 @@ import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 import { checkAddDetailsOverride } from '../utils';
+import { VARIABLE_EVENTS } from '../Events';
 
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
@@ -45,6 +46,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowChoiceBehaviour: Function;
 
+    _renderLinkChoices: Function;
+
     _applySocialSharePanelBehaviour: Function;
 
     _applyLinkOutBehaviour: Function;
@@ -70,6 +73,8 @@ export default class BaseRenderer extends EventEmitter {
     _preloadedIconAssets: Array<Image>;
 
     _savedLinkConditions: Object;
+
+    _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
 
@@ -119,6 +124,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
+        this._renderLinkChoices = this._renderLinkChoices.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
@@ -200,8 +206,7 @@ export default class BaseRenderer extends EventEmitter {
         this._hasEnded = false;
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
-        this._removeInvalidDuringBehaviours()
-            .then(() => this._runDuringBehaviours())
+        this._runDuringBehaviours();
     }
 
     end() {
@@ -210,6 +215,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._controller.off(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
         this._loopCounter = 0;
     }
 
@@ -521,9 +527,37 @@ export default class BaseRenderer extends EventEmitter {
     // //////////// show link choice behaviour
 
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-
         logger.info('Rendering link icons for user choice');
+        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+        this._choiceBehaviourData = {
+            choiceIconNEObjects: null,
+            behaviour,
+            callback,
+        };
+        // listen for variable changes and update choices to reflect
+        this._controller.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
+        // show them in current state
+        return this._renderLinkChoices(behaviour, callback);
+    }
+
+    // have the choices available changed
+    // compare new NE objects to those we have at the moment
+    _choicesHaveChanged(newNEObjects: Array<Object>) {
+        const { choiceIconNEObjects } = this._choiceBehaviourData;
+        if (choiceIconNEObjects.length !== newNEObjects.length) return true;
+        let allNesStillIn = true;
+        newNEObjects.forEach((neo) => {
+            if (!choiceIconNEObjects.find(
+                (e) => e.targetNeId === neo.targetNeId)) {
+                allNesStillIn = false;
+            }
+        });
+        return !allNesStillIn;
+    }
+
+    _renderLinkChoices() {
+        const { behaviour, callback, choiceIconNEObjects } = this._choiceBehaviourData;
+        logger.info('Refreshing link icons for user choice');
         // get behaviours of links from data
         const {
             showNeToEnd,
@@ -544,19 +578,28 @@ export default class BaseRenderer extends EventEmitter {
 
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
-            if(narrativeElementObjects.length === 0) {
-                return Promise.reject(new Error(
-                    "Shouldn't be possible to get here as "
-                    + "_removeInvalidDuringBehaviours should remove this rep"
-                ));
+            if (choiceIconNEObjects !== null) {
+                if (this._choicesHaveChanged(narrativeElementObjects)) {
+                    logger.info('Variable state has changed valid links - need to refresh icons');
+                    this._player.clearLinkChoices();
+                } else {
+                    logger.info('Variable state has changed, but same link options valid');
+                    return Promise.resolve();
+                }
             }
+
+            // save current set of icons so we can easily test if they need to be rebuilt
+            // after a variable state change
+            this._choiceBehaviourData.choiceIconNEObjects = narrativeElementObjects;
+            if(narrativeElementObjects.length === 0) {
+                logger.warn('Show link icons behaviour run, but no links are currently valid');
+                return Promise.resolve();
+            }
+
             // build icons
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
 
-            // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
-            if(!this.checkIsLooping()) {
-                this._applyDefaultLink(narrativeElementObjects);
-            }
+            // find out which link is default
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
@@ -830,6 +873,8 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string) {
+        this._controller.off(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
+
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -839,16 +884,15 @@ export default class BaseRenderer extends EventEmitter {
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
             }
-            // now make this link the only valid option
-            currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id === narrativeElementId) {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 1] };
-                } else {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 0] };
-                }
-            });
+
+            // now make chosen link top option
+            const chosenLink = currentNarrativeElement.links.find(nelink =>
+                nelink.target_narrative_element_id === narrativeElementId);
+            if (chosenLink) {
+                const chosenIndex = currentNarrativeElement.links.indexOf(chosenLink);
+                currentNarrativeElement.links.splice(chosenIndex);
+                currentNarrativeElement.links.unshift(chosenLink);
+            }
 
             // if already ended, follow immediately
             if (this._hasEnded) {
@@ -876,34 +920,6 @@ export default class BaseRenderer extends EventEmitter {
         const defaultLink = validLinks[0];
         
         return defaultLink && defaultLink.target_narrative_element_id;
-    }
-
-    // set the link conditions so only the default is valid
-    // returns the id of the NE of the default link or null if
-    // there isn't one
-    // takes an array of objects for all currently valid links
-    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
-        // filter links to ones amongst the valid links
-        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        const validLinks = currentNarrativeElement.links.filter(link =>
-            narrativeElementObjects.filter(ne =>
-                ne.targetNeId === link.target_narrative_element_id).length > 0);
-
-        const defaultLink = validLinks[0];
-        // save link conditions from model, and apply new ones to force default choice
-        if (!this._savedLinkConditions.narrativeElement) {
-            this._saveLinkConditions();
-        }
-        validLinks.forEach((neLink) => {
-            if (neLink === defaultLink) {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 1] };
-            } else {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 0] };
-            }
-        });
-        return defaultLink.target_narrative_element_id;
     }
 
     // save link conditions for current NE
@@ -1498,7 +1514,8 @@ export default class BaseRenderer extends EventEmitter {
                 this.resetDuringBehaviours();
 
                 if(this.isSrcIosPlayoutEngine()) {
-                    if(this._playoutEngine._playing && this._playoutEngine._foregroundMediaElement.paused) {
+                    if(this._playoutEngine._playing
+                        && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
                     }
                 }
