@@ -351,7 +351,6 @@ export default class BaseRenderer extends EventEmitter {
             this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
             this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
             this._playoutEngine.on(this._rendererId, 'waiting', () => { 
-                console.log('WAITING');
                 this._timer.pause();
             });
         }
@@ -361,6 +360,9 @@ export default class BaseRenderer extends EventEmitter {
         if (this._timer) {
             this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
             this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.off(this._rendererId, 'waiting', () => { 
+                this._timer.pause();
+            });
         }
     }
 

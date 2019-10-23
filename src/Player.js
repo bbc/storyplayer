@@ -1722,13 +1722,11 @@ class Player extends EventEmitter {
 
 
     enableLinkChoiceControl() {
-        console.trace();
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.remove('romper-inactive');
     }
 
     disableLinkChoiceControl() {
-        console.trace();
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.add('romper-inactive');
     }
