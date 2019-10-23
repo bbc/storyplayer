@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -75,7 +75,7 @@
     "express": "^4.17.1",
     "hls.js": "^0.12.4",
     "json-logic-js": "^1.0.11",
-    "shaka-player": "^2.5.1",
+    "shaka-player": "^2.5.5",
     "three": "^0.105.1",
     "uuid": "^3.3.2"
   }
