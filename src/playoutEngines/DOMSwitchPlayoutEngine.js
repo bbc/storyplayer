@@ -429,6 +429,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutActive(rendererId: string) {
+        console.log('ANDY PE active');
         const rendererPlayoutObj = this._media[rendererId];
         if (this._media[rendererId].error === true) {
             this._player._showErrorLayer()
@@ -566,6 +567,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutInactive(rendererId: string) {
+        console.log('ANDY PE inactive');
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -633,6 +635,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     play() {
+        console.log('ANDY PE play');
         this._playing = true;
         this._hasStarted = true;
         this._player.setPlaying(true);
@@ -661,6 +664,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     pause() {
+        console.log('ANDY PE pause');
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)

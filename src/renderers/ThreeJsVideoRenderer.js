@@ -76,19 +76,19 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         }
     }
 
-    _outTimeEventListener() {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (currentTime) {
-            if (this._outTime > 0 && currentTime >= this._outTime) {
-                // TODO: Is this needed?
-                if(videoElement) {
-                    videoElement.pause();
-                }
-                this._endedEventListener();
-            }
-        }
-    }
+    // _outTimeEventListener() {
+    //     const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+    //     const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+    //     if (currentTime) {
+    //         if (this._outTime > 0 && currentTime >= this._outTime) {
+    //             // TODO: Is this needed?
+    //             if(videoElement) {
+    //                 videoElement.pause();
+    //             }
+    //             this._endedEventListener();
+    //         }
+    //     }
+    // }
 
     start() {
         super.start();

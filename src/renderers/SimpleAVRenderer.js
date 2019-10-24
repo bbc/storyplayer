@@ -27,8 +27,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour: Function;
 
-    _lastSetTime: number;
-
     _endedEventListener: Function;
 
     _outTimeEventListener: Function;
@@ -63,8 +61,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // eslint-disable-next-line max-len
         this._behaviourRendererMap['urn:x-object-based-media:representation-behaviour:blur/v1.0'] = this._applyBlurBehaviour;
-
-        this._lastSetTime = 0;
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
@@ -144,15 +140,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.setPlayoutActive(this._rendererId);
         logger.info(`Started: ${this._representation.id}`);
 
-        // set time to last set time (relative to click start)
-        this.setCurrentTime(this._lastSetTime);
+        // // set time to last set time (relative to click start)
         this._player.enablePlayButton();
         this._player.enableScrubBar();
     }
 
     end() {
         super.end();
-        this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
@@ -263,19 +257,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
         this._duration = duration;
         return duration;
-    }
-
-    // set how far into the segment this video should be (relative to in-point)
-    setCurrentTime(time: number) {
-        let targetTime = time;
-        const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < time) {
-            targetTime = choiceTime;
-        }
-        // convert to absolute time into video
-        this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        this._timer.setTime(targetTime);
     }
 
     switchFrom() {

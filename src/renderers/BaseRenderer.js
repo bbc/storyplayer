@@ -120,6 +120,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _duration: ?number;
 
+    _lastSetTime: number;
+
     _inTime: number;
 
     _outTime: number;
@@ -201,6 +203,7 @@ export default class BaseRenderer extends EventEmitter {
 
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
+        this._lastSetTime = 0;
         this._inTime = 0;
         this._outTime = -1;
 
@@ -255,7 +258,12 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
-        if (!this._playoutEngine.isPlaying()) this._timer.pause();
+        if (!this._playoutEngine.isPlaying()) {
+            console.log('ANDY starting playout is puased');
+            this._timer.pause();
+        } else {
+            console.log('ANDY starting playout is playing');
+        }
         this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
@@ -263,6 +271,8 @@ export default class BaseRenderer extends EventEmitter {
             .then(() => this._runDuringBehaviours());
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
+        // set time to last set time (relative to click start)
+        this.setCurrentTime(this._lastSetTime);
     }
 
     end() {
@@ -276,6 +286,7 @@ export default class BaseRenderer extends EventEmitter {
         this._timer.clear();
         this._loopCounter = 0;
         this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
+        this._lastSetTime = 0;
     }
 
     hasEnded(): boolean {
@@ -394,8 +405,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        logger.warn(`setting time on BaseRenderer ${time}`);
-        this._timer.setTime(time);
+        let targetTime = time;
+        const choiceTime = this.getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
+        // convert to absolute time into video
+        this._lastSetTime = targetTime; // time into segment
+        console.log('ANDY BR set PE to ', targetTime + this._inTime);
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
+        console.log('ANDY BR set timer to ', targetTime);
+        this._timer.setTime(targetTime);
     }
 
     _togglePause() {
