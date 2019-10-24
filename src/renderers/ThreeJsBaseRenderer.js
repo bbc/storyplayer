@@ -236,6 +236,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         if (this._userInteracting) {
             this._userDragging = true;
             this._view.lon = (this._view.onPointerDownPointerX - event.clientX) * 0.1 + this._view.onPointerDownLon; // eslint-disable-line max-len
+            this._view.lon = (360 + this._view.lon) % 360;
             this._view.lat = (event.clientY - this._view.onPointerDownPointerY) * 0.1 + this._view.onPointerDownLat; // eslint-disable-line max-len
         }
     }
