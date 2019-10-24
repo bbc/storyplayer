@@ -978,6 +978,10 @@ $romper-hover-text-size: 1.53em;
   width: 100%;
 }
 
+.romper-render-image {
+  background-color: $romper-background-color;
+}
+
 .romper-modal-container {
   height: 100%;
   position: relative;
@@ -1490,10 +1494,10 @@ $romper-hover-text-size: 1.53em;
 }
 
 .details-overlay {
-  display: flex;
-  flex-direction: column;
   background-color: $black;
   color: $white;
+  display: flex;
+  flex-direction: column;
   font-size: 1.25em;
   left: 70%;
   position: absolute;
@@ -1501,11 +1505,11 @@ $romper-hover-text-size: 1.53em;
   width: 30%;
   z-index: 2000;
 
-  .detail{
-    padding-left: 3%;
-    border: none;
-    color: $white;
+  .detail {
     background: $black;
+    border: 0;
+    color: $white;
+    padding-left: 3%;
     width: 60%;
   }
 }
