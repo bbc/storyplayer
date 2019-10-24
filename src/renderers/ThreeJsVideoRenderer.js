@@ -94,6 +94,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         super.start();
         this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     _startThreeSixtyVideo() {

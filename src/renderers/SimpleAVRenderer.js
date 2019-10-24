@@ -266,6 +266,18 @@ export default class SimpleAVRenderer extends BaseRenderer {
         callback();
     }
 
+    _getDuration() {
+        // compensate for trimming
+        let duration = super._getDuration();
+        if (this._outTime >= 0) {
+            duration = this._outTime - this._inTime;
+        } else if (this._inTime) {
+            duration -= this._inTime;
+        }
+        this._duration = duration;
+        return duration;
+    }
+
     // set how far into the segment this video should be (relative to in-point)
     setCurrentTime(time: number) {
         let targetTime = time;
