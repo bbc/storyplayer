@@ -13,6 +13,7 @@ import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils';
+import { REASONER_EVENTS } from './Events';
 
 const PLAYOUT_ENGINES = {
     SRC_SWITCH_PLAYOUT: 'src',
@@ -143,10 +144,12 @@ function createOverlay(name: string, logFunction: Function) {
         activeIconId = id;
         Object.keys(elements).forEach((key) => {
             if (key === id) {
+                elements[key].setAttribute('data-link-choice', 'active');
                 elements[key].classList.add('romper-control-selected');
                 elements[key].classList.remove('romper-control-unselected');
                 elements[key].classList.remove('default');
             } else {
+                elements[key].setAttribute('data-link-choice', 'inactive');
                 elements[key].classList.add('romper-control-unselected');
                 elements[key].classList.remove('romper-control-selected');
                 elements[key].classList.remove('default');
@@ -465,6 +468,7 @@ class Player extends EventEmitter {
         this._backButton.classList.add('romper-back-button');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
+        this._backButton.setAttribute('data-required-controls', 'false');
         const backButtonIconDiv = document.createElement('div');
         backButtonIconDiv.classList.add('romper-button-icon-div');
         backButtonIconDiv.classList.add('romper-back-button-icon-div');
@@ -476,6 +480,7 @@ class Player extends EventEmitter {
         this._seekBackButton.classList.add('romper-seek-back-button');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
         this._seekBackButton.setAttribute('aria-label', 'Seek Back Button');
+        this._seekBackButton.setAttribute('data-required-controls', 'false');
         const seekBackButtonIconDiv = document.createElement('div');
         seekBackButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekBackButton.appendChild(seekBackButtonIconDiv);
@@ -486,6 +491,7 @@ class Player extends EventEmitter {
         this._playPauseButton.classList.add('romper-play-button');
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
+        this._playPauseButton.setAttribute('data-required-controls', 'true');
         const playPauseButtonIconDiv = document.createElement('div');
         playPauseButtonIconDiv.classList.add('romper-button-icon-div');
         this._playPauseButton.appendChild(playPauseButtonIconDiv);
@@ -496,6 +502,7 @@ class Player extends EventEmitter {
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
         this._seekForwardButton.setAttribute('aria-label', 'Seek Forward Button');
+        this._seekForwardButton.setAttribute('data-required-controls', 'false');
         const seekForwardButtonIconDiv = document.createElement('div');
         seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
@@ -506,6 +513,7 @@ class Player extends EventEmitter {
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
         this._nextButton.setAttribute('aria-label', 'Next Button');
+        this._nextButton.setAttribute('data-required-controls', 'false');
         this._narrativeElementTransport.appendChild(this._nextButton);
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
@@ -518,7 +526,9 @@ class Player extends EventEmitter {
         this._scrubBar = document.createElement('input');
         this._scrubBar.setAttribute('title', 'Seek bar');
         this._scrubBar.setAttribute('aria-label', 'Seek bar');
+        this._scrubBar.setAttribute('data-required-controls', 'false');
         this._scrubBar.type = 'range';
+        this._scrubBar.id = 'scrub-bar';
         this._scrubBar.value = '0';
         this._scrubBar.className = 'romper-scrub-bar';
         this._scrubBar.classList.add(SLIDER_CLASS);
@@ -558,12 +568,9 @@ class Player extends EventEmitter {
         mediaTransportRight.appendChild(this._icon.overlay);
         this._overlayToggleButtons.appendChild(this._icon.button);
 
-        this._linkChoice = createOverlay('link-choice', this._logUserInteraction);
-        this._overlays.appendChild(this._linkChoice.overlay);
         // no need for toggle button
         this._countdownContainer = document.createElement('div');
         this._countdownContainer.classList.add('romper-ux-divider');
-        this._linkChoice.overlay.appendChild(this._countdownContainer);
         this._countdowner = document.createElement('div');
         this._countdowner.classList.add('romper-ux-countdown');
         this._countdownContainer.appendChild(this._countdowner);
@@ -715,6 +722,9 @@ class Player extends EventEmitter {
         this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
         this._addContinueModal = this._addContinueModal.bind(this);
         this._startButtonHandler = this._startButtonHandler.bind(this);
+
+        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
+        this._addCountdownToElement = this._addCountdownToElement.bind(this);
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -797,13 +807,13 @@ class Player extends EventEmitter {
         cancelButton.addEventListener('touchend', cancelButtonHandler);
 
         const resumeExperienceButtonHandler = () => {
+            this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._narrativeElementTransport.classList.remove('romper-inactive');
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
             this._enableUserInteraction();
-
         };
 
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
@@ -884,16 +894,19 @@ class Player extends EventEmitter {
         }
     }
 
-    _activateRomperButtons(event: ?Object) {
+    _activateRomperButtons(event: ?Object, override: ?boolean) {
         if(event) {
             event.stopPropagation();
             event.preventDefault();
         }
-        if (this._controlsDisabled) {
+        if (!override && this._controlsDisabled) {
             return;
         }
         if (!this._RomperButtonsShowing) {
             this._showRomperButtons();
+        }
+        if(override) {
+            return;
         }
         if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
         this._showRomperButtonsTimeout = setTimeout(() => {
@@ -1061,6 +1074,7 @@ class Player extends EventEmitter {
     }
 
     _startButtonHandler() {
+        this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
         this._enableUserInteraction();
         this._narrativeElementTransport.classList.remove('romper-inactive');
@@ -1072,7 +1086,6 @@ class Player extends EventEmitter {
         this._icon.clearAll();
         this._representation.clearAll();
         this._volume.clearAll();
-        this._linkChoice.clearAll();
     }
 
     prepareForRestart() {
@@ -1407,32 +1420,44 @@ class Player extends EventEmitter {
         this._representation.add(id, representationControl);
     }
 
-    addTextLinkIconChoice(id: string, text: string, src: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, text, src);
+    createBehaviourOverlay(behaviour: Object) {
+        const behaviourOverlay = createOverlay('link-choice', this._logUserInteraction);
+        const behaviourElement = behaviourOverlay.overlay
+        behaviourElement.id = behaviour.id;
+
+        this._addCountdownToElement(behaviourElement);
+        this._overlays.appendChild(behaviourElement);
+        return behaviourOverlay;
     }
 
-    addLinkChoiceControl(id: string, src: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, null, src);
+    _addCountdownToElement(element: HTMLElement) {
+        element.appendChild(this._countdownContainer);
     }
 
-    addTextLinkChoice(id: string, text: string, label: string): HTMLDivElement {
-        return this._addLinkChoiceContainer(id, label, text, null);
+    addTextLinkIconChoice(behaviourElement: HTMLElement, id: string, text: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, text, src);
     }
 
-    _addLinkChoiceContainer(id: string, label: string, text: ?string, src: ?string) {
-        this._linkChoice.overlay.classList.remove(`choices-${this._numChoices}`);
+    addLinkChoiceControl(behaviourElement: HTMLElement, id: string, src: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, null, src);
+    }
+
+    addTextLinkChoice(behaviourElement: HTMLElement, id: string, text: string, label: string): HTMLDivElement {
+        return this._addLinkChoiceContainer(behaviourElement, id, label, text, null);
+    }
+
+    _addLinkChoiceContainer(behaviourElement: HTMLElement, id: string, label: string, text: ?string, src: ?string) {
         this._numChoices += 1;
-        this._linkChoice.overlay.classList.add(`choices-${this._numChoices}`);
 
         if (this._numChoices > 8) {
-            this._linkChoice.overlay.classList.remove('tworow');
-            this._linkChoice.overlay.classList.add('threerow');
+            behaviourElement.classList.remove('tworow');
+            behaviourElement.classList.add('threerow');
         } else if (this._numChoices >= 4) {
-            this._linkChoice.overlay.classList.remove('threerow');
-            this._linkChoice.overlay.classList.add('tworow');
+            behaviourElement.classList.remove('threerow');
+            behaviourElement.overlay.classList.add('tworow');
         } else {
-            this._linkChoice.overlay.classList.remove('tworow');
-            this._linkChoice.overlay.classList.remove('threerow');
+            behaviourElement.classList.remove('tworow');
+            behaviourElement.classList.remove('threerow');
         }
 
         const linkChoiceControl = document.createElement('div');
@@ -1442,9 +1467,12 @@ class Player extends EventEmitter {
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
             linkChoiceControl.setAttribute('aria-label', label);
 
+            linkChoiceControl.setAttribute('data-link-choice', 'inactive');
+
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-                this.emit(PlayerEvents.LINK_CHOSEN, { id });
+                
+                this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
             };
             iconContainer.onclick = choiceClick;
@@ -1507,17 +1535,19 @@ class Player extends EventEmitter {
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
-    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string) {
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourOverlay: Object, choiceCount: number) {
         this._hideRomperButtons();
+        const behaviourElement = behaviourOverlay.overlay
         this._buttons.classList.add('icons-showing');
-        this._linkChoice.overlay.classList.remove('romper-inactive');
+        behaviourElement.classList.remove('romper-inactive');
+        behaviourElement.classList.add(`choices-${choiceCount}`);
+        behaviourElement.classList.add(`count-${choiceCount}`);
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
             promisesArray.push(this._choiceIconSet[id]);
         });
-        if (overlayClass
-            && !(overlayClass in this._linkChoice.overlay.classList)) {
-            this._linkChoice.overlay.classList.add(overlayClass);
+        if (overlayClass && !(overlayClass in behaviourElement.classList)) {
+            behaviourElement.classList.add(overlayClass);
         }
         return Promise.all(promisesArray).then((icons) => {
             icons.forEach((iconObj, id) => {
@@ -1527,17 +1557,21 @@ class Player extends EventEmitter {
                 }
                 const clickHandler = () => {
                     // set classes to show which is selected
-                    this._linkChoice.setActive(`${id}`);
+                    behaviourOverlay.setActive(`${id}`);
                 };
                 icon.onclick = clickHandler;
                 icon.addEventListener('touchend', clickHandler);
-                this._linkChoice.add(id, icon);
+                behaviourOverlay.add(id, icon);
+                if(behaviourElement){
+                    behaviourElement.appendChild(icon);
+                }
             });
         });
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getActiveChoiceIcon(): ?HTMLDivElement {
-        return this._linkChoice.getActive();
+        return document.querySelectorAll('[data-link-choice="active"]')[0];
     }
 
     // start animation to reflect choice remaining
@@ -1683,44 +1717,63 @@ class Player extends EventEmitter {
     exitStartBehaviourPhase() {
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
         this.enableControls();
+        this.showSeekButtons();
         this.enablePlayButton();
         this.enableScrubBar();
         this.enableRepresentationControl();
     }
 
+
     enableLinkChoiceControl() {
-        this._linkChoice.overlay.classList.remove('romper-inactive');
+        const linkChoice = this.getLinkChoiceElement()[0];
+        linkChoice.classList.remove('romper-inactive');
     }
 
     disableLinkChoiceControl() {
-        this._linkChoice.overlay.classList.add('romper-inactive');
+        const linkChoice = this.getLinkChoiceElement()[0];
+        linkChoice.classList.add('romper-inactive');
+    }
+
+    hideScrubBar() {
+        this._scrubBar.style.display = 'none';
+    }
+
+    showScrubBar() {
+        console.trace()
+        this._scrubBar.style.display = 'block';
     }
 
 
     resetControls() {
-        this.clearLinkChoices();
+        // this.clearLinkChoices();
         this.enableControls();
         this._hideAllOverlays();
     }
 
     clearLinkChoices() {
-        this._linkChoice.overlay.style.setProperty('animation', 'none');
-        this._numChoices = 0;
-        this._choiceIconSet = {};
-        this._linkChoice.clearAll();
-        if (this._choiceCountdownTimeout) {
-            clearTimeout(this._choiceCountdownTimeout);
-            this._choiceCountdownTimeout = null;
-            this._countdownTotal = 0;
-            this._countdownContainer.classList.remove('show');
-        }
-        this._linkChoice.overlay.className =
-            'romper-overlay romper-link-choice-overlay romper-inactive';
-        this._buttons.classList.remove('icons-showing');
+        const linkChoices = this.getLinkChoiceElement(true);
+        linkChoices.forEach((linkChoice) => {
+            linkChoice.style.setProperty('animation', 'none');
+            this._numChoices = 0;
+            this._choiceIconSet = {};
+            // this._linkChoice.clearAll();
+            if (this._choiceCountdownTimeout) {
+                clearTimeout(this._choiceCountdownTimeout);
+                this._choiceCountdownTimeout = null;
+                this._countdownTotal = 0;
+                this._countdownContainer.classList.remove('show');
+            }
+            // eslint-disable-next-line no-param-reassign
+            linkChoice.className =
+                'romper-overlay romper-link-choice-overlay romper-inactive';
+            this._buttons.classList.remove('icons-showing');
+        });
     }
 
-    getLinkChoiceElement(): HTMLElement {
-        return this._linkChoice.overlay;
+    // eslint-disable-next-line class-methods-use-this
+    getLinkChoiceElement(full: ?boolean): [HTMLElement] {
+        const linkChoices = document.querySelectorAll('[data-behaviour="link-choice"]');
+        return full? linkChoices : [linkChoices[0]];
     }
 
     enableRepresentationControl() {
@@ -1739,6 +1792,15 @@ class Player extends EventEmitter {
 
     enableControls() {
         this._controlsDisabled = false;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    showSeekButtons() {
+        const nonEssential = document.querySelectorAll('[data-required-controls="false"');
+        nonEssential.forEach(control => {
+            // eslint-disable-next-line no-param-reassign
+            control.style.display = 'block';
+        });
     }
 
     enableScrubBar() {

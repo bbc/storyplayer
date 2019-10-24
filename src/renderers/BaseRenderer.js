@@ -18,8 +18,17 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
+import TimeManager from '../TimeManager';
 
 const SEEK_TIME = 10;
+
+const getBehaviourEndTime = (behaviour: Object) => {
+    if(behaviour.duration !== undefined) {
+        const endTime = behaviour.start_time + behaviour.duration;
+        return endTime;
+    }
+    return undefined;
+}
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
@@ -58,6 +67,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _seekBack: Function;
 
+    _togglePause: Function;
+
     _behaviourElements: Array<HTMLElement>;
 
     _target: HTMLDivElement;
@@ -82,8 +93,6 @@ export default class BaseRenderer extends EventEmitter {
 
     inVariablePanel: boolean;
 
-    _timeEventListeners: { [key: string]: (callback: () => mixed) => void };
-
     _linkFadeTimeout: TimeoutID;
 
     seekEventHandler: Function;
@@ -91,6 +100,26 @@ export default class BaseRenderer extends EventEmitter {
     checkIsLooping: Function;
 
     _loopCounter: number;
+
+    _willHideControls: Function;
+
+    _hideControls: Function;
+
+    _timer: TimeManager;
+
+    isSrcIosPlayoutEngine: Function;
+
+    _cleanupSingleDuringBehaviour: Function;
+
+    _runSingleDuringBehaviour: Function;
+
+    _runDuringBehaviours: Function;
+
+    addTimeEventListener: Function;
+
+    _addPauseHandlersForTimer: Function;
+    
+    _removePauseHandlersForTimer: Function;
 
     /**
      * Load an particular representation. This should not actually render anything until start()
@@ -130,10 +159,20 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
+        this._togglePause = this._togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
 
+
+        this._willHideControls = this._willHideControls.bind(this); 
+        this._hideControls = this._hideControls.bind(this);
+        this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
+        this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
+        this.addTimeEventListener = this.addTimeEventListener.bind(this);
+        this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
+        this._removePauseHandlersForTimer = this._removePauseHandlersForTimer.bind(this);
+ 
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -151,8 +190,7 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         this._behaviourElements = [];
-
-        this._timeEventListeners = {};
+        this._timer = new TimeManager();
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -204,18 +242,22 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
+        this._timer.start();
+        this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._runDuringBehaviours();
     }
 
     end() {
+        this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._controller.off(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
+        this._timer.clear();
         this._loopCounter = 0;
     }
 
@@ -272,16 +314,55 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        logger.warn('getting time data from on BaseRenderer');
+        let  { duration } = this._representation;
+        let timeBased = false;
+        if (duration === undefined) {
+            duration = Infinity;
+        } else {
+            timeBased = true;
+        }
+        logger.warn('getting time data from BaseRenderer');
         const timeObject = {
-            timeBased: false,
-            currentTime: 0,
+            timeBased,
+            currentTime: this._timer.getTime(),
+            duration,
         };
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        logger.warn(`ignoring setting time on BaseRenderer ${time}`);
+        logger.warn(`setting time on BaseRenderer ${time}`);
+        this._timer.setTime(time);
+    }
+
+    _togglePause() {
+        if (this._playoutEngine.isPlaying()) {
+            this._timer.resume();
+        } else {
+            this._timer.pause();
+        }
+    }
+
+    _addPauseHandlersForTimer() {
+        if (this._timer) {
+            this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
+            this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
+        }
+    }
+
+    _removePauseHandlersForTimer() {
+        if (this._timer) {
+            this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
+            this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
+        }
+    }
+
+    pause() {
+        this._timer.pause();
+    }
+
+    play() {
+        this._timer.resume();
     }
 
     _seekBack() {
@@ -333,6 +414,7 @@ export default class BaseRenderer extends EventEmitter {
 
     complete() {
         this._hasEnded = true;
+        this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
             this._player.enterCompleteBehavourPhase();
@@ -459,76 +541,76 @@ export default class BaseRenderer extends EventEmitter {
             })
     }
 
-    resetDuringBehaviours() {
+    resetPlayer() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-        this._runDuringBehaviours();
+    }
+
+
+    _willHideControls(behaviour: Object) {
+        return behaviour.type ===
+            'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
+            && behaviour.disable_controls && behaviour.show_if_one_choice;
+    }
+
+    _hideControls(startTime: number) {
+        const hideControls = () => {
+            this._player.disableControls();
+            this._player._hideRomperButtons();
+        };
+        if (startTime > 1) {
+            this.addTimeEventListener(
+                'prechoice-control-hide',
+                startTime - 0.8,
+                hideControls,
+            );
+        } else {
+            hideControls();
+        }
     }
 
     _runDuringBehaviours() {
+        // run during behaviours
         if (this._representation.behaviours && this._representation.behaviours.during) {
-            // for each behaviour
-            this._representation.behaviours.during.forEach((behaviour) => {
-                // get start time
-                const startTime = behaviour.start_time;
-                const behaviourObject = behaviour.behaviour;
-                // get function to handle behaviour
-                const behaviourRunner = this.getBehaviourRenderer(behaviourObject.type);
-
-                if(behaviourRunner) {
-                    logger.info(`started during behaviour ${behaviourObject.type}`);
-                    if (startTime === 0) {
-                        behaviourRunner(behaviourObject, () => 
-                            logger.info(`completed during behaviour ${behaviourObject.type}`));
-                    } else {
-                        // set up to run function at set time
-                        this.addTimeEventListener(behaviourObject.type, startTime, () => {
-                            logger.info(`started during behaviour ${behaviourObject.type}`);
-                            behaviourRunner(behaviourObject, () =>
-                                logger.info(`completed during behaviour ${behaviourObject.type}`));
-                        });
-
-                        // if we have choices, hide the controls before they appear
-                        if (behaviourObject.type
-                            === 'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
-                            && behaviourObject.hasOwnProperty('disable_controls')
-                            && behaviourObject.disable_controls) {
-                            const hideControls = () => {
-                                this._player.disableControls();
-                                this._player._hideRomperButtons();
-                            };
-                            if (startTime > 1) {
-                                this.addTimeEventListener(
-                                    'prechoice-control-hide',
-                                    startTime - 0.8,
-                                    hideControls,
-                                );
-                            } else {
-                                hideControls();
-                            }
-                        }
-                    }
-                    // if there is a duration
-                    if (behaviour.duration) {
-                        const endTime = startTime + behaviour.duration;
-                        this.addTimeEventListener(`${behaviourObject.type}-clearup`, endTime, () => { // eslint-disable-line max-len
-                            // tidy up...
-                            logger.error('StoryPlayer does not yet support duration on behaviours');
-                        });
-                    }
-                } else {
-                    logger.warn(`${this.constructor.name} does not support ` +
-                        `${behaviourObject.type} - ignoring`)
-                }
+            const duringBehaviours = this._representation.behaviours.during;
+            duringBehaviours.forEach((behaviour) => {
+                this._runSingleDuringBehaviour(behaviour);
             });
         }
     }
 
-    // //////////// show link choice behaviour
+    _runSingleDuringBehaviour(behaviour: Object) {
+        const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
+        if (behaviourRunner) {
+            const startCallback = () => {
+                logger.info(`started during behaviour ${behaviour.behaviour.type}`);
+                behaviourRunner(behaviour.behaviour, () =>
+                    logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
+                if (this._willHideControls(behaviour.behaviour)) {
+                    this._hideControls(behaviour.start_time);
+                }
+            }
+            const startTime = behaviour.start_time;
+            const endTime = getBehaviourEndTime(behaviour);
+            const clearFunction = () => {
+                const behaviourElement = document.getElementById(behaviour.behaviour.id);
+                if (behaviourElement && behaviourElement.parentNode) {
+                    behaviourElement.parentNode.removeChild(behaviourElement);
+                }
+            };
+            const listenerId = behaviour.behaviour.id;
+            this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
+        } else {
+            logger.warn(`${this.constructor.name} does not support ` +
+                `${behaviour.behaviour.type} - ignoring`)
+        }
+    }
 
+    // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
         logger.info('Rendering link icons for user choice');
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+
         this._choiceBehaviourData = {
             choiceIconNEObjects: null,
             behaviour,
@@ -536,8 +618,9 @@ export default class BaseRenderer extends EventEmitter {
         };
         // listen for variable changes and update choices to reflect
         this._controller.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
+
         // show them in current state
-        return this._renderLinkChoices(behaviour, callback);
+        return this._renderLinkChoices();
     }
 
     // have the choices available changed
@@ -576,6 +659,9 @@ export default class BaseRenderer extends EventEmitter {
             callback: forceChoice ? callback : () => {},
         };
 
+        const behaviourOverlay = this._player.createBehaviourOverlay(behaviour);
+        this._setBehaviourElementAttribute(behaviourOverlay.overlay, 'link-choice');
+
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
             if (choiceIconNEObjects !== null) {
@@ -607,9 +693,12 @@ export default class BaseRenderer extends EventEmitter {
 
                 this._player.clearLinkChoices();
                 iconObjects.forEach((iconSpecObject) => {
-                    // add the icon to the player
-                    this._buildLinkIcon(iconSpecObject);
+
+                    this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                 });
+                if(iconObjects.length > 1 || showIfOneLink) {
+                    // add link elements to the div element for the behaviour
+                }
 
                 if (iconObjects.length > 1 || showIfOneLink) {
                     this._showChoiceIcons({
@@ -618,6 +707,9 @@ export default class BaseRenderer extends EventEmitter {
                         disableControls, // are controls disabled while icons shown
                         countdown, // do we animate countdown
                         iconOverlayClass, // css classes to apply to overlay
+
+                        behaviourOverlay,
+                        choiceCount: iconObjects.length,
                     });
 
                     // callback to say behaviour is done, but not if user can
@@ -637,17 +729,16 @@ export default class BaseRenderer extends EventEmitter {
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         if(this.checkIsLooping()) {
-            // this.removeLoopAttribute();
             this._playoutEngine.removeLoopAttribute(this._rendererId);
         }
-        this._followLink(eventObject.id);
+        this._followLink(eventObject.id, eventObject.behaviourId);
     }
 
     // get behaviours of links from behaviour meta data
     _getLinkChoiceBehaviours(behaviour: Object): Object {
         // set default behaviours if not specified in data model
         let countdown = false;
-        const disableControls = true; // always disable controls
+        let disableControls = true;
         let iconOverlayClass = null;
         let forceChoice = false;
         let oneShot = false;
@@ -664,16 +755,13 @@ export default class BaseRenderer extends EventEmitter {
         if (behaviour.hasOwnProperty('show_if_one_choice')) {
             showIfOneLink = behaviour.show_if_one_choice;
         }
-
         // do we show countdown?
         if (behaviour.hasOwnProperty('show_time_remaining')) {
             countdown = behaviour.show_time_remaining;
         }
         // do we disable controls while choosing
         if (behaviour.hasOwnProperty('disable_controls')) {
-            if (!behaviour.disable_controls) {
-                logger.warn('StoryPlayer ignoring data model: controls disabled during choices');
-            }
+            disableControls = behaviour.disable_controls;
         }
         // do we apply any special css classes to the overlay
         if (behaviour.hasOwnProperty('overlay_class')) {
@@ -798,12 +886,13 @@ export default class BaseRenderer extends EventEmitter {
 
     // tell the player to build an icon
     // but won't show yet
-    _buildLinkIcon(iconObject: Object) {
+    _buildLinkIcon(iconObject: Object, behaviourElement: HTMLElement) {
         // tell Player to build icon
         const targetId = iconObject.targetNarrativeElementId;
         let icon;
         if (iconObject.iconText && iconObject.resolvedUrl) {
             icon = this._player.addTextLinkIconChoice(
+                behaviourElement,
                 targetId,
                 iconObject.iconText,
                 iconObject.resolvedUrl,
@@ -811,12 +900,14 @@ export default class BaseRenderer extends EventEmitter {
             );
         } else if (iconObject.iconText) {
             icon = this._player.addTextLinkChoice(
+                behaviourElement,
                 targetId,
                 iconObject.iconText,
                 `Option ${(iconObject.choiceId + 1)}`,
             );
         } else if (iconObject.resolvedUrl) {
             icon = this._player.addLinkChoiceControl(
+                behaviourElement,
                 targetId,
                 iconObject.resolvedUrl,
                 `Option ${(iconObject.choiceId + 1)}`,
@@ -858,9 +949,11 @@ export default class BaseRenderer extends EventEmitter {
             disableControls, // are controls disabled while icons shown
             countdown, // do we animate countdown
             iconOverlayClass, // css classes to apply to overlay
+            behaviourOverlay,
+            choiceCount,
         } = iconDataObject;
 
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass);
+        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourOverlay, choiceCount);
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -872,9 +965,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // user has made a choice of link to follow - do it
-    _followLink(narrativeElementId: string) {
+    _followLink(narrativeElementId: string, behaviourId: string) {
         this._controller.off(VARIABLE_EVENTS.VARIABLE_CHANGED, this._renderLinkChoices);
-
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -896,18 +988,19 @@ export default class BaseRenderer extends EventEmitter {
 
             // if already ended, follow immediately
             if (this._hasEnded) {
-                this._hideChoiceIcons(narrativeElementId);
+                this._hideChoiceIcons(narrativeElementId, behaviourId);
             // do we keep the choice open?
             } else if (this._linkBehaviour && this._linkBehaviour.oneShot) {
                 // hide icons
-                this._hideChoiceIcons(null);
+                this._hideChoiceIcons(null, behaviourId);
                 // refresh next/prev so user can skip now if necessary
                 this._controller.refreshPlayerNextAndBack();
                 this._player.enableControls();
+                this._player.showSeekButtons();
             }
         } else {
             // or follow link now
-            this._hideChoiceIcons(narrativeElementId);
+            this._hideChoiceIcons(narrativeElementId, behaviourId);
         }
     }
 
@@ -959,18 +1052,21 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // hide the choice icons, and optionally follow the link
-    _hideChoiceIcons(narrativeElementId: ?string) {
+    _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
-        this._player._linkChoice.overlay.classList.add('romper-icon-fade');
-        this._linkFadeTimeout = setTimeout(() => {
-            this._player._linkChoice.overlay.classList.remove('romper-icon-fade');
-            this._player.clearLinkChoices();
-            if (narrativeElementId) {
-                this._controller.followLink(narrativeElementId);
-            } else {
-                this._linkBehaviour.callback();
-            }
-        }, 1500);
+        const behaviourElement = document.getElementById(behaviourId);
+        if(behaviourElement) {
+            this._linkFadeTimeout = setTimeout(() => {
+                behaviourElement.classList.remove('romper-icon-fade');
+                this._player.clearLinkChoices();
+                if (narrativeElementId) {
+                    this._controller.followLink(narrativeElementId);
+                } else {
+                    this._linkBehaviour.callback();
+                }
+            }, 1500);
+            behaviourElement.classList.add('romper-icon-fade');
+        }
     }
 
     // //////////// end of show link choice behaviour
@@ -978,6 +1074,7 @@ export default class BaseRenderer extends EventEmitter {
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
         const { colour } = behaviour;
         const overlayImageElement = document.createElement('div');
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
@@ -992,15 +1089,17 @@ export default class BaseRenderer extends EventEmitter {
         if (assetCollectionId) {
             this._fetchAssetCollection(assetCollectionId).then((image) => {
                 if (image.assets.image_src) {
-                    this._overlayImage(image.assets.image_src);
+                    this._overlayImage(image.assets.image_src, behaviour.id);
                     callback();
                 }
             });
         }
     }
 
-    _overlayImage(imageSrc: string) {
+    _overlayImage(imageSrc: string, id: string) {
         const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
+        this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.style.backgroundImage = `url(${imageSrc})`;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
@@ -1008,13 +1107,20 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderSocialPopup(behaviour, this._target, callback);
+        const modalElement = renderSocialPopup(behaviour, this._player._overlays, callback);
+        this._setBehaviourElementAttribute(modalElement, 'social-share');
         this._behaviourElements.push(modalElement);
     }
 
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderLinkoutPopup(behaviour, this._target, callback);
+        const modalElement = renderLinkoutPopup(behaviour, this._player._overlays, callback);
+        this._setBehaviourElementAttribute(modalElement, 'link-out');
         this._behaviourElements.push(modalElement);
+    }
+
+
+    _setBehaviourElementAttribute(element: HTMLElement, attributeValue: string) {
+        element.setAttribute('data-behaviour', attributeValue)
     }
 
     // //////////// variables panel choice behaviour
@@ -1314,17 +1420,18 @@ export default class BaseRenderer extends EventEmitter {
 
         const behaviourVariables = behaviour.variables;
         const formTitle = behaviour.panel_label;
-        const overlayImageElement = document.createElement('div');
-        overlayImageElement.className = 'romper-variable-panel';
+        const vairablePannelElement = document.createElement('div');
+        this._setBehaviourElementAttribute(vairablePannelElement, 'variable-pannel');
+        vairablePannelElement.className = 'romper-variable-panel';
 
         if (behaviour.background_colour) {
-            overlayImageElement.style.background = behaviour.background_colour;
+            vairablePannelElement.style.background = behaviour.background_colour;
         }
 
         const titleDiv = document.createElement('div');
         titleDiv.innerHTML = formTitle;
         titleDiv.className = 'romper-var-form-title';
-        overlayImageElement.appendChild(titleDiv);
+        vairablePannelElement.appendChild(titleDiv);
 
         this._controller.getVariableState()
             .then((storyVariables) => {
@@ -1348,7 +1455,7 @@ export default class BaseRenderer extends EventEmitter {
                     carouselDiv.appendChild(variableDiv);
                 });
 
-                overlayImageElement.appendChild(carouselDiv);
+                vairablePannelElement.appendChild(carouselDiv);
                 // show first question
                 let currentQuestion = 0;
 
@@ -1398,7 +1505,7 @@ export default class BaseRenderer extends EventEmitter {
 
                     if (fwd && currentQuestion >= behaviourVariables.length - 1) {
                         // start fade out
-                        overlayImageElement.classList.remove('active');
+                        vairablePannelElement.classList.remove('active');
                         this.inVariablePanel = false;
                         // complete NE when fade out done
                         setTimeout(() => {
@@ -1439,20 +1546,22 @@ export default class BaseRenderer extends EventEmitter {
                 okButtonContainer.appendChild(statusSpan);
                 okButtonContainer.appendChild(okButton);
 
-                overlayImageElement.appendChild(okButtonContainer);
+                vairablePannelElement.appendChild(okButtonContainer);
 
-                this._target.appendChild(overlayImageElement);
-                setTimeout(() => { overlayImageElement.classList.add('active'); }, 200);
-                this._behaviourElements.push(overlayImageElement);
+                this._target.appendChild(vairablePannelElement);
+                setTimeout(() => { vairablePannelElement.classList.add('active'); }, 200);
+                this._behaviourElements.push(vairablePannelElement);
             });
     }
 
     // //////////// end of variables panel choice behaviour
-
     _clearBehaviourElements() {
-        this._behaviourElements.forEach((be) => {
+        const behaviourElements = document.querySelectorAll('[data-behaviour]');
+        behaviourElements.forEach((be) => {
             try {
-                this._target.removeChild(be);
+                if(be && be.parentNode) {
+                    be.parentNode.removeChild(be);
+                }
             } catch (e) {
                 logger.warn(`could not remove behaviour element ${be.id} from Renderer`);
             }
@@ -1483,26 +1592,15 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timeEventListeners[listenerId] = callback;
-        this._playoutEngine.on(this._rendererId, 'timeupdate', () => {
-            const currentTime = this._playoutEngine.getCurrentTime(this._rendererId)
-            if (currentTime) {
-                if (time > 0 && currentTime >= time) {
-                    if (listenerId in this._timeEventListeners) {
-                        delete this._timeEventListeners[listenerId];
-                        callback();
-                    }
-                }
-            }
-        });
+    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
+        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback);
     }
 
     deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timeEventListeners) {
-            delete this._timeEventListeners[listenerId];
-        }
+        this._timer.deleteTimeEventListener(listenerId);
     }
+
+
 
     seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
@@ -1510,9 +1608,8 @@ export default class BaseRenderer extends EventEmitter {
             if (currentTime !== undefined && currentTime <= 0.002) {
                 if(inTime !== 0) {
                     this.setCurrentTime(inTime);
-                }
-                this.resetDuringBehaviours();
-
+                } 
+                // this.resetPlayer();
                 if(this.isSrcIosPlayoutEngine()) {
                     if(this._playoutEngine._playing
                         && this._playoutEngine._foregroundMediaElement.paused) {
@@ -1520,7 +1617,6 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 }
             }
-            this._loopCounter +=1;
         }
     }
     
