@@ -1739,7 +1739,6 @@ class Player extends EventEmitter {
     }
 
     showScrubBar() {
-        console.trace()
         this._scrubBar.style.display = 'block';
     }
 
