@@ -1860,27 +1860,20 @@ class Player extends EventEmitter {
         scrubBar.addEventListener('click', (e: MouseEvent) => {
             const percent = e.offsetX / scrubBar.offsetWidth;
             const { duration } = renderer.getCurrentTime();
-            if (renderer) {
-                renderer.setCurrentTime(percent * duration);
-            } else {
-                // Update the media time
-                const newTime = percent * duration;
-                renderer.setCurrentTime(newTime);
-            }
+            // Update the media time
+            const newTime = percent * duration;
+            renderer.setCurrentTime(newTime);
         });
 
-        let wasPlaying = false;
+        let isDragging = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
-            wasPlaying = renderer._playoutEngine.isPlaying();
-            renderer.pause();
+            isDragging = true;
         });
 
         // Play the media when the slider handle is dropped (if it was previously playing)
         scrubBar.addEventListener('mouseup', () => {
-            if (wasPlaying) {
-                renderer.play();
-            }
+            isDragging = false;
         });
 
         // Update the seek bar as the media plays
@@ -1888,9 +1881,8 @@ class Player extends EventEmitter {
             () => {
                 const { currentTime, duration } = renderer.getCurrentTime();
                 const value = ((100 / duration) * currentTime);
-
                 // Update the slider value
-                scrubBar.value = value.toString();
+                if (!isDragging) scrubBar.value = value.toString();
             },
             200,
         );

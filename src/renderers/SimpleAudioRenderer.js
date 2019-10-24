@@ -3,7 +3,6 @@
 import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
@@ -105,7 +104,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (mediaElement) {
             mediaElement.classList.add('romper-audio-element');
         }
-        this._player.enblePlayButton();
+        this._player.enablePlayButton();
         this._player.enableScrubBar();
     }
 
@@ -183,16 +182,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
-    _handlePlayPauseButtonClicked(): void {
-        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            if (this._playoutEngine.isPlaying()) {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            } else {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            }
-        }
-    }
-
     pause() {
         super.pause();
         this._playoutEngine.pause();
@@ -201,24 +190,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     play() {
         super.play();
         this._playoutEngine.play();
-    }
-
-    getCurrentTime(): Object {
-        let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (videoTime === undefined) {
-            videoTime = this._lastSetTime;
-        }
-        let duration = this._playoutEngine.getDuration(this._rendererId)
-        if (duration === undefined) {
-            duration = Infinity;
-        }
-        const remainingTime = duration - videoTime;
-        const timeObject = {
-            timeBased: true,
-            currentTime: videoTime,
-            remainingTime,
-        };
-        return timeObject;
     }
 
     setCurrentTime(time: number) {
@@ -230,6 +201,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
         this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        this._timer.setTime(targetTime);
     }
 
     switchFrom() {

@@ -118,6 +118,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _handlePlayPauseButtonClicked: Function;
 
+    _duration: ?number;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -240,6 +242,7 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
+        if (!this._playoutEngine.isPlaying()) this._timer.pause();
         this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
@@ -314,18 +317,50 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
-    getCurrentTime(): Object {
-        let  { duration } = this._representation;
-        let timeBased = false;
+    _getDuration(): number {
+        let  { duration } = this._representation; // specified in rep
+        if (duration !== undefined) {
+            this._duration = duration;
+            return this._duration;    
+        }
+
+        // otherwise need to work out
+        if (this._duration !== undefined  && this._duration !== Infinity) {
+            return this._duration; // if value stored, return
+        }
         if (duration === undefined) {
+            // if not, check playout engine
             duration = Infinity;
+            if (this.checkIsLooping()){
+                // looping, and not specified in rep => infinite
+                duration = Infinity;
+            } else {
+                // if we have playout engine duration, use
+                duration = this._playoutEngine.getDuration(this._rendererId);
+                if (duration === undefined) {
+                    duration = Infinity;
+                }
+            }
+        }
+        this._duration = duration;
+        return this._duration;
+    }
+
+    getCurrentTime(): Object {
+        const duration = this._getDuration();
+        const currentTime = this._timer.getTime();
+        let timeBased = false;
+        let remainingTime = Infinity;
+        if (duration === Infinity) {
             logger.warn('getting time data from BaseRenderer without duration');
         } else {
             timeBased = true;
+            remainingTime = duration - currentTime;
         }
         const timeObject = {
             timeBased,
-            currentTime: this._timer.getTime(),
+            currentTime,
+            remainingTime,
             duration,
         };
         return timeObject;

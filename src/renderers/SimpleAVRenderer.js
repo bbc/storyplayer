@@ -3,7 +3,6 @@
 import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
@@ -82,7 +81,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
-            // playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
@@ -276,37 +274,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             videoElement.style.filter = `blur(${blur}px)`;
         }
         callback();
-    }
-
-    getCurrentTime(): Object {
-        const videoTime = this._timer.getTime();
-        let  { duration } = this._representation;
-        if (duration === undefined) {
-            if (this._outTime > 0) {
-                duration = this._outTime - this._inTime;
-            } else if (this.checkIsLooping()){
-                duration = Infinity;
-            } else {
-                duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined) {
-                    duration = Infinity;
-                } else {
-                    duration -= this._inTime;
-                }
-            }
-        }
-        let remaining = duration;
-        if (this._outTime > 0) {
-            remaining = this._outTime;
-        }
-        remaining -= videoTime;
-        const timeObject = {
-            timeBased: true,
-            currentTime: videoTime,
-            remainingTime: remaining,
-            duration,
-        };
-        return timeObject;
     }
 
     // set how far into the segment this video should be (relative to in-point)

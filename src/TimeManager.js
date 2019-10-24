@@ -43,7 +43,8 @@ export default class TimeManager extends EventEmitter {
                         this._timedEvents[timeEventId].isRunning = true;
                     }
                     // handle clearing event
-                    if ((this._timeElapsed <= startTime || this._timeElapsed > endTime) && isRunning) {
+                    if ((this._timeElapsed <= startTime || this._timeElapsed > endTime)
+                        && isRunning) {
                         try {
                             if (clearCallback) clearCallback();
                         } catch (err) {
