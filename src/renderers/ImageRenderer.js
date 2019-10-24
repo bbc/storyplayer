@@ -7,8 +7,6 @@ import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
-const TIMER_INTERVAL = 100;
-
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLDivElement;
 
@@ -22,13 +20,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     _visible: boolean;
 
-    _imageTimer: ?IntervalID;
-
-    _timeElapsed: number;
-
     _duration: number;
-
-    _timedEvents: { [key: string]: Object };
 
     constructor(
         representation: Representation,
@@ -51,9 +43,7 @@ export default class ImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this._timeElapsed = 0;
-        this._duration = Infinity;
-        this._timedEvents = {};
+        this._duration = this._representation.duration ? this._representation.duration : Infinity;
     }
 
     willStart() {
@@ -62,72 +52,30 @@ export default class ImageRenderer extends BaseRenderer {
 
         this._visible = true;
         this._setVisibility(true);
-
         this._disablePlayButton();
     }
 
     start() {
         super.start();
         this._hasEnded = true;
-        if (this._representation.duration && this._representation.duration > 0){
-            this._duration = this._representation.duration;
-            this._timeElapsed = 0;
-            // eslint-disable-next-line max-len
-            logger.info(`Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
-        }
-        if (this._representation.duration && this._representation.duration === 0) {
+        if (this._duration === Infinity) {
+            logger.info(`Image representation ${this._representation.id} persistent`);
+        } else if (this._duration === 0) {
+            logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();
         } else {
-            this._startTimer();
+            // eslint-disable-next-line max-len
+            logger.info(`Image representation ${this._representation.id} timed for ${this._duration}s, starting now`);
+            this._timer.addTimeEventListener(
+                `${this._rendererId}-complete`,
+                this._duration,
+                () => {
+                    // eslint-disable-next-line max-len
+                    logger.info(`Image representation ${this._representation.id} completed time`);
+                    this.complete();
+                },  
+            );
         }
-    }
-
-    pause() {
-        clearInterval(this._imageTimer);
-    }
-
-    _startTimer() {
-        this._imageTimer = setInterval(() => {
-            this._timeElapsed += TIMER_INTERVAL/1000;
-            if (this._timeElapsed >= this._duration) {
-                // eslint-disable-next-line max-len
-                logger.info(`Image representation ${this._representation.id} completed timeout`);
-                this.complete();
-            }
-            Object.keys(this._timedEvents).forEach((timeEventId) => {
-                const { time, callback } = this._timedEvents[timeEventId];
-                if (this._timeElapsed >= time){
-                    delete this._timedEvents[timeEventId];
-                    callback();
-                }
-            });
-        }, TIMER_INTERVAL);
-    }
-
-    getCurrentTime(): Object {
-        if (this._representation.duration && this._representation.duration > 0) {
-            const timeObject = {
-                timeBased: true,
-                currentTime: this._timeElapsed,
-                remainingTime: this._duration - this._timeElapsed,
-            };
-            return timeObject;
-        }
-        return super.getCurrentTime();
-    }
-
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timedEvents[listenerId] = { time, callback };
-    }
-
-    deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timedEvents) {
-            delete this._timedEvents[listenerId];
-        }
-    }
-
-    play(){
-        this._startTimer();
     }
 
     end() {
@@ -141,10 +89,6 @@ export default class ImageRenderer extends BaseRenderer {
                 this._setVisibility(false);
             }
         }, 100);
-        if (this._imageTimer){
-            clearInterval(this._imageTimer);
-        }
-        this._timedEvents = {};
         this._enablePlayButton();
         this._enableScrubBar();
     }

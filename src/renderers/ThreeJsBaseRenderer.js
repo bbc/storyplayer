@@ -146,6 +146,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     }
 
     _createScene() {
+        // maintain view direction
+        this._applyPreviousOrientation();
+
         const target = this._player.mediaTarget;
         logger.info('Starting 3js video scene');
         this._scene = new THREE.Scene();
@@ -184,6 +187,24 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             webGlRenderer.render( this._scene, this._camera );
             this._testIfViewingIcon();
         };
+    }
+
+    // retrieve previous lat and long values from the variable store and apply
+    _applyPreviousOrientation() {
+        this._controller.getVariableValue('_threejs_orientation_lon')
+            .then((lon) => {
+                if (lon !== null) {
+                    logger.info(`Maintaining 360 orientation at ${lon} longitude`);
+                    this._view.lon = lon; 
+                }
+            });
+        this._controller.getVariableValue('_threejs_orientation_lat')
+            .then((lat) => { 
+                if (lat !== null) {
+                    logger.info(`Maintaining 360 orientation at ${lat} latitude`);
+                    this._view.lat = lat;
+                }
+            });
     }
 
     _animate() {
@@ -370,7 +391,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     end() {
         // only if this is being rendered
         if (this._started) {
-            this._player.getLinkChoiceElement().style.visibility = 'visible';
+            this._player.getLinkChoiceElement()[0].style.visibility = 'visible';
         }
 
         if (this._domElement && this._domElement.parentNode) {

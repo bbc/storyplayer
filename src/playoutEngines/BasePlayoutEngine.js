@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
-
 import Player from '../Player';
 import { checkAddDetailsOverride } from '../utils';
 
