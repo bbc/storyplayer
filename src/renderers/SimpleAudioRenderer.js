@@ -182,16 +182,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
-    pause() {
-        super.pause();
-        this._playoutEngine.pause();
-    }
-
-    play() {
-        super.play();
-        this._playoutEngine.play();
-    }
-
     setCurrentTime(time: number) {
         let targetTime = time;
         const choiceTime = this.getChoiceTime();

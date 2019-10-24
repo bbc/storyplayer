@@ -181,16 +181,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    pause() {
-        super.pause();
-        this._playoutEngine.pause();
-    }
-
-    play() {
-        super.play();
-        this._playoutEngine.play();
-    }
-
     // allow for clip trimming
     addTimeEventListener(
         listenerId: string,

@@ -410,10 +410,12 @@ export default class BaseRenderer extends EventEmitter {
 
     pause() {
         this._timer.pause();
+        this._playoutEngine.pause();
     }
 
     play() {
         this._timer.resume();
+        this._playoutEngine.play();
     }
 
     _seekBack() {
