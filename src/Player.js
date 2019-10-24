@@ -1876,6 +1876,9 @@ class Player extends EventEmitter {
             isDragging = false;
         });
 
+        // clear any existing polling
+        if (this._scrubTimePoller) clearInterval(this._scrubTimePoller);
+
         // Update the seek bar as the media plays
         this._scrubTimePoller = setInterval(
             () => {
