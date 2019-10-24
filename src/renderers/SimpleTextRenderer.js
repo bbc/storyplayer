@@ -47,19 +47,17 @@ export default class SimpleTextRenderer extends BaseRenderer {
         );
 
         this._target = player.mediaTarget;
-
-        this._behaviourRendererMap = {};
     }
 
     willStart() {
         super.willStart();
+        this.renderTextElement();
         this._player.disablePlayButton();
         this._player.disableScrubBar();
     }
 
     start() {
         super.start();
-        this.renderTextElement();
     }
 
     end() {

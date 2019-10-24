@@ -168,6 +168,10 @@ export default class RenderManager extends EventEmitter {
 
         window.addEventListener('orientationchange', this._handleOrientationChange, false);
 
+        this._player.on(REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
+            this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
+        });
+
         this._initialise();
     }
 

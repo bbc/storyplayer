@@ -58,7 +58,9 @@ export default class Controller extends EventEmitter {
         this._handleRendererCompletedEvent = this._handleRendererCompletedEvent.bind(this);
         this._handleRendererNextButtonEvent = this._handleRendererNextButtonEvent.bind(this);
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
-    
+        this._startStoryEventListener = this._startStoryEventListener.bind(this);
+        this._handleStoryEnd = this._handleStoryEnd.bind(this);
+
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
         this._warnIosUsers();
@@ -173,7 +175,6 @@ export default class Controller extends EventEmitter {
             if(!this._sessionManager) {
                 this._createSessionManager(storyId);
             }
-
             switch (this._sessionManager.sessionState) {
             case SESSION_STATE.RESUME:
             case SESSION_STATE.EXISTING:
@@ -188,7 +189,6 @@ export default class Controller extends EventEmitter {
         } else {
             this.startFromDefaultState(storyId, initialState);
         }
-        
     }
 
     resumeStoryFromState(storyId: string, initialState?: Object) {
@@ -256,19 +256,14 @@ export default class Controller extends EventEmitter {
 
                 this._reasoner = reasoner;
                 this._reasoner.start(initialState);
-                
                 this._chooseBeginningElement();
-
                 this._addListenersToRenderManager();
-                this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
                 this._renderManager.handleStoryStart(storyId);
-                
             })
             .catch((err) => {
                 logger.warn('Error starting story', err);
             });
     }
-
 
     _chooseResumeElement() {
         this._sessionManager.fetchPathHistory().then(pathHistory => {
@@ -286,7 +281,6 @@ export default class Controller extends EventEmitter {
     }
 
     _chooseBeginningElement() {
-
         // if we don't have a session manager get the beginning and return
         if(!this._sessionManager) {
             this._reasoner.chooseBeginning();
@@ -416,6 +410,8 @@ export default class Controller extends EventEmitter {
     /* eslint-disable max-len */
     // add event listeners to manager
     _addListenersToRenderManager() {
+        this._renderManager.on(REASONER_EVENTS.ROMPER_STORY_STARTED, this._startStoryEventListener);
+
         this._renderManager.on(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
@@ -427,8 +423,19 @@ export default class Controller extends EventEmitter {
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
     }
-    /* eslint-enable max-len */
 
+
+    _startStoryEventListener() {
+        const hide = this._reasoner._story.meta &&
+            this._reasoner._story.meta.storyplayer &&
+            this._reasoner._story.meta.storyplayer.taster.hide;
+
+        this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED, {
+            hide
+        });
+    }
+
+    /* eslint-enable max-len */
     // see if we have a linear story
     // and if we do, create a StoryIconRenderer
     _testForLinearityAndBuildStoryRenderer(storyId: string): Promise<any> {
@@ -1116,6 +1123,7 @@ export default class Controller extends EventEmitter {
         };
         this._enhancedAnalytics(logData);
         logger.warn('Story Ended!');
+        this.emit(REASONER_EVENTS.STORY_END);
     }
 
     // eslint-disable-next-line class-methods-use-this

@@ -1642,7 +1642,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // //////////// end of variables panel choice behaviour
-
     _clearBehaviourElements() {
         const behaviourElements = document.querySelectorAll('[data-behaviour]');
         behaviourElements.forEach((be) => {
