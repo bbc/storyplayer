@@ -29,10 +29,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _lastSetTime: number;
 
-    _inTime: number;
-
-    _outTime: number;
-
     _endedEventListener: Function;
 
     _outTimeEventListener: Function;
@@ -40,10 +36,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _seekEventHandler: Function;
 
     _testEndStallTimeout: TimeoutID;
-
-    _setOutTime: Function;
-
-    _setInTime: Function;
 
     constructor(
         representation: Representation,
@@ -64,11 +56,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
-        this._setInTime = this._setInTime.bind(this);
-        this._setOutTime = this._setOutTime.bind(this);
-
-        this._inTime = 0;
-        this._outTime = -1;
 
         this.renderVideoElement();
 
@@ -289,15 +276,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._lastSetTime = targetTime; // time into segment
         this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
         this._timer.setTime(targetTime);
-    }
-
-    _setInTime(time: number) {
-        this._inTime = time;
-        this.setCurrentTime(0);
-    }
-
-    _setOutTime(time: number) {
-        this._outTime = time;
     }
 
     switchFrom() {

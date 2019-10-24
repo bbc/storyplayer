@@ -120,6 +120,14 @@ export default class BaseRenderer extends EventEmitter {
 
     _duration: ?number;
 
+    _inTime: number;
+
+    _outTime: number;
+
+    _setOutTime: Function;
+
+    _setInTime: Function;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -190,6 +198,11 @@ export default class BaseRenderer extends EventEmitter {
 
         this._behaviourElements = [];
         this._timer = new TimeManager();
+
+        this._setInTime = this._setInTime.bind(this);
+        this._setOutTime = this._setOutTime.bind(this);
+        this._inTime = 0;
+        this._outTime = -1;
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -317,6 +330,15 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
+    _setInTime(time: number) {
+        this._inTime = time;
+        this.setCurrentTime(0);
+    }
+
+    _setOutTime(time: number) {
+        this._outTime = time;
+    }
+
     _getDuration(): number {
         let  { duration } = this._representation; // specified in rep
         if (duration !== undefined) {
@@ -325,7 +347,7 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         // otherwise need to work out
-        if (this._duration !== undefined  && this._duration !== Infinity) {
+        if (this._duration && this._duration !== Infinity) {
             return this._duration; // if value stored, return
         }
         if (duration === undefined) {
@@ -341,6 +363,11 @@ export default class BaseRenderer extends EventEmitter {
                     duration = Infinity;
                 }
             }
+        }
+        if (this._outTime >= 0) {
+            duration = this._outTime - this._inTime;
+        } else if (this._inTime) {
+            duration -= this._inTime;
         }
         this._duration = duration;
         return this._duration;
