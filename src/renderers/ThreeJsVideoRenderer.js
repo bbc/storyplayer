@@ -76,19 +76,34 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         }
     }
 
-    // _outTimeEventListener() {
-    //     const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-    //     const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-    //     if (currentTime) {
-    //         if (this._outTime > 0 && currentTime >= this._outTime) {
-    //             // TODO: Is this needed?
-    //             if(videoElement) {
-    //                 videoElement.pause();
-    //             }
-    //             this._endedEventListener();
-    //         }
-    //     }
-    // }
+    _outTimeEventListener() {
+        const { duration } = this.getCurrentTime();
+        let { currentTime } = this.getCurrentTime();
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (!this.checkIsLooping()) {
+            // if not looping use video time to allow for buffering delays
+            currentTime = playheadTime - this._inTime;
+            // and sync timer
+            this._timer.setTime(currentTime);
+        } else if (this._outTime > 0 && videoElement) {
+            // if looping, use timer
+            // if looping with in/out points, need to manually re-initiate loop
+            if (playheadTime >= this._outTime) {
+                videoElement.currentTime = this._inTime;
+                videoElement.play();
+            }
+        }
+        // have we reached the end?
+        // either timer past specified duration (for looping) 
+        // or video time past out time
+        if (currentTime > duration) {
+            if (videoElement) {
+                videoElement.pause();
+            }
+            this._endedEventListener();
+        }
+    }
 
     start() {
         super.start();
