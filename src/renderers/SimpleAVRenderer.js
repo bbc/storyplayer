@@ -279,14 +279,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
     getCurrentTime(): Object {
         const videoTime = this._timer.getTime();
         let  { duration } = this._representation;
-        if (duration === undefined) {
+        if (duration === undefined || duration === null) {
             if (this._outTime > 0) {
                 duration = this._outTime - this._inTime;
             } else if (this.checkIsLooping()){
                 duration = Infinity;
             } else {
                 duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined) {
+                if (duration === undefined || duration === null) {
                     duration = Infinity;
                 } else {
                     duration -= this._inTime;

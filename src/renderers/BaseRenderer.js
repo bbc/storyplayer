@@ -317,7 +317,7 @@ export default class BaseRenderer extends EventEmitter {
     getCurrentTime(): Object {
         let  { duration } = this._representation;
         let timeBased = false;
-        if (duration === undefined) {
+        if (duration === undefined || duration === null) {
             duration = Infinity;
         } else {
             timeBased = true;
