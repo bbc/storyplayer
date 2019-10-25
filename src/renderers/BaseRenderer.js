@@ -417,8 +417,25 @@ export default class BaseRenderer extends EventEmitter {
         }
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        this._timer.setTime(targetTime);
+        targetTime += this._inTime;
+
+        // if we have a media element, set that time and pause the timer until playhead has synced
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            const sync = () => {
+                const playheadTime = mediaElement.currentTime;
+                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going again
+                    this._timer.setTime(playheadTime);
+                    this._timer.resume();
+                    mediaElement.removeEventListener('timeupdate', sync);
+                }
+            }
+            this._timer.pause();
+            mediaElement.addEventListener('timeupdate', sync);
+            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        } else {
+            this._timer.setTime(targetTime);
+        }
     }
 
     _togglePause() {
@@ -729,6 +746,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _renderLinkChoices() {
+        console.log('ANDY rendereing link choices');
         const { behaviour, callback, choiceIconNEObjects } = this._choiceBehaviourData;
         // get behaviours of links from data
         const {
@@ -1148,6 +1166,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
+        console.log('ANDY hiding choice icons');
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         const behaviourElement = document.getElementById(behaviourId);
         if(behaviourElement) {
