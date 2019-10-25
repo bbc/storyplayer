@@ -558,11 +558,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A
                 ) {
                     this._player.addVolumeControl(rendererId, 'Foreground');
-                    if (rendererPlayoutObj.mediaElement) {
-                        const videoElement = rendererPlayoutObj.mediaElement;
-                        this._player.disconnectScrubBar();
-                        this.connectScrubBar(rendererId, videoElement);
-                    }
                 } else {
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
@@ -645,22 +640,24 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             .filter(key => this._media[key].active)
             .forEach((key) => {
                 const { mediaElement } = this._media[key];
-                const playCallback = () => {
-                    mediaElement.removeEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                    this._play(key);
-                };
                 if (!mediaElement) {
                     setTimeout(() => { this._play(key); }, 500);
                 } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
                     this._play(key);
                 } else {
-                    mediaElement.addEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
+                    // loadeddata event seems not to be reliable
+                    // this hack avoids it
+                    const timeoutId = setInterval(() => {
+                        mediaElement.play()
+                            .then(() => {
+                                clearInterval(timeoutId);
+                            })
+                            .catch((error) => {
+                                logger.warn(error, 'Not got permission to play');
+                                // Auto-play was prevented
+                                clearInterval(timeoutId);
+                            });
+                    }, 100);
                 }
             });
     }

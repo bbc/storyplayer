@@ -220,8 +220,8 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer) this._currentRenderer.pause();
         } else {
             // pause the timer for the current representation
-            if (this._currentRenderer) this._currentRenderer.play();
             if (this._isPlaying) {
+                if (this._currentRenderer) this._currentRenderer.play();
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasEnded()) {
                     this._player.playoutEngine.play();

@@ -3,7 +3,6 @@
 import Player from '../Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
@@ -78,16 +77,31 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     _outTimeEventListener() {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        const { duration } = this.getCurrentTime();
+        let { currentTime } = this.getCurrentTime();
         const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (currentTime) {
-            if (this._outTime > 0 && currentTime >= this._outTime) {
-                // TODO: Is this needed?
-                if(videoElement) {
-                    videoElement.pause();
-                }
-                this._endedEventListener();
+        const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (!this.checkIsLooping()) {
+            // if not looping use video time to allow for buffering delays
+            currentTime = playheadTime - this._inTime;
+            // and sync timer
+            this._timer.setTime(currentTime);
+        } else if (this._outTime > 0 && videoElement) {
+            // if looping, use timer
+            // if looping with in/out points, need to manually re-initiate loop
+            if (playheadTime >= this._outTime) {
+                videoElement.currentTime = this._inTime;
+                videoElement.play();
             }
+        }
+        // have we reached the end?
+        // either timer past specified duration (for looping) 
+        // or video time past out time
+        if (currentTime > duration) {
+            if (videoElement) {
+                videoElement.pause();
+            }
+            this._endedEventListener();
         }
     }
 
@@ -95,6 +109,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         super.start();
         this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     _startThreeSixtyVideo() {
@@ -143,10 +159,6 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl, fg.loop);
-                                this._playoutEngine.setTimings(this._rendererId, {
-                                    inTime: this._inTime,
-                                    outTime: this._outTime,
-                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -167,47 +179,17 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         }
     }
 
-    _handlePlayPauseButtonClicked(): void {
-        this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
-        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            if (this._playoutEngine.isPlaying()) {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            } else {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            }
-        }
-    }
-
-    getCurrentTime(): Object {
-        let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (videoTime === undefined || videoTime === null) {
-            videoTime = this._lastSetTime;
-        } else {
-            // convert to time into segment
-            videoTime -= this._inTime;
-        }
-        let duration = this._playoutEngine.getDuration(this._rendererId)
-        if (duration === undefined || duration === null) {
-            duration = Infinity;
-        }
-        let remaining = duration;
-        if (this._outTime > 0) {
-            remaining = this._outTime;
-        }
-        remaining -= videoTime;
-        const timeObject = {
-            timeBased: true,
-            currentTime: videoTime,
-            remainingTime: remaining,
-        };
-        return timeObject;
-    }
-
     // set how far into the segment this video should be (relative to in-point)
     setCurrentTime(time: number) {
-        this._lastSetTime = time; // time into segment
+        let targetTime = time;
+        const choiceTime = this.getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
         // convert to absolute time into video
-        this._playoutEngine.setCurrentTime(this._rendererId, time + this._inTime);
+        this._lastSetTime = targetTime; // time into segment
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
+        this._timer.setTime(targetTime);
     }
 
     _setInTime(time: number) {

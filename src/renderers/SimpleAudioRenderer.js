@@ -3,7 +3,6 @@
 import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
@@ -37,6 +36,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _outTime: number;
 
+    _outTimeEventListener: Function;
+
     _endedEventListener: Function;
 
     _seekEventHandler: Function;
@@ -61,6 +62,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         );
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
+        this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
@@ -84,27 +86,56 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
+    _outTimeEventListener() {
+        const { duration } = this.getCurrentTime();
+        let { currentTime } = this.getCurrentTime();
+        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+        if (!this.checkIsLooping()) {
+            // if not looping use video time to allow for buffering delays
+            currentTime = playheadTime - this._inTime;
+            // and sync timer
+            this._timer.setTime(currentTime);
+        } else if (this._outTime > 0 && videoElement) {
+            // if looping, use timer
+            // if looping with in/out points, need to manually re-initiate loop
+            if (playheadTime >= this._outTime) {
+                videoElement.currentTime = this._inTime;
+                videoElement.play();
+            }
+        }
+        // have we reached the end?
+        // either timer past specified duration (for looping) 
+        // or video time past out time
+        if (currentTime > duration) {
+            if (videoElement) {
+                videoElement.pause();
+            }
+            this._endedEventListener();
+        }
+    }
+
     _seekEventHandler() {
         super.seekEventHandler(this._inTime);
     }
 
     start() {
         super.start();
-        this._hasEnded = false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
 
-        this.setCurrentTime(0);
-
         // automatically move on at audio end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
+        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
             mediaElement.classList.add('romper-audio-element');
         }
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     end() {
@@ -116,6 +147,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
+        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
         try {
             this._clearBehaviourElements();
@@ -134,14 +166,16 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
+                    if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                        this._setInTime(parseFloat(fg.meta.romper.in));
+                    }
+                    if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                        this._setOutTime(parseFloat(fg.meta.romper.out));
+                    }
                     if (fg.assets.audio_src) {
                         this._fetchMedia(fg.assets.audio_src)
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
-                                this._playoutEngine.setTimings(this._rendererId, {
-                                    inTime: this._inTime,
-                                    outTime: this._outTime,
-                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'audio not found');
@@ -183,45 +217,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                 subs_url: mediaUrl,
             });
         }
-    }
-
-    _handlePlayPauseButtonClicked(): void {
-        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            if (this._playoutEngine.isPlaying()) {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            } else {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            }
-        }
-    }
-
-    getCurrentTime(): Object {
-        let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (videoTime === undefined || videoTime === null) {
-            videoTime = this._lastSetTime;
-        }
-        let duration = this._playoutEngine.getDuration(this._rendererId)
-        if (duration === undefined || duration === null) {
-            duration = Infinity;
-        }
-        const remainingTime = duration - videoTime;
-        const timeObject = {
-            timeBased: true,
-            currentTime: videoTime,
-            remainingTime,
-        };
-        return timeObject;
-    }
-
-    setCurrentTime(time: number) {
-        let targetTime = time;
-        const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < time) {
-            targetTime = choiceTime;
-        }
-        // convert to absolute time into video
-        this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
     }
 
     switchFrom() {

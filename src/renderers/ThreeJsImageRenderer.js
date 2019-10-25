@@ -134,8 +134,6 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             clearInterval(this._imageTimer);
         }
         this._timedEvents = {};
-        this._enablePlayButton();
-        this._enableScrubBar();
     }
 
     _showImage() {

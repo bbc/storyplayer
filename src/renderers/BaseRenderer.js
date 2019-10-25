@@ -122,6 +122,20 @@ export default class BaseRenderer extends EventEmitter {
     
     _removePauseHandlersForTimer: Function;
 
+    _handlePlayPauseButtonClicked: Function;
+
+    _duration: ?number;
+
+    _lastSetTime: number;
+
+    _inTime: number;
+
+    _outTime: number;
+
+    _setOutTime: Function;
+
+    _setInTime: Function;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -164,6 +178,7 @@ export default class BaseRenderer extends EventEmitter {
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
 
         this._willHideControls = this._willHideControls.bind(this); 
@@ -192,6 +207,12 @@ export default class BaseRenderer extends EventEmitter {
 
         this._behaviourElements = [];
         this._timer = new TimeManager();
+
+        this._setInTime = this._setInTime.bind(this);
+        this._setOutTime = this._setOutTime.bind(this);
+        this._lastSetTime = 0;
+        this._inTime = 0;
+        this._outTime = -1;
 
         this._destroyed = false;
         this._analytics = analytics;
@@ -244,13 +265,21 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
+        if (!this._playoutEngine.isPlaying()) {
+            this._timer.pause();
+        }
         this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
+        this._player.connectScrubBar(this);
+        this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
+        // set time to last set time (relative to click start)
+        this.setCurrentTime(this._lastSetTime);
         this._runDuringBehaviours();
     }
 
     end() {
+        this._player.disconnectScrubBar(this);
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
@@ -260,6 +289,11 @@ export default class BaseRenderer extends EventEmitter {
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         this._timer.clear();
         this._loopCounter = 0;
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+        this._lastSetTime = 0;
     }
 
     hasEnded(): boolean {
@@ -314,26 +348,79 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
-    getCurrentTime(): Object {
-        let  { duration } = this._representation;
-        let timeBased = false;
+    _setInTime(time: number) {
+        this._inTime = time;
+        this.setCurrentTime(0);
+    }
+
+    _setOutTime(time: number) {
+        this._outTime = time;
+    }
+
+    _getDuration(): number {
+        let  { duration } = this._representation; // specified in rep
+        if (duration !== undefined && duration !== null) {
+            this._duration = duration;
+            return this._duration;    
+        }
+
+        // otherwise need to work out
+        if (this._duration && this._duration !== Infinity) {
+            return this._duration; // if value stored, return
+        }
         if (duration === undefined || duration === null) {
+            // if not, check playout engine
             duration = Infinity;
+            if (this.checkIsLooping()){
+                // looping, and not specified in rep => infinite
+                duration = Infinity;
+            } else {
+                // if we have playout engine duration, use
+                duration = this._playoutEngine.getDuration(this._rendererId);
+                if (duration === undefined || duration === null) {
+                    duration = Infinity;
+                }
+            }
+        }
+        if (this._outTime >= 0) {
+            duration = this._outTime - this._inTime;
+        } else if (this._inTime) {
+            duration -= this._inTime;
+        }
+        this._duration = duration;
+        return this._duration;
+    }
+
+    getCurrentTime(): Object {
+        const duration = this._getDuration();
+        const currentTime = this._timer.getTime();
+        let timeBased = false;
+        let remainingTime = Infinity;
+        if (duration === Infinity) {
+            logger.warn('getting time data from BaseRenderer without duration');
         } else {
             timeBased = true;
+            remainingTime = duration - currentTime;
         }
-        logger.warn('getting time data from BaseRenderer');
         const timeObject = {
             timeBased,
-            currentTime: this._timer.getTime(),
+            currentTime,
+            remainingTime,
             duration,
         };
         return timeObject;
     }
 
     setCurrentTime(time: number) {
-        logger.warn(`setting time on BaseRenderer ${time}`);
-        this._timer.setTime(time);
+        let targetTime = time;
+        const choiceTime = this.getChoiceTime();
+        if (choiceTime >= 0 && choiceTime < time) {
+            targetTime = choiceTime;
+        }
+        // convert to absolute time into video
+        this._lastSetTime = targetTime; // time into segment
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
+        this._timer.setTime(targetTime);
     }
 
     _togglePause() {
@@ -358,12 +445,29 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    _handlePlayPauseButtonClicked(): void {
+        if (this._timer._paused) { 
+            this._timer.resume(); 
+        } else { 
+            this._timer.pause(); 
+        }
+        if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
+            if (this._playoutEngine.isPlaying()) {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
+            } else {
+                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
+            }
+        }
+    }
+
     pause() {
         this._timer.pause();
+        this._playoutEngine.pause();
     }
 
     play() {
         this._timer.resume();
+        this._playoutEngine.play();
     }
 
     _seekBack() {
@@ -1198,8 +1302,6 @@ export default class BaseRenderer extends EventEmitter {
     deleteTimeEventListener(listenerId: string) {
         this._timer.deleteTimeEventListener(listenerId);
     }
-
-
 
     seekEventHandler(inTime: number) {
         const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
