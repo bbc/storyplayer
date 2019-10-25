@@ -1079,8 +1079,11 @@ export default class BaseRenderer extends EventEmitter {
                 nelink.target_narrative_element_id === narrativeElementId);
             if (chosenLink) {
                 const chosenIndex = currentNarrativeElement.links.indexOf(chosenLink);
-                currentNarrativeElement.links.splice(chosenIndex);
-                currentNarrativeElement.links.unshift(chosenLink);
+                // (unless it already is)
+                if (chosenIndex !== 0) {
+                    currentNarrativeElement.links.splice(chosenIndex);
+                    currentNarrativeElement.links.unshift(chosenLink);
+                }
             }
 
             // if already ended, follow immediately
