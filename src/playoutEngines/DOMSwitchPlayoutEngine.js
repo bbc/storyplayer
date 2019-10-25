@@ -663,6 +663,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     pause() {
+        this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
             .filter((key) => {
