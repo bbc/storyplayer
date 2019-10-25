@@ -52,7 +52,6 @@ export default class ImageRenderer extends BaseRenderer {
 
         this._visible = true;
         this._setVisibility(true);
-        this._disablePlayButton();
     }
 
     start() {
@@ -60,6 +59,8 @@ export default class ImageRenderer extends BaseRenderer {
         this._hasEnded = true;
         if (this._duration === Infinity) {
             logger.info(`Image representation ${this._representation.id} persistent`);
+            this._disablePlayButton();
+            this._disableScrubBar();
         } else if (this._duration === 0) {
             logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();
@@ -89,8 +90,6 @@ export default class ImageRenderer extends BaseRenderer {
                 this._setVisibility(false);
             }
         }, 100);
-        this._enablePlayButton();
-        this._enableScrubBar();
     }
 
     renderImageElement() {

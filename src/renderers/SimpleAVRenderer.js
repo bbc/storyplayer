@@ -3,7 +3,6 @@
 import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
@@ -28,14 +27,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _applyBlurBehaviour: Function;
 
-    _handlePlayPauseButtonClicked: Function;
-
-    _lastSetTime: number;
-
-    _inTime: number;
-
-    _outTime: number;
-
     _endedEventListener: Function;
 
     _outTimeEventListener: Function;
@@ -43,10 +34,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
     _seekEventHandler: Function;
 
     _testEndStallTimeout: TimeoutID;
-
-    _setOutTime: Function;
-
-    _setInTime: Function;
 
     constructor(
         representation: Representation,
@@ -64,15 +51,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
-        this._setInTime = this._setInTime.bind(this);
-        this._setOutTime = this._setOutTime.bind(this);
-
-        this._inTime = 0;
-        this._outTime = -1;
 
         this.renderVideoElement();
 
@@ -81,11 +62,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // eslint-disable-next-line max-len
         this._behaviourRendererMap['urn:x-object-based-media:representation-behaviour:blur/v1.0'] = this._applyBlurBehaviour;
 
-        this._lastSetTime = 0;
-
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
-            playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
@@ -162,13 +140,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.setPlayoutActive(this._rendererId);
         logger.info(`Started: ${this._representation.id}`);
 
-        // set time to last set time (relative to click start)
-        this.setCurrentTime(this._lastSetTime);
+        // // set time to last set time (relative to click start)
+        this._player.enablePlayButton();
+        this._player.enableScrubBar();
     }
 
     end() {
         super.end();
-        this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
@@ -185,8 +163,16 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     // allow for clip trimming
-    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
-        super.addTimeEventListener(listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback);
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number,
+        clearCallback: ?Function,
+    ) {
+        super.addTimeEventListener(
+            listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback,
+        );
     }
 
     renderVideoElement() {
@@ -212,11 +198,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
                                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                                 }
                                 this.populateVideoElement(appendedUrl, fg.loop, fg.id);
-
-                                this._playoutEngine.setTimings(this._rendererId, {
-                                    inTime: this._inTime,
-                                    outTime: this._outTime,
-                                });
                             })
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
@@ -264,69 +245,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
             videoElement.style.filter = `blur(${blur}px)`;
         }
         callback();
-    }
-
-    _handlePlayPauseButtonClicked(): void {
-        if(this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            if (this._playoutEngine.isPlaying()) {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
-            } else {
-                this.logRendererAction(AnalyticEvents.names.VIDEO_PAUSE);
-            }
-        }
-    }
-
-    getCurrentTime(): Object {
-        const videoTime = this._timer.getTime();
-        let  { duration } = this._representation;
-        if (duration === undefined || duration === null) {
-            if (this._outTime > 0) {
-                duration = this._outTime - this._inTime;
-            } else if (this.checkIsLooping()){
-                duration = Infinity;
-            } else {
-                duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined || duration === null) {
-                    duration = Infinity;
-                } else {
-                    duration -= this._inTime;
-                }
-            }
-        }
-        let remaining = duration;
-        if (this._outTime > 0) {
-            remaining = this._outTime;
-        }
-        remaining -= videoTime;
-        const timeObject = {
-            timeBased: true,
-            currentTime: videoTime,
-            remainingTime: remaining,
-            duration,
-        };
-        return timeObject;
-    }
-
-    // set how far into the segment this video should be (relative to in-point)
-    setCurrentTime(time: number) {
-        let targetTime = time;
-        const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < time) {
-            targetTime = choiceTime;
-        }
-        // convert to absolute time into video
-        this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        this._timer.setTime(targetTime);
-    }
-
-    _setInTime(time: number) {
-        this._inTime = time;
-        this.setCurrentTime(0);
-    }
-
-    _setOutTime(time: number) {
-        this._outTime = time;
     }
 
     switchFrom() {
