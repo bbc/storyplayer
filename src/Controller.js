@@ -426,10 +426,9 @@ export default class Controller extends EventEmitter {
 
 
     _startStoryEventListener() {
-        const hide = this._reasoner._story.meta &&
-            this._reasoner._story.meta.storyplayer &&
-            this._reasoner._story.meta.storyplayer.taster.hide;
-
+        const hide = this._reasoner._story.meta && this._reasoner._story.meta.storyplayer &&
+            this._reasoner._story.meta.storyplayer.taster && this._reasoner._story.meta.storyplayer.taster.hideDuringExperience || false;
+        
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED, {
             hide
         });
