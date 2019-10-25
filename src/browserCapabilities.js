@@ -121,3 +121,33 @@ export default class BrowserCapabilities {
         return false;
     }
 }
+
+export class MediaFormats { 
+
+    constructor() {
+        this.browserCapabilities = BrowserCapabilities;
+
+        this.userAgent = BrowserUserAgens;
+    
+        this.hls = 'hls';
+    
+        this.dash = 'dash';
+    }
+
+    static getFormat() {
+        // desktop safari is special
+        if (this.userAgent.desktopSafari()) {
+            return this.hls;
+        }
+        // otherwise we check for explicit hls or dash support
+        if (this.browserCapabilities.dashSupport()) {
+            return this.dash;
+        }
+        if (this.browserCapabilities.hlsSupport()) {
+            return this.hls;
+        }
+        // if we can't support anything we return null
+        return null;
+    }
+
+}

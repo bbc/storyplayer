@@ -16,7 +16,7 @@ export default function (params: Object) { // eslint-disable-line no-unused-vars
      * @return {Promise.<any>} A promise which resolves to the requested variable,
      *         or null if the variable does not exist
      */
-    return (uri: string): Promise<any> => new Promise((resolve, reject) => {
+    return (uri: string, options: ?Object): Promise<any> => new Promise((resolve, reject) => {
         if (uri) {
             resolve(uri);
         } else {

@@ -718,6 +718,7 @@ class Player extends EventEmitter {
             throw new Error('Invalid Playout Engine');
         }
 
+        console.log("USING", this.playoutEngine);
         this._showErrorLayer = this._showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);

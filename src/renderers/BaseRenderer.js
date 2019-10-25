@@ -20,6 +20,7 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
+import { MediaFormat } from '../browserCapabilities';
 
 const SEEK_TIME = 10;
 
@@ -397,7 +398,7 @@ export default class BaseRenderer extends EventEmitter {
         let timeBased = false;
         let remainingTime = Infinity;
         if (duration === Infinity) {
-            logger.warn('getting time data from BaseRenderer without duration');
+            // logger.warn('getting time data from BaseRenderer without duration');
         } else {
             timeBased = true;
             remainingTime = duration - currentTime;

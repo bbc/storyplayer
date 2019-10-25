@@ -164,7 +164,7 @@ export type NarrativeElementFetcher = (id: string) => Promise<NarrativeElement>;
 export type RepresentationCollectionFetcher = (id: string) => Promise<RepresentationCollection>;
 export type RepresentationFetcher = (id: string) => Promise<Representation>;
 export type AssetCollectionFetcher = (id: string) => Promise<AssetCollection>;
-export type MediaFetcher = (uri: string, mediaType?:string) => Promise<string>;
+export type MediaFetcher = (uri: string, options?:Object) => Promise<string>;
 
 export type ExperienceFetchers = {
     storyFetcher: StoryFetcher,
