@@ -142,7 +142,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
         // // set time to last set time (relative to click start)
         this._player.enablePlayButton();
-        this._player.enableScrubBar();
+
+        if (!this.checkIsLooping() || this._representation.duration) {
+            // enable scrub bar if we are not looping or we have a duration
+            this._player.enableScrubBar();
+        }
     }
 
     end() {
