@@ -941,7 +941,12 @@ export default class BaseRenderer extends EventEmitter {
             choiceCount,
         } = iconDataObject;
 
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourOverlay, choiceCount);
+        this._player.showChoiceIcons(
+            forceChoice ? null : defaultLinkId,
+            iconOverlayClass,
+            behaviourOverlay,
+            choiceCount,
+        );
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -1143,7 +1148,8 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// end of variables panel choice behaviour
     _clearBehaviourElements() {
-        const behaviourElements = document.querySelectorAll(`[behaviour-renderer="${this._rendererId}"]`);
+        const behaviourElements =
+            document.querySelectorAll(`[behaviour-renderer="${this._rendererId}"]`);
         behaviourElements.forEach((be) => {
             try {
                 if(be && be.parentNode) {
@@ -1179,8 +1185,14 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
-        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback);
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number,
+        clearCallback: ?Function,
+    ) {
+        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback); // eslint-disable-line max-len
     }
 
     deleteTimeEventListener(listenerId: string) {
