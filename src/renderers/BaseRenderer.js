@@ -396,9 +396,7 @@ export default class BaseRenderer extends EventEmitter {
         const currentTime = this._timer.getTime();
         let timeBased = false;
         let remainingTime = Infinity;
-        if (duration === Infinity) {
-            logger.warn('getting time data from BaseRenderer without duration');
-        } else {
+        if (duration !== Infinity) {
             timeBased = true;
             remainingTime = duration - currentTime;
         }
