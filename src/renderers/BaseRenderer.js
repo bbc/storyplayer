@@ -266,10 +266,7 @@ export default class BaseRenderer extends EventEmitter {
         this._hasEnded = false;
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
-            console.log('ANDY starting playout is puased');
             this._timer.pause();
-        } else {
-            console.log('ANDY starting playout is playing');
         }
         this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
@@ -292,7 +289,10 @@ export default class BaseRenderer extends EventEmitter {
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         this._timer.clear();
         this._loopCounter = 0;
-        this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
+        this._player.removeListener(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
         this._lastSetTime = 0;
     }
 
@@ -419,9 +419,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
-        console.log('ANDY BR set PE to ', targetTime + this._inTime);
         this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        console.log('ANDY BR set timer to ', targetTime);
         this._timer.setTime(targetTime);
     }
 

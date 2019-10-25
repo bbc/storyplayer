@@ -429,7 +429,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutActive(rendererId: string) {
-        console.log('ANDY PE active');
         const rendererPlayoutObj = this._media[rendererId];
         if (this._media[rendererId].error === true) {
             this._player._showErrorLayer()
@@ -567,7 +566,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutInactive(rendererId: string) {
-        console.log('ANDY PE inactive');
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -635,7 +633,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     play() {
-        console.log('ANDY PE play');
         this._playing = true;
         this._hasStarted = true;
         this._player.setPlaying(true);
@@ -643,29 +640,29 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             .filter(key => this._media[key].active)
             .forEach((key) => {
                 const { mediaElement } = this._media[key];
-                const playCallback = () => {
-                    mediaElement.removeEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                    this._play(key);
-                };
                 if (!mediaElement) {
                     setTimeout(() => { this._play(key); }, 500);
                 } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
                     this._play(key);
                 } else {
-                    mediaElement.addEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
+                    // loadeddata event seems not to be reliable
+                    // this hack avoids it
+                    const timeoutId = setInterval(() => {
+                        mediaElement.play()
+                            .then(() => {
+                                clearInterval(timeoutId);
+                            })
+                            .catch((error) => {
+                                logger.warn(error, 'Not got permission to play');
+                                // Auto-play was prevented
+                                clearInterval(timeoutId);
+                            });
+                    }, 100);
                 }
             });
     }
 
     pause() {
-        console.log('ANDY PE pause');
-        this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
             .filter((key) => {
