@@ -180,14 +180,14 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     getCurrentTime(): Object {
         let videoTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (videoTime === undefined) {
+        if (videoTime === undefined || videoTime === null) {
             videoTime = this._lastSetTime;
         } else {
             // convert to time into segment
             videoTime -= this._inTime;
         }
         let duration = this._playoutEngine.getDuration(this._rendererId)
-        if (duration === undefined) {
+        if (duration === undefined || duration === null) {
             duration = Infinity;
         }
         let remaining = duration;
