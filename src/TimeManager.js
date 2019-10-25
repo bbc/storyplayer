@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import logger from './logger';
 
-const TIMER_INTERVAL = 100;
+const TIMER_INTERVAL = 10;
 
 export default class TimeManager extends EventEmitter {
 
