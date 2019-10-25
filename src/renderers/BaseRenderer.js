@@ -12,6 +12,8 @@ import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
 import { checkAddDetailsOverride } from '../utils';
+import { VARIABLE_EVENTS } from '../Events';
+import { buildPanel } from '../behaviours/VariablePanelHelper';
 
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
@@ -54,6 +56,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyShowChoiceBehaviour: Function;
 
+    _renderLinkChoices: Function;
+
     _applySocialSharePanelBehaviour: Function;
 
     _applyLinkOutBehaviour: Function;
@@ -81,6 +85,8 @@ export default class BaseRenderer extends EventEmitter {
     _preloadedIconAssets: Array<Image>;
 
     _savedLinkConditions: Object;
+
+    _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
 
@@ -162,6 +168,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyShowImageBehaviour = this._applyShowImageBehaviour.bind(this);
         this._applyShowVariablePanelBehaviour = this._applyShowVariablePanelBehaviour.bind(this);
         this._applyShowChoiceBehaviour = this._applyShowChoiceBehaviour.bind(this);
+        this._renderLinkChoices = this._renderLinkChoices.bind(this);
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
@@ -267,12 +274,11 @@ export default class BaseRenderer extends EventEmitter {
         this._addPauseHandlersForTimer();
         this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
-        this._removeInvalidDuringBehaviours()
-            .then(() => this._runDuringBehaviours());
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
         // set time to last set time (relative to click start)
         this.setCurrentTime(this._lastSetTime);
+        this._runDuringBehaviours();
     }
 
     end() {
@@ -283,6 +289,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         this._timer.clear();
         this._loopCounter = 0;
         this._player.removeListener(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
@@ -352,7 +359,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _getDuration(): number {
         let  { duration } = this._representation; // specified in rep
-        if (duration !== undefined) {
+        if (duration !== undefined && duration !== null) {
             this._duration = duration;
             return this._duration;    
         }
@@ -361,7 +368,7 @@ export default class BaseRenderer extends EventEmitter {
         if (this._duration && this._duration !== Infinity) {
             return this._duration; // if value stored, return
         }
-        if (duration === undefined) {
+        if (duration === undefined || duration === null) {
             // if not, check playout engine
             duration = Infinity;
             if (this.checkIsLooping()){
@@ -370,7 +377,7 @@ export default class BaseRenderer extends EventEmitter {
             } else {
                 // if we have playout engine duration, use
                 duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined) {
+                if (duration === undefined || duration === null) {
                     duration = Infinity;
                 }
             }
@@ -625,22 +632,6 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    _removeInvalidDuringBehaviours() {
-        return this._controller.getValidNextSteps()
-            .then((narrativeElementObjects) => {
-                if(narrativeElementObjects.length === 0) {
-                    logger.warn("Removing showlinkchoices behaviour due to no valid links");
-                    delete this._behaviourRendererMap[
-                        'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
-                    ];
-                }
-            })
-            // If this fails then we don't care
-            .catch((err) => {
-                logger.warn(err);
-            })
-    }
-
     resetPlayer() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
@@ -686,9 +677,9 @@ export default class BaseRenderer extends EventEmitter {
                 logger.info(`started during behaviour ${behaviour.behaviour.type}`);
                 behaviourRunner(behaviour.behaviour, () =>
                     logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-                if (this._willHideControls(behaviour.behaviour)) {
-                    this._hideControls(behaviour.start_time);
-                }
+            }
+            if (this._willHideControls(behaviour.behaviour)) {
+                this._hideControls(behaviour.start_time);
             }
             const startTime = behaviour.start_time;
             const endTime = getBehaviourEndTime(behaviour);
@@ -708,11 +699,41 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
-        const behaviourOverlay = this._player.createBehaviourOverlay(behaviour);
-        this._setBehaviourElementAttribute(behaviourOverlay.overlay, 'link-choice');
-
         logger.info('Rendering link icons for user choice');
+        this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
+
+        this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
+        this._setBehaviourElementAttribute(this._linkChoiceBehaviourOverlay.overlay, 'link-choice');
+
+        this._choiceBehaviourData = {
+            choiceIconNEObjects: null,
+            behaviour,
+            callback,
+        };
+        // listen for variable changes and update choices to reflect
+        this._controller.on(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
+
+        // show them in current state
+        return this._renderLinkChoices();
+    }
+
+    // have the choices available changed
+    // compare new NE objects to those we have at the moment
+    _choicesHaveChanged(newNEObjects: Array<Object>) {
+        const { choiceIconNEObjects } = this._choiceBehaviourData;
+        if (choiceIconNEObjects.length !== newNEObjects.length) return true;
+        let allNesStillIn = true;
+        newNEObjects.forEach((neo) => {
+            if (!choiceIconNEObjects.find(
+                (e) => e.targetNeId === neo.targetNeId)) {
+                allNesStillIn = false;
+            }
+        });
+        return !allNesStillIn;
+    }
+
+    _renderLinkChoices() {
+        const { behaviour, callback, choiceIconNEObjects } = this._choiceBehaviourData;
         // get behaviours of links from data
         const {
             showNeToEnd,
@@ -731,21 +752,34 @@ export default class BaseRenderer extends EventEmitter {
             callback: forceChoice ? callback : () => {},
         };
 
+        const behaviourOverlay = this._linkChoiceBehaviourOverlay;
+            
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
-            if(narrativeElementObjects.length === 0) {
-                return Promise.reject(new Error(
-                    "Shouldn't be possible to get here as "
-                    + "_removeInvalidDuringBehaviours should remove this rep"
-                ));
+            if (choiceIconNEObjects !== null) {
+                if (this._choicesHaveChanged(narrativeElementObjects)) {
+                    logger.info('Variable state has changed valid links - need to refresh icons');
+                    this._player.clearLinkChoices();
+                    behaviourOverlay.clearAll();
+                } else {
+                    logger.info('Variable state has changed, but same link options valid');
+                    return Promise.resolve();
+                }
             }
+
+            // save current set of icons so we can easily test if they need to be rebuilt
+            // after a variable state change
+            this._choiceBehaviourData.choiceIconNEObjects = narrativeElementObjects;
+            if(narrativeElementObjects.length === 0) {
+                logger.warn('Show link icons behaviour run, but no links are currently valid');
+                this._player.enableControls();
+                return Promise.resolve();
+            }
+
             // build icons
             const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
 
-            // we want to ensure a default link is taken, if we aren't looping as that'll remove the link from the selection next time around
-            if(!this.checkIsLooping()) {
-                this._applyDefaultLink(narrativeElementObjects);
-            }
+            // find out which link is default
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
@@ -753,7 +787,7 @@ export default class BaseRenderer extends EventEmitter {
 
                 this._player.clearLinkChoices();
                 iconObjects.forEach((iconSpecObject) => {
-                    // add the icon to the player
+
                     this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                 });
                 if(iconObjects.length > 1 || showIfOneLink) {
@@ -767,7 +801,7 @@ export default class BaseRenderer extends EventEmitter {
                         disableControls, // are controls disabled while icons shown
                         countdown, // do we animate countdown
                         iconOverlayClass, // css classes to apply to overlay
-                        // css classes to apply to overlay
+
                         behaviourOverlay,
                         choiceCount: iconObjects.length,
                     });
@@ -1012,7 +1046,13 @@ export default class BaseRenderer extends EventEmitter {
             behaviourOverlay,
             choiceCount,
         } = iconDataObject;
-        this._player.showChoiceIcons(forceChoice ? null : defaultLinkId, iconOverlayClass, behaviourOverlay, choiceCount);
+
+        this._player.showChoiceIcons(
+            forceChoice ? null : defaultLinkId,
+            iconOverlayClass,
+            behaviourOverlay,
+            choiceCount,
+        );
         this._player.enableLinkChoiceControl();
         if (disableControls) {
             // disable transport controls
@@ -1025,6 +1065,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
+        this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
         }
@@ -1034,16 +1075,15 @@ export default class BaseRenderer extends EventEmitter {
             if (Object.keys(this._savedLinkConditions).length === 0) {
                 this._saveLinkConditions();
             }
-            // now make this link the only valid option
-            currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id === narrativeElementId) {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 1] };
-                } else {
-                    // eslint-disable-next-line no-param-reassign
-                    neLink.condition = { '==': [1, 0] };
-                }
-            });
+
+            // now make chosen link top option
+            const chosenLink = currentNarrativeElement.links.find(nelink =>
+                nelink.target_narrative_element_id === narrativeElementId);
+            if (chosenLink) {
+                const chosenIndex = currentNarrativeElement.links.indexOf(chosenLink);
+                currentNarrativeElement.links.splice(chosenIndex);
+                currentNarrativeElement.links.unshift(chosenLink);
+            }
 
             // if already ended, follow immediately
             if (this._hasEnded) {
@@ -1072,34 +1112,6 @@ export default class BaseRenderer extends EventEmitter {
         const defaultLink = validLinks[0];
         
         return defaultLink && defaultLink.target_narrative_element_id;
-    }
-
-    // set the link conditions so only the default is valid
-    // returns the id of the NE of the default link or null if
-    // there isn't one
-    // takes an array of objects for all currently valid links
-    _applyDefaultLink(narrativeElementObjects: Array<Object>): ?string {
-        // filter links to ones amongst the valid links
-        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        const validLinks = currentNarrativeElement.links.filter(link =>
-            narrativeElementObjects.filter(ne =>
-                ne.targetNeId === link.target_narrative_element_id).length > 0);
-
-        const defaultLink = validLinks[0];
-        // save link conditions from model, and apply new ones to force default choice
-        if (!this._savedLinkConditions.narrativeElement) {
-            this._saveLinkConditions();
-        }
-        validLinks.forEach((neLink) => {
-            if (neLink === defaultLink) {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 1] };
-            } else {
-                // eslint-disable-next-line no-param-reassign
-                neLink.condition = { '==': [1, 0] };
-            }
-        });
-        return defaultLink.target_narrative_element_id;
     }
 
     // save link conditions for current NE
@@ -1208,233 +1220,10 @@ export default class BaseRenderer extends EventEmitter {
 
     _setBehaviourElementAttribute(element: HTMLElement, attributeValue: string) {
         element.setAttribute('data-behaviour', attributeValue)
+        element.setAttribute('behaviour-renderer', this._rendererId);
     }
 
     // //////////// variables panel choice behaviour
-
-    // an input for selecting the value for a list variable
-    _getListVariableSetter(varName: string, variableDecl: Object) {
-        if (variableDecl.values.length > 3) {
-            return this._getLongListVariableSetter(varName, variableDecl);
-        }
-        return this._getShortListVariableSetter(varName, variableDecl);
-    }
-
-    // a drop-down list input for selecting the value for a list variable
-    _getLongListVariableSetter(varName: string, variableDecl: Object) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        const options = variableDecl.values;
-        const varInputSelect = document.createElement('select');
-
-        options.forEach((optionValue) => {
-            const optionElement = document.createElement('option');
-            optionElement.setAttribute('value', optionValue);
-            optionElement.textContent = optionValue;
-            varInputSelect.appendChild(optionElement);
-        });
-        varInput.appendChild(varInputSelect);
-
-        this._controller.getVariableValue(varName)
-            .then((varValue) => {
-                varInputSelect.value = varValue;
-            });
-
-        varInputSelect.onchange = () =>
-            this._setVariableValue(varName, varInputSelect.value);
-
-        return varInput;
-    }
-
-    // an input for selecting the value for a list variable
-    _getBooleanVariableSetter(varName: string) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        const varInputSelect = document.createElement('div');
-        varInputSelect.classList.add('romper-var-form-button-div');
-
-        const yesElement = document.createElement('button');
-        const noElement = document.createElement('button');
-
-        const setSelected = (varVal) => {
-            if (varVal) {
-                yesElement.classList.add('selected');
-                noElement.classList.remove('selected');
-            } else {
-                yesElement.classList.remove('selected');
-                noElement.classList.add('selected');
-            }
-        };
-
-        yesElement.textContent = 'Yes';
-        yesElement.onclick = () => {
-            this._setVariableValue(varName, true);
-            setSelected(true);
-        };
-        varInputSelect.appendChild(yesElement);
-        noElement.textContent = 'No';
-        noElement.onclick = () => {
-            this._setVariableValue(varName, false);
-            setSelected(false);
-        };
-        varInputSelect.appendChild(noElement);
-
-        varInput.appendChild(varInputSelect);
-
-        this._controller.getVariableValue(varName)
-            .then(varValue => setSelected(varValue));
-
-        return varInput;
-    }
-
-    // an input for selecting the value for a list variable
-    _getShortListVariableSetter(varName: string, variableDecl: Object) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        const options = variableDecl.values;
-        const varInputSelect = document.createElement('div');
-        varInputSelect.classList.add('romper-var-form-button-div');
-
-        const buttons = {};
-        const setSelected = (varValue) => {
-            Object.keys(buttons).forEach((key) => {
-                if (key === varValue) {
-                    buttons[key].classList.add('selected');
-                } else {
-                    buttons[key].classList.remove('selected');
-                }
-            });
-        };
-
-        options.forEach((optionValue) => {
-            const optionElement = document.createElement('button');
-            optionElement.textContent = optionValue;
-            buttons[optionValue] = optionElement;
-            optionElement.onclick = () => {
-                this._setVariableValue(varName, optionValue);
-                setSelected(optionValue);
-            };
-            varInputSelect.appendChild(optionElement);
-        });
-        varInput.appendChild(varInputSelect);
-
-        this._controller.getVariableValue(varName)
-            .then(varValue => setSelected(varValue));
-
-        return varInput;
-    }
-
-    // an input for changing the value for an integer number variables
-    _getIntegerVariableSetter(varName: string) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        const varIntInput = document.createElement('input');
-        varIntInput.type = 'number';
-
-        this._controller.getVariableValue(varName)
-            .then((varValue) => {
-                varIntInput.value = varValue;
-            });
-
-        varIntInput.onchange = () => this._setVariableValue(varName, varIntInput.value);
-        varInput.appendChild(varIntInput);
-
-        return varInput;
-    }
-
-    _getNumberRangeVariableSetter(varName: string, range: Object, behaviourVar: Object) {
-        const varInput = document.createElement('div');
-        varInput.classList.add('romper-var-form-input-container');
-
-        const sliderDiv = document.createElement('div');
-        sliderDiv.style.position = 'relative';
-        const minSpan = document.createElement('span');
-        minSpan.classList.add('min');
-        if (behaviourVar.hasOwnProperty('min_label')) {
-            minSpan.textContent = behaviourVar.min_label === null ? '' : behaviourVar.min_label;
-        } else {
-            minSpan.textContent = range.min_val;
-        }
-        const maxSpan = document.createElement('span');
-        maxSpan.classList.add('max');
-        if (behaviourVar.hasOwnProperty('max_label')) {
-            maxSpan.textContent = behaviourVar.max_label === null ? '' : behaviourVar.max_label;
-        } else {
-            maxSpan.textContent = range.max_val;
-        }
-
-        const outputTest = document.createElement('div');
-        outputTest.className = 'romper-var-form-range-output';
-
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.classList.add('romper-var-form-slider');
-        slider.id = `variable-input-${varName}`;
-
-        sliderDiv.appendChild(minSpan);
-        sliderDiv.appendChild(slider);
-        sliderDiv.appendChild(maxSpan);
-
-        const numberInput = document.createElement('input');
-        numberInput.classList.add('romper-var-form-slider-input');
-        numberInput.classList.add('slider-input');
-        numberInput.type = 'number';
-
-        const setOutputPosition = () => {
-            const proportion = parseFloat(slider.value)/parseFloat(slider.max);
-            let leftPos = minSpan.clientWidth; // minimum value element
-            leftPos += (1/12) * slider.clientWidth; // slider margin L
-            leftPos += (proportion * (10/12) * slider.clientWidth);
-            outputTest.style.left = `${leftPos}px`;
-        }
-
-        slider.min = range.min_val;
-        slider.max = range.max_val;
-        this._controller.getVariableValue(varName)
-            .then((varValue) => {
-                slider.value = varValue;
-                numberInput.value = varValue;
-                outputTest.textContent = `${varValue}`;
-                setOutputPosition();
-            });
-
-        slider.onchange = () => {
-            this._setVariableValue(varName, slider.value);
-            numberInput.value = slider.value;
-        };
-
-        slider.oninput = () => {
-            numberInput.value = slider.value;
-            outputTest.textContent = `${slider.value}`;
-            setOutputPosition();
-        };
-
-        numberInput.onchange = () => {
-            this._setVariableValue(varName, numberInput.value);
-            slider.value = numberInput.value;
-        };
-
-        numberInput.oninput = () => {
-            this._setVariableValue(varName, numberInput.value);
-        };
-
-        varInput.appendChild(sliderDiv);
-        if (behaviourVar.hasOwnProperty('precise_entry') && behaviourVar.precise_entry){
-            varInput.appendChild(numberInput);
-        } else if (!(behaviourVar.hasOwnProperty('min_label')
-            || behaviourVar.hasOwnProperty('max_label'))) {
-            // if precise, or user has specified labels, don't show
-            // otherwise give number feedback
-            sliderDiv.appendChild(outputTest);
-            window.onresize = () => setOutputPosition();
-        }
-
-        return varInput;
-    }
 
     _setVariableValue(varName: string, value: any) {
         this._controller.getVariableValue(varName).then((oldVal) => {
@@ -1449,201 +1238,24 @@ export default class BaseRenderer extends EventEmitter {
         });
     }
 
-    // create an input element for setting a variable
-    _getVariableSetter(variableDecl: Object, behaviourVar: Object): HTMLDivElement {
-        const variableDiv = document.createElement('div');
-        variableDiv.className = 'romper-variable-form-item';
-        variableDiv.id = `romper-var-form-${behaviourVar.variable_name.replace('_', '-')}`;
-
-        const variableType = variableDecl.variable_type;
-        const variableName = behaviourVar.variable_name;
-
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'romper-var-form-label-div';
-        const labelSpan = document.createElement('span');
-        labelSpan.innerHTML = behaviourVar.label;
-        labelDiv.appendChild(labelSpan);
-        variableDiv.appendChild(labelDiv);
-
-        const answerContainer = document.createElement('div');
-        answerContainer.className = 'romper-var-form-answer-cont-inner';
-        const answerContainerOuter = document.createElement('div');
-        answerContainerOuter.className = 'romper-var-form-answer-cont';
-
-        answerContainerOuter.appendChild(answerContainer);
-
-        if (variableType === 'boolean') {
-            const boolDiv = this._getBooleanVariableSetter(variableName);
-            answerContainer.append(boolDiv);
-        } else if (variableType === 'list') {
-            const listDiv = this._getLongListVariableSetter(
-                behaviourVar.variable_name,
-                variableDecl,
-            );
-            listDiv.classList.add('romper-var-form-list-input');
-            answerContainer.append(listDiv);
-        } else if (variableType === 'number') {
-            let numDiv;
-            if (variableDecl.hasOwnProperty('range')) {
-                numDiv = this._getNumberRangeVariableSetter(
-                    variableName,
-                    variableDecl.range,
-                    behaviourVar,
-                );
-            } else {
-                numDiv = this._getIntegerVariableSetter(variableName);
-            }
-            numDiv.classList.add('romper-var-form-number-input');
-            answerContainer.append(numDiv);
-        }
-
-        variableDiv.appendChild(answerContainerOuter);
-        return variableDiv;
-    }
-
     _applyShowVariablePanelBehaviour(behaviour: Object, callback: () => mixed) {
-        this._player.setNextAvailable(false);
-        this.inVariablePanel = true;
-
-        const behaviourVariables = behaviour.variables;
-        const formTitle = behaviour.panel_label;
-        const vairablePannelElement = document.createElement('div');
-        this._setBehaviourElementAttribute(vairablePannelElement, 'variable-pannel');
-        vairablePannelElement.className = 'romper-variable-panel';
-
-        if (behaviour.background_colour) {
-            vairablePannelElement.style.background = behaviour.background_colour;
-        }
-
-        const titleDiv = document.createElement('div');
-        titleDiv.innerHTML = formTitle;
-        titleDiv.className = 'romper-var-form-title';
-        vairablePannelElement.appendChild(titleDiv);
-
-        this._controller.getVariableState()
-            .then((storyVariables) => {
-                const variablesFormContainer = document.createElement('div');
-                variablesFormContainer.className = 'romper-var-form-var-containers';
-
-                const carouselDiv = document.createElement('div');
-                carouselDiv.className = 'romper-var-form-carousel';
-                variablesFormContainer.appendChild(carouselDiv);
-
-                // get an array of divs - one for each question
-                const variableFields = [];
-                // div for each variable Element
-                behaviourVariables.forEach((behaviourVar, i) => {
-                    const storyVariable = storyVariables[behaviourVar.variable_name];
-                    const variableDiv = this._getVariableSetter(storyVariable, behaviourVar);
-                    if (i > 0) {
-                        variableDiv.classList.add('right');
-                    }
-                    variableFields.push(variableDiv);
-                    carouselDiv.appendChild(variableDiv);
-                });
-
-                vairablePannelElement.appendChild(carouselDiv);
-                // show first question
-                let currentQuestion = 0;
-
-                // submit button
-                const okButtonContainer = document.createElement('div');
-
-                okButtonContainer.className = 'romper-var-form-button-container';
-                const okButton = document.createElement('input');
-                okButton.className = 'romper-var-form-button';
-                okButton.type = 'button';
-                okButton.classList.add('var-next');
-                okButton.value = 'Next';
-
-                // back button
-                const backButton = document.createElement('input');
-                backButton.type = 'button';
-                backButton.value = 'Back';
-                backButton.classList.add('var-back');
-                backButton.classList.add('romper-var-form-button');
-
-                const statusSpan = document.createElement('span');
-                statusSpan.classList.add('var-count');
-                let statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
-                statusSpan.textContent = statusText;
-
-                // log var panel, value, even if user doesn't change it
-                const logSlideChange = (fwd: boolean) => {
-                    const currentBehaviour = behaviourVariables[currentQuestion];
-                    const varName = currentBehaviour.variable_name;
-                    this._controller.getVariableValue(varName).then((value) => {
-                        const actionName = fwd ?
-                            AnalyticEvents.names.VARIABLE_PANEL_NEXT_CLICKED :
-                            AnalyticEvents.names.VARIABLE_PANEL_BACK_CLICKED;
-                        const logData = {
-                            type: AnalyticEvents.types.USER_ACTION,
-                            name: actionName,
-                            from: 'unset',
-                            to: `${varName}: ${value}`,
-                        };
-                        this._analytics(logData);
-                    });
-                };
-
-                const changeSlide = (fwd: boolean) => {
-                    logSlideChange(fwd);
-                    const targetId = fwd ? currentQuestion + 1 : currentQuestion - 1;
-
-                    if (fwd && currentQuestion >= behaviourVariables.length - 1) {
-                        // start fade out
-                        vairablePannelElement.classList.remove('active');
-                        this.inVariablePanel = false;
-                        // complete NE when fade out done
-                        setTimeout(() => {
-                            this._player.setNextAvailable(true);
-                            return callback();
-                        }, 700);
-                        return false;
-                    }
-                    // hide current question and show next
-                    variableFields.forEach((varDiv, i) => {
-                        if (i === targetId) {
-                            varDiv.classList.remove('left');
-                            varDiv.classList.remove('right');
-                        } else if (i < targetId) {
-                            varDiv.classList.add('left');
-                            varDiv.classList.remove('right');
-                        } else {
-                            varDiv.classList.remove('left');
-                            varDiv.classList.add('right');
-                        }
-                    });
-
-                    currentQuestion = targetId;
-                    if (currentQuestion > 0) {
-                        backButton.classList.add('active');
-                    } else {
-                        backButton.classList.remove('active');
-                    }
-                    statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
-                    statusSpan.textContent = statusText;
-                    return false;
-                };
-
-                backButton.onclick = () => { changeSlide(false); };
-                okButton.onclick = () => { changeSlide(true); };
-
-                okButtonContainer.appendChild(backButton);
-                okButtonContainer.appendChild(statusSpan);
-                okButtonContainer.appendChild(okButton);
-
-                vairablePannelElement.appendChild(okButtonContainer);
-
-                this._target.appendChild(vairablePannelElement);
-                setTimeout(() => { vairablePannelElement.classList.add('active'); }, 200);
-                this._behaviourElements.push(vairablePannelElement);
-            });
+        buildPanel(
+            behaviour,
+            this._controller.getVariableState.bind(this._controller),
+            this._controller.getVariableValue.bind(this._controller),
+            this._setVariableValue.bind(this),
+            callback,
+            this._target,
+            this._player,
+            this,
+            this._analytics,
+        );
     }
 
     // //////////// end of variables panel choice behaviour
     _clearBehaviourElements() {
-        const behaviourElements = document.querySelectorAll('[data-behaviour]');
+        const behaviourElements =
+            document.querySelectorAll(`[behaviour-renderer="${this._rendererId}"]`);
         behaviourElements.forEach((be) => {
             try {
                 if(be && be.parentNode) {
@@ -1679,8 +1291,14 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(listenerId: string, startTime: number, startCallback: Function, endTime: ?number, clearCallback: ?Function) {
-        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback);
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number,
+        clearCallback: ?Function,
+    ) {
+        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback); // eslint-disable-line max-len
     }
 
     deleteTimeEventListener(listenerId: string) {
@@ -1696,7 +1314,8 @@ export default class BaseRenderer extends EventEmitter {
                 } 
                 // this.resetPlayer();
                 if(this.isSrcIosPlayoutEngine()) {
-                    if(this._playoutEngine._playing && this._playoutEngine._foregroundMediaElement.paused) {
+                    if(this._playoutEngine._playing
+                        && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
                     }
                 }

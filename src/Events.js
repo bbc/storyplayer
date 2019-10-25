@@ -28,6 +28,7 @@ export type RendererEvent = $Keys<typeof REASONER_EVENTS>;
 
 export const VARIABLE_EVENTS = [
     'VARIABLE_CHANGED',
+    'CONTROLLER_CHANGED_VARIABLE',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;

@@ -12,7 +12,7 @@ import logger from './logger';
 import { BrowserUserAgent } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils';
+import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
 const PLAYOUT_ENGINES = {
@@ -1436,19 +1436,19 @@ class Player extends EventEmitter {
         element.appendChild(this._countdownContainer);
     }
 
-    addTextLinkIconChoice(behaviourElement: HTMLElement, id: string, text: string, src: string, label: string): HTMLDivElement {
+    addTextLinkIconChoice(behaviourElement: HTMLElement, id: string, text: string, src: string, label: string): HTMLDivElement { // eslint-disable-line max-len
         return this._addLinkChoiceContainer(behaviourElement, id, label, text, src);
     }
 
-    addLinkChoiceControl(behaviourElement: HTMLElement, id: string, src: string, label: string): HTMLDivElement {
+    addLinkChoiceControl(behaviourElement: HTMLElement, id: string, src: string, label: string): HTMLDivElement { // eslint-disable-line max-len
         return this._addLinkChoiceContainer(behaviourElement, id, label, null, src);
     }
 
-    addTextLinkChoice(behaviourElement: HTMLElement, id: string, text: string, label: string): HTMLDivElement {
+    addTextLinkChoice(behaviourElement: HTMLElement, id: string, text: string, label: string): HTMLDivElement { // eslint-disable-line max-len
         return this._addLinkChoiceContainer(behaviourElement, id, label, text, null);
     }
 
-    _addLinkChoiceContainer(behaviourElement: HTMLElement, id: string, label: string, text: ?string, src: ?string) {
+    _addLinkChoiceContainer(behaviourElement: HTMLElement, id: string, label: string, text: ?string, src: ?string) { // eslint-disable-line max-len
         this._numChoices += 1;
 
         if (this._numChoices > 8) {
@@ -1456,7 +1456,7 @@ class Player extends EventEmitter {
             behaviourElement.classList.add('threerow');
         } else if (this._numChoices >= 4) {
             behaviourElement.classList.remove('threerow');
-            behaviourElement.overlay.classList.add('tworow');
+            behaviourElement.classList.add('tworow');
         } else {
             behaviourElement.classList.remove('tworow');
             behaviourElement.classList.remove('threerow');
@@ -1537,7 +1537,7 @@ class Player extends EventEmitter {
     // show the choice icons
     // make the one linking to activeLinkId NE highlighted
     // optionally apply a class to the overlay
-    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourOverlay: Object, choiceCount: number) {
+    showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourOverlay: Object, choiceCount: number) { // eslint-disable-line max-len
         this._hideRomperButtons();
         const behaviourElement = behaviourOverlay.overlay
         this._buttons.classList.add('icons-showing');
@@ -1752,22 +1752,21 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
+        this._numChoices = 0;
+        this._choiceIconSet = {};
+        if (this._choiceCountdownTimeout) {
+            clearTimeout(this._choiceCountdownTimeout);
+            this._choiceCountdownTimeout = null;
+            this._countdownTotal = 0;
+            this._countdownContainer.classList.remove('show');
+        }
+        this._buttons.classList.remove('icons-showing');
         const linkChoices = this.getLinkChoiceElement(true);
         linkChoices.forEach((linkChoice) => {
             linkChoice.style.setProperty('animation', 'none');
-            this._numChoices = 0;
-            this._choiceIconSet = {};
-            // this._linkChoice.clearAll();
-            if (this._choiceCountdownTimeout) {
-                clearTimeout(this._choiceCountdownTimeout);
-                this._choiceCountdownTimeout = null;
-                this._countdownTotal = 0;
-                this._countdownContainer.classList.remove('show');
-            }
             // eslint-disable-next-line no-param-reassign
             linkChoice.className =
                 'romper-overlay romper-link-choice-overlay romper-inactive';
-            this._buttons.classList.remove('icons-showing');
         });
     }
 
