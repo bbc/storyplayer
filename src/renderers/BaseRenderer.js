@@ -360,6 +360,7 @@ export default class BaseRenderer extends EventEmitter {
     _getDuration(): number {
         let  { duration } = this._representation; // specified in rep
         if (duration !== undefined && duration !== null) {
+            if (duration < 0) duration = Infinity;
             this._duration = duration;
             return this._duration;    
         }
