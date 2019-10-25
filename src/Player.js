@@ -1836,6 +1836,8 @@ class Player extends EventEmitter {
         const scrubBarChangeFunc = () => {
             // Calculate the new time
             const { duration } = renderer.getCurrentTime();
+            if (duration === Infinity) return;
+            
             const time = duration * (parseInt(scrubBar.value, 10) / 100);
             renderer.setCurrentTime(time);
 
@@ -1862,8 +1864,10 @@ class Player extends EventEmitter {
             const percent = e.offsetX / scrubBar.offsetWidth;
             const { duration } = renderer.getCurrentTime();
             // Update the media time
-            const newTime = percent * duration;
-            renderer.setCurrentTime(newTime);
+            if (duration !== Infinity) {
+                const newTime = percent * duration;
+                renderer.setCurrentTime(newTime);
+            }
         });
 
         let isDragging = false;
