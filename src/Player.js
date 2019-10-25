@@ -1750,25 +1750,22 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
-        const lce = this.getLinkChoiceElement()[0];
-        if (lce) lce.innerHTML = '';
-        // const linkChoices = this.getLinkChoiceElement(true);
-        // linkChoices.forEach((linkChoice) => {
-        //     linkChoice.style.setProperty('animation', 'none');
         this._numChoices = 0;
         this._choiceIconSet = {};
-        // this._linkChoice.clearAll();
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
             this._countdownTotal = 0;
             this._countdownContainer.classList.remove('show');
         }
-        //     // eslint-disable-next-line no-param-reassign
-        //     linkChoice.className =
-        //         'romper-overlay romper-link-choice-overlay romper-inactive';
         this._buttons.classList.remove('icons-showing');
-        // });
+        const linkChoices = this.getLinkChoiceElement(true);
+        linkChoices.forEach((linkChoice) => {
+            linkChoice.style.setProperty('animation', 'none');
+            // eslint-disable-next-line no-param-reassign
+            linkChoice.className =
+                'romper-overlay romper-link-choice-overlay romper-inactive';
+        });
     }
 
     // eslint-disable-next-line class-methods-use-this

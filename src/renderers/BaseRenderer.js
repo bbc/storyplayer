@@ -526,22 +526,6 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    _removeInvalidDuringBehaviours() {
-        return this._controller.getValidNextSteps()
-            .then((narrativeElementObjects) => {
-                if(narrativeElementObjects.length === 0) {
-                    logger.warn("Removing showlinkchoices behaviour due to no valid links");
-                    delete this._behaviourRendererMap[
-                        'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0'
-                    ];
-                }
-            })
-            // If this fails then we don't care
-            .catch((err) => {
-                logger.warn(err);
-            })
-    }
-
     resetPlayer() {
         this._player.resetControls();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
@@ -587,9 +571,9 @@ export default class BaseRenderer extends EventEmitter {
                 logger.info(`started during behaviour ${behaviour.behaviour.type}`);
                 behaviourRunner(behaviour.behaviour, () =>
                     logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
-                if (this._willHideControls(behaviour.behaviour)) {
-                    this._hideControls(behaviour.start_time);
-                }
+            }
+            if (this._willHideControls(behaviour.behaviour)) {
+                this._hideControls(behaviour.start_time);
             }
             const startTime = behaviour.start_time;
             const endTime = getBehaviourEndTime(behaviour);
@@ -644,7 +628,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _renderLinkChoices() {
         const { behaviour, callback, choiceIconNEObjects } = this._choiceBehaviourData;
-        logger.info('Refreshing link icons for user choice');
         // get behaviours of links from data
         const {
             showNeToEnd,
@@ -671,6 +654,7 @@ export default class BaseRenderer extends EventEmitter {
                 if (this._choicesHaveChanged(narrativeElementObjects)) {
                     logger.info('Variable state has changed valid links - need to refresh icons');
                     this._player.clearLinkChoices();
+                    behaviourOverlay.clearAll();
                 } else {
                     logger.info('Variable state has changed, but same link options valid');
                     return Promise.resolve();
@@ -682,6 +666,7 @@ export default class BaseRenderer extends EventEmitter {
             this._choiceBehaviourData.choiceIconNEObjects = narrativeElementObjects;
             if(narrativeElementObjects.length === 0) {
                 logger.warn('Show link icons behaviour run, but no links are currently valid');
+                this._player.enableControls();
                 return Promise.resolve();
             }
 
