@@ -95,7 +95,7 @@ Behaviours are associated with Representations in the Data Model, and can be run
 
 ## URL Parameters
 Below are the URL parameters that can be used to toggle features in StoryPlayer
-- overridePlayout - Takes 'src' or 'dom'. Sets the playout engine.
+- overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
 - debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines, and renders scrub bar.
 - inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
 - activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.

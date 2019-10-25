@@ -37,6 +37,15 @@ export class BrowserUserAgent {
         return false;
     }
 
+    static desktopSafari() {
+        const ua = window.navigator.userAgent;
+        const macOS = 'MacIntel';
+        if (navigator.platform && navigator.platform === macOS) {
+            return ua.indexOf('Macintosh') > 0 && ua.indexOf('Safari') > 0;
+        }
+        return false;
+    }
+
     static ie() {
         const ua = window.navigator.userAgent;
 

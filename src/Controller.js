@@ -332,6 +332,7 @@ export default class Controller extends EventEmitter {
                 ie: BrowserUserAgent.ie(),
                 edge: BrowserUserAgent.edge(),
                 iOS: BrowserUserAgent.iOS(),
+                desktopSafari: BrowserUserAgent.desktopSafari(),
             },
         };
         const anyRequirementsFailed = requirements.some((req) => {
