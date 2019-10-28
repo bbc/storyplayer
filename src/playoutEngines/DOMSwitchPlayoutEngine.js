@@ -852,6 +852,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    _toggleMute(event: Object) {
+        const rendererPlayoutObj = this._media[event.id];
+        if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
+            rendererPlayoutObj.mediaElement.muted = !rendererPlayoutObj.mediaElement.muted;
+        }
+    }
+
     _queueSubtitleAttach(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {

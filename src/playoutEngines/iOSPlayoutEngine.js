@@ -366,6 +366,16 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    _toggleMute(event: Object) {
+        const rendererPlayoutObj = this._media[event.id];
+        if (rendererPlayoutObj) {
+            const mediaElement = this.getMediaElement(event.id);
+            if(mediaElement) {
+                mediaElement.muted = !mediaElement.muted;
+            }
+        }
+    }
+
     _queueSubtitleAttach(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
