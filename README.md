@@ -102,6 +102,7 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer
 - shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
 - disableLookahead - 'true' Stops preloading of next/previous elements
 - addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
+- overridePlayoutFormat - Takes either 'hls' or 'dash' Other values are ignored.
 
 
 ## Resume State
