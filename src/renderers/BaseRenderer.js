@@ -705,7 +705,12 @@ export default class BaseRenderer extends EventEmitter {
                 }
             };
             const listenerId = behaviour.behaviour.id;
-            this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
+            if (startTime === 0) {
+                startCallback();
+                this.addTimeEventListener(listenerId, endTime, clearFunction);
+            } else {
+                this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
+            }
         } else {
             logger.warn(`${this.constructor.name} does not support ` +
                 `${behaviour.behaviour.type} - ignoring`)
