@@ -144,8 +144,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._player.enablePlayButton();
 
         if (!this.checkIsLooping() || this._representation.duration) {
-            // enable scrub bar if we are not looping or we have a duration
+            // enable scrub bar only if we are not looping or we have a duration
             this._player.enableScrubBar();
+        } else {
+            this._player.disableScrubBar();
         }
     }
 

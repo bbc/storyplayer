@@ -410,6 +410,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
+        if (time < 0 || time === Infinity) {
+            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
+            return;
+        }
         let targetTime = time;
         const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < time) {
@@ -417,8 +421,25 @@ export default class BaseRenderer extends EventEmitter {
         }
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        this._timer.setTime(targetTime);
+        targetTime += this._inTime;
+
+        // if we have a media element, set that time and pause the timer until playhead has synced
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            const sync = () => {
+                const playheadTime = mediaElement.currentTime;
+                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going again
+                    this._timer.setTime(playheadTime);
+                    this._timer.resume();
+                    mediaElement.removeEventListener('timeupdate', sync);
+                }
+            }
+            this._timer.pause();
+            mediaElement.addEventListener('timeupdate', sync);
+            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        } else {
+            this._timer.setTime(targetTime);
+        }
     }
 
     _togglePause() {
@@ -695,7 +716,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        logger.info('Rendering link icons for user choice');
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
