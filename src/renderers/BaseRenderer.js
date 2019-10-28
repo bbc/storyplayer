@@ -403,6 +403,7 @@ export default class BaseRenderer extends EventEmitter {
             currentTime,
             remainingTime,
             duration,
+            timersSyncing: this._timer.isSyncing(),
         };
         return timeObject;
     }
@@ -428,11 +429,11 @@ export default class BaseRenderer extends EventEmitter {
                 const playheadTime = mediaElement.currentTime;
                 if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going again
                     this._timer.setTime(playheadTime);
-                    this._timer.resume();
+                    this._timer.setSyncing(false);
                     mediaElement.removeEventListener('timeupdate', sync);
                 }
             }
-            this._timer.pause();
+            this._timer.setSyncing(true);
             mediaElement.addEventListener('timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
         } else {

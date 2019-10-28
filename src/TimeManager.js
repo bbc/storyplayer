@@ -15,10 +15,13 @@ export default class TimeManager extends EventEmitter {
 
     _timer: ?IntervalID;
 
+    _syncing: boolean;
+
     constructor() {
         super();
         this._timedEvents = {};
         this._paused = false;
+        this._syncing = false;
     }
 
     start() {
@@ -56,6 +59,22 @@ export default class TimeManager extends EventEmitter {
             }
         }, TIMER_INTERVAL);
 
+    }
+
+    // set the timer to pause while it syncs, or restart when done
+    setSyncing(syncing: boolean) {
+        if (syncing) {
+            this.pause();
+            this._syncing = true;
+        } else {
+            this.resume();
+            this._syncing = false;
+        }
+    }
+
+    // is the timer waiting while it syncs with media?
+    isSyncing() {
+        return this._syncing;
     }
 
     pause() {
