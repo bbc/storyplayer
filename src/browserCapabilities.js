@@ -1,6 +1,8 @@
 // @flow
 
 import Hls from 'hls.js';
+import { getOverrideFormat } from './utils';
+import logger from './logger';
 
 export class BrowserUserAgent {
     static iOS() {
@@ -15,7 +17,9 @@ export class BrowserUserAgent {
 
         if (navigator.platform) {
             while (iDevices.length) {
-                if (navigator.platform === iDevices.pop()) { return true; }
+                if (navigator.platform === iDevices.pop()) {
+                    return true;
+                }
             }
         }
 
@@ -23,16 +27,22 @@ export class BrowserUserAgent {
     }
 
     static iPhone() {
-        const iDevices = [
-            'iPhone Simulator',
-            'iPod Simulator',
-            'iPhone',
-            'iPod',
-        ];
+        const iDevices = ['iPhone Simulator', 'iPod Simulator', 'iPhone', 'iPod'];
         if (navigator.platform) {
             while (iDevices.length) {
-                if (navigator.platform === iDevices.pop()) { return true; }
+                if (navigator.platform === iDevices.pop()) {
+                    return true;
+                }
             }
+        }
+        return false;
+    }
+
+    static desktopSafari() {
+        const ua = window.navigator.userAgent;
+        const macOS = 'MacIntel';
+        if (navigator.platform && navigator.platform === macOS) {
+            return ua.indexOf('Macintosh') > 0 && ua.indexOf('Safari') > 0;
         }
         return false;
     }
@@ -42,13 +52,15 @@ export class BrowserUserAgent {
 
         const msie = ua.indexOf('MSIE ');
         if (msie > 0) {
-        // IE 10 or older => return version number
-            return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+            // IE 10 or older => return version number
+            return parseInt(
+                ua.substring(msie + 5, ua.indexOf('.', msie)),
+                10,
+            );
         }
 
         const trident = ua.indexOf('Trident/');
         if (trident > 0) {
-        // IE 11 => return version number
             const rv = ua.indexOf('rv:');
             return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
         }
@@ -62,8 +74,11 @@ export class BrowserUserAgent {
 
         const edge = ua.indexOf('Edge/');
         if (edge > 0) {
-        // Edge (IE 12+) => return version number
-            return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+            // Edge (IE 12+) => return version number
+            return parseInt(
+                ua.substring(edge + 5, ua.indexOf('.', edge)),
+                10,
+            );
         }
 
         // other browser
@@ -71,7 +86,7 @@ export class BrowserUserAgent {
     }
 }
 
-export default class BrowserCapabilities {
+export class BrowserCapabilities {
     static hlsSupported: boolean
 
     static dashSupported: boolean
@@ -110,5 +125,29 @@ export default class BrowserCapabilities {
         }
         BrowserCapabilities.dashSupported = false;
         return false;
+    }
+}
+
+export class MediaFormats { 
+
+    static getFormat() {
+        const overrideFormat = getOverrideFormat();
+        if(overrideFormat) {
+            logger.info(`Overriding media selector format: , ${overrideFormat}`)
+            return overrideFormat;
+        }
+        // desktop safari is special
+        if (BrowserUserAgent.desktopSafari() && BrowserCapabilities.hlsSupport()) {
+            return 'hls';
+        }
+        // otherwise we check for explicit hls or dash support
+        if (BrowserCapabilities.dashSupport()) {
+            return 'dash';
+        }
+        if (BrowserCapabilities.hlsSupport()) {
+            return 'hls';
+        }
+        // if we can't support anything we return null
+        return null;
     }
 }

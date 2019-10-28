@@ -683,7 +683,7 @@ class Player extends EventEmitter {
 
         let playoutToUse = 'dom';
 
-        if (BrowserUserAgent.iOS()) {
+        if (BrowserUserAgent.iOS() || BrowserUserAgent.desktopSafari()) {
             playoutToUse = 'ios';
         }
 
@@ -1796,7 +1796,7 @@ class Player extends EventEmitter {
 
     // eslint-disable-next-line class-methods-use-this
     showSeekButtons() {
-        const nonEssential = document.querySelectorAll('[data-required-controls="false"');
+        const nonEssential = document.querySelectorAll('[data-required-controls="false"]');
         nonEssential.forEach(control => {
             // eslint-disable-next-line no-param-reassign
             control.style.display = 'block';

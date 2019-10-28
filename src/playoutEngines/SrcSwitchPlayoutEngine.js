@@ -41,7 +41,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMediaElement.crossOrigin = 'anonymous';
 
         // Permission to play not granted on iOS without the autplay tag
-        if (BrowserUserAgent.iOS()) {
+        if (BrowserUserAgent.iOS() || BrowserUserAgent.desktopSafari()) {
             this._foregroundMediaElement.autoplay = true;
             this._backgroundMediaElement.autoplay = true;
             this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");

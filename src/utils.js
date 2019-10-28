@@ -30,7 +30,17 @@ export const checkDisableLookahead = () => {
     const disableLookahead = new URLSearchParams(window.location.search).get('disableLookahead');
     return (disableLookahead === 'true');;
 };
-export const copySelection = (e) => {
+
+export const checkOverrideFormat = (format: ?string) => {
+    return format && (format === 'hls' || format === 'dash');
+}
+
+export const getOverrideFormat =() => { 
+    const overrideFormat = new URLSearchParams(window.location.search).get('overridePlayoutFormat');
+    return checkOverrideFormat(overrideFormat) ? overrideFormat : null;
+};
+
+export const copySelection = (e: Object) => {
     e.target.select();
     document.execCommand('copy');
     e.target.focus();
