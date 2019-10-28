@@ -410,6 +410,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
+        if (time < 0 || time === Infinity) {
+            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
+            return;
+        }
         let targetTime = time;
         const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < time) {
@@ -712,7 +716,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        logger.info('Rendering link icons for user choice');
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
@@ -746,7 +749,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _renderLinkChoices() {
-        console.log('ANDY rendereing link choices');
         const { behaviour, callback, choiceIconNEObjects } = this._choiceBehaviourData;
         // get behaviours of links from data
         const {
@@ -1166,7 +1168,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // hide the choice icons, and optionally follow the link
     _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
-        console.log('ANDY hiding choice icons');
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         const behaviourElement = document.getElementById(behaviourId);
         if(behaviourElement) {
