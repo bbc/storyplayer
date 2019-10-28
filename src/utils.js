@@ -78,6 +78,9 @@ export const scrollToTop = () => {
 
 export const SLIDER_CLASS = 'slider-input';
 
+export const VIDEO = 'video';
+export const AUDIO = 'audio';
+
 export const preventEventDefault = (event: Event) => {
     // if the event doesn't come from the scrub bar we suppress the touch moves
     if(!event.target.classList.includes(SLIDER_CLASS)) {
