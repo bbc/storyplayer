@@ -4,8 +4,6 @@ import Player from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 
-import { MediaFormat } from '../browserCapabilities';
-
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';

@@ -20,7 +20,6 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
-import { MediaFormat } from '../browserCapabilities';
 
 const SEEK_TIME = 10;
 
