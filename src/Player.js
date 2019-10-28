@@ -683,7 +683,7 @@ class Player extends EventEmitter {
 
         let playoutToUse = 'dom';
 
-        if (BrowserUserAgent.iOS()) {
+        if (BrowserUserAgent.iOS() || BrowserUserAgent.desktopSafari()) {
             playoutToUse = 'ios';
         }
 
@@ -1796,7 +1796,7 @@ class Player extends EventEmitter {
 
     // eslint-disable-next-line class-methods-use-this
     showSeekButtons() {
-        const nonEssential = document.querySelectorAll('[data-required-controls="false"');
+        const nonEssential = document.querySelectorAll('[data-required-controls="false"]');
         nonEssential.forEach(control => {
             // eslint-disable-next-line no-param-reassign
             control.style.display = 'block';
@@ -1833,13 +1833,16 @@ class Player extends EventEmitter {
     connectScrubBar(renderer: BaseRenderer) {
         const scrubBar = this._scrubBar;
 
+        let isSyncing = false; // do we need to wait for everything to sync?
+
         const scrubBarChangeFunc = () => {
             // Calculate the new time
             const { duration } = renderer.getCurrentTime();
             const time = duration * (parseInt(scrubBar.value, 10) / 100);
+            isSyncing = true;
             renderer.setCurrentTime(time);
 
-            // Don't spam analtics with lots of volume changes
+            // Don't spam analtics with lots of changes
             // Wait 1 second after volume stops changing before sending analytics
             if (this._scrubbedEventTimeout) {
                 clearTimeout(this._scrubbedEventTimeout);
@@ -1859,13 +1862,14 @@ class Player extends EventEmitter {
 
         // allow clicking the scrub bar to seek to a media position
         scrubBar.addEventListener('click', (e: MouseEvent) => {
+            isSyncing = true;
             const percent = e.offsetX / scrubBar.offsetWidth;
             const { duration } = renderer.getCurrentTime();
             // Update the media time
             const newTime = percent * duration;
             renderer.setCurrentTime(newTime);
         });
-
+        
         let isDragging = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
@@ -1883,10 +1887,15 @@ class Player extends EventEmitter {
         // Update the seek bar as the media plays
         this._scrubTimePoller = setInterval(
             () => {
-                const { currentTime, duration } = renderer.getCurrentTime();
+                const { currentTime, duration, timersSyncing } = renderer.getCurrentTime();
                 const value = ((100 / duration) * currentTime);
                 // Update the slider value
-                if (!isDragging) scrubBar.value = value.toString();
+                if (!(isDragging || isSyncing)) {
+                    scrubBar.value = value.toString();
+                }
+                if (isSyncing && !timersSyncing) {
+                    isSyncing = false;
+                }
             },
             200,
         );

@@ -10,6 +10,8 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 
 import logger from '../logger';
+import { MediaFormats } from '../browserCapabilities';
+
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -143,11 +145,23 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // // set time to last set time (relative to click start)
         this._player.enablePlayButton();
 
-        if (!this.checkIsLooping() || this._representation.duration) {
-            // enable scrub bar only if we are not looping or we have a duration
-            this._player.enableScrubBar();
-        } else {
-            this._player.disableScrubBar();
+        // should we show the scrub bar?
+        // TODO - move 'loop' attribute from asset collection to representation to avoid this
+        if (this._representation.asset_collections.foreground_id) {
+            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+                .then((fg) => {
+                    if (!fg.loop) {
+                        // non-looping - enable
+                        this._player.enableScrubBar();
+                    } else if (this._representation.duration
+                        && this._representation.duration > 0) {
+                        // looping but with duration - enable
+                        this._player.enableScrubBar();
+                    } else {
+                        // looping with no duration - disable
+                        this._player.disableScrubBar();
+                    }
+                });
         }
     }
 
@@ -193,7 +207,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
                             this._setOutTime(parseFloat(fg.meta.romper.out));
                         }
-                        this._fetchMedia(fg.assets.av_src)
+                        this._fetchMedia(
+                            fg.assets.av_src,
+                            { mediaFormat: MediaFormats.getFormat() },
+                        )
                             .then((mediaUrl) => {
                                 let appendedUrl = mediaUrl;
                                 if (this._inTime > 0 || this._outTime > 0) {
