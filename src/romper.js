@@ -10,7 +10,7 @@ import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
-import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
+import { BrowserCapabilities,  BrowserUserAgent } from './browserCapabilities';
 
 import Package from '../package.json';
 

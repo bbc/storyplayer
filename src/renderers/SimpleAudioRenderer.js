@@ -173,7 +173,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._setOutTime(parseFloat(fg.meta.romper.out));
                     }
                     if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src)
+                        this._fetchMedia(fg.assets.audio_src, { mediaType: 'audio'})
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
                             })

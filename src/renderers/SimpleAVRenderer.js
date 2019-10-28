@@ -12,6 +12,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities';
 
+
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
     label: string,

@@ -11,7 +11,7 @@ import RenderManager from './RenderManager';
 import RendererEvents from './renderers/RendererEvents';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger, AnalyticsPayload } from './AnalyticEvents';
-import BrowserCapabilities, { BrowserUserAgent } from './browserCapabilities';
+import { BrowserCapabilities, BrowserUserAgent } from './browserCapabilities';
 import logger from './logger';
 import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
