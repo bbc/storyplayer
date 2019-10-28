@@ -424,7 +424,7 @@ export default class BaseRenderer extends EventEmitter {
 
         // if we have a media element, set that time and pause the timer until playhead has synced
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
+        if (mediaElement && mediaElement.id && mediaElement.src) {
             const isPaused = this._timer._paused;
             const sync = () => {
                 const playheadTime = mediaElement.currentTime;
@@ -434,7 +434,7 @@ export default class BaseRenderer extends EventEmitter {
                     if (isPaused) this._timer.pause();  // don't restart if we were paused
                     mediaElement.removeEventListener('timeupdate', sync);
                 }
-            }
+            };
             this._timer.setSyncing(true);
             mediaElement.addEventListener('timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
@@ -708,7 +708,18 @@ export default class BaseRenderer extends EventEmitter {
                 }
             };
             const listenerId = behaviour.behaviour.id;
-            this.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearFunction);
+            if (startTime === 0) {
+                startCallback();
+                this.addTimeEventListener(listenerId, endTime, clearFunction);
+            } else {
+                this.addTimeEventListener(
+                    listenerId,
+                    startTime,
+                    startCallback,
+                    endTime,
+                    clearFunction,
+                );
+            }
         } else {
             logger.warn(`${this.constructor.name} does not support ` +
                 `${behaviour.behaviour.type} - ignoring`)
