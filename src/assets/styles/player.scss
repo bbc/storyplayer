@@ -931,6 +931,11 @@ $romper-hover-text-size: 1.53em;
   width: 80%;
   z-index: 5;
 
+  &.romper-control-disabled {
+    pointer-events: none;
+    visibility: hidden;
+  }
+
   &[type='range'] {
     -webkit-appearance: none;
     background-color: $transparent;
