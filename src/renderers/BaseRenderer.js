@@ -425,11 +425,13 @@ export default class BaseRenderer extends EventEmitter {
         // if we have a media element, set that time and pause the timer until playhead has synced
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (mediaElement) {
+            const isPaused = this._timer._paused;
             const sync = () => {
                 const playheadTime = mediaElement.currentTime;
-                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going again
+                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
                     this._timer.setTime(playheadTime);
                     this._timer.setSyncing(false);
+                    if (isPaused) this._timer.pause();  // don't restart if we were paused
                     mediaElement.removeEventListener('timeupdate', sync);
                 }
             }
