@@ -67,6 +67,7 @@ export default class ImageRenderer extends BaseRenderer {
         } else {
             // eslint-disable-next-line max-len
             logger.info(`Image representation ${this._representation.id} timed for ${this._duration}s, starting now`);
+            this._enableScrubBar();
             this._timer.addTimeEventListener(
                 `${this._rendererId}-complete`,
                 this._duration,
