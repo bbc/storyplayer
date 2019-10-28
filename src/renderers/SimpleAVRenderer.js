@@ -207,7 +207,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
                             this._setOutTime(parseFloat(fg.meta.romper.out));
                         }
-                        this._fetchMedia(fg.assets.av_src, { mediaFormat: MediaFormats.getFormat() })
+                        this._fetchMedia(
+                            fg.assets.av_src,
+                            { mediaFormat: MediaFormats.getFormat() },
+                        )
                             .then((mediaUrl) => {
                                 let appendedUrl = mediaUrl;
                                 if (this._inTime > 0 || this._outTime > 0) {
