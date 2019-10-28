@@ -7,6 +7,7 @@ import type { MediaFetcher, AssetCollection } from '../romper';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
+import { AUDIO } from '../utils';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 
@@ -121,7 +122,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
-            this._fetchMedia(this._assetCollection.assets.audio_src, { mediaType: 'audio' }).then((mediaUrl) => {
+            this._fetchMedia(this._assetCollection.assets.audio_src, { mediaType: AUDIO }).then((mediaUrl) => {
                 this._populateAudioElement(mediaUrl);
             }).catch((err) => { logger.error(err, 'Notfound'); });
         }
