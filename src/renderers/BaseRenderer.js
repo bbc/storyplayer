@@ -84,8 +84,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _preloadedIconAssets: Array<Image>;
 
-    _savedLinkConditions: Object;
-
     _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
@@ -217,7 +215,6 @@ export default class BaseRenderer extends EventEmitter {
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
-        this._savedLinkConditions = {};
         this._preloadedBehaviourAssets = [];
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
@@ -1089,21 +1086,14 @@ export default class BaseRenderer extends EventEmitter {
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         if (this._linkBehaviour && this._linkBehaviour.showNeToEnd) {
             // if not done so, save initial conditions
-            if (Object.keys(this._savedLinkConditions).length === 0) {
-                this._saveLinkConditions();
-            }
-
             // now make chosen link top option
-            const chosenLink = currentNarrativeElement.links.find(nelink =>
-                nelink.target_narrative_element_id === narrativeElementId);
-            if (chosenLink) {
-                const chosenIndex = currentNarrativeElement.links.indexOf(chosenLink);
-                // (unless it already is)
-                if (chosenIndex !== 0) {
-                    currentNarrativeElement.links.splice(chosenIndex);
-                    currentNarrativeElement.links.unshift(chosenLink);
+            currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id === narrativeElementId) {
+                    neLink.override_as_chosen = true; // eslint-disable-line no-param-reassign
+                } else if (neLink.hasOwnProperty('override_as_chosen')) {
+                    neLink.override_as_chosen = false; // eslint-disable-line no-param-reassign
                 }
-            }
+            });
 
             // if already ended, follow immediately
             if (this._hasEnded) {
@@ -1134,40 +1124,15 @@ export default class BaseRenderer extends EventEmitter {
         return defaultLink && defaultLink.target_narrative_element_id;
     }
 
-    // save link conditions for current NE
-    _saveLinkConditions() {
-        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        const conditions = [];
-        currentNarrativeElement.links.forEach((neLink) => {
-            if (neLink.target_narrative_element_id) {
-                conditions.push({
-                    target: neLink.target_narrative_element_id,
-                    condition: neLink.condition,
-                });
-            }
-        });
-        this._savedLinkConditions = {
-            narrativeElement: currentNarrativeElement,
-            conditions,
-        };
-    }
 
     // revert link conditions for current NE to what they were originally
     _reapplyLinkConditions() {
-        if (this._savedLinkConditions.narrativeElement) {
-            const currentNarrativeElement = this._savedLinkConditions.narrativeElement;
-            currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id) {
-                    const matches = this._savedLinkConditions.conditions
-                        .filter(cond => cond.target === neLink.target_narrative_element_id);
-                    if (matches.length > 0) {
-                        // eslint-disable-next-line no-param-reassign
-                        neLink.condition = matches[0].condition;
-                    }
-                }
-            });
-            this._savedLinkConditions = {};
-        }
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        currentNarrativeElement.links.forEach((neLink) => {
+            if (neLink.hasOwnProperty('override_as_chosen')) {
+                neLink.override_as_chosen = false; // eslint-disable-line no-param-reassign
+            }
+        });
     }
 
     // hide the choice icons, and optionally follow the link

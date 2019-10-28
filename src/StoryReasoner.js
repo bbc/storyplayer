@@ -232,7 +232,12 @@ export default class StoryReasoner extends EventEmitter {
                         this.emit(REASONER_EVENTS.MULTIPLE_VALID_LINKS, nextElementChoices);
                         logger.info('StoryReasoner: multiple valid paths');
                     }
-                    this._followLink(nextElementChoices[0]);
+                    const overrideLink = nextElementChoices.find(link => link.override_as_chosen);
+                    if (overrideLink) {
+                        this._followLink(overrideLink);
+                    } else {
+                        this._followLink(nextElementChoices[0]);
+                    }
                 } else {
                     this.emit(ERROR_EVENTS, new Error('There are no possible links'));
                 }
