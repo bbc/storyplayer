@@ -42,7 +42,8 @@ export class BrowserUserAgent {
         const ua = window.navigator.userAgent;
         const macOS = 'MacIntel';
         if (navigator.platform && navigator.platform === macOS) {
-            return ua.indexOf('Macintosh') > 0 && ua.indexOf('Safari') > 0;
+            // it is a mac running safari not running chrome
+            return ua.indexOf('Macintosh') > 0 && ua.indexOf('Safari') > 0 && ua.indexOf('Chrome') < 0;
         }
         if(this.iOS()) {
             return ua.indexOf('Safari') > 0;
