@@ -23,6 +23,7 @@ export type Link = {
     description?: string,
     target_narrative_element_id?: string,
     link_rank?: number,
+    override_as_chosen?: boolean,
 };
 
 export type Story = {
