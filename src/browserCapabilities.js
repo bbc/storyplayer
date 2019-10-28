@@ -38,11 +38,14 @@ export class BrowserUserAgent {
         return false;
     }
 
-    static desktopSafari() {
+    static safari() {
         const ua = window.navigator.userAgent;
         const macOS = 'MacIntel';
         if (navigator.platform && navigator.platform === macOS) {
             return ua.indexOf('Macintosh') > 0 && ua.indexOf('Safari') > 0;
+        }
+        if(this.iOS()) {
+            return ua.indexOf('Safari') > 0;
         }
         return false;
     }
@@ -137,7 +140,7 @@ export class MediaFormats {
             return overrideFormat;
         }
         // desktop safari is special
-        if (BrowserUserAgent.desktopSafari() && BrowserCapabilities.hlsSupport()) {
+        if (BrowserUserAgent.safari() && BrowserCapabilities.hlsSupport()) {
             return 'hls';
         }
         // otherwise we check for explicit hls or dash support
