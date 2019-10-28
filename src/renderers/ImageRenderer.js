@@ -57,7 +57,7 @@ export default class ImageRenderer extends BaseRenderer {
     start() {
         super.start();
         this._hasEnded = true;
-        if (this._duration === Infinity) {
+        if (this._duration === Infinity || this._duration < 0) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
             this._disableScrubBar();

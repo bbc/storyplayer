@@ -85,8 +85,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _preloadedIconAssets: Array<Image>;
 
-    _savedLinkConditions: Object;
-
     _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
@@ -218,7 +216,6 @@ export default class BaseRenderer extends EventEmitter {
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
-        this._savedLinkConditions = {};
         this._preloadedBehaviourAssets = [];
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
@@ -361,6 +358,7 @@ export default class BaseRenderer extends EventEmitter {
     _getDuration(): number {
         let  { duration } = this._representation; // specified in rep
         if (duration !== undefined && duration !== null) {
+            if (duration < 0) duration = Infinity;
             this._duration = duration;
             return this._duration;    
         }
@@ -397,9 +395,7 @@ export default class BaseRenderer extends EventEmitter {
         const currentTime = this._timer.getTime();
         let timeBased = false;
         let remainingTime = Infinity;
-        if (duration === Infinity) {
-            // logger.warn('getting time data from BaseRenderer without duration');
-        } else {
+        if (duration !== Infinity) {
             timeBased = true;
             remainingTime = duration - currentTime;
         }
@@ -413,6 +409,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
+        if (time < 0 || time === Infinity) {
+            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
+            return;
+        }
         let targetTime = time;
         const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < time) {
@@ -420,8 +420,25 @@ export default class BaseRenderer extends EventEmitter {
         }
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime + this._inTime);
-        this._timer.setTime(targetTime);
+        targetTime += this._inTime;
+
+        // if we have a media element, set that time and pause the timer until playhead has synced
+        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
+        if (mediaElement) {
+            const sync = () => {
+                const playheadTime = mediaElement.currentTime;
+                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going again
+                    this._timer.setTime(playheadTime);
+                    this._timer.resume();
+                    mediaElement.removeEventListener('timeupdate', sync);
+                }
+            }
+            this._timer.pause();
+            mediaElement.addEventListener('timeupdate', sync);
+            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        } else {
+            this._timer.setTime(targetTime);
+        }
     }
 
     _togglePause() {
@@ -698,7 +715,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
-        logger.info('Rendering link icons for user choice');
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
@@ -1071,18 +1087,14 @@ export default class BaseRenderer extends EventEmitter {
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
         if (this._linkBehaviour && this._linkBehaviour.showNeToEnd) {
             // if not done so, save initial conditions
-            if (Object.keys(this._savedLinkConditions).length === 0) {
-                this._saveLinkConditions();
-            }
-
             // now make chosen link top option
-            const chosenLink = currentNarrativeElement.links.find(nelink =>
-                nelink.target_narrative_element_id === narrativeElementId);
-            if (chosenLink) {
-                const chosenIndex = currentNarrativeElement.links.indexOf(chosenLink);
-                currentNarrativeElement.links.splice(chosenIndex);
-                currentNarrativeElement.links.unshift(chosenLink);
-            }
+            currentNarrativeElement.links.forEach((neLink) => {
+                if (neLink.target_narrative_element_id === narrativeElementId) {
+                    neLink.override_as_chosen = true; // eslint-disable-line no-param-reassign
+                } else if (neLink.hasOwnProperty('override_as_chosen')) {
+                    neLink.override_as_chosen = false; // eslint-disable-line no-param-reassign
+                }
+            });
 
             // if already ended, follow immediately
             if (this._hasEnded) {
@@ -1113,40 +1125,15 @@ export default class BaseRenderer extends EventEmitter {
         return defaultLink && defaultLink.target_narrative_element_id;
     }
 
-    // save link conditions for current NE
-    _saveLinkConditions() {
-        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
-        const conditions = [];
-        currentNarrativeElement.links.forEach((neLink) => {
-            if (neLink.target_narrative_element_id) {
-                conditions.push({
-                    target: neLink.target_narrative_element_id,
-                    condition: neLink.condition,
-                });
-            }
-        });
-        this._savedLinkConditions = {
-            narrativeElement: currentNarrativeElement,
-            conditions,
-        };
-    }
 
     // revert link conditions for current NE to what they were originally
     _reapplyLinkConditions() {
-        if (this._savedLinkConditions.narrativeElement) {
-            const currentNarrativeElement = this._savedLinkConditions.narrativeElement;
-            currentNarrativeElement.links.forEach((neLink) => {
-                if (neLink.target_narrative_element_id) {
-                    const matches = this._savedLinkConditions.conditions
-                        .filter(cond => cond.target === neLink.target_narrative_element_id);
-                    if (matches.length > 0) {
-                        // eslint-disable-next-line no-param-reassign
-                        neLink.condition = matches[0].condition;
-                    }
-                }
-            });
-            this._savedLinkConditions = {};
-        }
+        const currentNarrativeElement = this._controller.getCurrentNarrativeElement();
+        currentNarrativeElement.links.forEach((neLink) => {
+            if (neLink.hasOwnProperty('override_as_chosen')) {
+                neLink.override_as_chosen = false; // eslint-disable-line no-param-reassign
+            }
+        });
     }
 
     // hide the choice icons, and optionally follow the link

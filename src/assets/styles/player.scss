@@ -926,10 +926,16 @@ $romper-hover-text-size: 1.53em;
   height: 10px;
   left: 10%;
   margin: 0;
+  outline: none;
   position: absolute;
   right: 0;
   width: 80%;
   z-index: 5;
+
+  &.romper-control-disabled {
+    pointer-events: none;
+    visibility: hidden;
+  }
 
   &[type='range'] {
     -webkit-appearance: none;
