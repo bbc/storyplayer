@@ -683,7 +683,7 @@ class Player extends EventEmitter {
 
         let playoutToUse = 'dom';
 
-        if (BrowserUserAgent.iOS() || BrowserUserAgent.desktopSafari()) {
+        if (BrowserUserAgent.iOS() || BrowserUserAgent.safari()) {
             playoutToUse = 'ios';
         }
 
