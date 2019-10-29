@@ -138,6 +138,9 @@ $romper-button-border: 4px;
   }
 
   .romper-dog {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
     pointer-events: none;
     position: absolute;
     z-index: 101;
