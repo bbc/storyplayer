@@ -255,6 +255,7 @@ export default class RenderManager extends EventEmitter {
         };
         this._fetchers.storyFetcher(storyId)
             .then((story) => {
+                this._setAspectRatio(story);
                 if (story.meta && story.meta.romper && story.meta.romper.dog) {
                     const dog = Object.assign(story.meta.romper.dog);
                     this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
@@ -294,6 +295,16 @@ export default class RenderManager extends EventEmitter {
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
             });
+    }
+
+    _setAspectRatio(story: Object) {
+        let aspectRatio = 16 / 9;
+        if (story.meta
+        && story.meta.storyplayer
+        && story.meta.storyplayer.aspect_ratio) {
+            aspectRatio =  story.meta.storyplayer.aspect_ratio;
+        }
+        this._player.setAspectRatio(aspectRatio);
     }
 
     handleNEChange(narrativeElement: NarrativeElement) {
