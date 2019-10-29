@@ -5,6 +5,8 @@ $romper-button-height: 25px;
 $romper-button-width: 25px;
 $romper-buttons-max-height: 4em;
 $romper-hover-text-size: 1.53em;
+$romper-button-padding: 4px;
+$romper-button-border: 4px;
 
 .romper-media-element-queued {
   display: none;
@@ -16,7 +18,7 @@ $romper-hover-text-size: 1.53em;
   height: $romper-button-height;
   margin: 5px 0 0;
   outline: none;
-  padding: 4px;
+  padding: $romper-button-padding;
   vertical-align: top;
   width: $romper-button-width;
 
@@ -648,7 +650,7 @@ $romper-hover-text-size: 1.53em;
     .romper-link-control {
       border-bottom-color: $transparent;
       border-bottom-style: solid;
-      border-bottom-width: 4px;
+      border-bottom-width: $romper-button-border;
       cursor: pointer;
       flex: 1 1 0;
       height: 100%;
@@ -660,11 +662,11 @@ $romper-hover-text-size: 1.53em;
     .romper-control-selected {
 
       &.text {
-        border-bottom: 4px solid $highlight;
+        border-bottom: $romper-button-border solid $highlight;
       }
 
       .romper-link-icon-container {
-        border: 4px solid $highlight;
+        border: $romper-button-border solid $highlight;
       }
     }
 
@@ -672,11 +674,11 @@ $romper-hover-text-size: 1.53em;
 
       &.default {
         &.text {
-          border-bottom: 4px solid $backing-colour;
+          border-bottom: $romper-button-border solid $backing-colour;
         }
 
         .romper-link-icon-container {
-          border: 4px solid $backing-colour;
+          border: $romper-button-border solid $backing-colour;
         }
       }
     }
@@ -688,7 +690,7 @@ $romper-hover-text-size: 1.53em;
 }
 
 .romper-link-icon-container {
-  border: 4px solid $transparent;
+  border: $romper-button-border solid $transparent;
   border-radius: 50%;
   height: 8em;
   margin-bottom: 5px;
@@ -1490,7 +1492,7 @@ $romper-hover-text-size: 1.53em;
         width: 100%;
 
         .romper-narrative-element-transport {
-          display: table;
+          width: 5 * ($romper-button-width + (2 * $romper-button-padding));
         }
       }
 
