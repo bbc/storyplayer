@@ -1336,7 +1336,7 @@ class Player extends EventEmitter {
     }
 
     _setMuteCallBack(id: string, label: string, muteButton: HTMLDivElement)  {
-        return (event: Object) => {
+        return () => {
             muteButton.classList.toggle('romper-mute-button');
             const muted = muteButton.classList.toggle('romper-muted-button');
             muteButton.setAttribute('data-muted', muted)
