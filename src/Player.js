@@ -1314,7 +1314,7 @@ class Player extends EventEmitter {
             muteButton.setAttribute('data-muted', muted)
             this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
             this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED,
-                null, `${event.label}: ${muted}`);
+                `${label}: ${!muted}`, `${label}: ${muted}`);
         };
     };
 
