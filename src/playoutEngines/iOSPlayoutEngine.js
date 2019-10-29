@@ -59,6 +59,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._toggleMute = this._toggleMute.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
         this._queueSubtitleAttach = this._queueSubtitleAttach.bind(this);
 
@@ -76,6 +77,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+
+        this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
     }
 
     setPermissionToPlay(value: boolean) {
@@ -371,7 +374,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (rendererPlayoutObj) {
             const mediaElement = this.getMediaElement(event.id);
             if(mediaElement) {
-                mediaElement.muted = !mediaElement.muted;
+                mediaElement.muted = event.muted;
             }
         }
     }

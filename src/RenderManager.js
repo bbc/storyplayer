@@ -60,6 +60,7 @@ export default class RenderManager extends EventEmitter {
     _rendererState: {
         lastSwitchableLabel: string,
         volumes: { [key: string]: number },
+        muted: { [key: string]: boolean},
     };
 
     _upcomingRenderers: { [key: string]: BaseRenderer };
@@ -98,7 +99,8 @@ export default class RenderManager extends EventEmitter {
         this._analytics = analytics;
         this._assetUrls = assetUrls;
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
-        this._handleOrientationChange = this._handleOrientationChange.bind(this)
+        this._handleOrientationChange = this._handleOrientationChange.bind(this);
+        this._setVolumePersistence = this._setVolumePersistence.bind(this);
         this._privacyNotice = privacyNotice;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls, this._controller);
@@ -142,6 +144,10 @@ export default class RenderManager extends EventEmitter {
         });
         this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
             this._rendererState.volumes[event.label] = event.value;
+        });
+
+        this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, (event) => {
+            this._rendererState.muted[event.label] = event.muted;
         });
         // pause background fade when fg renderer pauses
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, () => {
@@ -493,10 +499,7 @@ export default class RenderManager extends EventEmitter {
                         }
                     });
                     // ensure volume persistence
-                    Object.keys(this._rendererState.volumes).forEach((label) => {
-                        const value = this._rendererState.volumes[label];
-                        this._player.setVolumeControlLevel(label, value);
-                    });
+                    this._setVolumePersistence();
                 },
             );
 
@@ -517,10 +520,7 @@ export default class RenderManager extends EventEmitter {
             currentRenderer.willStart();
             this.refreshOnwardIcons();
             // ensure volume persistence
-            Object.keys(this._rendererState.volumes).forEach((label) => {
-                const value = this._rendererState.volumes[label];
-                this._player.setVolumeControlLevel(label, value);
-            });
+            this._setVolumePersistence();
         } else {
             logger.error('no current renderer to restart');
         }
@@ -561,15 +561,23 @@ export default class RenderManager extends EventEmitter {
         this.refreshOnwardIcons();
         newRenderer.willStart(newNarrativeElement.name, newNarrativeElement.id);
         // ensure volume persistence
-        Object.keys(this._rendererState.volumes).forEach((label) => {
-            const value = this._rendererState.volumes[label];
-            this._player.setVolumeControlLevel(label, value);
-        });
+        this._setVolumePersistence();
 
     }
 
     _showBackIcon() {
         this._player.setBackAvailable(true);
+    }
+
+    _setVolumePersistence() {
+        Object.keys(this._rendererState.volumes).forEach((label) => {
+            const value = this._rendererState.volumes[label];
+            this._player.setVolumeControlLevel(label, value);
+        });
+        Object.keys(this._rendererState.muted).forEach((label) => {
+            const muted = this._rendererState.muted[label];
+            this._player.setMuted(label, muted);
+        });
     }
 
     // show next button, or icons if choice
@@ -825,6 +833,7 @@ export default class RenderManager extends EventEmitter {
             lastSwitchableLabel: '', // the label of the last selected switchable choice
             // also, audio muted/not...
             volumes: {},
+            muted: {},
         };
     }
 

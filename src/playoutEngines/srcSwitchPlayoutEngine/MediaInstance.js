@@ -407,8 +407,8 @@ export default class HlsInstance {
         this._mediaElement.volume = volume;
     }
 
-    toggleMute() {
-        this._mediaElement.muted = !this._mediaElement.muted;
+    toggleMute(muted: boolean) {
+        this._mediaElement.muted = muted;
     }
 
     getVolume() {
