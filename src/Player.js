@@ -1313,7 +1313,7 @@ class Player extends EventEmitter {
             const muted = muteButton.classList.toggle('romper-muted-button');
             muteButton.setAttribute('data-muted', muted)
             this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
-            this._player._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED,
+            this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED,
                 null, `${event.label}: ${muted}`);
         };
     };
