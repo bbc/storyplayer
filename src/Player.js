@@ -339,7 +339,9 @@ class Player extends EventEmitter {
 
     _countdownTotal: number;
 
-    _dogImage: HTMLImageElement;
+    _aspectRatio: number;
+
+    _dogImage: HTMLDivElement;
 
     _details: ?HTMLDivElement
 
@@ -417,6 +419,7 @@ class Player extends EventEmitter {
         this._loadingLayer.appendChild(loadingLayerInner);
         this._mediaLayer.appendChild(this._loadingLayer);
 
+        this._aspectRatio = 16 / 9;
         this._guiLayer = document.createElement('div');
         this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
@@ -734,18 +737,43 @@ class Player extends EventEmitter {
         this._currentRenderer = renderer;
     }
 
+    setAspectRatio(aspectRatio: number) {
+        logger.info(`Setting aspect ratio to ${aspectRatio}`);
+        this._aspectRatio = aspectRatio;
+    }
+
     addDog(src: string, position: Object) {
         if (this._dogImage === undefined) {
-            this._dogImage = document.createElement('img');
+            this._dogImage = document.createElement('div');
         }
+        window.addEventListener('resize', () => {
+            this._setDogPosition(position);
+        });
         this._dogImage.className = 'romper-dog';
-        this._dogImage.src = src;
+        this._dogImage.style.backgroundImage = `url(${src})`;
         this._player.appendChild(this._dogImage);
+
+        this._setDogPosition(position);
+    }
+
+    _setDogPosition(position: Object) {
         const { top, left, width, height } = position;
-        this._dogImage.style.top = `${top}%`;
-        this._dogImage.style.left = `${left}%`;
-        this._dogImage.style.width = `${width}%`;
-        this._dogImage.style.height = `${height}%`;
+        const guiAspect = this._guiLayer.clientWidth / this._guiLayer.clientHeight;
+        if (guiAspect > this._aspectRatio) {
+            const mediaWidth = (this._aspectRatio * this._guiLayer.clientHeight);
+            const sideGap = (this._guiLayer.clientWidth - mediaWidth) / 2;
+            this._dogImage.style.left = `${sideGap + ((left/100) * mediaWidth)}px`;
+            this._dogImage.style.top = `${top}%`;
+            this._dogImage.style.width = `${(width/100) * mediaWidth}px`;
+            this._dogImage.style.height = `${height}%`;
+        } else {
+            const mediaHeight = this._guiLayer.clientWidth / this._aspectRatio;
+            const topGap = (this._guiLayer.clientHeight - mediaHeight) / 2;
+            this._dogImage.style.left = `${left}%`;
+            this._dogImage.style.top = `${topGap + ((top/100) * mediaHeight)}px`;
+            this._dogImage.style.width = `${width}%`;
+            this._dogImage.style.height = `${(height/100) * mediaHeight}px`;
+        }
     }
 
     addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {

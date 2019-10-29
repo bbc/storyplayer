@@ -13,6 +13,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import Controller from '../Controller';
 
 import logger from '../logger';
+import { AUDIO } from '../utils';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -173,7 +174,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._setOutTime(parseFloat(fg.meta.romper.out));
                     }
                     if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, { mediaType: 'audio'})
+                        this._fetchMedia(fg.assets.audio_src, { mediaType: AUDIO })
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
                             })
