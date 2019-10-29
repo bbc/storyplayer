@@ -338,7 +338,7 @@ class Player extends EventEmitter {
 
     _countdownTotal: number;
 
-    _dogImage: HTMLImageElement;
+    _dogImage: HTMLDivElement;
 
     _details: ?HTMLDivElement
 
@@ -735,10 +735,10 @@ class Player extends EventEmitter {
 
     addDog(src: string, position: Object) {
         if (this._dogImage === undefined) {
-            this._dogImage = document.createElement('img');
+            this._dogImage = document.createElement('div');
         }
         this._dogImage.className = 'romper-dog';
-        this._dogImage.src = src;
+        this._dogImage.style.backgroundImage = `url(${src})`;
         this._player.appendChild(this._dogImage);
         const { top, left, width, height } = position;
         this._dogImage.style.top = `${top}%`;
