@@ -375,12 +375,12 @@ export default class StoryReasoner extends EventEmitter {
         const storyEndCallback = () => {
             this._subStoryReasoner = null;
             this._chooseNextNode();
-            subStoryReasoner.removeListener(ERROR_EVENTS, errorCallback);
-            subStoryReasoner.removeListener(
-                REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
-                elementChangedCallback,
-            );
-            subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END, storyEndCallback);
+            subStoryReasoner.removeListener(ERROR_EVENTS,
+                errorCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                elementChangedCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END,
+                storyEndCallback);
         };
         subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_BEGINNINGS, branchBeginningCallback);
         subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_LINKS, branchLinkCallback);
@@ -538,7 +538,8 @@ export default class StoryReasoner extends EventEmitter {
                         this.emit(ERROR_EVENTS, err);
                     });
             } else {
-                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`)); // eslint-disable-line max-len
+                this.emit(ERROR_EVENTS,
+                    new Error(`No Story target id for element ${narrativeElementId}`));
             }
             
         }

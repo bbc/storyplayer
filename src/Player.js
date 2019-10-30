@@ -23,6 +23,7 @@ const PLAYOUT_ENGINES = {
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
+    'VOLUME_MUTE_TOGGLE',
     'ICON_CLICKED',
     'REPRESENTATION_CLICKED',
     'BACK_BUTTON_CLICKED',
@@ -1320,12 +1321,36 @@ class Player extends EventEmitter {
         }
     }
 
+    setMuted(label: string, muted: boolean) {
+        const id = this._volume.getIdForLabel(label);
+        const overlay = this._volume.get(id);
+        if(overlay) {
+            const muteButton = document.getElementById('mute-button-id');
+            if(muted && muteButton) {
+                muteButton.setAttribute('data-muted', 'true');
+                muteButton.classList.remove('romper-mute-button');
+                muteButton.classList.add('romper-muted-button');
+            }
+            this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
+        }
+    }
+
+    _setMuteCallBack(id: string, label: string, muteButton: HTMLDivElement)  {
+        return () => {
+            muteButton.classList.toggle('romper-mute-button');
+            const muted = muteButton.classList.toggle('romper-muted-button');
+            muteButton.setAttribute('data-muted', muted)
+            this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
+            this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED,
+                `${label}: ${!muted}`, `${label}: ${muted}`);
+        };
+    };
+
     _setVolumeCallback(
         id: string,
         label: string,
         levelSpan: HTMLSpanElement,
-        muteButton: HTMLDivElement,
-    ) {
+        muteButton: HTMLDivElement) {
         return (event: Object) => {
             const value = parseFloat(event.target.value);
             // eslint-disable-next-line no-param-reassign
@@ -1334,6 +1359,10 @@ class Player extends EventEmitter {
                 muteButton.classList.remove('romper-mute-button');
                 muteButton.classList.add('romper-muted-button');
             } else {
+                const isMuted = muteButton.classList.contains('romper-muted-button');
+                if(isMuted) {
+                    this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted: false });
+                }
                 muteButton.classList.add('romper-mute-button');
                 muteButton.classList.remove('romper-muted-button');
             }
@@ -1370,6 +1399,7 @@ class Player extends EventEmitter {
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
         const muteDiv = document.createElement('div');
+        muteDiv.id = 'mute-button-id';
         muteDiv.classList.add('romper-mute-button');
         muteDiv.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
@@ -1386,13 +1416,8 @@ class Player extends EventEmitter {
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 
-        const muteClickHandler = () => {
-            volumeRange.value = '0';
-            this._setVolumeCallback(id, label, levelSpan, muteDiv)
-                .bind(this)({ target: { value: 0 }});
-        };
-        muteDiv.onclick = muteClickHandler;
-        muteDiv.addEventListener('touchend', muteClickHandler);
+        muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
+        muteDiv.ontouchend = this._setMuteCallBack(id, label, muteDiv).bind(this);
 
         controlDiv.appendChild(muteDiv);
         controlDiv.appendChild(volumeRange);

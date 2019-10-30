@@ -119,7 +119,8 @@ export default class StoryPathWalker extends EventEmitter {
 
     // finished the walk - notify listeners
     _walkComplete(path: Array<PathGather>) {
-        this._getRepresentationCollections(path).then(() => this.emit(REASONER_EVENTS.WALK_COMPLETE));
+        this._getRepresentationCollections(path).then(() =>
+            this.emit(REASONER_EVENTS.WALK_COMPLETE));
     }
 
     /**
@@ -191,7 +192,8 @@ export default class StoryPathWalker extends EventEmitter {
                 path.push(pathItem);
                 if (this._linear) linearReasoner.next();
             };
-            linearReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, _handleNarrativeElementChanged);
+            linearReasoner.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                _handleNarrativeElementChanged);
 
             linearReasoner.start();
             linearReasoner.chooseBeginning();

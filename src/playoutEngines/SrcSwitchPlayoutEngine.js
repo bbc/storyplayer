@@ -69,6 +69,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
+        this._toggleMute = this._toggleMute.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
         this._queueSubtitleAttach = this._queueSubtitleAttach.bind(this);
 
@@ -86,6 +87,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumeClicked,
         );
+
+        this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
     }
 
     setPermissionToPlay(value: boolean) {
@@ -134,7 +137,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaInstance.loadSource(mediaObj.url);
         }
         if(mediaObj.loop) {
-            super.setLoopAttribute(rendererId, mediaObj.loop, rendererPlayoutObj.mediaInstance.getMediaElement());
+            super.setLoopAttribute(rendererId, mediaObj.loop,
+                rendererPlayoutObj.mediaInstance.getMediaElement());
         }
         if (mediaObj.subs_url) {
             this._player.enableSubtitlesControl();
@@ -429,6 +433,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[event.id];
         if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
             rendererPlayoutObj.mediaInstance.setVolume(event.value);
+        }
+    }
+
+    _toggleMute(event: Object) {
+        const rendererPlayoutObj = this._media[event.id];
+        if (rendererPlayoutObj && rendererPlayoutObj.mediaInstance) {
+            rendererPlayoutObj.mediaInstance.toggleMute(event.muted);
         }
     }
 
