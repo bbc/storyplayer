@@ -19,6 +19,7 @@ import { InternalVariableNames } from './InternalVariables';
 
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
+import { checkDebugPlayout } from './utils';
 
 // eslint-disable-next-line max-len
 const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
@@ -332,9 +333,15 @@ export default class Controller extends EventEmitter {
                 ie: BrowserUserAgent.ie(),
                 edge: BrowserUserAgent.edge(),
                 iOS: BrowserUserAgent.iOS(),
-                desktopSafari: BrowserUserAgent.safari(),
+                safari: BrowserUserAgent.safari(),
             },
         };
+
+        if(checkDebugPlayout()) {
+            // we want to check which devices can olay what
+            console.log('playing capabilities', data);
+        }
+
         const anyRequirementsFailed = requirements.some((req) => {
             if (JsonLogic.apply(req.logic, data) === false) {
                 this._target.innerHTML = '';
