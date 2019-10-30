@@ -681,8 +681,7 @@ class Player extends EventEmitter {
 
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
 
-        let playoutToUse = MediaFormats.getPlayoutEngine();
-
+        const playoutToUse = MediaFormats.getPlayoutEngine();
 
         const debugPlayout = checkDebugPlayout();
         if (debugPlayout) {
