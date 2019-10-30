@@ -63,7 +63,8 @@ export class BrowserUserAgent {
         const safariCheck = (!window.safari ||
             (typeof safari !== 'undefined' && window.safari.pushNotification));
 
-        return safariCheck.toString() === "[object SafariRemoteNotification]"
+        // fallback to user agent sniffing if we can't detect safari using this method
+        return safariCheck.toString() === "[object SafariRemoteNotification]" || this.safari();
     }
 
     static ie() {
