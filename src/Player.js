@@ -683,11 +683,6 @@ class Player extends EventEmitter {
 
         let playoutToUse = MediaFormats.getPlayoutEngine();
 
-        const overridePlayout = fetchOverridePlayout();
-        if (overridePlayout) {
-            playoutToUse = overridePlayout;
-            logger.info("Overriding playout engine: ",playoutToUse)
-        }
 
         const debugPlayout = checkDebugPlayout();
         if (debugPlayout) {
