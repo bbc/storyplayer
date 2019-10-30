@@ -44,11 +44,8 @@ export class BrowserUserAgent {
         if (navigator.platform && navigator.platform === macOS) {
             // it is a mac running safari not running chrome
             return ua.indexOf('Macintosh') > -1 &&
-                ua.indexOf('Safari') > -1 &&
-                ua.indexOf('version/') > -1 &&
-                ua.indexOf('Chrome') < -1 &&
-                navigator.vendor &&
-                navigator.vendor.indexOf('Apple') > -1;
+            ua.indexOf('Safari') > -1 &&
+            ua.indexOf('Chrome') < 0;
         }
         if(this.iOS()) {
             return ua.indexOf('Safari') > 0;
@@ -135,6 +132,7 @@ export class BrowserCapabilities {
         BrowserCapabilities.dashSupported = false;
         return false;
     }
+
 }
 
 export class MediaFormats { 
@@ -158,5 +156,15 @@ export class MediaFormats {
         }
         // if we can't support anything we return null
         return null;
+    }
+
+    static getPlayoutEngine() {
+        if(BrowserCapabilities.dashSupport()) {
+            return 'dom';
+        }
+        if(BrowserCapabilities.hlsSupport()) {
+            return 'ios';
+        }
+        return 'dom';
     }
 }
