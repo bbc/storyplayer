@@ -1124,6 +1124,10 @@ export default class Controller extends EventEmitter {
         this._renderManager.reset();
     }
 
+    destroy() {
+        this._renderManager
+    }
+
 
     _handleStoryEnd() {
         const logData = {

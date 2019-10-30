@@ -140,6 +140,13 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             super.setLoopAttribute(rendererId, mediaObj.loop,
                 rendererPlayoutObj.mediaInstance.getMediaElement());
         }
+        if(mediaObj.id) {
+            const mediaElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+            if(mediaElement) {
+                mediaElement.id =  mediaObj.id; 
+            }
+        }
+
         if (mediaObj.subs_url) {
             this._player.enableSubtitlesControl();
             if (rendererPlayoutObj.active) {
