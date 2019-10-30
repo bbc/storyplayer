@@ -9,17 +9,13 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent } from './browserCapabilities';
+import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { fetchOverridePlayout, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
-const PLAYOUT_ENGINES = {
-    SRC_SWITCH_PLAYOUT: 'src',
-    DOM_SWITCH_PLAYOUT: 'dom',
-    IOS_PLAYOUT: 'ios',
-};
+
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -684,11 +680,7 @@ class Player extends EventEmitter {
 
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
 
-        let playoutToUse = 'dom';
-
-        if (BrowserUserAgent.iOS() || BrowserUserAgent.safari()) {
-            playoutToUse = 'ios';
-        }
+        let playoutToUse = MediaFormats.getPlayoutEngine();
 
         const overridePlayout = fetchOverridePlayout();
         if (overridePlayout) {
