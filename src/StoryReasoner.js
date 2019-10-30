@@ -8,6 +8,9 @@ import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
 import InternalVariables, { InternalVariableNames } from './InternalVariables';
 import {REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import AnalyticEvents from './AnalyticEvents';
+import type { AnalyticsLogger } from './AnalyticEvents';
+
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
  * structure of a story.
@@ -32,6 +35,8 @@ export default class StoryReasoner extends EventEmitter {
     _subStoryReasoner: ?StoryReasoner;
 
     _parent: ?StoryReasoner;
+
+    _analytics: AnalyticsLogger;
 
     /**
      * An error event. This will get fired if the narrative gets stuck or some other error occurs.
@@ -70,6 +75,7 @@ export default class StoryReasoner extends EventEmitter {
         narrativeElements: Array<NarrativeElement>,
         dataResolver: DataResolver,
         reasonerFactory: StoryReasonerFactory,
+        analytics: AnalyticsLogger,
     ) {
         super();
         this._story = story;
@@ -79,6 +85,7 @@ export default class StoryReasoner extends EventEmitter {
         this._storyEnded = false;
         this._resolving = false;
         this._parent = null;
+        this._analytics = analytics;
 
         this._narrativeElements = {};
         narrativeElements.forEach((narrativeElement) => {
@@ -256,7 +263,9 @@ export default class StoryReasoner extends EventEmitter {
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this.chooseBeginning();
         } else {
-            this.emit(ERROR_EVENTS, new Error(`Unable to follow a link of type ${nextElement.link_type}`),
+            this.emit(
+                ERROR_EVENTS,
+                new Error(`Unable to follow a link of type ${nextElement.link_type}`),
             );
         }
     }
@@ -270,7 +279,14 @@ export default class StoryReasoner extends EventEmitter {
                 this.appendToHistory(narrativeElementId);
                 this._resolving = true;
                 if (this._currentNarrativeElement.body.story_target_id) {
-                    this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                    const storyId = this._currentNarrativeElement.body.story_target_id;
+                    this._analytics({
+                        type: AnalyticEvents.types.STORY_NAVIGATION,
+                        name: AnalyticEvents.names.ENTER_SUB_STORY,
+                        from: this._currentNarrativeElement.id,
+                        to: storyId,
+                    });
+                    this._reasonerFactory(storyId, this._analytics)
                         .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
                         .catch((err) => {
                             this.emit(ERROR_EVENTS, err);
@@ -289,8 +305,10 @@ export default class StoryReasoner extends EventEmitter {
         this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
         this._resolving = true;
         if (this._currentNarrativeElement.body.story_target_id) {
-            this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
-                .then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
+            this._reasonerFactory(
+                this._currentNarrativeElement.body.story_target_id,
+                this._analytics,
+            ).then(subStoryReasoner => this._initSubStoryReasoner(subStoryReasoner))
                 .catch((err) => {
                     this.emit(ERROR_EVENTS, err);
                 });
@@ -358,7 +376,10 @@ export default class StoryReasoner extends EventEmitter {
             this._subStoryReasoner = null;
             this._chooseNextNode();
             subStoryReasoner.removeListener(ERROR_EVENTS, errorCallback);
-            subStoryReasoner.removeListener(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, elementChangedCallback);
+            subStoryReasoner.removeListener(
+                REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                elementChangedCallback,
+            );
             subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END, storyEndCallback);
         };
         subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_BEGINNINGS, branchBeginningCallback);
@@ -505,23 +526,35 @@ export default class StoryReasoner extends EventEmitter {
         }
         if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
             if (this._currentNarrativeElement.body.story_target_id) {
-                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
+                // don't worry about logging these
+                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id, () => {})
                     .then(subStoryReasoner => {
-                        this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
+                        this._initShadowSubStoryReasoner(
+                            subStoryReasoner,
+                            narrativeElementId,
+                            pathHistory,
+                        )
                     }).catch((err) => {
                         this.emit(ERROR_EVENTS, err);
                     });
             } else {
-                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`));
+                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`)); // eslint-disable-line max-len
             }
             
         }
     }
 
 
-    _initShadowSubStoryReasoner(subStoryReasoner: StoryReasoner, narrativeElement: string, pathHistory: [string]) {
+    _initShadowSubStoryReasoner(
+        subStoryReasoner: StoryReasoner,
+        narrativeElement: string,
+        pathHistory: [string],
+    ) {
         this._addSubReasonerListeners(subStoryReasoner);
-        subStoryReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (foundElement) => this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement));
+        subStoryReasoner.on(
+            REASONER_EVENTS.ELEMENT_FOUND,
+            (foundElement) => this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement),
+        );
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         this._subStoryReasoner.setParent(this);

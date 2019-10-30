@@ -230,7 +230,7 @@ export default class Controller extends EventEmitter {
 
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId)
-            .then(() => this._storyReasonerFactory(storyId))
+            .then(() => this._storyReasonerFactory(storyId, this._analytics))
             .then((reasoner) => {
                 if (this._storyId !== storyId) {
                     return;
@@ -559,7 +559,7 @@ export default class Controller extends EventEmitter {
     // when it reaches a target node, it boots out the original reasoner
     // and takes its place (with suitable event listeners)
     _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string) {
-        this._storyReasonerFactory(storyId).then((shadowReasoner) => {
+        this._storyReasonerFactory(storyId, () => {}).then((shadowReasoner) => {
             if (this._storyId !== storyId) {
                 return;
             }
@@ -1134,7 +1134,7 @@ export default class Controller extends EventEmitter {
     }
 
     walkPathHistory(storyId: string, lastVisited: string, pathHistory: [string]) {
-        this._storyReasonerFactory(storyId).then((newReasoner)=> {
+        this._storyReasonerFactory(storyId, () => {}).then((newReasoner)=> {
             if(this._storyId !== storyId) {
                 return;
             }
