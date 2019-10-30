@@ -174,7 +174,7 @@ export class MediaFormats {
 
     static getPlayoutEngine() {
         const overridePlayout = fetchOverridePlayout();
-        if(overridePlayout) {
+        if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
             logger.info("Overriding playout engine: ", overridePlayout);
             if(overridePlayout === 'src') {
                 logger.warn('Cannot use source engine');
