@@ -852,6 +852,7 @@ $romper-button-border: 4px;
       display: flex;
       flex: 1 1 auto;
       padding-top: 10px;
+      width: 15%;
     }
 
 
@@ -1518,7 +1519,9 @@ $romper-button-border: 4px;
         width: 100%;
 
         .romper-narrative-element-transport {
-          width: 5 * ($romper-button-width + (2 * $romper-button-padding));
+          justify-content: space-between;
+          min-width: 5 * ($romper-button-width + (2 * $romper-button-padding));
+          width: 50%;
         }
       }
 
