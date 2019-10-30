@@ -693,6 +693,12 @@ export default class BaseRenderer extends EventEmitter {
         if (behaviourRunner) {
             const startCallback = () => {
                 logger.info(`started during behaviour ${behaviour.behaviour.type}`);
+                this._analytics({
+                    type: AnalyticEvents.types.RENDERER_ACTION,
+                    name: AnalyticEvents.names.DURING_BEHAVIOUR_STARTED,
+                    from: behaviour.behaviour.type,
+                    to: '',
+                });
                 behaviourRunner(behaviour.behaviour, () =>
                     logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
             }
