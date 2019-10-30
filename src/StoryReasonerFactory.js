@@ -1,9 +1,13 @@
 // @flow
 // eslint-disable-next-line max-len
 import type { DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement } from './romper';
+import type { AnalyticsLogger } from './AnalyticEvents';
 import StoryReasoner from './StoryReasoner';
 
-export type StoryReasonerFactory = (id: string) => Promise<StoryReasoner>;
+export type StoryReasonerFactory = (
+    id: string,
+    analytics?: AnalyticsLogger,
+) => Promise<StoryReasoner>;
 
 /**
  * Create an instance of a StoryReasonerFactory
@@ -24,7 +28,7 @@ export default function (
      * @param {string} id the ID of the story to fetch
      * @return {Promise.<StoryReasoner>} a promise which will resolve to an instance of a reasoner
      */
-    function Factory(id: string): Promise<StoryReasoner> {
+    function Factory(id: string, analytics?: AnalyticsLogger = () => {}): Promise<StoryReasoner> {
         let returnedStory;
         return storyFetcher(id)
             .then((story) => {
@@ -40,6 +44,7 @@ export default function (
                 narrativeElements,
                 dataResolver,
                 Factory,
+                analytics,
             ));
     }
 
