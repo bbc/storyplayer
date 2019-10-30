@@ -256,7 +256,8 @@ export default class StoryReasoner extends EventEmitter {
         } else if (nextElement.link_type === 'CHOOSE_BEGINNING') {
             this.chooseBeginning();
         } else {
-            this.emit(ERROR_EVENTS, new Error(`Unable to follow a link of type ${nextElement.link_type}`),
+            this.emit(ERROR_EVENTS,
+                new Error(`Unable to follow a link of type ${nextElement.link_type}`),
             );
         }
     }
@@ -357,9 +358,12 @@ export default class StoryReasoner extends EventEmitter {
         const storyEndCallback = () => {
             this._subStoryReasoner = null;
             this._chooseNextNode();
-            subStoryReasoner.removeListener(ERROR_EVENTS, errorCallback);
-            subStoryReasoner.removeListener(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, elementChangedCallback);
-            subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END, storyEndCallback);
+            subStoryReasoner.removeListener(ERROR_EVENTS,
+                errorCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                elementChangedCallback);
+            subStoryReasoner.removeListener(REASONER_EVENTS.STORY_END,
+                storyEndCallback);
         };
         subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_BEGINNINGS, branchBeginningCallback);
         subStoryReasoner.on(REASONER_EVENTS.CHOICE_OF_LINKS, branchLinkCallback);
@@ -507,21 +511,27 @@ export default class StoryReasoner extends EventEmitter {
             if (this._currentNarrativeElement.body.story_target_id) {
                 this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
                     .then(subStoryReasoner => {
-                        this._initShadowSubStoryReasoner(subStoryReasoner, narrativeElementId, pathHistory)
+                        this._initShadowSubStoryReasoner(subStoryReasoner,
+                            narrativeElementId, pathHistory)
                     }).catch((err) => {
                         this.emit(ERROR_EVENTS, err);
                     });
             } else {
-                this.emit(ERROR_EVENTS, new Error(`No Story target id for element ${narrativeElementId}`));
+                this.emit(ERROR_EVENTS,
+                    new Error(`No Story target id for element ${narrativeElementId}`));
             }
             
         }
     }
 
 
-    _initShadowSubStoryReasoner(subStoryReasoner: StoryReasoner, narrativeElement: string, pathHistory: [string]) {
+    _initShadowSubStoryReasoner(
+        subStoryReasoner: StoryReasoner,
+        narrativeElement: string,
+        pathHistory: [string]) {
         this._addSubReasonerListeners(subStoryReasoner);
-        subStoryReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (foundElement) => this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement));
+        subStoryReasoner.on(REASONER_EVENTS.ELEMENT_FOUND, (foundElement) =>
+            this.emit(REASONER_EVENTS.ELEMENT_FOUND, foundElement));
         this._subStoryReasoner = subStoryReasoner;
         this._resolving = false;
         this._subStoryReasoner.setParent(this);

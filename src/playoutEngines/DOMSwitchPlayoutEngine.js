@@ -8,7 +8,11 @@ import logger from '../logger';
 
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
 import { SHAKA_EVENTS } from '../Events';
-import { fetchShakaDebugLevel, fetchActiveBufferingOverride, fetchInactiveBufferingOverride } from '../utils';
+import {
+    fetchShakaDebugLevel,
+    fetchActiveBufferingOverride,
+    fetchInactiveBufferingOverride
+} from '../utils';
 
 const MediaTypesArray = [
     'HLS',
@@ -499,7 +503,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     );
 
                     // generic error
-                    // if the error code is 1001 and http status is 404 - we can't find the segement so ignore the error as we shouldn't ever get in this situation.
+                    // eslint-disable-next-line max-len
+                    // if the error code is 1001 and http status is 404we can't find the segement so ignore the error as we shouldn't ever get in this situation.
                     rendererPlayoutObj._shaka.addEventListener(
                         SHAKA_EVENTS.error, (e) => {
                             if(e.detail && e.detail.data) {
@@ -603,10 +608,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     }
 
                     // remove the event listeners
-                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.error, this._player._showErrorLayer);
-                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.buffering, this._player._showBufferingLayer);
-                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation, this._player._removeBufferingLayer);
-                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation, this._player._removeErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.error,
+                        this._player._showErrorLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.buffering,
+                        this._player._showBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
+                        this._player._removeBufferingLayer);
+                    rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
+                        this._player._removeErrorLayer);
 
                     break;
                 case MediaTypes.OTHER:

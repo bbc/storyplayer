@@ -1346,7 +1346,11 @@ class Player extends EventEmitter {
         };
     };
 
-    _setVolumeCallback( id: string, label: string, levelSpan: HTMLSpanElement, muteButton: HTMLDivElement) {
+    _setVolumeCallback(
+        id: string,
+        label: string,
+        levelSpan: HTMLSpanElement,
+        muteButton: HTMLDivElement) {
         return (event: Object) => {
             const value = parseFloat(event.target.value);
             // eslint-disable-next-line no-param-reassign
@@ -1355,6 +1359,10 @@ class Player extends EventEmitter {
                 muteButton.classList.remove('romper-mute-button');
                 muteButton.classList.add('romper-muted-button');
             } else {
+                const isMuted = muteButton.classList.contains('romper-muted-button');
+                if(isMuted) {
+                    this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted: false });
+                }
                 muteButton.classList.add('romper-mute-button');
                 muteButton.classList.remove('romper-muted-button');
             }
