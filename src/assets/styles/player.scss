@@ -523,9 +523,35 @@ $romper-button-border: 4px;
       }
 
       .romper-volume-range {
+        -webkit-appearance: none;
+        background-color: $transparent;
         margin-left: 5px;
         margin-top: 5px;
+        outline: none;
         width: 100%;
+
+        &::-webkit-slider-runnable-track {
+          -webkit-appearance: none;
+          background-color: $white;
+          height: 1px;
+        }
+
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          background-color: $white;
+          border-radius: 50%;
+          height: 12px;
+          margin-top: -5px;
+          width: 12px;
+        }
+
+        &::-moz-range-progress {
+          background-color: $highlight;
+        }
+
+        &::-moz-range-track {
+          background-color: $transparent;
+        }
       }
     }
 
@@ -826,6 +852,7 @@ $romper-button-border: 4px;
       display: flex;
       flex: 1 1 auto;
       padding-top: 10px;
+      width: 15%;
     }
 
 
@@ -1492,7 +1519,9 @@ $romper-button-border: 4px;
         width: 100%;
 
         .romper-narrative-element-transport {
-          width: 5 * ($romper-button-width + (2 * $romper-button-padding));
+          justify-content: space-between;
+          min-width: 5 * ($romper-button-width + (2 * $romper-button-padding));
+          width: 50%;
         }
       }
 
