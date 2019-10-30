@@ -40,11 +40,16 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._foregroundMediaElement.autoplay = true;
         this._backgroundMediaElement.autoplay = true;
 
+        // disable ios controls too, we use our own
+        this._foregroundMediaElement.setAttribute("controls", "false");
+        this._backgroundMediaElement.setAttribute("controls", "false");
+
         // Needed to stop iOS automatically making video fullscreen on phone iOS devices
         this._foregroundMediaElement.setAttribute("playsinline", "true");
         this._backgroundMediaElement.setAttribute("playsinline", "true");
         this._foregroundMediaElement.setAttribute("webkit-playsinline", "true");
         this._backgroundMediaElement.setAttribute("webkit-playsinline", "true");
+        
 
         // This doesn't work but maybe it will in the future to stop PIP being available
         this._foregroundMediaElement.setAttribute("disablePictureInPicture", "true");
