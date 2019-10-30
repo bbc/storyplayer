@@ -26,7 +26,7 @@ export type SessionState = typeof SESSION_STATE;
 export default class SessionManager extends EventEmitter {
     _storyId: string; // storyId for the top level story
 
-    sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
+    sessionState: string; // current state of the session 'RESUME'/'RESTART'/'NEW'/'EXISTING'
 
     deleteExistingSession: Function; // delete the existing session
 
@@ -40,7 +40,7 @@ export default class SessionManager extends EventEmitter {
 
     fetchPathHistory: Function; // fetch the path history for the existing session
 
-    setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
+    setSessionState: Function; // set the session state takes 'RESUME'/'RESTART'/'NEW'/'EXISTING',
 
     setVariable: Function;
 
@@ -50,7 +50,8 @@ export default class SessionManager extends EventEmitter {
     constructor(storyId: string) {
         super();
         this._storyId = storyId;
-        this.sessionState = this.checkExistingSession() ? SESSION_STATE.EXISTING : SESSION_STATE.NEW;
+        this.sessionState = this.checkExistingSession() ?
+            SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
     deleteExistingSession() {

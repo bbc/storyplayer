@@ -231,7 +231,7 @@ export default class Controller extends EventEmitter {
 
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId)
-            .then(() => this._storyReasonerFactory(storyId))
+            .then(() => this._storyReasonerFactory(storyId, this._analytics))
             .then((reasoner) => {
                 if (this._storyId !== storyId) {
                     return;

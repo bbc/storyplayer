@@ -104,6 +104,8 @@ export default class BaseRenderer extends EventEmitter {
 
     _hideControls: Function;
 
+    _showControls: Function;
+
     _timer: TimeManager;
 
     isSrcIosPlayoutEngine: Function;
@@ -181,6 +183,7 @@ export default class BaseRenderer extends EventEmitter {
 
         this._willHideControls = this._willHideControls.bind(this); 
         this._hideControls = this._hideControls.bind(this);
+        this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
@@ -670,12 +673,16 @@ export default class BaseRenderer extends EventEmitter {
         if (startTime > 1) {
             this.addTimeEventListener(
                 'prechoice-control-hide',
-                startTime - 0.8,
+                startTime - 0.4,
                 hideControls,
             );
         } else {
             hideControls();
         }
+    }
+
+    _showControls() {
+        this._player.enableControls();
     }
 
     _runDuringBehaviours() {
@@ -693,6 +700,12 @@ export default class BaseRenderer extends EventEmitter {
         if (behaviourRunner) {
             const startCallback = () => {
                 logger.info(`started during behaviour ${behaviour.behaviour.type}`);
+                this._analytics({
+                    type: AnalyticEvents.types.RENDERER_ACTION,
+                    name: AnalyticEvents.names.DURING_BEHAVIOUR_STARTED,
+                    from: behaviour.behaviour.type,
+                    to: '',
+                });
                 behaviourRunner(behaviour.behaviour, () =>
                     logger.info(`completed during behaviour ${behaviour.behaviour.type}`));
             }
@@ -706,6 +719,7 @@ export default class BaseRenderer extends EventEmitter {
                 if (behaviourElement && behaviourElement.parentNode) {
                     behaviourElement.parentNode.removeChild(behaviourElement);
                 }
+                this._showControls();
             };
             const listenerId = behaviour.behaviour.id;
             if (startTime === 0) {
