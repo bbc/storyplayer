@@ -6,7 +6,7 @@ import StoryReasoner from './StoryReasoner';
 
 export type StoryReasonerFactory = (
     id: string,
-    analytics: AnalyticsLogger,
+    analytics?: AnalyticsLogger,
 ) => Promise<StoryReasoner>;
 
 /**
@@ -28,7 +28,7 @@ export default function (
      * @param {string} id the ID of the story to fetch
      * @return {Promise.<StoryReasoner>} a promise which will resolve to an instance of a reasoner
      */
-    function Factory(id: string, analytics: AnalyticsLogger): Promise<StoryReasoner> {
+    function Factory(id: string, analytics?: AnalyticsLogger = () => {}): Promise<StoryReasoner> {
         let returnedStory;
         return storyFetcher(id)
             .then((story) => {

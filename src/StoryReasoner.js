@@ -527,7 +527,7 @@ export default class StoryReasoner extends EventEmitter {
         if(this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
             if (this._currentNarrativeElement.body.story_target_id) {
                 // don't worry about logging these
-                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id, () => {})
+                this._reasonerFactory(this._currentNarrativeElement.body.story_target_id)
                     .then(subStoryReasoner => {
                         this._initShadowSubStoryReasoner(
                             subStoryReasoner,
