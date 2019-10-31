@@ -367,34 +367,9 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         });
     }
 
-    _showChoiceIcons(iconDataObject: Object) {
-        super._showChoiceIcons(iconDataObject);
-        this._readyToShowIcons = true;
-        Object.keys(this._icons).forEach((targetId) => {
-            const { iconPlane } = this._icons[targetId];
-            if (!this._scene.children.includes(iconPlane)) {
-                this._scene.add(iconPlane);
-            }
-        });
-    }
-
-    _hideChoiceIcons(narrativeElementId: ?string) {
-        super._hideChoiceIcons(narrativeElementId);
-        Object.keys(this._icons).forEach((targetId) => {
-            const { iconPlane } = this._icons[targetId];
-            if (this._scene.children.includes(iconPlane)) {
-                this._scene.remove(iconPlane);
-            }
-        });
-        this._icons = {};
-    }
-
     end() {
-        // only if this is being rendered
-        if (this._started) {
-            this._player.getLinkChoiceElement()[0].style.visibility = 'visible';
-        }
-
+        super.end();
+        
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
         }
