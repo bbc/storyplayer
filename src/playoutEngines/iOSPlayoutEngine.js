@@ -16,15 +16,17 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
     _subtitlesShowing: boolean;
 
-    _handlePlayPauseButtonClicked: Function
+    _handlePlayPauseButtonClicked: Function;
 
-    _handleSubtitlesClicked: Function
+    _handleSubtitlesClicked: Function;
 
-    _handleVolumeClicked: Function
+    _handleVolumeClicked: Function;
 
-    _showHideSubtitles: Function
+    _toggleMute: Function;
 
-    _queueSubtitleAttach: Function
+    _showHideSubtitles: Function;
+
+    _queueSubtitleAttach: Function;
 
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
@@ -102,7 +104,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             if(mediaObj.type) {
                 let mediaElement: HTMLMediaElement;
                 if(mediaObj.type === MEDIA_TYPES.FOREGROUND_AV) {
-                    mediaElement = this._foregroundMediaElement
+                    mediaElement = this._foregroundMediaElement;
                     if(mediaObj.url) {
                         mediaElement.src = mediaObj.url;
                     }
@@ -129,6 +131,9 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             if (mediaObj.subs_url) {
                 this._player.enableSubtitlesControl();
                 this._queueSubtitleAttach(rendererId);
+            }
+            if(mediaObj.id) {
+                this._foregroundMediaElement.id =  mediaObj.id; 
             }
             if (mediaObj.url && this._playing) {
                 this.play();
