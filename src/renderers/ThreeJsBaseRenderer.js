@@ -7,6 +7,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import { InternalVariableNames } from '../InternalVariables';
 
 const THREE = require('three');
 
@@ -191,14 +192,14 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     // retrieve previous lat and long values from the variable store and apply
     _applyPreviousOrientation() {
-        this._controller.getVariableValue('_threejs_orientation_lon')
+        this._controller.getVariableValue(InternalVariableNames.LONGITUDE)
             .then((lon) => {
                 if (lon !== null) {
                     logger.info(`Maintaining 360 orientation at ${lon} longitude`);
                     this._view.lon = lon; 
                 }
             });
-        this._controller.getVariableValue('_threejs_orientation_lat')
+        this._controller.getVariableValue(InternalVariableNames.LATITUDE)
             .then((lat) => { 
                 if (lat !== null) {
                     logger.info(`Maintaining 360 orientation at ${lat} latitude`);
@@ -324,8 +325,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         };
 
         this._controller.setVariables({
-            _threejs_orientation_lon: phi,
-            _threejs_orientation_lat: theta,
+            [InternalVariableNames.LONGITUDE]: phi,
+            [InternalVariableNames.LATITUDE]: theta,
         });
 
         // and log analytics
@@ -369,7 +370,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     end() {
         super.end();
-        
+
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
         }
