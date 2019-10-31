@@ -667,7 +667,6 @@ class Player extends EventEmitter {
         this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
         this._inFullScreen = false;
 
-        document.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
 
         this._buttonsActivateArea.onmouseenter = this._activateRomperButtons.bind(this);
@@ -900,14 +899,6 @@ class Player extends EventEmitter {
             } else if (proventClickTriggerElements.some(el => (el === endTarget))) {
                 event.preventDefault();
             }
-        }
-    }
-
-    _handleKeyboardEvent(event: Object) {
-        if (event.code === 'Escape') {
-            if (this._RomperButtonsShowing) this._hideRomperButtons();
-        } else if (!this._RomperButtonsShowing) {
-            this._activateRomperButtons(event);
         }
     }
 
