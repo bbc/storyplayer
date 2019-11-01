@@ -2,13 +2,13 @@
 
 import EventEmitter from 'events';
 import Player, { PlayerEvents } from '../Player';
-import type { AssetCollection, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
 import { REASONER_EVENTS } from '../Events';
 import type { StoryPathItem } from '../StoryPathWalker';
 
-export type AssetCollectionPair = {
-    default: ?AssetCollection,
-    active: ?AssetCollection,
+export type IconUrlPair = {
+    default: ?sring,
+    active: ?string,
 };
 
 // Render story data (i.e., not refreshed every NE)
@@ -120,7 +120,8 @@ export default class StoryIconRenderer extends EventEmitter {
 
     // go through the list of path items and collect the AssetCollection for the
     // default and active icons of each
-    _getIconAssets(): Promise<Array<AssetCollectionPair>> {
+    // then resolve the image_urls of each
+    _getIconAssets(): Promise<Array<IconUrlPair>> {
         const promises = [];
         this._pathItemList.forEach((pathItem) => {
             if (pathItem.representation.asset_collections.icon) {
@@ -142,16 +143,26 @@ export default class StoryIconRenderer extends EventEmitter {
             }
         });
 
-        const iconAssetList = []; // list of icon asset collections in AssetCollectionPair objects
         return Promise.all(promises).then((iconAssets) => {
-            for (let i = 0; i < iconAssets.length; i += 2) {
+            const resolvePromises = [];
+            iconAssets.forEach((assetUrl) => {
+                if (assetUrl && assetUrl.assets.image_src) {
+                    resolvePromises.push(this._fetchMedia(assetUrl.assets.image_src));
+                } else {
+                    resolvePromises.push(Promise.resolve(null));
+                }
+            });
+            return Promise.all(resolvePromises);
+        }).then((resolvedUrls) => {
+            const resolvedAssetList = [];
+            for (let i = 0; i < resolvedUrls.length; i += 2) {
                 const urls = {
-                    default: iconAssets[i],
-                    active: iconAssets[i + 1],
+                    default: resolvedUrls[i],
+                    active: resolvedUrls[i + 1],
                 };
-                iconAssetList.push(urls);
+                resolvedAssetList.push(urls);
             }
-            return Promise.resolve(iconAssetList);
+            return resolvedAssetList;
         });
     }
 
@@ -159,7 +170,7 @@ export default class StoryIconRenderer extends EventEmitter {
     // and build a map of urls of default and active icons for each representationId
     static _buildUrlMap(
         pathItems: Array<StoryPathItem>,
-        assets: Array<AssetCollectionPair>,
+        assets: Array<IconUrlPair>,
     ): { [key: string]: { default: ?string, active: ?string } } {
         // Build a map of representationIds to asset urls.
         return assets.reduce((urlMap, icon, idx) => {
@@ -167,10 +178,8 @@ export default class StoryIconRenderer extends EventEmitter {
 
             // eslint-disable-next-line no-param-reassign
             urlMap[representationId] = {
-                default: icon.default && icon.default.assets.image_src ?
-                    icon.default.assets.image_src : null,
-                active: icon.active && icon.active.assets.image_src ?
-                    icon.active.assets.image_src : null,
+                default: icon.default,
+                active: icon.active,
             };
 
             return urlMap;
