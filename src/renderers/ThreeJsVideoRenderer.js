@@ -73,7 +73,6 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         logger.info('360 video ended');
         if (!this._hasEnded) {
             this._hasEnded = true;
-            this._player.getLinkChoiceElement()[0].style.visibility = 'visible';
             super.complete();
         }
     }

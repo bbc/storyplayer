@@ -339,7 +339,7 @@ export default class Controller extends EventEmitter {
 
         if(checkDebugPlayout()) {
             // we want to check which devices can olay what
-            console.log('playing capabilities', data);
+            logger.info('playing capabilities', data);
         }
 
         const anyRequirementsFailed = requirements.some((req) => {

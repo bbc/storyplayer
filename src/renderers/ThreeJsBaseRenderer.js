@@ -7,6 +7,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import { InternalVariableNames } from '../InternalVariables';
 
 const THREE = require('three');
 
@@ -16,6 +17,7 @@ const RETICLE_RADIUS = 15;
 export type ThreeIcon = {
     iconPlane: THREE.Mesh,
     viewCount: number,
+    behaviourId: string,
 };
 
 export default class ThreeJsBaseRenderer extends BaseRenderer {
@@ -191,14 +193,14 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     // retrieve previous lat and long values from the variable store and apply
     _applyPreviousOrientation() {
-        this._controller.getVariableValue('_threejs_orientation_lon')
+        this._controller.getVariableValue(InternalVariableNames.LONGITUDE)
             .then((lon) => {
                 if (lon !== null) {
                     logger.info(`Maintaining 360 orientation at ${lon} longitude`);
                     this._view.lon = lon; 
                 }
             });
-        this._controller.getVariableValue('_threejs_orientation_lat')
+        this._controller.getVariableValue(InternalVariableNames.LATITUDE)
             .then((lat) => { 
                 if (lat !== null) {
                     logger.info(`Maintaining 360 orientation at ${lat} latitude`);
@@ -264,7 +266,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 // const { iconPlane } = iconObj;
                 if (iconObj && firstIntersectObject === iconObj.iconPlane) {
                     logger.info(`User has clicked icon for ${targetId} - following link`);
-                    this._followLink(targetId);
+                    this._followLink(targetId, iconObj.behaviourId);
                 }
             });
         }
@@ -294,7 +296,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 }
                 if (iconObj.viewCount > 50) {
                     logger.info(`User has viewed icon for ${targetId} for 2s - following link`);
-                    this._followLink(targetId);
+                    this._followLink(targetId, iconObj.behaviourId);
                     iconObj.viewCount = 0;
                 }
             });
@@ -324,8 +326,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         };
 
         this._controller.setVariables({
-            _threejs_orientation_lon: phi,
-            _threejs_orientation_lat: theta,
+            [InternalVariableNames.LONGITUDE]: phi,
+            [InternalVariableNames.LATITUDE]: theta,
         });
 
         // and log analytics
@@ -338,7 +340,16 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._analytics(logData);
     }
 
-    _addIcon(iconSrc: string, position: Object, size: Object, targetId: string) {
+    // add a link choice icon to within the 360 scene that can be stared at
+    // or clicked to activate
+    // (currently not used as no authoring for position)
+    _addIcon(
+        iconSrc: string,
+        position: Object,
+        size: Object,
+        targetId: string,
+        behaviourId: string,
+    ) {
         const { lat, long, radius } = position;
         const { width, height } = size;
         logger.info(`Adding threejs icon for ${targetId}, src ${iconSrc}, at (${lat}, ${long})`);
@@ -360,6 +371,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             this._icons[targetId] = {
                 iconPlane,
                 viewCount: 0,
+                behaviourId,
             };
             if(this._readyToShowIcons) {
                 this._scene.add(iconPlane);
@@ -367,33 +379,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         });
     }
 
-    _showChoiceIcons(iconDataObject: Object) {
-        super._showChoiceIcons(iconDataObject);
-        this._readyToShowIcons = true;
-        Object.keys(this._icons).forEach((targetId) => {
-            const { iconPlane } = this._icons[targetId];
-            if (!this._scene.children.includes(iconPlane)) {
-                this._scene.add(iconPlane);
-            }
-        });
-    }
-
-    _hideChoiceIcons(narrativeElementId: ?string) {
-        super._hideChoiceIcons(narrativeElementId);
-        Object.keys(this._icons).forEach((targetId) => {
-            const { iconPlane } = this._icons[targetId];
-            if (this._scene.children.includes(iconPlane)) {
-                this._scene.remove(iconPlane);
-            }
-        });
-        this._icons = {};
-    }
-
     end() {
-        // only if this is being rendered
-        if (this._started) {
-            this._player.getLinkChoiceElement()[0].style.visibility = 'visible';
-        }
+        super.end();
 
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
