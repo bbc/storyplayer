@@ -17,6 +17,7 @@ const RETICLE_RADIUS = 15;
 export type ThreeIcon = {
     iconPlane: THREE.Mesh,
     viewCount: number,
+    behaviourId: string,
 };
 
 export default class ThreeJsBaseRenderer extends BaseRenderer {
@@ -265,7 +266,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 // const { iconPlane } = iconObj;
                 if (iconObj && firstIntersectObject === iconObj.iconPlane) {
                     logger.info(`User has clicked icon for ${targetId} - following link`);
-                    this._followLink(targetId);
+                    this._followLink(targetId, iconObj.behaviourId);
                 }
             });
         }
@@ -295,7 +296,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
                 }
                 if (iconObj.viewCount > 50) {
                     logger.info(`User has viewed icon for ${targetId} for 2s - following link`);
-                    this._followLink(targetId);
+                    this._followLink(targetId, iconObj.behaviourId);
                     iconObj.viewCount = 0;
                 }
             });
@@ -339,7 +340,16 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._analytics(logData);
     }
 
-    _addIcon(iconSrc: string, position: Object, size: Object, targetId: string) {
+    // add a link choice icon to within the 360 scene that can be stared at
+    // or clicked to activate
+    // (currently not used as no authoring for position)
+    _addIcon(
+        iconSrc: string,
+        position: Object,
+        size: Object,
+        targetId: string,
+        behaviourId: string,
+    ) {
         const { lat, long, radius } = position;
         const { width, height } = size;
         logger.info(`Adding threejs icon for ${targetId}, src ${iconSrc}, at (${lat}, ${long})`);
@@ -361,6 +371,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             this._icons[targetId] = {
                 iconPlane,
                 viewCount: 0,
+                behaviourId,
             };
             if(this._readyToShowIcons) {
                 this._scene.add(iconPlane);
