@@ -812,9 +812,18 @@ export default class BaseRenderer extends EventEmitter {
             // save current set of icons so we can easily test if they need to be rebuilt
             // after a variable state change
             this._choiceBehaviourData.choiceIconNEObjects = narrativeElementObjects;
-            if(narrativeElementObjects.length === 0) {
+            if (narrativeElementObjects.length === 0) {
                 logger.warn('Show link icons behaviour run, but no links are currently valid');
                 this._player.enableControls();
+                callback();
+                return Promise.resolve();
+            }
+
+            // abort now if only one link and not showIfOneLink
+            if (narrativeElementObjects.length === 1 && !showIfOneLink) {
+                logger.info('Link Choice behaviour ignored - only one link');
+                this._player.enableControls();
+                callback();
                 return Promise.resolve();
             }
 
@@ -832,10 +841,6 @@ export default class BaseRenderer extends EventEmitter {
 
                     this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                 });
-                if(iconObjects.length > 1 || showIfOneLink) {
-                    // add link elements to the div element for the behaviour
-                }
-
                 if (iconObjects.length > 1 || showIfOneLink) {
                     this._showChoiceIcons({
                         defaultLinkId, // id for link to highlight at start
