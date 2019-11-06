@@ -44,10 +44,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMediaElement.autoplay = true;
 
         // disable ios controls too, we use our own
-        if(BrowserUserAgent.iOS()) {
-            this._foregroundMediaElement.setAttribute("controls", "false");
-            this._backgroundMediaElement.setAttribute("controls", "false");
-        }
+        this._foregroundMediaElement.removeAttribute("controls");
+        this._backgroundMediaElement.removeAttribute("controls");
         
 
         // Needed to stop iOS automatically making video fullscreen on phone iOS devices
