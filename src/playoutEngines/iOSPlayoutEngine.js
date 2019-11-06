@@ -4,7 +4,6 @@ import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
-import { BrowserUserAgent } from '../browserCapabilities';
 
 export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
