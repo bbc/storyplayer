@@ -20,7 +20,6 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
-import ImageRenderer from './renderers/ImageRenderer';
 import { REASONER_EVENTS } from './Events';
 import { checkDisableLookahead } from './utils';
 
@@ -183,28 +182,6 @@ export default class RenderManager extends EventEmitter {
 
 
     _handleOrientationChange() {
-        logger.info(`Window Orientation change to ${window.orientation}`);
-        // pause when in portrait
-        if (window.orientation === 0) {
-            this._player.playoutEngine.pause();
-            this._player.playoutEngine.pauseBackgrounds();
-            if (this._currentRenderer instanceof ImageRenderer) {
-                this._currentRenderer.pause();
-            }
-        } else {
-            this._player.playoutEngine.play();
-            if (this._player.playoutEngine.hasStarted()) {
-                this._player.playoutEngine.playBackgrounds();
-            }
-            if (this._currentRenderer instanceof ImageRenderer) {
-                this._currentRenderer.play();
-            }
-        }
-
-        if (Player._isFullScreen()) {
-            this._player._exitFullScreen();
-        }
-
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.WINDOW_ORIENTATION_CHANGE,

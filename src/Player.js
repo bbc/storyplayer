@@ -1393,8 +1393,11 @@ class Player extends EventEmitter {
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 
+        muteDiv.ontouchend = (e) => {
+            e.preventDefault();
+            this._setMuteCallBack(id, label, muteDiv);
+        };
         muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
-        muteDiv.ontouchend = this._setMuteCallBack(id, label, muteDiv).bind(this);
 
         controlDiv.appendChild(muteDiv);
         controlDiv.appendChild(volumeRange);
