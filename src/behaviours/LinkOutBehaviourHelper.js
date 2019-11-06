@@ -1,5 +1,6 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
+import AnalyticEvents from '../AnalyticEvents';
 
 /* eslint-disable no-param-reassign */
 const setPosition = (modalElement, behaviour) => {
@@ -28,7 +29,7 @@ const createLink = (behaviour) => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const renderLinkoutPopup = (behaviour, target, callback) => {
+export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     const modalElement = document.createElement('div');
     modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
@@ -58,6 +59,14 @@ export const renderLinkoutPopup = (behaviour, target, callback) => {
     modalElement.appendChild(closeButton);
 
     const link = createLink(behaviour);
+    link.onclick = () => {
+        analytics({
+            type: AnalyticEvents.types.USER_ACTION,
+            name: AnalyticEvents.names.OUTWARD_LINK_CLICKED,
+            from: 'not_set',
+            to: behaviour.link_url,
+        });
+    };
     const sentenceDiv = document.createElement('div');
     
     if (behaviour.before_text) {

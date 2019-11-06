@@ -1224,13 +1224,23 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderSocialPopup(behaviour, this._player._overlays, callback);
+        const modalElement = renderSocialPopup(
+            behaviour,
+            this._player._overlays,
+            callback,
+            this._analytics,
+        );
         this._setBehaviourElementAttribute(modalElement, 'social-share');
         this._behaviourElements.push(modalElement);
     }
 
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const modalElement = renderLinkoutPopup(behaviour, this._player._overlays, callback);
+        const modalElement = renderLinkoutPopup(
+            behaviour,
+            this._player._overlays,
+            callback,
+            this._analytics,
+        );
         this._setBehaviourElementAttribute(modalElement, 'link-out');
         this._behaviourElements.push(modalElement);
     }
