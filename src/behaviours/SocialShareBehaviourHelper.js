@@ -1,5 +1,6 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
+import AnalyticEvents from '../AnalyticEvents';
 
 const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
@@ -52,8 +53,19 @@ const setPosition = (modalElement, behaviour) => {
 };
 /* eslint-enable no-param-reassign */
 
+const addAnalytics = (icon, platformId, analytics) => {
+    icon.addEventListener('click', () => {
+        analytics({
+            type: AnalyticEvents.types.USER_ACTION,
+            name: AnalyticEvents.names.SOCIAL_SHARE_CLICKED,
+            from: 'not_set',
+            to: platformId,
+        });
+    });
+}
+
 // eslint-disable-next-line import/prefer-default-export
-export const renderSocialPopup = (behaviour, target, callback) => { 
+export const renderSocialPopup = (behaviour, target, callback, analytics = () => {}) => { 
     const modalElement = document.createElement('div');
     modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
@@ -93,12 +105,15 @@ export const renderSocialPopup = (behaviour, target, callback) => {
     behaviour.platforms.forEach((platformId) => {
         if (platformId === 'twitter') {
             const twitterIcon = createTwitterIcon(shareText, shareUrl);
+            addAnalytics(twitterIcon, platformId, analytics);
             platformList.appendChild(twitterIcon);
         } else if (platformId === 'email') {
             const emailIcon = createEmailIcon(shareText, shareUrl);
+            addAnalytics(emailIcon, platformId, analytics);
             platformList.appendChild(emailIcon);
         } else if (platformId === 'facebook') {
             const facebookIcon = createFacebookIcon(shareText, shareUrl);
+            addAnalytics(facebookIcon, platformId, analytics);
             platformList.appendChild(facebookIcon);
         }
     });
