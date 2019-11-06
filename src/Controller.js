@@ -21,9 +21,6 @@ import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { checkDebugPlayout } from './utils';
 
-// eslint-disable-next-line max-len
-const IOS_WARNING = 'Due to technical limitations, the performance of this experience is degraded on iOS. To get the best experience please use another device';
-
 export const PLACEHOLDER_REPRESENTATION = {
     object_class: 'REPRESENTATION',
     version: '0:0',
@@ -64,7 +61,6 @@ export default class Controller extends EventEmitter {
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
-        this._warnIosUsers();
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -365,17 +361,6 @@ export default class Controller extends EventEmitter {
         }
         logger.info(`All requirements satisfied: ${JSON.stringify(requirements)}`);
         return 0;
-    }
-
-    _warnIosUsers() {
-        if (BrowserUserAgent.iOS()) {
-            if (!this._privacyNotice) {
-                this._privacyNotice = IOS_WARNING;
-            } else {
-                const appendedNotice = `${this._privacyNotice}\n${IOS_WARNING}`;
-                this._privacyNotice = appendedNotice;
-            }
-        }
     }
 
     // create a manager to handle the rendering
