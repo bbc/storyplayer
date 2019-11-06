@@ -4,6 +4,7 @@ import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
 import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
+import { BrowserUserAgent } from '../browserCapabilities';
 
 export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
@@ -43,8 +44,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMediaElement.autoplay = true;
 
         // disable ios controls too, we use our own
-        this._foregroundMediaElement.setAttribute("controls", "false");
-        this._backgroundMediaElement.setAttribute("controls", "false");
+        if(BrowserUserAgent.iOS()) {
+            this._foregroundMediaElement.setAttribute("controls", "false");
+            this._backgroundMediaElement.setAttribute("controls", "false");
+        }
+        
 
         // Needed to stop iOS automatically making video fullscreen on phone iOS devices
         this._foregroundMediaElement.setAttribute("playsinline", "true");
