@@ -136,6 +136,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        const setStartToInTime = () => {
+            if (this._playoutEngine.getCurrentTime(this._rendererId) < this._inTime) {
+                logger.warn('video not synced to in time, resetting');
+                this.setCurrentTime(0);
+            }
+            this._playoutEngine.off(this._rendererId, 'playing', setStartToInTime);
+        };
+        this._playoutEngine.on(this._rendererId, 'playing', setStartToInTime);
         // automatically move on at video end
         this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
