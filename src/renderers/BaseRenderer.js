@@ -20,7 +20,6 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
-import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 
 const SEEK_TIME = 10;
 
@@ -186,6 +185,7 @@ export default class BaseRenderer extends EventEmitter {
         this._hideControls = this._hideControls.bind(this);
         this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
+        this._runStartBehaviours = this._runStartBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
         this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
