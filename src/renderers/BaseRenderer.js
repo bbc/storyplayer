@@ -20,6 +20,7 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
+import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 
 const SEEK_TIME = 10;
 
@@ -226,9 +227,23 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
+
+        // run start behaviours for dom switch playout engine
+        if(this._player.playoutEngine instanceof DOMSwitchPlayoutEngine) {
+            this._runStartBehaviours();
+        }
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        if(checkAddDetailsOverride()) {
+            const { name, id } = this._representation;
+            this._player.addDetails(elementName, elementId, name, id)
+        }
+    }
+
+    _runStartBehaviours() {
+        this._behaviourRunner = this._representation.behaviours ?
+            new BehaviourRunner(this._representation.behaviours, this) :
+            null;
         this._player.enterStartBehaviourPhase(this);
         this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
@@ -238,12 +253,6 @@ export default class BaseRenderer extends EventEmitter {
             )
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
-        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(checkAddDetailsOverride()) {
-            const { name, id } = this._representation;
-            this._player.addDetails(elementName, elementId, name, id)
         }
     }
 
