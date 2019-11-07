@@ -1264,7 +1264,7 @@ class Player extends EventEmitter {
         userEventName: AnalyticEventName,
         fromId: string = 'not_set',
         toId: string = 'not_set',
-        information: ?Object = null,
+        information: ?Object = {},
     ) {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
