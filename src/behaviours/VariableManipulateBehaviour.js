@@ -11,8 +11,9 @@ export default class VariableManipulateBehaviour extends BaseBehaviour {
     start(renderer: BaseRenderer) {
         // eslint-disable-next-line max-len
         logger.info(`ANDY starting manipulator behaviour ${JSON.stringify(this._behaviourDefinition)}`);
-        const { operation, targetVariable } = this._behaviourDefinition;
-        
+        const { operation } = this._behaviourDefinition;
+        const targetVariable = this._behaviourDefinition.target_variable;
+
         const controller = renderer.getController();
 
         const interestingVars = [];
