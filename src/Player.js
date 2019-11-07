@@ -619,7 +619,7 @@ class Player extends EventEmitter {
         this._overlays.onclick = this._handleOverlayClick.bind(this);
         this._overlays.addEventListener(
             'touchend',
-            this._handleOverlayClick.bind(this),
+            handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
@@ -673,7 +673,7 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.addEventListener(
             'touchend',
-            this._activateRomperButtons.bind(this),
+            handleButtonTouchEvent(this._activateRomperButtons.bind(this)),
         );
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
@@ -820,7 +820,10 @@ class Player extends EventEmitter {
         };
 
         cancelButton.onclick = cancelButtonHandler;
-        cancelButton.addEventListener('touchend', cancelButtonHandler);
+        cancelButton.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(cancelButtonHandler),
+        );
 
         const resumeExperienceButtonHandler = () => {
             this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
@@ -835,7 +838,7 @@ class Player extends EventEmitter {
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
         this._resumeExperienceButton.addEventListener(
             'touchend',
-            resumeExperienceButtonHandler,
+            handleButtonTouchEvent(resumeExperienceButtonHandler),
         );
 
         // resume
@@ -1077,7 +1080,7 @@ class Player extends EventEmitter {
         this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
             'touchend',
-            this._startButtonHandler,
+            handleButtonTouchEvent(this._startButtonHandler),
         );
     }
 
@@ -1393,10 +1396,10 @@ class Player extends EventEmitter {
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 
-        muteDiv.ontouchend = (e) => {
-            e.preventDefault();
-            this._setMuteCallBack(id, label, muteDiv);
-        };
+        muteDiv.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteDiv).bind(this)),
+        );
         muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
 
         controlDiv.appendChild(muteDiv);
@@ -1513,7 +1516,7 @@ class Player extends EventEmitter {
             iconContainer.onclick = choiceClick;
             iconContainer.addEventListener(
                 'touchend',
-                choiceClick,
+                handleButtonTouchEvent(choiceClick),
             );
 
             linkChoiceControl.appendChild(iconContainer);
@@ -1595,7 +1598,10 @@ class Player extends EventEmitter {
                     behaviourOverlay.setActive(`${id}`);
                 };
                 icon.onclick = clickHandler;
-                icon.addEventListener('touchend', clickHandler);
+                icon.addEventListener(
+                    'touchend', 
+                    handleButtonTouchEvent(clickHandler),
+                );
                 behaviourOverlay.add(id, icon);
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
