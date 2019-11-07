@@ -228,10 +228,8 @@ export default class BaseRenderer extends EventEmitter {
     willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
 
-        // run start behaviours for dom switch playout engine
-        if(this._player.playoutEngine instanceof DOMSwitchPlayoutEngine) {
-            this._runStartBehaviours();
-        }
+        this._runStartBehaviours();
+
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         if(checkAddDetailsOverride()) {
