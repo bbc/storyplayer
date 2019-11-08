@@ -1020,18 +1020,12 @@ $romper-button-border: 4px;
   background-color: $romper-background-color;
 }
 
-.romper-modal-container {
-  height: 100%;
-  position: relative;
-  width: 100%;
-}
-
 .romper-behaviour-modal {
   background-color: $var-panel-background;
   border-radius: 0.5em;
   color: $white;
   padding: 1%;
-  z-index: 5;
+  z-index: 15;
 
   .title {
     font-size: 120%;
