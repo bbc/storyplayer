@@ -79,10 +79,7 @@ export default class Controller extends EventEmitter {
                 this.getCurrentNarrativeElement().id : 'null';
         }
         const appendedData: AnalyticsPayload = {
-            name: AnalyticEvents.names[logData.name],
-            type: AnalyticEvents.types[logData.type],
-            from: logData.from,
-            to: logData.to,
+            ...logData,
             current_narrative_element: neId,
             current_representation: repId,
         };
