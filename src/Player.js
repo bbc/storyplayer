@@ -1267,12 +1267,14 @@ class Player extends EventEmitter {
         userEventName: AnalyticEventName,
         fromId: string = 'not_set',
         toId: string = 'not_set',
+        information: ?Object = {},
     ) {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names[userEventName],
             from: fromId == null ? 'not_set' : fromId,
             to: toId == null ? 'not_set' : toId,
+            information: JSON.stringify(information),
         };
         this._analytics(logData);
     }
@@ -1511,7 +1513,12 @@ class Player extends EventEmitter {
             const choiceClick = () => {
                 
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
-                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+                this._logUserInteraction(
+                    AnalyticEvents.names.LINK_CHOICE_CLICKED,
+                    null,
+                    id,
+                    { label, text, },
+                );
             };
             iconContainer.onclick = choiceClick;
             iconContainer.addEventListener(
