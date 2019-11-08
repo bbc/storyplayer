@@ -185,6 +185,7 @@ export default class BaseRenderer extends EventEmitter {
         this._hideControls = this._hideControls.bind(this);
         this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
+        this._runStartBehaviours = this._runStartBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
         this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
@@ -226,9 +227,21 @@ export default class BaseRenderer extends EventEmitter {
 
     willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
+
+        this._runStartBehaviours();
+
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        if(checkAddDetailsOverride()) {
+            const { name, id } = this._representation;
+            this._player.addDetails(elementName, elementId, name, id)
+        }
+    }
+
+    _runStartBehaviours() {
+        this._behaviourRunner = this._representation.behaviours ?
+            new BehaviourRunner(this._representation.behaviours, this) :
+            null;
         this._player.enterStartBehaviourPhase(this);
         this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
@@ -238,12 +251,6 @@ export default class BaseRenderer extends EventEmitter {
             )
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
-        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(checkAddDetailsOverride()) {
-            const { name, id } = this._representation;
-            this._player.addDetails(elementName, elementId, name, id)
         }
     }
 
