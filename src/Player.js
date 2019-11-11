@@ -1309,9 +1309,12 @@ class Player extends EventEmitter {
         if(overlay) {
             const muteButton = document.getElementById(`mute-button-${id}`);
             if(muted && muteButton) {
+                this._volume.get(id).classList.add('romper-muted');
                 muteButton.setAttribute('data-muted', 'true');
                 muteButton.classList.remove('romper-mute-button');
                 muteButton.classList.add('romper-muted-button');
+            } else {
+                this._volume.get(id).classList.remove('romper-muted');
             }
             this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
         }
@@ -2069,6 +2072,7 @@ class Player extends EventEmitter {
         // if we are an iphone capture these events;
         if(BrowserUserAgent.iOS()) {
             this._playerParent.addEventListener('touchmove', preventEventDefault);
+            this._playerParent.classList.add('ios-fullscreen'); // iOS
         }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
@@ -2112,6 +2116,7 @@ class Player extends EventEmitter {
 
         if(BrowserUserAgent.iOS()) {
             this._playerParent.removeEventListener('touchmove', preventEventDefault);
+            this._playerParent.classList.remove('ios-fullscreen'); // iOS
         }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);

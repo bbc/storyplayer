@@ -1554,3 +1554,12 @@ $romper-button-border: 4px;
     width: 60%;
   }
 }
+
+@media (orientation: portrait) {
+  .romper-player {
+    &.ios-fullscreen > .romper-gui > .romper-buttons-fullscreen {
+      bottom: 50px;  // iphone fullscreen push buttons up
+    }
+  }
+}
+
