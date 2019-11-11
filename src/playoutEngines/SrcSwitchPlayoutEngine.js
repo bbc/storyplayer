@@ -146,6 +146,12 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
                 mediaElement.id =  mediaObj.id; 
             }
         }
+        if (mediaObj.inTime) {
+            const mediaElement = rendererPlayoutObj.mediaInstance.getMediaElement();
+            if(mediaElement) {
+                mediaElement.currentTime = mediaObj.inTime;
+            }
+        }
 
         if (mediaObj.subs_url) {
             this._player.enableSubtitlesControl();

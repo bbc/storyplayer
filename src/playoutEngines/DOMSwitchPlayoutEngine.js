@@ -333,6 +333,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             // rendererPlayoutObj.mediaElement.loop = true;
             super.setLoopAttribute(rendererId, mediaObj.loop, rendererPlayoutObj.mediaElement);
         }
+        if (mediaObj.inTime) {
+            rendererPlayoutObj.mediaElement.currentTime = mediaObj.inTime;
+        }
 
         if (mediaObj.subs_url) {
             this._queueSubtitleAttach(rendererId);
