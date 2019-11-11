@@ -1307,7 +1307,7 @@ class Player extends EventEmitter {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
         if(overlay) {
-            const muteButton = document.getElementById('mute-button-id');
+            const muteButton = document.getElementById(`mute-button-${id}`);
             if(muted && muteButton) {
                 muteButton.setAttribute('data-muted', 'true');
                 muteButton.classList.remove('romper-mute-button');
@@ -1319,6 +1319,7 @@ class Player extends EventEmitter {
 
     _setMuteCallBack(id: string, label: string, muteButton: HTMLDivElement)  {
         return () => {
+            this._volume.get(id).classList.toggle('romper-muted');
             muteButton.classList.toggle('romper-mute-button');
             const muted = muteButton.classList.toggle('romper-muted-button');
             muteButton.setAttribute('data-muted', muted)
@@ -1344,6 +1345,7 @@ class Player extends EventEmitter {
                 const isMuted = muteButton.classList.contains('romper-muted-button');
                 if(isMuted) {
                     this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted: false });
+                    this._volume.get(id).classList.remove('romper-muted');
                 }
                 muteButton.classList.add('romper-mute-button');
                 muteButton.classList.remove('romper-muted-button');
@@ -1380,8 +1382,9 @@ class Player extends EventEmitter {
 
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
+        controlDiv.id = `volume-control-${id}`;
         const muteDiv = document.createElement('div');
-        muteDiv.id = 'mute-button-id';
+        muteDiv.id = `mute-button-${id}`;
         muteDiv.classList.add('romper-mute-button');
         muteDiv.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');

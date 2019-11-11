@@ -502,6 +502,13 @@ $romper-button-border: 4px;
       justify-content: center;
       width: 100%;
 
+      &.romper-muted {
+        .romper-volume-level,
+        .romper-volume-range {
+          opacity: 0.4;
+        }
+      }
+
       .romper-control-line {
         display: inline-flex;
       }
