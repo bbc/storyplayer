@@ -2,7 +2,7 @@
 import EventEmitter  from 'events';
 import { InternalVariableNames } from './InternalVariables';
 
-export const EXISTING_SESSIONS = 'EXISTING_SESSION'
+const EXISTING_SESSIONS = 'EXISTING_SESSION'
 const EMPTY_OBJECT = '{}';
 const EMPTY_ARRAY= '[]';
 
