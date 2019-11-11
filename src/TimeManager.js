@@ -28,7 +28,7 @@ export default class TimeManager extends EventEmitter {
         this.clear();
         
         this._timer = setInterval(() => {
-            if (!this._paused) {
+            if (!(this._paused || this._syncing)) {
                 this._timeElapsed += TIMER_INTERVAL/1000;
                 Object.keys(this._timedEvents).forEach((timeEventId) => {
                     const { 
@@ -64,10 +64,8 @@ export default class TimeManager extends EventEmitter {
     // set the timer to pause while it syncs, or restart when done
     setSyncing(syncing: boolean) {
         if (syncing) {
-            this.pause();
             this._syncing = true;
         } else {
-            this.resume();
             this._syncing = false;
         }
     }
