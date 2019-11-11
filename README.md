@@ -103,6 +103,7 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer
 - disableLookahead - 'true' Stops preloading of next/previous elements
 - addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
 - overridePlayoutFormat - Takes either 'hls' or 'dash' Other values are ignored.
+- cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
 
 
 ## Resume State
