@@ -181,6 +181,7 @@ export default class Controller extends EventEmitter {
                 break;
             }
         } else {
+            this.deleteExistingSession();
             this.startFromDefaultState(storyId, initialState);
         }
     }
@@ -1169,8 +1170,11 @@ export default class Controller extends EventEmitter {
     }
 
     deleteExistingSession() {
+        if(this._storyId) {
+            SessionManager.deleteExistingSession(this._storyId);
+        }
         if(this._sessionManager) {
-            this._sessionManager.deleteExistingSession();
+            this._sessionManager.setSessionState(SESSION_STATE.NEW);
         }
     }
 
