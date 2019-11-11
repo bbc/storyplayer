@@ -439,7 +439,7 @@ export default class BaseRenderer extends EventEmitter {
             const sync = () => {
                 const playheadTime = mediaElement.currentTime;
                 if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
-                    this._timer.setTime(playheadTime);
+                    this._timer.setTime(playheadTime - this._inTime);
                     this._timer.setSyncing(false);
                     if (isPaused) this._timer.pause();  // don't restart if we were paused
                     mediaElement.removeEventListener('timeupdate', sync);
@@ -449,7 +449,7 @@ export default class BaseRenderer extends EventEmitter {
             mediaElement.addEventListener('timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
         } else {
-            this._timer.setTime(targetTime);
+            this._timer.setTime(time);
         }
     }
 

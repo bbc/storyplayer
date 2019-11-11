@@ -136,10 +136,13 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        // set timer to sync mode until really ready
+        this._timer.setSyncing(true);
         const setStartToInTime = () => {
             if (this._playoutEngine.getCurrentTime(this._rendererId) < this._inTime) {
                 logger.warn('video not synced to in time, resetting');
                 this.setCurrentTime(0);
+                this._timer.setSyncing(false);
             }
             this._playoutEngine.off(this._rendererId, 'playing', setStartToInTime);
         };
@@ -253,7 +256,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
                 loop,
-                id
+                id,
+                inTime: this._inTime,
             });
         }
     }
