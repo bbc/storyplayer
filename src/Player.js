@@ -1523,7 +1523,7 @@ class Player extends EventEmitter {
             iconContainer.onclick = choiceClick;
             iconContainer.addEventListener(
                 'touchend',
-                handleButtonTouchEvent(choiceClick),
+                choiceClick, // let event through to overlay
             );
 
             linkChoiceControl.appendChild(iconContainer);
