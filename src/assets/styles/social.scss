@@ -32,14 +32,37 @@ $facebook-blue: #3b5998;
       div {
         background-image: url('../images/Twitter_Social_Icon_Circle_Color.svg');
       }
+
+      &.white {
+        div {
+          background-image: url('../images/social/Twitter_Social_Icon_Circle_White.svg');
+        }
+      }
     }
 
     &.facebook {
       div {
-        background-color: $facebook-blue;
-        background-image: url('../images/facebook.svg');
+        background-image: url('../images/social/f_logo_RGB-Blue_250.png');
       }
-    }
+
+      &.white {
+        div {
+          background-image: url('../images/social/f_logo_RGB-White_250.png');
+        }
+      }
+
+      &.black {
+        div {
+          background-image: url('../images/social/f_logo_RGB-Black_250.png');
+        }
+      }
+
+      &.grey {
+        div {
+          background-image: url('../images/social/f_logo_RGB-Grey_250.png');
+        }
+      }
+     }
   }
 }
 
