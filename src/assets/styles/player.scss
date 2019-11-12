@@ -7,6 +7,7 @@ $romper-buttons-max-height: 4em;
 $romper-hover-text-size: 1.53em;
 $romper-button-padding: 4px;
 $romper-button-border: 4px;
+$start-button-size: 15vw;
 
 .romper-media-element-queued {
   display: none;
@@ -749,13 +750,13 @@ $romper-button-border: 4px;
 .romper-player > .romper-gui {
 
   .romper-start-button {
-    bottom: calc(50% - 85px);
+    bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
-    height: 170px;
-    left: calc(50% - 85px);
+    height: $start-button-size;
+    left: calc(50% - #{(0.5 * $start-button-size)});
     margin: 0;
     position: absolute;
-    width: 170px;
+    width: $start-button-size;
     z-index: 101;
 
     &:hover {
@@ -770,17 +771,17 @@ $romper-button-border: 4px;
       background-color: $transparent;
       border: 1px solid $white;
       border-radius: 50%;
-      height: 100px;
+      height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
-      width: 100px;
+      width: 0.75 * $start-button-size;
     }
 
     .romper-start-button-icon-div {
-      height: 100px; // 40px;
-      margin-left: 15px; // 37px;
-      margin-top: 0; //30px;
-      width: 80px; // 33px;
+      height: 0.75 * $start-button-size;
+      margin-left: 0.12 * 0.75 * $start-button-size;
+      margin-top: 0;
+      width: 0.75 * 0.8 * $start-button-size;
     }
 
     .romper-start-button-text-div {
@@ -794,13 +795,13 @@ $romper-button-border: 4px;
   }
 
   .romper-reset-button {
-    bottom: calc(50% - 85px);
+    bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
-    height: 170px;
-    left: calc(50% - 85px);
+    height: $start-button-size;
+    left: calc(50% - #{(0.5 * $start-button-size)});
     margin: 0;
     position: absolute;
-    width: 170px;
+    width: $start-button-size;
     z-index: 101;
 
     &:hover {
@@ -815,16 +816,16 @@ $romper-button-border: 4px;
       background-color: $transparent;
       border: 1px solid $white;
       border-radius: 50%;
-      height: 100px;
+      height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
-      width: 100px;
+      width: 0.75 * $start-button-size;
     }
 
     .romper-reset-button-icon-div {
-      height: 100px; // 40px;
-      margin-top: 0; //30px;
-      width: 80px; // 33px;
+      height: 0.75 * $start-button-size;
+      margin-top: 0;
+      width: 0.75 * 0.8 * $start-button-size;
     }
 
     .romper-reset-button-text-div {
@@ -1481,6 +1482,21 @@ $romper-button-border: 4px;
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
+    }
+  }
+}
+
+@media (min-width: 320px) and (max-width: 500px) {
+  .romper-player > .romper-media {
+    &.romper-prestart > .romper-privacy-notice {
+      font-size: 70%;
+      height: 75px;
+
+      > p {
+        bottom: 0;
+        margin-bottom: 3px;
+        padding: 0 2%;
+      }
     }
   }
 }
