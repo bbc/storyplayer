@@ -18,8 +18,12 @@ $facebook-blue: #3b5998;
       background-position: center;
       background-repeat: no-repeat;
       background-size: contain;
-      height: 3em;
-      width: 3em;
+      height: 3vw;
+      max-height: 3em;
+      max-width: 3em;
+      min-height: 2em;
+      min-width: 2em;
+      width: 3vw;
     }
 
     &.email {
