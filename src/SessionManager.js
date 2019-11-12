@@ -6,7 +6,7 @@ const EXISTING_SESSIONS = 'EXISTING_SESSION'
 const EMPTY_OBJECT = '{}';
 const EMPTY_ARRAY= '[]';
 
-const fetchStateFromStorage = (key: string, defaultValue: string) => {
+export const fetchStateFromStorage = (key: string, defaultValue: string) => {
     return JSON.parse(localStorage.getItem(key) || defaultValue);
 }
 
@@ -54,16 +54,14 @@ export default class SessionManager extends EventEmitter {
             SESSION_STATE.EXISTING : SESSION_STATE.NEW;
     }
 
-    deleteExistingSession() {
-        if (!this._storyId) return;
-        localStorage.removeItem(this._storyId);
+    static deleteExistingSession(storyId: string) {
+        if (!storyId) return;
+        localStorage.removeItem(storyId);
         const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
-        if (existingSessions.includes(!this._storyId)) {
-            const filteredSessions = existingSessions.filter(sess => sess !== !this._storyId);
+        if (existingSessions.includes(storyId)) {
+            const filteredSessions = existingSessions.filter(sess => sess !== storyId);
             localStorage.setItem(EXISTING_SESSIONS, JSON.stringify(filteredSessions));
         }
-
-        this.setSessionState(SESSION_STATE.NEW);
     }
 
     setExistingSession() {
