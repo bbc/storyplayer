@@ -4,6 +4,7 @@ import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import { MediaFormats } from '../browserCapabilities';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
@@ -107,7 +108,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             }
         }
         // have we reached the end?
-        // either timer past specified duration (for looping) 
+        // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
             if (videoElement) {
@@ -175,7 +176,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._setOutTime(parseFloat(fg.meta.romper.out));
                     }
                     if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, { mediaFormat: MediaFormats.getFormat(),mediaType: AUDIO })
+                        this._fetchMedia(fg.assets.audio_src, {
+                            mediaFormat: MediaFormats.getFormat(), 
+                            mediaType: AUDIO
+                        })
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
                             })

@@ -996,9 +996,9 @@ class Player extends EventEmitter {
 
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
-            this._startExperienceImage = document.createElement('div');
+            this._startExperienceImage = document.createElement('img');
             this._startExperienceImage.className = 'romper-start-image';
-            this._startExperienceImage.style.backgroundImage = `url(${options.background_art})`;
+            this._startExperienceImage.src = options.background_art;
             this._mediaLayer.appendChild(this._startExperienceImage);
         }
     }
@@ -2072,7 +2072,7 @@ class Player extends EventEmitter {
         // if we are an iphone capture these events;
         if(BrowserUserAgent.iOS()) {
             this._playerParent.addEventListener('touchmove', preventEventDefault);
-            this._playerParent.classList.add('ios-fullscreen'); // iOS
+            this._player.classList.add('ios-fullscreen'); // iOS
         }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
@@ -2116,7 +2116,7 @@ class Player extends EventEmitter {
 
         if(BrowserUserAgent.iOS()) {
             this._playerParent.removeEventListener('touchmove', preventEventDefault);
-            this._playerParent.classList.remove('ios-fullscreen'); // iOS
+            this._player.classList.remove('ios-fullscreen'); // iOS
         }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);

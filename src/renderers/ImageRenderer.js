@@ -8,7 +8,7 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
 export default class ImageRenderer extends BaseRenderer {
-    _imageElement: HTMLDivElement;
+    _imageElement: HTMLImgElement;
 
     _disablePlayButton: Function;
 
@@ -94,7 +94,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     renderImageElement() {
-        this._imageElement = document.createElement('div');
+        this._imageElement = document.createElement('img');
         this._imageElement.className = 'romper-render-image';
         this._setVisibility(false);
         if (this._representation.asset_collections.foreground_id) {
@@ -103,7 +103,7 @@ export default class ImageRenderer extends BaseRenderer {
                     if (fg.assets.image_src) {
                         this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
                             logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                            this._imageElement.style.backgroundImage = `url(${mediaUrl})`;
+                            this._imageElement.src = mediaUrl;
                         }).catch((err) => { logger.error(err, 'Notfound'); });
                     }
                 });

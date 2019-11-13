@@ -774,13 +774,17 @@ $start-button-size: 15vw;
       height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
+      max-height: 170px;
+      max-width: 170px;
       width: 0.75 * $start-button-size;
     }
 
     .romper-start-button-icon-div {
       height: 0.75 * $start-button-size;
-      margin-left: 0.12 * 0.75 * $start-button-size;
+      margin-left: auto;
       margin-top: 0;
+      max-height: 170px;
+      max-width: 100px;
       width: 0.75 * 0.8 * $start-button-size;
     }
 
@@ -819,12 +823,16 @@ $start-button-size: 15vw;
       height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
+      max-height: 170px;
+      max-width: 170px;
       width: 0.75 * $start-button-size;
     }
 
     .romper-reset-button-icon-div {
       height: 0.75 * $start-button-size;
       margin-top: 0;
+      max-height: 170px;
+      max-width: 100px;
       width: 0.75 * 0.8 * $start-button-size;
     }
 
@@ -1012,13 +1020,12 @@ $start-button-size: 15vw;
 .romper-image-overlay,
 .romper-start-image,
 .romper-render-image {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
   height: 100%;
   left: 0;
   max-height: 100%;
   max-width: 100%;
+  object-fit: contain;
+  object-position: center;
   position: absolute;
   top: 0;
   width: 100%;
@@ -1039,6 +1046,7 @@ $start-button-size: 15vw;
     font-size: 120%;
     font-weight: bold;
     padding-bottom: 0.5em;
+    padding-right: 1.5em;
   }
 
   a {
@@ -1377,7 +1385,7 @@ $start-button-size: 15vw;
 
   .modal-inner-content {
     border-bottom: 1px solid $white;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
     padding-bottom: 1em;
   }
 
@@ -1388,9 +1396,9 @@ $start-button-size: 15vw;
     margin-left: auto;
     margin-right: auto;
     max-height: calc(100% - 100px);
-    min-height: 200px;
+    min-height: 130px;
     min-width: 300px;
-    padding: 5%;
+    padding: 2%;
     position: relative;
     text-align: center;
     top: 5%;
@@ -1573,7 +1581,7 @@ $start-button-size: 15vw;
 @media (orientation: portrait) {
   .romper-player {
     &.ios-fullscreen > .romper-gui > .romper-buttons-fullscreen {
-      bottom: 50px;  // iphone fullscreen push buttons up
+      bottom: 115px;  // iphone fullscreen push buttons up
     }
   }
 }
