@@ -146,7 +146,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     destroy() {
         this.end();
-
         this._playoutEngine.unqueuePlayout(this._rendererId);
 
         super.destroy();

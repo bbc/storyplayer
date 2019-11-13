@@ -49,11 +49,12 @@ export const copySelection = (e: Object) => {
 // eslint-disable-next-line class-methods-use-this
 export const addDetail = (key: string, name: ? string, id : ? string) => {
     const detail = document.createElement('div');
+    detail.className= 'detail'
     detail.innerText = `${key}: ${name || ''}`;
     const detailId = document.createElement('input');
     detailId.value = `${id || ''}`;
     detailId.readOnly = true;
-    detailId.className = 'detail';
+    detailId.className = 'detail-input';
     detailId.onclick = copySelection;
     detail.appendChild(detailId);
     return detail;
