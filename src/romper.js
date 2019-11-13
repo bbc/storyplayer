@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS = {
     },
     staticImageBaseUrl: '/dist/images',
     privacyNotice: null,
-    saveSession: true,
+    saveSession: false,
 };
 
 module.exports = {
