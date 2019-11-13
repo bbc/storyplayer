@@ -659,7 +659,8 @@ $start-button-size: 15vw;
         grid-template-rows: 1fr 1fr 1fr;
       }
 
-      .romper-link-icon-container {
+      .romper-link-icon-container,
+      .romper-text-link-container {
         height: 100%;
         margin: 0;
         width: 100%;
