@@ -996,9 +996,9 @@ class Player extends EventEmitter {
 
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
-            this._startExperienceImage = document.createElement('div');
+            this._startExperienceImage = document.createElement('img');
             this._startExperienceImage.className = 'romper-start-image';
-            this._startExperienceImage.style.backgroundImage = `url(${options.background_art})`;
+            this._startExperienceImage.src = options.background_art;
             this._mediaLayer.appendChild(this._startExperienceImage);
         }
     }
