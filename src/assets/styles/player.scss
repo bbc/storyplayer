@@ -1564,14 +1564,18 @@ $start-button-size: 15vw;
   display: flex;
   flex-direction: row;
   font-size: 1em;
-  left: 0%;
+  left: 0;
   overflow: scroll;
-  padding-left: 0.5em;
+  
   position: absolute;
   top: 2%;
   z-index: 2000;
 
   .detail {
+    padding-left: 0.5em;
+  }
+
+  .detail-input {
     background: $black;
     border: 0;
     color: $white;

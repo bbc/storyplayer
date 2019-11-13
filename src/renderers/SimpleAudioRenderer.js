@@ -7,15 +7,10 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import { MediaFormats } from '../browserCapabilities';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
-
-// import MediaManager from '../MediaManager';
-// import MediaInstance from '../MediaInstance';
-
 import Controller from '../Controller';
-
 import logger from '../logger';
 import { AUDIO } from '../utils';
-import { MediaFormats } from '../browserCapabilities';
+
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
