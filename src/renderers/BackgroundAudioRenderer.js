@@ -3,6 +3,7 @@
 import Player from '../Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
+import { MediaFormats } from '../browserCapabilities';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
@@ -122,7 +123,10 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
-            this._fetchMedia(this._assetCollection.assets.audio_src, { mediaType: AUDIO })
+            this._fetchMedia(this._assetCollection.assets.audio_src, {
+                mediaFormat: MediaFormats.getFormat(), 
+                mediaType: AUDIO
+            })
                 .then((mediaUrl) => {
                     this._populateAudioElement(mediaUrl);
                 }).catch((err) => { logger.error(err, 'Notfound'); });
