@@ -8,6 +8,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 import { AUDIO } from '../utils';
+import { MediaFormats } from '../browserCapabilities';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 
@@ -122,7 +123,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
-            this._fetchMedia(this._assetCollection.assets.audio_src, { mediaType: AUDIO })
+            this._fetchMedia(this._assetCollection.assets.audio_src, { mediaFormat: MediaFormats.getFormat(), mediaType: AUDIO })
                 .then((mediaUrl) => {
                     this._populateAudioElement(mediaUrl);
                 }).catch((err) => { logger.error(err, 'Notfound'); });
@@ -142,7 +143,6 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     destroy() {
         this.end();
-
         this._playoutEngine.unqueuePlayout(this._rendererId);
 
         super.destroy();

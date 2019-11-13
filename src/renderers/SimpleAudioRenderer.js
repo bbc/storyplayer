@@ -14,6 +14,7 @@ import Controller from '../Controller';
 
 import logger from '../logger';
 import { AUDIO } from '../utils';
+import { MediaFormats } from '../browserCapabilities';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -174,7 +175,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._setOutTime(parseFloat(fg.meta.romper.out));
                     }
                     if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, { mediaType: AUDIO })
+                        this._fetchMedia(fg.assets.audio_src, { mediaFormat: MediaFormats.getFormat(),mediaType: AUDIO })
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
                             })

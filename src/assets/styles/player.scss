@@ -1554,20 +1554,19 @@ $start-button-size: 15vw;
   background-color: $black;
   color: $white;
   display: flex;
-  flex-direction: column;
-  font-size: 1.25em;
-  left: 70%;
+  flex-direction: row;
+  font-size: 1em;
+  left: 0%;
+  overflow: scroll;
+  padding-left: 0.5em;
   position: absolute;
   top: 2%;
-  width: 30%;
   z-index: 2000;
 
   .detail {
     background: $black;
     border: 0;
     color: $white;
-    padding-left: 3%;
-    width: 60%;
   }
 }
 
