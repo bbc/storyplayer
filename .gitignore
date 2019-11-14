@@ -2,7 +2,6 @@
 /flow-typed
 /node_modules
 /dist
-/examples
 npm-debug.log
 yarn-error.log
 package-lock.json
