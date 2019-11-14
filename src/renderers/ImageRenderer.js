@@ -121,7 +121,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     _setVisibility(visible: boolean) {
-        if (this._imageElement) this._imageElement.style.display = visible ? 'initial' : 'none';
+        if (this._imageElement) this._imageElement.style.opacity = visible ? '1' : '0';
     }
 
     destroy() {
