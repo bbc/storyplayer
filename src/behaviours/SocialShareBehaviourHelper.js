@@ -1,6 +1,7 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import AnalyticEvents from '../AnalyticEvents';
+import { handleButtonTouchEvent } from '../utils';
 
 const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
@@ -11,6 +12,7 @@ const createTwitterIcon = (shareText, shareUrl) => {
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
     twitterDiv.onclick = twitterAction;
+    twitterDiv.addEventListener('touchend', handleButtonTouchEvent(twitterAction));
     twitterLi.className = 'twitter';
     twitterLi.appendChild(twitterDiv);
     return twitterLi;  
@@ -37,6 +39,7 @@ const createFacebookIcon = (shareText, shareUrl) => {
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
     facebookDiv.onclick = facebookAction;
+    facebookDiv.addEventListener('touchend', handleButtonTouchEvent(facebookAction));
     facebookLi.className = 'facebook';
     facebookLi.appendChild(facebookDiv);
     return facebookLi;    
@@ -92,6 +95,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
         callback();
     };
     closeButton.onclick = closeModal;
+    closeButton.addEventListener('touchend', handleButtonTouchEvent(closeModal));
     modalElement.appendChild(closeButton);
 
     const shareText = behaviour.share_text;
