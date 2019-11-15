@@ -732,6 +732,15 @@ $start-button-size: 15vw;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
+
+  img {
+    height: 80%;
+    margin-left: 10%;
+    margin-top: 10%;
+    object-fit: contain;
+    object-position: center;
+    width: 80%;
+  }
 }
 
 .romper-text-link-container {
@@ -1563,7 +1572,6 @@ $start-button-size: 15vw;
   font-size: 1em;
   left: 0;
   overflow: scroll;
-  
   position: absolute;
   top: 2%;
   z-index: 2000;
