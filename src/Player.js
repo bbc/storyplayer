@@ -1535,20 +1535,17 @@ class Player extends EventEmitter {
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-                const iconElement = document.createElement('div');
-                iconElement.className = 'romper-link-icon-container'
                 linkChoiceControl.classList.add('icon');
                 linkChoiceControl.classList.add('text');
-                iconContainer.appendChild(iconElement);
-                const { style } = iconElement;
-                // @flowignore
-                style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'cover';
-                style.backgroundRepeat = 'no-repeat';
-                style.backgroundPosition = 'center';
+                const iconParent = document.createElement('div');
+                const iconElement = document.createElement('img');
+                iconElement.src = linkChoiceIconSrc;
+                iconParent.appendChild(iconElement);
+                iconParent.className = 'romper-link-icon-container'
                 const iconTextPar = document.createElement('p');
                 iconTextPar.textContent = text;
                 iconTextPar.className = 'romper-link-text-icon';
+                iconContainer.appendChild(iconParent);
                 iconContainer.appendChild(iconTextPar);
             } else if (text) {
                 iconContainer.className = 'romper-text-link-container';
@@ -1561,12 +1558,9 @@ class Player extends EventEmitter {
                 iconContainer.className = 'romper-link-icon-container';
                 linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-                const { style } = iconContainer;
-                // @flowignore
-                style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'cover';
-                style.backgroundRepeat = 'no-repeat';
-                style.backgroundPosition = 'center';
+                const iconElement = document.createElement('img');
+                iconElement.src = linkChoiceIconSrc;
+                iconContainer.appendChild(iconElement);
             }
             resolve({
                 icon: linkChoiceControl,
