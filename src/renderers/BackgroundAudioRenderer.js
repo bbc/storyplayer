@@ -11,6 +11,7 @@ import logger from '../logger';
 import { AUDIO } from '../utils';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
+const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
@@ -25,6 +26,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     // fade out interval
     _fadePaused: boolean;
 
+    _fadedOut: boolean;
+
     constructor(
         assetCollection: AssetCollection,
         mediaFetcher: MediaFetcher,
@@ -38,8 +41,9 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         });
         this._renderBackgroundAudio();
     }
-
+    
     start() {
+        this._fadedOut = false;
         this._fadePaused = false;
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
             this._playoutEngine.setPlayoutActive(this._rendererId);
@@ -70,14 +74,22 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     end() {
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
-        if (this._volFadeInterval) {
-            clearInterval(this._volFadeInterval);
-            this._volFadeInterval = null;
-        }
-        if (this._fadeIntervalId) {
-            clearInterval(this._fadeIntervalId);
-            this._fadeIntervalId = null;
+        this.fadeOut(HARD_FADE_OUT_TIME/1000);
+        const endFunc = () => {
+            this._playoutEngine.setPlayoutInactive(this._rendererId);
+            if (this._volFadeInterval) {
+                clearInterval(this._volFadeInterval);
+                this._volFadeInterval = null;
+            }
+            if (this._fadeIntervalId) {
+                clearInterval(this._fadeIntervalId);
+                this._fadeIntervalId = null;
+            }
+        };
+        if (this._fadedOut) {
+            endFunc();
+        } else {
+            setTimeout(endFunc, HARD_FADE_OUT_TIME);
         }
     }
 
@@ -116,6 +128,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                     audioElement.volume = 0;
                     clearInterval(this._fadeIntervalId);
                     this._fadeIntervalId = null;
+                    this._fadedOut = true;
                 }
             }, 50);
         }
@@ -146,8 +159,15 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     destroy() {
         this.end();
-        this._playoutEngine.unqueuePlayout(this._rendererId);
-
-        super.destroy();
+        const destroyFunc = () => {
+            this._playoutEngine.unqueuePlayout(this._rendererId);
+            super.destroy();           
+        };
+        if (this._fadedOut) {
+            destroyFunc();
+        } else {
+            // allow time for end fade to take place
+            setTimeout(destroyFunc, HARD_FADE_OUT_TIME);
+        }
     }
 }
