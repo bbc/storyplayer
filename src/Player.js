@@ -727,6 +727,26 @@ class Player extends EventEmitter {
 
     // key listener
     _keyPressHandler(event: KeyboardEvent) {
+        // F toggles fullscreen
+        if (event.code === 'KeyF') {
+            this._toggleFullScreen();
+            event.preventDefault();
+        }
+        // space starts or toggles play/pause
+        if (event.code === 'Space') {
+            console.log('ANDY space', this._controlsDisabled, this.isShowingChoices());
+            if (!this._userInteractionStarted) {
+                this._startButtonHandler();
+            } else if (                
+                !this._controlsDisabled
+                && !this.isShowingChoices()
+            ){
+                this._playPauseButtonClicked();
+            }
+            event.preventDefault();
+        }
+        if (!this._userInteractionStarted) return;
+        // numbers activate link choices
         const keyNumber = parseInt(event.key, 10);
         if (!isNaN(keyNumber)) { // eslint-disable-line no-restricted-globals
             // for choices map number key presses to choices L-R
@@ -736,10 +756,6 @@ class Player extends EventEmitter {
                 newMouseEvent.synthetic = true; 
                 this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
             }
-        }
-        if (event.code === 'KeyF') {
-            this._toggleFullScreen();
-            event.preventDefault();
         }
     }
 
@@ -1642,6 +1658,10 @@ class Player extends EventEmitter {
                 this._visibleChoices[id + 1] = container;
             });
         });
+    }
+
+    isShowingChoices(): boolean {
+        return Object.keys(this._visibleChoices).length > 0;
     }
 
     // eslint-disable-next-line class-methods-use-this
