@@ -476,9 +476,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        if (!this._hasEnded) {
-            this._playoutEngine.handlePlayPauseButtonClicked();
-        }
         if (this._timer._paused) { 
             this._timer.resume(); 
         } else { 

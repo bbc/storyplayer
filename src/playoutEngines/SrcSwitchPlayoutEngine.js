@@ -20,6 +20,8 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _subtitlesShowing: boolean;
 
+    _handlePlayPauseButtonClicked: Function
+
     _handleSubtitlesClicked: Function
 
     _handleVolumeClicked: Function
@@ -64,11 +66,17 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
             this._debugPlayout,
         );
 
+        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._handleSubtitlesClicked = this._handleSubtitlesClicked.bind(this);
         this._handleVolumeClicked = this._handleVolumeClicked.bind(this);
         this._toggleMute = this._toggleMute.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
         this._queueSubtitleAttach = this._queueSubtitleAttach.bind(this);
+
+        this._player.on(
+            PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
 
         this._player.on(
             PlayerEvents.SUBTITLES_BUTTON_CLICKED,
@@ -410,7 +418,7 @@ export default class SrcSwitchPlayoutEngine extends BasePlayoutEngine {
         return rendererPlayoutObj.mediaInstance.getMediaElement();
     }
 
-    handlePlayPauseButtonClicked(): void {
+    _handlePlayPauseButtonClicked(): void {
         if (this._playing === false) {
             this.play();
         } else {

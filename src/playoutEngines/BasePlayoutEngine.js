@@ -93,10 +93,6 @@ export default class BasePlayoutEngine {
         }
     }
 
-    handlePlayPauseButtonClicked() {
-        
-    }
-
     play() {
 
     }
