@@ -737,6 +737,10 @@ class Player extends EventEmitter {
                 this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
             }
         }
+        if (event.code === 'KeyF') {
+            this._toggleFullScreen();
+            event.preventDefault();
+        }
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
