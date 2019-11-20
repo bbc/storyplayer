@@ -738,7 +738,7 @@ class Player extends EventEmitter {
                 this._startButtonHandler();
             } else if (                
                 !this._controlsDisabled
-                && !this.isShowingChoices()
+                && !(this._playPauseButton.getAttribute('disabled') === true)
             ){
                 this._playPauseButtonClicked();
             }
@@ -1657,10 +1657,6 @@ class Player extends EventEmitter {
                 this._visibleChoices[id + 1] = container;
             });
         });
-    }
-
-    isShowingChoices(): boolean {
-        return Object.keys(this._visibleChoices).length > 0;
     }
 
     // eslint-disable-next-line class-methods-use-this
