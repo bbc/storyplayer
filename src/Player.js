@@ -734,7 +734,6 @@ class Player extends EventEmitter {
         }
         // space starts or toggles play/pause
         if (event.code === 'Space') {
-            console.log('ANDY space', this._controlsDisabled, this.isShowingChoices());
             if (!this._userInteractionStarted) {
                 this._startButtonHandler();
             } else if (                
