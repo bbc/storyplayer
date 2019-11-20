@@ -1099,7 +1099,6 @@ $start-button-size: 15vw;
   color: $transparent-white;
   display: flex;
   flex-direction: column;
-  font-size: 1.8vw;
   left: 0;
   opacity: 0;
   padding-bottom: 0;
@@ -1523,6 +1522,18 @@ $start-button-size: 15vw;
     font-size: 100%;
     left: 0;
     width: 100%;
+  }
+
+  .romper-variable-panel {
+    font-size: 80%;
+  }
+
+  .romper-var-form-button {
+    max-height: 15px;
+  }
+
+  .romper-var-form-button-container > .var-count {
+    line-height: 20px;
   }
 
   .romper-player > .romper-gui >.romper-buttons {
