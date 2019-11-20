@@ -327,6 +327,8 @@ class Player extends EventEmitter {
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
+    _visibleChoices: { [key: number]: HTMLElement };
+
     _choiceCountdownTimeout: ?TimeoutID;
 
     _countdowner: HTMLDivElement;
@@ -379,6 +381,7 @@ class Player extends EventEmitter {
         this._controller = controller;
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {}
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
         this._countdownTotal = 0;
@@ -616,6 +619,10 @@ class Player extends EventEmitter {
         this.backgroundTarget = this._backgroundLayer;
 
         // Event Listeners
+        // keyboard
+        document.addEventListener('keydown', this._keyPressHandler.bind(this));
+
+        // mouse/touch
         this._overlays.onclick = this._handleOverlayClick.bind(this);
         this._overlays.addEventListener(
             'touchend',
@@ -718,6 +725,46 @@ class Player extends EventEmitter {
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
     }
 
+    // key listener
+    _keyPressHandler(event: KeyboardEvent) {
+        // F toggles fullscreen
+        if (event.code === 'KeyF') {
+            this._toggleFullScreen();
+            event.preventDefault();
+        }
+        // space starts (from beginning) or toggles play/pause
+        if (event.code === 'Space') {
+            if (!this._userInteractionStarted) {
+                switch (this._controller.getSessionState()) {
+                case SESSION_STATE.EXISTING:
+                    this._cancelButtonHandler();
+                    break;
+                default:
+                    this._startButtonHandler();
+                    break;
+                }
+            } else if (                
+                !this._controlsDisabled
+                && !(this._playPauseButton.getAttribute('disabled') === true)
+            ){
+                this._playPauseButtonClicked();
+            }
+            event.preventDefault();
+        }
+        if (!this._userInteractionStarted) return;
+        // numbers activate link choices
+        const keyNumber = parseInt(event.key, 10);
+        if (!isNaN(keyNumber)) { // eslint-disable-line no-restricted-globals
+            // for choices map number key presses to choices L-R
+            if (this._visibleChoices[keyNumber]) {
+                const newMouseEvent = document.createEvent('MouseEvents');
+                newMouseEvent.initEvent('click', true, true);
+                newMouseEvent.synthetic = true; 
+                this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
+            }
+        }
+    }
+
     setCurrentRenderer(renderer: BaseRenderer) {
         this._currentRenderer = renderer;
     }
@@ -809,20 +856,10 @@ class Player extends EventEmitter {
         cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
         cancelButtonHolder.appendChild(cancelButtonDiv);
 
-        const cancelButtonHandler = () => {
-            this._narrativeElementTransport.classList.remove('romper-inactive');
-            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
-            this._controller.setSessionState(SESSION_STATE.RESTART);
-            this._controller.deleteExistingSession();
-            this._controller.resetStory(this._controller._storyId);
-            this._hideModalLayer();
-            this._startButtonHandler();
-        };
-
-        cancelButton.onclick = cancelButtonHandler;
+        cancelButton.onclick = this._cancelButtonHandler.bind(this);
         cancelButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(cancelButtonHandler),
+            handleButtonTouchEvent(this._cancelButtonHandler.bind(this)),
         );
 
         const resumeExperienceButtonHandler = () => {
@@ -1091,6 +1128,16 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('romper-inactive');
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
+    }
+
+    _cancelButtonHandler() {
+        this._narrativeElementTransport.classList.remove('romper-inactive');
+        this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
+        this._controller.setSessionState(SESSION_STATE.RESTART);
+        this._controller.deleteExistingSession();
+        this._controller.resetStory(this._controller._storyId);
+        this._hideModalLayer();
+        this._startButtonHandler();
     }
 
     _clearOverlays() {
@@ -1565,6 +1612,7 @@ class Player extends EventEmitter {
             resolve({
                 icon: linkChoiceControl,
                 uuid: id,
+                container: iconContainer,
             });
         });
 
@@ -1596,7 +1644,7 @@ class Player extends EventEmitter {
         }
         return Promise.all(promisesArray).then((icons) => {
             icons.forEach((iconObj, id) => {
-                const { icon, uuid } = iconObj;
+                const { icon, uuid, container } = iconObj;
                 if (activeLinkId && uuid === activeLinkId) {
                     icon.classList.add('default');
                 }
@@ -1613,6 +1661,7 @@ class Player extends EventEmitter {
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
                 }
+                this._visibleChoices[id + 1] = container;
             });
         });
     }
@@ -1800,6 +1849,7 @@ class Player extends EventEmitter {
     clearLinkChoices() {
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {};
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
