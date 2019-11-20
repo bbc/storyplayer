@@ -732,10 +732,17 @@ class Player extends EventEmitter {
             this._toggleFullScreen();
             event.preventDefault();
         }
-        // space starts or toggles play/pause
+        // space starts (from beginning) or toggles play/pause
         if (event.code === 'Space') {
             if (!this._userInteractionStarted) {
-                this._startButtonHandler();
+                switch (this._controller.getSessionState()) {
+                case SESSION_STATE.EXISTING:
+                    this._cancelButtonHandler();
+                    break;
+                default:
+                    this._startButtonHandler();
+                    break;
+                }
             } else if (                
                 !this._controlsDisabled
                 && !(this._playPauseButton.getAttribute('disabled') === true)
@@ -849,20 +856,10 @@ class Player extends EventEmitter {
         cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
         cancelButtonHolder.appendChild(cancelButtonDiv);
 
-        const cancelButtonHandler = () => {
-            this._narrativeElementTransport.classList.remove('romper-inactive');
-            this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
-            this._controller.setSessionState(SESSION_STATE.RESTART);
-            this._controller.deleteExistingSession();
-            this._controller.resetStory(this._controller._storyId);
-            this._hideModalLayer();
-            this._startButtonHandler();
-        };
-
-        cancelButton.onclick = cancelButtonHandler;
+        cancelButton.onclick = this._cancelButtonHandler.bind(this);
         cancelButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(cancelButtonHandler),
+            handleButtonTouchEvent(this._cancelButtonHandler.bind(this)),
         );
 
         const resumeExperienceButtonHandler = () => {
@@ -1131,6 +1128,16 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.remove('romper-inactive');
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
+    }
+
+    _cancelButtonHandler() {
+        this._narrativeElementTransport.classList.remove('romper-inactive');
+        this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
+        this._controller.setSessionState(SESSION_STATE.RESTART);
+        this._controller.deleteExistingSession();
+        this._controller.resetStory(this._controller._storyId);
+        this._hideModalLayer();
+        this._startButtonHandler();
     }
 
     _clearOverlays() {
