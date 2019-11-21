@@ -35,7 +35,7 @@ const createFacebookIcon = (shareText, shareUrl) => {
     const facebookDiv = document.createElement('div');
     // TODO: uses app id scraped from BBC news website
     const facebookAction = () => window.open(
-        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup`,
+        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup&quote=${shareText}`,
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
@@ -99,10 +99,10 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     closeButton.addEventListener('touchend', handleButtonTouchEvent(closeModal));
     modalElement.appendChild(closeButton);
 
-    const shareText = behaviour.share_text;
+    const shareText = encodeURI(behaviour.share_text);
     let shareUrl = window.location.href;
     if (behaviour.share_url) {
-        shareUrl = behaviour.share_url;
+        shareUrl = encodeURI(behaviour.share_url);
     }
 
     const platformList = document.createElement('ul');
