@@ -35,7 +35,7 @@ const createFacebookIcon = (shareText, shareUrl) => {
     const facebookDiv = document.createElement('div');
     // TODO: uses app id scraped from BBC news website
     const facebookAction = () => window.open(
-        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup`,
+        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup&quote=${shareText}`,
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
@@ -109,7 +109,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     platformList.className = 'romper-share-list';
     behaviour.platforms.forEach((platformId) => {
         if (platformId === 'twitter') {
-            const twitterIcon = createTwitterIcon(shareText, shareUrl);
+            const twitterIcon = createTwitterIcon(encodeURI(shareText), encodeURI(shareUrl));
             addAnalytics(twitterIcon, platformId, analytics);
             platformList.appendChild(twitterIcon);
         } else if (platformId === 'email') {
@@ -117,7 +117,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
             addAnalytics(emailIcon, platformId, analytics);
             platformList.appendChild(emailIcon);
         } else if (platformId === 'facebook') {
-            const facebookIcon = createFacebookIcon(shareText, shareUrl);
+            const facebookIcon = createFacebookIcon(encodeURI(shareText), encodeURI(shareUrl));
             addAnalytics(facebookIcon, platformId, analytics);
             platformList.appendChild(facebookIcon);
         }
