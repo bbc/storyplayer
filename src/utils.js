@@ -84,8 +84,10 @@ export const AUDIO = 'audio';
 
 export const preventEventDefault = (event: Event) => {
     // if the event doesn't come from the scrub bar we suppress the touch moves
-    if(!event.target.classList.includes(SLIDER_CLASS)) {
-        event.preventDefault();
+    if(event && event.target && event.target.classList) {
+        if(!event.target.classList.includes(SLIDER_CLASS)) {
+            event.preventDefault();
+        }
     }
 };
 
