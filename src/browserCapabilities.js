@@ -184,7 +184,7 @@ export class MediaFormats {
         }
         if(BrowserCapabilities.dashSupport()) {
             if(BrowserUserAgent.isSafari()) {
-                return 'ios';
+                return 'dom';
             }
             return 'dom';
         }
