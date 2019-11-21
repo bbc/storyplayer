@@ -99,17 +99,17 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     closeButton.addEventListener('touchend', handleButtonTouchEvent(closeModal));
     modalElement.appendChild(closeButton);
 
-    const shareText = behaviour.share_text;
+    const shareText = encodeURI(behaviour.share_text);
     let shareUrl = window.location.href;
     if (behaviour.share_url) {
-        shareUrl = behaviour.share_url;
+        shareUrl = encodeURI(behaviour.share_url);
     }
 
     const platformList = document.createElement('ul');
     platformList.className = 'romper-share-list';
     behaviour.platforms.forEach((platformId) => {
         if (platformId === 'twitter') {
-            const twitterIcon = createTwitterIcon(encodeURI(shareText), encodeURI(shareUrl));
+            const twitterIcon = createTwitterIcon(shareText, shareUrl);
             addAnalytics(twitterIcon, platformId, analytics);
             platformList.appendChild(twitterIcon);
         } else if (platformId === 'email') {
@@ -117,7 +117,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
             addAnalytics(emailIcon, platformId, analytics);
             platformList.appendChild(emailIcon);
         } else if (platformId === 'facebook') {
-            const facebookIcon = createFacebookIcon(encodeURI(shareText), encodeURI(shareUrl));
+            const facebookIcon = createFacebookIcon(shareText, shareUrl);
             addAnalytics(facebookIcon, platformId, analytics);
             platformList.appendChild(facebookIcon);
         }
