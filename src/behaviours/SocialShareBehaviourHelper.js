@@ -35,7 +35,8 @@ const createFacebookIcon = (shareText, shareUrl) => {
     const facebookDiv = document.createElement('div');
     // TODO: uses app id scraped from BBC news website
     const facebookAction = () => window.open(
-        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&display=popup&quote=${shareText}`,
+        // eslint-disable-next-line max-len
+        `http://www.facebook.com/dialog/feed?app_id=58567469885&link=${shareUrl}&quote=${shareText}&display=popup`,
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );

@@ -327,6 +327,8 @@ class Player extends EventEmitter {
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
+    _visibleChoices: { [key: number]: HTMLElement };
+
     _choiceCountdownTimeout: ?TimeoutID;
 
     _countdowner: HTMLDivElement;
@@ -379,6 +381,7 @@ class Player extends EventEmitter {
         this._controller = controller;
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {}
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
         this._countdownTotal = 0;
@@ -616,6 +619,10 @@ class Player extends EventEmitter {
         this.backgroundTarget = this._backgroundLayer;
 
         // Event Listeners
+        // keyboard
+        document.addEventListener('keydown', this._keyPressHandler.bind(this));
+
+        // mouse/touch
         this._overlays.onclick = this._handleOverlayClick.bind(this);
         this._overlays.addEventListener(
             'touchend',
@@ -716,6 +723,27 @@ class Player extends EventEmitter {
 
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
+    }
+
+    // key listener
+    _keyPressHandler(event: KeyboardEvent) {
+        // F toggles fullscreen
+        if (event.code === 'KeyF') {
+            this._toggleFullScreen();
+            event.preventDefault();
+        }
+        if (!this._userInteractionStarted) return;
+        // numbers activate link choices
+        const keyNumber = parseInt(event.key, 10);
+        if (!isNaN(keyNumber)) { // eslint-disable-line no-restricted-globals
+            // for choices map number key presses to choices L-R
+            if (this._visibleChoices[keyNumber]) {
+                const newMouseEvent = document.createEvent('MouseEvents');
+                newMouseEvent.initEvent('click', true, true);
+                newMouseEvent.synthetic = true; 
+                this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
+            }
+        }
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -1565,6 +1593,7 @@ class Player extends EventEmitter {
             resolve({
                 icon: linkChoiceControl,
                 uuid: id,
+                container: iconContainer,
             });
         });
 
@@ -1596,7 +1625,7 @@ class Player extends EventEmitter {
         }
         return Promise.all(promisesArray).then((icons) => {
             icons.forEach((iconObj, id) => {
-                const { icon, uuid } = iconObj;
+                const { icon, uuid, container } = iconObj;
                 if (activeLinkId && uuid === activeLinkId) {
                     icon.classList.add('default');
                 }
@@ -1613,6 +1642,7 @@ class Player extends EventEmitter {
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
                 }
+                this._visibleChoices[id + 1] = container;
             });
         });
     }
@@ -1800,6 +1830,7 @@ class Player extends EventEmitter {
     clearLinkChoices() {
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {};
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
