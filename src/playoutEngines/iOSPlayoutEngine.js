@@ -138,7 +138,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 this._foregroundMediaElement.currentTime = mediaObj.inTime;
             }
             if (mediaObj.url && this._playing) {
-               this.play();
+                this.play();
             }
         }
     }
