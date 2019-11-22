@@ -1,7 +1,7 @@
 // @flow
 
 import Hls from 'hls.js';
-import { getOverrideFormat, fetchOverridePlayout } from './utils';
+import { checkDebugPlayout, getOverrideFormat, fetchOverridePlayout } from './utils';
 import logger from './logger';
 
 export const PLAYOUT_ENGINES = {
@@ -59,12 +59,12 @@ export class BrowserUserAgent {
         return false;
     }
 
-    static isSafari() {
+    static isSafariDesktop() {
         const safariCheck = (!window.safari ||
             (typeof safari !== 'undefined' && window.safari.pushNotification));
 
         // fallback to user agent sniffing if we can't detect safari using this method
-        return safariCheck.toString() === "[object SafariRemoteNotification]" || this.safari();
+        return safariCheck.toString() === "[object SafariRemoteNotification]"
     }
 
     static ie() {
@@ -149,23 +149,41 @@ export class BrowserCapabilities {
 
 }
 
-export class MediaFormats { 
+export class MediaFormats {
 
     static getFormat() {
         const overrideFormat = getOverrideFormat();
+        const debugPlayout = checkDebugPlayout();
         if(overrideFormat) {
             logger.info(`Overriding media selector format: , ${overrideFormat}`)
             return overrideFormat;
         }
-        // desktop safari is special
-        if (BrowserUserAgent.isSafari() && BrowserCapabilities.hlsSupport()) {
+
+        // desktop safari supports dash
+        if(BrowserUserAgent.isSafariDesktop()) {
+            if (debugPlayout) {
+                logger.info("getFormat: isSafariDesktop = True")
+            }
+            return 'dash'
+        }
+        // iOS uses hls
+        if (BrowserUserAgent.safari() && BrowserCapabilities.hlsSupport()) {
+            if (debugPlayout) {
+                logger.info("getFormat: safari = True")
+            }
             return 'hls';
         }
         // otherwise we check for explicit hls or dash support
         if (BrowserCapabilities.dashSupport()) {
+            if (debugPlayout) {
+                logger.info("getFormat: Dash Support = True")
+            }
             return 'dash';
         }
         if (BrowserCapabilities.hlsSupport()) {
+            if (debugPlayout) {
+                logger.info("getFormat: HLS Support = True")
+            }
             return 'hls';
         }
         // if we can't support anything we return null
@@ -174,6 +192,7 @@ export class MediaFormats {
 
     static getPlayoutEngine() {
         const overridePlayout = fetchOverridePlayout();
+        const debugPlayout = checkDebugPlayout();
         if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
             logger.info("Overriding playout engine: ", overridePlayout);
             if(overridePlayout === 'src') {
@@ -183,13 +202,35 @@ export class MediaFormats {
             return overridePlayout
         }
         if(BrowserCapabilities.dashSupport()) {
-            if(BrowserUserAgent.isSafari()) {
+            if(BrowserUserAgent.isSafariDesktop()) {
+                // Safari Desktop
+                if (debugPlayout) {
+                    logger.info("getPlayoutEngine: DashSupport + isSafariDesktop = True")
+                }
                 return 'dom';
+            }
+            if (BrowserUserAgent.safari()) {
+                // Safari iOS
+                if (debugPlayout) {
+                    logger.info("getPlayoutEngine: DashSupport + safari = True")
+                }
+                return 'ios';
+            }
+            if (debugPlayout) {
+                logger.info("getPlayoutEngine: DashSupport + not safari = True")
             }
             return 'dom';
         }
         if(BrowserCapabilities.hlsSupport()) {
+            // Safari Mobile
+            if (debugPlayout) {
+                logger.info("getPlayoutEngine: HlsSupport = True")
+            }
             return 'ios';
+        }
+
+        if (debugPlayout) {
+            logger.info("getPlayoutEngine: No DashSupport or HlsSupport")
         }
         // default?
         return 'dom';
