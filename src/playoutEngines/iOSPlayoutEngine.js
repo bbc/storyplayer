@@ -215,10 +215,17 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {}
 
     play() {
+        this._player.setPlaying(true);
         this._playing = true;
         this._hasStarted = true;
-        this._player.setPlaying(true);
-        this._foregroundMediaElement.play()
+        // Check there is an active media
+        const activeForegroundMedia = Object.keys(this._media)
+            .filter(key => this._media[key].active)
+            .filter(key => this._media[key].media
+                && this._media[key].media.type === MEDIA_TYPES.FOREGROUND_AV)
+        if (activeForegroundMedia.length > 0) {
+            this._foregroundMediaElement.play()
+        }
     }
 
     pause() {
@@ -236,7 +243,13 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     playBackgrounds() {
-        this._backgroundMediaElement.play()
+        const activeBackgroundMedia = Object.keys(this._media)
+            .filter(key => this._media[key].active)
+            .filter(key => this._media[key].media
+                && this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A)
+        if (activeBackgroundMedia.length > 0) {
+            this._backgroundMediaElement.play()
+        }
     }
 
     getCurrentTime(rendererId: string) {
