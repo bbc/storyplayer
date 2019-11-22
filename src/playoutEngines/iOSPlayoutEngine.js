@@ -154,9 +154,15 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (mediaObject.type === MEDIA_TYPES.FOREGROUND_AV) {
             this._cleanUpSubtitles(rendererId);
             this._player.disableSubtitlesControl();
-            this._foregroundMediaElement.pause();
+            const mediaElement = this._foregroundMediaElement;
+            if (mediaObject.url && mediaObject.url === mediaElement.src) {
+                this._foregroundMediaElement.pause();
+            }
         } else if(mediaObject.type === MEDIA_TYPES.BACKGROUND_A) {
-            this._backgroundMediaElement.pause();
+            const mediaElement = this._backgroundMediaElement;
+            if (mediaObject.url && mediaObject.url === mediaElement.src) {
+                this._backgroundMediaElement.pause();
+            }
         }
     }
 
