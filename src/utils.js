@@ -93,6 +93,10 @@ export const preventEventDefault = (event: Event) => {
 
 export const handleButtonTouchEvent = (callback: Function) => {
     return (event: Object) => {
+        // handle multiple touch points?
+        if(event.touches !== undefined && event.touches && event.touches.length > 1) {
+            return;
+        }
         // Stop propagation of touch event.
         event.stopPropagation();
         // Stop click events on tablets being fired off for this touch.
