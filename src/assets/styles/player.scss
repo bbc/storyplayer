@@ -1489,7 +1489,7 @@ $start-button-size: 15vw;
   }
 
   .romper-link-text-icon {
-    font-size: 130%;
+    font-size: 120%;
   }
 }
 
@@ -1521,7 +1521,7 @@ $start-button-size: 15vw;
 
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
-@media (min-width: 320px) and (max-width: 767px) {
+@media (min-width: 320px) and (max-width: 767px), (max-height: 450px) {
   .romper-scrub-bar {
     bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;
@@ -1530,7 +1530,7 @@ $start-button-size: 15vw;
   }
 
   .romper-link-text-icon {
-    font-size: 100%;
+    font-size: 80%;
   }
 
   .romper-text-link-container {
