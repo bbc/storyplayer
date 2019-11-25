@@ -1503,19 +1503,20 @@ $start-button-size: 15vw;
   }
 }
 
-@media (min-width: 320px) and (max-width: 500px) {
-  .romper-player > .romper-media {
-    &.romper-prestart > .romper-privacy-notice {
-      font-size: 70%;
-      height: 75px;
+@media (min-width: 320px) and (max-width: 500px),
+  (max-height: 450px) {
+    .romper-player > .romper-media {
+      &.romper-prestart > .romper-privacy-notice {
+        font-size: 70%;
+        height: 75px;
 
-      > p {
-        bottom: 0;
-        margin-bottom: 3px;
-        padding: 0 2%;
+        > p {
+          bottom: 0;
+          margin-bottom: 3px;
+          padding: 0 2%;
+        }
       }
     }
-  }
 }
 
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
