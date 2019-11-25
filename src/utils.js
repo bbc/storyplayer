@@ -93,10 +93,11 @@ export const preventEventDefault = (event: Event) => {
     }
 };
 
-export const handleButtonTouchEvent = (callback: Function) => {
+export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
         if(checkDebugPlayout()) {
             logger.info('Event Captured:', event);
+            console.log('Touch Event Captured:', touchEvent);
         }
         // handle multiple touch points?
         if(event.touches !== undefined && event.touches && event.touches.length > 1) {
