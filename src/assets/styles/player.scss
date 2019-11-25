@@ -1612,10 +1612,12 @@ $start-button-size: 15vw;
 }
 
 @media (orientation: portrait) {
-  .romper-player {
-    &.ios-fullscreen > .romper-gui > .romper-buttons-fullscreen {
-      bottom: 115px;  // iphone fullscreen push buttons up
-    }
+  .romper-player-fullscreen > .romper-gui > .romper-buttons {
+    bottom: 20%; // fullscreen push buttons up
+  }
+
+  .romper-player-fullscreen > .romper-gui > .romper-overlays > .romper-overlay {
+    bottom: 20%; // fullscreen push icons up
   }
 }
 
