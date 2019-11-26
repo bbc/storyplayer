@@ -15,7 +15,7 @@ const createTwitterIcon = (shareText, shareUrl) => {
     twitterDiv.addEventListener('touchend', handleButtonTouchEvent(twitterAction));
     twitterLi.className = 'twitter';
     twitterLi.appendChild(twitterDiv);
-    return twitterLi;  
+    return twitterLi;
 };
 
 const createEmailIcon = (shareText, shareUrl) => {
@@ -44,7 +44,7 @@ const createFacebookIcon = (shareText, shareUrl) => {
     facebookDiv.addEventListener('touchend', handleButtonTouchEvent(facebookAction));
     facebookLi.className = 'facebook';
     facebookLi.appendChild(facebookDiv);
-    return facebookLi;    
+    return facebookLi;
 };
 
 /* eslint-disable no-param-reassign */
@@ -70,7 +70,7 @@ const addAnalytics = (icon, platformId, analytics) => {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export const renderSocialPopup = (behaviour, target, callback, analytics = () => {}) => { 
+export const renderSocialPopup = (behaviour, target, callback, analytics = () => {}) => {
     const modalElement = document.createElement('div');
     modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
@@ -100,10 +100,10 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     closeButton.addEventListener('touchend', handleButtonTouchEvent(closeModal));
     modalElement.appendChild(closeButton);
 
-    const shareText = encodeURI(behaviour.share_text);
+    const shareText = encodeURIComponent(behaviour.share_text);
     let shareUrl = window.location.href;
     if (behaviour.share_url) {
-        shareUrl = encodeURI(behaviour.share_url);
+        shareUrl = encodeURIComponent(behaviour.share_url);
     }
 
     const platformList = document.createElement('ul');
