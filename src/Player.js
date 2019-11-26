@@ -9,10 +9,10 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities';
+import { BrowserUserAgent, BrowserCapabilities, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities';
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
+import { checkDebugUA, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
 
@@ -606,7 +606,25 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        target.appendChild(this._player);
+        const showUA = checkDebugUA();
+        if(showUA) {
+            const uaDiv = document.createElement('div');
+            uaDiv.innerHTML = `<h3>platform</h3>`
+                + `<p>${window.navigator.platform}</p>`
+                + `<h3>ua</h3>`
+                + `<p>${window.navigator.userAgent}</p>`
+                + `<h3>HLS Support</h3>`
+                + `${BrowserCapabilities.hlsSupport()}`
+                + `<h3>Dash Support</h3>`
+                + `${BrowserCapabilities.dashSupport()}`
+                + `<h3>Chosen Format</h3>`
+                + `${MediaFormats.getFormat()}`
+                + `<h3>Chosen Playout</h3>`
+                + `${MediaFormats.getPlayoutEngine()}`
+            target.appendChild(uaDiv);
+        } else {
+            target.appendChild(this._player);
+        }
 
         // Hide gui elements until start clicked
         this._overlays.classList.add('romper-inactive');
@@ -740,7 +758,7 @@ class Player extends EventEmitter {
             if (this._visibleChoices[keyNumber]) {
                 const newMouseEvent = document.createEvent('MouseEvents');
                 newMouseEvent.initEvent('click', true, true);
-                newMouseEvent.synthetic = true; 
+                newMouseEvent.synthetic = true;
                 this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
             }
         }
@@ -1545,7 +1563,7 @@ class Player extends EventEmitter {
 
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-                
+
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(
                     AnalyticEvents.names.LINK_CHOICE_CLICKED,
@@ -1635,7 +1653,7 @@ class Player extends EventEmitter {
                 };
                 icon.onclick = clickHandler;
                 icon.addEventListener(
-                    'touchend', 
+                    'touchend',
                     handleButtonTouchEvent(clickHandler),
                 );
                 behaviourOverlay.add(id, icon);
@@ -1946,7 +1964,7 @@ class Player extends EventEmitter {
             const newTime = percent * duration;
             renderer.setCurrentTime(newTime);
         });
-        
+
         let isDragging = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {

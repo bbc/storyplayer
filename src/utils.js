@@ -14,6 +14,11 @@ export const checkDebugPlayout = () => {
     return (override === 'true');
 };
 
+export const checkDebugUA = () => {
+    const override = new URLSearchParams(window.location.search).get('debugUA');
+    return (override === 'true');
+};
+
 export const fetchShakaDebugLevel = () => {
     return new URLSearchParams(window.location.search).get('shakaDebugLevel');
 };
@@ -35,7 +40,7 @@ export const checkOverrideFormat = (format: ?string) => {
     return format && (format === 'hls' || format === 'dash');
 }
 
-export const getOverrideFormat =() => { 
+export const getOverrideFormat =() => {
     const overrideFormat = new URLSearchParams(window.location.search).get('overridePlayoutFormat');
     return checkOverrideFormat(overrideFormat) ? overrideFormat : null;
 };
