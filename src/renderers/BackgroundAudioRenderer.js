@@ -12,6 +12,7 @@ import { AUDIO } from '../utils';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
+const FADE_STEP_LENGTH = 10; // time between steps for fades
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
@@ -59,13 +60,14 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             }
             audioElement.volume = 0;
             this._volFadeInterval = setInterval(() => {
-                if (audioElement.volume >= (1 - (50 / FADE_IN_TIME)) && this._volFadeInterval) {
+                if (audioElement.volume >= (1 - (FADE_STEP_LENGTH / FADE_IN_TIME))
+                    && this._volFadeInterval) {
                     clearInterval(this._volFadeInterval);
                     this._volFadeInterval = null;
                 } else {
-                    audioElement.volume += (50 / FADE_IN_TIME);
+                    audioElement.volume += (FADE_STEP_LENGTH / FADE_IN_TIME);
                 }
-            }, 50);
+            }, FADE_STEP_LENGTH);
         }
     }
 
@@ -118,7 +120,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
         const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
         if (audioElement && !this._fadeIntervalId) {
-            const interval = (duration * 1000) / 50; // number of steps
+            const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
                 if (audioElement.volume >= (1 / interval) && this._fadeIntervalId) {
                     if (!this._fadePaused) {
@@ -130,7 +132,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                     this._fadeIntervalId = null;
                     this._fadedOut = true;
                 }
-            }, 50);
+            }, FADE_STEP_LENGTH);
         }
     }
 

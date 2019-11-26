@@ -1125,8 +1125,7 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._startExperienceButton);
         this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._startButtonHandler),
+            'touchend', (event) => {handleButtonTouchEvent(this._startButtonHandler, event)}, false,
         );
     }
 

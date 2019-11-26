@@ -116,6 +116,14 @@ $start-button-size: 15vw;
   justify-content: flex-end;
   position: relative;
 
+  &.ios-fullscreen > .romper-gui {
+    > .romper-buttons,
+    > .romper-buttons-activate-area,
+    > .romper-overlays >.romper-overlay {
+      bottom: 5%;
+    }
+  }
+
   * {
     box-sizing: content-box;
   }
@@ -1489,7 +1497,7 @@ $start-button-size: 15vw;
   }
 
   .romper-link-text-icon {
-    font-size: 130%;
+    font-size: 120%;
   }
 }
 
@@ -1503,24 +1511,25 @@ $start-button-size: 15vw;
   }
 }
 
-@media (min-width: 320px) and (max-width: 500px) {
-  .romper-player > .romper-media {
-    &.romper-prestart > .romper-privacy-notice {
-      font-size: 70%;
-      height: 75px;
+@media (min-width: 320px) and (max-width: 500px),
+  (max-height: 450px) {
+    .romper-player > .romper-media {
+      &.romper-prestart > .romper-privacy-notice {
+        font-size: 70%;
+        height: 75px;
 
-      > p {
-        bottom: 0;
-        margin-bottom: 3px;
-        padding: 0 2%;
+        > p {
+          bottom: 0;
+          margin-bottom: 3px;
+          padding: 0 2%;
+        }
       }
     }
-  }
 }
 
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
-@media (min-width: 320px) and (max-width: 767px) {
+@media (min-width: 320px) and (max-width: 767px), (max-height: 450px) {
   .romper-scrub-bar {
     bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;
@@ -1529,7 +1538,7 @@ $start-button-size: 15vw;
   }
 
   .romper-link-text-icon {
-    font-size: 100%;
+    font-size: 80%;
   }
 
   .romper-text-link-container {
@@ -1612,9 +1621,12 @@ $start-button-size: 15vw;
 
 @media (orientation: portrait) {
   .romper-player {
-    &.ios-fullscreen > .romper-gui > .romper-buttons-fullscreen {
-      bottom: 115px;  // iphone fullscreen push buttons up
+    &.ios-fullscreen > .romper-gui {
+      > .romper-buttons,
+      > .romper-overlays > .romper-overlay,
+      > .romper-buttons-activate-area {
+        bottom: 20%; // ios fullscreen portrait push buttons up more
+      }
     }
   }
 }
-

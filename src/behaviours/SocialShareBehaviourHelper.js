@@ -7,7 +7,7 @@ const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
     const twitterDiv = document.createElement('div');
     const twitterAction = () => window.open(
-        `https://twitter.com/intent/tweet?text=${shareText}&amp;url=${shareUrl}`,
+        `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`,
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );

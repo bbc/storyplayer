@@ -1,3 +1,5 @@
+import logger from './logger';
+
 // @flow
 
 export const checkAddDetailsOverride = () => {
@@ -96,8 +98,16 @@ export const preventEventDefault = (event: Event) => {
     }
 };
 
-export const handleButtonTouchEvent = (callback: Function) => {
+export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
+        if(checkDebugPlayout()) {
+            logger.info('Event Captured:', event);
+            console.log('Touch Event Captured:', touchEvent);
+        }
+        // handle multiple touch points?
+        if(event.touches !== undefined && event.touches && event.touches.length > 1) {
+            return;
+        }
         // Stop propagation of touch event.
         event.stopPropagation();
         // Stop click events on tablets being fired off for this touch.
