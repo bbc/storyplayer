@@ -46,6 +46,8 @@ const DEFAULT_SETTINGS = {
 };
 
 if(checkWebviewDebug()) {
+    document.getElementById('debug-div').classList.add("debug-div-shown");
+
     /* eslint-disable */
     if (typeof console  != "undefined")
     if (typeof console.log != 'undefined') {
@@ -54,23 +56,23 @@ if(checkWebviewDebug()) {
         console.olog = function() {};
     }
 
-    console.log = function(message) {
-        console.olog(message);
-        document.getElementById('legal-footer').innerHTML += ('<p>' + message + '</p>');
+    console.log = function(...args) {
+        console.olog(args);
+        document.getElementById('debug-div').innerHTML += ('<p>' + args.join(" | ") + '</p>');
     };
     console.error = console.debug = console.info =  console.log
 
 
     window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
-        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + errorMsg + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + errorMsg + '</p>');
         return false;
     }
     window.addEventListener("error", function (e) {
-        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + e.error.message + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + e.error.message + '</p>');
         return false;
     })
     window.addEventListener('unhandledrejection', function (e) {
-        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + e.reason.message + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + e.reason.message + '</p>');
     })
     /* eslint-enable */
 }
