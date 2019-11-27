@@ -609,12 +609,15 @@ class Player extends EventEmitter {
         const showUA = checkDebugUA();
         if(showUA) {
             const uaDiv = document.createElement('div');
+            uaDiv.className = "ua-debug"; 
             uaDiv.innerHTML = `<h3>platform</h3>`
                 + `<p>${window.navigator.platform}</p>`
                 + `<h3>ua</h3>`
                 + `<p>${window.navigator.userAgent}</p>`
                 + `<h3>HLS Support</h3>`
                 + `${BrowserCapabilities.hlsSupport()}`
+                + `<h3>HLS.js Support</h3>`
+                + `${BrowserCapabilities.hlsJsSupport()}`
                 + `<h3>Dash Support</h3>`
                 + `${BrowserCapabilities.dashSupport()}`
                 + `<h3>Chosen Format</h3>`
@@ -2114,7 +2117,7 @@ class Player extends EventEmitter {
         const windowAspect = window.innerWidth / window.innerHeight;
         const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
         if (windowAspect > this._aspectRatio) { // too wide
-            const width = this._aspectRatio * 100 * scaleFactor; 
+            const width = this._aspectRatio * 100 * scaleFactor;
             this._player.style.height = `${100 * scaleFactor}vh`;
             this._player.style.width = `${width}vh`;
             this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;

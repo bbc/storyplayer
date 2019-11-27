@@ -111,6 +111,10 @@ export class BrowserCapabilities {
 
     static dashSupported: boolean
 
+    static hlsJsSupport() {
+        return Hls.isSupported();
+    }
+
     static hlsSupport() {
         if (BrowserCapabilities.hlsSupported !== undefined) {
             return BrowserCapabilities.hlsSupported;
@@ -120,7 +124,7 @@ export class BrowserCapabilities {
             BrowserCapabilities.hlsSupported = false;
             return false;
         }
-        if (Hls.isSupported()) {
+        if (BrowserCapabilities.hlsJsSupport()) {
             BrowserCapabilities.hlsSupported = true;
             return true;
         }
