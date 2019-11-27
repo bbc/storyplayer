@@ -606,13 +606,14 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        const facebookiOSWebview = true // BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
         if(facebookiOSWebview) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
-            fbWebviewDiv.innerHTML = "<h1>Facebook Browser is not supported</h1>"
-                + "<p>Please click on the three dots in top right corner and click"
-                + "'Open in Safari'</p>";
+            fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"
+                + "<h1>Facebook Browser is not supported</h1>"
+                + "<p>Please click on the three dots in top right corner and click "
+                + "'Open in Safari'</p></div>";
             target.appendChild(fbWebviewDiv);
         } else {
             target.appendChild(this._player);

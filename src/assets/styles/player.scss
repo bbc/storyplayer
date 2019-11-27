@@ -1635,3 +1635,17 @@ $start-button-size: 15vw;
   height: 200px;
   overflow: scroll;
 }
+
+.webview-error {
+  height: 100%;
+  text-align: center;
+}
+
+.webview-error-div {
+  -ms-transform: translateY(-50%);
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+}
