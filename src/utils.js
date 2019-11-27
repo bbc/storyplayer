@@ -16,6 +16,11 @@ export const checkDebugPlayout = () => {
     return (override === 'true');
 };
 
+export const checkWebviewDebug = () => {
+    const override = new URLSearchParams(window.location.search).get('webviewDebug');
+    return (override === 'true');
+};
+
 export const checkDebugUA = () => {
     const override = new URLSearchParams(window.location.search).get('debugUA');
     return (override === 'true');

@@ -11,6 +11,7 @@ import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
 import { BrowserCapabilities,  BrowserUserAgent } from './browserCapabilities';
+import { checkWebviewDebug } from './utils'
 
 import Package from '../package.json';
 
@@ -43,6 +44,36 @@ const DEFAULT_SETTINGS = {
     privacyNotice: null,
     saveSession: false,
 };
+
+if(checkWebviewDebug()) {
+    /* eslint-disable */
+    if (typeof console  != "undefined")
+    if (typeof console.log != 'undefined') {
+        console.olog = console.log;
+    } else {
+        console.olog = function() {};
+    }
+
+    console.log = function(message) {
+        console.olog(message);
+        document.getElementById('legal-footer').innerHTML += ('<p>' + message + '</p>');
+    };
+    console.error = console.debug = console.info =  console.log
+
+
+    window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
+        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + errorMsg + '</p>');
+        return false;
+    }
+    window.addEventListener("error", function (e) {
+        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + e.error.message + '</p>');
+        return false;
+    })
+    window.addEventListener('unhandledrejection', function (e) {
+        document.getElementById('legal-footer').innerHTML += ('<p> ERROR: ' + e.reason.message + '</p>');
+    })
+    /* eslint-enable */
+}
 
 module.exports = {
     RESOLVERS: {
