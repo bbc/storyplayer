@@ -11,6 +11,18 @@ export const PLAYOUT_ENGINES = {
 };
 
 export class BrowserUserAgent {
+    static facebookWebview() {
+        const ua = window.navigator.userAgent;
+        if(
+            ua.indexOf('FBAN') > -1 &&
+            ua.indexOf('FBDV') > -1 &&
+            ua.indexOf('FBSV') > -1
+        ) {
+            return true
+        }
+        return false
+    }
+
     static iOS() {
         const iDevices = [
             'iPad Simulator',

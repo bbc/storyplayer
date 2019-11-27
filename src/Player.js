@@ -9,10 +9,10 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, BrowserCapabilities, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
+import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { checkDebugUA, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
+import { checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
 
@@ -606,25 +606,15 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        const showUA = checkDebugUA();
-        if(showUA) {
-            const uaDiv = document.createElement('div');
-            uaDiv.className = "ua-debug"; 
-            uaDiv.innerHTML = `<h3>platform</h3>`
-                + `<p>${window.navigator.platform}</p>`
-                + `<h3>ua</h3>`
-                + `<p>${window.navigator.userAgent}</p>`
-                + `<h3>HLS Support</h3>`
-                + `${BrowserCapabilities.hlsSupport()}`
-                + `<h3>HLS.js Support</h3>`
-                + `${BrowserCapabilities.hlsJsSupport()}`
-                + `<h3>Dash Support</h3>`
-                + `${BrowserCapabilities.dashSupport()}`
-                + `<h3>Chosen Format</h3>`
-                + `${MediaFormats.getFormat()}`
-                + `<h3>Chosen Playout</h3>`
-                + `${MediaFormats.getPlayoutEngine()}`
-            target.appendChild(uaDiv);
+        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        if(facebookiOSWebview) {
+            const fbWebviewDiv = document.createElement('div');
+            fbWebviewDiv.className = "webview-error";
+            fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"
+                + "<h1>Facebook Browser is not supported</h1>"
+                + "<p>Please click on the three dots in top right corner and click "
+                + "'Open in Safari'</p></div>";
+            target.appendChild(fbWebviewDiv);
         } else {
             target.appendChild(this._player);
         }
