@@ -9,7 +9,7 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, BrowserCapabilities, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities';
+import { BrowserUserAgent, BrowserCapabilities, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import { checkDebugUA, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
@@ -2110,6 +2110,21 @@ class Player extends EventEmitter {
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
 
+        // fit player to size, so all UI remains within media
+        const windowAspect = window.innerWidth / window.innerHeight;
+        const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
+        if (windowAspect > this._aspectRatio) { // too wide
+            const width = this._aspectRatio * 100 * scaleFactor; 
+            this._player.style.height = `${100 * scaleFactor}vh`;
+            this._player.style.width = `${width}vh`;
+            this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
+        } else { // too tall
+            const height = (100 * scaleFactor) / this._aspectRatio;
+            this._player.style.height = `${height}vw`;
+            this._player.style.width = `${100 * scaleFactor}vw`;
+            this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+        }
+
         this._inFullScreen = false;
         // if we are an iphone capture these events;
         if(BrowserUserAgent.iOS()) {
@@ -2155,6 +2170,8 @@ class Player extends EventEmitter {
             this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
         }
         scrollToTop();
+
+        this._player.removeAttribute('style');
 
         if(BrowserUserAgent.iOS()) {
             this._playerParent.removeEventListener('touchmove', preventEventDefault);
