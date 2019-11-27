@@ -606,8 +606,8 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        const facebookWebview = BrowserUserAgent.facebookWebview();
-        if(facebookWebview) {
+        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        if(facebookiOSWebview) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
             fbWebviewDiv.innerHTML = "<h1>Facebook Browser is not supported</h1>"
