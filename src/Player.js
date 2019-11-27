@@ -9,10 +9,10 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, BrowserCapabilities, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
+import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { checkDebugUA, checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
+import { checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
 
