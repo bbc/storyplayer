@@ -606,7 +606,7 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        const facebookiOSWebview = true // BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
         if(facebookiOSWebview) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
