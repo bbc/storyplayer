@@ -606,25 +606,14 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        const showUA = checkDebugUA();
-        if(showUA) {
-            const uaDiv = document.createElement('div');
-            uaDiv.className = "ua-debug"; 
-            uaDiv.innerHTML = `<h3>platform</h3>`
-                + `<p>${window.navigator.platform}</p>`
-                + `<h3>ua</h3>`
-                + `<p>${window.navigator.userAgent}</p>`
-                + `<h3>HLS Support</h3>`
-                + `${BrowserCapabilities.hlsSupport()}`
-                + `<h3>HLS.js Support</h3>`
-                + `${BrowserCapabilities.hlsJsSupport()}`
-                + `<h3>Dash Support</h3>`
-                + `${BrowserCapabilities.dashSupport()}`
-                + `<h3>Chosen Format</h3>`
-                + `${MediaFormats.getFormat()}`
-                + `<h3>Chosen Playout</h3>`
-                + `${MediaFormats.getPlayoutEngine()}`
-            target.appendChild(uaDiv);
+        const facebookWebview = BrowserUserAgent.facebookWebview();
+        if(facebookWebview) {
+            const fbWebviewDiv = document.createElement('div');
+            fbWebviewDiv.className = "webview-error";
+            fbWebviewDiv.innerHTML = "<h1>Facebook Browser is not supported</h1>"
+                + "<p>Please click on the three dots in top right corner and click"
+                + "'Open in Safari'</p>";
+            target.appendChild(fbWebviewDiv);
         } else {
             target.appendChild(this._player);
         }

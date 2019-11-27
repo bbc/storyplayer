@@ -10,8 +10,8 @@ import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
-import { BrowserCapabilities,  BrowserUserAgent } from './browserCapabilities';
-import { checkWebviewDebug } from './utils'
+import { BrowserCapabilities,  BrowserUserAgent, MediaFormats } from './browserCapabilities';
+import { checkWebviewDebug, checkDebugUA } from './utils'
 
 import Package from '../package.json';
 
@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS = {
     saveSession: false,
 };
 
+// Limited Debugging for iOS webviews
 if(checkWebviewDebug()) {
     document.getElementById('debug-div').classList.add("debug-div-shown");
 
@@ -64,17 +65,35 @@ if(checkWebviewDebug()) {
 
 
     window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
-        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + errorMsg + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 1: ' + errorMsg + '</p>');
         return false;
     }
     window.addEventListener("error", function (e) {
-        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + e.error.message + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 2: ' + e.error.message + '</p>');
         return false;
     })
     window.addEventListener('unhandledrejection', function (e) {
-        document.getElementById('debug-div').innerHTML += ('<p> ERROR: ' + e.reason.message + '</p>');
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 3: ' + e.reason.message + '</p>');
     })
     /* eslint-enable */
+}
+
+if(checkDebugUA()) {
+    document.getElementById('debug-div').classList.add("debug-div-shown");
+    document.getElementById('debug-div').innerHTML += `<h3>platform</h3>`
+        + `<p>${window.navigator.platform}</p>`
+        + `<h3>ua</h3>`
+        + `<p>${window.navigator.userAgent}</p>`
+        + `<h3>HLS Support</h3>`
+        + `${BrowserCapabilities.hlsSupport()}`
+        + `<h3>HLS.js Support</h3>`
+        + `${BrowserCapabilities.hlsJsSupport()}`
+        + `<h3>Dash Support</h3>`
+        + `${BrowserCapabilities.dashSupport()}`
+        + `<h3>Chosen Format</h3>`
+        + `${MediaFormats.getFormat()}`
+        + `<h3>Chosen Playout</h3>`
+        + `${MediaFormats.getPlayoutEngine()}`
 }
 
 module.exports = {
