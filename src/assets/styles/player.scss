@@ -116,14 +116,6 @@ $start-button-size: 15vw;
   justify-content: flex-end;
   position: relative;
 
-  &.ios-fullscreen > .romper-gui {
-    > .romper-buttons,
-    > .romper-buttons-activate-area,
-    > .romper-overlays >.romper-overlay {
-      bottom: 5%;
-    }
-  }
-
   * {
     box-sizing: content-box;
   }
@@ -1616,18 +1608,6 @@ $start-button-size: 15vw;
     background: $black;
     border: 0;
     color: $white;
-  }
-}
-
-@media (orientation: portrait) {
-  .romper-player {
-    &.ios-fullscreen > .romper-gui {
-      > .romper-buttons,
-      > .romper-overlays > .romper-overlay,
-      > .romper-buttons-activate-area {
-        bottom: 20%; // ios fullscreen portrait push buttons up more
-      }
-    }
   }
 }
 
