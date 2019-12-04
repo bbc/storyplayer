@@ -12,7 +12,15 @@ import logger from './logger';
 import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
+import {
+    checkDebugPlayout,
+    checkOverrideFacebookBlock,
+    addDetail,
+    scrollToTop,
+    preventEventDefault,
+    SLIDER_CLASS,
+    handleButtonTouchEvent
+} from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
 
@@ -607,7 +615,8 @@ class Player extends EventEmitter {
 
 
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
-        if(facebookiOSWebview) {
+        const overrideFacebookBlock = checkOverrideFacebookBlock();
+        if(facebookiOSWebview && !overrideFacebookBlock) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
             fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"

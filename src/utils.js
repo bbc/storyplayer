@@ -16,6 +16,11 @@ export const checkDebugPlayout = () => {
     return (override === 'true');
 };
 
+export const checkOverrideFacebookBlock = () => {
+    const override = new URLSearchParams(window.location.search).get('overrideFacebookBlock');
+    return (override === 'true');
+};
+
 export const checkWebviewDebug = () => {
     const override = new URLSearchParams(window.location.search).get('webviewDebug');
     return (override === 'true');
