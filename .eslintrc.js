@@ -27,6 +27,8 @@ module.exports = {
     "no-prototype-builtins": [0],
     "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
     "no-underscore-dangle": 0,
-    "import/no-cycle": "off"
+    "import/no-cycle": "off",
+    "max-classes-per-file": "off"
+
   }
 };

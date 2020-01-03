@@ -107,7 +107,7 @@ module.exports = {
     VARIABLE_EVENTS,
     init: (settings: Settings): ?Controller => {
         logger.info('StoryPlayer Version: ', Package.version);
-        const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
             logger.info('No data resolver passed to romper - creating one');

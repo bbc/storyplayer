@@ -32,7 +32,7 @@ export default class ConsoleFormattedStream {
     css: Object;
 
     constructor(settings: ConsoleFormattedStreamOptions) {
-        const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         this.logByLevel = mergedSettings.logByLevel;
         this.css = mergedSettings.css;
