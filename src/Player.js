@@ -640,7 +640,9 @@ class Player extends EventEmitter {
 
         // Event Listeners
         // keyboard
-        document.addEventListener('keydown', this._keyPressHandler.bind(this));
+        if (this._controller.handleKeys) {
+            document.addEventListener('keydown', this._keyPressHandler.bind(this));
+        }
 
         // mouse/touch
         this._overlays.onclick = this._handleOverlayClick.bind(this);

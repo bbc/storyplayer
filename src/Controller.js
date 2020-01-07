@@ -40,6 +40,7 @@ export default class Controller extends EventEmitter {
         assetUrls: AssetUrls,
         privacyNotice: ?string,
         saveSession: ?boolean,
+        handleKeys: ?boolean,
     ) {
         super();
         this._storyId = null;
@@ -61,6 +62,7 @@ export default class Controller extends EventEmitter {
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
+        this.handleKeys = handleKeys;
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
@@ -1244,4 +1246,6 @@ export default class Controller extends EventEmitter {
     _handleRendererNextButtonEvent: Function;
 
     _handleRendererPreviousButtonEvent: Function;
+
+    handleKeys: ?boolean;
 }
