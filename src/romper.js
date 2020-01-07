@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
     staticImageBaseUrl: '/dist/images',
     privacyNotice: null,
     saveSession: false,
+    handleKeys: true,
 };
 
 // Limited Debugging for iOS webviews
@@ -148,6 +149,7 @@ module.exports = {
             assetUrls,
             mergedSettings.privacyNotice,
             mergedSettings.saveSession,
+            mergedSettings.handleKeys,
         );
     },
 };
