@@ -190,7 +190,7 @@ export default class HlsInstance {
                     // Using HLS.js
                     this.detachMedia();
                     this.attachMedia(this._mediaElement);
-                    this._hls.config = Object.assign({}, this._hls.config, this._activeConfig.hls);
+                    this._hls.config = { ...this._hls.config, ...this._activeConfig.hls};
                 } else {
                     // Using Video Element
                     this.loadSource(this._mediaSrc);
@@ -220,7 +220,7 @@ export default class HlsInstance {
                     // Using HLS.js
                     this.detachMedia();
                     // eslint-disable-next-line max-len
-                    this._hls.config = Object.assign({}, this._hls.config, this._inactiveConfig.hls);
+                    this._hls.config = { ...this._hls.config, ...this._inactiveConfig.hls};
                 }
                 break;
             case MediaTypes.DASH:
