@@ -257,10 +257,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         if (event.code === 'ArrowLeft') {
             this._moveInterval = setInterval(() => {
                 this._view.lon -= 1;
+                this._view.lon = (360 + this._view.lon) % 360;
             }, 50);
         } else if (event.code === 'ArrowRight') {
             this._moveInterval = setInterval(() => {
                 this._view.lon += 1;
+                this._view.lon = (360 + this._view.lon) % 360;
             }, 50);   
         } else if (event.code === 'ArrowUp') {
             this._moveInterval = setInterval(() => {
