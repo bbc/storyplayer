@@ -53,7 +53,7 @@ if(checkWebviewDebug()) {
     /* eslint-disable */
     if (typeof console  != "undefined")
     if (typeof console.log != 'undefined') {
-        console.olog = console.log;
+        console.log = console.log;
     } else {
         console.olog = function() {};
     }
