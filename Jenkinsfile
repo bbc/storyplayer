@@ -17,6 +17,7 @@ pipeline {
     HOME = "$PWD"
     http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
+    NODE_ENV = "production"
   }
 
   stages {
@@ -35,17 +36,22 @@ pipeline {
         }
       }
     }
+    stage('Set discovered package versions') {
+      steps {
+        withBBCRDJavascriptArtifactory {
+          script {
+            env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
+            env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
+            env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" version || echo 0.0.0')
+            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
+          }
+        }
+      }
+    }
     stage('Print package info') {
       steps {
         withBBCRDJavascriptArtifactory {
           sh '''
-            package_name=$(node -p "require('./package.json').name")
-            git_version=$(node -p "require('./package.json').version")
-            # Latest version published to BBC npm org
-            npm_version=$(npm show ${package_name} version || echo 0.0.0)
-            # Latest version published to Artifactory
-            artifactory_version=$(npm show ${package_name} version --reg ${artifactory} || echo 0.0.0)
-
             echo "Package name: $package_name"
             echo "Git version: $git_version"
             echo "NPM version: $npm_version"
