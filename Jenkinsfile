@@ -48,15 +48,19 @@ pipeline {
         }
       }
     }
-    stage('Print package info') {
+    stage('Publish to NPMjs Private') {
+      when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh '''
-            echo "Package name: $package_name"
-            echo "Git version: $git_version"
-            echo "NPM version: $npm_version"
-            echo "Artifactory version: $artifactory_version"
-          '''
+          sh 'echo npm publish'
+        }
+      }
+    }
+    stage('Publish to Artifactory Private') {
+      when { not { equals expected: env.git_version, actual: env.artifactory_version } }
+      steps {
+        withBBCRDJavascriptArtifactory {
+          sh 'echo artifactory publish'
         }
       }
     }
