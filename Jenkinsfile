@@ -31,7 +31,6 @@ pipeline {
 
             npm config set proxy http://www-cache.rd.bbc.co.uk:8080/
             npm config set https-proxy http://www-cache.rd.bbc.co.uk:8080/
-            npm config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/
           '''
         }
       }
