@@ -28,6 +28,10 @@ pipeline {
             yarn config set https-proxy http://www-cache.rd.bbc.co.uk:8080/
             yarn config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/
 
+            npm config set proxy http://www-cache.rd.bbc.co.uk:8080/
+            npm config set https-proxy http://www-cache.rd.bbc.co.uk:8080/
+            npm config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/
+
             package_name=$(node -p "require('./package.json').name")
             git_version=$(node -p "require('./package.json').version")
             # Latest version published to BBC npm org
