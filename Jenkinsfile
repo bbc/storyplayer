@@ -5,6 +5,7 @@ pipeline {
     docker {
       image 'node:10'
       label 'apmm-slave'
+      args '-v /etc/pki:/etc/pki'
     }
   }
 
