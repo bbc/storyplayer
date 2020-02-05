@@ -24,6 +24,8 @@ pipeline {
       steps {
         withBBCRDJavascriptArtifactory {
           sh '''
+            yarn config set proxy http://www-cache.rd.bbc.co.uk:8080/
+            yarn config set https-proxy http://www-cache.rd.bbc.co.uk:8080/
             yarn config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/
 
             package_name=$(node -p "require('./package.json').name")
