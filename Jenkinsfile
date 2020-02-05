@@ -1,6 +1,9 @@
 pipeline {
   agent {
-    docker { image 'node:10' }
+    docker {
+      image 'node:10'
+      label 'apmm-slave'
+    }
   }
 
   stages {
