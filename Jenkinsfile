@@ -35,7 +35,7 @@ pipeline {
         }
       }
     }
-    stage('Set discovered package versions') {
+    stage('Discover package versions') {
       steps {
         withBBCRDJavascriptArtifactory {
           script {
@@ -43,6 +43,11 @@ pipeline {
             env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
             env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" version || echo 0.0.0')
             env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
+
+            println """Package name:        ${package_name}
+                      |Git version:         $git_version
+                      |NPM version:         $npm_version
+                      |Artifactory version: $artifactory_version""".stripMargin()
           }
         }
       }
