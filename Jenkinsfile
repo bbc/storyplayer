@@ -2,8 +2,7 @@
 
 pipeline {
   agent {
-    docker {
-      image 'node:10'
+    dockerfile {
       label 'apmm-slave'
       args '-v /etc/pki:/etc/pki'
     }
