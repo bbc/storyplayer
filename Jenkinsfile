@@ -54,15 +54,47 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh 'echo npm publish'
+          sh '# npm publish'
         }
       }
     }
     stage('Publish to Artifactory Private') {
-      when { not { equals expected: env.git_version, actual: env.artifactory_version } }
+      // when { not { equals expected: env.git_version, actual: env.artifactory_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh 'echo artifactory publish'
+          sh '# npm publish --reg ${artifactory} --_auth=${artifactory_auth}'
+          withBBCGithubSSHAgent {
+            sh '''
+              git config --global user.name "Jenkins"
+              git config --global user.email jenkins-slave@rd.bbc.co.uk
+              git clone git@github.com:bbc/rd-ux-storyplayer-harness.git
+              git clone git@github.com:bbc/rd-ux-storyformer.git
+            '''
+
+            dir('rd-ux-storyplayer-harness') {
+              sh '''
+                yarn add --dev --ignore-scripts @bbc/storyplayer
+                git status
+                # git add package.json yarn.lock
+                # git commit -m "chore: Bumped storyplayer to version ${git_version}"
+                # git fetch origin
+                # git rebase origin/master
+                # git push origin master
+              '''
+            }
+
+            dir('rd-ux-storyformer') {
+              sh '''
+                yarn add --dev --ignore-scripts @bbc/storyplayer
+                git status
+                # git add package.json yarn.lock
+                # git commit -m "chore: Bumped storyplayer to version ${git_version}"
+                # git fetch origin
+                # git rebase origin/master
+                # git push origin master
+              '''
+            }
+          }
         }
       }
     }
