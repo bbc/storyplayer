@@ -17,6 +17,7 @@ pipeline {
     http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     NODE_ENV = "production"
+    GIT_SSH_COMMAND = 'ssh -o ProxyCommand="nc -x socks-gw.rd.bbc.co.uk -X 5 %h %p"'
   }
 
   stages {
