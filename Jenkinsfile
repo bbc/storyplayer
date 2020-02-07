@@ -71,8 +71,8 @@ pipeline {
 
             dir('rd-ux-storyplayer-harness') {
               sh '''
-                yarn add --dev --ignore-scripts @bbc/storyplayer
                 git status
+                # yarn add --dev --ignore-scripts @bbc/storyplayer
                 # git add package.json yarn.lock
                 # git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 # git fetch origin
@@ -83,8 +83,8 @@ pipeline {
 
             dir('rd-ux-storyformer') {
               sh '''
-                yarn add --dev --ignore-scripts @bbc/storyplayer
                 git status
+                # yarn add --dev --ignore-scripts @bbc/storyplayer
                 # git add package.json yarn.lock
                 # git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 # git fetch origin
