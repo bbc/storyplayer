@@ -33,7 +33,7 @@ pipeline {
             env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
             env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
             env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" version || echo 0.0.0')
-            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
+            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/" || echo 0.0.0')
 
             println """
                       |----------------
