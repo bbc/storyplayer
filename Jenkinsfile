@@ -19,7 +19,7 @@ pipeline {
   }
 
   stages {
-    stage('Set Yarn and NPM config') {
+    stage('Set Yarn config') {
       steps {
         withBBCRDJavascriptArtifactory {
           sh 'yarn config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/'
