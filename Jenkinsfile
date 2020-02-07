@@ -28,23 +28,29 @@ pipeline {
     }
     stage('Discover package versions') {
       steps {
-        withBBCRDJavascriptArtifactory {
-          script {
-            env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
-            env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
-            env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" version || echo 0.0.0')
-            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/" || echo 0.0.0')
+        script {
+          env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
+          env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
 
-            println """
-                      |----------------
-                      |-- BUILD INFO --
-                      |----------------
-                      |
-                      |Package name:        ${package_name}
-                      |Git version:         $git_version
-                      |NPM version:         $npm_version
-                      |Artifactory version: $artifactory_version""".stripMargin()
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
+            env.npm_version = sh(returnStdout: true, script: '''
+              npm show "$package_name" --email support@rd.bbc.co.uk --_auth=$NPM_TOKEN version || echo 0.0.0
+            ''')
           }
+
+          withBBCRDJavascriptArtifactory {
+            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/" || echo 0.0.0')
+          }
+
+          println """
+                    |----------------
+                    |-- BUILD INFO --
+                    |----------------
+                    |
+                    |Package name:        ${package_name}
+                    |Git version:         $git_version
+                    |NPM version:         $npm_version
+                    |Artifactory version: $artifactory_version""".stripMargin()
         }
       }
     }
