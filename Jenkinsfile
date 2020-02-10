@@ -61,7 +61,7 @@ pipeline {
       }
     }
     stage('Publish to Artifactory Private') {
-      // when { not { equals expected: env.git_version, actual: env.artifactory_version } }
+      when { not { equals expected: env.git_version, actual: env.artifactory_version } }
       steps {
         withBBCRDJavascriptArtifactory {
           sh '# npm publish --reg ${artifactory} --_auth=${artifactory_auth}'
