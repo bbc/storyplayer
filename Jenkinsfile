@@ -52,6 +52,14 @@ pipeline {
         }
       }
     }
+    stage('Test') {
+      steps {
+        sh '''
+          yarn install --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm
+          yarn test
+        '''
+      }
+    }
     stage('Publish to NPMjs Private') {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
