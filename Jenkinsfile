@@ -9,7 +9,9 @@ pipeline {
   }
 
   environment {
-    // Jenkins sets the container user to `jenkins`. In the absence of a real user with a real home dir, npm looks for startup files (e.g. .npmrc) under /, which causes the container to bomb out with a permissions
+    // Jenkins sets the container user to `jenkins`. In the absence of a real
+    // user with a real home dir, npm looks for startup files (e.g. .npmrc)
+    // under /, which causes the container to bomb out with a permissions
     // error.  Setting $HOME fixes this.
     HOME = "$PWD"
     http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
@@ -22,7 +24,6 @@ pipeline {
     stage('Set Yarn config') {
       steps {
         withBBCRDJavascriptArtifactory {
-          sh 'yarn config set registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/'
         }
       }
     }
@@ -34,7 +35,10 @@ pipeline {
 
           withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
             env.npm_version = sh(returnStdout: true, script: '''
-              npm show "$package_name" --email support@rd.bbc.co.uk --_auth=$NPM_TOKEN version || echo 0.0.0
+              # the only way I could find to temporarily set up token auth for the private registry
+              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
+              npm show "$package_name" --reg https://registry.npmjs.org/ version || echo 0.0.0
+              sed -i '$ d' .npmrc
             ''')
           }
 
