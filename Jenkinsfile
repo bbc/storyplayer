@@ -67,9 +67,9 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
         script {
-          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
             sh '''
-              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
+              echo //registry.npmjs.org/:_authToken=$npm_token >> .npmrc
               npm publish
               sed -i '$ d' .npmrc
             '''
@@ -81,7 +81,14 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.artifactory_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh 'npm publish --reg ${artifactory}'
+          // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
+          withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_token')]) {
+            sh '''
+              echo //artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/:_authToken=$artifactory_token >> .npmrc
+              npm publish --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm
+              sed -i '$ d' .npmrc
+            '''
+          }
           withBBCGithubSSHAgent {
             sh '''
               git config --global user.name "Jenkins"
