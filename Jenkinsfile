@@ -76,22 +76,22 @@ pipeline {
             dir('rd-ux-storyplayer-harness') {
               sh '''
                 yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
-                # git add package.json yarn.lock
-                # git commit -m "chore: Bumped storyplayer to version ${git_version}"
-                # git fetch origin
-                # git rebase origin/master
-                # git push origin master
+                git add package.json yarn.lock
+                git commit -m "chore: Bumped storyplayer to version ${git_version}"
+                git fetch origin
+                git rebase origin/master
+                git push origin master
               '''
             }
 
             dir('rd-ux-storyformer') {
               sh '''
                 yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
-                # git add package.json yarn.lock
-                # git commit -m "chore: Bumped storyplayer to version ${git_version}"
-                # git fetch origin
-                # git rebase origin/master
-                # git push origin master
+                git add package.json yarn.lock
+                git commit -m "chore: Bumped storyplayer to version ${git_version}"
+                git fetch origin
+                git rebase origin/master
+                git push origin master
               '''
             }
           }
