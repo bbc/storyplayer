@@ -70,7 +70,7 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.artifactory_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh '# npm publish --reg ${artifactory} --_auth=${artifactory_auth}'
+          sh 'npm publish --reg ${artifactory}'
           withBBCGithubSSHAgent {
             sh '''
               git config --global user.name "Jenkins"
