@@ -21,12 +21,6 @@ pipeline {
   }
 
   stages {
-    stage('Set Yarn config') {
-      steps {
-        withBBCRDJavascriptArtifactory {
-        }
-      }
-    }
     stage('Discover package versions') {
       steps {
         script {
@@ -81,8 +75,7 @@ pipeline {
 
             dir('rd-ux-storyplayer-harness') {
               sh '''
-                git status
-                # yarn add --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
                 # git add package.json yarn.lock
                 # git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 # git fetch origin
@@ -93,8 +86,7 @@ pipeline {
 
             dir('rd-ux-storyformer') {
               sh '''
-                git status
-                # yarn add --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
                 # git add package.json yarn.lock
                 # git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 # git fetch origin
