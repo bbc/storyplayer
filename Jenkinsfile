@@ -55,12 +55,14 @@ pipeline {
     stage('Publish to NPMjs Private') {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
-        withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
-          env.npm_version = sh(returnStdout: true, script: '''
-            echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
-            npm publish
-            sed -i '$ d' .npmrc
-          ''')
+        script {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
+            env.npm_version = sh(returnStdout: true, script: '''
+              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
+              npm publish
+              sed -i '$ d' .npmrc
+            ''')
+          }
         }
       }
     }
