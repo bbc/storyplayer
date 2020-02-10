@@ -61,6 +61,7 @@ pipeline {
             npm publish
             sed -i '$ d' .npmrc
           ''')
+        }
       }
     }
     stage('Publish to Artifactory Private') {
