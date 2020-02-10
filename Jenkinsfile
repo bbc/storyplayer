@@ -16,6 +16,7 @@ pipeline {
     HOME = "$PWD"
     http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
+    artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
     GIT_SSH_COMMAND = 'ssh -o ProxyCommand="nc -x socks-gw.rd.bbc.co.uk -X 5 %h %p"'
   }
@@ -37,7 +38,7 @@ pipeline {
           }
 
           withBBCRDJavascriptArtifactory {
-            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/" || echo 0.0.0')
+            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
           }
 
           println """
@@ -56,7 +57,7 @@ pipeline {
       steps {
         sh '''
           yarn install \
-            --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm \
+            --registry "$artifactory" \
             --production=false \
             --non-interactive
           yarn test
@@ -84,8 +85,8 @@ pipeline {
           // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
           withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_token')]) {
             sh '''
-              echo //artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/:_authToken=$artifactory_token >> .npmrc
-              npm publish --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm
+              echo ${artifactory#https:}:_authToken=$artifactory_token >> .npmrc
+              npm publish --registry "$artifactory"
               sed -i '$ d' .npmrc
             '''
           }
@@ -99,7 +100,7 @@ pipeline {
 
             dir('rd-ux-storyplayer-harness') {
               sh '''
-                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
                 git add package.json yarn.lock
                 git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 git fetch origin
@@ -110,7 +111,7 @@ pipeline {
 
             dir('rd-ux-storyformer') {
               sh '''
-                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
                 git add package.json yarn.lock
                 git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 git fetch origin
