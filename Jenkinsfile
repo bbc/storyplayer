@@ -55,7 +55,10 @@ pipeline {
     stage('Test') {
       steps {
         sh '''
-          yarn install --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm
+          yarn install \
+            --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm \
+            --production=false \
+            --non-interactive
           yarn test
         '''
       }
