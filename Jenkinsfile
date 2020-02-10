@@ -57,11 +57,11 @@ pipeline {
       steps {
         script {
           withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
-            env.npm_version = sh(returnStdout: true, script: '''
+            sh '''
               echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
               npm publish
               sed -i '$ d' .npmrc
-            ''')
+            '''
           }
         }
       }
