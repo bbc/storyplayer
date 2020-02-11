@@ -13,9 +13,6 @@ pipeline {
     // user with a real home dir, npm looks for startup files (e.g. .npmrc)
     // under /, which causes the container to bomb out with a permissions
     // error.  Setting $HOME fixes this.
-    HOME = "$PWD"
-    http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
-    https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
     NODE_OPTIONS = "--max-old-space-size=4096"
