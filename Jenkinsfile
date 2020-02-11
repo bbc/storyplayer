@@ -82,10 +82,13 @@ pipeline {
       steps {
         withBBCRDJavascriptArtifactory {
           // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
-          withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_token')]) {
+          withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
             sh '''
-              echo ${artifactory#https:}:_authToken=$artifactory_token >> .npmrc
-              npm publish --registry "$artifactory" --access restricted
+              set +x
+              api_token=$(echo "$artifactory_bearer_token" | base64 -d | cut -d: -f 2)
+              echo "${artifactory#https:}:_authToken=$api_token" >> .npmrc
+              set -x
+              npm publish --registry "$artifactory"
               sed -i '$ d' .npmrc
             '''
           }
