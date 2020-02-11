@@ -18,6 +18,8 @@ pipeline {
     https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
     artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
+    NODE_OPTIONS = "--max-old-space-size=4096"
+
     GIT_SSH_COMMAND = 'ssh -o ProxyCommand="nc -x socks-gw.rd.bbc.co.uk -X 5 %h %p"'
   }
 
@@ -71,7 +73,7 @@ pipeline {
           withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
             sh '''
               echo //registry.npmjs.org/:_authToken=$npm_token >> .npmrc
-              npm publish
+              npm publish --access restricted
               sed -i '$ d' .npmrc
             '''
           }
@@ -86,7 +88,7 @@ pipeline {
           withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_token')]) {
             sh '''
               echo ${artifactory#https:}:_authToken=$artifactory_token >> .npmrc
-              npm publish --registry "$artifactory"
+              npm publish --registry "$artifactory" --access restricted
               sed -i '$ d' .npmrc
             '''
           }
