@@ -726,7 +726,7 @@ export default class Controller extends EventEmitter {
     }
 
     // get the ids of every story nested within the one given
-    _getAllStories(storyId: string): Promise<Array<string>> {
+    _getAllStories(storyId: string, doneAlready: Array<string> = []): Promise<Array<string>> {
         return this._fetchers.storyFetcher(storyId)
             .then((story) => {
                 const nePromises = [];
@@ -738,13 +738,17 @@ export default class Controller extends EventEmitter {
             .then((nes) => {
                 const subStoryIds = [];
                 nes.forEach((ne) => {
-                    if (ne.body.type === 'STORY_ELEMENT' && ne.body.story_target_id) {
+                    if (ne.body.type === 'STORY_ELEMENT' && ne.body.story_target_id
+                        && !subStoryIds.includes(ne.body.story_target_id)
+                        && !doneAlready.includes(ne.body.story_target_id)) {
                         subStoryIds.push(ne.body.story_target_id);
+                        doneAlready.push(ne.body.story_target_id);
                     }
                 });
+
                 const substoryPromises = [];
                 subStoryIds.forEach((subStory) => {
-                    substoryPromises.push(this._getAllStories(subStory));
+                    substoryPromises.push(this._getAllStories(subStory, doneAlready));
                 });
                 return Promise.all(substoryPromises);
             })
