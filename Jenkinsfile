@@ -13,10 +13,10 @@ pipeline {
     // user with a real home dir, npm looks for startup files (e.g. .npmrc)
     // under /, which causes the container to bomb out with a permissions
     // error.  Setting $HOME fixes this.
-    HOME = "$PWD"
-    http_proxy = "http://www-cache.rd.bbc.co.uk:8080"
-    https_proxy = "http://www-cache.rd.bbc.co.uk:8080"
+    artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
+    NODE_OPTIONS = "--max-old-space-size=4096"
+
     GIT_SSH_COMMAND = 'ssh -o ProxyCommand="nc -x socks-gw.rd.bbc.co.uk -X 5 %h %p"'
   }
 
@@ -37,7 +37,7 @@ pipeline {
           }
 
           withBBCRDJavascriptArtifactory {
-            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/" || echo 0.0.0')
+            env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
           }
 
           println """
@@ -55,7 +55,10 @@ pipeline {
     stage('Test') {
       steps {
         sh '''
-          yarn install --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm
+          yarn install \
+            --registry "$artifactory" \
+            --production=false \
+            --non-interactive
           yarn test
         '''
       }
@@ -64,10 +67,10 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
         script {
-          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
             sh '''
-              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
-              npm publish
+              echo //registry.npmjs.org/:_authToken=$npm_token >> .npmrc
+              npm publish --access restricted
               sed -i '$ d' .npmrc
             '''
           }
@@ -78,7 +81,17 @@ pipeline {
       when { not { equals expected: env.git_version, actual: env.artifactory_version } }
       steps {
         withBBCRDJavascriptArtifactory {
-          sh 'npm publish --reg ${artifactory}'
+          // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
+          withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
+            sh '''
+              set +x
+              api_token=$(echo "$artifactory_bearer_token" | base64 -d | cut -d: -f 2)
+              echo "${artifactory#https:}:_authToken=$api_token" >> .npmrc
+              set -x
+              npm publish --registry "$artifactory"
+              sed -i '$ d' .npmrc
+            '''
+          }
           withBBCGithubSSHAgent {
             sh '''
               git config --global user.name "Jenkins"
@@ -89,7 +102,7 @@ pipeline {
 
             dir('rd-ux-storyplayer-harness') {
               sh '''
-                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
                 git add package.json yarn.lock
                 git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 git fetch origin
@@ -100,7 +113,7 @@ pipeline {
 
             dir('rd-ux-storyformer') {
               sh '''
-                yarn add --registry https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm --dev --ignore-scripts @bbc/storyplayer
+                yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
                 git add package.json yarn.lock
                 git commit -m "chore: Bumped storyplayer to version ${git_version}"
                 git fetch origin
