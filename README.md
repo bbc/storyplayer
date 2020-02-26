@@ -93,6 +93,28 @@ const config = {
 };
 ```
 
+Internal Variables
+------------------
+
+StoryPlayer creates and manipulates some variables as it runs.  These are available for authors to query to control the story logic (e.g., a representation or a link condition can depend on the state of one or more of these).  The variables are as follows:
+
+* `_day_of_week`: the day of the week (according to the client computer) at the time the experience was loaded.  A string that takes one of the following values:
+    - `Sunday`
+    - `Monday`
+    - `Tuesday`
+    - `Wednesday`
+    - `Thursday`
+    - `Friday`
+    - `Saturday`
+* `_portion_of_day`: the approximate time of day (according to the client computer) at the time the experience was loaded.  A string that takes one of the following values:
+    - `Morning`: before 1200
+    - `Afternoon`: between 1200 and 1659
+    - `Evening`: after 1700
+* `_path_history`: an array of UUIDs of the Narrative Elements that the user has visited so far.  If a user goes back in a story, that UUID is removed from the list.
+* `_location_longitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the left-right dimension, expressed in degrees, and takes values between 0 and 359.  The player records this variable value every 2 seconds.
+* `_location_latitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the up-down dimension, expressed in degrees, and takes values between -90 and 90.  The player records this variable value every 2 seconds.
+
+
 Code Components and Data Flow
 -----------------------------
 
