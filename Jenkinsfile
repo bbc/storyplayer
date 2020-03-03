@@ -4,15 +4,11 @@ pipeline {
   agent {
     dockerfile {
       label 'apmm-slave'
-      args '-v /etc/pki:/etc/pki'
+      args '--mount type=bind,source=/etc/pki,target=/etc/pki'
     }
   }
 
   environment {
-    // Jenkins sets the container user to `jenkins`. In the absence of a real
-    // user with a real home dir, npm looks for startup files (e.g. .npmrc)
-    // under /, which causes the container to bomb out with a permissions
-    // error.  Setting $HOME fixes this.
     artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
     NODE_OPTIONS = "--max-old-space-size=4096"
@@ -21,20 +17,23 @@ pipeline {
   }
 
   stages {
+    stage('Configure NPMjs authentication') {
+      steps {
+        script {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
+            sh 'echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> $HOME/.npmrc'
+          }
+        }
+      }
+    }
+
     stage('Discover package versions') {
       steps {
         script {
           env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
           env.git_version = sh(returnStdout: true, script: '''node -p "require('./package.json').version"''')
 
-          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'NPM_TOKEN')]) {
-            env.npm_version = sh(returnStdout: true, script: '''
-              # the only way I could find to temporarily set up token auth for the private registry
-              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> .npmrc
-              npm show "$package_name" --reg https://registry.npmjs.org/ version || echo 0.0.0
-              sed -i '$ d' .npmrc
-            ''')
-          }
+          env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" --reg https://registry.npmjs.org/ version || echo 0.0.0')
 
           withBBCRDJavascriptArtifactory {
             env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
@@ -68,11 +67,7 @@ pipeline {
       steps {
         script {
           withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
-            sh '''
-              echo //registry.npmjs.org/:_authToken=$npm_token >> .npmrc
-              npm publish --access restricted
-              sed -i '$ d' .npmrc
-            '''
+            sh 'npm publish --access restricted'
           }
         }
       }
@@ -83,14 +78,7 @@ pipeline {
         withBBCRDJavascriptArtifactory {
           // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
           withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
-            sh '''
-              set +x
-              api_token=$(echo "$artifactory_bearer_token" | base64 -d | cut -d: -f 2)
-              echo "${artifactory#https:}:_authToken=$api_token" >> .npmrc
-              set -x
-              npm publish --registry "$artifactory"
-              sed -i '$ d' .npmrc
-            '''
+            sh 'npm publish --reg "$artifactory" --email=support@rd.bbc.co.uk --_auth="$artifactory_bearer_token"'
           }
           withBBCGithubSSHAgent {
             sh '''
