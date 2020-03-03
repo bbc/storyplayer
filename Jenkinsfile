@@ -17,6 +17,7 @@ pipeline {
   }
 
   stages {
+
     stage('Configure NPMjs authentication') {
       steps {
         script {
@@ -27,7 +28,20 @@ pipeline {
       }
     }
 
+    stage('Test') {
+      steps {
+        sh '''
+          yarn install \
+            --registry "$artifactory" \
+            --production=false \
+            --non-interactive
+          yarn test
+        '''
+      }
+    }
+
     stage('Discover package versions') {
+      when { branch 'master' }
       steps {
         script {
           env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
@@ -51,19 +65,14 @@ pipeline {
         }
       }
     }
-    stage('Test') {
-      steps {
-        sh '''
-          yarn install \
-            --registry "$artifactory" \
-            --production=false \
-            --non-interactive
-          yarn test
-        '''
-      }
-    }
+
     stage('Publish to NPMjs Private') {
-      when { not { equals expected: env.git_version, actual: env.npm_version } }
+      when {
+        allOf {
+          branch 'master',
+          not { equals expected: env.git_version, actual: env.npm_version }
+        }
+      }
       steps {
         script {
           withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
@@ -72,8 +81,14 @@ pipeline {
         }
       }
     }
+
     stage('Publish to Artifactory Private') {
-      when { not { equals expected: env.git_version, actual: env.artifactory_version } }
+      when {
+        allOf {
+          branch 'master',
+          not { equals expected: env.git_version, actual: env.artifactory_version }
+        }
+      }
       steps {
         withBBCRDJavascriptArtifactory {
           // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
