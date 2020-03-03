@@ -4,7 +4,7 @@ pipeline {
   agent {
     dockerfile {
       label 'apmm-slave'
-      args '-v /etc/pki:/etc/pki'
+      args '--mount type=bind,source=/etc/pki,target=/etc/pki'
     }
   }
 
