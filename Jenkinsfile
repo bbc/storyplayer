@@ -17,6 +17,7 @@ pipeline {
   }
 
   stages {
+
     stage('Configure NPMjs authentication') {
       steps {
         script {
@@ -24,6 +25,18 @@ pipeline {
             sh 'echo //registry.npmjs.org/:_authToken=$NPM_TOKEN >> $HOME/.npmrc'
           }
         }
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh '''
+          yarn install \
+            --registry "$artifactory" \
+            --production=false \
+            --non-interactive
+          yarn test
+        '''
       }
     }
 
@@ -51,17 +64,7 @@ pipeline {
         }
       }
     }
-    stage('Test') {
-      steps {
-        sh '''
-          yarn install \
-            --registry "$artifactory" \
-            --production=false \
-            --non-interactive
-          yarn test
-        '''
-      }
-    }
+
     stage('Publish to NPMjs Private') {
       when { not { equals expected: env.git_version, actual: env.npm_version } }
       steps {
