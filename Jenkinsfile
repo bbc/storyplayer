@@ -69,7 +69,7 @@ pipeline {
     stage('Publish to NPMjs Private') {
       when {
         allOf {
-          branch 'master',
+          branch 'master';
           not { equals expected: env.git_version, actual: env.npm_version }
         }
       }
@@ -85,7 +85,7 @@ pipeline {
     stage('Publish to Artifactory Private') {
       when {
         allOf {
-          branch 'master',
+          branch 'master';
           not { equals expected: env.git_version, actual: env.artifactory_version }
         }
       }
