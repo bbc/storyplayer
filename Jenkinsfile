@@ -6,6 +6,10 @@ pipeline {
     }
   }
 
+  options {
+      ansiColor('xterm') // Add support for coloured output
+  }
+
   environment {
     artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
     NODE_ENV = "production"
