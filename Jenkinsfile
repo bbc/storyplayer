@@ -11,7 +11,8 @@ pipeline {
   }
 
   environment {
-    artifactory = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
+    artifactory_publish = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/uxcs-cosmos-npm/"
+    artifactory_pull = "https://artifactory.virt.ch.bbc.co.uk/artifactory/api/npm/cosmos-npm/"
     NODE_ENV = "production"
     NODE_OPTIONS = "--max-old-space-size=4096"
 
@@ -46,7 +47,7 @@ pipeline {
       steps {
         sh '''
           yarn install \
-            --registry "$artifactory" \
+            --registry "$artifactory_publish" \
             --production=false \
             --non-interactive
           yarn test
@@ -63,7 +64,7 @@ pipeline {
 
           env.npm_version = sh(returnStdout: true, script: 'npm show "$package_name" --reg https://registry.npmjs.org/ version || echo 0.0.0')
 
-          env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory" || echo 0.0.0')
+          env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory_publish" || echo 0.0.0')
 
           println """
                     |----------------
@@ -73,7 +74,7 @@ pipeline {
                     |Package name:        ${package_name}
                     |Git version:         $git_version
                     |NPM version:         $npm_version
-                    |Artifactory version: $artifactory_version""".stripMargin()
+                    |Artifactory version: $artifactory_publish_version""".stripMargin()
         }
       }
     }
@@ -104,7 +105,7 @@ pipeline {
       steps {
         // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
         withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
-          sh 'npm publish --reg "$artifactory" --email=support@rd.bbc.co.uk --_auth="$artifactory_bearer_token"'
+          sh 'npm publish --reg "$artifactory_publish" --email=support@rd.bbc.co.uk --_auth="$artifactory_publish_bearer_token"'
         }
         withBBCGithubSSHAgent {
           sh '''
@@ -116,7 +117,7 @@ pipeline {
 
           dir('rd-ux-storyplayer-harness') {
             sh '''
-              yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
+              yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
               git add package.json yarn.lock
               git commit -m "chore: Bumped storyplayer to version ${git_version}"
               git fetch origin
@@ -127,7 +128,7 @@ pipeline {
 
           dir('rd-ux-storyformer') {
             sh '''
-              yarn add --registry "$artifactory" --dev --ignore-scripts @bbc/storyplayer
+              yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
               git add package.json yarn.lock
               git commit -m "chore: Bumped storyplayer to version ${git_version}"
               git fetch origin
