@@ -74,7 +74,7 @@ pipeline {
                     |Package name:        ${package_name}
                     |Git version:         $git_version
                     |NPM version:         $npm_version
-                    |Artifactory version: $artifactory_publish_version""".stripMargin()
+                    |Artifactory version: $artifactory_version""".stripMargin()
         }
       }
     }
@@ -105,7 +105,7 @@ pipeline {
       steps {
         // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
         withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
-          sh 'npm publish --reg "$artifactory_publish" --email=support@rd.bbc.co.uk --_auth="$artifactory_publish_bearer_token"'
+          sh 'npm publish --reg "$artifactory_publish" --email=support@rd.bbc.co.uk --_auth="$artifactory_bearer_token"'
         }
         withBBCGithubSSHAgent {
           sh '''
