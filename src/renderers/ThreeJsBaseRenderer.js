@@ -124,8 +124,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         logger.info(`Started: ${this._representation.id}`);
         this._hasEnded = false;
         this._started = true;
-        document.addEventListener('keydown', this._onKeyDown);
-        document.addEventListener('keyup', this._onKeyUp);
+        if (this._controller.handleKeys) {
+            document.addEventListener('keydown', this._onKeyDown);
+            document.addEventListener('keyup', this._onKeyUp);
+        }
         this._createScene();
     }
 
@@ -255,10 +257,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         if (event.code === 'ArrowLeft') {
             this._moveInterval = setInterval(() => {
                 this._view.lon -= 1;
+                this._view.lon = (360 + this._view.lon) % 360;
             }, 50);
         } else if (event.code === 'ArrowRight') {
             this._moveInterval = setInterval(() => {
                 this._view.lon += 1;
+                this._view.lon = (360 + this._view.lon) % 360;
             }, 50);   
         } else if (event.code === 'ArrowUp') {
             this._moveInterval = setInterval(() => {
@@ -447,8 +451,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
         uiLayer.removeEventListener('mousemove', this._onMouseMove);
 
-        document.removeEventListener('keydown', this._onKeyDown);
-        document.removeEventListener('keyup', this._onKeyUp);
+        if (this._controller.handleKeys) {
+            document.removeEventListener('keydown', this._onKeyDown);
+            document.removeEventListener('keyup', this._onKeyUp);
+        }
         if (this._orientationWatcher) {
             clearInterval(this._orientationWatcher);
         }

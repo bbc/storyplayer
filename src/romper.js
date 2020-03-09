@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
     staticImageBaseUrl: '/dist/images',
     privacyNotice: null,
     saveSession: false,
+    handleKeys: true,
 };
 
 // Limited Debugging for iOS webviews
@@ -52,7 +53,7 @@ if(checkWebviewDebug()) {
     /* eslint-disable */
     if (typeof console  != "undefined")
     if (typeof console.log != 'undefined') {
-        console.olog = console.log;
+        console.log = console.log;
     } else {
         console.olog = function() {};
     }
@@ -107,7 +108,7 @@ module.exports = {
     VARIABLE_EVENTS,
     init: (settings: Settings): ?Controller => {
         logger.info('StoryPlayer Version: ', Package.version);
-        const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
             logger.info('No data resolver passed to romper - creating one');
@@ -148,6 +149,7 @@ module.exports = {
             assetUrls,
             mergedSettings.privacyNotice,
             mergedSettings.saveSession,
+            mergedSettings.handleKeys,
         );
     },
 };

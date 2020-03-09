@@ -14,11 +14,37 @@ How to develop
 * We use [Yarn](https://yarnpkg.com/en/) for dependency management, Mocha as a test runner with Chai for assertions.
   TDD is preferred here. We have an ESLint file which follows our house file, and we prefer to have Facebook Flow
   annotations in place for type checking.
+
+* Pre-requisites.  In order to get a local version of StoryPlayer running, you will need:
+    1.  To download the repo
+    1.  Ensure yarn is installed
+    1.  Have a Forge certificate
+    1.  Set up [Artifactory to run locally](https://confluence.dev.bbc.co.uk/display/PRODTOOLS/Set+up+Artifactory+outside+Sandbox)
 * Run `yarn` to get all your dev dependencies included
 * `demo.html` puts a simple player onto a page
 * `yarn build` will do a single build of the library
 * `yarn test` will do a single run of the tests (Mocha with Chai, ESLint and Flow type checking)
 * `yarn dev` will do continuously build and test the library on change
+
+Running a local StoryPlayer with local stories/media
+--------------
+
+* The StoryPlayer code should be placed behind a Web Server, e.g., by running `python -m http.server` in the root directory of the code.
+
+* The media can be placed in the `/examples/` folder.  It can be put directly in, or organised into subfolders.
+
+* The story json can be placed in the `/examples/` folder.  The json must conform with the [schema](https://github.com/bbc/object-based-media-schema); there are stories in the examples folder there can provide some guidance or be edited manually for testing and exploration.   The Asset Collection source values can use a relative path to the local folder containing the media.  For example, if you are editing `my_story.json` in the `/examples/` folder, and wish to use the video `/examples/my_project/my_nice_vid.mp4`, then the asset collection should have:
+
+```
+    "assets": {
+        "av_src": ".//my_project/my_nice_vid.mp4"
+    }
+```
+
+* Stories can be played by visiting `localhost:8000/examples/` (the server prefix may vary depending on your local web server - this should work if you have used python, as above); there you will see a list of the example stories provided in the repository.  Select a story in the "Select story" tab then visit the "Render" tab to play.
+
+* Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:8000/examples/index.html?storyjson=my_story.json`.
+
 
 Developing [StoryFormer](https://github.com/bbc/rd-ux-storformer) against a local StoryPlayer instance
 --------------
@@ -66,6 +92,28 @@ const config = {
     },
 };
 ```
+
+Internal Variables
+------------------
+
+StoryPlayer creates and manipulates some variables as it runs.  These are available for authors to query to control the story logic (e.g., a representation or a link condition can depend on the state of one or more of these).  The variables are as follows:
+
+* `_day_of_week`: the day of the week (according to the client computer) at the time the experience was loaded.  A string that takes one of the following values:
+    - `Sunday`
+    - `Monday`
+    - `Tuesday`
+    - `Wednesday`
+    - `Thursday`
+    - `Friday`
+    - `Saturday`
+* `_portion_of_day`: the approximate time of day (according to the client computer) at the time the experience was loaded.  A string that takes one of the following values:
+    - `Morning`: before 1200
+    - `Afternoon`: between 1200 and 1659
+    - `Evening`: after 1700
+* `_path_history`: an array of UUIDs of the Narrative Elements that the user has visited so far.  If a user goes back in a story, that UUID is removed from the list.
+* `_location_longitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the left-right dimension, expressed in degrees, and takes values between 0 and 359.  The player records this variable value every 2 seconds.
+* `_location_latitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the up-down dimension, expressed in degrees, and takes values between -90 and 90.  The player records this variable value every 2 seconds.
+
 
 Code Components and Data Flow
 -----------------------------
