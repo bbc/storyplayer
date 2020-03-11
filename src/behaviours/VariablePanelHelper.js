@@ -49,7 +49,9 @@ const _getBooleanVariableSetter = (
     varInputSelect.classList.add('romper-var-form-button-div');
 
     const yesElement = document.createElement('button');
+    yesElement.setAttribute('type', 'button');
     const noElement = document.createElement('button');
+    noElement.setAttribute('type', 'button');
 
     const setSelected = (varVal) => {
         if (varVal) {
