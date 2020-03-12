@@ -970,26 +970,6 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
             }
-            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
-                // if not specified - get default icon...
-                iconObjectPromises.push(this._controller
-                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
-                    .then((representation) => {
-                        let defaultSrcAcId = null;
-                        if (representation && representation.asset_collections.icon
-                            && representation.asset_collections.icon.default_id) {
-                            defaultSrcAcId = representation.asset_collections.icon.default_id;
-                        }
-                        return Promise.resolve({
-                            choiceId: i,
-                            acId: defaultSrcAcId,
-                            ac: null,
-                            resolvedUrl: null,
-                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
-                        });
-                    }));
-            }
-
             iconObjectPromises.push(Promise.resolve(iconSpecObject));
         });
 
