@@ -646,17 +646,18 @@ $start-button-size: 15vw;
     &.fullscreen-icons {
       background: none;
       display: grid;
+      grid-auto-columns: 1fr;
       grid-auto-flow: column;
       height: 100%;
       padding: 0;
       width: 100%;
 
       &.tworow {
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: 50% 50%;
       }
 
       &.threerow {
-        grid-template-rows: 1fr 1fr 1fr;
+        grid-template-rows: 33% 33% 33%;
       }
 
       .romper-link-icon-container,
