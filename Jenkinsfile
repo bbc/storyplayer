@@ -132,10 +132,10 @@ pipeline {
             sh '''
               yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
               git add package.json yarn.lock
-              git commit -m "chore: Bumped storyplayer to version ${git_version}"
               git fetch origin
               git rebase origin/master
-              git push origin master
+              yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s"
+              git push origin master --tags
             '''
           }
         }
