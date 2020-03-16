@@ -1,3 +1,5 @@
+@Library("rd-apmm-groovy-ci-library@v1.x") _
+
 pipeline {
   agent {
     dockerfile {
