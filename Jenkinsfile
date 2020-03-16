@@ -135,7 +135,7 @@ pipeline {
               git fetch origin
               git rebase origin/master
               yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s"
-              git push --tags
+              git push origin master --tags
             '''
           }
         }
