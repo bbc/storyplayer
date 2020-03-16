@@ -134,7 +134,7 @@ pipeline {
               git add package.json yarn.lock
               git fetch origin
               git rebase origin/master
-              yarn version --patch --message  "Upgrade storyplayer and version bump to %s"
+              yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s"
               git push --tags
             '''
           }
