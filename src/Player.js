@@ -24,7 +24,6 @@ import {
 import { REASONER_EVENTS } from './Events';
 
 
-
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'VOLUME_MUTE_TOGGLE',
