@@ -119,11 +119,10 @@ pipeline {
 
           dir('rd-ux-storyplayer-harness') {
             sh '''
-              git checkout master
-              git pull
               yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
               git add package.json yarn.lock
               yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s"
+              git pull --rebase
               git push origin master --tags
             '''
           }
