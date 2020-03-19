@@ -23,8 +23,6 @@ import {
 } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
-
-
 const PlayerEvents = [
     'VOLUME_CHANGED',
     'VOLUME_MUTE_TOGGLE',
@@ -60,6 +58,7 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const button = document.createElement('button');
+    button.setAttribute('type', 'button');
 
     const deactivateOverlay = () => {
         if (!overlay.classList.contains('romper-inactive')) {
@@ -477,6 +476,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
 
         this._backButton = document.createElement('button');
+        this._backButton.setAttribute('type', 'button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
         this._backButton.setAttribute('title', 'Back Button');
@@ -489,6 +489,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._backButton);
 
         this._seekBackButton = document.createElement('button');
+        this._seekBackButton.setAttribute('type', 'button');
         this._seekBackButton.classList.add('romper-button');
         this._seekBackButton.classList.add('romper-seek-back-button');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
@@ -500,6 +501,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._seekBackButton);
 
         this._playPauseButton = document.createElement('button');
+        this._playPauseButton.setAttribute('type', 'button');
         this._playPauseButton.classList.add('romper-button');
         this._playPauseButton.classList.add('romper-play-button');
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
@@ -511,6 +513,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._playPauseButton);
 
         this._seekForwardButton = document.createElement('button');
+        this._seekForwardButton.setAttribute('type', 'button');
         this._seekForwardButton.classList.add('romper-button');
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
@@ -522,6 +525,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._seekForwardButton);
 
         this._nextButton = document.createElement('button');
+        this._nextButton.setAttribute('type', 'button');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
@@ -589,6 +593,7 @@ class Player extends EventEmitter {
         this._countdownContainer.appendChild(this._countdowner);
 
         this._subtitlesButton = document.createElement('button');
+        this._subtitlesButton.setAttribute('type', 'button');
         this._subtitlesButton.classList.add('romper-button');
         this._subtitlesButton.setAttribute('title', 'Subtitles Button');
         this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
@@ -601,6 +606,7 @@ class Player extends EventEmitter {
         mediaTransportRight.appendChild(this._subtitlesButton);
 
         this._fullscreenButton = document.createElement('button');
+        this._fullscreenButton.setAttribute('type', 'button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
         this._fullscreenButton.setAttribute('title', 'Fullscreen Button');
@@ -846,6 +852,7 @@ class Player extends EventEmitter {
         this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
 
         const cancelButton = document.createElement('button');
+        cancelButton.setAttribute('type', 'button');
         cancelButton.classList.add('romper-reset-button');
         cancelButton.setAttribute('title', 'Restart and accept terms');
         cancelButton.setAttribute('aria-label', 'Restart Button');
@@ -1030,6 +1037,7 @@ class Player extends EventEmitter {
 
     _createStartExperienceButton(options: Object) {
         this._startExperienceButton = document.createElement('button');
+        this._startExperienceButton.setAttribute('type', 'button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Start Button');
@@ -1055,6 +1063,7 @@ class Player extends EventEmitter {
 
     _createResumeExperienceButton(options: Object) {
         this._resumeExperienceButton = document.createElement('button');
+        this._resumeExperienceButton.setAttribute('type', 'button');
         this._resumeExperienceButton.classList.add(options.button_class);
         this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
         this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
