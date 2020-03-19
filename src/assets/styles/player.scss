@@ -262,11 +262,13 @@ $start-button-size: 15vw;
   .romper-text-element {
     background: $romper-background-color;
     color: $white;
+    font-size: xx-large;
     height: 100%;
     margin: 0;
-    padding: 10px;
+    padding: 10%;
     position: absolute;
-    width: 100%;
+    text-align: center;
+    width: 80%;
   }
 
   .romper-inactive {
