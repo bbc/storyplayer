@@ -67,6 +67,10 @@ export default class Controller extends EventEmitter {
         this._createRenderManager();
         this._storyIconRendererCreated = false;
         this._segmentSummaryData = {};
+
+        this._lastPauseTime = Date.now();
+        this._lastHideTime = Date.now();
+        this._paused = false;
     }
 
     _enhancedAnalytics(logData: AnalyticsPayload): mixed {
@@ -99,19 +103,64 @@ export default class Controller extends EventEmitter {
             }
         }
 
+        const sumPauseTime = () => {
+            const pausedTime = Date.now() - this._lastPauseTime;
+            const totalPausedTime = this._segmentSummaryData.pauseTime + pausedTime;
+            this._segmentSummaryData.pauseTime = totalPausedTime;
+        };
+
+        const sumHiddenTime = () => {
+            const hiddenTime = Date.now() - this._lastHideTime;
+            const totalHiddenTime = this._segmentSummaryData.hiddenTime + hiddenTime;
+            this._segmentSummaryData.hiddenTime = totalHiddenTime;
+        };
+
+        if (appendedData.name === AnalyticEvents.names.VIDEO_PAUSE) {
+            this._lastPauseTime = Date.now();
+            this._paused = true;
+        }
+        if (appendedData.name === AnalyticEvents.names.VIDEO_UNPAUSE) {
+            this._paused = false;
+            sumPauseTime();
+        }
+        if (appendedData.name === AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE
+            && appendedData.to === 'hidden') {
+            this._lastHideTime = Date.now();
+            // stop pause time and accrue what has accumulated already
+            if (this._paused) {
+                sumPauseTime();
+            }
+        } else if (appendedData.name === AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE) {
+            // restart pause time if appropriate
+            if (this._paused) {
+                this._lastPauseTime = Date.now();
+            }
+            sumHiddenTime();
+        }
+
         if (appendedData.name === AnalyticEvents.names.START_BUTTON_CLICKED) {
             // log start time and first ne
             this._segmentSummaryData = {
                 startTime: Date.now(),
                 current_narrative_element: appendedData.current_narrative_element,
                 current_representation: appendedData.current_representation,
+                pauseTime: 0,
+                hiddenTime: 0,
             };
+            this._lastPauseTime = Date.now();
+            this._lastHideTime = Date.now();
+            this._paused = false;
         }
 
         if (appendedData.name === AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE
             || appendedData.name === AnalyticEvents.names.STORY_END) {
             // work out and save summary data
-            this._segmentSummaryData.duration = Date.now() - this._segmentSummaryData.startTime;
+            const { startTime, pauseTime, hiddenTime } = this._segmentSummaryData;
+            const duration = Date.now() - startTime;
+            this._segmentSummaryData.duration = duration;
+            this._segmentSummaryData.playingTime = duration - pauseTime - hiddenTime;
+            this._segmentSummaryData.visibleTime = duration - hiddenTime;
+
             if (!this._segmentSummaryData.chapter) {
                 this._segmentSummaryData.chapter = appendedData.from;
             }
@@ -127,9 +176,14 @@ export default class Controller extends EventEmitter {
             if (summaryData.current_representation) {
                 this._analytics(summaryData);
             }
+            this._lastPauseTime = Date.now();
+            this._lastHideTime = Date.now();
+            this._paused = false;
             this._segmentSummaryData = {
                 startTime: Date.now(),
                 chapter: appendedData.to,
+                pauseTime: 0,
+                hiddenTime: 0,
             };
         }
 
@@ -1262,4 +1316,11 @@ export default class Controller extends EventEmitter {
     _handleRendererPreviousButtonEvent: Function;
 
     handleKeys: ?boolean;
+    
+    _lastPauseTime: number;
+    
+    _lastHideTime: number;
+    
+    _paused: boolean;
+
 }
