@@ -118,6 +118,8 @@ export default class Controller extends EventEmitter {
             const summaryData = {
                 type: AnalyticEvents.types.SEGMENT_COMPLETION,
                 name: appendedData.name,
+                from: appendedData.from,
+                to: appendedData.to,
                 data: this._segmentSummaryData,
                 current_narrative_element: appendedData.current_narrative_element,
                 current_representation: appendedData.current_representation,
@@ -518,14 +520,20 @@ export default class Controller extends EventEmitter {
 
     _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
         let oldName = 'null';
+        let oldId = 'null';
         if (oldNarrativeElement) {
+            oldId = oldNarrativeElement.id;
             oldName = oldNarrativeElement.name;
         }
         const logData = {
             type: AnalyticEvents.types.STORY_NAVIGATION,
             name: AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE,
-            from: oldName,
-            to: newNarrativeElement.name,
+            from: oldId,
+            to: newNarrativeElement.id,
+            data: {
+                fromName: oldName,
+                toName: newNarrativeElement.name,
+            },
         };
         this._enhancedAnalytics(logData);
         this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
@@ -1118,6 +1126,8 @@ export default class Controller extends EventEmitter {
         const logData = {
             type: AnalyticEvents.types.STORY_NAVIGATION,
             name: AnalyticEvents.names.STORY_END,
+            from: this._currentNarrativeElement.id,
+            to: 'STORY_END',
         };
         this._enhancedAnalytics(logData);
         logger.warn('Story Ended!');
