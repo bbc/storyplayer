@@ -20,6 +20,7 @@ import { InternalVariableNames } from './InternalVariables';
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { checkDebugPlayout } from './utils';
+import AnalyticsHandler from './AnalyticsHandler';
 
 export const PLACEHOLDER_REPRESENTATION = {
     object_class: 'REPRESENTATION',
@@ -51,14 +52,15 @@ export default class Controller extends EventEmitter {
         this._storyReasonerFactory = storyReasonerFactory;
         this._representationReasoner = representationReasoner;
         this._fetchers = fetchers;
-        this._analytics = analytics;
-        this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
         this._handleVariableChanged = this._handleVariableChanged.bind(this);
         this._handleRendererCompletedEvent = this._handleRendererCompletedEvent.bind(this);
         this._handleRendererNextButtonEvent = this._handleRendererNextButtonEvent.bind(this);
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
+        
+        this._analyticsHandler = new AnalyticsHandler(analytics, this);
+        this._handleAnalytics = this._handleAnalytics.bind(this);
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
@@ -66,130 +68,12 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
-        this._segmentSummaryData = {};
-
-        this._lastPauseTime = Date.now();
-        this._lastHideTime = Date.now();
-        this._paused = false;
     }
 
-    _enhancedAnalytics(logData: AnalyticsPayload): mixed {
-        let repId = logData.current_representation;
-        const renderer = this.getCurrentRenderer();
-        if (repId === undefined && renderer && renderer.getRepresentation()){
-            repId = renderer.getRepresentation().id;
-        }
-        let neId = logData.current_narrative_element;
-        if (neId === undefined) {
-            neId = this.getCurrentNarrativeElement() ?
-                this.getCurrentNarrativeElement().id : 'null';
-        }
-        const appendedData: AnalyticsPayload = {
-            ...logData,
-            current_narrative_element: neId,
-            current_representation: repId,
-        };
-
-        this._handleSegmentSummaries(appendedData);
-        this._analytics(appendedData);
+    _handleAnalytics(logData: AnalyticsPayload): mixed {
+        this._analyticsHandler.handleAnalyticsEvent(logData);
     }
-     
-    _handleSegmentSummaries(appendedData: Object) {
-        if (appendedData.type === AnalyticEvents.types.USER_ACTION) {
-            if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
-                this._segmentSummaryData[appendedData.name] += 1;
-            } else {
-                this._segmentSummaryData[appendedData.name] = 1;
-            }
-        }
-
-        const sumPauseTime = () => {
-            const pausedTime = Date.now() - this._lastPauseTime;
-            const totalPausedTime = this._segmentSummaryData.pauseTime + pausedTime;
-            this._segmentSummaryData.pauseTime = totalPausedTime;
-        };
-
-        const sumHiddenTime = () => {
-            const hiddenTime = Date.now() - this._lastHideTime;
-            const totalHiddenTime = this._segmentSummaryData.hiddenTime + hiddenTime;
-            this._segmentSummaryData.hiddenTime = totalHiddenTime;
-        };
-
-        if (appendedData.name === AnalyticEvents.names.VIDEO_PAUSE) {
-            this._lastPauseTime = Date.now();
-            this._paused = true;
-        }
-        if (appendedData.name === AnalyticEvents.names.VIDEO_UNPAUSE) {
-            this._paused = false;
-            sumPauseTime();
-        }
-        if (appendedData.name === AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE
-            && appendedData.to === 'hidden') {
-            this._lastHideTime = Date.now();
-            // stop pause time and accrue what has accumulated already
-            if (this._paused) {
-                sumPauseTime();
-            }
-        } else if (appendedData.name === AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE) {
-            // restart pause time if appropriate
-            if (this._paused) {
-                this._lastPauseTime = Date.now();
-            }
-            sumHiddenTime();
-        }
-
-        if (appendedData.name === AnalyticEvents.names.START_BUTTON_CLICKED) {
-            // log start time and first ne
-            this._segmentSummaryData = {
-                startTime: Date.now(),
-                current_narrative_element: appendedData.current_narrative_element,
-                current_representation: appendedData.current_representation,
-                pauseTime: 0,
-                hiddenTime: 0,
-            };
-            this._lastPauseTime = Date.now();
-            this._lastHideTime = Date.now();
-            this._paused = false;
-        }
-
-        if (appendedData.name === AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE
-            || appendedData.name === AnalyticEvents.names.STORY_END) {
-            // work out and save summary data
-            const { startTime, pauseTime, hiddenTime } = this._segmentSummaryData;
-            const duration = Date.now() - startTime;
-            this._segmentSummaryData.duration = duration;
-            this._segmentSummaryData.playingTime = duration - pauseTime - hiddenTime;
-            this._segmentSummaryData.visibleTime = duration - hiddenTime;
-
-            if (!this._segmentSummaryData.chapter) {
-                this._segmentSummaryData.chapter = appendedData.from;
-            }
-            const summaryData = {
-                type: AnalyticEvents.types.SEGMENT_COMPLETION,
-                name: appendedData.name,
-                from: appendedData.from,
-                to: appendedData.to,
-                data: this._segmentSummaryData,
-                current_narrative_element: appendedData.current_narrative_element,
-                current_representation: appendedData.current_representation,
-            };
-            if (summaryData.current_representation) {
-                this._analytics(summaryData);
-            }
-            this._lastPauseTime = Date.now();
-            this._lastHideTime = Date.now();
-            this._paused = false;
-            this._segmentSummaryData = {
-                startTime: Date.now(),
-                chapter: appendedData.to,
-                pauseTime: 0,
-                hiddenTime: 0,
-            };
-        }
-
-    }
-
-
+ 
     restart(storyId: string, initialState?: Object = {}) {
         this._reasoner = null;
         this._prepareRenderManagerForRestart();
@@ -426,7 +310,7 @@ export default class Controller extends EventEmitter {
             this._target,
             this._representationReasoner,
             this._fetchers,
-            this._enhancedAnalytics,
+            this._handleAnalytics,
             this._assetUrls,
             this._privacyNotice,
         );
@@ -589,7 +473,7 @@ export default class Controller extends EventEmitter {
                 toName: newNarrativeElement.name,
             },
         };
-        this._enhancedAnalytics(logData);
+        this._handleAnalytics(logData);
         this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     }
 
@@ -1183,7 +1067,7 @@ export default class Controller extends EventEmitter {
             from: this._currentNarrativeElement.id,
             to: 'STORY_END',
         };
-        this._enhancedAnalytics(logData);
+        this._handleAnalytics(logData);
         logger.warn('Story Ended!');
         this.emit(REASONER_EVENTS.STORY_END);
     }
@@ -1283,7 +1167,7 @@ export default class Controller extends EventEmitter {
 
     _analytics: AnalyticsLogger;
 
-    _enhancedAnalytics: AnalyticsLogger
+    _handleAnalytics: AnalyticsLogger
 
     _assetUrls: AssetUrls;
 
@@ -1307,8 +1191,6 @@ export default class Controller extends EventEmitter {
 
     _sessionManager: SessionManager;
 
-    _segmentSummaryData: Object;
-
     _handleRendererCompletedEvent: Function;
 
     _handleRendererNextButtonEvent: Function;
@@ -1317,10 +1199,5 @@ export default class Controller extends EventEmitter {
 
     handleKeys: ?boolean;
     
-    _lastPauseTime: number;
-    
-    _lastHideTime: number;
-    
-    _paused: boolean;
-
+    _analyticsHandler: AnalyticsHandler;
 }
