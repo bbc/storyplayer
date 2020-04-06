@@ -691,10 +691,10 @@ $start-button-size: 15vw;
       border-bottom-width: $romper-button-border;
       cursor: pointer;
       flex: 1 1 0;
-      height: 100%;
+      height: calc(100% - #{(2 * $romper-button-border)});
       margin-bottom: 1%;
       pointer-events: all;
-      width: 100%;
+      width: calc(100% - #{(2 * $romper-button-border)});
     }
 
     .romper-control-selected {
@@ -729,7 +729,6 @@ $start-button-size: 15vw;
 
 .romper-link-icon-container {
   border: $romper-button-border solid $transparent;
-  border-radius: 50%;
   height: 8em;
   margin-bottom: 5px;
   margin-left: auto;
