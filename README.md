@@ -29,7 +29,7 @@ How to develop
 Running a local StoryPlayer with local stories/media
 --------------
 
-* The StoryPlayer code should be placed behind a Web Server, e.g., by running `python -m http.server` in the root directory of the code.
+* The StoryPlayer code should be placed behind a Web Server, e.g., by running `python -m http.server` (python3 only) in the root directory of the code.
 
 * The media can be placed in the `/examples/` folder.  It can be put directly in, or organised into subfolders.
 
