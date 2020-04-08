@@ -9,3 +9,5 @@ package-lock.json
 /examples/*
 
 node_modules/
+*/node_modules/
+storyplayer-electron/node_modules
