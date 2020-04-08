@@ -11,3 +11,4 @@ package-lock.json
 node_modules/
 */node_modules/
 storyplayer-electron/node_modules
+storyplayer-electron/dist
