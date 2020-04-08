@@ -218,19 +218,21 @@ Each of these are described in a little more detail below, with the names of all
 | `STORY_END` | the current (sub) story has ended | UUID of NE just finished | "`END_STORY`" | - |
 
 ### `RENDERER_ACTION`
-| name | meaning | from | to | data |
-| -- | -- | -- | -- | -- |
-| `START_BEHAVIOUR_PHASE_STARTED` | The renderer has started running start behaviours | "not_set" | "not_set" | - |
-| `START_BEHAVIOUR_PHASE_ENDED` | The renderer has finished running start behaviours | "not_set" | "not_set" | - |
-| `COMPLETE_BEHAVIOUR_PHASE_STARTED` | The renderer has started running end behaviours | "not_set" | "not_set" | - |
-| `DURING_BEHAVIOUR_STARTED` | The renderer has started running a during behaviour | behaviour URI | - | - |
-| `SWITCHABLE_REPRESENTATION_SWITCH` | The renderer has changed representation in a Switchable | previous Representation name | new Representation name | - |
-| `VIDEO_PAUSE` | The renderer has received the instruction to pause |"not_set" | "not_set" | - |
-| `VIDEO_UNPAUSE` | The renderer has received the instruction to play |"not_set" | "not_set" | - |
-| `WINDOW_ORIENTATION_CHANGE` | The browser has reported a change in window orientation | "not_set" | `window.orientation` | - |
-| `BROWSER_VISIBILITY_CHANGE` | The browser has reported a change in visibility | "visible" or "hidden" | "hidden" or "visible" | - |
-| `BUTTONS_ACTIVATED` | The renderer has started showing the control bar | "not_set" | "not_set" | - |
-| `BUTTONS_DEACTIVATED` | The renderer has hidden the control bar | "not_set" | "not_set" | - |
+These are events that reflect changes in the renderer.  None of these return anything in the `data` field.
+
+| name | meaning | from | to |
+| -- | -- | -- | -- |
+| `START_BEHAVIOUR_PHASE_STARTED` | The renderer has started running start behaviours | "not_set" | "not_set" |
+| `START_BEHAVIOUR_PHASE_ENDED` | The renderer has finished running start behaviours | "not_set" | "not_set" |
+| `COMPLETE_BEHAVIOUR_PHASE_STARTED` | The renderer has started running end behaviours | "not_set" | "not_set" |
+| `DURING_BEHAVIOUR_STARTED` | The renderer has started running a during behaviour | behaviour URI | - |
+| `SWITCHABLE_REPRESENTATION_SWITCH` | The renderer has changed representation in a Switchable | previous Representation name | new Representation name |
+| `VIDEO_PAUSE` | The renderer has received the instruction to pause |"not_set" | "not_set" |
+| `VIDEO_UNPAUSE` | The renderer has received the instruction to play |"not_set" | "not_set" |
+| `WINDOW_ORIENTATION_CHANGE` | The browser has reported a change in window orientation | "not_set" | `window.orientation` |
+| `BROWSER_VISIBILITY_CHANGE` | The browser has reported a change in visibility | "visible" or "hidden" | "hidden" or "visible" |
+| `BUTTONS_ACTIVATED` | The renderer has started showing the control bar | "not_set" | "not_set" |
+| `BUTTONS_DEACTIVATED` | The renderer has hidden the control bar | "not_set" | "not_set" |
 
 ### `USER_ACTION`
 | name | meaning | from | to | data | notes |
@@ -265,7 +267,7 @@ Each of these are described in a little more detail below, with the names of all
 Segment completion events are events that are fired each time a Narrative Element completes.  They return summary data about user activity during the NE.  This is compiled client-side, so should contain all events.
 
 | name | meaning | from | to |
-| -- | -- | -- | -- | -- |
+| -- | -- | -- | -- |
 | `NARRATIVE_ELEMENT_CHANGE` | A Narrative Element has completed | UUID of completed NE | UUID of next NE |
 | `STORY_END` | The final Narrative Element in a story has completed | UUID of completed NE | `STORY_END` |
 
