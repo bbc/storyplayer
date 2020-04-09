@@ -1,10 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const express = require('express');
 const { createStoriesDirectory }  = require('./utilities');
 
-// create the express server
-const server = express();
 // create the main window variable
 let mainWindow;
 
@@ -28,29 +25,23 @@ app.on('ready', () => {
     // create the stories directory
     const storiesPath = createStoriesDirectory();
 
-    const staticAssetsPath = path.join(__dirname, 'dist');
-    // TODO loop through the stories in here and replace the path
+    // in here we want to fetch the story and then send that data to the renderer process
 
-    // use the stories path
-    server.use(express.static(storiesPath));
-    // serve the other assets
-    server.use(express.static(staticAssetsPath));
-    // Listen for requests
-    server.listen(0, () => {
-        console.log('The server is running');
-        // create the window
-        
-        createWindow();
+    //ipcmain ipcrenderer
 
-        // and load the index.html of the app.
-        mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
+    console.log('The server is running');
+    // create the window
 
-        // Open the DevTools for debugging.
-        mainWindow.webContents.openDevTools();
+    createWindow();
 
-        // focus on the main window
-        mainWindow.focus();
-    });
+    // and load the index.html of the app.
+    mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+    // Open the DevTools for debugging.
+    mainWindow.webContents.openDevTools();
+
+    // focus on the main window
+    mainWindow.focus();
 });
 
 // Quit when all windows are closed.

@@ -29,7 +29,5 @@
     "electron": "^8.2.1",
     "electron-builder": "^22.4.1"
   },
-  "dependencies": {
-    "express": "^4.17.1"
-  }
+  "dependencies": {}
 }
