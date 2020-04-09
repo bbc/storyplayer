@@ -14,10 +14,14 @@
     <script>
         const { ipcRenderer } = require('electron');
 
+        // event listener for story
+        //
         ipcRenderer.on('found-story', (event, story) => {
           console.log(JSON.parse(story));
         });
 
+        // send a get story event;
+        // this will be extended to fetch the story id
         ipcRenderer.send('get-story', 'story');
 
         (function () {
