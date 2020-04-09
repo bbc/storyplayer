@@ -1,6 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { createStoriesDirectory }  = require('./utilities');
+const { createStoriesDirectory, getStory }  = require('./utilities');
 
 // create the main window variable
 let mainWindow;
@@ -10,6 +10,9 @@ const createWindow = () => {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
 
     mainWindow.on('closed',() => {
@@ -22,12 +25,12 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
 
-    // create the stories directory
-    const storiesPath = createStoriesDirectory();
 
-    // in here we want to fetch the story and then send that data to the renderer process
-
-    //ipcmain ipcrenderer
+    ipcMain.on('get-story', (event, arg) => {
+        console.log('arg', arg);
+        const firstStory = getStory();
+        event.reply('found-story', JSON.stringify(firstStory));
+    })
 
     console.log('The server is running');
     // create the window
@@ -36,6 +39,9 @@ app.on('ready', () => {
 
     // and load the index.html of the app.
     mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+    const { webContents } = mainWindow;
+    
 
     // Open the DevTools for debugging.
     mainWindow.webContents.openDevTools();

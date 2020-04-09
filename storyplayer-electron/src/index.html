@@ -12,6 +12,14 @@
     <div id="romper-target"></div>
     <script src="./dist/romper.js"></script>
     <script>
+        const { ipcRenderer } = require('electron');
+
+        ipcRenderer.on('found-story', (event, story) => {
+          console.log(JSON.parse(story));
+        });
+
+        ipcRenderer.send('get-story', 'story');
+
         (function () {
 
             fetch('../../examples/demo1.json')

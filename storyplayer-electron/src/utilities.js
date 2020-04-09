@@ -22,9 +22,37 @@ const createStoriesDirectory = () => {
     return STORIES_PATH;
 };
 
+const checkStoriesExists = () => {
+    return fs.existsSync(STORIES_PATH);
+}
+
+const readFileData = (filePath) => {
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        return JSON.parse(fileBuffer);
+    } catch (error) {
+        console.log(error)
+        return {};
+    }
+}
+
+const getStory = () => {
+    console.log('checking storues');
+    if(checkStoriesExists()) {
+        const files = fs.readdirSync(STORIES_PATH);
+        if(files) {
+            console.log('files', files);
+            const firstStoryPath = path.join(STORIES_PATH, files[0]);
+            return readFileData(firstStoryPath);
+        }
+    };
+}
+
 module.exports = {
     DOCUMENTS_PATH,
     STORIES_PATH,
     justCreatedDirectory,
     createStoriesDirectory,
+    readFileData,
+    getStory
 };
