@@ -37,15 +37,15 @@ const readFileData = (filePath) => {
 }
 
 const getStory = () => {
-    console.log('checking storues');
     if(checkStoriesExists()) {
         const files = fs.readdirSync(STORIES_PATH);
         if(files) {
-            console.log('files', files);
             const firstStoryPath = path.join(STORIES_PATH, files[0]);
             return readFileData(firstStoryPath);
+
         }
     };
+    return {};
 }
 
 module.exports = {

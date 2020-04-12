@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const _require = require('esm')(module);
 const path = require('path');
-const { createStoriesDirectory, getStory }  = require('./utilities');
+const { getStory }  = require('./utilities');
 
 // create the main window variable
 let mainWindow;
@@ -38,11 +39,8 @@ app.on('ready', () => {
     createWindow();
 
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, 'index.html'));
-
-    const { webContents } = mainWindow;
+    mainWindow.loadURL(`file://${path.join(__dirname, 'index.html?debugPlayout=true&shakaDebugLevel=vv&overridePlayoutFormat=DASH')}`);
     
-
     // Open the DevTools for debugging.
     mainWindow.webContents.openDevTools();
 
@@ -58,6 +56,11 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
+
+
+process.once('loaded', () => {
+    global.require = _require
+})
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
