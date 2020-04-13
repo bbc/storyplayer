@@ -39,7 +39,7 @@ app.on('ready', () => {
     createWindow();
 
     // and load the index.html of the app.
-    mainWindow.loadURL(`file://${path.join(__dirname, 'index.html?debugPlayout=true&shakaDebugLevel=vv&overridePlayoutFormat=DASH')}`);
+    mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
     
     // Open the DevTools for debugging.
     mainWindow.webContents.openDevTools();

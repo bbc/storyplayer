@@ -6,21 +6,30 @@
     <meta charset="utf-8">
     <title>Romper Wrapper Demo</title>
     <link href="./dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="./styles.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
-    <h1>StoryPlayer</h1>
-    <div id="romper-target"></div>
+    <h1 class="title" id="title">StoryPlayer</h1>
+    <div id="storyplayer-target"></div>
     <script src="../../dist/romper.js"></script>
     <script>
         const { ipcRenderer } = require('electron');
         const { mediaResolver } = require('./mediaResolver.js');
         const StoryPlayer = window.Romper;
 
+
+        const replaceTitle = (firstStory) => {
+            if(firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
+                const titleElement = document.getElementById('title');
+                titleElement.textContent = firstStory.meta.storyplayer.htmltitle;
+            }
+        };
+
         // start storyPlayer
         const resetStoryPlayer = (config) => {
             let storyPlayer = StoryPlayer.init({
-                target: document.getElementById('romper-target'),
+                target: document.getElementById('storyplayer-target'),
                 staticImageBaseUrl: 'src/assets/images/',
                 analyticsLogger: dataObj => {
                     console.log('ANALYTICS:', dataObj);
@@ -66,8 +75,10 @@
         //
         ipcRenderer.on('found-story', (event, story) => {
             const config = JSON.parse(story);
-            console.log(config);
             resetStoryPlayer(config);
+            console.log(config)
+            const firstStory = config.stories[0];
+            replaceTitle(firstStory);
         });
 
         // send a get story event;
