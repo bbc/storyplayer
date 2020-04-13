@@ -24,17 +24,39 @@ const createStoriesDirectory = () => {
 
 const checkStoriesExists = () => {
     return fs.existsSync(STORIES_PATH);
-}
+};
 
-const readFileData = (filePath) => {
+
+const replaceRelativePath = (fileBuffer) => {
+    try {
+        const experience = JSON.parse(fileBuffer);
+        experience.asset_collections = experience.asset_collections.map(asset => {
+            const newAsset = asset;
+            newAsset.assets = Object.keys(asset.assets).reduce((acc, key) => {
+                acc[key] = acc[key].replace('$$', path.join(STORIES_PATH));
+                return acc;
+            }, {});
+            return newAsset;
+        });
+        return experience;
+    } catch (error) {
+        console.log(error);
+        return {};
+    }
+};
+
+const readFileData = (filePath, replaceFlag = true) => {
     try {
         const fileBuffer = fs.readFileSync(filePath);
+        if(replaceFlag) {
+            return replaceRelativePath(fileBuffer);
+        }
         return JSON.parse(fileBuffer);
     } catch (error) {
         console.log(error)
         return {};
     }
-}
+};
 
 const getStory = () => {
     if(checkStoriesExists()) {
@@ -46,7 +68,7 @@ const getStory = () => {
         }
     };
     return {};
-}
+};
 
 module.exports = {
     DOCUMENTS_PATH,

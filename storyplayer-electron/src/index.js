@@ -28,7 +28,6 @@ app.on('ready', () => {
 
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', (event, arg) => {
-        console.log('arg', arg);
         const firstStory = getStory();
         event.reply('found-story', JSON.stringify(firstStory));
     })
