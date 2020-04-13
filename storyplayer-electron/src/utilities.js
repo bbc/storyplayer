@@ -87,6 +87,8 @@ const readFileData = (filePath) => {
 
 // fetch the story from the storyplayer folder
 // should these be grouped by the storyid?
+// todo first pass, check we have a folder and check that it matches a uuid and then
+// get the name, that is the experience id
 const getStory = () => {
     if(checkStoriesExists()) {
         const files = fs.readdirSync(path.join(STORIES_PATH, 'ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5'), {
