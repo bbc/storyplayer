@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const _require = require('esm')(module);
 const path = require('path');
 const { getStory }  = require('./utilities');
 
@@ -29,12 +28,11 @@ app.on('ready', () => {
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', (event, arg) => {
         const firstStory = getStory();
-        event.reply('found-story', JSON.stringify(firstStory));
+        event.reply('found-story', firstStory);
     })
 
     console.log('The server is running');
     // create the window
-
     createWindow();
 
     // and load the index.html of the app.
@@ -56,10 +54,6 @@ app.on('window-all-closed', () => {
     }
 });
 
-
-process.once('loaded', () => {
-    global.require = _require
-})
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the

@@ -73,11 +73,10 @@
 
         // event listener for story
         //
-        ipcRenderer.on('found-story', (event, story) => {
-            const config = JSON.parse(story);
-            resetStoryPlayer(config);
-            console.log(config)
-            const firstStory = config.stories[0];
+        ipcRenderer.on('found-story', (event, experience) => {
+            resetStoryPlayer(experience);
+            console.log(experience)
+            const firstStory = experience.stories[0];
             replaceTitle(firstStory);
         });
 
