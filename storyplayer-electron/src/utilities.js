@@ -5,6 +5,13 @@ const path = require('path');
 
 const DOCUMENTS_PATH = app.getPath('documents');
 
+const JSON_PATTERN = /\.[json]+$/i;
+// Tells fs to read an utf-8 file.
+const FILE_READ_OPTIONS = {
+    encoding: 'utf-8',
+    withFileTypes: true,
+};
+
 // helper to check we have created a directory.
 const justCreatedDirectory = (dirPath) => {
     if (!fs.existsSync(dirPath)) {
@@ -13,6 +20,8 @@ const justCreatedDirectory = (dirPath) => {
     }
     return false;
 };
+
+
 
 // the path to the stories is in the users documents
 const STORIES_PATH = path.join(DOCUMENTS_PATH, 'storyplayer');
@@ -40,11 +49,13 @@ const getExperienceId = experience => {
 const replaceRelativePath = (experience) => {
     try {
         const newExperience = experience;
+        const experienceId = getExperienceId(experience);
         newExperience.asset_collections = experience.asset_collections.map(asset => {
             const newAsset = asset;
             const { assets } = asset;
             newAsset.assets = Object.keys(assets).reduce((acc, key) => {
-                acc[key] = acc[key].replace('$$', path.join(STORIES_PATH, ));
+                acc[key] = acc[key].replace('$$', path.join(STORIES_PATH, experienceId));
+                console.log(acc)
                 return acc;
             }, assets);
             return newAsset;
@@ -60,12 +71,12 @@ const replaceRelativePath = (experience) => {
 // read the story file or error and return an empty object
 const readFileData = (filePath) => {
     try {
-        const fileBuffer = fs.readFileSync(filePath);
+        const fileBuffer = fs.readFileSync(filePath, FILE_READ_OPTIONS);
         const experience = JSON.parse(fileBuffer);
-        // // todo if we want to replace the path, probably put something in the meta for the first story?
-        // if(replaceFlag) {
-        //     return replaceRelativePath(experience);
-        // }
+        // todo if we want to replace the path, probably put something in the meta for the first story?
+        if(true) {
+            return replaceRelativePath(experience);
+        }
         return experience;
     } catch (error) {
         console.log(error)
@@ -78,9 +89,11 @@ const readFileData = (filePath) => {
 // should these be grouped by the storyid?
 const getStory = () => {
     if(checkStoriesExists()) {
-        const files = fs.readdirSync(STORIES_PATH);
-        if(files) {
-            const firstStoryPath = path.join(STORIES_PATH, files[0]);
+        const files = fs.readdirSync(path.join(STORIES_PATH, 'ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5'), {
+            withFileTypes: true
+        }).filter(fileEnt => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN));
+        if(files && files.length === 1) {
+            const firstStoryPath = path.join(STORIES_PATH, 'ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5', files[0].name);
             return readFileData(firstStoryPath);
         }
     };
