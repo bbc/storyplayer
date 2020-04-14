@@ -9,6 +9,7 @@ let storyPlayer;
 const storyPlayerTarget = document.getElementById('storyplayer-target');
 
 const displayErrorMessage = (error) => {
+    console.log(error);
     const errorElement = document.getElementById('error-message');
     errorElement.textContent = error.error;
 }
@@ -21,10 +22,10 @@ const replaceTitle = (firstStory) => {
 };
 
 const destroyStoryPlayer = () => {
-    storyPlayer = null;
     if(storyPlayer) {
         storyPlayer.reset();
     }
+    storyPlayer = null;
     if(storyPlayerTarget) {
         while (storyPlayerTarget.firstChild) {
             storyPlayerTarget.removeChild(storyPlayerTarget.firstChild);
