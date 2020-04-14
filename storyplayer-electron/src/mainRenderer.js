@@ -59,12 +59,17 @@ ipcRenderer.on('found-story', (event, data) => {
     if (!data || data.error !== undefined) {
         displayErrorMessage(data)
     } else {
-        resetStoryPlayer(data);
         const firstStory = data.stories[0];
         replaceTitle(firstStory);
+        resetStoryPlayer(data);
     }
 });
 
-// send a get story event;
-// this will be extended to fetch the story id
-ipcRenderer.send('get-story', 'story');
+
+
+module.exports = {
+    resetStoryPlayer,
+    replaceTitle,
+    displayErrorMessage,
+}
+

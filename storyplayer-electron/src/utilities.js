@@ -36,6 +36,8 @@ const justCreatedDirectory = async (dirPath) => {
 };
 
 
+const isJSON = (fileEnt) => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN);
+
 
 // the path to the stories is in the users documents
 const STORIES_PATH = path.join(DOCUMENTS_PATH, 'storyplayer');
@@ -78,12 +80,15 @@ const resolveAssetPaths = (experience) => {
 
 
 // read the story file or error and return an empty object
-const readFileData = async (filePath) => {
+const readFileData = async (filePath, resolvePaths = false) => {
     try {
         const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         const experience = JSON.parse(fileBuffer);
         // resolve the paths to the media
-        return resolveAssetPaths(experience);
+        if(resolvePaths) {
+            return resolveAssetPaths(experience);
+        }
+        return experience;
     } catch (error) {
         console.log(error);
         throw new Error(`Could not read file from ${filePath}`);
@@ -93,14 +98,18 @@ const readFileData = async (filePath) => {
 // get all the experience directories we have
 const fetchExperienceDirs = async () =>  { 
     const experienceDirs = await readDir(STORIES_PATH, FILE_TYPES);
-    return experienceDirs.filter(dir => dir.isDirectory() && dir.name.match(UUID_PATTERN));
+    return experienceDirs.filter(dir => dir.isDirectory());
 }   
 
 // fetch the data model for that experience
-const fetchDataModel = async (dirName) => {
-    const filePath = path.join(STORIES_PATH, dirName);
-    const dataModel = await readDir(filePath, FILE_TYPES);
-    return dataModel.filter(fileEnt => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN));
+const fetchDataModel = async (filePath, resolvePaths) => {
+    const storyDirectory = await readDir(filePath, FILE_TYPES);
+    const dataModelFile = storyDirectory.find(isJSON);
+    if(dataModelFile) {
+        const dataModel = await readFileData(path.join(filePath, dataModelFile.name), resolvePaths);
+        return dataModel;
+    }
+    return null;
 }
 
 
@@ -108,19 +117,10 @@ const fetchDataModel = async (dirName) => {
 // should these be grouped by the storyid?
 // todo first pass, check we have a folder and check that it matches a uuid and then
 // get the name, that is the experience id
-const getStory = async () => {
+const getStory = async (directoryName) => {
     try {
-        if (checkStoriesExists()) {
-            const directories = await fetchExperienceDirs();
-            if (directories && directories.length > 0 ) {
-                const dirName = directories[0].name;
-                const [dataModel] = await fetchDataModel(dirName);
-                if (dataModel) {
-                    const firstStoryPath = path.join(STORIES_PATH, dirName, dataModel.name);
-                    return readFileData(firstStoryPath);
-                }
-            }
-        } 
+        const dataModel = await fetchDataModel(path.join(STORIES_PATH, directoryName), true);
+        return dataModel;
         throw new Error('Could not load story');
     } catch (err) {
         console.log(err);
@@ -128,11 +128,36 @@ const getStory = async () => {
     }
 };
 
+const getStoryName = async (storyDir) => {
+    const dataModel = await fetchDataModel(storyDir, false);
+    return dataModel.stories[0].name || 'unknown';
+};
+
+const listStories = async () => {
+    try {
+        if(checkStoriesExists()) {
+            // list directories
+            const storiesDirs = await fetchExperienceDirs();
+            if(storiesDirs && storiesDirs.length > 0) {
+                const storyNames = storiesDirs.map(async (dir) => {
+                    const filePath = path.join(STORIES_PATH, dir.name);
+                    const storyName = await getStoryName(filePath);
+                    return {name: storyName, dirName: dir.name};
+                });
+                return Promise.all(storyNames);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     DOCUMENTS_PATH,
     STORIES_PATH,
     justCreatedDirectory,
     createStoriesDirectory,
     readFileData,
-    getStory
+    getStory,
+    listStories,
 };

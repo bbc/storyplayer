@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { getStory }  = require('./utilities');
+const { getStory, listStories }  = require('./utilities');
 
 // create the main window variable
 let mainWindow;
@@ -11,7 +11,7 @@ const createWindow = () => {
         width: 800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
         }
     });
 
@@ -26,9 +26,15 @@ const createWindow = () => {
 app.on('ready', () => {
 
     // on event get-story we fetch the story and reply
-    ipcMain.on('get-story', async (event,) => {
-        const firstStory = await getStory();
-        event.reply('found-story', firstStory);
+    ipcMain.on('get-story', async (event, data) => {
+        const story = await getStory(data);
+        event.reply('found-story', story);
+    })
+
+
+    ipcMain.on('list-stories', async (event) => {
+        const storiesData = await listStories();
+        event.reply('list-stories-reply', storiesData);
     })
 
     console.log('The server is running');
