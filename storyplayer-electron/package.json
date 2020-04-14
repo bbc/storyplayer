@@ -11,7 +11,7 @@
     "compile": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "dist-all": "electron-builder -mwl"
+    "dist:all": "electron-builder -mwl"
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {

@@ -21,3 +21,11 @@ body {
   height: calc(100vh - 40px);
   width: 100%;
 }
+
+#error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  color: red;
+}

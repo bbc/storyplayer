@@ -91124,6 +91124,8 @@ MediaTypesArray.forEach(function (name) {
 });
 
 var getMediaType = function getMediaType(src) {
+  console.log('SOURCE', src);
+
   if (src.indexOf('.m3u8') !== -1) {
     return MediaTypes.HLS;
   }
@@ -91364,7 +91366,10 @@ function (_BasePlayoutEngine) {
           if (currentTime > start && currentTime < end) {
             validPlayback = true;
           }
-        }
+        } // eslint-disable-next-line no-console
+
+
+        console.log("Media Type: ".concat(this._activePlayer.mediaType));
 
         switch (this._activePlayer.mediaType) {
           case MediaTypes.DASH:
@@ -91779,7 +91784,7 @@ function (_BasePlayoutEngine) {
 
       if (promise !== undefined) {
         promise.then(function () {}).catch(function (error) {
-          _logger.default.warn(error, 'Not got permission to play'); // Auto-play was prevented
+          _logger.default.warn(error, 'DOMPlayotEngine Not got permission to play'); // Auto-play was prevented
 
         });
       }
@@ -91812,7 +91817,7 @@ function (_BasePlayoutEngine) {
             mediaElement.play().then(function () {
               clearInterval(timeoutId);
             }).catch(function (error) {
-              _logger.default.warn(error, 'Not got permission to play'); // Auto-play was prevented
+              _logger.default.warn(error, ' DOMPlayoutEngine set Timer Not got permission to play'); // Auto-play was prevented
 
 
               clearInterval(timeoutId);
@@ -93683,7 +93688,7 @@ function () {
 
       if (promise !== undefined) {
         promise.then(function () {}).catch(function (error) {
-          _logger.default.warn(error, 'Not got permission to play'); // Auto-play was prevented
+          _logger.default.warn(error, 'Media Instance Not got permission to play'); // Auto-play was prevented
 
         });
       }
