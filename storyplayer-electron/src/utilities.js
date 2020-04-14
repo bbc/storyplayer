@@ -18,6 +18,7 @@ const UUID_PATTERN = /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{
 // Tells fs to read an utf-8 file.
 const FILE_READ_OPTIONS = {
     encoding: 'utf-8',
+    withFileTypes: true,
 };
 
 const FILE_TYPES = {
@@ -57,10 +58,8 @@ const getExperienceId = experience => {
     return experience.stories && experience.stories[0].id || 'noId';
 }
 
-// replace $$ in any asset collection with the relative path to the asset
-// we don't necessarily want to do this permanently so we only do it for the story instance on demand
-// this should allow the electron renderer render that path to the asset.
-const replaceRelativePath = (experience) => {
+// prepend path
+const resolveAssetPaths = (experience) => {
     const newExperience = experience;
     const experienceId = getExperienceId(experience);
     newExperience.asset_collections = experience.asset_collections.map(asset => {
@@ -83,7 +82,7 @@ const readFileData = async (filePath) => {
         const experience = JSON.parse(fileBuffer);
         // todo if we want to replace the path, probably put something in the meta for the first story?
         if (true) {
-            return replaceRelativePath(experience);
+            return resolveAssetPaths(experience);
         }
         return experience;
     } catch (error) {
