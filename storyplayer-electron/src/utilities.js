@@ -58,7 +58,7 @@ const getExperienceId = experience => {
     return experience.stories && experience.stories[0].id || 'noId';
 }
 
-// prepend path
+// prepend path if we need to.
 const resolveAssetPaths = (experience) => {
     const newExperience = experience;
     const experienceId = getExperienceId(experience);
@@ -66,7 +66,9 @@ const resolveAssetPaths = (experience) => {
         const newAsset = asset;
         const { assets } = asset;
         newAsset.assets = Object.keys(assets).reduce((acc, key) => {
-            acc[key] = acc[key].replace('$$', path.join(STORIES_PATH, experienceId));
+            if(acc[key].startsWith('./')) {
+                acc[key] = path.join(STORIES_PATH, experienceId, acc[key]);
+            }
             return acc;
         }, assets);
         return newAsset;
@@ -80,11 +82,8 @@ const readFileData = async (filePath) => {
     try {
         const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         const experience = JSON.parse(fileBuffer);
-        // todo if we want to replace the path, probably put something in the meta for the first story?
-        if (true) {
-            return resolveAssetPaths(experience);
-        }
-        return experience;
+        // resolve the paths to the media
+        return resolveAssetPaths(experience);
     } catch (error) {
         console.log(error);
         throw new Error(`Could not read file from ${filePath}`);

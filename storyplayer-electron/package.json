@@ -5,7 +5,6 @@
   "description": "My Electron application description",
   "main": "src/index.js",
   "keywords": [],
-  "author": "BBC",
   "license": "MIT",
   "scripts": {
     "compile": "electron .",
@@ -16,7 +15,7 @@
   "postinstall": "electron-builder install-app-deps",
   "build": {
     "productName": "StoryPlayer",
-    "appId": "com.bbc.storyplayer",
+    "appId": "com.storyplayer",
     "mac": {
       "category": "public.app-category.video",
       "identity": null
