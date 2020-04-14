@@ -1,7 +1,13 @@
 const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
+
+const readFile = util.promisify(fs.readFile);
+const readDir = util.promisify(fs.readdir);
+const hasAccess = util.promisify(fs.stat);
+const mkdir = util.promisify(fs.mkdir);
 
 const DOCUMENTS_PATH = app.getPath('documents');
 
@@ -12,7 +18,6 @@ const UUID_PATTERN = /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{
 // Tells fs to read an utf-8 file.
 const FILE_READ_OPTIONS = {
     encoding: 'utf-8',
-    withFileTypes: true,
 };
 
 const FILE_TYPES = {
@@ -20,11 +25,10 @@ const FILE_TYPES = {
 };
 
 // helper to check we have created a directory.
-const justCreatedDirectory = (dirPath) => {
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, {
-            recursive: true
-        });
+const justCreatedDirectory = async (dirPath) => {
+    const dirExists = await hasAccess(dirPath);
+    if (!dirExists) {
+        await mkdir(dirPath, { recursive: true });
         return true;
     }
     return false;
@@ -44,8 +48,9 @@ const createStoriesDirectory = () => {
 };
 
 // check the stories path exists
-const checkStoriesExists = () => {
-    return fs.existsSync(STORIES_PATH);
+const checkStoriesExists = async () => {
+    const storiesDir = await hasAccess(STORIES_PATH);
+    return storiesDir;
 };
 
 const getExperienceId = experience => {
@@ -72,9 +77,9 @@ const replaceRelativePath = (experience) => {
 
 
 // read the story file or error and return an empty object
-const readFileData = (filePath) => {
+const readFileData = async (filePath) => {
     try {
-        const fileBuffer = fs.readFileSync(filePath, FILE_READ_OPTIONS);
+        const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         const experience = JSON.parse(fileBuffer);
         // todo if we want to replace the path, probably put something in the meta for the first story?
         if (true) {
@@ -88,33 +93,36 @@ const readFileData = (filePath) => {
 };
 
 // get all the experience directories we have
-const fetchExperienceDirs = () => fs.readdirSync(STORIES_PATH, FILE_TYPES)
-    .filter(dir => dir.isDirectory() && dir.name.match(UUID_PATTERN));
+const fetchExperienceDirs = async () =>  { 
+    const experienceDirs = await readDir(STORIES_PATH, FILE_TYPES);
+    return experienceDirs.filter(dir => dir.isDirectory() && dir.name.match(UUID_PATTERN));
+}   
 
 // fetch the data model for that experience
-const fetchDataModel = dirName => fs.readdirSync(path.join(STORIES_PATH, dirName), FILE_TYPES)
-    .filter(fileEnt => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN));
+const fetchDataModel = async (dirName) => {
+    const filePath = path.join(STORIES_PATH, dirName);
+    const dataModel = await readDir(filePath, FILE_TYPES);
+    return dataModel.filter(fileEnt => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN));
+}
 
 
 // fetch the story from the storyplayer folder
 // should these be grouped by the storyid?
 // todo first pass, check we have a folder and check that it matches a uuid and then
 // get the name, that is the experience id
-const getStory = () => {
+const getStory = async () => {
     try {
         if (checkStoriesExists()) {
-            const directories = fetchExperienceDirs();
-            if (directories && directories.length > 1 ) {
-                console.log(directories)
+            const directories = await fetchExperienceDirs();
+            if (directories && directories.length > 0 ) {
                 const dirName = directories[0].name;
-                const [dataModel] = fetchDataModel(dirName);
+                const [dataModel] = await fetchDataModel(dirName);
                 if (dataModel) {
-                    console.log(dataModel)
                     const firstStoryPath = path.join(STORIES_PATH, dirName, dataModel.name);
                     return readFileData(firstStoryPath);
                 }
             }
-        }
+        } 
         throw new Error('Could not load story');
     } catch (err) {
         console.log(err);

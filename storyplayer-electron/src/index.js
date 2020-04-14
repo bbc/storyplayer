@@ -26,8 +26,8 @@ const createWindow = () => {
 app.on('ready', () => {
 
     // on event get-story we fetch the story and reply
-    ipcMain.on('get-story', (event, _) => {
-        const firstStory = getStory();
+    ipcMain.on('get-story', async (event,) => {
+        const firstStory = await getStory();
         event.reply('found-story', firstStory);
     })
 

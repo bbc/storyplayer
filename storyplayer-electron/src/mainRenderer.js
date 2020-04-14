@@ -1,5 +1,6 @@
 const { ipcRenderer } = require('electron');
 const { mediaResolver } = require('./mediaResolver.js');
+const logger = require('./logger')
 
 const StoryPlayer = window.Romper;
 
@@ -21,26 +22,32 @@ const resetStoryPlayer = (config) => {
     const storyPlayer = StoryPlayer.init({
         target: document.getElementById('storyplayer-target'),
         staticImageBaseUrl: 'src/assets/images',
-        analyticsLogger: dataObj => {
-            console.log('ANALYTICS:', dataObj);
+        analyticsLogger: event => {
+            logger.info('ANALYTICS:', event);
         },
-        storyFetcher: id => Promise.resolve().then(() => config.stories.filter(storyObject => storyObject.id === id)[0]
-        ),
         mediaFetcher: mediaResolver({}),
+        
+        storyFetcher: id => Promise.resolve(config.stories.find(story => story.id === id)),
+        
         representationCollectionFetcher: id => Promise.resolve(
-            config.representation_collections.filter(presentationObject => presentationObject.id === id)[0]
-        ).then(presentationObject => (presentationObject || Promise.reject(`no such presentation object: ${  id}`))),
+            config.representation_collections.filter(repCollection => repCollection.id === id)[0]
+        ).then(repCol => repCol || Promise.reject(new Error(`no such presentation object: ${id}`))),
+        
         assetCollectionFetcher: id => Promise.resolve(
-            config.asset_collections.filter(assetCollectionObject => assetCollectionObject.id === id)[0]
-        ).then(assetCollectionObject => assetCollectionObject || Promise.reject(`no such asset collection: ${  id}`)),
+            config.asset_collections.filter(ac => ac.id === id)[0]
+        ).then(ac => ac || Promise.reject(new Error(`no such asset collection: ${id}`))),
+        
         representationFetcher: id => Promise.resolve(
-            config.representations.filter(representationObject => representationObject.id === id)[0]
-        ).then(representationObject => representationObject || Promise.reject(`no such representation: ${  id}`)),
+            config.representations.filter(rep => rep.id === id)[0]
+        ).then(rep => rep || Promise.reject(new Error(`no such representation: ${id}`))),
+
         narrativeElementFetcher: id => Promise.resolve(
-            config.narrative_elements.filter(narrativeElementObject => narrativeElementObject.id === id)[0]
-        ).then(narrativeElementObject => narrativeElementObject || Promise.reject(`no such narrative element: ${  id}`)),
-        subStoryFetcher: id => Promise.resolve(config.stories.find(s => s.narrative_elements.includes(id))[0]
-        ).then(storyObject => storyObject || Promise.reject('no story for narrative element')),
+            config.narrative_elements.filter(ne => ne.id === id)[0]
+        ).then(ne => ne || Promise.reject(new Error(`no such narrative element: ${id}`))),
+
+        subStoryFetcher: id => Promise.resolve(
+            config.stories.find(s => s.narrative_elements.includes(id))[0]
+        ).then(story => story || Promise.reject(new Error('no story for narrative element'))),
     });
     storyPlayer.start(config.stories[0].id);
 }
@@ -48,7 +55,8 @@ const resetStoryPlayer = (config) => {
 
 // event listener for story
 ipcRenderer.on('found-story', (event, data) => {
-    if (data.error !== undefined) {
+    logger.info(data);
+    if (!data || data.error !== undefined) {
         displayErrorMessage(data)
     } else {
         resetStoryPlayer(data);
