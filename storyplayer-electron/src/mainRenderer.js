@@ -4,6 +4,9 @@ const logger = require('./logger')
 
 const StoryPlayer = window.Romper;
 
+let storyPlayer;
+
+const storyPlayerTarget = document.getElementById('storyplayer-target');
 
 const displayErrorMessage = (error) => {
     const errorElement = document.getElementById('error-message');
@@ -17,10 +20,22 @@ const replaceTitle = (firstStory) => {
     }
 };
 
+const destroyStoryPlayer = () => {
+    storyPlayer = null;
+    if(storyPlayer) {
+        storyPlayer.reset();
+    }
+    if(storyPlayerTarget) {
+        while (storyPlayerTarget.firstChild) {
+            storyPlayerTarget.removeChild(storyPlayerTarget.firstChild);
+        }
+    }
+}
+
 // start storyPlayer
-const resetStoryPlayer = (config) => {
-    const storyPlayer = StoryPlayer.init({
-        target: document.getElementById('storyplayer-target'),
+const initializeStoryPlayer = (config) => {
+    storyPlayer = StoryPlayer.init({
+        target: storyPlayerTarget,
         staticImageBaseUrl: 'src/assets/images',
         analyticsLogger: event => {
             logger.info('ANALYTICS:', event);
@@ -59,16 +74,17 @@ ipcRenderer.on('found-story', (event, data) => {
     if (!data || data.error !== undefined) {
         displayErrorMessage(data)
     } else {
+        destroyStoryPlayer();
         const firstStory = data.stories[0];
         replaceTitle(firstStory);
-        resetStoryPlayer(data);
+        initializeStoryPlayer(data);
     }
 });
 
 
 
 module.exports = {
-    resetStoryPlayer,
+    resetStoryPlayer: initializeStoryPlayer,
     replaceTitle,
     displayErrorMessage,
 }
