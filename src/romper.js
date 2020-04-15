@@ -13,6 +13,7 @@ import logger from './logger';
 import { BrowserCapabilities,  BrowserUserAgent, MediaFormats } from './browserCapabilities';
 import { checkWebviewDebug, checkDebugUA } from './utils'
 
+import Package from '../package.json';
 
 // Import Assets for assetUrls object as they may not of been imported in CSS
 import './assets/images/media-play-8x.png';
@@ -106,7 +107,7 @@ module.exports = {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     init: (settings: Settings): ?Controller => {
-        logger.info('StoryPlayer Version: ', STORYPLAYER_VERSION);
+        logger.info('StoryPlayer Version: ', Package.version);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {

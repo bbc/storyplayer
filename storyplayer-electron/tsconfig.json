@@ -3,15 +3,12 @@
         "target": "es5",
         "noImplicitAny": true,
         "sourceMap": true,
-        "esModuleInterop": true,
-        "allowJs": true,
         "moduleResolution": "node",
         "outDir": "dist",
         "baseUrl": ".",
         "typeRoots": [
             "./node_modules/@types"
-        ],
-        "types": ["node"]
+        ]
     },
     "include": [
         "src/**/*"

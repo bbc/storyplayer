@@ -6,9 +6,6 @@ module.exports = {
     "jasmine": true,
     "es6": true
   },
-  "globals": {
-    "STORYPLAYER_VERSION": true,
-  },
   "parser": "babel-eslint",
   "plugins": [
     "babel",
