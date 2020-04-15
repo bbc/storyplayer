@@ -1,6 +1,8 @@
 /* eslint-disable comma-dangle */
 const path = require('path');
+const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const Package = require('./package.json');
 
 const productionBuild = process.env.NODE_ENV === 'production';
 
@@ -47,6 +49,9 @@ const config = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: 'romper.css',
+        }),
+        new webpack.DefinePlugin({
+            STORYPLAYER_VERSION: JSON.stringify(Package.version),
         }),
     ]
 };
