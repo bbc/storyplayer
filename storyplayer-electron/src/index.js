@@ -47,6 +47,12 @@ app.on('ready', () => {
     // Open the DevTools for debugging.
     mainWindow.webContents.openDevTools();
 
+
+    mainWindow.webContents.once('dom-ready', async () => {
+        const storiesData = await listStories();
+        mainWindow.webContents.send('list-stories', storiesData);
+    });
+
     // focus on the main window
     mainWindow.focus();
 });
