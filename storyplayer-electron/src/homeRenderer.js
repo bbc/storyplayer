@@ -1,9 +1,4 @@
 const { ipcRenderer } = require('electron');
-const logger = require('./logger')
-const { displayErrorMessage, replaceTitle, resetStoryPlayer } = require('./mainRenderer');
-
-// ipcRenderer.send('list-stories');
-
 
 const generateButton = (storyName) => {
     const button = document.createElement('button');

@@ -8,12 +8,20 @@ let storyPlayer;
 
 const storyPlayerTarget = document.getElementById('storyplayer-target');
 
+/**
+ * Renders an error message
+ * @param {*} error Error object
+ */
 const displayErrorMessage = (error) => {
     logger.error(error);
     const errorElement = document.getElementById('error-message');
     errorElement.textContent = error.error;
 }
 
+/**
+ * Replaces the title of the page with the story name
+ * @param {*} firstStory parent story
+ */
 const replaceTitle = (firstStory) => {
     if (firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
         const titleElement = document.getElementById('title');
@@ -21,6 +29,9 @@ const replaceTitle = (firstStory) => {
     }
 };
 
+/**
+ * Destroys the storyplayer instance and removes the child nodes from the DOM
+ */
 const destroyStoryPlayer = () => {
     if(storyPlayer) {
         storyPlayer.reset();
@@ -33,8 +44,11 @@ const destroyStoryPlayer = () => {
     }
 }
 
-// start storyPlayer
-const initializeStoryPlayer = (config) => {
+/**
+ * initializes storyplayer 
+ * @param {*} experience Experience Data Model
+ */
+const initializeStoryPlayer = (experience) => {
     storyPlayer = StoryPlayer.init({
         target: storyPlayerTarget,
         staticImageBaseUrl: 'src/assets/images',
@@ -43,29 +57,29 @@ const initializeStoryPlayer = (config) => {
         },
         mediaFetcher: mediaResolver({}),
         
-        storyFetcher: id => Promise.resolve(config.stories.find(story => story.id === id)),
+        storyFetcher: id => Promise.resolve(experience.stories.find(story => story.id === id)),
         
         representationCollectionFetcher: id => Promise.resolve(
-            config.representation_collections.filter(repCollection => repCollection.id === id)[0]
+            experience.representation_collections.filter(repCollection => repCollection.id === id)[0]
         ).then(repCol => repCol || Promise.reject(new Error(`no such presentation object: ${id}`))),
         
         assetCollectionFetcher: id => Promise.resolve(
-            config.asset_collections.filter(ac => ac.id === id)[0]
+            experience.asset_collections.filter(ac => ac.id === id)[0]
         ).then(ac => ac || Promise.reject(new Error(`no such asset collection: ${id}`))),
         
         representationFetcher: id => Promise.resolve(
-            config.representations.filter(rep => rep.id === id)[0]
+            experience.representations.filter(rep => rep.id === id)[0]
         ).then(rep => rep || Promise.reject(new Error(`no such representation: ${id}`))),
 
         narrativeElementFetcher: id => Promise.resolve(
-            config.narrative_elements.filter(ne => ne.id === id)[0]
+            experience.narrative_elements.filter(ne => ne.id === id)[0]
         ).then(ne => ne || Promise.reject(new Error(`no such narrative element: ${id}`))),
 
         subStoryFetcher: id => Promise.resolve(
-            config.stories.find(s => s.narrative_elements.includes(id))[0]
+            experience.stories.find(s => s.narrative_elements.includes(id))[0]
         ).then(story => story || Promise.reject(new Error('no story for narrative element'))),
     });
-    storyPlayer.start(config.stories[0].id);
+    storyPlayer.start(experience.stories[0].id);
 }
 
 
@@ -85,7 +99,8 @@ ipcRenderer.on('found-story', (event, data) => {
 
 
 module.exports = {
-    resetStoryPlayer: initializeStoryPlayer,
+    initializeStoryPlayer,
+    destroyStoryPlayer,
     replaceTitle,
     displayErrorMessage,
 }

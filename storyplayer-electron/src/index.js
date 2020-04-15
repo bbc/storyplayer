@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { getStory, listStories }  = require('./utilities');
+const logger = require('./logger');
 
 // create the main window variable
 let mainWindow;
@@ -37,7 +38,7 @@ app.on('ready', () => {
         event.reply('list-stories-reply', storiesData);
     })
 
-    console.log('The server is running');
+    logger.info('The server is running');
     // create the window
     createWindow();
 
@@ -48,7 +49,7 @@ app.on('ready', () => {
     mainWindow.webContents.openDevTools();
 
 
-    // once the dom is ready we want to pick up the list of stories and send them back    
+    // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
         const storiesData = await listStories();
         mainWindow.webContents.send('list-stories', storiesData);

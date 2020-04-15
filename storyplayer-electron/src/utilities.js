@@ -2,6 +2,7 @@ const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const logger = require('./logger');
 
 
 const readFile = util.promisify(fs.readFile);
@@ -50,7 +51,7 @@ const justCreatedDirectory = async (dirPath) => {
  */
 const createStoriesDirectory = () => {
     if (justCreatedDirectory(STORIES_PATH)) {
-        console.log('created assets folder');
+        logger.info('created assets folder');
     }
     return STORIES_PATH;
 };
@@ -102,7 +103,7 @@ const readFileData = async (filePath) => {
         const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         return JSON.parse(fileBuffer);
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         throw new Error(`Could not read file from ${filePath}`);
     }
 };
@@ -145,7 +146,7 @@ const getStory = async (directoryName) => {
         const dataModel = await fetchDataModel(path.join(STORIES_PATH, directoryName), true);
         return dataModel;
     } catch (err) {
-        console.log(err);
+        logger.error(err);
         return { error: err.message }
     }
 };
@@ -179,7 +180,8 @@ const listStories = async () => {
         }
         throw new Error('No Stories');
     } catch (error) {
-        console.log(error);
+        logger.error(error);
+        return Promise.reject(error);
     }
 }
 
