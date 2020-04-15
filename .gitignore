@@ -13,3 +13,4 @@ node_modules/
 storyplayer-electron/node_modules
 storyplayer-electron/src/electron/
 storyplayer-electron/src/storyplayer
+storyplayer-electron/dist/
