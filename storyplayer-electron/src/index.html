@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<!-- An example of a minimal wrapper for romper -->
+
+<head>
+    <meta charset="utf-8">
+    <title>Romper Wrapper Demo</title>
+    <link href="./dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="./styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div id="home-page">
+        <h1 class="title" id="title">StoryPlayer</h1>
+        <div id="error-message"></div>
+        <div class="home-content">
+            
+            <div class="content-box">
+                <h2>
+                    Terms &amp; Conditions
+                </h2>
+                <div class="terms-content">
+                    TBC
+                </div>
+            </div>
+            <div id="story-selector-container"></div>
+        </div>
+    </div>
+    <div id="storyplayer-target"></div>
+    <script src="./dist/romper.js"></script>
+    <script>
+        require('./mainRenderer.js');
+        require('./homeRenderer.js');
+    </script>
+</body>
+
+</html>

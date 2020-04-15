@@ -7,9 +7,7 @@
   "keywords": [],
   "license": "MIT",
   "scripts": {
-    "watch": "tsc -w",
-    "build": "tsc",
-    "compile": "yarn build  && electron ./dist/src/main.js",
+    "compile": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:all": "electron-builder -mwl"
@@ -27,7 +25,6 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^13.11.1",
     "electron": "^8.2.1",
     "electron-builder": "^22.4.1",
     "esm": "^3.2.25"

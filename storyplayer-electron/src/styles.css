@@ -1,0 +1,72 @@
+body {
+  font-family: system-ui;
+  background: #ededed;
+}
+
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  color: #3cffd5;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  max-height: 40px;
+}
+
+.romper-player {
+  height: calc(100vh - 40px);
+  width: 100%;
+}
+
+#error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  color: red;
+}
+
+.home-page {
+  background-color: #ededed;
+  display: flex;
+  flex-direction: row;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.story-selector {
+  padding: 20px;
+}
+
+.story-button {
+  background-color: #006def;
+  font-size: 0.8rem;
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: normal;
+  height: 2.5rem;
+  letter-spacing: normal;
+  line-height: normal;
+  padding: 0.625rem;
+}
+
+.content-box {
+  border: 1px solid #767676;
+  margin-top: 5vh;
+  max-width: 50vw;
+  padding: 20px;
+}
+
+
+.terms-content {
+  color: #767676;
+  max-height: 50vh;
+  overflow: auto;
+}

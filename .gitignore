@@ -11,6 +11,10 @@ package-lock.json
 node_modules/
 */node_modules/
 storyplayer-electron/node_modules
+<<<<<<< HEAD
 storyplayer-electron/src/electron/
 storyplayer-electron/src/storyplayer
 storyplayer-electron/dist/
+=======
+storyplayer-electron/dist
+>>>>>>> parent of 204fd85... typescript first commit
