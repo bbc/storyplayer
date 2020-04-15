@@ -9,7 +9,7 @@ let storyPlayer;
 const storyPlayerTarget = document.getElementById('storyplayer-target');
 
 const displayErrorMessage = (error) => {
-    console.log(error);
+    logger.error(error);
     const errorElement = document.getElementById('error-message');
     errorElement.textContent = error.error;
 }

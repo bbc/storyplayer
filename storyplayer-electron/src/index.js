@@ -8,8 +8,8 @@ let mainWindow;
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 800,
         webPreferences: {
             nodeIntegration: true,
         }
@@ -48,6 +48,7 @@ app.on('ready', () => {
     mainWindow.webContents.openDevTools();
 
 
+    // once the dom is ready we want to pick up the list of stories and send them back    
     mainWindow.webContents.once('dom-ready', async () => {
         const storiesData = await listStories();
         mainWindow.webContents.send('list-stories', storiesData);

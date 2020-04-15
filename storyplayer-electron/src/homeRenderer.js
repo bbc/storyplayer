@@ -8,9 +8,7 @@ const { displayErrorMessage, replaceTitle, resetStoryPlayer } = require('./mainR
 const generateButton = (storyName) => {
     const button = document.createElement('button');
     button.setAttribute('type', 'button')
-    button.onclick = () => {
-        ipcRenderer.send('get-story', storyName.dirName);
-    }
+    button.onclick = () => ipcRenderer.send('get-story', storyName.dirName);
     button.textContent = storyName.name;
     return button;
 };
@@ -25,7 +23,6 @@ const generateButtons = (data) => {
 
 
 ipcRenderer.on('list-stories', (event, data) => {
-    console.log(data)
     generateButtons(data)
 });
 
