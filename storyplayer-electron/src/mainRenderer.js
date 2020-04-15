@@ -16,7 +16,7 @@ const displayErrorMessage = (error) => {
     logger.error(error);
     const errorElement = document.getElementById('error-message');
     errorElement.textContent = error.error;
-}
+};
 
 /**
  * Replaces the title of the page with the story name
@@ -42,7 +42,8 @@ const destroyStoryPlayer = () => {
             storyPlayerTarget.removeChild(storyPlayerTarget.firstChild);
         }
     }
-}
+};
+
 
 /**
  * initializes storyplayer 
@@ -83,7 +84,9 @@ const initializeStoryPlayer = (experience) => {
 }
 
 
-// event listener for story
+/**
+ * Event listener on finding a story we either error or render the player
+ */
 ipcRenderer.on('found-story', (event, data) => {
     logger.info(data);
     if (!data || data.error !== undefined) {

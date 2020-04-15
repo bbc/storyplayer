@@ -1,5 +1,11 @@
 const { ipcRenderer } = require('electron');
 
+
+
+/**
+ * Creates the button for the story using the name and the directory the story is in
+ * @param {Object} storyName 
+ */
 const generateButton = (storyName) => {
     const button = document.createElement('button');
     button.setAttribute('type', 'button')
@@ -8,7 +14,10 @@ const generateButton = (storyName) => {
     return button;
 };
 
-
+/**
+ * Returns back an array of storyName objects to generate buttons for
+ * @param {Array} data 
+ */
 const generateButtons = (data) => {
     const home = document.getElementById('home');
     data.forEach(async (storyName) => {
