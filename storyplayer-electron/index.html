@@ -5,16 +5,22 @@
 <head>
     <meta charset="utf-8">
     <title>Romper Wrapper Demo</title>
-    <link href="./dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="./storyplayer/romper.css" rel="stylesheet" type="text/css">
     <link href="./styles.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
     <h1 class="title" id="title">StoryPlayer</h1>
-    <div id="storyplayer-target"></div>
     <div id="error-message"></div>
-    <div id="home"></div>
-    <script src="./dist/romper.js"></script>
+    <div id="home">
+
+    </div>
+    <div id="player-container">
+        <div id="storyplayer-target"></div>
+    </div>
+    
+    
+    <script src="./storyplayer/romper.js"></script>
     <script>
         require('./mainRenderer.js');
         require('./homeRenderer.js');
