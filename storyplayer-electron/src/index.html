@@ -10,20 +10,27 @@
 </head>
 
 <body>
-    <div id="home-page">
-        <h1 class="title" id="title">StoryPlayer</h1>
+    <div id="main-content">
+        <div class="navbar">
+            <button id="home-button" class="home-button">Home page</button>
+            <h1 class="title" id="title">StoryPlayer</h1>
+        </div>
         <div id="error-message"></div>
-        <div class="home-content">
-            
-            <div class="content-box">
-                <h2>
-                    Terms &amp; Conditions
-                </h2>
-                <div class="terms-content">
-                    TBC
+        <div id="home-page">
+            <div class="home-content" id="home-content">
+                <div class="content-box">
+                    <h2>
+                        How to Use this Application
+                    </h2>
+                    <div class="terms-content">
+                        <p>On install if the application doesn't create a folder 'storyplayer' in your 'My Documents' you will have to do so manually </p>
+                        <p>The application will read from your my Documents folder, on Windows this is your 'My Documents folder' On MacOS this is simply 'Documents'</p>
+                        <p>Any story you wish to view can be added to this folder. Please ensure the story data model and the media are in the same folder.</p>
+                        <p>Any stories that can be read are displayed below for you to select</p>
+                    </div>
                 </div>
+                <div id="story-selector-container"></div>
             </div>
-            <div id="story-selector-container"></div>
         </div>
     </div>
     <div id="storyplayer-target"></div>

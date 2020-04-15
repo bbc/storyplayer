@@ -22,11 +22,9 @@ const displayErrorMessage = (error) => {
  * Replaces the title of the page with the story name
  * @param {*} firstStory parent story
  */
-const replaceTitle = (firstStory) => {
-    if (firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
-        const titleElement = document.getElementById('title');
-        titleElement.textContent = firstStory.meta.storyplayer.htmltitle;
-    }
+const replaceTitle = (title) => {
+    const titleElement = document.getElementById('title');
+    titleElement.textContent = title;
 };
 
 /**
@@ -44,6 +42,26 @@ const destroyStoryPlayer = () => {
     }
 };
 
+
+
+const hideHomePage = () => {
+    const homePage = document.getElementById('home-page');
+    if(homePage) {
+        homePage.style.display = "none"; 
+    }
+};
+
+
+
+const showHomePage = () => {
+    destroyStoryPlayer();
+    const homePage = document.getElementById('home-page');
+    replaceTitle('Storyplayer');
+    if(homePage) {
+        homePage.style.display = "block"; 
+    }
+};
+document.getElementById("home-button").addEventListener("click", showHomePage); 
 
 /**
  * initializes storyplayer 
@@ -90,11 +108,15 @@ const initializeStoryPlayer = (experience) => {
 ipcRenderer.on('found-story', (event, data) => {
     logger.info(data);
     if (!data || data.error !== undefined) {
-        displayErrorMessage(data)
+        displayErrorMessage(data);
+        showHomePage();
     } else {
         destroyStoryPlayer();
+        hideHomePage();
         const firstStory = data.stories[0];
-        replaceTitle(firstStory);
+        if (firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
+            replaceTitle(firstStory.meta.storyplayer.htmltitle);
+        }
         initializeStoryPlayer(data);
     }
 });

@@ -4,16 +4,18 @@ body {
 }
 
 
-.title {
-  display: flex;
+.navbar {
   align-items: center;
-  justify-content: center;
   background: black;
   color: #3cffd5;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  display: flex;
+  justify-content: center;
   max-height: 40px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  position: relative;
 }
+
 
 .romper-player {
   height: calc(100vh - 40px);
@@ -28,7 +30,9 @@ body {
   color: red;
 }
 
-.home-page {
+.main-content {
+  position: absolute;
+  left: 10px;
   background-color: #ededed;
   display: flex;
   flex-direction: row;
@@ -41,12 +45,23 @@ body {
   align-items: center;
 }
 
-.story-selector {
+.story-selectors {
   padding: 20px;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  flex-basis: 0;
+  flex-wrap: wrap;
+  max-width: 85vw;
 }
 
-.story-button {
+.home-button {
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
   background-color: #006def;
+  border: solid 1px #006def;
+  color: white;
   font-size: 0.8rem;
   font-stretch: normal;
   font-style: normal;
@@ -54,7 +69,47 @@ body {
   height: 2.5rem;
   letter-spacing: normal;
   line-height: normal;
+  margin-right: 20px;
   padding: 0.625rem;
+  min-width: fit-content;
+  margin: 5px;
+}
+
+.story-selectors button {
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+  background-color: #006def;
+  border: solid 1px #006def;
+  color: white;
+  font-size: 0.8rem;
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: normal;
+  height: 2.5rem;
+  letter-spacing: normal;
+  line-height: normal;
+  margin-right: 20px;
+  padding: 0.625rem;
+  min-width: fit-content;
+  width: 190px;
+  margin-top: 20px;
+}
+
+.story-selectors button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+/* Clear floats (clearfix hack) */
+.story-selectors:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Add a background color on hover */
+.story-selectors button:hover {
+  background-color: purple;
 }
 
 .content-box {
