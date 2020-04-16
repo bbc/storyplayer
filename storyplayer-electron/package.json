@@ -1,7 +1,7 @@
 {
   "name": "storyplayer-electron",
   "productName": "storyplayer-electron",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "My Electron application description",
   "main": "src/index.js",
   "keywords": [],
@@ -27,10 +27,10 @@
   "devDependencies": {
     "electron": "^8.2.1",
     "electron-builder": "^22.4.1",
-    "electron-is-dev": "^1.2.0",
     "esm": "^3.2.25"
   },
   "dependencies": {
-    "@bbc/rd-ux-media-resolver": "^3.0.5"
+    "@bbc/rd-ux-media-resolver": "^3.0.5",
+    "electron-is-dev": "^1.2.0"
   }
 }
