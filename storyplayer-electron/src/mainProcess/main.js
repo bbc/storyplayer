@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { getStory, listStories }  = require('./utilities');
 const { createAppMenu } = require('./menu');
@@ -10,9 +10,10 @@ let mainWindow;
 // create the main window
 const createWindow = () => {
     // Create the browser window.
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize
     mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
+        width,
+        height,
         webPreferences: {
             preload: path.join(app.getAppPath(), '../renderers/rendererPreload.js'),
             contextIsolation: true,
@@ -42,7 +43,7 @@ app.on('ready', () => {
     createWindow();
 
     // and load the index.html of the app.
-    mainWindow.loadURL(`file://${path.join(app.getAppPath(), '../templates/index.html')}`);
+    mainWindow.loadURL(`file://${path.join(app.getAppPath(), '../index.html')}`);
     
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
@@ -53,7 +54,6 @@ app.on('ready', () => {
             mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
         });
     });
-    mainWindow.webContents.openDevTools();
     // focus on the main window
     mainWindow.focus();
 });
