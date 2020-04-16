@@ -2,7 +2,7 @@ const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const logger = require('./logger');
+// const logger = require('./logger');
 
 
 const readFile = util.promisify(fs.readFile);
@@ -51,7 +51,7 @@ const justCreatedDirectory = async (dirPath) => {
  */
 const createStoriesDirectory = () => {
     if (justCreatedDirectory(STORIES_PATH)) {
-        logger.info('created assets folder');
+        console.log('created assets folder');
     }
     return STORIES_PATH;
 };
@@ -103,8 +103,8 @@ const readFileData = async (filePath) => {
         const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         return JSON.parse(fileBuffer);
     } catch (error) {
-        logger.error(error);
-        throw new Error(`Could not read file from ${filePath}`);
+        console.error(`Could not read file from ${filePath}`, error);
+        return null;
     }
 };
 
@@ -128,7 +128,7 @@ const fetchDataModel = async (directoryPath, resolvePaths) => {
     const dataModelFile = storyDirectory.find(isJSON);
     if(dataModelFile) {
         const dataModel = await readFileData(path.join(directoryPath, dataModelFile.name));
-        if(resolvePaths) {
+        if(dataModel && resolvePaths) {
             return resolveAssetPaths(dataModel);
         }
         return dataModel;
@@ -146,7 +146,7 @@ const getStory = async (directoryName) => {
         const dataModel = await fetchDataModel(path.join(STORIES_PATH, directoryName), true);
         return dataModel;
     } catch (err) {
-        logger.error(err);
+        console.log(err);
         return { error: err.message }
     }
 };
@@ -158,7 +158,10 @@ const getStory = async (directoryName) => {
  */
 const getStoryName = async (storyDir) => {
     const dataModel = await fetchDataModel(path.join(STORIES_PATH, storyDir), false);
-    return dataModel.stories[0].name || 'unknown';
+    if(dataModel) {
+        return dataModel.stories[0].name || 'unknown';
+    }
+    return null;
 };
 
 /**
@@ -173,14 +176,17 @@ const listStories = async () => {
             if(storiesDirs && storiesDirs.length > 0) {
                 const storyNames = storiesDirs.map(async (dir) => {
                     const storyName = await getStoryName(dir.name);
-                    return {name: storyName, dirName: dir.name};
+                    if(storyName) {
+                        return {name: storyName, dirName: dir.name};
+                    }
+                    return null;
                 });
                 return Promise.all(storyNames);
             }
         }
         throw new Error('No Stories');
     } catch (error) {
-        logger.error(error);
+        console.log(error);
         return Promise.reject(error);
     }
 }

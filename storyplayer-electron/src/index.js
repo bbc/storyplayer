@@ -52,12 +52,13 @@ app.on('ready', () => {
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
         const storiesData = await listStories();
-        mainWindow.webContents.send('list-stories', storiesData);
+        mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
 
         // then on every subsequent reload
         mainWindow.webContents.on('did-frame-finish-load', async (event) => {
+            const refreshedStories = await listStories()
             event.preventDefault();
-            mainWindow.webContents.send('list-stories', storiesData);
+            mainWindow.webContents.send('list-stories', refreshedStories.filter(Boolean));
         });
     });
 
