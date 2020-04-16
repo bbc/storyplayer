@@ -16,9 +16,8 @@ const createWindow = () => {
         height,
         webPreferences: {
             preload: path.join(__dirname, '../renderers/rendererPreload.js'),
-            // contextIsolation: true,
-            // enableRemoteModule: false,
-            nodeIntegration: true,
+            contextIsolation: true,
+            enableRemoteModule: false,
         },
         skipTaskBar: true,
     });
