@@ -1,12 +1,15 @@
 const { ipcRenderer } = require('electron');
 const { mediaResolver } = require('./mediaResolver.js');
+const StoryPlayer = require('./dist/romper');
 const logger = require('./logger')
 
-const StoryPlayer = window.Romper;
 
 let storyPlayer;
 
-const storyPlayerTarget = document.getElementById('storyplayer-target');
+
+const getTargetElement = () => {
+    return document.getElementById('storyplayer-target');
+}
 
 /**
  * Renders an error message
@@ -35,14 +38,28 @@ const destroyStoryPlayer = () => {
         storyPlayer.reset();
     }
     storyPlayer = null;
+    const storyPlayerTarget = getTargetElement();
     if(storyPlayerTarget) {
         while (storyPlayerTarget.firstChild) {
             storyPlayerTarget.removeChild(storyPlayerTarget.firstChild);
         }
     }
+
 };
 
+const hideMainInterface = () => {
+    const mainInterface = document.getElementById('main-interface');
+    if(mainInterface) {
+        mainInterface.style.display = 'none';
+    }
+};
 
+const showMainInterface = () => {
+    const mainInterface = document.getElementById('main-interface');
+    if(mainInterface) {
+        mainInterface.style.display = 'block';
+    }
+}
 
 const hideHomePage = () => {
     const homePage = document.getElementById('main-content');
@@ -51,8 +68,6 @@ const hideHomePage = () => {
     }
 };
 
-
-
 const showHomePage = () => {
     destroyStoryPlayer();
     const homePage = document.getElementById('main-content');
@@ -60,14 +75,16 @@ const showHomePage = () => {
     if(homePage) {
         homePage.style.display = "block"; 
     }
+    hideMainInterface();
 };
-document.getElementById("home-button").addEventListener("click", showHomePage); 
+
 
 /**
  * initializes storyplayer 
  * @param {*} experience Experience Data Model
  */
 const initializeStoryPlayer = (experience) => {
+    const storyPlayerTarget = getTargetElement();
     storyPlayer = StoryPlayer.init({
         target: storyPlayerTarget,
         staticImageBaseUrl: 'src/assets/images',
@@ -101,19 +118,6 @@ const initializeStoryPlayer = (experience) => {
     storyPlayer.start(experience.stories[0].id);
 }
 
-const hideMainInterface = () => {
-    const mainInterface = document.getElementById('main-interface');
-    if(mainInterface) {
-        mainInterface.style.display = 'none';
-    }
-};
-
-const showMainInterface = () => {
-    const mainInterface = document.getElementById('main-interface');
-    if(mainInterface) {
-        mainInterface.style.display = 'block';
-    }
-}
 
 /**
  * Event listener on finding a story we either error or render the player
@@ -137,11 +141,11 @@ ipcRenderer.on('found-story', (event, data) => {
 });
 
 
-
 module.exports = {
     initializeStoryPlayer,
     destroyStoryPlayer,
     replaceTitle,
     displayErrorMessage,
+    showHomePage,
 }
 

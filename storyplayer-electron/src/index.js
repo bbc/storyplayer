@@ -13,7 +13,7 @@ const createWindow = () => {
         width: 1200,
         height: 800,
         webPreferences: {
-            nodeIntegration: true,
+            preload: path.join(app.getAppPath(), 'src','rendererPreload.js'),
         },
         skipTaskBar: true,
     });
@@ -34,12 +34,6 @@ app.on('ready', () => {
         event.reply('found-story', story);
     })
 
-
-    ipcMain.on('list-stories', async (event) => {
-        const storiesData = await listStories();
-        event.reply('list-stories-reply', storiesData);
-    })
-
     logger.info('The server is running');
     // create the window
     createWindow();
@@ -55,14 +49,11 @@ app.on('ready', () => {
 
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
-        const storiesData = await listStories();
-        mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
-
         // then on every subsequent reload
         mainWindow.webContents.on('did-frame-finish-load', async (event) => {
-            const refreshedStories = await listStories()
+            const storiesData = await listStories()
             event.preventDefault();
-            mainWindow.webContents.send('list-stories', refreshedStories.filter(Boolean));
+            mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
         });
     });
 
