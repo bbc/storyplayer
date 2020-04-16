@@ -15,9 +15,10 @@ const createWindow = () => {
         width,
         height,
         webPreferences: {
-            preload: path.join(app.getAppPath(), '../renderers/rendererPreload.js'),
-            contextIsolation: true,
-            enableRemoteModule: false,
+            preload: path.join(__dirname, '../renderers/rendererPreload.js'),
+            // contextIsolation: true,
+            // enableRemoteModule: false,
+            nodeIntegration: true,
         },
         skipTaskBar: true,
     });
@@ -38,12 +39,12 @@ app.on('ready', () => {
         event.reply('found-story', story);
     })
 
-    logger.info('The server is running');
+    logger.info('The server is running at');
     // create the window
     createWindow();
 
     // and load the index.html of the app.
-    mainWindow.loadURL(`file://${path.join(app.getAppPath(), '../index.html')}`);
+    mainWindow.loadURL(`file://${path.join(__dirname, '../index.html')}`);
     
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {

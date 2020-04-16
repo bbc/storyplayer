@@ -2,15 +2,15 @@
   "name": "storyplayer-electron",
   "productName": "storyplayer-electron",
   "version": "0.6.1",
-  "description": "My Electron application description",
+  "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
   "license": "MIT",
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "dist:all": "electron-builder -mwl"
+    "dist": "electron-builder build",
+    "dist:all": "electron-builder build -mwl"
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {
