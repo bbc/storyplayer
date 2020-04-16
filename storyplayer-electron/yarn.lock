@@ -481,6 +481,11 @@ electron-builder@^22.4.1:
     update-notifier "^4.1.0"
     yargs "^15.1.0"
 
+electron-is-dev@^1.2.0:
+  version "1.2.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
+  integrity sha1-LlzqChs8zxyG9XfO53Nj71XesF4=
+
 electron-publish@22.4.1:
   version "22.4.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/electron-publish/-/electron-publish-22.4.1.tgz#a7fcf166786f7d5957f19a70ee8389f219769ba5"

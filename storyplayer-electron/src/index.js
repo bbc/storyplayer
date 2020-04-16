@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { getStory, listStories }  = require('./utilities');
+const { createAppMenu } = require('./menu');
 const logger = require('./logger');
 
 // create the main window variable
@@ -13,7 +14,8 @@ const createWindow = () => {
         height: 800,
         webPreferences: {
             nodeIntegration: true,
-        }
+        },
+        skipTaskBar: true,
     });
 
     mainWindow.on('closed',() => {
@@ -25,7 +27,7 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-
+    createAppMenu();
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
         const story = await getStory(data);
@@ -47,6 +49,8 @@ app.on('ready', () => {
     
     // Open the DevTools for debugging.
     mainWindow.webContents.openDevTools();
+
+
 
 
     // once the dom is ready, request the list of stories.  
@@ -76,6 +80,11 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+// remove the menu bar for the browser window
+app.on('browser-window-created', (e, window) => {
+    // window.setMenu(null);
 });
 
 
