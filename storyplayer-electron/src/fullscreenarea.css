@@ -1,0 +1,76 @@
+body {
+  --interface-side-padding: 20px;
+
+  --videoplayer-max-width: 1280px;
+  --videoplayer-max-height: --videoplayer-max-width * (9 / 16);
+
+  --romper-scrub-track-width: 90%;
+  --romper-button-height: 70px;
+  --romper-buttons-height: 270px;
+  --romper-buttons-max-height: 270px;
+  --romper-buttons-height-fullscreen: 400px;
+  --romper-buttons-max-height-fullscreen: 300px;
+
+  --romper-volumes-bottom: 120px;
+  --romper-volumes-left: 110px;
+  --romper-volumes-height: 10em;
+  --romper-volume-width: 5em;
+
+  --romper-hover-text-size: 25px;
+}
+
+
+
+.fullscreen-parent {
+  height: 100%;
+  padding-bottom: 56.25%;
+  position: relative;
+  width: 100%;
+
+  .fullscreen-container--fullscreen & {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.fullscreen-child {
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+}
+
+.fullscreen-container {
+
+  background-color: --black;
+  height: 100%;
+  margin: 0 auto;
+  min-width: 322px;
+  width: 100%;
+
+  @media all and (min-width: var(--videoplayer-max-width) + (2 * var(--interface-side-padding))) {
+    height: var(--videoplayer-max-height);
+    margin: 0 auto;
+    width: var(--videoplayer-max-width);
+  }
+
+  &--fullscreen {
+    height: 100vh;
+    width: 100vw;
+  }
+}
+
+.fullscreen {
+  background-color: var(--black);
+
+  .rdux-masthead,
+  .taster-offsite-panel,
+  .cookiewarning,
+  .legal-footer {
+    display: none;
+  }
+
+  .main-interface {
+    padding: 0;
+  }
+}

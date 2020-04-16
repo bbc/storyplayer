@@ -7,6 +7,7 @@
     <title>Romper Wrapper Demo</title>
     <link href="./dist/romper.css" rel="stylesheet" type="text/css">
     <link href="./styles.css" rel="stylesheet" type="text/css">
+    <link href="./fullscreenarea.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -33,7 +34,15 @@
             </div>
         </div>
     </div>
-    <div id="storyplayer-target"></div>
+    <div class="main-interface">
+        <div class="fullscreen-container">
+            <div class="fullscreen-parent">
+                <div class="fullscreen-child">
+                    <div id="storyplayer-target"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./dist/romper.js"></script>
     <script>
         require('./mainRenderer.js');

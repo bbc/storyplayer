@@ -10,7 +10,7 @@ body {
   color: #3cffd5;
   display: flex;
   justify-content: center;
-  max-height: 40px;
+  max-height: 50px;
   padding-bottom: 5px;
   padding-top: 5px;
   position: relative;
@@ -18,7 +18,7 @@ body {
 
 
 .romper-player {
-  height: calc(100vh - 40px);
+  height: calc(100vh - 70px);
   width: 100%;
 }
 
@@ -56,23 +56,21 @@ body {
 }
 
 .home-button {
-  padding: 10px 24px; /* Some padding */
-  cursor: pointer; /* Pointer/hand icon */
-  float: left; /* Float the buttons side by side */
   background-color: #006def;
   border: solid 1px #006def;
   color: white;
+  cursor: pointer;
   font-size: 0.8rem;
   font-stretch: normal;
   font-style: normal;
   font-weight: normal;
   height: 2.5rem;
+  left: 10px;
   letter-spacing: normal;
   line-height: normal;
-  margin-right: 20px;
-  padding: 0.625rem;
   min-width: fit-content;
-  margin: 5px;
+  padding: 10px 24px;
+  position: absolute;
 }
 
 .story-selectors button {
