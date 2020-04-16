@@ -14,7 +14,7 @@ const createWindow = () => {
         width: 1200,
         height: 800,
         webPreferences: {
-            preload: path.join(app.getAppPath(), 'src','rendererPreload.js'),
+            preload: path.join(app.getAppPath(), '../renderers/rendererPreload.js'),
             contextIsolation: true,
             enableRemoteModule: false,
         },
@@ -42,7 +42,7 @@ app.on('ready', () => {
     createWindow();
 
     // and load the index.html of the app.
-    mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
+    mainWindow.loadURL(`file://${path.join(app.getAppPath(), '../templates/index.html')}`);
     
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
@@ -53,6 +53,7 @@ app.on('ready', () => {
             mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
         });
     });
+    mainWindow.webContents.openDevTools();
     // focus on the main window
     mainWindow.focus();
 });

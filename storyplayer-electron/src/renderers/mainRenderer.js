@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 const { mediaResolver } = require('./mediaResolver.js');
-const StoryPlayer = require('./dist/romper');
-const logger = require('./logger')
+const StoryPlayer = require('../dist/romper');
+const logger = require('../mainProcess/logger')
 
 
 let storyPlayer;

@@ -76,15 +76,14 @@ const getExperienceId = experience => {
  * Resolved the relative paths to the media with absolute paths
  * @param {Object} experience Experience Data model.
  */
-const resolveAssetPaths = (experience) => {
+const resolveAssetPaths = (experience, directoryPath) => {
     const newExperience = experience;
-    const experienceId = getExperienceId(experience);
     newExperience.asset_collections = experience.asset_collections.map(asset => {
         const newAsset = asset;
         const { assets } = asset;
         newAsset.assets = Object.keys(assets).reduce((acc, key) => {
             if(acc[key].startsWith('./')) {
-                acc[key] = path.join(STORIES_PATH, experienceId, acc[key]);
+                acc[key] = path.join(STORIES_PATH, directoryPath, acc[key]);
             }
             return acc;
         }, assets);
@@ -129,7 +128,7 @@ const fetchDataModel = async (directoryPath, resolvePaths) => {
     if(dataModelFile) {
         const dataModel = await readFileData(path.join(directoryPath, dataModelFile.name));
         if(dataModel && resolvePaths) {
-            return resolveAssetPaths(dataModel);
+            return resolveAssetPaths(dataModel, directoryPath);
         }
         return dataModel;
     }

@@ -34,17 +34,24 @@ const createAppMenu = () => {
                 { role: 'minimize' },
                 { role: 'close' }
             ]
-        }, 
-    ];
-    if (isDevMode) {
-        appMenuTemplate.push({
+        },
+        {
             label: "Debug",
             submenu: [
                 { role: 'forcereload' },
                 { role: 'toggledevtools' },
             ],
-        });
-    }
+        }
+    ];
+    // if (isDevMode) {
+    //     appMenuTemplate.push({
+    //         label: "Debug",
+    //         submenu: [
+    //             { role: 'forcereload' },
+    //             { role: 'toggledevtools' },
+    //         ],
+    //     });
+    // }
     Menu.setApplicationMenu(
         Menu.buildFromTemplate(appMenuTemplate)
     );

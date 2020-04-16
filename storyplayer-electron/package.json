@@ -3,11 +3,11 @@
   "productName": "storyplayer-electron",
   "version": "0.5.1",
   "description": "My Electron application description",
-  "main": "src/index.js",
+  "main": "src/mainProcess/main.js",
   "keywords": [],
   "license": "MIT",
   "scripts": {
-    "compile": "electron .",
+    "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:all": "electron-builder -mwl"
