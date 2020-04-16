@@ -82,11 +82,6 @@ app.on('window-all-closed', () => {
     }
 });
 
-// remove the menu bar for the browser window
-app.on('browser-window-created', (e, window) => {
-    // window.setMenu(null);
-});
-
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
