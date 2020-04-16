@@ -7,6 +7,7 @@ const logger = require('./logger');
 // create the main window variable
 let mainWindow;
 
+// create the main window
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
@@ -14,6 +15,8 @@ const createWindow = () => {
         height: 800,
         webPreferences: {
             preload: path.join(app.getAppPath(), 'src','rendererPreload.js'),
+            contextIsolation: true,
+            enableRemoteModule: false,
         },
         skipTaskBar: true,
     });
@@ -41,12 +44,6 @@ app.on('ready', () => {
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
     
-    // Open the DevTools for debugging.
-    mainWindow.webContents.openDevTools();
-
-
-
-
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {
         // then on every subsequent reload
@@ -56,10 +53,6 @@ app.on('ready', () => {
             mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
         });
     });
-
-
-    
-
     // focus on the main window
     mainWindow.focus();
 });
@@ -73,6 +66,12 @@ app.on('window-all-closed', () => {
     }
 });
 
+
+app.on('web-contents-created', (event, contents) => {
+    contents.on('will-navigate', (e) => {
+        e.preventDefault()
+    });
+});
 
 app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
