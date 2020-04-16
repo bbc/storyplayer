@@ -1,6 +1,19 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  font-family: system-ui;
   background: #ededed;
+  font-family: system-ui;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 
@@ -19,7 +32,7 @@ body {
 
 .romper-player {
   height: calc(100vh - 70px);
-  width: 100%;
+  width: 100vw;
 }
 
 #error-message {
@@ -30,15 +43,14 @@ body {
   color: red;
 }
 
-.main-content {
-  position: absolute;
-  left: 10px;
+#home-page {
   background-color: #ededed;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  max-height: fit-content;
 }
 
-.home-content {
+#content-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -55,7 +67,7 @@ body {
   max-width: 85vw;
 }
 
-.home-button {
+#home-button {
   background-color: #006def;
   border: solid 1px #006def;
   color: white;
@@ -110,7 +122,7 @@ body {
   background-color: purple;
 }
 
-.content-box {
+#instructions {
   border: 1px solid #767676;
   margin-top: 5vh;
   max-width: 50vw;

@@ -53,7 +53,16 @@ app.on('ready', () => {
     mainWindow.webContents.once('dom-ready', async () => {
         const storiesData = await listStories();
         mainWindow.webContents.send('list-stories', storiesData);
+
+        // then on every subsequent reload
+        mainWindow.webContents.on('did-frame-finish-load', async (event) => {
+            event.preventDefault();
+            mainWindow.webContents.send('list-stories', storiesData);
+        });
     });
+
+
+    
 
     // focus on the main window
     mainWindow.focus();

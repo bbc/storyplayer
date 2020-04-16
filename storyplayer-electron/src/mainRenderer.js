@@ -45,7 +45,7 @@ const destroyStoryPlayer = () => {
 
 
 const hideHomePage = () => {
-    const homePage = document.getElementById('home-page');
+    const homePage = document.getElementById('main-content');
     if(homePage) {
         homePage.style.display = "none"; 
     }
@@ -55,7 +55,7 @@ const hideHomePage = () => {
 
 const showHomePage = () => {
     destroyStoryPlayer();
-    const homePage = document.getElementById('home-page');
+    const homePage = document.getElementById('main-content');
     replaceTitle('Storyplayer');
     if(homePage) {
         homePage.style.display = "block"; 
@@ -101,6 +101,19 @@ const initializeStoryPlayer = (experience) => {
     storyPlayer.start(experience.stories[0].id);
 }
 
+const hideMainInterface = () => {
+    const mainInterface = document.getElementById('main-interface');
+    if(mainInterface) {
+        mainInterface.style.display = 'none';
+    }
+};
+
+const showMainInterface = () => {
+    const mainInterface = document.getElementById('main-interface');
+    if(mainInterface) {
+        mainInterface.style.display = 'block';
+    }
+}
 
 /**
  * Event listener on finding a story we either error or render the player
@@ -110,9 +123,11 @@ ipcRenderer.on('found-story', (event, data) => {
     if (!data || data.error !== undefined) {
         displayErrorMessage(data);
         showHomePage();
+        hideMainInterface();
     } else {
         destroyStoryPlayer();
         hideHomePage();
+        showMainInterface();
         const firstStory = data.stories[0];
         if (firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
             replaceTitle(firstStory.meta.storyplayer.htmltitle);

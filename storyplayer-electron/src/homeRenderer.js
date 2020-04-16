@@ -29,6 +29,7 @@ const generateButtons = (data) => {
 
 
 ipcRenderer.on('list-stories', (event, data) => {
+    console.log('data', data);
     generateButtons(data)
 });
 
