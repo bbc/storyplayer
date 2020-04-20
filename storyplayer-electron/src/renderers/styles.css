@@ -36,11 +36,11 @@ body {
 }
 
 #error-message {
-  display: flex;
   align-items: center;
-  justify-content: center;
   background: black;
   color: red;
+  display: flex;
+  justify-content: center;
 }
 
 #home-page {
@@ -51,20 +51,20 @@ body {
 }
 
 #content-container {
+  align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
 }
 
 .story-selectors {
-  padding: 20px;
   display: flex;
+  flex-basis: 0;
   flex-direction: row;
   flex-grow: 1;
-  flex-basis: 0;
   flex-wrap: wrap;
   max-width: 85vw;
+  padding: 20px;
 }
 
 #home-button {
@@ -86,12 +86,11 @@ body {
 }
 
 .story-selectors button {
-  padding: 10px 24px; /* Some padding */
-  cursor: pointer; /* Pointer/hand icon */
-  float: left; /* Float the buttons side by side */
   background-color: #006def;
   border: solid 1px #006def;
   color: white;
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
   font-size: 0.8rem;
   font-stretch: normal;
   font-style: normal;
@@ -100,10 +99,11 @@ body {
   letter-spacing: normal;
   line-height: normal;
   margin-right: 20px;
-  padding: 0.625rem;
-  min-width: fit-content;
-  width: 190px;
   margin-top: 20px;
+  min-width: fit-content;
+  padding: 0.625rem;
+  padding: 10px 24px; /* Some padding */
+  width: 190px;
 }
 
 .story-selectors button:not(:last-child) {
