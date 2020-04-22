@@ -83,7 +83,7 @@ const resolveAssetPaths = (experience, directoryPath) => {
         const { assets } = asset;
         newAsset.assets = Object.keys(assets).reduce((acc, key) => {
             if(acc[key].startsWith('./')) {
-                acc[key] = path.join(STORIES_PATH, directoryPath, acc[key]);
+                acc[key] = path.join(directoryPath, acc[key]);
             }
             return acc;
         }, assets);
