@@ -1,12 +1,31 @@
 StoryPlayer
 ======
 
-R&D's Object-based Media Player
+StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using the [Data Model](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
+
+You may be wondering why the term "_romper_" appears so frequently.  This is historical and is because the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
 How to use
 ----------
 
-_Coming soon_
+StoryPlayer is initiated with an Object containing the following attributes:
+
+* `target` - An HTML element for the player to live in.
+* `staticImageBaseUrl` - The location of some static assets used by the player (specifically image assets to used if not defined in the story)
+* `analyticsLogger` (optional, defaults to logging on the browser console) - A function that processes analytics data Objects; see [below](#analytics).  For example, the function might save the information into a database
+* fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
+  - `storyFetcher` - returns a [`story`](https://github.com/bbc/object-based-media-schema#story)
+  - `narrativeElementFetcher` - returns a [`Narrative Element`](https://github.com/bbc/object-based-media-schema#narrative-element)
+  - `representationCollectionFetcher` - returns a [`Representation Collection`](https://github.com/bbc/object-based-media-schema#representation-collection)
+  - `representationFetcher` - returns a [`Representation`](https://github.com/bbc/object-based-media-schema#representation)
+  - `assetCollectionFetcher` - returns an [`Asset Collection`](https://github.com/bbc/object-based-media-schema#asset-collection)
+* `mediaFetcher`  - A function that takes a URI for some media and returns a URL that can be given, for example, as a `src` attribute for a `<video>` element
+* `privacyNotice` (optional, defaults to null) - A string rendered alongside the start button and start image designed to present a privacy warning to users
+* `saveSession` (optional, defaults to false) - A boolean to say whether or not the player should save state and offer to resume when restarted
+* `handleKeys` (optional, defaults to true) - A boolean to say whether keyboard events should be handled by the player
+* `dataResolver` (optional, defaults to creating one) - contains `get` and `set` functions to get and set the values of the variables that determine the flow of logic of the story (see the [built-in DataResolver](src/resolvers/ObjectDataResolver.js))
+
+The [demo index page](examples/index.html) shows how this might work, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
 How to develop
 --------------
@@ -17,9 +36,9 @@ How to develop
 
 * Pre-requisites.  In order to get a local version of StoryPlayer running, you will need:
     1.  To download the repo
-    1.  Ensure yarn is installed
-    1.  Have a Forge certificate
-    1.  Set up [Artifactory to run locally](https://confluence.dev.bbc.co.uk/display/PRODTOOLS/Set+up+Artifactory+outside+Sandbox)
+    2.  Ensure yarn is installed
+    3.  Have a Forge certificate
+    4.  Set up [Artifactory to run locally](https://confluence.dev.bbc.co.uk/display/PRODTOOLS/Set+up+Artifactory+outside+Sandbox)
 * Run `yarn` to get all your dev dependencies included
 * `demo.html` puts a simple player onto a page
 * `yarn build` will do a single build of the library
