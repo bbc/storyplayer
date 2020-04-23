@@ -8,7 +8,7 @@ You may be wondering why the term "_romper_" appears so frequently.  This is his
 How to use
 ----------
 
-StoryPlayer is initiated with an Object containing the following attributes:
+[romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, which is an Object containing the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * `staticImageBaseUrl` - The location of some static assets used by the player (specifically image assets to used if not defined in the story)
