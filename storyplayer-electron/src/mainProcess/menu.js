@@ -111,7 +111,7 @@ const createAppMenu = () => {
             },
             ],
         }
-    ];
+    ].filter(Boolean);
     // if (isDevMode) {
     //     appMenuTemplate.push({
     //         label: "Debug",
