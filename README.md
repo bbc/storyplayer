@@ -37,7 +37,7 @@ Running a local StoryPlayer with local stories/media
 
 ```
     "assets": {
-        "av_src": ".//my_project/my_nice_vid.mp4"
+        "av_src": "./my_project/my_nice_vid.mp4"
     }
 ```
 
@@ -45,53 +45,6 @@ Running a local StoryPlayer with local stories/media
 
 * Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:8000/examples/index.html?storyjson=my_story.json`.
 
-
-Developing [StoryFormer](https://github.com/bbc/rd-ux-storformer) against a local StoryPlayer instance
---------------
-
-StoryFormer is a tool for authoring experiences.  It includes StoryPlayer for previewing stories, so if you wish to use unpublished StoryPlayer changes within StoryFormer, you will need to follow the steps below (assuming Yarn is being used for dependency management):
-
-1. SSH into the Storyformer Vagrant box with `vagrant ssh`
-1. Navigate to the StoryPlayer directory: `cd ~/workspace/rd-ux-storyplayer`
-1. Run `yarn link` and check you see the following output:
-
-   ```bash
-   [developer@sandbox7 rd-ux-storyplayer]$ yarn link
-   yarn link v1.2.1
-   success Registered "@bbc/storyplayer".
-   info You can now run `yarn link "@bbc/storyplayer"` in the projects where you want to use this module and it will be used instead.
-   ```
-
-1. Navigate back to the Storyformer repo: `cd ~/workspace/rd-ux-storyformer`
-1. Run `yarn link "@bbc/storyplayer"` and verify the command worked:
-
-   ```bash
-   [developer@sandbox7 rd-ux-storyformer]$ yarn link "@bbc/storyplayer"
-   yarn link v1.2.1
-   success Using linked module for "@bbc/storyplayer".
-   ```
-
-1. (Optional) Verify that your `node_modules` is pointing to the correct version of Romper:
-
-       ```bash
-       [developer@sandbox7 rd-ux-storyformer]$ ls -l node_modules/@bbc
-       total 4
-       ... 1 1499 developer 15 Dec  4 11:12 romper -> ../../../rd-ux-storyplayer
-       ```
-
-⚠️ You must run `yarn build` in the Romper directory to make local changes available to repositories using the linked
-version.
-
-⚠️ The Webpack default setting for symlink resolution when building must be disabled:
-
-```javascript
-const config = {
-    resolve: {
-        extensions: ['.js', '.jsx'],
-        symlinks: false, // webpack builds will fail without this line
-    },
-};
-```
 
 Internal Variables
 ------------------
@@ -117,7 +70,7 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 
 Document Object Model
 ---------------------
-The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.
+The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name (excepting those presented with blue text).
 
 ![StoryPlayer DOM](docs/img/storyplayer-dom.png)
 
