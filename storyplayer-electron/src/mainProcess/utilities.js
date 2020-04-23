@@ -65,14 +65,6 @@ const checkStoriesExists = async () => {
 };
 
 /**
- * Returns back the experience Id.
- * @param {*} experience Experience data model
- */
-const getExperienceId = experience => {
-    return experience.stories && experience.stories[0].id || 'noId';
-}
-
-/**
  * Resolved the relative paths to the media with absolute paths
  * @param {Object} experience Experience Data model.
  */
