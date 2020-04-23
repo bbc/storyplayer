@@ -115,12 +115,16 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 * `_location_latitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the up-down dimension, expressed in degrees, and takes values between -90 and 90.  The player records this variable value every 2 seconds.
 
 
+Document Object Model
+---------------------
+The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.
+
+![StoryPlayer DOM](docs/img/storyplayer-dom.png)
+
 Code Components and Data Flow
 -----------------------------
 
-The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this diagram](https://github.com/bbc/object-based-media-schema#story-logic-flow).
-
-This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
+The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this diagram](https://github.com/bbc/object-based-media-schema#story-logic-flow).  This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
 
 ## Story Control
 
