@@ -61,6 +61,18 @@ The returned instance will fire events that can be listened for and handled.  Fo
 
 The [demo index page](examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
+### URL Parameters for Debugging
+Below are the URL parameters that can be used to toggle features in StoryPlayer.  These are primarily related to debugging.
+- overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
+- debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines, and renders scrub bar.
+- inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
+- activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
+- shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
+- disableLookahead - 'true' Stops preloading of next/previous elements
+- addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
+- overridePlayoutFormat - Takes either 'hls' or 'dash' Other values are ignored.
+- cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
+
 How to develop
 --------------
 
@@ -132,7 +144,7 @@ Code Components and Data Flow
 
 The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this diagram](https://github.com/bbc/object-based-media-schema#story-logic-flow).  This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
 
-## Story Control
+### Story Control
 
 Each instance of StoryPlayer is an instance of a `Controller` that is created by `romper.js`.  This creates a `RenderManager`, which handles rendering of content, and two reasoners for determining which content is shown.  The `StoryReasoner` is responsible for evaluating links between Narrative Elements to determine which is taken (the first link in the array whose conditions evaluate to true), while the `RepresentationReasoner` is responsible for determining which Representation is rendered for a given Narrative Element (again, the first Representation in the RepresentationCollection whose conditions evaluate to true).  Both reasoners use a `DataResolver` that is passed in to StoryPlayer (although there is a default that is used if one is not provided); this is essentially the variable store.  Also passed in to StoryPlayer are:
 
@@ -144,10 +156,23 @@ The `Controller` also determines whether the system meets the story requirements
 
 The `RenderManager` is responsible for creating and managing the Renderers that display each Narrative Element.  This involves using the `RepresentationReasoner` to determine which Representation will be used, then using the `RendererFactory` to find a Renderer that is capable of rendering it.  In order to achieve smooth playback, it also creates renderers for current, previous and next Narrative Elements so these are ready to play as soon as the story moves on to the next NarrativeElement (a change in the variable state requires these to be refreshed as the particular representation that should be played depends on the state of the variables).  The `RenderManager` creates a `Player` that all Renderers use, and which is responsible for creating the UI and handling the HTML/DOM that the browser displays.
 
-## Rendering the UI
+#### Resume State
+StoryPlayer uses local storage to record how far a user has got through an experience and the state of their variables.  When they revisit the page they will be given the opportunity to resume from where they were or to restart.  This option can be disabled by initiating StoryPlayer with the `saveSession: false` attribute; in this case the user will always start from the beginning of the story.
+
+The `Controller` creates a `SessionManager` to handle this, which lasts for the duration of the page. When the page is reloaded the `SessionManager` is created again; the controller will check the existing state of the session and give the user options to resume current session or restart and create a new session.
+
+The session state is one of the following enums 
+- ```'NEW'```: There is a new session created.
+- ```'EXISTING'```: There is an existing session that can be resumed.
+- ```'RESUME'```: A Session has been resumed
+- ```'RESTART'```: The session will restart from a fresh.
+
+Note that the session manager handles creating the session and fetching the existing session from the local storage. Handling variables data during the session is handled by the `DataResolver`.
+
+### Rendering the UI
 The `Player` builds the DOM tree for rendering the content and the UI.  It handles the overlay system, which is used to display multiple volume controls, chapter icons (for switching Narrative Elements), Representation icons (for switching Representations in a Switchable Representation).  It manages the Scrub Bar so it is associated with the appropriate video/audio and the rendering of icons to represent branch choices (the `Player` manages the rendering of these, but the logic is controlled from within the Renderer that is handling the Representation with which this behaviour is associated).  The `Player` creates and handles a `PlayoutEngine` that handles changes of AV media; either by handling multiple video elements or by changing the src of a single element.
 
-## Renderer Lifecycle
+### Renderer Lifecycle
 The basic lifecycle of a renderer is shown below:
 
 ![Overview of Renderer Lifecycle](docs/img/renderer_lifecycle.png)
@@ -159,68 +184,23 @@ The diagram below extends the simple overview (above) to show the functions that
 ![Details of Renderer Lifecycle](docs/img/renderer_lifecycle_ext.png)
 
 
-### Behaviours
+#### Behaviours
 [Behaviours](https://github.com/bbc/object-based-media-schema#behaviours) are associated with Representations in the Data Model, and can be run at the start, middle, or end of an Element.  They are handled by the Renderer for the given Representation; this uses a `BehaviourRunner` to run the behaviours.  The BehaviourRunner passes each behaviour to the `BehaviourFactory`; which returns a `Behaviour` that is capable of handling it.  Some (e.g., pause) are generic enough to be handled by their own class for all Renderer types; other behaviours can only be handled by certain Representation types, or need to be handled differently for different Representation types; these are handled by the `BaseBehaviour`, which basically passes responsibility on to the Renderer for the Representation.  Each Renderer has a map that associates functions with the URNs of the behaviours it can handle; the function is called when the behaviour needs to be run and runs a callback when it is completed.  The behaviours are considered complete when all of those which are capable of being run have run their callbacks.
 
-## Interpretation of User Interactions
+### Interpretation of User Interactions
 There is considerable complexity in how user interactions influence the lifecycle.  For example, if a link choice behaviour has been applied to a Representation, what should the Next button on the transport bar do?  The following diagrams are intended to capture how StoryPlayer works.
 
-### Transport controls
+#### Transport controls
 
 ![Next button](docs/img/next_button.png)
 ![Previous button](docs/img/back_button.png)
 ![Seek forward](docs/img/seek_fwd_button.png)
 ![Seek backward](docs/img/seek_back_button.png)
 
-### Interaction with behaviours
+#### Interaction with behaviours
 The variables panel and link choice behaviours both allow for user interaction.  The following diagram shows how this affects the renderer lifecycle in StoryPlayer.
 
 ![Interaction with behaviours](docs/img/behaviour_interaction.png)
-
-
-## URL Parameters
-Below are the URL parameters that can be used to toggle features in StoryPlayer
-- overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
-- debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines, and renders scrub bar.
-- inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
-- activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
-- shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
-- disableLookahead - 'true' Stops preloading of next/previous elements
-- addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
-- overridePlayoutFormat - Takes either 'hls' or 'dash' Other values are ignored.
-- cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
-
-
-## Resume State
-The resume state is stored in local storage. The controller creates a session manager for the duration of the page. When the page is reloaded the session manager is created again. The session manager implements the following interface 
-```
-   _storyId: string; // storyId for the top level story
-
-    sessionState: string; // the current state of the session one of 'RESUME', 'RESTART', 'NEW', 'EXISTING'
-
-    deleteExistingSession: Function; // delete the existing session
-
-    setExistingSession: Function; // set a new session
-
-    checkExistingSession: () => boolean; // check we have existing sessions
-
-    fetchExistingSessionState: () => Promise<?Object>; // fetch the existing session state
-
-    fetchLastVisitedElement: () => Promise<?string>; // fetch the last visited element
-
-    fetchPathHistory: () => Promise<?[string]>; // fetch the path history for the existing session
-
-    setSessionState: Function; // set the session state to be one of  'RESUME', 'RESTART', 'NEW', 'EXISTING',
- ```
-On start the controller will check the existing state of the session and give the user options to resume current session or restart and create a new session. 
-The session state is one of the following enums 
-- ```'NEW'```: There is a new session created.
-- ```'EXISTING'```: There is an existing session that can be resumed.
-- ```'RESUME'```: A Session has been resumed
-- ```'RESTART'```: The session will restart from a fresh.
-
-The session manager handles creating the session and fetching the existing session from the local storage. It does not yet handle storing the session, this is handled by the data resolvers.
-
 
 
 Analytics
