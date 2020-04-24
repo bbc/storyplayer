@@ -11,8 +11,6 @@ How to use
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, which is an Object containing the following attributes:
 
 * `target` - An HTML element for the player to live in.
-* `staticImageBaseUrl` - The location of some static assets used by the player (specifically image assets to used if not defined in the story)
-* `analyticsLogger` (optional, defaults to logging on the browser console) - A function that processes analytics data Objects; see [below](#analytics).  For example, the function might save the information into a database
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
   - `storyFetcher` - returns a [`story`](https://github.com/bbc/object-based-media-schema#story)
   - `narrativeElementFetcher` - returns a [`Narrative Element`](https://github.com/bbc/object-based-media-schema#narrative-element)
@@ -20,10 +18,12 @@ How to use
   - `representationFetcher` - returns a [`Representation`](https://github.com/bbc/object-based-media-schema#representation)
   - `assetCollectionFetcher` - returns an [`Asset Collection`](https://github.com/bbc/object-based-media-schema#asset-collection)
 * `mediaFetcher`  - A function that takes a URI for some media and returns a URL that can be given, for example, as a `src` attribute for a `<video>` element
+* `staticImageBaseUrl` - The location of some static assets used by the player (specifically image assets to used if not defined in the story)
+* `analyticsLogger` (optional, defaults to logging on the browser console) - A function that processes analytics data Objects; see [below](#analytics).  For example, the function might save the information into a database
+* `dataResolver` (optional, defaults to creating one) - contains `get` and `set` functions to get and set the values of the variables that determine the flow of logic of the story (see the [built-in DataResolver](src/resolvers/ObjectDataResolver.js)).  This can be used to hook the player into an external data store
 * `privacyNotice` (optional, defaults to null) - A string rendered alongside the start button and start image designed to present a privacy warning to users
 * `saveSession` (optional, defaults to false) - A boolean to say whether or not the player should save state and offer to resume when restarted
 * `handleKeys` (optional, defaults to true) - A boolean to say whether keyboard events should be handled by the player
-* `dataResolver` (optional, defaults to creating one) - contains `get` and `set` functions to get and set the values of the variables that determine the flow of logic of the story (see the [built-in DataResolver](src/resolvers/ObjectDataResolver.js))
 
 For example, in a Node/React application import the player:
 
@@ -33,10 +33,10 @@ import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer
 
 Initiate it using an Object with the attributes described above:
 ```
-    const playerSettings = {
+    const playerSettingsObject = {
         // an Object including the above attributes
     }
-    this.storyplayer = Romper.init({ playerSettings });
+    this.storyplayer = Romper.init(playerSettingsObject);
 ```
 
 The returned instance will fire events that can be listened for and handled.  For example:
@@ -123,7 +123,7 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 
 Document Object Model
 ---------------------
-The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.
+The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.  The blue `target` node at the root of the tree is the `<div>` that is passed into StoryPlayer when it is initiated.
 
 ![StoryPlayer DOM](docs/img/storyplayer-dom.png)
 
