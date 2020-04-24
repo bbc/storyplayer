@@ -89,7 +89,7 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 
 Document Object Model
 ---------------------
-The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name (excepting those presented with blue text).
+The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.
 
 ![StoryPlayer DOM](docs/img/storyplayer-dom.png)
 
