@@ -25,7 +25,41 @@ How to use
 * `handleKeys` (optional, defaults to true) - A boolean to say whether keyboard events should be handled by the player
 * `dataResolver` (optional, defaults to creating one) - contains `get` and `set` functions to get and set the values of the variables that determine the flow of logic of the story (see the [built-in DataResolver](src/resolvers/ObjectDataResolver.js))
 
-The [demo index page](examples/index.html) shows how this might work, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
+For example, in a Node/React application import the player:
+
+```
+import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
+```
+
+Initiate it using an Object with the attributes described above:
+```
+    const playerSettings = {
+        // an Object including the above attributes
+    }
+    this.storyplayer = Romper.init({ playerSettings });
+```
+
+The returned instance will fire events that can be listened for and handled.  For example:
+
+```
+    // whenever a variable is changed
+    this.storyplayer.on(VARIABLE_EVENTS.VARIABLE_CHANGED, this.handleVariableChange);
+
+    // whenever the user changes to a new Narrative Element
+    this.storyplayer.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+        this.handleNarrativeElementChange);
+
+    // whenever the Controller calculates what elements can come next
+    this.storyplayer.on(REASONER_EVENTS.NEXT_ELEMENTS, this.handleUpcomingChange);
+
+    // the story is started
+    this.storyplayer.on(REASONER_EVENTS.ROMPER_STORY_STARTED, this.handleStoryStart);
+
+    // the story has ended
+    this.storyplayer.on(REASONER_EVENTS.STORY_END, this.handleStoryEnd)
+```
+
+The [demo index page](examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
 How to develop
 --------------
