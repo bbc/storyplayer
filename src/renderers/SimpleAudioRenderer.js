@@ -73,6 +73,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_A,
+            id: this._representation.asset_collections.foreground_id,
             playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
