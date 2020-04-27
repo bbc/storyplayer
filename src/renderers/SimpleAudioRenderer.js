@@ -42,6 +42,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _hasEnded: boolean;
 
+    _backgroundImage: ?HTMLElement;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -65,6 +67,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
         this.renderAudioElement();
+        this._renderBackgroundImage();
 
         this._lastSetTime = 0;
 
@@ -118,8 +121,28 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         super.seekEventHandler(this._inTime);
     }
 
+    _renderBackgroundImage() {
+        logger.info(`Rendering background image for audio representation ${this._representation.id}`);
+        if (this._representation.asset_collections.image) {
+            const assetCollectionId = this._representation.asset_collections.image;
+            this._fetchAssetCollection(assetCollectionId).then((image) => {
+                if (image.assets.image_src) {
+                    return this._fetchMedia(image.assets.image_src);
+                }
+                return Promise.resolve();
+            }).then((imageUrl: string) => {
+                this._backgroundImage = document.createElement('img');
+                this._backgroundImage.className = 'romper-render-image';
+                this._setImageVisibility(false);
+                this._backgroundImage.src = imageUrl;
+                this._target.appendChild(this._backgroundImage);
+            }).catch((err) => { logger.error(err, 'Notfound'); });
+        }
+    }
+
     start() {
         super.start();
+        this._setImageVisibility(true);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -139,6 +162,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     end() {
         super.end();
+        this._setImageVisibility(false);
         this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
@@ -199,6 +223,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
+    // show/hide the background image
+    _setImageVisibility(visible: boolean) {
+        if (this._backgroundImage) this._backgroundImage.style.opacity = visible ? '1' : '0';
+    }
+
     populateAudioElement(mediaUrl: string, loop: ?boolean) {
         if (this._destroyed) {
             logger.warn('trying to populate audio element that has been destroyed');
@@ -233,6 +262,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this.end();
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
+        if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
 
         super.destroy();
     }
