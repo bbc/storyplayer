@@ -8,7 +8,7 @@ You may be wondering why the term "_romper_" appears so frequently.  This is his
 How to use
 ----------
 
-[romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, which is an Object containing the following attributes:
+[romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
@@ -25,7 +25,7 @@ How to use
 * `saveSession` (optional, defaults to false) - A boolean to say whether or not the player should save state and offer to resume when restarted
 * `handleKeys` (optional, defaults to true) - A boolean to say whether keyboard events should be handled by the player
 
-For example, in a Node/React application import the player:
+For example, in a React application import the player:
 
 ```
 import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
