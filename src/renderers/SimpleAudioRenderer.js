@@ -122,9 +122,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     _renderBackgroundImage() {
+        // eslint-disable-next-line max-len
         logger.info(`Rendering background image for audio representation ${this._representation.id}`);
-        if (this._representation.asset_collections.image) {
-            const assetCollectionId = this._representation.asset_collections.image;
+        if (this._representation.asset_collections.background_image) {
+            const assetCollectionId = this._representation.asset_collections.background_image;
             this._fetchAssetCollection(assetCollectionId).then((image) => {
                 if (image.assets.image_src) {
                     return this._fetchMedia(image.assets.image_src);

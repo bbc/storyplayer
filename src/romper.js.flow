@@ -78,7 +78,7 @@ export type Representation = {
     asset_collections: {
         foreground_id?: string,
         background_ids?: Array<string>,
-        image?: string,
+        background_image?: string,
         icon?: {
             default_id: string,
             active_id?: string,
