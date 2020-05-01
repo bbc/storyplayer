@@ -26,7 +26,6 @@ export default class PauseBehaviour extends BaseBehaviour {
     }
 
     handleTimeout() {
-        this._renderer.setInPause(false);
         this.timerHandle = null;
         this._handleDone();
     }

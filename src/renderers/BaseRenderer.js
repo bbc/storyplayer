@@ -254,7 +254,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _runStartBehaviours() {
-        console.log('ANDY running start behaviours');
         this._behaviourRunner = this._representation.behaviours ?
             new BehaviourRunner(this._representation.behaviours, this) :
             null;
@@ -1206,7 +1205,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
-        console.log('ANDY apply show image', behaviour);
         const behaviourAssetCollectionMappingId = behaviour.image;
         const assetCollectionId =
             this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
@@ -1214,7 +1212,6 @@ export default class BaseRenderer extends EventEmitter {
             this._fetchAssetCollection(assetCollectionId).then((image) => {
                 if (image.assets.image_src) {
                     this._overlayImage(image.assets.image_src, behaviour.id);
-                    console.log('ANDY applying callback');
                     callback();
                 }
             });
@@ -1343,7 +1340,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // the renderer is waiting in an infinite pause behaviour
     setInPause(paused: boolean) {
-        console.log('ANDY in pause', paused);
         this._inPauseBehaviourState = paused;
     }
 

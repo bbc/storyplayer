@@ -114,7 +114,7 @@ export default class RenderManager extends EventEmitter {
                 const choiceTime = rend.getChoiceTime();
                 const { currentTime } = rend.getCurrentTime();
                 if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
-                    logger.info('Next button clicked during infinite start pause - starting element');
+                    logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
                     rend.setInPause(false);
                     rend.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
                 }
