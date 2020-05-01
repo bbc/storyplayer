@@ -31,6 +31,14 @@ const getBehaviourEndTime = (behaviour: Object) => {
     return undefined;
 }
 
+export const RENDERER_PHASES = {
+    CONSTRUCTED: 'CONSTRUCTED',
+    START: 'START',
+    MAIN: 'MAIN',
+    END: 'END',
+    ENDED: 'ENDED',
+};
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
 
@@ -136,6 +144,10 @@ export default class BaseRenderer extends EventEmitter {
 
     _setInTime: Function;
 
+    _inPauseBehaviourState: boolean;
+
+    phase: string;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -223,10 +235,13 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
         this._loopCounter = 0;
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        this._inPauseBehaviourState = false;
     }
 
     willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
+        this.phase = RENDERER_PHASES.START;
 
         this._runStartBehaviours();
 
@@ -239,6 +254,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _runStartBehaviours() {
+        console.log('ANDY running start behaviours');
         this._behaviourRunner = this._representation.behaviours ?
             new BehaviourRunner(this._representation.behaviours, this) :
             null;
@@ -269,6 +285,7 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
+        this.phase = RENDERER_PHASES.MAIN;
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
@@ -286,6 +303,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+        this.phase = RENDERER_PHASES.ENDED;
         this._player.disconnectScrubBar(this);
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
@@ -548,6 +566,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this.phase = RENDERER_PHASES.END;
         this._hasEnded = true;
         this._timer.pause();
         if (!this._linkBehaviour ||
@@ -1187,6 +1206,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
+        console.log('ANDY apply show image', behaviour);
         const behaviourAssetCollectionMappingId = behaviour.image;
         const assetCollectionId =
             this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
@@ -1194,6 +1214,7 @@ export default class BaseRenderer extends EventEmitter {
             this._fetchAssetCollection(assetCollectionId).then((image) => {
                 if (image.assets.image_src) {
                     this._overlayImage(image.assets.image_src, behaviour.id);
+                    console.log('ANDY applying callback');
                     callback();
                 }
             });
@@ -1318,6 +1339,16 @@ export default class BaseRenderer extends EventEmitter {
 
     deleteTimeEventListener(listenerId: string) {
         this._timer.deleteTimeEventListener(listenerId);
+    }
+
+    // the renderer is waiting in an infinite pause behaviour
+    setInPause(paused: boolean) {
+        console.log('ANDY in pause', paused);
+        this._inPauseBehaviourState = paused;
+    }
+
+    getInPause(): boolean {
+        return this._inPauseBehaviourState;
     }
 
     seekEventHandler(inTime: number) {
