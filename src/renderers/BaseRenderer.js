@@ -1191,12 +1191,19 @@ export default class BaseRenderer extends EventEmitter {
         const assetCollectionId =
             this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
         if (assetCollectionId) {
-            this._fetchAssetCollection(assetCollectionId).then((image) => {
-                if (image.assets.image_src) {
-                    this._overlayImage(image.assets.image_src, behaviour.id);
+            this._fetchAssetCollection(assetCollectionId)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        this._overlayImage(imageUrl, behaviour.id);
+                    }
                     callback();
-                }
-            });
+                });
         }
     }
 
