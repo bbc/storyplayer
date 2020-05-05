@@ -1,10 +1,10 @@
 /build
 /flow-typed
-/node_modules
-/dist
+node_modules
+dist
 npm-debug.log
 yarn-error.log
 package-lock.json
 .DS_Store
-/examples/*
-storyplayer-electron/dist/
+examples/*
+
