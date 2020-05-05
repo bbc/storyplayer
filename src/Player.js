@@ -1332,7 +1332,7 @@ class Player extends EventEmitter {
             name: AnalyticEvents.names[userEventName],
             from: fromId == null ? 'not_set' : fromId,
             to: toId == null ? 'not_set' : toId,
-            information: JSON.stringify(information),
+            data: information,
         };
         this._analytics(logData);
     }
