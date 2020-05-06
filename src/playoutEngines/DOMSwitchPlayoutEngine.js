@@ -236,6 +236,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     })
                     // Below causes the video buffer to be cleared and hlsjs then
                     // repopulates the buffer solving weird issues.
+                    // eslint-disable-next-line no-self-assign
                     rendererPlayoutObj._hls.currentLevel = rendererPlayoutObj._hls.currentLevel
                 }
             }
@@ -332,6 +333,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if(mediaObj.loop) {
             // rendererPlayoutObj.mediaElement.loop = true;
             super.setLoopAttribute(rendererId, mediaObj.loop, rendererPlayoutObj.mediaElement);
+        }
+        if (mediaObj.inTime) {
+            rendererPlayoutObj.mediaElement.currentTime = mediaObj.inTime;
         }
 
         if (mediaObj.subs_url) {
@@ -449,11 +453,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 case MediaTypes.HLS:
                     if (this._useHlsJs) {
                         // Using HLS.js
-                        rendererPlayoutObj._hls.config = Object.assign(
-                            {},
-                            rendererPlayoutObj._hls.config,
-                            this._activeConfig.hls,
-                        );
+                        rendererPlayoutObj._hls.config = {
+                            
+                            ...rendererPlayoutObj._hls.config,
+                            ...this._activeConfig.hls,
+                        };
                         if(this._debugPlayout) {
                             allHlsEvents.forEach((e) => {
                                 rendererPlayoutObj._hls.on(
@@ -584,11 +588,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 case MediaTypes.HLS:
                     if (this._useHlsJs) {
                         // Using HLS.js
-                        rendererPlayoutObj._hls.config = Object.assign(
-                            {},
-                            rendererPlayoutObj._hls.config,
-                            this._inactiveConfig.hls,
-                        );
+                        rendererPlayoutObj._hls.config = {
+                            
+                            ...rendererPlayoutObj._hls.config,
+                            ...this._inactiveConfig.hls,
+                        };
                         // remove the event listeners
                     }
                     break;

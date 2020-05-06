@@ -136,11 +136,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        // set timer to sync mode until really ready
+        this._timer.setSyncing(true);
         const setStartToInTime = () => {
             if (this._playoutEngine.getCurrentTime(this._rendererId) < this._inTime) {
                 logger.warn('video not synced to in time, resetting');
                 this.setCurrentTime(0);
             }
+            this._timer.setSyncing(false);
             this._playoutEngine.off(this._rendererId, 'playing', setStartToInTime);
         };
         this._playoutEngine.on(this._rendererId, 'playing', setStartToInTime);
@@ -189,19 +192,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } catch (e) {
             logger.info(e);
         }
-    }
-
-    // allow for clip trimming
-    addTimeEventListener(
-        listenerId: string,
-        startTime: number,
-        startCallback: Function,
-        endTime: ?number,
-        clearCallback: ?Function,
-    ) {
-        super.addTimeEventListener(
-            listenerId, (startTime + this._inTime), startCallback, endTime, clearCallback,
-        );
     }
 
     renderVideoElement() {
@@ -253,7 +243,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
             this._playoutEngine.queuePlayout(this._rendererId, {
                 url: mediaUrl,
                 loop,
-                id
+                id,
+                inTime: this._inTime,
             });
         }
     }

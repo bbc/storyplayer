@@ -6,7 +6,7 @@ import type {
     RepresentationChoice, AssetUrls,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
-import BaseRenderer from './renderers/BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';
 import type { StoryPathItem } from './StoryPathWalker';
 import StoryIconRenderer from './renderers/StoryIconRenderer';
@@ -113,7 +113,12 @@ export default class RenderManager extends EventEmitter {
                 const rend = this._currentRenderer;
                 const choiceTime = rend.getChoiceTime();
                 const { currentTime } = rend.getCurrentTime();
-                if (choiceTime > 0 && currentTime < choiceTime) {
+                if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
+                    logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
+                    rend.setInPause(false);
+                    rend.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+                }
+                else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
                     rend.setCurrentTime(choiceTime - 0.25);
                 } else if (rend.hasVariablePanelBehaviour()
@@ -204,9 +209,9 @@ export default class RenderManager extends EventEmitter {
         } else {
             // pause the timer for the current representation
             if (this._isPlaying) {
-                if (this._currentRenderer) this._currentRenderer.play();
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasEnded()) {
+                    if (this._currentRenderer) this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
             }

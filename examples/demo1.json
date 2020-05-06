@@ -233,7 +233,8 @@
             },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
+                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
+                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
             }
         },
         {
@@ -245,7 +246,8 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "https://rdux.files.bbci.co.uk/romper/step2.m4v"
+                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
+                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
             }
         },
         {
@@ -257,7 +259,8 @@
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
+                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
+                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
             }
         }
     ]

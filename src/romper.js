@@ -10,7 +10,8 @@ import RepresentationReasonerFactory from './RepresentationReasoner';
 import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
-import { BrowserCapabilities,  BrowserUserAgent } from './browserCapabilities';
+import { BrowserCapabilities,  BrowserUserAgent, MediaFormats } from './browserCapabilities';
+import { checkWebviewDebug, checkDebugUA } from './utils'
 
 import Package from '../package.json';
 
@@ -41,8 +42,60 @@ const DEFAULT_SETTINGS = {
     },
     staticImageBaseUrl: '/dist/images',
     privacyNotice: null,
-    saveSession: true,
+    saveSession: false,
+    handleKeys: true,
 };
+
+// Limited Debugging for iOS webviews
+if(checkWebviewDebug()) {
+    document.getElementById('debug-div').classList.add("debug-div-shown");
+
+    /* eslint-disable */
+    if (typeof console  != "undefined")
+    if (typeof console.log != 'undefined') {
+        console.log = console.log;
+    } else {
+        console.olog = function() {};
+    }
+
+    console.log = function(...args) {
+        console.olog(args);
+        document.getElementById('debug-div').innerHTML += ('<p>' + args.join(" | ") + '</p>');
+    };
+    console.error = console.debug = console.info =  console.log
+
+
+    window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 1: ' + errorMsg + '</p>');
+        return false;
+    }
+    window.addEventListener("error", function (e) {
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 2: ' + e.error.message + '</p>');
+        return false;
+    })
+    window.addEventListener('unhandledrejection', function (e) {
+        document.getElementById('debug-div').innerHTML += ('<p> ERROR 3: ' + e.reason.message + '</p>');
+    })
+    /* eslint-enable */
+}
+
+if(checkDebugUA()) {
+    document.getElementById('debug-div').classList.add("debug-div-shown");
+    document.getElementById('debug-div').innerHTML += `<h3>platform</h3>`
+        + `<p>${window.navigator.platform}</p>`
+        + `<h3>ua</h3>`
+        + `<p>${window.navigator.userAgent}</p>`
+        + `<h3>HLS Support</h3>`
+        + `${BrowserCapabilities.hlsSupport()}`
+        + `<h3>HLS.js Support</h3>`
+        + `${BrowserCapabilities.hlsJsSupport()}`
+        + `<h3>Dash Support</h3>`
+        + `${BrowserCapabilities.dashSupport()}`
+        + `<h3>Chosen Format</h3>`
+        + `${MediaFormats.getFormat()}`
+        + `<h3>Chosen Playout</h3>`
+        + `${MediaFormats.getPlayoutEngine()}`
+}
 
 module.exports = {
     RESOLVERS: {
@@ -55,7 +108,7 @@ module.exports = {
     VARIABLE_EVENTS,
     init: (settings: Settings): ?Controller => {
         logger.info('StoryPlayer Version: ', Package.version);
-        const mergedSettings = Object.assign({}, DEFAULT_SETTINGS, settings);
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
             logger.info('No data resolver passed to romper - creating one');
@@ -96,6 +149,7 @@ module.exports = {
             assetUrls,
             mergedSettings.privacyNotice,
             mergedSettings.saveSession,
+            mergedSettings.handleKeys,
         );
     },
 };

@@ -7,6 +7,7 @@ $romper-buttons-max-height: 4em;
 $romper-hover-text-size: 1.53em;
 $romper-button-padding: 4px;
 $romper-button-border: 4px;
+$start-button-size: 15vw;
 
 .romper-media-element-queued {
   display: none;
@@ -261,11 +262,13 @@ $romper-button-border: 4px;
   .romper-text-element {
     background: $romper-background-color;
     color: $white;
+    font-size: xx-large;
     height: 100%;
     margin: 0;
-    padding: 10px;
+    padding: 10%;
     position: absolute;
-    width: 100%;
+    text-align: center;
+    width: 80%;
   }
 
   .romper-inactive {
@@ -502,6 +505,13 @@ $romper-button-border: 4px;
       justify-content: center;
       width: 100%;
 
+      &.romper-muted {
+        .romper-volume-level,
+        .romper-volume-range {
+          opacity: 0.4;
+        }
+      }
+
       .romper-control-line {
         display: inline-flex;
       }
@@ -638,20 +648,22 @@ $romper-button-border: 4px;
     &.fullscreen-icons {
       background: none;
       display: grid;
+      grid-auto-columns: 1fr;
       grid-auto-flow: column;
       height: 100%;
       padding: 0;
       width: 100%;
 
       &.tworow {
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: 50% 50%;
       }
 
       &.threerow {
-        grid-template-rows: 1fr 1fr 1fr;
+        grid-template-rows: 33% 33% 33%;
       }
 
-      .romper-link-icon-container {
+      .romper-link-icon-container,
+      .romper-text-link-container {
         height: 100%;
         margin: 0;
         width: 100%;
@@ -679,10 +691,10 @@ $romper-button-border: 4px;
       border-bottom-width: $romper-button-border;
       cursor: pointer;
       flex: 1 1 0;
-      height: 100%;
+      height: calc(100% - #{(2 * $romper-button-border)});
       margin-bottom: 1%;
       pointer-events: all;
-      width: 100%;
+      width: calc(100% - #{(2 * $romper-button-border)});
     }
 
     .romper-control-selected {
@@ -717,12 +729,20 @@ $romper-button-border: 4px;
 
 .romper-link-icon-container {
   border: $romper-button-border solid $transparent;
-  border-radius: 50%;
   height: 8em;
   margin-bottom: 5px;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
+
+  img {
+    height: 80%;
+    margin-left: 10%;
+    margin-top: 10%;
+    object-fit: contain;
+    object-position: center;
+    width: 80%;
+  }
 }
 
 .romper-text-link-container {
@@ -742,13 +762,13 @@ $romper-button-border: 4px;
 .romper-player > .romper-gui {
 
   .romper-start-button {
-    bottom: calc(50% - 85px);
+    bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
-    height: 170px;
-    left: calc(50% - 85px);
+    height: $start-button-size;
+    left: calc(50% - #{(0.5 * $start-button-size)});
     margin: 0;
     position: absolute;
-    width: 170px;
+    width: $start-button-size;
     z-index: 101;
 
     &:hover {
@@ -763,17 +783,21 @@ $romper-button-border: 4px;
       background-color: $transparent;
       border: 1px solid $white;
       border-radius: 50%;
-      height: 100px;
+      height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
-      width: 100px;
+      max-height: 170px;
+      max-width: 170px;
+      width: 0.75 * $start-button-size;
     }
 
     .romper-start-button-icon-div {
-      height: 100px; // 40px;
-      margin-left: 15px; // 37px;
-      margin-top: 0; //30px;
-      width: 80px; // 33px;
+      height: 0.75 * $start-button-size;
+      margin-left: auto;
+      margin-top: 0;
+      max-height: 170px;
+      max-width: 100px;
+      width: 0.75 * 0.8 * $start-button-size;
     }
 
     .romper-start-button-text-div {
@@ -787,13 +811,13 @@ $romper-button-border: 4px;
   }
 
   .romper-reset-button {
-    bottom: calc(50% - 85px);
+    bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
-    height: 170px;
-    left: calc(50% - 85px);
+    height: $start-button-size;
+    left: calc(50% - #{(0.5 * $start-button-size)});
     margin: 0;
     position: absolute;
-    width: 170px;
+    width: $start-button-size;
     z-index: 101;
 
     &:hover {
@@ -808,16 +832,20 @@ $romper-button-border: 4px;
       background-color: $transparent;
       border: 1px solid $white;
       border-radius: 50%;
-      height: 100px;
+      height: 0.75 * $start-button-size;
       margin-left: auto;
       margin-right: auto;
-      width: 100px;
+      max-height: 170px;
+      max-width: 170px;
+      width: 0.75 * $start-button-size;
     }
 
     .romper-reset-button-icon-div {
-      height: 100px; // 40px;
-      margin-top: 0; //30px;
-      width: 80px; // 33px;
+      height: 0.75 * $start-button-size;
+      margin-top: 0;
+      max-height: 170px;
+      max-width: 100px;
+      width: 0.75 * 0.8 * $start-button-size;
     }
 
     .romper-reset-button-text-div {
@@ -1004,25 +1032,14 @@ $romper-button-border: 4px;
 .romper-image-overlay,
 .romper-start-image,
 .romper-render-image {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
   height: 100%;
   left: 0;
   max-height: 100%;
   max-width: 100%;
+  object-fit: contain;
+  object-position: center;
   position: absolute;
   top: 0;
-  width: 100%;
-}
-
-.romper-render-image {
-  background-color: $romper-background-color;
-}
-
-.romper-modal-container {
-  height: 100%;
-  position: relative;
   width: 100%;
 }
 
@@ -1031,12 +1048,13 @@ $romper-button-border: 4px;
   border-radius: 0.5em;
   color: $white;
   padding: 1%;
-  z-index: 5;
+  z-index: 15;
 
   .title {
     font-size: 120%;
     font-weight: bold;
     padding-bottom: 0.5em;
+    padding-right: 1.5em;
   }
 
   a {
@@ -1083,7 +1101,6 @@ $romper-button-border: 4px;
   color: $transparent-white;
   display: flex;
   flex-direction: column;
-  font-size: 1.8vw;
   left: 0;
   opacity: 0;
   padding-bottom: 0;
@@ -1375,7 +1392,7 @@ $romper-button-border: 4px;
 
   .modal-inner-content {
     border-bottom: 1px solid $white;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
     padding-bottom: 1em;
   }
 
@@ -1386,9 +1403,9 @@ $romper-button-border: 4px;
     margin-left: auto;
     margin-right: auto;
     max-height: calc(100% - 100px);
-    min-height: 200px;
+    min-height: 130px;
     min-width: 300px;
-    padding: 5%;
+    padding: 2%;
     position: relative;
     text-align: center;
     top: 5%;
@@ -1472,6 +1489,10 @@ $romper-button-border: 4px;
       width: 100%;
     }
   }
+
+  .romper-link-text-icon {
+    font-size: 120%;
+  }
 }
 
 // ##Device = Tablets, Ipads (landscape)
@@ -1484,14 +1505,50 @@ $romper-button-border: 4px;
   }
 }
 
+@media (min-width: 320px) and (max-width: 500px),
+  (max-height: 450px) {
+    .romper-player > .romper-media {
+      &.romper-prestart > .romper-privacy-notice {
+        font-size: 70%;
+        height: 75px;
+
+        > p {
+          bottom: 0;
+          margin-bottom: 3px;
+          padding: 0 2%;
+        }
+      }
+    }
+}
+
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
-@media (min-width: 320px) and (max-width: 767px) {
+@media (min-width: 320px) and (max-width: 767px), (max-height: 450px) {
   .romper-scrub-bar {
     bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;
     left: 0;
     width: 100%;
+  }
+
+  .romper-link-text-icon {
+    font-size: 80%;
+  }
+
+  .romper-text-link-container {
+    height: 6em;
+  }
+
+  .romper-variable-panel {
+    font-size: 80%;
+  }
+
+  .romper-var-form-button {
+    max-height: 15px;
+  }
+
+  .romper-var-form-button-container > .var-count {
+    line-height: 20px;
   }
 
   .romper-player > .romper-gui >.romper-buttons {
@@ -1537,19 +1594,40 @@ $romper-button-border: 4px;
   background-color: $black;
   color: $white;
   display: flex;
-  flex-direction: column;
-  font-size: 1.25em;
-  left: 70%;
+  flex-direction: row;
+  font-size: 1em;
+  left: 0;
+  overflow: scroll;
   position: absolute;
   top: 2%;
-  width: 30%;
   z-index: 2000;
 
   .detail {
+    padding-left: 0.5em;
+  }
+
+  .detail-input {
     background: $black;
     border: 0;
     color: $white;
-    padding-left: 3%;
-    width: 60%;
   }
+}
+
+.ua-debug {
+  height: 200px;
+  overflow: scroll;
+}
+
+.webview-error {
+  height: 100%;
+  text-align: center;
+}
+
+.webview-error-div {
+  -ms-transform: translateY(-50%);
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
 }

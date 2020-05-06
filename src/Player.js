@@ -9,13 +9,19 @@ import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities';
+import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
-import { checkDebugPlayout, addDetail, scrollToTop, preventEventDefault, SLIDER_CLASS, handleButtonTouchEvent } from './utils'; // eslint-disable-line max-len
+import {
+    checkDebugPlayout,
+    checkOverrideFacebookBlock,
+    addDetail,
+    scrollToTop,
+    preventEventDefault,
+    SLIDER_CLASS,
+    handleButtonTouchEvent
+} from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
-
-
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -52,6 +58,7 @@ function createOverlay(name: string, logFunction: Function) {
     };
 
     const button = document.createElement('button');
+    button.setAttribute('type', 'button');
 
     const deactivateOverlay = () => {
         if (!overlay.classList.contains('romper-inactive')) {
@@ -327,6 +334,8 @@ class Player extends EventEmitter {
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
+    _visibleChoices: { [key: number]: HTMLElement };
+
     _choiceCountdownTimeout: ?TimeoutID;
 
     _countdowner: HTMLDivElement;
@@ -379,6 +388,7 @@ class Player extends EventEmitter {
         this._controller = controller;
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {}
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
         this._countdownTotal = 0;
@@ -466,6 +476,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
 
         this._backButton = document.createElement('button');
+        this._backButton.setAttribute('type', 'button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
         this._backButton.setAttribute('title', 'Back Button');
@@ -478,6 +489,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._backButton);
 
         this._seekBackButton = document.createElement('button');
+        this._seekBackButton.setAttribute('type', 'button');
         this._seekBackButton.classList.add('romper-button');
         this._seekBackButton.classList.add('romper-seek-back-button');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
@@ -489,6 +501,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._seekBackButton);
 
         this._playPauseButton = document.createElement('button');
+        this._playPauseButton.setAttribute('type', 'button');
         this._playPauseButton.classList.add('romper-button');
         this._playPauseButton.classList.add('romper-play-button');
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
@@ -500,6 +513,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._playPauseButton);
 
         this._seekForwardButton = document.createElement('button');
+        this._seekForwardButton.setAttribute('type', 'button');
         this._seekForwardButton.classList.add('romper-button');
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
@@ -511,6 +525,7 @@ class Player extends EventEmitter {
         this._narrativeElementTransport.appendChild(this._seekForwardButton);
 
         this._nextButton = document.createElement('button');
+        this._nextButton.setAttribute('type', 'button');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
@@ -578,6 +593,7 @@ class Player extends EventEmitter {
         this._countdownContainer.appendChild(this._countdowner);
 
         this._subtitlesButton = document.createElement('button');
+        this._subtitlesButton.setAttribute('type', 'button');
         this._subtitlesButton.classList.add('romper-button');
         this._subtitlesButton.setAttribute('title', 'Subtitles Button');
         this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
@@ -590,6 +606,7 @@ class Player extends EventEmitter {
         mediaTransportRight.appendChild(this._subtitlesButton);
 
         this._fullscreenButton = document.createElement('button');
+        this._fullscreenButton.setAttribute('type', 'button');
         this._fullscreenButton.classList.add('romper-button');
         this._fullscreenButton.classList.add('romper-fullscreen-button');
         this._fullscreenButton.setAttribute('title', 'Fullscreen Button');
@@ -603,7 +620,19 @@ class Player extends EventEmitter {
         this._buttons.appendChild(this._mediaTransport);
 
 
-        target.appendChild(this._player);
+        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        const overrideFacebookBlock = checkOverrideFacebookBlock();
+        if(facebookiOSWebview && !overrideFacebookBlock) {
+            const fbWebviewDiv = document.createElement('div');
+            fbWebviewDiv.className = "webview-error";
+            fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"
+                + "<h1>Facebook Browser is not supported</h1>"
+                + "<p>Please click on the three dots in top right corner and click "
+                + "'Open in Safari'</p></div>";
+            target.appendChild(fbWebviewDiv);
+        } else {
+            target.appendChild(this._player);
+        }
 
         // Hide gui elements until start clicked
         this._overlays.classList.add('romper-inactive');
@@ -616,10 +645,16 @@ class Player extends EventEmitter {
         this.backgroundTarget = this._backgroundLayer;
 
         // Event Listeners
+        // keyboard
+        if (this._controller.handleKeys) {
+            document.addEventListener('keydown', this._keyPressHandler.bind(this));
+        }
+
+        // mouse/touch
         this._overlays.onclick = this._handleOverlayClick.bind(this);
         this._overlays.addEventListener(
             'touchend',
-            this._handleOverlayClick.bind(this),
+            handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
@@ -673,7 +708,7 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.onmousemove = this._activateRomperButtons.bind(this);
         this._buttonsActivateArea.addEventListener(
             'touchend',
-            this._activateRomperButtons.bind(this),
+            handleButtonTouchEvent(this._activateRomperButtons.bind(this)),
         );
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
@@ -716,6 +751,27 @@ class Player extends EventEmitter {
 
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
+    }
+
+    // key listener
+    _keyPressHandler(event: KeyboardEvent) {
+        // F toggles fullscreen
+        if (event.code === 'KeyF') {
+            this._toggleFullScreen();
+            event.preventDefault();
+        }
+        if (!this._userInteractionStarted) return;
+        // numbers activate link choices
+        const keyNumber = parseInt(event.key, 10);
+        if (!isNaN(keyNumber)) { // eslint-disable-line no-restricted-globals
+            // for choices map number key presses to choices L-R
+            if (this._visibleChoices[keyNumber]) {
+                const newMouseEvent = document.createEvent('MouseEvents');
+                newMouseEvent.initEvent('click', true, true);
+                newMouseEvent.synthetic = true;
+                this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
+            }
+        }
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
@@ -796,6 +852,7 @@ class Player extends EventEmitter {
         this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
 
         const cancelButton = document.createElement('button');
+        cancelButton.setAttribute('type', 'button');
         cancelButton.classList.add('romper-reset-button');
         cancelButton.setAttribute('title', 'Restart and accept terms');
         cancelButton.setAttribute('aria-label', 'Restart Button');
@@ -820,7 +877,10 @@ class Player extends EventEmitter {
         };
 
         cancelButton.onclick = cancelButtonHandler;
-        cancelButton.addEventListener('touchend', cancelButtonHandler);
+        cancelButton.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(cancelButtonHandler),
+        );
 
         const resumeExperienceButtonHandler = () => {
             this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
@@ -835,7 +895,7 @@ class Player extends EventEmitter {
         this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
         this._resumeExperienceButton.addEventListener(
             'touchend',
-            resumeExperienceButtonHandler,
+            handleButtonTouchEvent(resumeExperienceButtonHandler),
         );
 
         // resume
@@ -977,6 +1037,7 @@ class Player extends EventEmitter {
 
     _createStartExperienceButton(options: Object) {
         this._startExperienceButton = document.createElement('button');
+        this._startExperienceButton.setAttribute('type', 'button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Start Button');
@@ -993,15 +1054,16 @@ class Player extends EventEmitter {
 
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
-            this._startExperienceImage = document.createElement('div');
+            this._startExperienceImage = document.createElement('img');
             this._startExperienceImage.className = 'romper-start-image';
-            this._startExperienceImage.style.backgroundImage = `url(${options.background_art})`;
+            this._startExperienceImage.src = options.background_art;
             this._mediaLayer.appendChild(this._startExperienceImage);
         }
     }
 
     _createResumeExperienceButton(options: Object) {
         this._resumeExperienceButton = document.createElement('button');
+        this._resumeExperienceButton.setAttribute('type', 'button');
         this._resumeExperienceButton.classList.add(options.button_class);
         this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
         this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
@@ -1076,8 +1138,7 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._startExperienceButton);
         this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
-            'touchend',
-            this._startButtonHandler,
+            'touchend', (event) => {handleButtonTouchEvent(this._startButtonHandler, event)}, false,
         );
     }
 
@@ -1264,12 +1325,14 @@ class Player extends EventEmitter {
         userEventName: AnalyticEventName,
         fromId: string = 'not_set',
         toId: string = 'not_set',
+        information: ?Object = {},
     ) {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names[userEventName],
             from: fromId == null ? 'not_set' : fromId,
             to: toId == null ? 'not_set' : toId,
+            data: information,
         };
         this._analytics(logData);
     }
@@ -1302,11 +1365,14 @@ class Player extends EventEmitter {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
         if(overlay) {
-            const muteButton = document.getElementById('mute-button-id');
+            const muteButton = document.getElementById(`mute-button-${id}`);
             if(muted && muteButton) {
+                this._volume.get(id).classList.add('romper-muted');
                 muteButton.setAttribute('data-muted', 'true');
                 muteButton.classList.remove('romper-mute-button');
                 muteButton.classList.add('romper-muted-button');
+            } else {
+                this._volume.get(id).classList.remove('romper-muted');
             }
             this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted });
         }
@@ -1314,6 +1380,7 @@ class Player extends EventEmitter {
 
     _setMuteCallBack(id: string, label: string, muteButton: HTMLDivElement)  {
         return () => {
+            this._volume.get(id).classList.toggle('romper-muted');
             muteButton.classList.toggle('romper-mute-button');
             const muted = muteButton.classList.toggle('romper-muted-button');
             muteButton.setAttribute('data-muted', muted)
@@ -1339,6 +1406,7 @@ class Player extends EventEmitter {
                 const isMuted = muteButton.classList.contains('romper-muted-button');
                 if(isMuted) {
                     this.emit(PlayerEvents.VOLUME_MUTE_TOGGLE, { id, label, muted: false });
+                    this._volume.get(id).classList.remove('romper-muted');
                 }
                 muteButton.classList.add('romper-mute-button');
                 muteButton.classList.remove('romper-muted-button');
@@ -1375,8 +1443,9 @@ class Player extends EventEmitter {
 
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
+        controlDiv.id = `volume-control-${id}`;
         const muteDiv = document.createElement('div');
-        muteDiv.id = 'mute-button-id';
+        muteDiv.id = `mute-button-${id}`;
         muteDiv.classList.add('romper-mute-button');
         muteDiv.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
@@ -1393,10 +1462,10 @@ class Player extends EventEmitter {
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 
-        muteDiv.ontouchend = (e) => {
-            e.preventDefault();
-            this._setMuteCallBack(id, label, muteDiv);
-        };
+        muteDiv.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteDiv).bind(this)),
+        );
         muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
 
         controlDiv.appendChild(muteDiv);
@@ -1506,33 +1575,35 @@ class Player extends EventEmitter {
 
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-                
+
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
-                this._logUserInteraction(AnalyticEvents.names.LINK_CHOICE_CLICKED, null, id);
+                this._logUserInteraction(
+                    AnalyticEvents.names.LINK_CHOICE_CLICKED,
+                    null,
+                    id,
+                    { label, text, },
+                );
             };
             iconContainer.onclick = choiceClick;
             iconContainer.addEventListener(
                 'touchend',
-                choiceClick,
+                choiceClick, // let event through to overlay
             );
 
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-                const iconElement = document.createElement('div');
-                iconElement.className = 'romper-link-icon-container'
                 linkChoiceControl.classList.add('icon');
                 linkChoiceControl.classList.add('text');
-                iconContainer.appendChild(iconElement);
-                const { style } = iconElement;
-                // @flowignore
-                style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'cover';
-                style.backgroundRepeat = 'no-repeat';
-                style.backgroundPosition = 'center';
+                const iconParent = document.createElement('div');
+                const iconElement = document.createElement('img');
+                iconElement.src = linkChoiceIconSrc;
+                iconParent.appendChild(iconElement);
+                iconParent.className = 'romper-link-icon-container'
                 const iconTextPar = document.createElement('p');
                 iconTextPar.textContent = text;
                 iconTextPar.className = 'romper-link-text-icon';
+                iconContainer.appendChild(iconParent);
                 iconContainer.appendChild(iconTextPar);
             } else if (text) {
                 iconContainer.className = 'romper-text-link-container';
@@ -1545,16 +1616,14 @@ class Player extends EventEmitter {
                 iconContainer.className = 'romper-link-icon-container';
                 linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
-                const { style } = iconContainer;
-                // @flowignore
-                style.backgroundImage = `url(${linkChoiceIconSrc})`;
-                style.backgroundSize = 'cover';
-                style.backgroundRepeat = 'no-repeat';
-                style.backgroundPosition = 'center';
+                const iconElement = document.createElement('img');
+                iconElement.src = linkChoiceIconSrc;
+                iconContainer.appendChild(iconElement);
             }
             resolve({
                 icon: linkChoiceControl,
                 uuid: id,
+                container: iconContainer,
             });
         });
 
@@ -1586,7 +1655,7 @@ class Player extends EventEmitter {
         }
         return Promise.all(promisesArray).then((icons) => {
             icons.forEach((iconObj, id) => {
-                const { icon, uuid } = iconObj;
+                const { icon, uuid, container } = iconObj;
                 if (activeLinkId && uuid === activeLinkId) {
                     icon.classList.add('default');
                 }
@@ -1595,11 +1664,15 @@ class Player extends EventEmitter {
                     behaviourOverlay.setActive(`${id}`);
                 };
                 icon.onclick = clickHandler;
-                icon.addEventListener('touchend', clickHandler);
+                icon.addEventListener(
+                    'touchend',
+                    handleButtonTouchEvent(clickHandler),
+                );
                 behaviourOverlay.add(id, icon);
                 if(behaviourElement){
                     behaviourElement.appendChild(icon);
                 }
+                this._visibleChoices[id + 1] = container;
             });
         });
     }
@@ -1787,6 +1860,7 @@ class Player extends EventEmitter {
     clearLinkChoices() {
         this._numChoices = 0;
         this._choiceIconSet = {};
+        this._visibleChoices = {};
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
@@ -1902,7 +1976,7 @@ class Player extends EventEmitter {
             const newTime = percent * duration;
             renderer.setCurrentTime(newTime);
         });
-        
+
         let isDragging = false;
         // Pause the media when the slider handle is being dragged
         scrubBar.addEventListener('mousedown', () => {
@@ -2049,10 +2123,26 @@ class Player extends EventEmitter {
             this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
 
+        // fit player to size, so all UI remains within media
+        const windowAspect = window.innerWidth / window.innerHeight;
+        const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
+        if (windowAspect > this._aspectRatio) { // too wide
+            const width = this._aspectRatio * 100 * scaleFactor;
+            this._player.style.height = `${100 * scaleFactor}vh`;
+            this._player.style.width = `${width}vh`;
+            this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
+        } else { // too tall
+            const height = (100 * scaleFactor) / this._aspectRatio;
+            this._player.style.height = `${height}vw`;
+            this._player.style.width = `${100 * scaleFactor}vw`;
+            this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+        }
+
         this._inFullScreen = false;
         // if we are an iphone capture these events;
         if(BrowserUserAgent.iOS()) {
             this._playerParent.addEventListener('touchmove', preventEventDefault);
+            this._player.classList.add('ios-fullscreen'); // iOS
         }
         document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
@@ -2094,8 +2184,11 @@ class Player extends EventEmitter {
         }
         scrollToTop();
 
+        this._player.removeAttribute('style');
+
         if(BrowserUserAgent.iOS()) {
             this._playerParent.removeEventListener('touchmove', preventEventDefault);
+            this._player.classList.remove('ios-fullscreen'); // iOS
         }
         document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
         document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);

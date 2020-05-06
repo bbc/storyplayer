@@ -31,6 +31,14 @@ const getBehaviourEndTime = (behaviour: Object) => {
     return undefined;
 }
 
+export const RENDERER_PHASES = {
+    CONSTRUCTED: 'CONSTRUCTED',
+    START: 'START',
+    MAIN: 'MAIN',
+    END: 'END',
+    ENDED: 'ENDED',
+};
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string;
 
@@ -136,6 +144,10 @@ export default class BaseRenderer extends EventEmitter {
 
     _setInTime: Function;
 
+    _inPauseBehaviourState: boolean;
+
+    phase: string;
+
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -185,6 +197,7 @@ export default class BaseRenderer extends EventEmitter {
         this._hideControls = this._hideControls.bind(this);
         this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
+        this._runStartBehaviours = this._runStartBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
         this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
@@ -222,13 +235,28 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
         this._loopCounter = 0;
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        this._inPauseBehaviourState = false;
     }
 
     willStart(elementName: ?string, elementId: ?string) {
         this.inVariablePanel = false;
-        this._behaviourRunner = this._representation.behaviours
-            ? new BehaviourRunner(this._representation.behaviours, this)
-            : null;
+        this.phase = RENDERER_PHASES.START;
+
+        this._runStartBehaviours();
+
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
+        if(checkAddDetailsOverride()) {
+            const { name, id } = this._representation;
+            this._player.addDetails(elementName, elementId, name, id)
+        }
+    }
+
+    _runStartBehaviours() {
+        this._behaviourRunner = this._representation.behaviours ?
+            new BehaviourRunner(this._representation.behaviours, this) :
+            null;
         this._player.enterStartBehaviourPhase(this);
         this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
@@ -238,12 +266,6 @@ export default class BaseRenderer extends EventEmitter {
             )
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        }
-        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
-        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(checkAddDetailsOverride()) {
-            const { name, id } = this._representation;
-            this._player.addDetails(elementName, elementId, name, id)
         }
     }
 
@@ -262,6 +284,7 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
+        this.phase = RENDERER_PHASES.MAIN;
         this.emit(RendererEvents.STARTED);
         this._hasEnded = false;
         this._timer.start();
@@ -279,6 +302,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end() {
+        this.phase = RENDERER_PHASES.ENDED;
         this._player.disconnectScrubBar(this);
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
@@ -432,7 +456,7 @@ export default class BaseRenderer extends EventEmitter {
             const sync = () => {
                 const playheadTime = mediaElement.currentTime;
                 if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
-                    this._timer.setTime(playheadTime);
+                    this._timer.setTime(playheadTime - this._inTime);
                     this._timer.setSyncing(false);
                     if (isPaused) this._timer.pause();  // don't restart if we were paused
                     mediaElement.removeEventListener('timeupdate', sync);
@@ -442,7 +466,7 @@ export default class BaseRenderer extends EventEmitter {
             mediaElement.addEventListener('timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
         } else {
-            this._timer.setTime(targetTime);
+            this._timer.setTime(time);
         }
     }
 
@@ -541,6 +565,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        this.phase = RENDERER_PHASES.END;
         this._hasEnded = true;
         this._timer.pause();
         if (!this._linkBehaviour ||
@@ -963,26 +988,6 @@ export default class BaseRenderer extends EventEmitter {
                     }
                 });
             }
-            if (iconSpecObject.acId === null && iconSpecObject.iconText === null) {
-                // if not specified - get default icon...
-                iconObjectPromises.push(this._controller
-                    .getRepresentationForNarrativeElementId(choiceNarrativeElementObj.ne.id)
-                    .then((representation) => {
-                        let defaultSrcAcId = null;
-                        if (representation && representation.asset_collections.icon
-                            && representation.asset_collections.icon.default_id) {
-                            defaultSrcAcId = representation.asset_collections.icon.default_id;
-                        }
-                        return Promise.resolve({
-                            choiceId: i,
-                            acId: defaultSrcAcId,
-                            ac: null,
-                            resolvedUrl: null,
-                            targetNarrativeElementId: choiceNarrativeElementObj.targetNeId,
-                        });
-                    }));
-            }
-
             iconObjectPromises.push(Promise.resolve(iconSpecObject));
         });
 
@@ -1204,20 +1209,27 @@ export default class BaseRenderer extends EventEmitter {
         const assetCollectionId =
             this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
         if (assetCollectionId) {
-            this._fetchAssetCollection(assetCollectionId).then((image) => {
-                if (image.assets.image_src) {
-                    this._overlayImage(image.assets.image_src, behaviour.id);
+            this._fetchAssetCollection(assetCollectionId)
+                .then((assetCollection) => {
+                    if (assetCollection.assets.image_src) {
+                        return this._fetchMedia(assetCollection.assets.image_src);
+                    }
+                    return Promise.resolve();
+                })
+                .then((imageUrl) => {
+                    if (imageUrl) {
+                        this._overlayImage(imageUrl, behaviour.id);
+                    }
                     callback();
-                }
-            });
+                });
         }
     }
 
     _overlayImage(imageSrc: string, id: string) {
-        const overlayImageElement = document.createElement('div');
+        const overlayImageElement = document.createElement('img');
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
-        overlayImageElement.style.backgroundImage = `url(${imageSrc})`;
+        overlayImageElement.src = imageSrc;
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
@@ -1331,6 +1343,15 @@ export default class BaseRenderer extends EventEmitter {
 
     deleteTimeEventListener(listenerId: string) {
         this._timer.deleteTimeEventListener(listenerId);
+    }
+
+    // the renderer is waiting in an infinite pause behaviour
+    setInPause(paused: boolean) {
+        this._inPauseBehaviourState = paused;
+    }
+
+    getInPause(): boolean {
+        return this._inPauseBehaviourState;
     }
 
     seekEventHandler(inTime: number) {

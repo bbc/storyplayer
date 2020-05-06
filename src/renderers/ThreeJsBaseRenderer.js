@@ -29,6 +29,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _onMouseUp: Function;
 
+    _onKeyUp: Function;
+
+    _onKeyDown: Function;
+
+    _moveInterval: ?IntervalID;
+
     _orientationWatcher: ?IntervalID;
 
     _initialRotation: string;
@@ -83,6 +89,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._onMouseDown = this._onMouseDown.bind(this);
         this._onMouseMove = this._onMouseMove.bind(this);
         this._onMouseUp = this._onMouseUp.bind(this);
+        this._onKeyDown = this._onKeyDown.bind(this);
+        this._onKeyUp = this._onKeyUp.bind(this);
 
         this._orientationWatcher = null;
 
@@ -116,6 +124,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         logger.info(`Started: ${this._representation.id}`);
         this._hasEnded = false;
         this._started = true;
+        if (this._controller.handleKeys) {
+            document.addEventListener('keydown', this._onKeyDown);
+            document.addEventListener('keyup', this._onKeyUp);
+        }
         this._createScene();
     }
 
@@ -223,6 +235,50 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             this._setOrientationVariable,
             ORIENTATION_POLL_INTERVAL,
         );
+    }
+
+    static _isArrowKey(event: KeyboardEvent) {
+        return event.code === 'ArrowLeft'
+            || event.code === 'ArrowRight'
+            || event.code === 'ArrowDown'
+            || event.code === 'ArrowUp';
+    }
+
+    _onKeyDown(event: KeyboardEvent) {
+        if (this._userDragging && ThreeJsBaseRenderer._isArrowKey(event)) {
+            event.preventDefault(); 
+            return;
+        }
+        if (ThreeJsBaseRenderer._isArrowKey(event)) {
+            this._userInteracting = true;
+            this._userDragging = true;
+            event.preventDefault(); 
+        }
+        if (event.code === 'ArrowLeft') {
+            this._moveInterval = setInterval(() => {
+                this._view.lon -= 1;
+                this._view.lon = (360 + this._view.lon) % 360;
+            }, 50);
+        } else if (event.code === 'ArrowRight') {
+            this._moveInterval = setInterval(() => {
+                this._view.lon += 1;
+                this._view.lon = (360 + this._view.lon) % 360;
+            }, 50);   
+        } else if (event.code === 'ArrowUp') {
+            this._moveInterval = setInterval(() => {
+                this._view.lat += 0.5;
+            }, 50);   
+        } else if (event.code === 'ArrowDown') {
+            this._moveInterval = setInterval(() => {
+                this._view.lat -= 0.5;
+            }, 50);   
+        }
+    }
+
+    _onKeyUp() {
+        this._userInteracting = false;
+        this._userDragging = false;
+        if (this._moveInterval) clearInterval(this._moveInterval);
     }
 
     _onMouseDown(event: MouseEvent) {
@@ -395,6 +451,10 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
         uiLayer.removeEventListener('mousemove', this._onMouseMove);
 
+        if (this._controller.handleKeys) {
+            document.removeEventListener('keydown', this._onKeyDown);
+            document.removeEventListener('keyup', this._onKeyUp);
+        }
         if (this._orientationWatcher) {
             clearInterval(this._orientationWatcher);
         }

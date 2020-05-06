@@ -49,7 +49,9 @@ const _getBooleanVariableSetter = (
     varInputSelect.classList.add('romper-var-form-button-div');
 
     const yesElement = document.createElement('button');
+    yesElement.setAttribute('type', 'button');
     const noElement = document.createElement('button');
+    noElement.setAttribute('type', 'button');
 
     const setSelected = (varVal) => {
         if (varVal) {
@@ -271,17 +273,17 @@ const getVariableSetter = (
 };
 
 const createVarPanelElements = (formTitle, backgroundColour): Object => {
-    const overlayImageElement = document.createElement('div');
-    overlayImageElement.className = 'romper-variable-panel';
+    const variablePanelElement = document.createElement('div');
+    variablePanelElement.className = 'romper-variable-panel';
 
     if (backgroundColour) {
-        overlayImageElement.style.background = backgroundColour;
+        variablePanelElement.style.background = backgroundColour;
     }
 
     const titleDiv = document.createElement('div');
     titleDiv.innerHTML = formTitle;
     titleDiv.className = 'romper-var-form-title';
-    overlayImageElement.appendChild(titleDiv);
+    variablePanelElement.appendChild(titleDiv);
 
     const variablesFormContainer = document.createElement('div');
     variablesFormContainer.className = 'romper-var-form-var-containers';
@@ -289,7 +291,7 @@ const createVarPanelElements = (formTitle, backgroundColour): Object => {
     const carouselDiv = document.createElement('div');
     carouselDiv.className = 'romper-var-form-carousel';
     variablesFormContainer.appendChild(carouselDiv);
-    overlayImageElement.appendChild(carouselDiv);
+    variablePanelElement.appendChild(carouselDiv);
 
     const okButtonContainer = document.createElement('div');
 
@@ -299,7 +301,7 @@ const createVarPanelElements = (formTitle, backgroundColour): Object => {
     okButton.type = 'button';
     okButton.classList.add('var-next');
     okButton.value = 'Next';
-    overlayImageElement.appendChild(okButtonContainer);
+    variablePanelElement.appendChild(okButtonContainer);
 
     // back button
     const backButton = document.createElement('input');
@@ -317,7 +319,7 @@ const createVarPanelElements = (formTitle, backgroundColour): Object => {
     okButtonContainer.appendChild(okButton);
 
     return {
-        overlayImageElement,
+        overlayImageElement: variablePanelElement,
         carouselDiv,
         backButton,
         okButton,
@@ -347,6 +349,9 @@ export const buildPanel = (
         okButton,
         statusSpan,
     } = createVarPanelElements(behaviour.panel_label, behaviour.background_colour);
+
+    overlayImageElement.id = behaviour.id;
+    renderer._setBehaviourElementAttribute(overlayImageElement, 'variable-panel');
 
     const behaviourVariables = behaviour.variables;
 

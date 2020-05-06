@@ -1,3 +1,5 @@
+import logger from './logger';
+
 // @flow
 
 export const checkAddDetailsOverride = () => {
@@ -11,6 +13,21 @@ export const fetchOverridePlayout = () => {
 
 export const checkDebugPlayout = () => {
     const override = new URLSearchParams(window.location.search).get('debugPlayout');
+    return (override === 'true');
+};
+
+export const checkOverrideFacebookBlock = () => {
+    const override = new URLSearchParams(window.location.search).get('overrideFacebookBlock');
+    return (override === 'true');
+};
+
+export const checkWebviewDebug = () => {
+    const override = new URLSearchParams(window.location.search).get('webviewDebug');
+    return (override === 'true');
+};
+
+export const checkDebugUA = () => {
+    const override = new URLSearchParams(window.location.search).get('debugUA');
     return (override === 'true');
 };
 
@@ -35,7 +52,7 @@ export const checkOverrideFormat = (format: ?string) => {
     return format && (format === 'hls' || format === 'dash');
 }
 
-export const getOverrideFormat =() => { 
+export const getOverrideFormat =() => {
     const overrideFormat = new URLSearchParams(window.location.search).get('overridePlayoutFormat');
     return checkOverrideFormat(overrideFormat) ? overrideFormat : null;
 };
@@ -49,11 +66,12 @@ export const copySelection = (e: Object) => {
 // eslint-disable-next-line class-methods-use-this
 export const addDetail = (key: string, name: ? string, id : ? string) => {
     const detail = document.createElement('div');
+    detail.className= 'detail'
     detail.innerText = `${key}: ${name || ''}`;
     const detailId = document.createElement('input');
     detailId.value = `${id || ''}`;
     detailId.readOnly = true;
-    detailId.className = 'detail';
+    detailId.className = 'detail-input';
     detailId.onclick = copySelection;
     detail.appendChild(detailId);
     return detail;
@@ -83,13 +101,23 @@ export const AUDIO = 'audio';
 
 export const preventEventDefault = (event: Event) => {
     // if the event doesn't come from the scrub bar we suppress the touch moves
-    if(!event.target.classList.includes(SLIDER_CLASS)) {
-        event.preventDefault();
+    if(event && event.target && event.target.classList) {
+        if(!event.target.classList.includes(SLIDER_CLASS)) {
+            event.preventDefault();
+        }
     }
 };
 
-export const handleButtonTouchEvent = (callback: Function) => {
+export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
+        if(checkDebugPlayout()) {
+            logger.info('Event Captured:', event);
+            console.log('Touch Event Captured:', touchEvent);
+        }
+        // handle multiple touch points?
+        if(event.touches !== undefined && event.touches && event.touches.length > 1) {
+            return;
+        }
         // Stop propagation of touch event.
         event.stopPropagation();
         // Stop click events on tablets being fired off for this touch.

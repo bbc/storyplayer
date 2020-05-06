@@ -20,6 +20,7 @@ import { InternalVariableNames } from './InternalVariables';
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { checkDebugPlayout } from './utils';
+import AnalyticsHandler from './AnalyticsHandler';
 
 export const PLACEHOLDER_REPRESENTATION = {
     object_class: 'REPRESENTATION',
@@ -40,6 +41,7 @@ export default class Controller extends EventEmitter {
         assetUrls: AssetUrls,
         privacyNotice: ?string,
         saveSession: ?boolean,
+        handleKeys: ?boolean,
     ) {
         super();
         this._storyId = null;
@@ -50,91 +52,28 @@ export default class Controller extends EventEmitter {
         this._storyReasonerFactory = storyReasonerFactory;
         this._representationReasoner = representationReasoner;
         this._fetchers = fetchers;
-        this._analytics = analytics;
-        this._enhancedAnalytics = this._enhancedAnalytics.bind(this);
         this._handleVariableChanged = this._handleVariableChanged.bind(this);
         this._handleRendererCompletedEvent = this._handleRendererCompletedEvent.bind(this);
         this._handleRendererNextButtonEvent = this._handleRendererNextButtonEvent.bind(this);
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
+        
+        this._analyticsHandler = new AnalyticsHandler(analytics, this);
+        this._handleAnalytics = this._handleAnalytics.bind(this);
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
+        this.handleKeys = handleKeys;
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
-        this._segmentSummaryData = {};
     }
 
-    _enhancedAnalytics(logData: AnalyticsPayload): mixed {
-        let repId = logData.current_representation;
-        const renderer = this.getCurrentRenderer();
-        if (repId === undefined && renderer && renderer.getRepresentation()){
-            repId = renderer.getRepresentation().id;
-        }
-        let neId = logData.current_narrative_element;
-        if (neId === undefined) {
-            neId = this.getCurrentNarrativeElement() ?
-                this.getCurrentNarrativeElement().id : 'null';
-        }
-        const appendedData: AnalyticsPayload = {
-            name: AnalyticEvents.names[logData.name],
-            type: AnalyticEvents.types[logData.type],
-            from: logData.from,
-            to: logData.to,
-            current_narrative_element: neId,
-            current_representation: repId,
-        };
-
-        this._handleSegmentSummaries(appendedData);
-        this._analytics(appendedData);
+    _handleAnalytics(logData: AnalyticsPayload): mixed {
+        this._analyticsHandler.handleAnalyticsEvent(logData);
     }
-     
-    _handleSegmentSummaries(appendedData: Object) {
-        if (appendedData.type === AnalyticEvents.types.USER_ACTION) {
-            if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
-                this._segmentSummaryData[appendedData.name] += 1;
-            } else {
-                this._segmentSummaryData[appendedData.name] = 1;
-            }
-        }
-
-        if (appendedData.name === AnalyticEvents.names.START_BUTTON_CLICKED) {
-            // log start time and first ne
-            this._segmentSummaryData = {
-                startTime: Date.now(),
-                current_narrative_element: appendedData.current_narrative_element,
-                current_representation: appendedData.current_representation,
-            };
-        }
-
-        if (appendedData.name === AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE
-            || appendedData.name === AnalyticEvents.names.STORY_END) {
-            // work out and save summary data
-            this._segmentSummaryData.duration = Date.now() - this._segmentSummaryData.startTime;
-            if (!this._segmentSummaryData.chapter) {
-                this._segmentSummaryData.chapter = appendedData.from;
-            }
-            const summaryData = {
-                type: AnalyticEvents.types.SEGMENT_COMPLETION,
-                name: appendedData.name,
-                data: this._segmentSummaryData,
-                current_narrative_element: appendedData.current_narrative_element,
-                current_representation: appendedData.current_representation,
-            };
-            if (summaryData.current_representation) {
-                this._analytics(summaryData);
-            }
-            this._segmentSummaryData = {
-                startTime: Date.now(),
-                chapter: appendedData.to,
-            };
-        }
-
-    }
-
-
+ 
     restart(storyId: string, initialState?: Object = {}) {
         this._reasoner = null;
         this._prepareRenderManagerForRestart();
@@ -184,6 +123,7 @@ export default class Controller extends EventEmitter {
                 break;
             }
         } else {
+            this.deleteExistingSession();
             this.startFromDefaultState(storyId, initialState);
         }
     }
@@ -370,7 +310,7 @@ export default class Controller extends EventEmitter {
             this._target,
             this._representationReasoner,
             this._fetchers,
-            this._enhancedAnalytics,
+            this._handleAnalytics,
             this._assetUrls,
             this._privacyNotice,
         );
@@ -518,16 +458,22 @@ export default class Controller extends EventEmitter {
 
     _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
         let oldName = 'null';
+        let oldId = 'null';
         if (oldNarrativeElement) {
+            oldId = oldNarrativeElement.id;
             oldName = oldNarrativeElement.name;
         }
         const logData = {
             type: AnalyticEvents.types.STORY_NAVIGATION,
             name: AnalyticEvents.names.NARRATIVE_ELEMENT_CHANGE,
-            from: oldName,
-            to: newNarrativeElement.name,
+            from: oldId,
+            to: newNarrativeElement.id,
+            data: {
+                fromName: oldName,
+                toName: newNarrativeElement.name,
+            },
         };
-        this._enhancedAnalytics(logData);
+        this._handleAnalytics(logData);
         this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     }
 
@@ -726,7 +672,7 @@ export default class Controller extends EventEmitter {
     }
 
     // get the ids of every story nested within the one given
-    _getAllStories(storyId: string): Promise<Array<string>> {
+    _getAllStories(storyId: string, doneAlready: Array<string> = []): Promise<Array<string>> {
         return this._fetchers.storyFetcher(storyId)
             .then((story) => {
                 const nePromises = [];
@@ -738,13 +684,17 @@ export default class Controller extends EventEmitter {
             .then((nes) => {
                 const subStoryIds = [];
                 nes.forEach((ne) => {
-                    if (ne.body.type === 'STORY_ELEMENT' && ne.body.story_target_id) {
+                    if (ne.body.type === 'STORY_ELEMENT' && ne.body.story_target_id
+                        && !subStoryIds.includes(ne.body.story_target_id)
+                        && !doneAlready.includes(ne.body.story_target_id)) {
                         subStoryIds.push(ne.body.story_target_id);
+                        doneAlready.push(ne.body.story_target_id);
                     }
                 });
+
                 const substoryPromises = [];
                 subStoryIds.forEach((subStory) => {
-                    substoryPromises.push(this._getAllStories(subStory));
+                    substoryPromises.push(this._getAllStories(subStory, doneAlready));
                 });
                 return Promise.all(substoryPromises);
             })
@@ -1114,8 +1064,10 @@ export default class Controller extends EventEmitter {
         const logData = {
             type: AnalyticEvents.types.STORY_NAVIGATION,
             name: AnalyticEvents.names.STORY_END,
+            from: this._currentNarrativeElement.id,
+            to: 'STORY_END',
         };
-        this._enhancedAnalytics(logData);
+        this._handleAnalytics(logData);
         logger.warn('Story Ended!');
         this.emit(REASONER_EVENTS.STORY_END);
     }
@@ -1172,8 +1124,11 @@ export default class Controller extends EventEmitter {
     }
 
     deleteExistingSession() {
+        if(this._storyId) {
+            SessionManager.deleteExistingSession(this._storyId);
+        }
         if(this._sessionManager) {
-            this._sessionManager.deleteExistingSession();
+            this._sessionManager.setSessionState(SESSION_STATE.NEW);
         }
     }
 
@@ -1212,7 +1167,7 @@ export default class Controller extends EventEmitter {
 
     _analytics: AnalyticsLogger;
 
-    _enhancedAnalytics: AnalyticsLogger
+    _handleAnalytics: AnalyticsLogger
 
     _assetUrls: AssetUrls;
 
@@ -1236,11 +1191,13 @@ export default class Controller extends EventEmitter {
 
     _sessionManager: SessionManager;
 
-    _segmentSummaryData: Object;
-
     _handleRendererCompletedEvent: Function;
 
     _handleRendererNextButtonEvent: Function;
 
     _handleRendererPreviousButtonEvent: Function;
+
+    handleKeys: ?boolean;
+    
+    _analyticsHandler: AnalyticsHandler;
 }

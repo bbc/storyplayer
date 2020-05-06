@@ -4,16 +4,13 @@ import Player from '../Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
+import { MediaFormats } from '../browserCapabilities';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
-
-// import MediaManager from '../MediaManager';
-// import MediaInstance from '../MediaInstance';
-
 import Controller from '../Controller';
-
 import logger from '../logger';
 import { AUDIO } from '../utils';
+
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -45,6 +42,8 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _hasEnded: boolean;
 
+    _backgroundImage: ?HTMLElement;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -68,6 +67,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
         this.renderAudioElement();
+        this._renderBackgroundImage();
 
         this._lastSetTime = 0;
 
@@ -76,6 +76,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_A,
+            id: this._representation.asset_collections.foreground_id,
             playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
@@ -106,7 +107,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             }
         }
         // have we reached the end?
-        // either timer past specified duration (for looping) 
+        // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
             if (videoElement) {
@@ -120,8 +121,29 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         super.seekEventHandler(this._inTime);
     }
 
+    _renderBackgroundImage() {
+        // eslint-disable-next-line max-len
+        logger.info(`Rendering background image for audio representation ${this._representation.id}`);
+        if (this._representation.asset_collections.background_image) {
+            const assetCollectionId = this._representation.asset_collections.background_image;
+            this._fetchAssetCollection(assetCollectionId).then((image) => {
+                if (image.assets.image_src) {
+                    return this._fetchMedia(image.assets.image_src);
+                }
+                return Promise.resolve();
+            }).then((imageUrl: string) => {
+                this._backgroundImage = document.createElement('img');
+                this._backgroundImage.className = 'romper-render-image';
+                this._setImageVisibility(false);
+                this._backgroundImage.src = imageUrl;
+                this._target.appendChild(this._backgroundImage);
+            }).catch((err) => { logger.error(err, 'Notfound'); });
+        }
+    }
+
     start() {
         super.start();
+        this._setImageVisibility(true);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         logger.info(`Started: ${this._representation.id}`);
@@ -141,6 +163,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     end() {
         super.end();
+        this._setImageVisibility(false);
         this._lastSetTime = 0;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
@@ -174,7 +197,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                         this._setOutTime(parseFloat(fg.meta.romper.out));
                     }
                     if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, { mediaType: AUDIO })
+                        this._fetchMedia(fg.assets.audio_src, {
+                            mediaFormat: MediaFormats.getFormat(), 
+                            mediaType: AUDIO
+                        })
                             .then((mediaUrl) => {
                                 this.populateAudioElement(mediaUrl, fg.loop);
                             })
@@ -196,6 +222,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                     }
                 });
         }
+    }
+
+    // show/hide the background image
+    _setImageVisibility(visible: boolean) {
+        if (this._backgroundImage) this._backgroundImage.style.opacity = visible ? '1' : '0';
     }
 
     populateAudioElement(mediaUrl: string, loop: ?boolean) {
@@ -232,6 +263,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this.end();
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
+        if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
 
         super.destroy();
     }
