@@ -546,6 +546,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
+        if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
+            logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
+            this.setInPause(false);
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        }    
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime + SEEK_TIME;
