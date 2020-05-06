@@ -81839,7 +81839,7 @@ module.exports = function(module) {
 /*! exports provided: name, version, description, main, scripts, repository, author, license, bugs, homepage, devDependencies, dependencies, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"name\":\"@bbc/storyplayer\",\"version\":\"0.12.1\",\"description\":\"Object Based Media player\",\"main\":\"dist/romper.js\",\"scripts\":{\"prepublish\":\"npm run build\",\"build\":\"webpack\",\"test\":\"concurrently --names \\\"eslint,jest,sass-lint\\\" -c \\\"blue.bgWhite,magenta.bgWhite,black.bgWhite\\\" --prefix \\\"[{name}]\\\" \\\"yarn test:eslint\\\" \\\"yarn test:jest\\\" \\\"yarn test:sass-lint\\\"\",\"test-noinstall\":\"concurrently --names \\\"eslint,jest,sass-lint\\\" -c \\\"blue.bgWhite,magenta.bgWhite,black.bgWhite\\\" --prefix \\\"[{name}]\\\" \\\"yarn test:eslint\\\" \\\"yarn test:jest\\\" \\\"yarn test:sass-lint\\\"\",\"test-watch\":\"nodemon -L --watch src --exec yarn test-noinstall\",\"test:eslint\":\"eslint src/ spec/\",\"test:jest\":\"jest\",\"test:sass-lint\":\"sass-lint -v\",\"demo\":\"yarn build && rm -f ./tmp/*.json && node demos.js\",\"watch\":\"concurrently \\\"webpack --watch --watch-poll 500 --progress --profile --bail\\\" \\\"jest --watch\\\" \\\"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\\\" \\\"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\\\"\",\"dev\":\"webpack --watch --watch-poll 500 --progress --profile --bail\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/bbc/rd-ux-storyplayer.git\"},\"author\":\"BBC R&D\",\"license\":\"UNLICENSED\",\"bugs\":{\"url\":\"https://github.com/bbc/rd-ux-storyplayer/issues\"},\"homepage\":\"https://github.com/bbc/rd-ux-storyplayer#readme\",\"devDependencies\":{\"@babel/cli\":\"^7.7.7\",\"@babel/core\":\"^7.7.7\",\"@babel/node\":\"^7.7.7\",\"@babel/plugin-proposal-object-rest-spread\":\"^7.7.7\",\"@babel/plugin-transform-flow-strip-types\":\"^7.7.4\",\"@babel/plugin-transform-modules-commonjs\":\"^7.7.5\",\"@babel/plugin-transform-runtime\":\"^7.7.6\",\"@babel/preset-env\":\"^7.7.7\",\"@babel/runtime\":\"^7.7.7\",\"babel-eslint\":\"^10.0.3\",\"babel-jest\":\"^24.9.0\",\"babel-loader\":\"^8.0.6\",\"body-parser\":\"^1.19.0\",\"chai\":\"^4.2.0\",\"concurrently\":\"^5.0.2\",\"core-js\":\"^3.6.1\",\"css-loader\":\"^3.4.0\",\"eslint\":\"^6.8.0\",\"eslint-config-airbnb-base\":\"^14.0.0\",\"eslint-config-prettier\":\"^6.9.0\",\"eslint-plugin-babel\":\"^5.3.0\",\"eslint-plugin-flowtype\":\"^4.5.3\",\"eslint-plugin-import\":\"^2.19.1\",\"file-loader\":\"4\",\"flow-bin\":\"^0.114.0\",\"flow-typed\":\"^2.6.2\",\"jest-cli\":\"^24.9.0\",\"jest-junit-reporter\":\"^1.1.0\",\"jsoneditor\":\"^8.1.1\",\"mini-css-extract-plugin\":\"^0.9.0\",\"node-sass\":\"^4.13.0\",\"nodemon\":\"2.0.2\",\"regenerator-runtime\":\"^0.13.3\",\"sass-lint\":\"^1.13.1\",\"sass-loader\":\"^8.0.0\",\"sinon\":\"^8.0.2\",\"sinon-chai\":\"^3.4.0\",\"style-loader\":\"^1.1.2\",\"webpack\":\"^4.41.5\",\"webpack-cli\":\"^3.3.10\"},\"dependencies\":{\"browser-bunyan\":\"^1.5.3\",\"browserify-css\":\"^0.15.0\",\"dashjs\":\"^3.0.1\",\"express\":\"^4.17.1\",\"hls.js\":\"^0.13.0\",\"json-logic-js\":\"^1.0.11\",\"shaka-player\":\"^2.5.7\",\"three\":\"^0.112.1\",\"uuid\":\"^3.3.3\"}}");
+module.exports = JSON.parse("{\"name\":\"@bbc/storyplayer\",\"version\":\"0.12.7\",\"description\":\"Object Based Media player\",\"main\":\"dist/romper.js\",\"scripts\":{\"prepublish\":\"npm run build\",\"build\":\"webpack\",\"test\":\"concurrently --names \\\"eslint,jest,sass-lint\\\" -c \\\"blue.bgWhite,magenta.bgWhite,black.bgWhite\\\" --prefix \\\"[{name}]\\\" \\\"yarn test:eslint\\\" \\\"yarn test:jest\\\" \\\"yarn test:sass-lint\\\"\",\"test-noinstall\":\"concurrently --names \\\"eslint,jest,sass-lint\\\" -c \\\"blue.bgWhite,magenta.bgWhite,black.bgWhite\\\" --prefix \\\"[{name}]\\\" \\\"yarn test:eslint\\\" \\\"yarn test:jest\\\" \\\"yarn test:sass-lint\\\"\",\"test-watch\":\"nodemon -L --watch src --exec yarn test-noinstall\",\"test:eslint\":\"eslint src/ spec/\",\"test:jest\":\"jest\",\"test:sass-lint\":\"sass-lint -v\",\"demo\":\"yarn build && rm -f ./tmp/*.json && node demos.js\",\"watch\":\"concurrently \\\"webpack --watch --watch-poll 500 --progress --profile --bail\\\" \\\"jest --watch\\\" \\\"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\\\" \\\"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\\\"\",\"dev\":\"webpack --watch --watch-poll 500 --progress --profile --bail\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/bbc/rd-ux-storyplayer.git\"},\"author\":\"BBC R&D\",\"license\":\"UNLICENSED\",\"bugs\":{\"url\":\"https://github.com/bbc/rd-ux-storyplayer/issues\"},\"homepage\":\"https://github.com/bbc/rd-ux-storyplayer#readme\",\"devDependencies\":{\"@babel/cli\":\"^7.7.7\",\"@babel/core\":\"^7.7.7\",\"@babel/node\":\"^7.7.7\",\"@babel/plugin-proposal-object-rest-spread\":\"^7.7.7\",\"@babel/plugin-transform-flow-strip-types\":\"^7.7.4\",\"@babel/plugin-transform-modules-commonjs\":\"^7.7.5\",\"@babel/plugin-transform-runtime\":\"^7.7.6\",\"@babel/preset-env\":\"^7.7.7\",\"@babel/runtime\":\"^7.7.7\",\"babel-eslint\":\"^10.0.3\",\"babel-jest\":\"^24.9.0\",\"babel-loader\":\"^8.0.6\",\"body-parser\":\"^1.19.0\",\"chai\":\"^4.2.0\",\"concurrently\":\"^5.0.2\",\"core-js\":\"^3.6.1\",\"css-loader\":\"^3.4.0\",\"eslint\":\"^6.8.0\",\"eslint-config-airbnb-base\":\"^14.0.0\",\"eslint-config-prettier\":\"^6.9.0\",\"eslint-plugin-babel\":\"^5.3.0\",\"eslint-plugin-flowtype\":\"^4.5.3\",\"eslint-plugin-import\":\"^2.19.1\",\"file-loader\":\"4\",\"flow-bin\":\"^0.114.0\",\"flow-typed\":\"^2.6.2\",\"jest-cli\":\"^24.9.0\",\"jest-junit-reporter\":\"^1.1.0\",\"jsoneditor\":\"^8.1.1\",\"mini-css-extract-plugin\":\"^0.9.0\",\"node-sass\":\"^4.13.0\",\"nodemon\":\"2.0.2\",\"regenerator-runtime\":\"^0.13.3\",\"sass-lint\":\"^1.13.1\",\"sass-loader\":\"^8.0.0\",\"sinon\":\"^8.0.2\",\"sinon-chai\":\"^3.4.0\",\"style-loader\":\"^1.1.2\",\"webpack\":\"^4.41.5\",\"webpack-cli\":\"^3.3.10\"},\"dependencies\":{\"browser-bunyan\":\"^1.5.3\",\"browserify-css\":\"^0.15.0\",\"dashjs\":\"^3.0.1\",\"express\":\"^4.17.1\",\"hls.js\":\"^0.13.0\",\"json-logic-js\":\"^1.0.11\",\"shaka-player\":\"^2.5.7\",\"three\":\"^0.112.1\",\"uuid\":\"^3.3.3\"}}");
 
 /***/ }),
 
@@ -81860,7 +81860,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var types = ['STORY_NAVIGATION', 'RENDERER_ACTION', 'USER_ACTION', 'SEGMENT_COMPLETION'];
-var names = ['NARRATIVE_ELEMENT_CHANGE', 'ENTER_SUB_STORY', 'STORY_END', 'SWITCHABLE_REPRESENTATION_SWITCH', 'START_BEHAVIOUR_PHASE_STARTED', 'START_BEHAVIOUR_PHASE_ENDED', 'COMPLETE_BEHAVIOUR_PHASE_STARTED', 'COMPLETE_BEHAVIOUR_PHASE_ENDED', 'DURING_BEHAVIOUR_STARTED', 'VIDEO_START', 'VIDEO_PAUSE', 'VIDEO_UNPAUSE', 'VIDEO_END', 'PLAY_PAUSE_BUTTON_CLICKED', 'SEEK_FORWARD_BUTTON_CLICKED', 'SEEK_BACKWARD_BUTTON_CLICKED', 'REPEAT_BUTTON_CLICKED', 'BACK_BUTTON_CLICKED', 'NEXT_BUTTON_CLICKED', 'START_BUTTON_CLICKED', 'SUBTITLES_BUTTON_CLICKED', 'FULLSCREEN_BUTTON_CLICKED', 'VOLUME_CHANGED', 'VOLUME_MUTE_TOGGLED', 'VIDEO_SCRUBBED', 'OVERLAY_BUTTON_CLICKED', 'OVERLAY_DEACTIVATED', 'BUTTONS_ACTIVATED', 'BUTTONS_DEACTIVATED', 'CHANGE_CHAPTER_BUTTON_CLICKED', 'SWITCH_VIEW_BUTTON_CLICKED', 'LINK_CHOICE_CLICKED', 'BEHAVIOUR_CONTINUE_BUTTON_CLICKED', 'BEHAVIOUR_CANCEL_BUTTON_CLICKED', 'VR_ORIENTATION_CHANGED', 'VR_SCENE_TOGGLE_HIDDEN', 'CHANGE_VR_MODE', 'BROWSER_VISIBILITY_CHANGE', 'WINDOW_ORIENTATION_CHANGE', 'USER_SET_VARIABLE', 'VARIABLE_PANEL_NEXT_CLICKED', 'VARIABLE_PANEL_BACK_CLICKED', 'SOCIAL_SHARE_CLICKED', 'OUTWARD_LINK_CLICKED'];
+var names = ['NARRATIVE_ELEMENT_CHANGE', 'ENTER_SUB_STORY', 'STORY_END', 'SWITCHABLE_REPRESENTATION_SWITCH', 'START_BEHAVIOUR_PHASE_STARTED', 'START_BEHAVIOUR_PHASE_ENDED', 'COMPLETE_BEHAVIOUR_PHASE_STARTED', 'DURING_BEHAVIOUR_STARTED', 'VIDEO_PAUSE', 'VIDEO_UNPAUSE', 'PLAY_PAUSE_BUTTON_CLICKED', 'SEEK_FORWARD_BUTTON_CLICKED', 'SEEK_BACKWARD_BUTTON_CLICKED', 'BACK_BUTTON_CLICKED', 'NEXT_BUTTON_CLICKED', 'START_BUTTON_CLICKED', 'SUBTITLES_BUTTON_CLICKED', 'FULLSCREEN_BUTTON_CLICKED', 'VOLUME_CHANGED', 'VOLUME_MUTE_TOGGLED', 'VIDEO_SCRUBBED', 'OVERLAY_BUTTON_CLICKED', 'OVERLAY_DEACTIVATED', 'BUTTONS_ACTIVATED', 'BUTTONS_DEACTIVATED', 'CHANGE_CHAPTER_BUTTON_CLICKED', 'SWITCH_VIEW_BUTTON_CLICKED', 'LINK_CHOICE_CLICKED', 'BEHAVIOUR_CONTINUE_BUTTON_CLICKED', 'BEHAVIOUR_CANCEL_BUTTON_CLICKED', 'VR_ORIENTATION_CHANGED', 'BROWSER_VISIBILITY_CHANGE', 'WINDOW_ORIENTATION_CHANGE', 'USER_SET_VARIABLE', 'VARIABLE_PANEL_NEXT_CLICKED', 'VARIABLE_PANEL_BACK_CLICKED', 'SOCIAL_SHARE_CLICKED', 'OUTWARD_LINK_CLICKED'];
 var AnalyticEvents = {
   names: {},
   types: {}
@@ -81873,6 +81873,234 @@ names.forEach(function (name) {
 });
 var _default = AnalyticEvents;
 exports.default = _default;
+
+/***/ }),
+
+/***/ "./src/AnalyticsHandler.js":
+/*!*********************************!*\
+  !*** ./src/AnalyticsHandler.js ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(/*! core-js/modules/es.symbol */ "./node_modules/core-js/modules/es.symbol.js");
+
+__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
+
+__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
+
+__webpack_require__(/*! core-js/modules/es.date.to-string */ "./node_modules/core-js/modules/es.date.to-string.js");
+
+__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
+
+__webpack_require__(/*! core-js/modules/es.object.get-own-property-descriptor */ "./node_modules/core-js/modules/es.object.get-own-property-descriptor.js");
+
+__webpack_require__(/*! core-js/modules/es.object.get-own-property-descriptors */ "./node_modules/core-js/modules/es.object.get-own-property-descriptors.js");
+
+__webpack_require__(/*! core-js/modules/es.object.keys */ "./node_modules/core-js/modules/es.object.keys.js");
+
+__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _AnalyticEvents = _interopRequireDefault(__webpack_require__(/*! ./AnalyticEvents */ "./src/AnalyticEvents.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var AnalyticsHandler =
+/*#__PURE__*/
+function () {
+  function AnalyticsHandler(analytics, controller) {
+    _classCallCheck(this, AnalyticsHandler);
+
+    this._analytics = analytics;
+    this._controller = controller;
+    this._segmentSummaryData = {};
+    this._lastpausedTime = Date.now();
+    this._lastHideTime = Date.now();
+    this._paused = false;
+  } // handles an event by taking an Object with attributes
+  //  - type
+  //  - name
+  //  - from
+  //  - to
+  //  - data (Object)
+
+
+  _createClass(AnalyticsHandler, [{
+    key: "handleAnalyticsEvent",
+    value: function handleAnalyticsEvent(logData) {
+      var appendedPayload = this._enhanceAnalytics(logData);
+
+      this._handleSegmentSummaries(appendedPayload);
+
+      this._analytics(appendedPayload);
+    } // add current NE and Representation ids
+
+  }, {
+    key: "_enhanceAnalytics",
+    value: function _enhanceAnalytics(logData) {
+      var repId = logData.current_representation;
+
+      var renderer = this._controller.getCurrentRenderer();
+
+      if (repId === undefined && renderer && renderer.getRepresentation()) {
+        repId = renderer.getRepresentation().id;
+      }
+
+      var neId = logData.current_narrative_element;
+
+      if (neId === undefined) {
+        neId = this._controller.getCurrentNarrativeElement() ? this._controller.getCurrentNarrativeElement().id : 'null';
+      }
+
+      var appendedData = _objectSpread({}, logData, {
+        current_narrative_element: neId,
+        current_representation: repId
+      });
+
+      return appendedData;
+    }
+  }, {
+    key: "_sumpausedTime",
+    value: function _sumpausedTime() {
+      var pausedTime = Date.now() - this._lastpausedTime;
+
+      var totalPausedTime = this._segmentSummaryData.pausedTime + pausedTime;
+      this._segmentSummaryData.pausedTime = totalPausedTime;
+    }
+  }, {
+    key: "_sumHiddenTime",
+    value: function _sumHiddenTime() {
+      var hiddenTime = Date.now() - this._lastHideTime;
+
+      var totalHiddenTime = this._segmentSummaryData.hiddenTime + hiddenTime;
+      this._segmentSummaryData.hiddenTime = totalHiddenTime;
+    } // log events that happen within the lifetime of a NarrativeElement so we can 
+    // store a single analytics event with some summary data
+
+  }, {
+    key: "_handleSegmentSummaries",
+    value: function _handleSegmentSummaries(appendedData) {
+      // count number of each user event type
+      if (appendedData.type === _AnalyticEvents.default.types.USER_ACTION) {
+        if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
+          this._segmentSummaryData[appendedData.name] += 1;
+        } else {
+          this._segmentSummaryData[appendedData.name] = 1;
+        }
+      } // log play/pause time (pause time does not include time when browser 
+      // is not visible)
+
+
+      if (appendedData.name === _AnalyticEvents.default.names.VIDEO_PAUSE) {
+        this._lastpausedTime = Date.now();
+        this._paused = true;
+      }
+
+      if (appendedData.name === _AnalyticEvents.default.names.VIDEO_UNPAUSE) {
+        this._paused = false;
+
+        this._sumpausedTime();
+      } // log time browser is visible/hidden (according to browser's 
+      // visibilitychange event)
+
+
+      if (appendedData.name === _AnalyticEvents.default.names.BROWSER_VISIBILITY_CHANGE && appendedData.to === 'hidden') {
+        this._lastHideTime = Date.now(); // stop pause time and accrue what has accumulated already
+
+        if (this._paused) {
+          this._sumpausedTime();
+        }
+      } else if (appendedData.name === _AnalyticEvents.default.names.BROWSER_VISIBILITY_CHANGE) {
+        // restart pause time if appropriate
+        if (this._paused) {
+          this._lastpausedTime = Date.now();
+        }
+
+        this._sumHiddenTime();
+      } // starting experience: log start time and first ne
+
+
+      if (appendedData.name === _AnalyticEvents.default.names.START_BUTTON_CLICKED) {
+        this._resetSegmentData();
+      } // reached NE end - save data
+
+
+      if (appendedData.name === _AnalyticEvents.default.names.NARRATIVE_ELEMENT_CHANGE || appendedData.name === _AnalyticEvents.default.names.STORY_END) {
+        this._saveSummaryData(appendedData);
+      }
+    }
+  }, {
+    key: "_resetSegmentData",
+    value: function _resetSegmentData() {
+      this._segmentSummaryData = {
+        startTime: Date.now(),
+        pausedTime: 0,
+        hiddenTime: 0
+      };
+      this._lastpausedTime = Date.now();
+      this._lastHideTime = Date.now();
+      this._paused = false;
+    }
+  }, {
+    key: "_saveSummaryData",
+    value: function _saveSummaryData(appendedData) {
+      var _this$_segmentSummary = this._segmentSummaryData,
+          startTime = _this$_segmentSummary.startTime,
+          pausedTime = _this$_segmentSummary.pausedTime,
+          hiddenTime = _this$_segmentSummary.hiddenTime;
+      var duration = Date.now() - startTime;
+      this._segmentSummaryData.duration = duration;
+      this._segmentSummaryData.playingTime = duration - pausedTime - hiddenTime;
+      this._segmentSummaryData.visibleTime = duration - hiddenTime;
+
+      if (!this._segmentSummaryData.chapter) {
+        this._segmentSummaryData.chapter = appendedData.from;
+      }
+
+      var summaryData = {
+        type: _AnalyticEvents.default.types.SEGMENT_COMPLETION,
+        name: appendedData.name,
+        from: appendedData.from,
+        to: appendedData.to,
+        data: this._segmentSummaryData,
+        current_narrative_element: appendedData.current_narrative_element,
+        current_representation: appendedData.current_representation
+      };
+
+      if (summaryData.current_representation) {
+        this._analytics(summaryData);
+      }
+
+      this._resetSegmentData();
+
+      this._segmentSummaryData.chapter = appendedData.to;
+    }
+  }]);
+
+  return AnalyticsHandler;
+}();
+
+exports.default = AnalyticsHandler;
 
 /***/ }),
 
@@ -81973,6 +82201,8 @@ var _SessionManager = _interopRequireWildcard(__webpack_require__(/*! ./SessionM
 
 var _utils = __webpack_require__(/*! ./utils */ "./src/utils.js");
 
+var _AnalyticsHandler = _interopRequireDefault(__webpack_require__(/*! ./AnalyticsHandler */ "./src/AnalyticsHandler.js"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -81980,6 +82210,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -81996,12 +82232,6 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -82048,8 +82278,6 @@ function (_EventEmitter) {
     _this._storyReasonerFactory = storyReasonerFactory;
     _this._representationReasoner = representationReasoner;
     _this._fetchers = fetchers;
-    _this._analytics = analytics;
-    _this._enhancedAnalytics = _this._enhancedAnalytics.bind(_assertThisInitialized(_this));
     _this._handleVariableChanged = _this._handleVariableChanged.bind(_assertThisInitialized(_this));
     _this._handleRendererCompletedEvent = _this._handleRendererCompletedEvent.bind(_assertThisInitialized(_this));
     _this._handleRendererNextButtonEvent = _this._handleRendererNextButtonEvent.bind(_assertThisInitialized(_this));
@@ -82057,6 +82285,8 @@ function (_EventEmitter) {
 
     _this._startStoryEventListener = _this._startStoryEventListener.bind(_assertThisInitialized(_this));
     _this._handleStoryEnd = _this._handleStoryEnd.bind(_assertThisInitialized(_this));
+    _this._analyticsHandler = new _AnalyticsHandler.default(analytics, _assertThisInitialized(_this));
+    _this._handleAnalytics = _this._handleAnalytics.bind(_assertThisInitialized(_this));
     _this._assetUrls = assetUrls;
     _this._privacyNotice = privacyNotice;
     _this.handleKeys = handleKeys;
@@ -82065,80 +82295,13 @@ function (_EventEmitter) {
     _this._createRenderManager();
 
     _this._storyIconRendererCreated = false;
-    _this._segmentSummaryData = {};
     return _this;
   }
 
   _createClass(Controller, [{
-    key: "_enhancedAnalytics",
-    value: function _enhancedAnalytics(logData) {
-      var repId = logData.current_representation;
-      var renderer = this.getCurrentRenderer();
-
-      if (repId === undefined && renderer && renderer.getRepresentation()) {
-        repId = renderer.getRepresentation().id;
-      }
-
-      var neId = logData.current_narrative_element;
-
-      if (neId === undefined) {
-        neId = this.getCurrentNarrativeElement() ? this.getCurrentNarrativeElement().id : 'null';
-      }
-
-      var appendedData = _objectSpread({}, logData, {
-        current_narrative_element: neId,
-        current_representation: repId
-      });
-
-      this._handleSegmentSummaries(appendedData);
-
-      this._analytics(appendedData);
-    }
-  }, {
-    key: "_handleSegmentSummaries",
-    value: function _handleSegmentSummaries(appendedData) {
-      if (appendedData.type === _AnalyticEvents.default.types.USER_ACTION) {
-        if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
-          this._segmentSummaryData[appendedData.name] += 1;
-        } else {
-          this._segmentSummaryData[appendedData.name] = 1;
-        }
-      }
-
-      if (appendedData.name === _AnalyticEvents.default.names.START_BUTTON_CLICKED) {
-        // log start time and first ne
-        this._segmentSummaryData = {
-          startTime: Date.now(),
-          current_narrative_element: appendedData.current_narrative_element,
-          current_representation: appendedData.current_representation
-        };
-      }
-
-      if (appendedData.name === _AnalyticEvents.default.names.NARRATIVE_ELEMENT_CHANGE || appendedData.name === _AnalyticEvents.default.names.STORY_END) {
-        // work out and save summary data
-        this._segmentSummaryData.duration = Date.now() - this._segmentSummaryData.startTime;
-
-        if (!this._segmentSummaryData.chapter) {
-          this._segmentSummaryData.chapter = appendedData.from;
-        }
-
-        var summaryData = {
-          type: _AnalyticEvents.default.types.SEGMENT_COMPLETION,
-          name: appendedData.name,
-          data: this._segmentSummaryData,
-          current_narrative_element: appendedData.current_narrative_element,
-          current_representation: appendedData.current_representation
-        };
-
-        if (summaryData.current_representation) {
-          this._analytics(summaryData);
-        }
-
-        this._segmentSummaryData = {
-          startTime: Date.now(),
-          chapter: appendedData.to
-        };
-      }
+    key: "_handleAnalytics",
+    value: function _handleAnalytics(logData) {
+      this._analyticsHandler.handleAnalyticsEvent(logData);
     }
   }, {
     key: "restart",
@@ -82423,7 +82586,7 @@ function (_EventEmitter) {
   }, {
     key: "_createRenderManager",
     value: function _createRenderManager() {
-      this._renderManager = new _RenderManager.default(this, this._target, this._representationReasoner, this._fetchers, this._enhancedAnalytics, this._assetUrls, this._privacyNotice);
+      this._renderManager = new _RenderManager.default(this, this._target, this._representationReasoner, this._fetchers, this._handleAnalytics, this._assetUrls, this._privacyNotice);
     }
   }, {
     key: "_createSessionManager",
@@ -82590,19 +82753,25 @@ function (_EventEmitter) {
     key: "_logNEChange",
     value: function _logNEChange(oldNarrativeElement, newNarrativeElement) {
       var oldName = 'null';
+      var oldId = 'null';
 
       if (oldNarrativeElement) {
+        oldId = oldNarrativeElement.id;
         oldName = oldNarrativeElement.name;
       }
 
       var logData = {
         type: _AnalyticEvents.default.types.STORY_NAVIGATION,
         name: _AnalyticEvents.default.names.NARRATIVE_ELEMENT_CHANGE,
-        from: oldName,
-        to: newNarrativeElement.name
+        from: oldId,
+        to: newNarrativeElement.id,
+        data: {
+          fromName: oldName,
+          toName: newNarrativeElement.name
+        }
       };
 
-      this._enhancedAnalytics(logData);
+      this._handleAnalytics(logData);
 
       this.emit(_Events.REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     } // try to get the narrative element object with the given id
@@ -83288,10 +83457,12 @@ function (_EventEmitter) {
     value: function _handleStoryEnd() {
       var logData = {
         type: _AnalyticEvents.default.types.STORY_NAVIGATION,
-        name: _AnalyticEvents.default.names.STORY_END
+        name: _AnalyticEvents.default.names.STORY_END,
+        from: this._currentNarrativeElement.id,
+        to: 'STORY_END'
       };
 
-      this._enhancedAnalytics(logData);
+      this._handleAnalytics(logData);
 
       _logger.default.warn('Story Ended!');
 
@@ -85104,7 +85275,7 @@ function (_EventEmitter) {
         name: _AnalyticEvents.default.names[userEventName],
         from: fromId == null ? 'not_set' : fromId,
         to: toId == null ? 'not_set' : toId,
-        information: JSON.stringify(information)
+        data: information
       };
 
       this._analytics(logData);
@@ -86218,7 +86389,7 @@ exports.default = void 0;
 
 var _events = _interopRequireDefault(__webpack_require__(/*! events */ "./node_modules/events/events.js"));
 
-var _BaseRenderer = _interopRequireDefault(__webpack_require__(/*! ./renderers/BaseRenderer */ "./src/renderers/BaseRenderer.js"));
+var _BaseRenderer = _interopRequireWildcard(__webpack_require__(/*! ./renderers/BaseRenderer */ "./src/renderers/BaseRenderer.js"));
 
 var _RendererFactory = _interopRequireDefault(__webpack_require__(/*! ./renderers/RendererFactory */ "./src/renderers/RendererFactory.js"));
 
@@ -86321,7 +86492,13 @@ function (_EventEmitter) {
         var _rend$getCurrentTime = rend.getCurrentTime(),
             currentTime = _rend$getCurrentTime.currentTime;
 
-        if (choiceTime > 0 && currentTime < choiceTime) {
+        if (rend.getInPause() && rend.phase === _BaseRenderer.RENDERER_PHASES.START) {
+          _logger.default.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
+
+
+          rend.setInPause(false);
+          rend.emit(_RendererEvents.default.COMPLETE_START_BEHAVIOURS);
+        } else if (choiceTime > 0 && currentTime < choiceTime) {
           _logger.default.info('Next button clicked on element with choices, skip to them');
 
           rend.setCurrentTime(choiceTime - 0.25);
@@ -89353,6 +89530,8 @@ exports.default = void 0;
 
 var _BaseBehaviour2 = _interopRequireDefault(__webpack_require__(/*! ./BaseBehaviour */ "./src/behaviours/BaseBehaviour.js"));
 
+var _BaseRenderer = _interopRequireDefault(__webpack_require__(/*! ../renderers/BaseRenderer */ "./src/renderers/BaseRenderer.js"));
+
 var _logger = _interopRequireDefault(__webpack_require__(/*! ../logger */ "./src/logger.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -89392,11 +89571,14 @@ function (_BaseBehaviour) {
 
   _createClass(PauseBehaviour, [{
     key: "start",
-    value: function start() {
+    value: function start(renderer) {
+      this._renderer = renderer;
       var pause = parseFloat(this._behaviourDefinition.pauseTime);
 
       if (pause < 0) {
         _logger.default.info('negative pause time: pause behaviour will never complete');
+
+        this._renderer.setInPause(true);
       } else {
         this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
       }
@@ -91124,8 +91306,6 @@ MediaTypesArray.forEach(function (name) {
 });
 
 var getMediaType = function getMediaType(src) {
-  console.log('SOURCE', src);
-
   if (src.indexOf('.m3u8') !== -1) {
     return MediaTypes.HLS;
   }
@@ -91366,10 +91546,7 @@ function (_BasePlayoutEngine) {
           if (currentTime > start && currentTime < end) {
             validPlayback = true;
           }
-        } // eslint-disable-next-line no-console
-
-
-        console.log("Media Type: ".concat(this._activePlayer.mediaType));
+        }
 
         switch (this._activePlayer.mediaType) {
           case MediaTypes.DASH:
@@ -91784,7 +91961,7 @@ function (_BasePlayoutEngine) {
 
       if (promise !== undefined) {
         promise.then(function () {}).catch(function (error) {
-          _logger.default.warn(error, 'DOMPlayotEngine Not got permission to play'); // Auto-play was prevented
+          _logger.default.warn(error, 'DOMSwitchPlayotEngine Not got permission to play'); // Auto-play was prevented
 
         });
       }
@@ -91817,7 +91994,7 @@ function (_BasePlayoutEngine) {
             mediaElement.play().then(function () {
               clearInterval(timeoutId);
             }).catch(function (error) {
-              _logger.default.warn(error, ' DOMPlayoutEngine set Timer Not got permission to play'); // Auto-play was prevented
+              _logger.default.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play'); // Auto-play was prevented
 
 
               clearInterval(timeoutId);
@@ -94781,7 +94958,7 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = exports.RENDERER_PHASES = void 0;
 
 var _events = _interopRequireDefault(__webpack_require__(/*! events */ "./node_modules/events/events.js"));
 
@@ -94851,6 +95028,15 @@ var getBehaviourEndTime = function getBehaviourEndTime(behaviour) {
 
   return undefined;
 };
+
+var RENDERER_PHASES = {
+  CONSTRUCTED: 'CONSTRUCTED',
+  START: 'START',
+  MAIN: 'MAIN',
+  END: 'END',
+  ENDED: 'ENDED'
+};
+exports.RENDERER_PHASES = RENDERER_PHASES;
 
 var BaseRenderer =
 /*#__PURE__*/
@@ -94936,6 +95122,8 @@ function (_EventEmitter) {
     _this._preloadIconAssets();
 
     _this._loopCounter = 0;
+    _this.phase = RENDERER_PHASES.CONSTRUCTED;
+    _this._inPauseBehaviourState = false;
     return _this;
   }
 
@@ -94943,6 +95131,7 @@ function (_EventEmitter) {
     key: "willStart",
     value: function willStart(elementName, elementId) {
       this.inVariablePanel = false;
+      this.phase = RENDERER_PHASES.START;
 
       this._runStartBehaviours();
 
@@ -94988,6 +95177,7 @@ function (_EventEmitter) {
   }, {
     key: "start",
     value: function start() {
+      this.phase = RENDERER_PHASES.MAIN;
       this.emit(_RendererEvents.default.STARTED);
       this._hasEnded = false;
 
@@ -95015,6 +95205,8 @@ function (_EventEmitter) {
   }, {
     key: "end",
     value: function end() {
+      this.phase = RENDERER_PHASES.ENDED;
+
       this._player.disconnectScrubBar(this);
 
       this._clearBehaviourElements();
@@ -95362,6 +95554,7 @@ function (_EventEmitter) {
   }, {
     key: "complete",
     value: function complete() {
+      this.phase = RENDERER_PHASES.END;
       this._hasEnded = true;
 
       this._timer.pause();
@@ -96080,12 +96273,18 @@ function (_EventEmitter) {
       var assetCollectionId = this.resolveBehaviourAssetCollectionMappingId(behaviourAssetCollectionMappingId);
 
       if (assetCollectionId) {
-        this._fetchAssetCollection(assetCollectionId).then(function (image) {
-          if (image.assets.image_src) {
-            _this13._overlayImage(image.assets.image_src, behaviour.id);
-
-            callback();
+        this._fetchAssetCollection(assetCollectionId).then(function (assetCollection) {
+          if (assetCollection.assets.image_src) {
+            return _this13._fetchMedia(assetCollection.assets.image_src);
           }
+
+          return Promise.resolve();
+        }).then(function (imageUrl) {
+          if (imageUrl) {
+            _this13._overlayImage(imageUrl, behaviour.id);
+          }
+
+          callback();
         });
       }
     }
@@ -96205,6 +96404,17 @@ function (_EventEmitter) {
     key: "deleteTimeEventListener",
     value: function deleteTimeEventListener(listenerId) {
       this._timer.deleteTimeEventListener(listenerId);
+    } // the renderer is waiting in an infinite pause behaviour
+
+  }, {
+    key: "setInPause",
+    value: function setInPause(paused) {
+      this._inPauseBehaviourState = paused;
+    }
+  }, {
+    key: "getInPause",
+    value: function getInPause() {
+      return this._inPauseBehaviourState;
     }
   }, {
     key: "seekEventHandler",
@@ -97002,6 +97212,8 @@ __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/c
 
 __webpack_require__(/*! core-js/modules/es.parse-float */ "./node_modules/core-js/modules/es.parse-float.js");
 
+__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
+
 __webpack_require__(/*! core-js/modules/es.reflect.get */ "./node_modules/core-js/modules/es.reflect.get.js");
 
 __webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
@@ -97069,12 +97281,15 @@ function (_BaseRenderer) {
 
     _this.renderAudioElement();
 
+    _this._renderBackgroundImage();
+
     _this._lastSetTime = 0;
     _this._inTime = 0;
     _this._outTime = -1;
 
     _this._playoutEngine.queuePlayout(_this._rendererId, {
       type: _BasePlayoutEngine.MEDIA_TYPES.FOREGROUND_A,
+      id: _this._representation.asset_collections.foreground_id,
       playPauseHandler: _this._handlePlayPauseButtonClicked
     });
 
@@ -97134,9 +97349,42 @@ function (_BaseRenderer) {
       _get(_getPrototypeOf(SimpleAudioRenderer.prototype), "seekEventHandler", this).call(this, this._inTime);
     }
   }, {
+    key: "_renderBackgroundImage",
+    value: function _renderBackgroundImage() {
+      var _this2 = this;
+
+      // eslint-disable-next-line max-len
+      _logger.default.info("Rendering background image for audio representation ".concat(this._representation.id));
+
+      if (this._representation.asset_collections.background_image) {
+        var assetCollectionId = this._representation.asset_collections.background_image;
+
+        this._fetchAssetCollection(assetCollectionId).then(function (image) {
+          if (image.assets.image_src) {
+            return _this2._fetchMedia(image.assets.image_src);
+          }
+
+          return Promise.resolve();
+        }).then(function (imageUrl) {
+          _this2._backgroundImage = document.createElement('img');
+          _this2._backgroundImage.className = 'romper-render-image';
+
+          _this2._setImageVisibility(false);
+
+          _this2._backgroundImage.src = imageUrl;
+
+          _this2._target.appendChild(_this2._backgroundImage);
+        }).catch(function (err) {
+          _logger.default.error(err, 'Notfound');
+        });
+      }
+    }
+  }, {
     key: "start",
     value: function start() {
       _get(_getPrototypeOf(SimpleAudioRenderer.prototype), "start", this).call(this);
+
+      this._setImageVisibility(true);
 
       this._playoutEngine.setPlayoutActive(this._rendererId);
 
@@ -97164,6 +97412,8 @@ function (_BaseRenderer) {
     value: function end() {
       _get(_getPrototypeOf(SimpleAudioRenderer.prototype), "end", this).call(this);
 
+      this._setImageVisibility(false);
+
       this._lastSetTime = 0;
 
       this._playoutEngine.setPlayoutInactive(this._rendererId);
@@ -97190,33 +97440,33 @@ function (_BaseRenderer) {
   }, {
     key: "renderAudioElement",
     value: function renderAudioElement() {
-      var _this2 = this;
+      var _this3 = this;
 
       // set audio source
       if (this._representation.asset_collections.foreground_id) {
         this._fetchAssetCollection(this._representation.asset_collections.foreground_id).then(function (fg) {
           if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-            _this2._setInTime(parseFloat(fg.meta.romper.in));
+            _this3._setInTime(parseFloat(fg.meta.romper.in));
           }
 
           if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-            _this2._setOutTime(parseFloat(fg.meta.romper.out));
+            _this3._setOutTime(parseFloat(fg.meta.romper.out));
           }
 
           if (fg.assets.audio_src) {
-            _this2._fetchMedia(fg.assets.audio_src, {
+            _this3._fetchMedia(fg.assets.audio_src, {
               mediaFormat: _browserCapabilities.MediaFormats.getFormat(),
               mediaType: _utils.AUDIO
             }).then(function (mediaUrl) {
-              _this2.populateAudioElement(mediaUrl, fg.loop);
+              _this3.populateAudioElement(mediaUrl, fg.loop);
             }).catch(function (err) {
               _logger.default.error(err, 'audio not found');
             });
           }
 
           if (fg.assets.sub_src) {
-            _this2._fetchMedia(fg.assets.sub_src).then(function (mediaUrl) {
-              _this2.populateAudioSubs(mediaUrl);
+            _this3._fetchMedia(fg.assets.sub_src).then(function (mediaUrl) {
+              _this3.populateAudioSubs(mediaUrl);
             }).catch(function (err) {
               _logger.default.error(err, 'Subs not found'); // this._subtitlesExist = false;
 
@@ -97225,6 +97475,12 @@ function (_BaseRenderer) {
           }
         });
       }
+    } // show/hide the background image
+
+  }, {
+    key: "_setImageVisibility",
+    value: function _setImageVisibility(visible) {
+      if (this._backgroundImage) this._backgroundImage.style.opacity = visible ? '1' : '0';
     }
   }, {
     key: "populateAudioElement",
@@ -97266,6 +97522,8 @@ function (_BaseRenderer) {
       this.end();
 
       this._playoutEngine.unqueuePlayout(this._rendererId);
+
+      if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
 
       _get(_getPrototypeOf(SimpleAudioRenderer.prototype), "destroy", this).call(this);
     }
