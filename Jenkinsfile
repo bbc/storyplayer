@@ -45,18 +45,6 @@ pipeline {
       }
     }
 
-    stage('Test') {
-      steps {
-        sh '''
-          yarn install \
-            --registry "$artifactory_publish" \
-            --production=false \
-            --non-interactive
-          yarn test
-        '''
-      }
-    }
-
     stage('Discover package versions') {
       steps {
         script {
