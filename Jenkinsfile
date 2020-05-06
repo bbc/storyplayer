@@ -68,7 +68,7 @@ pipeline {
           env.artifactory_version = sh(returnStdout: true, script: 'npm show "$package_name" version --reg "$artifactory_publish" || echo 0.0.0')
 
           env.last_version_commit_id = sh(returnStdout: true, script: 'git log -L 3,3:package.json | grep -e "^commit [0-9a-z]*$" | head -n 2 | tail -1 | awk \'{print $2}\'')
-          env.commit_messages = sh(returnStdout: true, script: 'git log --pretty=oneline ${last_version_commit_id}...master')
+          env.commit_messages = sh(returnStdout: true, script: 'git log --pretty=oneline $(git log -L 3,3:package.json | grep -e "^commit [0-9a-z]*$" | head -n 2 | tail -1 | awk \'{print $2}\')...master')
 
           println """
                     |----------------
