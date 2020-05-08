@@ -112,6 +112,21 @@ export default class SessionManager extends EventEmitter {
         });
     }
 
+    fetchUserId(): Promise<?[string]> {
+        return this.fetchExistingSessionState().then(resumeState => {
+            if (!resumeState) return null;
+            return resumeState.userid;
+        });
+    }
+    
+    setUserId(userid: string) {
+        this.fetchExistingSessionState().then(resumeState => {
+            // eslint-disable-next-line no-param-reassign
+            resumeState.userid = userid;
+            localStorage.setItem(this._storyId, JSON.stringify(resumeState));
+        });
+    }
+
     setSessionState(state: string) {
         this.sessionState = SESSION_STATE[state];
     }
