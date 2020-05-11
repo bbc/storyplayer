@@ -10,7 +10,7 @@ The player should create this folder on load, and subsequently check for the fol
 
 To build/package and publish the application we are using the `electron-builder` npm package. This allows us to package our code as an electron application. The module has various cli arguements we use to achieve this. When we want to compile the code locally we can run the scripts as follows:
 
-```json
+```js
 "scripts": {
     "compile": "electron src/mainProcess/main.js", // compile the application
     "build": "electron-builder build", // build on the current platform
@@ -20,7 +20,7 @@ To build/package and publish the application we are using the `electron-builder`
 ```
 
 The build steps read from the `build` key in the package.json for the electron-app. These are outlined below
-```json
+```js
 {
     "build": {
         "productName": "StoryPlayer", // name of the application
