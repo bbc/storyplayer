@@ -25,7 +25,7 @@ The build steps read from the `build` key in the package.json for the electron-a
     "build": {
         "productName": "StoryPlayer", // name of the application
         "appId": "com.bbc.storyplayer", // id used by each platform
-        // mac specific code
+        // mac specific config
         "mac": {
             "category": "public.app-category.video", // what do we define our app as for apple to sort
             "asar": true, // zip this up into an archive
@@ -39,6 +39,7 @@ The build steps read from the `build` key in the package.json for the electron-a
                 "path": "applications/macos"
             }
         },
+        // windows specific config
         "win": {
             "target": "nsis", // we only target this, the others aren't needed
             "asar": true, // package it up like macos
