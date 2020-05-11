@@ -5,17 +5,19 @@
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
+  "author": "FXT",
   "license": "MIT",
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder build",
-    "dist:all": "electron-builder build -mwl"
+    "build": "electron-builder build",
+    "build:all": "electron-builder build -mwl",
+    "build:release": "export $(cat config.env | xargs) && electron-builder build -mwl"
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {
     "productName": "StoryPlayer",
-    "appId": "com.storyplayer",
+    "appId": "com.bbc.storyplayer",
     "mac": {
       "category": "public.app-category.video",
       "identity": null
