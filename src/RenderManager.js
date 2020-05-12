@@ -78,6 +78,8 @@ export default class RenderManager extends EventEmitter {
 
     _handleVisibilityChange: Function;
 
+    _handleClose: Function;
+
     _isPlaying: boolean;
 
     constructor(
@@ -97,6 +99,7 @@ export default class RenderManager extends EventEmitter {
         this._fetchers = fetchers;
         this._analytics = analytics;
         this._assetUrls = assetUrls;
+        this._handleClose = this._handleClose.bind(this);
         this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
         this._handleOrientationChange = this._handleOrientationChange.bind(this);
         this._setVolumePersistence = this._setVolumePersistence.bind(this);
@@ -177,6 +180,7 @@ export default class RenderManager extends EventEmitter {
         }
 
         window.addEventListener('orientationchange', this._handleOrientationChange, false);
+        window.addEventListener('beforeunload', this._handleClose, false);
 
         this._player.on(REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
             this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
@@ -230,6 +234,20 @@ export default class RenderManager extends EventEmitter {
             from: isVisible ? 'hidden' : 'visible',
             to: isVisible ? 'visible' : 'hidden',
         });
+    }
+
+    // handle browser close
+    _handleClose(ev: Event) {
+        const confirmationMessage = "Are you sure you want to exit this experience?";
+        this._analytics({
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.BROWSER_CLOSE,
+            from: 'unset',
+            to: 'unset',
+        });
+        // eslint-disable-next-line no-param-reassign
+        (ev || window.event).returnValue = confirmationMessage; // Gecko + IE
+        return confirmationMessage; // Webkit, Safari, Chrome
     }
 
     handleStoryStart(storyId: string) {
