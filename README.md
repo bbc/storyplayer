@@ -257,7 +257,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `PLAY_PAUSE_BUTTON_CLICKED` | The user has clicked the play/pause button | "not_set" | "not_set" | - |
 | `SEEK_FORWARD_BUTTON_CLICKED`  | The user has clicked the seek forward button | time seeked from | time seeked to | - |
 | `SEEK_BACKWARD_BUTTON_CLICKED`  | The user has clicked the seek back button | time seeked from | time seeked to | - |
-| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | `null` | time scrubbed to | - |
+| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | time scrubbed from | time scrubbed to | - |
 | `BACK_BUTTON_CLICKED`  | The user has clicked the back button | "not_set" | "not_set" | - |
 | `NEXT_BUTTON_CLICKED`  | The user has clicked the next button | "not_set" | "not_set" | - |
 | `START_BUTTON_CLICKED`  | The user has clicked the start button | "not_set" | "not_set" | - |

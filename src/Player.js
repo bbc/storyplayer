@@ -1944,7 +1944,8 @@ class Player extends EventEmitter {
 
         const scrubBarChangeFunc = () => {
             // Calculate the new time
-            const { duration } = renderer.getCurrentTime();
+            const { duration, currentTime } = renderer.getCurrentTime();
+            const scrubStartTime = currentTime;
             const time = duration * (parseInt(scrubBar.value, 10) / 100);
             isSyncing = true;
             renderer.setCurrentTime(time);
@@ -1957,7 +1958,7 @@ class Player extends EventEmitter {
             this._scrubbedEventTimeout = setTimeout(() => {
                 this._logUserInteraction(
                     AnalyticEvents.names.VIDEO_SCRUBBED,
-                    null,
+                    scrubStartTime.toString(),
                     time.toString(),
                 );
             }, 1000);
