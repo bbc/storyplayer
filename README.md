@@ -61,6 +61,12 @@ The returned instance will fire events that can be listened for and handled.  Fo
 
 The [demo index page](examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
+### URL Parameters for Playback
+Two URL parameters can be used to set the state of one variable for playback.  These could be used, for example, to send a link that plays a particular version of a story.  Two parameters are both required:
+- varName - the name of the variable.  This must be a variable defined in the story or one of the first two [internal variables](#internal-variables) below: `_portion_of_day` or `_day_of_week`.
+- varVal - the value of the variable.  This must conform to the variable type. e.g., `true` or `false` for a boolean, a member of a `list` variable, etc.
+
+
 ### URL Parameters for Debugging
 Below are the URL parameters that can be used to toggle features in StoryPlayer.  These are primarily related to debugging.
 - overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
