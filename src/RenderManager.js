@@ -241,7 +241,7 @@ export default class RenderManager extends EventEmitter {
         const confirmationMessage = "Are you sure you want to exit this experience?";
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
-            name: AnalyticEvents.names.BROWSER_CLOSE,
+            name: AnalyticEvents.names.BROWSER_CLOSE_CLICKED,
             from: 'unset',
             to: 'unset',
         });
