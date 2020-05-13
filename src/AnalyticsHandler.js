@@ -41,6 +41,10 @@ export default class AnalyticsHandler {
             current_representation: repId,
         };
 
+        // if we've not yet noted it, get the duration of the element
+        if (renderer && this._segmentSummaryData.defaultDuration === null) {
+            this._segmentSummaryData.defaultDuration = renderer.getDuration();
+        }
         return appendedData;
     }
      
@@ -114,6 +118,7 @@ export default class AnalyticsHandler {
             startTime: Date.now(),
             pausedTime: 0,
             hiddenTime: 0,
+            defaultDuration: null,
         };
         this._lastpausedTime = Date.now();
         this._lastHideTime = Date.now();
