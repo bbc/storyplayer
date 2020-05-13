@@ -20,7 +20,7 @@ export default function (data: Object): DataResolver {
      */
     const get = (name: string): Promise<any> => {
         if (name === InternalVariableNames.RANDOM) {
-            return Promise.resolve(Math.random());
+            return Promise.resolve(100*Math.random());
         }
         return Promise.resolve((name.split('.'): any)
             .reduce((obj, key) => ((obj !== null && key in obj) ? obj[key] : null), data));
