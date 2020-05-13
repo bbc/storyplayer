@@ -1,5 +1,6 @@
 // @flow
 import PauseBehaviour from './PauseBehaviour';
+import VariableManipulateBehaviour from './VariableManipulateBehaviour';
 import BaseBehaviour from './BaseBehaviour';
 import ExitFullscreenBehaviour from './ExitFullscreenBehaviour';
 import logger from '../logger';
@@ -10,6 +11,8 @@ export default function BehaviourFactory(
 ) {
     const BEHAVIOURS = {
         'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
+        // eslint-disable-next-line max-len
+        'urn:x-object-based-media:representation-behaviour:manipulatevariable/v1.0': VariableManipulateBehaviour,
         // eslint-disable-next-line max-len
         'urn:x-object-based-media:representation-behaviour:exit-fullscreen/v1.0': ExitFullscreenBehaviour,
         'urn:x-object-based-media:representation-behaviour:blur/v1.0': BaseBehaviour,
