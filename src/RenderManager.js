@@ -237,17 +237,13 @@ export default class RenderManager extends EventEmitter {
     }
 
     // handle browser close
-    _handleClose(ev: Event) {
-        const confirmationMessage = "Are you sure you want to exit this experience?";
+    _handleClose() {
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names.BROWSER_CLOSE_CLICKED,
             from: 'unset',
             to: 'unset',
         });
-        // eslint-disable-next-line no-param-reassign
-        (ev || window.event).returnValue = confirmationMessage; // Gecko + IE
-        return confirmationMessage; // Webkit, Safari, Chrome
     }
 
     handleStoryStart(storyId: string) {
