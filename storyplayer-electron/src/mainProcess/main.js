@@ -10,6 +10,7 @@ let mainWindow;
 // create the main window
 const createWindow = () => {
     // Create the browser window.
+    const basePath = __dirname;
     const { width, height } = screen.getPrimaryDisplay().workAreaSize
     mainWindow = new BrowserWindow({
         width,
@@ -18,6 +19,7 @@ const createWindow = () => {
             preload: path.join(__dirname, '../renderers/rendererPreload.js'),
             contextIsolation: true,
             enableRemoteModule: false,
+            additionalArguments: [`-base_path=${basePath}`]
         },
         skipTaskBar: true,
     });
@@ -47,8 +49,10 @@ app.on('ready', () => {
     // create the window
     createWindow();
 
+    // get the image path and pass it in
+    const imagePath = path.join(__dirname, '..', 'dist', 'images');
     // and load the index.html of the app.
-    mainWindow.loadURL(`file://${path.join(__dirname, '../index.html')}`);
+    mainWindow.loadURL(`file://${path.join(__dirname, `../index.html?imagePath=${imagePath}`)}`);
     
     // once the dom is ready, request the list of stories.  
     mainWindow.webContents.once('dom-ready', async () => {

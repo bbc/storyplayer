@@ -80,6 +80,7 @@ const showHomePage = () => {
 
 // we send the command to the main process so we don't have any electron remote apis in the window, helps with XSS attacks
 const reloadWindow = () => {
+    console.log(window.base_path);
     ipcRenderer.send('reload')
 };
 
@@ -87,11 +88,12 @@ const reloadWindow = () => {
  * initializes storyplayer 
  * @param {*} experience Experience Data Model
  */
-const initializeStoryPlayer = (experience) => {
+const initializeStoryPlayer = (experience) => {    
     const storyPlayerTarget = getTargetElement();
+    const imagePath = new URLSearchParams(window.location.search).get('imagePath');
     storyPlayer = StoryPlayer.init({
         target: storyPlayerTarget,
-        staticImageBaseUrl: 'src/assets/images',
+        staticImageBaseUrl: imagePath,
         analyticsLogger: event => {
             logger.info('ANALYTICS:', event);
         },
