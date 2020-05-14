@@ -16,7 +16,7 @@
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {
-    "productName": "StoryPlayer",
+    "productName": "BBC StoryPlayer",
     "appId": "com.bbc.storyplayer",
     "mac": {
       "category": "public.app-category.video",
