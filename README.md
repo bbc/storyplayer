@@ -131,6 +131,7 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 * `_path_history`: an array of UUIDs of the Narrative Elements that the user has visited so far.  If a user goes back in a story, that UUID is removed from the list.
 * `_location_longitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the left-right dimension, expressed in degrees, and takes values between 0 and 359.  The player records this variable value every 2 seconds.
 * `_location_latitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the up-down dimension, expressed in degrees, and takes values between -90 and 90.  The player records this variable value every 2 seconds.
+* `_random_number`: returns a random number between 0 and 100 each time it is requested (i.e., the number does not persist across the story)
 
 
 Document Object Model

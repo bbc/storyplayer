@@ -1416,4 +1416,8 @@ export default class BaseRenderer extends EventEmitter {
         return (this._playoutEngine instanceof iOSPlayoutEngine || 
             this._playoutEngine instanceof SrcSwitchPlayoutEngine)
     }
+
+    getController(): Controller {
+        return this._controller;
+    }
 }

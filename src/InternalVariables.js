@@ -9,6 +9,7 @@ export const InternalVariableNames = {
     PATH_HISTORY: '_path_history',
     LONGITUDE: '_location_longitude',
     LATITUDE: '_location_latitude',
+    RANDOM: '_random_number',
 };
 
 export default class InternalVariables {
