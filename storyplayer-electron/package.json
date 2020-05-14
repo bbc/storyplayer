@@ -11,7 +11,7 @@
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
     "build": "electron-builder build",
-    "build:all": "electron-builder build -mwl",
+    "build:all": "electron-builder build -mw",
     "build:release": "export $(cat config.env | xargs) && electron-builder build -mwl"
   },
   "postinstall": "electron-builder install-app-deps",
@@ -21,9 +21,6 @@
     "mac": {
       "category": "public.app-category.video",
       "identity": null
-    },
-    "linux": {
-      "target": "AppImage"
     }
   },
   "devDependencies": {
