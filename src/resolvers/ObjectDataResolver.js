@@ -1,6 +1,7 @@
 // @flow
 
 import type { DataResolver } from '../romper';
+import { InternalVariableNames } from '../InternalVariables';
 
 /**
  * Returns an instance of DataResolver which resolves over the data object passed in
@@ -17,8 +18,13 @@ export default function (data: Object): DataResolver {
      * @return {Promise.<any>} A promise which resolves to the requested variable, or null if the
      *        variable does not exist
      */
-    const get = (name: string): Promise<any> => Promise.resolve((name.split('.'): any)
-        .reduce((obj, key) => ((obj !== null && key in obj) ? obj[key] : null), data));
+    const get = (name: string): Promise<any> => {
+        if (name === InternalVariableNames.RANDOM) {
+            return Promise.resolve(100*Math.random());
+        }
+        return Promise.resolve((name.split('.'): any)
+            .reduce((obj, key) => ((obj !== null && key in obj) ? obj[key] : null), data));
+    };
 
     /**
      * Fetches a piece of data from the pre-configured dictionary
