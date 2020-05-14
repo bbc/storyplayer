@@ -1,12 +1,17 @@
 require('./mainRenderer');
 require('./homeRenderer');
-const { showHomePage } = require('./mainRenderer');
+const { showHomePage, reloadWindow } = require('./mainRenderer');
 
 const pageDidLoad = () => {
 
     const homeButton = document.getElementById("home-button")
     if(homeButton) {
         homeButton.addEventListener("click", showHomePage); 
+    }
+
+    const reloadWindowButton = document.getElementById('reload-button') 
+    if(reloadWindowButton) {
+        reloadWindowButton.addEventListener("click", reloadWindow);
     }
 
     const documentsElement = document.getElementById('documents-folder');

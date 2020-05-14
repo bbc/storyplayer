@@ -78,6 +78,10 @@ const showHomePage = () => {
     hideMainInterface();
 };
 
+// we send the command to the main process so we don't have any electron remote apis in the window, helps with XSS attacks
+const reloadWindow = () => {
+    ipcRenderer.send('reload')
+};
 
 /**
  * initializes storyplayer 
@@ -147,5 +151,6 @@ module.exports = {
     replaceTitle,
     displayErrorMessage,
     showHomePage,
+    reloadWindow,
 }
 

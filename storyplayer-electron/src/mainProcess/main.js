@@ -36,7 +36,12 @@ app.on('ready', () => {
     ipcMain.on('get-story', async (event, data) => {
         const story = await getStory(data);
         event.reply('found-story', story);
-    })
+    });
+
+    // reload safely
+    ipcMain.on('reload', () => {
+        mainWindow.reload();
+    });
 
     logger.info('The server is running at');
     // create the window
