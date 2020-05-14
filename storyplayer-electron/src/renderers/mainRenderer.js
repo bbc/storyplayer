@@ -71,7 +71,7 @@ const hideHomePage = () => {
 const showHomePage = () => {
     destroyStoryPlayer();
     const homePage = document.getElementById('main-content');
-    replaceTitle('Storyplayer');
+    replaceTitle('StoryPlayer');
     if(homePage) {
         homePage.style.display = "block"; 
     }
