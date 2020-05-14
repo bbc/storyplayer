@@ -251,6 +251,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `BROWSER_VISIBILITY_CHANGE` | The browser has reported a change in visibility | "visible" or "hidden" | "hidden" or "visible" |
 | `BUTTONS_ACTIVATED` | The renderer has started showing the control bar | "not_set" | "not_set" |
 | `BUTTONS_DEACTIVATED` | The renderer has hidden the control bar | "not_set" | "not_set" |
+| `BROWSER_CLOSE_CLICKED` | The tab/browser close button has been pressed | "not_set" | "not_set" |
 
 ### `USER_ACTION`
 | name | meaning | from | to | data | notes |
