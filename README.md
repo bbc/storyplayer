@@ -131,6 +131,7 @@ StoryPlayer creates and manipulates some variables as it runs.  These are availa
 * `_path_history`: an array of UUIDs of the Narrative Elements that the user has visited so far.  If a user goes back in a story, that UUID is removed from the list.
 * `_location_longitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the left-right dimension, expressed in degrees, and takes values between 0 and 359.  The player records this variable value every 2 seconds.
 * `_location_latitude`: the most recent record of the direction of view that the user has taken in a 360 scene (video or image).  This is a number variable which represents the view in the up-down dimension, expressed in degrees, and takes values between -90 and 90.  The player records this variable value every 2 seconds.
+* `_random_number`: returns a random number between 0 and 100 each time it is requested (i.e., the number does not persist across the story)
 
 
 Document Object Model
@@ -214,6 +215,8 @@ StoryPlayer generates analytics events so that we can record what users are doin
 * `to` - String representing 'to' state
 * `current_narrative_element` - UUID of current Narrative Element
 * `current_representation` - UUID of current Representation
+* `userid` - automatically generated UUID that lasts for the session
+* `timestamp` - String ISO timestamp giving time at which the event was sent
 * `data` - Object with other information about the event (see below for details)
 
 ### Event Types
@@ -250,6 +253,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `BROWSER_VISIBILITY_CHANGE` | The browser has reported a change in visibility | "visible" or "hidden" | "hidden" or "visible" |
 | `BUTTONS_ACTIVATED` | The renderer has started showing the control bar | "not_set" | "not_set" |
 | `BUTTONS_DEACTIVATED` | The renderer has hidden the control bar | "not_set" | "not_set" |
+| `BROWSER_CLOSE_CLICKED` | The tab/browser close button has been pressed | "not_set" | "not_set" |
 
 ### `USER_ACTION`
 | name | meaning | from | to | data | notes |
@@ -257,7 +261,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `PLAY_PAUSE_BUTTON_CLICKED` | The user has clicked the play/pause button | "not_set" | "not_set" | - |
 | `SEEK_FORWARD_BUTTON_CLICKED`  | The user has clicked the seek forward button | time seeked from | time seeked to | - |
 | `SEEK_BACKWARD_BUTTON_CLICKED`  | The user has clicked the seek back button | time seeked from | time seeked to | - |
-| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | `null` | time scrubbed to | - |
+| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | time scrubbed from | time scrubbed to | - |
 | `BACK_BUTTON_CLICKED`  | The user has clicked the back button | "not_set" | "not_set" | - |
 | `NEXT_BUTTON_CLICKED`  | The user has clicked the next button | "not_set" | "not_set" | - |
 | `START_BUTTON_CLICKED`  | The user has clicked the start button | "not_set" | "not_set" | - |
