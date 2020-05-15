@@ -436,10 +436,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        if (time < 0 || time === Infinity) {
+        const timeIsInvalid = (value) => {
+            return (value < 0 || value === Infinity || Number.isNaN(value))
+        };
+
+        // ensure that we are setting a valid time
+        if (timeIsInvalid(time)) {
             logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
             return;
         }
+
+        // work out what time we actually need to go to, given what was asked for
         let targetTime = time;
         const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < time) {
@@ -448,6 +455,12 @@ export default class BaseRenderer extends EventEmitter {
         // convert to absolute time into video
         this._lastSetTime = targetTime; // time into segment
         targetTime += this._inTime;
+
+        // test again to make sure calculations haven't resulted in invalid time
+        if (timeIsInvalid(time)) {
+            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
+            return;
+        }
 
         // if we have a media element, set that time and pause the timer until playhead has synced
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
@@ -533,6 +546,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
+        if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
+            logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
+            this.setInPause(false);
+            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        }    
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime + SEEK_TIME;
@@ -1397,5 +1415,9 @@ export default class BaseRenderer extends EventEmitter {
     isSrcIosPlayoutEngine() {
         return (this._playoutEngine instanceof iOSPlayoutEngine || 
             this._playoutEngine instanceof SrcSwitchPlayoutEngine)
+    }
+
+    getController(): Controller {
+        return this._controller;
     }
 }
