@@ -323,12 +323,8 @@ export default class Controller extends EventEmitter {
                 .then(id => {
                     if (id) {
                         this._analyticsHandler.setUserId(id);
-                    } else {
-                        this._sessionManager.setUserId(this._analyticsHandler.userid);
                     }
                 });
-        } else {
-            this._sessionManager.setUserId(this._analyticsHandler.userid);
         }
     }
 
