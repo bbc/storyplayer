@@ -1,7 +1,6 @@
 const {
     Menu, app
 } = require('electron');
-const isDevMode = require('electron-is-dev');
 
 const isMac = process.platform === 'darwin'
 
@@ -112,15 +111,6 @@ const createAppMenu = () => {
             ],
         }
     ].filter(Boolean);
-    // if (isDevMode) {
-    //     appMenuTemplate.push({
-    //         label: "Debug",
-    //         submenu: [
-    //             { role: 'forcereload' },
-    //             { role: 'toggledevtools' },
-    //         ],
-    //     });
-    // }
     Menu.setApplicationMenu(
         Menu.buildFromTemplate(appMenuTemplate)
     );

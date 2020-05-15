@@ -80,8 +80,16 @@ const showHomePage = () => {
 
 // we send the command to the main process so we don't have any electron remote apis in the window, helps with XSS attacks
 const reloadWindow = () => {
-    console.log(window.base_path);
     ipcRenderer.send('reload')
+};
+
+const getTooExperienceId = (experience) => {
+    const topStory = experience.stories && experience.stories[0];
+    return topStory.id || 'noID';
+}
+
+const analyticsHandler = (analyticsEvent) => {
+    ipcRenderer.send('analyticsEvent', analyticsEvent);
 };
 
 /**
@@ -91,11 +99,14 @@ const reloadWindow = () => {
 const initializeStoryPlayer = (experience) => {    
     const storyPlayerTarget = getTargetElement();
     const imagePath = new URLSearchParams(window.location.search).get('imagePath');
+    const experienceId = getTooExperienceId(experience);
     storyPlayer = StoryPlayer.init({
         target: storyPlayerTarget,
         staticImageBaseUrl: imagePath,
-        analyticsLogger: event => {
-            logger.info('ANALYTICS:', event);
+        analyticsLogger: (eventData) => {
+            // eslint-disable-next-line no-param-reassign
+            eventData.experienceId = experienceId;
+            analyticsHandler(eventData);
         },
         mediaFetcher: mediaResolver({}),
         
@@ -121,7 +132,7 @@ const initializeStoryPlayer = (experience) => {
             experience.stories.find(s => s.narrative_elements.includes(id))[0]
         ).then(story => story || Promise.reject(new Error('no story for narrative element'))),
     });
-    storyPlayer.start(experience.stories[0].id);
+    storyPlayer.start(experienceId);
 }
 
 

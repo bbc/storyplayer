@@ -2,6 +2,7 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const JavaScriptObfuscator = require('webpack-obfuscator');
 
 const productionBuild = process.env.NODE_ENV === 'production';
 
@@ -52,10 +53,29 @@ module.exports = env => {
         ],
     };
 
-    if (env.platform === 'electron') {
+    if (env && env.platform === 'electron') {
         config.optimization = {
             minimize: true,
-            minimizer: [new TerserPlugin()],
+            minimizer: [
+                new TerserPlugin({
+                    sourceMap: false,
+                    extractComments: false, // To avoid separate file with licenses.
+                    terserOptions: {
+                        // mangle: {
+                        //     // properties: true,
+                        //     // toplevel: true,
+                        // },
+                        mangle: true,
+                        keep_classnames: false,
+                        keep_fnames: false,
+                        module: false,
+                        toplevel: true,
+                        nameCache: null,
+                        ie8: false,
+                        safari10: false,
+                    },
+                })
+            ],
         }
         config.output = {
             path: path.resolve(__dirname, 'storyplayer-electron', 'src', 'dist'),
@@ -63,7 +83,10 @@ module.exports = env => {
             library: 'Romper',
             libraryTarget: 'umd'
         }
+        config.devtool = undefined;
+        if(env.mangle === 'true') {
+            config.plugins.push(new JavaScriptObfuscator({rotateUnicodeArray: true}, []))
+        }
     }
-
     return config;
-}
+};

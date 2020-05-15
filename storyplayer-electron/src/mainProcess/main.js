@@ -45,6 +45,11 @@ app.on('ready', () => {
         mainWindow.reload();
     });
 
+    // analytics handlers
+    ipcMain.on('analyticsEvent', (event, data) => {
+        console.log(data);
+    })
+
     logger.info('The server is running at');
     // create the window
     createWindow();
@@ -65,6 +70,8 @@ app.on('ready', () => {
     });
     // focus on the main window
     mainWindow.focus();
+
+    mainWindow.webContents.openDevTools();
 });
 
 // Quit when all windows are closed.
