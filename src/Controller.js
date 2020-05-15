@@ -318,6 +318,14 @@ export default class Controller extends EventEmitter {
 
     _createSessionManager(storyId: string) {
         this._sessionManager = new SessionManager(storyId);
+        if (this.getSessionState() !== SESSION_STATE.NEW) {
+            this._sessionManager.fetchUserId()
+                .then(id => {
+                    if (id) {
+                        this._analyticsHandler.setUserId(id);
+                    }
+                });
+        }
     }
 
     getCurrentRenderer(): ?BaseRenderer {
