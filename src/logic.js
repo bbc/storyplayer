@@ -30,7 +30,7 @@ function sortCandidates(a, b) {
  * @param {Array} resolvedVars an array of nested objects in the form [{key: 'a.b.c', value: 123}]
  * @return {{}} the nested object
  */
-function convertDotNotationToNestedObjects(resolvedVars) {
+export function convertDotNotationToNestedObjects(resolvedVars) {
     const vars = {};
     resolvedVars.forEach(({ key, value }) => {
         let objPart = vars;
