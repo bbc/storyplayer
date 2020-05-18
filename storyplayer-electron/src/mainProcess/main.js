@@ -53,8 +53,6 @@ app.on('ready', () => {
 
     // analytics handlers
     ipcMain.on('analyticsEvent', (event, data) => {
-        // eslint-disable-next-line no-param-reassign
-        data.timestamp = Date.now();
         logToFile(data);
     })
 
