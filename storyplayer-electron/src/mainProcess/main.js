@@ -78,8 +78,6 @@ app.on('ready', () => {
     });
     // focus on the main window
     mainWindow.focus();
-
-    mainWindow.webContents.openDevTools();
 });
 
 // Quit when all windows are closed.
