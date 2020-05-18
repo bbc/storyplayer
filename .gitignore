@@ -8,4 +8,5 @@ package-lock.json
 .DS_Store
 examples/*
 *.env
-
+storyplayer_electron/node_modules
+storyplayer_electron/dist
