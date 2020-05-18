@@ -1,12 +1,15 @@
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { getStory, listStories }  = require('./utilities');
+const { logToFile, createAnalyticsLogFile }  = require('./analyticsLogger');
 const { createAppMenu } = require('./menu');
 const logger = require('./logger');
 
 // create the main window variable
 let mainWindow;
 
+
+app.setAppLogsPath();
 // create the main window
 const createWindow = () => {
     // Create the browser window.
@@ -34,6 +37,9 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
     createAppMenu();
+
+    createAnalyticsLogFile();
+
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
         const story = await getStory(data);
@@ -47,7 +53,9 @@ app.on('ready', () => {
 
     // analytics handlers
     ipcMain.on('analyticsEvent', (event, data) => {
-        console.log(data);
+        // eslint-disable-next-line no-param-reassign
+        data.timestamp = Date.now();
+        logToFile(data);
     })
 
     logger.info('The server is running at');
@@ -63,7 +71,7 @@ app.on('ready', () => {
     mainWindow.webContents.once('dom-ready', async () => {
         // then on every subsequent reload
         mainWindow.webContents.on('did-frame-finish-load', async (event) => {
-            const storiesData = await listStories()
+            const storiesData = await listStories();
             event.preventDefault();
             mainWindow.webContents.send('list-stories', storiesData.filter(Boolean));
         });
@@ -96,4 +104,10 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
+});
+
+// if we've not caught an exception then quit stuff has really gone wrong
+process.on('uncaughtException', (err) => {
+    logger.error(err);
+    app.quit();
 });

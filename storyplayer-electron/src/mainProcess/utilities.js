@@ -2,12 +2,11 @@ const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-// const logger = require('./logger');
+const logger = require('./logger');
 
-
+//  promisify the file api calls
 const readFile = util.promisify(fs.readFile);
 const readDir = util.promisify(fs.readdir);
-const hasAccess = util.promisify(fs.stat);
 const mkdir = util.promisify(fs.mkdir);
 
 // Path to documents folder
@@ -16,6 +15,7 @@ const DOCUMENTS_PATH = app.getPath('documents');
 // the path to the stories is in the users documents
 const STORIES_PATH = path.join(DOCUMENTS_PATH, 'storyplayer');
 
+// JSON file path regex match.
 const JSON_PATTERN = /\.[json]+$/i;
 
 // filter all files that are of the type json
@@ -32,35 +32,32 @@ const FILE_TYPES = {
     withFileTypes: true
 };
 
+
 /**
- * Helper to check we haven't made a directory and makes it if we have not.
- * @param {string} dirPath Directory to check/create
+ * 
+ * @param {string} dirPath create path if not exists
  */
-const justCreatedDirectory = async (dirPath) => {
-    const dirExists = await hasAccess(dirPath);
-    if (!dirExists) {
-        await mkdir(dirPath, { recursive: true });
+const createDirectory = async (dirPath) => {
+    try {
+        await mkdir(dirPath);
         return true;
+    } catch (error) {
+        if(error.code === 'EEXIST') {
+            return true;
+        }
+        logger.warn('error', error);
+        if(error.code === 'ENOENT') {
+            return false;
+        }
+        return false;
     }
-    return false;
-};
-
-
-/**
- * Creates the storyplayer directory
- */
-const createStoriesDirectory = () => {
-    if (justCreatedDirectory(STORIES_PATH)) {
-        console.log('created assets folder');
-    }
-    return STORIES_PATH;
-};
+}
 
 /**
  * Checks whether the storyplayer directory exists and we have access.
  */
 const checkStoriesExists = async () => {
-    const storiesDir = await hasAccess(STORIES_PATH);
+    const storiesDir = await createDirectory(STORIES_PATH);
     return storiesDir;
 };
 
@@ -94,7 +91,7 @@ const readFileData = async (filePath) => {
         const fileBuffer = await readFile(filePath, FILE_READ_OPTIONS);
         return JSON.parse(fileBuffer);
     } catch (error) {
-        console.error(`Could not read file from ${filePath}`, error);
+        logger.error(`Could not read file from ${filePath}`, error);
         return null;
     }
 };
@@ -137,7 +134,7 @@ const getStory = async (directoryName) => {
         const dataModel = await fetchDataModel(path.join(STORIES_PATH, directoryName), true);
         return dataModel;
     } catch (err) {
-        console.log(err);
+        logger.error(err);
         return { error: err.message }
     }
 };
@@ -177,16 +174,15 @@ const listStories = async () => {
         }
         throw new Error('No Stories');
     } catch (error) {
-        console.log(error);
-        return Promise.reject(error);
+        logger.error(error);
+        return [];
     }
 }
 
 module.exports = {
     DOCUMENTS_PATH,
     STORIES_PATH,
-    justCreatedDirectory,
-    createStoriesDirectory,
+    createDirectory,
     readFileData,
     getStory,
     listStories,

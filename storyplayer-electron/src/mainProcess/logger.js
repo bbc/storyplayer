@@ -7,4 +7,5 @@ module.exports = {
     info: log,
     warn: log,
     debug: log,
+    error: log,
 }
