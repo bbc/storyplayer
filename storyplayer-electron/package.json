@@ -1,7 +1,7 @@
 {
   "name": "StoryPlayer",
   "productName": "storyplayer-electron",
-  "version": "0.9.1",
+  "version": "0.9.3",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
@@ -20,8 +20,15 @@
     "appId": "com.bbc.storyplayer",
     "mac": {
       "category": "public.app-category.video",
-      "identity": null
-    }
+      "identity": null,
+      "asar": true,
+      "target": "dmg",
+      "darkModeSupport": false
+    },
+    "win": {
+      "target": "nsis",
+      "asar": true
+  }
   },
   "devDependencies": {
     "electron": "^8.2.1",
