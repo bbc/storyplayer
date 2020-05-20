@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
+const logger = require('electron-log');
 const { getStory, listStories }  = require('./utilities');
 const { logToFile, createAnalyticsLogFile }  = require('./analyticsLogger');
 const { createAppMenu } = require('./menu');
-const logger = require('./logger');
+
 
 // create the main window variable
 let mainWindow;
@@ -38,6 +39,7 @@ const createWindow = () => {
 app.on('ready', () => {
     createAppMenu();
 
+    // create the analytics folders/file
     createAnalyticsLogFile();
 
     // on event get-story we fetch the story and reply
@@ -56,7 +58,7 @@ app.on('ready', () => {
         logToFile(data);
     })
 
-    logger.info('The server is running at');
+    logger.info('Application ready');
     // create the window
     createWindow();
 

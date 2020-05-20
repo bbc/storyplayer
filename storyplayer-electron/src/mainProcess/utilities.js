@@ -1,22 +1,19 @@
-const { app } = require('electron');
+
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const logger = require('./logger');
+const logger = require('electron-log');
+
+const { STORIES_PATH }  = require('./paths');
 
 //  promisify the file api calls
 const readFile = util.promisify(fs.readFile);
 const readDir = util.promisify(fs.readdir);
 const mkdir = util.promisify(fs.mkdir);
 
-// Path to documents folder
-const DOCUMENTS_PATH = app.getPath('documents');
-
-// the path to the stories is in the users documents
-const STORIES_PATH = path.join(DOCUMENTS_PATH, 'storyplayer');
 
 // JSON file path regex match.
-const JSON_PATTERN = /\.[json]+$/i;
+const JSON_PATTERN = /^(?![\._]).+(\.[json]+$)/i;
 
 // filter all files that are of the type json
 const isJSON = (fileEnt) => fileEnt.isFile() && fileEnt.name.match(JSON_PATTERN);
@@ -175,13 +172,11 @@ const listStories = async () => {
         throw new Error('No Stories');
     } catch (error) {
         logger.error(error);
-        return [];
+        return []
     }
 }
 
 module.exports = {
-    DOCUMENTS_PATH,
-    STORIES_PATH,
     createDirectory,
     readFileData,
     getStory,

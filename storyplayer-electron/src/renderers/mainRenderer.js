@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 const { mediaResolver } = require('./mediaResolver.js');
 const StoryPlayer = require('../dist/romper');
-const logger = require('../mainProcess/logger')
+const browserLogger = require('./logger');
 
 
 let storyPlayer;
@@ -16,7 +16,7 @@ const getTargetElement = () => {
  * @param {*} error Error object
  */
 const displayErrorMessage = (error) => {
-    logger.error(error);
+    browserLogger.error(error);
     const errorElement = document.getElementById('error-message');
     errorElement.textContent = error.error;
 };
@@ -140,7 +140,7 @@ const initializeStoryPlayer = (experience) => {
  * Event listener on finding a story we either error or render the player
  */
 ipcRenderer.on('found-story', (event, data) => {
-    logger.info(data);
+    browserLogger.info(data);
     if (!data || data.error !== undefined) {
         displayErrorMessage(data);
         showHomePage();

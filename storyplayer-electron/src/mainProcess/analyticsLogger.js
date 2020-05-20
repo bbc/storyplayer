@@ -1,14 +1,10 @@
-const { app } = require('electron');
-const path = require('path');
+
 const fs = require('fs');
 const util = require('util');
+const logger = require('electron-log');
 const { createDirectory }  = require('./utilities');
-const logger = require('./logger');
+const { LOG_FILE, LOG_FOLDER } = require('./paths');
 
-const appDataPath = app.getPath('home');
-const LOG_FOLDER = path.join(appDataPath, 'Storyplayer-analytics');
-
-const LOG_FILE = path.join(LOG_FOLDER, 'analytics.txt')
 
 const openFile = util.promisify(fs.open);
 
