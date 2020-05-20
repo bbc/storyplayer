@@ -1,7 +1,7 @@
 {
   "name": "StoryPlayer",
   "productName": "storyplayer-electron",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
