@@ -132,7 +132,7 @@ export default class HlsInstance {
         const promise = this._mediaElement.play();
         if (promise !== undefined) {
             promise.then(() => {}).catch((error) => {
-                logger.warn(error, 'Not got permission to play');
+                logger.warn(error, 'Media Instance Not got permission to play');
                 // Auto-play was prevented
             });
         }

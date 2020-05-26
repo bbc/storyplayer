@@ -162,6 +162,7 @@ export default class StoryReasoner extends EventEmitter {
         }
         const internalVarSetter = new InternalVariables(this._dataResolver, this._story.meta);
         internalVarSetter.setAllVariables();
+        internalVarSetter.setQueryParameterVariables(this._story.variables);
     }
 
 

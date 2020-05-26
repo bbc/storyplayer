@@ -61,6 +61,12 @@ The returned instance will fire events that can be listened for and handled.  Fo
 
 The [demo index page](examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
+### URL Parameters for Playback
+Two URL parameters can be used to set the state of one variable for playback.  These could be used, for example, to send a link that plays a particular version of a story.  Two parameters are both required:
+- varName - the name of the variable.  This must be a variable defined in the story or one of the first two [internal variables](#internal-variables) below: `_portion_of_day` or `_day_of_week`.
+- varVal - the value of the variable.  This must conform to the variable type. e.g., `true` or `false` for a boolean, a member of a `list` variable, etc.
+
+
 ### URL Parameters for Debugging
 Below are the URL parameters that can be used to toggle features in StoryPlayer.  These are primarily related to debugging.
 - overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
@@ -215,6 +221,8 @@ StoryPlayer generates analytics events so that we can record what users are doin
 * `to` - String representing 'to' state
 * `current_narrative_element` - UUID of current Narrative Element
 * `current_representation` - UUID of current Representation
+* `userid` - automatically generated UUID that lasts for the session
+* `timestamp` - String ISO timestamp giving time at which the event was sent
 * `data` - Object with other information about the event (see below for details)
 
 ### Event Types
@@ -259,7 +267,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `PLAY_PAUSE_BUTTON_CLICKED` | The user has clicked the play/pause button | "not_set" | "not_set" | - |
 | `SEEK_FORWARD_BUTTON_CLICKED`  | The user has clicked the seek forward button | time seeked from | time seeked to | - |
 | `SEEK_BACKWARD_BUTTON_CLICKED`  | The user has clicked the seek back button | time seeked from | time seeked to | - |
-| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | `null` | time scrubbed to | - |
+| `VIDEO_SCRUBBED` | The user has moved the video scrub bar | time scrubbed from | time scrubbed to | - |
 | `BACK_BUTTON_CLICKED`  | The user has clicked the back button | "not_set" | "not_set" | - |
 | `NEXT_BUTTON_CLICKED`  | The user has clicked the next button | "not_set" | "not_set" | - |
 | `START_BUTTON_CLICKED`  | The user has clicked the start button | "not_set" | "not_set" | - |
