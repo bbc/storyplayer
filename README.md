@@ -310,3 +310,6 @@ And the following attributes added in version 0.12.2:
 * `hiddenTime` - total time (ms) that the browser was not visible while in this NE
 * `visibleTime` - total time (ms) that the NE was visible
 * `playingTime` - total time (ms) that the NE was playing
+
+In 0.12.17
+* `defaultDuration` - the time (in seconds) that the media was planned to last.  This is the duration of a piece of timed media (audio, video, or image with duration), and will be null if the representation is not time-bound.
