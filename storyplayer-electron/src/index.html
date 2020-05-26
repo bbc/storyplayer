@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'"> -->
+    <title>StoryPlayer</title>
+    <link href="./dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="./renderers/styles.css" rel="stylesheet" type="text/css">
+    <link href="./renderers/fullscreenarea.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div id="home-page">
+        <div class="navbar">
+            <div class="home-button-container">
+                <button id="home-button" class="home-buttons">Home page</button>
+                <button id="reload-button" class="home-buttons">Refresh list</button>
+            </div>
+            <h1 class="title" id="title">StoryPlayer</h1>
+        </div>
+        <div id="error-message"></div>
+        <div id="main-content">
+            <div id="content-container">
+                <div id="instructions">
+                    <h2>
+                        How to Use this Application
+                    </h2>
+                    <div class="terms-content">
+                        <p>On install if the application doesn't create a folder 'storyplayer' in your <span id="documents-folder">My documents folder.</span> If the application does not create the folder, you will have to do so manually.</p>
+                        <p>The application will read from your storyplayer folder</p>
+                        <p>Any story you wish to view can be added to this folder as separate folders for each story. Please ensure the story data model .json file and the corresponding media are in the same folder.</p>
+                        <p>Any stories that can be read are displayed below for you to select</p>
+                    </div>
+                </div>
+                <div id="story-selector-container"></div>
+            </div>
+        </div>
+    </div>
+    <div class="main-interface" id="main-interface" style="display: none;">
+        <div class="fullscreen-container">
+            <div class="fullscreen-parent">
+                <div class="fullscreen-child">
+                    <div id="storyplayer-target"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

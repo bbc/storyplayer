@@ -1,0 +1,41 @@
+{
+  "name": "StoryPlayer",
+  "productName": "storyplayer-electron",
+  "version": "0.9.4",
+  "description": "Storyplayer standalone application",
+  "main": "src/mainProcess/main.js",
+  "keywords": [],
+  "author": "FXT",
+  "license": "MIT",
+  "scripts": {
+    "compile": "electron src/mainProcess/main.js",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder build",
+    "build:all": "electron-builder build -mw",
+    "build:release": "export $(cat config.env | xargs) && electron-builder build -mwl"
+  },
+  "postinstall": "electron-builder install-app-deps",
+  "build": {
+    "productName": "BBC StoryPlayer",
+    "appId": "com.bbc.storyplayer",
+    "mac": {
+      "category": "public.app-category.video",
+      "identity": null,
+      "asar": true,
+      "target": "dmg",
+      "darkModeSupport": false
+    },
+    "win": {
+      "target": "nsis",
+      "asar": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^8.2.1",
+    "electron-builder": "^22.4.1",
+    "esm": "^3.2.25"
+  },
+  "dependencies": {
+    "electron-log": "^4.1.2"
+  }
+}
