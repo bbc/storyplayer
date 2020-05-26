@@ -1,9 +1,12 @@
 import AnalyticEvents from './AnalyticEvents';
 
+const uuidv4 = require('uuid/v4');
+
 export default class AnalyticsHandler {
     constructor(analytics, controller) {
         this._analytics = analytics;
         this._controller = controller;
+        this.userid = uuidv4();
 
         this._segmentSummaryData = {};
         this._lastpausedTime = Date.now();
@@ -23,7 +26,7 @@ export default class AnalyticsHandler {
         this._analytics(appendedPayload);
     }
 
-    // add current NE and Representation ids
+    // add user id, current NE and Representation ids
     _enhanceAnalytics(logData) {
         let repId = logData.current_representation;
         const renderer = this._controller.getCurrentRenderer();
@@ -39,9 +42,16 @@ export default class AnalyticsHandler {
             ...logData,
             current_narrative_element: neId,
             current_representation: repId,
+            userid: this.userid,
+            timestamp: new Date().toISOString(),
         };
 
         return appendedData;
+    }
+
+    // override automatically generated uuid, perhaps with one from saved state
+    setUserId(uuid) {
+        this.userid = uuid;
     }
      
     _sumpausedTime() {

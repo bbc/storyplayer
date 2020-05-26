@@ -642,7 +642,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         const promise = mediaElement.play();
         if (promise !== undefined) {
             promise.then(() => {}).catch((error) => {
-                logger.warn(error, 'Not got permission to play');
+                logger.warn(error, 'DOMSwitchPlayotEngine Not got permission to play');
                 // Auto-play was prevented
             });
         }
@@ -669,7 +669,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                                 clearInterval(timeoutId);
                             })
                             .catch((error) => {
-                                logger.warn(error, 'Not got permission to play');
+                                logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
                                 // Auto-play was prevented
                                 clearInterval(timeoutId);
                             });

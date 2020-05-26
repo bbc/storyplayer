@@ -221,6 +221,8 @@ StoryPlayer generates analytics events so that we can record what users are doin
 * `to` - String representing 'to' state
 * `current_narrative_element` - UUID of current Narrative Element
 * `current_representation` - UUID of current Representation
+* `userid` - automatically generated UUID that lasts for the session
+* `timestamp` - String ISO timestamp giving time at which the event was sent
 * `data` - Object with other information about the event (see below for details)
 
 ### Event Types
