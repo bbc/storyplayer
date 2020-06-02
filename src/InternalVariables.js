@@ -107,7 +107,8 @@ export default class InternalVariables {
 
         if (isValid) {
             logger.info(`Query Parameter variable: setting ${varName} to ${varVal}`);
-            this._setVariableValue(varName, varVal);
+            const typedValue = this._parseExternalVariable(varVal, storyVars[varName]);
+            this._setVariableValue(varName, typedValue);
         } else {
             // eslint-disable-next-line max-len
             logger.info(`Query Parameter variable failed: ${varVal} is invalid value for ${varName}`);
@@ -140,6 +141,19 @@ export default class InternalVariables {
             break;
         }
         return isValidType;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _parseExternalVariable(varVal: string, varDef: Object): any {
+        const varType = varDef.variable_type;
+        switch(varType) {
+        case('boolean'):
+            return varVal === 'true';
+        case('number'):
+            return parseFloat(varVal);
+        default:
+            return varVal;
+        }
     }
 
     // only support setting date/time (can help debugging)
