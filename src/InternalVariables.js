@@ -121,7 +121,10 @@ export default class InternalVariables {
         let isValidType = false;
         switch(varType) {
         case('boolean'):
-            isValidType = (varVal === 'true' || varVal === 'false');
+            {
+                const valLower = varVal.toLowerCase();
+                isValidType = (valLower === 'true' || valLower === 'false');
+            }
             break;
         case('number'):
             {
@@ -148,7 +151,7 @@ export default class InternalVariables {
         const varType = varDef.variable_type;
         switch(varType) {
         case('boolean'):
-            return varVal === 'true';
+            return varVal.toLowerCase() === 'true';
         case('number'):
             return parseFloat(varVal);
         default:
