@@ -9,9 +9,12 @@ export default class PauseBehaviour extends BaseBehaviour {
 
     _renderer: BaseRenderer;
 
+    isPausing: boolean;
+
     constructor(behaviourDefinition: Object, onComplete: () => void) {
         super(behaviourDefinition, onComplete);
         this.timerHandle = null;
+        this.isPausing = false;
     }
 
     start(renderer: BaseRenderer) {
@@ -19,18 +22,22 @@ export default class PauseBehaviour extends BaseBehaviour {
         const pause = parseFloat(this._behaviourDefinition.pauseTime);
         if (pause < 0) {
             logger.info('negative pause time: pause behaviour will never complete');
-            this._renderer.setInPause(true);
         } else {
             this.timerHandle = setTimeout(this.handleTimeout.bind(this), pause * 1000);
         }
+        this._renderer.setInPause(true);
+        this.isPausing = true;
     }
 
     handleTimeout() {
+        if (!this.isPausing) return;
+        this.isPausing = false;
         this.timerHandle = null;
         this._handleDone();
     }
 
     destroy() {
+        this.isPausing = false;
         if (this.timerHandle) {
             clearTimeout(this.timerHandle);
         }
