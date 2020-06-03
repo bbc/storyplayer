@@ -118,8 +118,7 @@ export default class RenderManager extends EventEmitter {
                 const { currentTime } = rend.getCurrentTime();
                 if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
                     logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
-                    rend.setInPause(false);
-                    rend.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+                    rend.exitStartPauseBehaviour();
                 }
                 else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
@@ -479,6 +478,7 @@ export default class RenderManager extends EventEmitter {
 
         if (newRenderer) {
             newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
+                this.refreshOnwardIcons();
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
@@ -590,17 +590,23 @@ export default class RenderManager extends EventEmitter {
     // show next button, or icons if choice
     // ... but if there is only one choice, show next!
     refreshOnwardIcons() {
-        if (this._currentRenderer
-            && !this._currentRenderer.inVariablePanel) {
-            return this._controller.getValidNextSteps()
-                .then((nextSteps) => {
-                    const hasNext = nextSteps.length > 0;
-                    this._player.setNextAvailable(hasNext);
-                })
-                .catch((err) => {
-                    logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
-                    this._player.setNextAvailable(false);
-                });
+        if (this._currentRenderer) {
+            const rend = this._currentRenderer;
+            if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
+                this._player.setNextAvailable(true);
+                return Promise.resolve();
+            }
+            if (!rend.inVariablePanel) {
+                return this._controller.getValidNextSteps()
+                    .then((nextSteps) => {
+                        const hasNext = nextSteps.length > 0;
+                        this._player.setNextAvailable(hasNext);
+                    })
+                    .catch((err) => {
+                        logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
+                        this._player.setNextAvailable(false);
+                    });
+            }
         }
         this._player.setNextAvailable(false);
         return Promise.resolve();
