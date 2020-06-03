@@ -130,7 +130,7 @@ pipeline {
 
           dir('rd-ux-storyplayer-harness') {
             sh '''
-              yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
+              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
               git add package.json yarn.lock
               yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s
 
@@ -143,7 +143,7 @@ ${commit_messages}
 
           dir('rd-ux-storyformer') {
             sh '''
-              yarn add --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer
+              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
               git add package.json yarn.lock
               yarn version --patch --message  "chore: Upgrade storyplayer to ${git_version} and version bump to %s
 

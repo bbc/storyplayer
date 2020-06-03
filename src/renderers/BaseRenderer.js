@@ -394,7 +394,7 @@ export default class BaseRenderer extends EventEmitter {
         this._outTime = time;
     }
 
-    _getDuration(): number {
+    getDuration(): number {
         let  { duration } = this._representation; // specified in rep
         if (duration !== undefined && duration !== null) {
             if (duration < 0) duration = Infinity;
@@ -430,7 +430,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        const duration = this._getDuration();
+        const duration = this.getDuration();
         const currentTime = this._timer.getTime();
         let timeBased = false;
         let remainingTime = Infinity;
