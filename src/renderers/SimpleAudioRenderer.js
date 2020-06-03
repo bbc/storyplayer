@@ -1,11 +1,10 @@
 // @flow
 
 import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import { MediaFormats } from '../browserCapabilities';
-import { RENDERER_PHASES } from './BaseRenderer';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import Controller from '../Controller';
@@ -231,6 +230,13 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     // show/hide the background image
     _setImageVisibility(visible: boolean) {
+        if (this._backgroundImage && this._backgroundImage.src) {
+            console.log('ANDY setting im vis to', visible, this._backgroundImage.src);
+        } else if (this._backgroundImage) {
+            console.log('ANDY setting im vis to', visible, 'but no src');
+        } else {
+            console.log('ANDY setting im vis to', visible, 'but no image');
+        }
         if (this._backgroundImage) this._backgroundImage.style.opacity = visible ? '1' : '0';
     }
 
