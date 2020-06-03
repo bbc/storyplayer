@@ -1,7 +1,7 @@
 // @flow
 
 import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import { MediaFormats } from '../browserCapabilities';
@@ -134,8 +134,12 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             }).then((imageUrl: string) => {
                 this._backgroundImage = document.createElement('img');
                 this._backgroundImage.className = 'romper-render-image';
-                this._setImageVisibility(false);
                 this._backgroundImage.src = imageUrl;
+                if (this.phase !== RENDERER_PHASES.MAIN) {
+                    this._setImageVisibility(false);
+                } else {
+                    this._setImageVisibility(true);
+                }
                 this._target.appendChild(this._backgroundImage);
             }).catch((err) => { logger.error(err, 'Notfound'); });
         }
