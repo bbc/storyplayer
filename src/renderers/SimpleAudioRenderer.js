@@ -124,27 +124,21 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     _renderBackgroundImage() {
         // eslint-disable-next-line max-len
-        logger.info(`ANDY Rendering background image for audio representation ${this._representation.id}`);
+        logger.info(`Rendering background image for audio representation ${this._representation.id}`);
         if (this._representation.asset_collections.background_image) {
             const assetCollectionId = this._representation.asset_collections.background_image;
-            console.log('ANDY getting bg AC uuid', assetCollectionId);
             this._fetchAssetCollection(assetCollectionId).then((image) => {
-                console.log('ANDY got ac', image);
                 if (image.assets.image_src) {
-                    console.log('ANDY getting bg src', image.assets.image_src);
                     return this._fetchMedia(image.assets.image_src);
                 }
                 return Promise.resolve();
             }).then((imageUrl: string) => {
-                console.log('ANDY resolved bg src', imageUrl);
                 this._backgroundImage = document.createElement('img');
                 this._backgroundImage.className = 'romper-render-image';
                 this._backgroundImage.src = imageUrl;
                 if (this.phase !== RENDERER_PHASES.MAIN) {
-                    console.log('ANDY hiding bg');
                     this._setImageVisibility(false);
                 } else {
-                    console.log('ANDY showing bg - already started');
                     this._setImageVisibility(true);
                 }
                 this._target.appendChild(this._backgroundImage);
@@ -154,7 +148,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        console.log('ANDY starting and showing bg');
         this._setImageVisibility(true);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
@@ -238,13 +231,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     // show/hide the background image
     _setImageVisibility(visible: boolean) {
-        if (this._backgroundImage && this._backgroundImage.src) {
-            console.log('ANDY setting im vis to', visible, this._backgroundImage.src);
-        } else if (this._backgroundImage) {
-            console.log('ANDY setting im vis to', visible, 'but no src');
-        } else {
-            console.log('ANDY setting im vis to', visible, 'but no image');
-        }
         if (this._backgroundImage) this._backgroundImage.style.opacity = visible ? '1' : '0';
     }
 
