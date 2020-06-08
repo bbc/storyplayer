@@ -58,6 +58,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._hasEnded = true;
     }
 
     end() {

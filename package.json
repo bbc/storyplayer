@@ -1,11 +1,13 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "0.12.14",
+  "version": "0.12.21",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
     "prepublish": "npm run build",
     "build": "webpack",
+    "build:electron": "webpack --env.platform=electron",
+    "build:electron -m": "webpack --env.platform=electron --env.mangle=true",
     "test": "concurrently --names \"eslint,jest,sass-lint\" -c \"blue.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:jest\" \"yarn test:sass-lint\"",
     "test-noinstall": "concurrently --names \"eslint,jest,sass-lint\" -c \"blue.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:jest\" \"yarn test:sass-lint\"",
     "test-watch": "nodemon -L --watch src --exec yarn test-noinstall",
@@ -65,8 +67,10 @@
     "sinon": "^8.0.2",
     "sinon-chai": "^3.4.0",
     "style-loader": "^1.1.2",
+    "terser-webpack-plugin": "^3.0.1",
     "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-obfuscator": "^0.28.1"
   },
   "dependencies": {
     "browser-bunyan": "^1.5.3",

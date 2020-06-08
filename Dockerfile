@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:10.20
 
 ENV http_proxy http://www-cache.rd.bbc.co.uk:8080
 ENV https_proxy http://www-cache.rd.bbc.co.uk:8080

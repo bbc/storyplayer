@@ -12,6 +12,22 @@ export const InternalVariableNames = {
     RANDOM: '_random_number',
 };
 
+const TimeWindowNames = {
+    MORNING: 'Morning',
+    AFTERNOON: 'Afternoon',
+    EVENING: 'Evening'
+};
+
+const weekday = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+];
+
 export default class InternalVariables {
     _dataResolver: DataResolver;
 
@@ -49,15 +65,6 @@ export default class InternalVariables {
 
     // sets the value of this variable to be a string for today's day of the week
     _setTodaysDay() {
-        const weekday = [
-            'Sunday',
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-        ];
         this._setVariableValue(InternalVariableNames.DAY_OF_WEEK, weekday[new Date().getDay()]);
     }
 
@@ -66,11 +73,11 @@ export default class InternalVariables {
         const hourNow = new Date().getHours();
         let segmentName;
         if (hourNow < 12) {
-            segmentName = 'Morning';
+            segmentName = TimeWindowNames.MORNING;
         } else if (hourNow < 17) {
-            segmentName = 'Afternoon';
+            segmentName = TimeWindowNames.MORNING;
         } else {
-            segmentName = 'Evening';
+            segmentName = TimeWindowNames.EVENING;
         }
         this._setVariableValue(InternalVariableNames.PORTION_OF_DAY, segmentName);
     }
@@ -78,5 +85,86 @@ export default class InternalVariables {
     // eslint-disable-next-line class-methods-use-this
     _setLocation() {
         logger.info('GeoLocation has been disabled');
+    }
+
+    setQueryParameterVariables(storyVars: Object){
+        const varName = new URLSearchParams(window.location.search).get('varName');
+        const varVal = new URLSearchParams(window.location.search).get('varVal');
+        if (!(varName && varVal)) {
+            logger.info(`Query Parameter variable failed - need name and value`);
+            return;
+        }
+        // variable must be defined in story or as internal var
+        let isValid = false;
+        if (storyVars[varName]) {
+            isValid = this._validateExternalVariable(varName, varVal, storyVars[varName])
+        } else if (Object.values(InternalVariableNames).includes(varName)) {
+            isValid = this._validateInternalVariable(varName, varVal);
+        } else {
+            logger.info(`Query Parameter variable failed - invalid variable name`);
+            return;            
+        }
+
+        if (isValid) {
+            logger.info(`Query Parameter variable: setting ${varName} to ${varVal}`);
+            const typedValue = this._parseExternalVariable(varVal, storyVars[varName]);
+            this._setVariableValue(varName, typedValue);
+        } else {
+            // eslint-disable-next-line max-len
+            logger.info(`Query Parameter variable failed: ${varVal} is invalid value for ${varName}`);
+        }
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _validateExternalVariable(varName: string, varVal: string, varDef: Object): boolean {
+        const varType = varDef.variable_type;
+        let isValidType = false;
+        switch(varType) {
+        case('boolean'):
+            {
+                const valLower = varVal.toLowerCase();
+                isValidType = (valLower === 'true' || valLower === 'false');
+            }
+            break;
+        case('number'):
+            {
+                const numVal = parseFloat(varVal);
+                if (isNaN(numVal) || numVal === null) { // eslint-disable-line no-restricted-globals
+                    isValidType = false;
+                } else {
+                    isValidType = (numVal > varDef.range.min_val 
+                        && numVal < varDef.range.max_val);
+                }
+            }
+            break;
+        case('list'):
+            isValidType = varDef.values.includes(varVal);
+            break;
+        default:
+            break;
+        }
+        return isValidType;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _parseExternalVariable(varVal: string, varDef: Object): any {
+        const varType = varDef.variable_type;
+        switch(varType) {
+        case('boolean'):
+            return varVal.toLowerCase() === 'true';
+        case('number'):
+            return parseFloat(varVal);
+        default:
+            return varVal;
+        }
+    }
+
+    // only support setting date/time (can help debugging)
+    // eslint-disable-next-line class-methods-use-this
+    _validateInternalVariable(varName: string, varVal: string): boolean {
+        return (
+            (varName === InternalVariableNames.DAY_OF_WEEK && weekday.includes(varVal))
+            || (varName === InternalVariableNames.PORTION_OF_DAY && TimeWindowNames.includes(varVal)) // eslint-disable-line max-len
+        );
     }
 }

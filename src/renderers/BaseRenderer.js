@@ -20,6 +20,7 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
+import PauseBehaviour from '../behaviours/PauseBehaviour';
 
 const SEEK_TIME = 10;
 
@@ -324,6 +325,18 @@ export default class BaseRenderer extends EventEmitter {
         return this._hasEnded;
     }
 
+    // if we have any start pauses, complete those behaviours early
+    exitStartPauseBehaviour() {
+        if (!this._behaviourRunner || this._behaviourRunner.eventCounters.started === 0 ) return;
+        const startBehaviours = this._behaviourRunner.behaviours;
+        startBehaviours.forEach((behaviour => {
+            if (behaviour instanceof PauseBehaviour) {
+                behaviour.handleTimeout();
+            }
+        }));
+        this.setInPause(false);
+    }
+
     // does this renderer have a show variable panel behaviour
     hasVariablePanelBehaviour(): boolean {
         let hasPanel = false;
@@ -381,7 +394,7 @@ export default class BaseRenderer extends EventEmitter {
         this._outTime = time;
     }
 
-    _getDuration(): number {
+    getDuration(): number {
         let  { duration } = this._representation; // specified in rep
         if (duration !== undefined && duration !== null) {
             if (duration < 0) duration = Infinity;
@@ -417,7 +430,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getCurrentTime(): Object {
-        const duration = this._getDuration();
+        const duration = this.getDuration();
         const currentTime = this._timer.getTime();
         let timeBased = false;
         let remainingTime = Infinity;
@@ -548,8 +561,7 @@ export default class BaseRenderer extends EventEmitter {
     _seekForward() {
         if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
-            this.setInPause(false);
-            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+            this.exitStartPauseBehaviour();
         }    
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
