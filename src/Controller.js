@@ -1136,10 +1136,10 @@ export default class Controller extends EventEmitter {
     }
 
     deleteExistingSession() {
-        if(this._storyId) {
-            this._sessionManager.clearExistingSession();
-        }
         if(this._sessionManager) {
+            if(this._storyId) {
+                this._sessionManager.clearExistingSession();
+            }
             this._sessionManager.setSessionState(SESSION_STATE.NEW);
         }
     }
