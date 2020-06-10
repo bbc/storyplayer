@@ -56,11 +56,11 @@ export default class ImageRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hasEnded = true;
         if (this._duration === Infinity || this._duration < 0) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
             this._disableScrubBar();
+            this._hasEnded = true; // so link choices still work
         } else if (this._duration === 0) {
             logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();
