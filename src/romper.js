@@ -128,7 +128,7 @@ module.exports = {
 
         const assetUrls: AssetUrls = {
             noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
-            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`
+            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/black.png`
         };
 
         const fetchers: ExperienceFetchers = {
