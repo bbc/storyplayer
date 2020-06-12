@@ -21,6 +21,7 @@ import './assets/images/media-pause-8x.png';
 import './assets/images/media-step-forward-8x.png';
 import './assets/images/media-step-backward-8x.png';
 import './assets/images/no-asset.svg';
+import './assets/images/black.png';
 
 // @flowignore
 import './assets/styles/player.scss';
