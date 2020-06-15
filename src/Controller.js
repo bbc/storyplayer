@@ -323,8 +323,12 @@ export default class Controller extends EventEmitter {
                 .then(id => {
                     if (id) {
                         this._analyticsHandler.setUserId(id);
+                    } else {
+                        this._sessionManager.setUserId(this._analyticsHandler.userid);
                     }
                 });
+        } else {
+            this._sessionManager.setUserId(this._analyticsHandler.userid);
         }
     }
 
@@ -1132,10 +1136,10 @@ export default class Controller extends EventEmitter {
     }
 
     deleteExistingSession() {
-        if(this._storyId) {
-            SessionManager.deleteExistingSession(this._storyId);
-        }
         if(this._sessionManager) {
+            if(this._storyId) {
+                this._sessionManager.clearExistingSession();
+            }
             this._sessionManager.setSessionState(SESSION_STATE.NEW);
         }
     }

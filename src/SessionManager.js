@@ -64,6 +64,20 @@ export default class SessionManager extends EventEmitter {
         }
     }
 
+    clearExistingSession() {
+        if (!this._storyId) return;
+        this.fetchUserId().then((userid) => {
+            if (userid) {
+                // clear all but userid
+                const blankState = { userid };
+                localStorage.setItem(this._storyId, JSON.stringify(blankState));
+            } else {
+                // clear the lot
+                SessionManager.deleteExistingSession(this._storyId);
+            }
+        });
+    }
+
     setExistingSession() {
         if (!this._storyId) return;
         const existingSessions = fetchStateFromStorage(EXISTING_SESSIONS, EMPTY_ARRAY);
