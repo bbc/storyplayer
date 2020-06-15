@@ -221,7 +221,7 @@ StoryPlayer generates analytics events so that we can record what users are doin
 * `to` - String representing 'to' state
 * `current_narrative_element` - UUID of current Narrative Element
 * `current_representation` - UUID of current Representation
-* `userid` - automatically generated UUID that lasts for the session
+* `userid` - automatically generated UUID.  If the `saveSession` attribute for StoryPlayer is `true` this uuid is stored in local storage and used across multiple sessions.  Otherwise it lasts for the session.  `userid` is unique per experience (the same browser will use different userids for different stories).
 * `timestamp` - String ISO timestamp giving time at which the event was sent
 * `data` - Object with other information about the event (see below for details)
 
