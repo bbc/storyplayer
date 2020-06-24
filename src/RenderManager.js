@@ -272,29 +272,38 @@ export default class RenderManager extends EventEmitter {
                 if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
                     return this._fetchers
-                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
+                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id)
+                        .then((fg) => {
+                            if (fg.assets.image_src) {
+                                return this._fetchers.mediaFetcher(fg.assets.image_src);
+                            }
+                            return Promise.reject(
+                                new Error('Could not find splash image Asset Collection'),
+                            );
+                        })
+                        .then((mediaUrl) => {
+                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                            this._player.setupExperienceOverlays(Object.assign(
+                                onLaunchConfig,
+                                { background_art: mediaUrl },
+                            ));
+                        })
+                        .catch((err) => {
+                            logger.error(err, `Could not resolve splash image asset: ${err}`);
+                            this._player.setupExperienceOverlays(Object.assign(
+                                onLaunchConfig,
+                                { background_art: this._assetUrls.noBackgroundAssetUrl },
+                            ));
+                        });
                 }
-                return Promise.reject(new Error('No onLaunch options in Story'));
-            })
-            .then((fg) => {
-                if (fg.assets.image_src) {
-                    return this._fetchers.mediaFetcher(fg.assets.image_src);
-                }
-                return Promise.reject(new Error('Could not find Asset Collection'));
-            })
-            .then((mediaUrl) => {
-                logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                this._player.setupExperienceOverlays(Object.assign(
-                    onLaunchConfig,
-                    { background_art: mediaUrl },
-                ));
-            })
-            .catch((err) => {
-                logger.error(err, 'Could not get url from asset collection uuid');
-                this._player.setupExperienceOverlays(Object.assign(
+                logger.warn('No onLaunch config in story meta');
+                return this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
+            })
+            .catch((err) => {
+                logger.error(err, `Could not get fetch story ${err}`);
             });
     }
 
