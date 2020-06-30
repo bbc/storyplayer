@@ -20,7 +20,6 @@ var smpPlugin = (function () {
         pluginInitialisation: function (utils) {
             var plug = this;
             playerInterface = utils.playerInterface;
-            window.playerInterface = playerInterface;
             pluginUtils = utils;
             pluginUtils.loadCSS('dist/romper.css');
 

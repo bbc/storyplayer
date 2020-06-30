@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
-import MediaManager from './srcSwitchPlayoutEngine/MediaManager';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -9,8 +8,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
 
     _backgroundMediaElement: HTMLAudioElement
-
-    _mediaManager: MediaManager
 
     _playing: boolean;
 
