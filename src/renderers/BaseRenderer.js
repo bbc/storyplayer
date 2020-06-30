@@ -18,7 +18,6 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
-import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
 
@@ -117,7 +116,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _timer: TimeManager;
 
-    isSrcIosPlayoutEngine: Function;
+    isIosPlayoutEngine: Function;
 
     _cleanupSingleDuringBehaviour: Function;
 
@@ -190,7 +189,7 @@ export default class BaseRenderer extends EventEmitter {
         this._togglePause = this._togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
-        this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+        this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
 
@@ -1395,7 +1394,7 @@ export default class BaseRenderer extends EventEmitter {
                     this.setCurrentTime(inTime);
                 }
                 // this.resetPlayer();
-                if(this.isSrcIosPlayoutEngine()) {
+                if(this.isIosPlayoutEngine()) {
                     if(this._playoutEngine._playing
                         && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
@@ -1426,9 +1425,8 @@ export default class BaseRenderer extends EventEmitter {
         this._destroyed = true;
     }
 
-    isSrcIosPlayoutEngine() {
-        return (this._playoutEngine instanceof iOSPlayoutEngine ||
-            this._playoutEngine instanceof SrcSwitchPlayoutEngine)
+    isIosPlayoutEngine() {
+        return (this._playoutEngine instanceof iOSPlayoutEngine)
     }
 
     getController(): Controller {
