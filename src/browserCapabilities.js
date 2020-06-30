@@ -209,7 +209,7 @@ export class MediaFormats {
         return null;
     }
 
-    static getPlayoutEngine() {
+    static getPlayoutEngine(noSMP = false) {
         const overridePlayout = fetchOverridePlayout();
         const debugPlayout = checkDebugPlayout();
         if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
@@ -217,7 +217,7 @@ export class MediaFormats {
             return overridePlayout
         }
 
-        if(inSMPWrapper) {
+        if(inSMPWrapper && noSMP === false) {
             return PLAYOUT_ENGINES.SMP_PLAYOUT
         }
 
