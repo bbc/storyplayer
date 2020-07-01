@@ -31,16 +31,19 @@ function load(ev) {
 function loadIt(json) {
   var pluginUrl=(location.href.split('#')[0]);
   pluginUrl = pluginUrl.substring(0,pluginUrl.lastIndexOf('/'))+'/plugin.js';
-  var settings={
+  var settings = {
   superResponsive:true,
   allowCasting: true,
   noTracking: true, // Probably should set this true until we handle it correctly
   threeSixty: true,
+  noAutomaticNextQueued: false,
   ui:{
     controls:{
       enabled:true,
-      spaceControlsPlayback:true
+      spaceControlsPlayback:true,
+      availableOnMediaEnded: true
     },
+    playbackSettingsPanel:{enabled:true},
     cta:{enabled:false},
     colour:'#3cffd5',
   },

@@ -1402,6 +1402,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     checkIsLooping() {
+        return false
         const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
         return mediaElement && mediaElement.hasAttribute('loop');
     }

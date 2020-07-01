@@ -7,6 +7,7 @@ import type { AssetUrls } from './romper';
 import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
+import SMPPlayoutEngine from './playoutEngines/SMPPlayoutEngine';
 import logger from './logger';
 import { BrowserUserAgent, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
@@ -664,10 +665,14 @@ class Player extends EventEmitter {
         );
 
         this._nextButton.onclick = this._nextButtonClicked.bind(this);
+
         this._nextButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._nextButtonClicked.bind(this)),
         );
+
+        window.SPnext = this._nextButtonClicked.bind(this);
+        window.SPback = this._backButtonClicked.bind(this);
 
         this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
 
@@ -735,6 +740,7 @@ class Player extends EventEmitter {
             break;
         case PLAYOUT_ENGINES.SMP_PLAYOUT:
             // SMP playout engine
+            this.playoutEngine = new SMPPlayoutEngine(this, debugPlayout);
             break;
         default:
             logger.fatal('Invalid Playout Engine');

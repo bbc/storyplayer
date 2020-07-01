@@ -20,7 +20,7 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-    
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
