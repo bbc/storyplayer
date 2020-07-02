@@ -11,7 +11,6 @@ import Controller from '../Controller';
 import logger from '../logger';
 import { AUDIO } from '../utils';
 
-
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
     label: string,
@@ -60,17 +59,13 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             analytics,
             controller,
         );
+        
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._endedEventListener = this._endedEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
-        this.renderAudioElement();
-        this._renderBackgroundImage();
-
         this._lastSetTime = 0;
-
         this._inTime = 0;
         this._outTime = -1;
 
@@ -79,6 +74,13 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             id: this._representation.asset_collections.foreground_id,
             playPauseHandler: this._handlePlayPauseButtonClicked,
         });
+    }
+
+    async init() {
+        await this._renderAudioElement()
+            .catch(e => logger.error(e, 'could not initiate audio renderer'));
+        await this._renderBackgroundImage();
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
     _endedEventListener() {
@@ -121,7 +123,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         super.seekEventHandler(this._inTime);
     }
 
-    _renderBackgroundImage() {
+    async _renderBackgroundImage() {
         // eslint-disable-next-line max-len
         logger.info(`Rendering background image for audio representation ${this._representation.id}`);
         if (this._representation.asset_collections.background_image) {
@@ -141,7 +143,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                     this._setImageVisibility(true);
                 }
                 this._target.appendChild(this._backgroundImage);
-            }).catch((err) => { logger.error(err, 'Notfound'); });
+            }).catch((err) => { logger.error(err, 'Not found'); });
         }
     }
 
@@ -189,10 +191,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         }
     }
 
-    renderAudioElement() {
+    async _renderAudioElement() {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                         this._setInTime(parseFloat(fg.meta.romper.in));
@@ -226,6 +228,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                     }
                 });
         }
+        return Promise.reject(new Error('No foreground asset collection for audio representation'));
     }
 
     // show/hide the background image

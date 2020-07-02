@@ -38,6 +38,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _testEndStallTimeout: TimeoutID;
 
+    _shouldShowScrubBar: boolean;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -57,9 +59,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
-
-
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
+        
+        this._shouldShowScrubBar = true;
 
         // eslint-disable-next-line max-len
         this._behaviourRendererMap['urn:x-object-based-media:representation-behaviour:blur/v1.0'] = this._applyBlurBehaviour;
@@ -69,12 +71,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
         });
     }
 
-    init() {
-        this.renderVideoElement()
-            .then(() => {
-                this.phase = RENDERER_PHASES.CONSTRUCTED;
-            })
+    async init() {
+        await this.renderVideoElement()
             .catch(e => logger.error(e, 'could not initiate video renderer'));
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
     _endedEventListener() {
@@ -141,6 +141,22 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
+    // given the forground asset collection, determine whether or not 
+    // scrub bar should be shown
+    _testShowScrubBar(foregroundAssetCollection: AssetCollection) {
+        if (!foregroundAssetCollection.loop) {
+            // non-looping - enable
+            this._shouldShowScrubBar = true;
+        } else if (this._representation.duration
+            && this._representation.duration > 0) {
+            // looping but with duration - enable
+            this._shouldShowScrubBar = true;
+        } else {
+            // looping with no duration - disable
+            this._shouldShowScrubBar = false;
+        }
+    }
+
     start() {
         super.start();
         // set timer to sync mode until really ready
@@ -164,23 +180,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         // // set time to last set time (relative to click start)
         this._player.enablePlayButton();
 
-        // should we show the scrub bar?
-        // TODO - move 'loop' attribute from asset collection to representation to avoid this
-        if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (!fg.loop) {
-                        // non-looping - enable
-                        this._player.enableScrubBar();
-                    } else if (this._representation.duration
-                        && this._representation.duration > 0) {
-                        // looping but with duration - enable
-                        this._player.enableScrubBar();
-                    } else {
-                        // looping with no duration - disable
-                        this._player.disableScrubBar();
-                    }
-                });
+        // show/hide scrub bar
+        if (this._shouldShowScrubBar) {
+            this._player.enableScrubBar();
+        } else {
+            this._player.disableScrubBar();
         }
     }
 
@@ -201,11 +205,11 @@ export default class SimpleAVRenderer extends BaseRenderer {
         }
     }
 
-    renderVideoElement() {
-        // set video source
+    async renderVideoElement() {
         if (this._representation.asset_collections.foreground_id) {
             return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
+                    this._testShowScrubBar(fg);
                     if (fg.assets.av_src) {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                             this._setInTime(parseFloat(fg.meta.romper.in));
@@ -229,6 +233,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
                             .catch((err) => {
                                 logger.error(err, 'Video not found');
                             });
+                    } else {
+                        throw new Error('No av source for video');
                     }
                     if (fg.assets.sub_src) {
                         this._fetchMedia(fg.assets.sub_src)

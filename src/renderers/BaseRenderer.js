@@ -243,7 +243,7 @@ export default class BaseRenderer extends EventEmitter {
         this._inPauseBehaviourState = false;
     }
 
-    init() {
+    async init() {
         // run any code that may be asynchronous
         // do not call super from classes that extend this
         // overwrite if any async code needs to be called

@@ -1,7 +1,7 @@
 // @flow
 
 import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -49,9 +49,15 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target = player.mediaTarget;
     }
 
+    async init() {
+        await this.renderTextElement()
+            .catch(err => logger.error(err, 'could not initiate text renderer'));
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+    }
+
     willStart() {
         super.willStart();
-        this.renderTextElement();
+        this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
     }
@@ -79,24 +85,23 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         // set text source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.text_src) {
-                        this._fetchMedia(fg.assets.text_src)
+                        return this._fetchMedia(fg.assets.text_src)
                             .then((textFileUrl) => {
                                 this._fetchTextContent(textFileUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'text not found');
                             });
-                    } else {
-                        logger.warn('No text content found');
                     }
+                    return Promise.reject(new Error('No text_src in foreground asset collection'));
                 });
-        } else if (this._representation.description) {
+        }
+        if (this._representation.description) {
             this.populateTextElement(this._representation.description);
             logger.warn('Text Renderer has no asset collection - rendering description');
+            return Promise.resolve();
         }
+        return Promise.reject(new Error('No text to render'));
     }
 
     _fetchTextContent(mediaUrl: string) {
@@ -116,7 +121,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     populateTextElement(textContent: string) {
         this._textDiv.innerHTML = textContent;
-        this._target.appendChild(this._textDiv);
     }
 
     destroy() {
