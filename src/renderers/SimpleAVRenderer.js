@@ -1,7 +1,7 @@
 // @flow
 
 import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -58,7 +58,6 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
-        this.renderVideoElement();
 
         this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
 
@@ -68,6 +67,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_AV,
         });
+    }
+
+    init() {
+        this.renderVideoElement()
+            .then(() => {
+                this.phase = RENDERER_PHASES.CONSTRUCTED;
+            })
+            .catch(e => logger.error(e, 'could not initiate video renderer'));
     }
 
     _endedEventListener() {
@@ -197,7 +204,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
     renderVideoElement() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.av_src) {
                         if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
@@ -234,6 +241,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
                     }
                 });
         }
+        return Promise.reject(new Error('No foreground asset id for video'));
     }
 
     populateVideoElement(mediaUrl: string, loop :?boolean, id: ?string) {

@@ -33,6 +33,7 @@ const getBehaviourEndTime = (behaviour: Object) => {
 }
 
 export const RENDERER_PHASES = {
+    CONSTRUCTING: 'CONSTRUCTING',
     CONSTRUCTED: 'CONSTRUCTED',
     START: 'START',
     MAIN: 'MAIN',
@@ -236,11 +237,22 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadBehaviourAssets();
         this._preloadIconAssets();
         this._loopCounter = 0;
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        this.phase = RENDERER_PHASES.CONSTRUCTING;
         this._inPauseBehaviourState = false;
     }
 
+    init() {
+        // run any code that may be asynchronous
+        // do not call super from classes that extend this
+        // overwrite if any async code needs to be called
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+    }
+
     willStart(elementName: ?string, elementId: ?string) {
+        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
+            setTimeout(() => this.willStart(elementName, elementId), 100);
+            return;
+        }
         this.inVariablePanel = false;
         this.phase = RENDERER_PHASES.START;
 
@@ -268,10 +280,6 @@ export default class BaseRenderer extends EventEmitter {
         ) {
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
         }
-    }
-
-    init() {
-        // run any code that may be asynchronous
     }
 
     /**
@@ -633,8 +641,9 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadedBehaviourAssets = [];
         const assetCollectionIds = this._representation.asset_collections.behaviours ?
             this._representation.asset_collections.behaviours : [];
-        assetCollectionIds.forEach((behaviour) => {
-            this._fetchAssetCollection(behaviour.asset_collection_id)
+        return Promise.all(assetCollectionIds.map((behaviour) => {
+        // assetCollectionIds.forEach((behaviour) => {
+            return this._fetchAssetCollection(behaviour.asset_collection_id)
                 .then((assetCollection) => {
                     if (assetCollection.assets.image_src) {
                         return this._fetchMedia(assetCollection.assets.image_src);
@@ -647,8 +656,10 @@ export default class BaseRenderer extends EventEmitter {
                         image.src = imageUrl;
                         this._preloadedBehaviourAssets.push(image);
                     }
+                }).catch((err) => {
+                    logger.error(err, `could not preload behaviour asset ${behaviour.asset_collection_id}`);
                 });
-        });
+        }));
     }
 
     _preloadIconAssets() {
@@ -677,6 +688,8 @@ export default class BaseRenderer extends EventEmitter {
                         logger.info(`Preloading icon ${imageUrl}`);
                         this._preloadedIconAssets.push(image);
                     }
+                }).catch((err) => {
+                    logger.error(err, `could not preload icon asset ${iconAssetCollection}`);
                 });
         }));
     }
