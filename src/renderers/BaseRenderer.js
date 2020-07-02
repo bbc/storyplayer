@@ -234,8 +234,10 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._preloadedBehaviourAssets = [];
-        this._preloadBehaviourAssets();
-        this._preloadIconAssets();
+        this._preloadBehaviourAssets().catch(e =>
+            logger.warn(e, 'Could not preload behaviour assets'));
+        this._preloadIconAssets().catch(e =>
+            logger.warn(e, 'Could not preload icon assets'));
         this._loopCounter = 0;
         this.phase = RENDERER_PHASES.CONSTRUCTING;
         this._inPauseBehaviourState = false;
@@ -657,7 +659,8 @@ export default class BaseRenderer extends EventEmitter {
                         this._preloadedBehaviourAssets.push(image);
                     }
                 }).catch((err) => {
-                    logger.error(err, `could not preload behaviour asset ${behaviour.asset_collection_id}`);
+                    logger.error(err,
+                        `could not preload behaviour asset ${behaviour.asset_collection_id}`);
                 });
         }));
     }
@@ -869,7 +872,7 @@ export default class BaseRenderer extends EventEmitter {
         const behaviourOverlay = this._linkChoiceBehaviourOverlay;
             
         // get valid links
-        return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
+        this._controller.getValidNextSteps().then((narrativeElementObjects) => {
             if (choiceIconNEObjects !== null) {
                 if (this._choicesHaveChanged(narrativeElementObjects)) {
                     logger.info('Variable state has changed valid links - need to refresh icons');
@@ -899,43 +902,46 @@ export default class BaseRenderer extends EventEmitter {
                 return Promise.resolve();
             }
 
-            // build icons
-            const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
-
             // find out which link is default
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
-            return iconSrcPromises.then((iconObjects) => {
+            return this._getIconSourceUrls(narrativeElementObjects, behaviour)
+                .then((iconObjects) => {
 
-                this._player.clearLinkChoices();
-                iconObjects.forEach((iconSpecObject) => {
-
-                    this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
-                });
-                if (iconObjects.length > 1 || showIfOneLink) {
-                    this._showChoiceIcons({
-                        defaultLinkId, // id for link to highlight at start
-                        forceChoice, // do we highlight
-                        disableControls, // are controls disabled while icons shown
-                        countdown, // do we animate countdown
-                        iconOverlayClass, // css classes to apply to overlay
-
-                        behaviourOverlay,
-                        choiceCount: iconObjects.length,
+                    this._player.clearLinkChoices();
+                    iconObjects.forEach((iconSpecObject) => {
+                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                     });
+                    if (iconObjects.length > 1 || showIfOneLink) {
+                        this._showChoiceIcons({
+                            defaultLinkId, // id for link to highlight at start
+                            forceChoice, // do we highlight
+                            disableControls, // are controls disabled while icons shown
+                            countdown, // do we animate countdown
+                            iconOverlayClass, // css classes to apply to overlay
 
-                    // callback to say behaviour is done, but not if user can
-                    // change their mind
-                    if (!forceChoice) {
+                            behaviourOverlay,
+                            choiceCount: iconObjects.length,
+                        });
+
+                        // callback to say behaviour is done, but not if user can
+                        // change their mind
+                        if (!forceChoice) {
+                            callback();
+                        }
+                    } else {
+                        logger.info('Link Choice behaviour ignored - only one link');
+                        this._linkBehaviour.forceChoice = false;
                         callback();
                     }
-                } else {
-                    logger.info('Link Choice behaviour ignored - only one link');
-                    this._linkBehaviour.forceChoice = false;
+                }).catch((err) => {
+                    logger.error(err, 'could not get assets for rendering link icons');
                     callback();
-                }
-            });
+                });
+        }).catch((err) => {
+            logger.error(err, 'Could not get next steps for rendering links');
+            callback();
         });
     }
 
@@ -1151,15 +1157,18 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             behaviourOverlay,
             choiceCount,
-        );
-        this._player.enableLinkChoiceControl();
-        if (disableControls) {
-            // disable transport controls
-            this._player.disableControls();
-        }
-        if (countdown) {
-            this._player.startChoiceCountdown(this);
-        }
+        ).then(() => {
+            if (disableControls) {
+                // disable transport controls
+                this._player.disableControls();
+            }
+            if (countdown) {
+                this._player.startChoiceCountdown(this);
+            }
+            this._player.enableLinkChoiceControl();
+        }).catch((err) => { // REFACTOR: this returns a promise
+            logger.error(err, 'could not render link choice icons')  ;
+        });
     }
 
     // user has made a choice of link to follow - do it
@@ -1251,6 +1260,8 @@ export default class BaseRenderer extends EventEmitter {
         callback();
     }
 
+    // REFACTOR note: these are called by the behaviour, without knowing what will happen
+    // via behaviour map
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
         const behaviourAssetCollectionMappingId = behaviour.image;
         const assetCollectionId =
@@ -1268,7 +1279,12 @@ export default class BaseRenderer extends EventEmitter {
                         this._overlayImage(imageUrl, behaviour.id);
                     }
                     callback();
+                })
+                .catch((err) => {
+                    logger.error(err, 'could not get image for show image behaviour');
                 });
+        } else {
+            logger.error('No asset collection id for show image behaviour');
         }
     }
 
@@ -1338,8 +1354,8 @@ export default class BaseRenderer extends EventEmitter {
             this._analytics,
         );
     }
-
     // //////////// end of variables panel choice behaviour
+
     _clearBehaviourElements() {
         const behaviourElements =
             document.querySelectorAll(`[behaviour-renderer="${this._rendererId}"]`);
