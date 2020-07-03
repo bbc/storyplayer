@@ -245,15 +245,13 @@ export default class BaseRenderer extends EventEmitter {
 
     async init() {
         // run any code that may be asynchronous
-        // do not call super from classes that extend this
-        // overwrite if any async code needs to be called
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
     }
 
-    willStart(elementName: ?string, elementId: ?string) {
+    willStart(elementName: ?string, elementId: ?string): boolean {
         if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
             setTimeout(() => this.willStart(elementName, elementId), 100);
-            return;
+            return false;
         }
         this.inVariablePanel = false;
         this.phase = RENDERER_PHASES.START;
@@ -266,6 +264,7 @@ export default class BaseRenderer extends EventEmitter {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
         }
+        return true;
     }
 
     _runStartBehaviours() {
@@ -872,7 +871,7 @@ export default class BaseRenderer extends EventEmitter {
         const behaviourOverlay = this._linkChoiceBehaviourOverlay;
             
         // get valid links
-        this._controller.getValidNextSteps().then((narrativeElementObjects) => {
+        return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
             if (choiceIconNEObjects !== null) {
                 if (this._choicesHaveChanged(narrativeElementObjects)) {
                     logger.info('Variable state has changed valid links - need to refresh icons');

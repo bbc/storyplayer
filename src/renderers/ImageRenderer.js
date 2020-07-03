@@ -1,6 +1,6 @@
 // @flow
 
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../Player';
 import logger from '../logger';
@@ -38,7 +38,6 @@ export default class ImageRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-        this.renderImageElement();
         this._disablePlayButton = () => { this._player.disablePlayButton(); };
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
@@ -46,12 +45,22 @@ export default class ImageRenderer extends BaseRenderer {
         this._duration = this._representation.duration ? this._representation.duration : Infinity;
     }
 
+    async init() {
+        try {
+            await this.renderImageElement();
+            this.phase = RENDERER_PHASES.CONSTRUCTED;
+        } catch(e) {
+            logger.error(e, 'Could not construct image renderer');
+        }
+    }
+
     willStart() {
-        super.willStart();
-        if (!this._imageElement) this.renderImageElement();
+        const ready = super.willStart();
+        if (!ready) return false;
 
         this._visible = true;
         this._setVisibility(true);
+        return true;
     }
 
     start() {
@@ -93,20 +102,25 @@ export default class ImageRenderer extends BaseRenderer {
         }, 100);
     }
 
-    renderImageElement() {
+    async renderImageElement() {
         this._imageElement = document.createElement('img');
         this._imageElement.className = 'romper-render-image';
         this._setVisibility(false);
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (fg.assets.image_src) {
-                        this._fetchMedia(fg.assets.image_src).then((mediaUrl) => {
-                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                            this._imageElement.src = mediaUrl;
-                        }).catch((err) => { logger.error(err, 'Notfound'); });
-                    }
-                });
+            const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+            if (fg.assets.image_src) {
+                try {
+                    const mediaUrl = await this._fetchMedia(fg.assets.image_src);
+                    logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                    this._imageElement.src = mediaUrl;
+                }
+                catch(err) { 
+                    logger.error(err, 'Notfound');
+                    throw new Error('Image media not found');
+                }
+            }
+        } else {
+            throw new Error('No foreground assets for image representation');
         }
 
         this._target.appendChild(this._imageElement);

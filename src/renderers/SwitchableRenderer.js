@@ -54,7 +54,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._controller = controller;
 
         this._preloadSwitchIcons();
-        this._preloadedSwitchIcons = [];
+        this._preloadedSwitchIcons = []; // TODO: should this be here????
     }
 
     _updateChoiceRenderers() {
@@ -126,14 +126,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
+                    cr.init();
                     cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
                     });
-                }
-            });
-            choices.forEach((choiceRenderer) => {
-                if (choiceRenderer) {
-                    const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
                             this.complete();
@@ -170,14 +166,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
+                    cr.init();
                     cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
                     });
-                }
-            });
-            choices.forEach((choiceRenderer) => {
-                if (choiceRenderer) {
-                    const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
                             this.complete();

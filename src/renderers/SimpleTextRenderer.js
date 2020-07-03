@@ -50,16 +50,22 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     async init() {
-        await this.renderTextElement()
-            .catch(err => logger.error(err, 'could not initiate text renderer'));
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        try {
+            await this.renderTextElement()
+            this.phase = RENDERER_PHASES.CONSTRUCTED;
+        } catch(err) {
+            logger.error(err, 'could not initiate text renderer');
+        }
     }
 
     willStart() {
-        super.willStart();
+        const ready = super.willStart();
+        if (!ready) return false;
+        
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
+        return true;
     }
 
     start() {

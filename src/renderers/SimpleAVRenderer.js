@@ -72,8 +72,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     async init() {
-        await this.renderVideoElement()
-            .catch(e => logger.error(e, 'could not initiate video renderer'));
+        try {
+            await this.renderVideoElement();
+        }
+        catch(e) {
+            logger.error(e, 'could not initiate video renderer');
+        }
         this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
@@ -207,47 +211,47 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     async renderVideoElement() {
         if (this._representation.asset_collections.foreground_id) {
-            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    this._testShowScrubBar(fg);
-                    if (fg.assets.av_src) {
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                            this._setInTime(parseFloat(fg.meta.romper.in));
+            const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+            this._testShowScrubBar(fg);
+            if (fg.assets.av_src) {
+                if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                    this._setInTime(parseFloat(fg.meta.romper.in));
+                }
+                if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                    this._setOutTime(parseFloat(fg.meta.romper.out));
+                }
+                const options = { mediaFormat: MediaFormats.getFormat(), mediaType: VIDEO };
+                try {
+                    const mediaUrl = await this._fetchMedia(fg.assets.av_src, options);
+                    let appendedUrl = mediaUrl;
+                    if (this._inTime > 0 || this._outTime > 0) {
+                        let mediaFragment = `#t=${this._inTime}`;
+                        if (this._outTime > 0) {
+                            mediaFragment = `${mediaFragment},${this._outTime}`;
                         }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                            this._setOutTime(parseFloat(fg.meta.romper.out));
-                        }
-                        const options = { mediaFormat: MediaFormats.getFormat(), mediaType: VIDEO };
-                        this._fetchMedia(fg.assets.av_src, options)
-                            .then((mediaUrl) => {
-                                let appendedUrl = mediaUrl;
-                                if (this._inTime > 0 || this._outTime > 0) {
-                                    let mediaFragment = `#t=${this._inTime}`;
-                                    if (this._outTime > 0) {
-                                        mediaFragment = `${mediaFragment},${this._outTime}`;
-                                    }
-                                    appendedUrl = `${mediaUrl}${mediaFragment}`;
-                                }
-                                this.populateVideoElement(appendedUrl, fg.loop, fg.id);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Video not found');
-                            });
-                    } else {
-                        throw new Error('No av source for video');
+                        appendedUrl = `${mediaUrl}${mediaFragment}`;
                     }
-                    if (fg.assets.sub_src) {
-                        this._fetchMedia(fg.assets.sub_src)
-                            .then((mediaUrl) => {
-                                this.populateVideoSubs(mediaUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Subs not found');
-                            });
-                    }
-                });
+                    this.populateVideoElement(appendedUrl, fg.loop, fg.id);
+                }
+                catch(err) {
+                    logger.error(err, 'Video not found');
+                    throw new Error('Video not found');
+                }
+            } else {
+                throw new Error('No av source for video');
+            }
+            if (fg.assets.sub_src) {
+                this._fetchMedia(fg.assets.sub_src)
+                    .then((mediaUrl) => {
+                        this.populateVideoSubs(mediaUrl);
+                    })
+                    .catch((err) => {
+                        logger.error(err, 'Subs not found');
+                    });
+            }
+        } else {
+            throw new Error('No foreground asset id for video');
         }
-        return Promise.reject(new Error('No foreground asset id for video'));
     }
 
     populateVideoElement(mediaUrl: string, loop :?boolean, id: ?string) {

@@ -77,10 +77,15 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     async init() {
-        await this._renderAudioElement()
-            .catch(e => logger.error(e, 'could not initiate audio renderer'));
-        await this._renderBackgroundImage();
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        try {
+            await Promise.all([
+                this._renderAudioElement(),
+                this._renderBackgroundImage(),
+            ]);
+            this.phase = RENDERER_PHASES.CONSTRUCTED;
+        } catch(e) {
+            logger.error(e, 'could not initiate audio renderer');
+        }
     }
 
     _endedEventListener() {
@@ -127,23 +132,24 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         // eslint-disable-next-line max-len
         logger.info(`Rendering background image for audio representation ${this._representation.id}`);
         if (this._representation.asset_collections.background_image) {
-            const assetCollectionId = this._representation.asset_collections.background_image;
-            this._fetchAssetCollection(assetCollectionId).then((image) => {
+            try {
+                const assetCollectionId = this._representation.asset_collections.background_image;
+                const image = await this._fetchAssetCollection(assetCollectionId);
                 if (image.assets.image_src) {
-                    return this._fetchMedia(image.assets.image_src);
+                    const imageUrl = await this._fetchMedia(image.assets.image_src);
+                    this._backgroundImage = document.createElement('img');
+                    this._backgroundImage.className = 'romper-render-image';
+                    this._backgroundImage.src = imageUrl;
+                    if (this.phase !== RENDERER_PHASES.MAIN) {
+                        this._setImageVisibility(false);
+                    } else {
+                        this._setImageVisibility(true);
+                    }
+                    this._target.appendChild(this._backgroundImage);
                 }
-                return Promise.resolve();
-            }).then((imageUrl: string) => {
-                this._backgroundImage = document.createElement('img');
-                this._backgroundImage.className = 'romper-render-image';
-                this._backgroundImage.src = imageUrl;
-                if (this.phase !== RENDERER_PHASES.MAIN) {
-                    this._setImageVisibility(false);
-                } else {
-                    this._setImageVisibility(true);
-                }
-                this._target.appendChild(this._backgroundImage);
-            }).catch((err) => { logger.error(err, 'Not found'); });
+            } catch (err) {
+                logger.error(err, 'Background image not found'); 
+            }
         }
     }
 
@@ -194,41 +200,35 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     async _renderAudioElement() {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
-            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                        this._setInTime(parseFloat(fg.meta.romper.in));
+            try {
+                const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+                if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                    this._setInTime(parseFloat(fg.meta.romper.in));
+                }
+                if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                    this._setOutTime(parseFloat(fg.meta.romper.out));
+                }
+                if (fg.assets.audio_src) {
+                    const mediaUrl = await this._fetchMedia(fg.assets.audio_src, {
+                        mediaFormat: MediaFormats.getFormat(), 
+                        mediaType: AUDIO
+                    });
+                    this.populateAudioElement(mediaUrl, fg.loop);
+                }
+                if (fg.assets.sub_src) {
+                    try {
+                        const subsUrl = await this._fetchMedia(fg.assets.sub_src);
+                        this.populateAudioSubs(subsUrl);
+                    } catch(err) {
+                        logger.error(err, 'Subs not found');
                     }
-                    if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                        this._setOutTime(parseFloat(fg.meta.romper.out));
-                    }
-                    if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, {
-                            mediaFormat: MediaFormats.getFormat(), 
-                            mediaType: AUDIO
-                        })
-                            .then((mediaUrl) => {
-                                this.populateAudioElement(mediaUrl, fg.loop);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'audio not found');
-                            });
-                    }
-                    if (fg.assets.sub_src) {
-                        this._fetchMedia(fg.assets.sub_src)
-                            .then((mediaUrl) => {
-                                this.populateAudioSubs(mediaUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Subs not found');
-                                // this._subtitlesExist = false;
-                            });
-                    } else {
-                        // this._subtitlesExist = false;
-                    }
-                });
+                }
+            } catch (err) {
+                throw new Error('Could not get audio assets');
+            }
+        } else {
+            throw new Error('No foreground asset collection for audio representation');
         }
-        return Promise.reject(new Error('No foreground asset collection for audio representation'));
     }
 
     // show/hide the background image
