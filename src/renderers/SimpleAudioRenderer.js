@@ -155,6 +155,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._hasEnded = false;
         this._setImageVisibility(true);
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
@@ -174,9 +175,12 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         this._setImageVisibility(false);
         this._lastSetTime = 0;
+        this._hasEnded = true;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
 
         logger.info(`Ended: ${this._representation.id}`);
@@ -195,13 +199,16 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         if (mediaElement) {
             mediaElement.classList.remove('romper-audio-element');
         }
+        return true;
     }
 
     async _renderAudioElement() {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
             try {
-                const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+                const fg = await this._fetchAssetCollection(
+                    this._representation.asset_collections.foreground_id,
+                );
                 if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                     this._setInTime(parseFloat(fg.meta.romper.in));
                 }
@@ -267,11 +274,11 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this.end();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
         if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
-
-        super.destroy();
+        return true;
     }
 }

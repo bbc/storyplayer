@@ -70,11 +70,14 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hasEnded = true;
+        // no duration, so ends immediately
+        this.phase = RENDERER_PHASES.MEDIA_FINISHED;
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
@@ -83,6 +86,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         }
         this._player.enablePlayButton();
         this._player.enableScrubBar();
+        return true;
     }
 
     renderTextElement() {
@@ -129,8 +133,4 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._textDiv.innerHTML = textContent;
     }
 
-    destroy() {
-        this.end();
-        super.destroy();
-    }
 }

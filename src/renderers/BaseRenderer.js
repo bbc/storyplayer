@@ -24,6 +24,8 @@ import PauseBehaviour from '../behaviours/PauseBehaviour';
 
 const SEEK_TIME = 10;
 
+const debugPhase = true;
+
 const getBehaviourEndTime = (behaviour: Object) => {
     if(behaviour.duration !== undefined) {
         const endTime = behaviour.start_time + behaviour.duration;
@@ -37,8 +39,10 @@ export const RENDERER_PHASES = {
     CONSTRUCTED: 'CONSTRUCTED',
     START: 'START',
     MAIN: 'MAIN',
-    END: 'END',
+    COMPLETING: 'COMPLETING',
     ENDED: 'ENDED',
+    DESTROYED: 'DESTROYED',
+    MEDIA_FINISHED: 'MEDIA_FINISHED', // done all its rendering and ready to move on, but not ended
 };
 
 export default class BaseRenderer extends EventEmitter {
@@ -97,8 +101,6 @@ export default class BaseRenderer extends EventEmitter {
     _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
-
-    _hasEnded: boolean;
 
     inVariablePanel: boolean;
 
@@ -243,8 +245,9 @@ export default class BaseRenderer extends EventEmitter {
         this._inPauseBehaviourState = false;
     }
 
+    // run any code that may be asynchronous
     async init() {
-        // run any code that may be asynchronous
+        // eslint-disable-next-line max-len
         throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
     }
 
@@ -253,8 +256,10 @@ export default class BaseRenderer extends EventEmitter {
             setTimeout(() => this.willStart(elementName, elementId), 100);
             return false;
         }
-        this.inVariablePanel = false;
+        // eslint-disable-next-line max-len
+        if (debugPhase) logger.info('PHASE will starting', this._representation.name, this.phase);        
         this.phase = RENDERER_PHASES.START;
+        this.inVariablePanel = false;
 
         this._runStartBehaviours();
 
@@ -298,9 +303,9 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
+        if (debugPhase) logger.info('PHASE starting', this._representation.name, this.phase);
         this.phase = RENDERER_PHASES.MAIN;
         this.emit(RendererEvents.STARTED);
-        this._hasEnded = false;
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
             this._timer.pause();
@@ -315,8 +320,17 @@ export default class BaseRenderer extends EventEmitter {
         this._runDuringBehaviours();
     }
 
-    end() {
-        this.phase = RENDERER_PHASES.ENDED;
+    end(): boolean {
+        switch (this.phase) {
+        case (RENDERER_PHASES.ENDED):
+        case (RENDERER_PHASES.DESTROYED):
+            // eslint-disable-next-line max-len
+            if (debugPhase) logger.info('PHASE base ended already', this._representation.name, this.phase);
+            return false;
+        default:
+            break;
+        };
+        if (debugPhase) logger.info('PHASE base ending', this._representation.name, this.phase);
         this._player.disconnectScrubBar(this);
         this._clearBehaviourElements()
         this._reapplyLinkConditions();
@@ -332,10 +346,17 @@ export default class BaseRenderer extends EventEmitter {
             this._handlePlayPauseButtonClicked,
         );
         this._lastSetTime = 0;
+        this.phase = RENDERER_PHASES.ENDED;
+        return true;
     }
 
-    hasEnded(): boolean {
-        return this._hasEnded;
+    // has the media finished?
+    hasMediaEnded(): boolean {
+        return (
+            this.phase === RENDERER_PHASES.MEDIA_FINISHED
+            || this.phase === RENDERER_PHASES.ENDED
+            || this.phase === RENDERER_PHASES.DESTROYED
+        );
     }
 
     // if we have any start pauses, complete those behaviours early
@@ -608,8 +629,8 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        this.phase = RENDERER_PHASES.END;
-        this._hasEnded = true;
+        if (debugPhase) logger.info('PHASE completing', this._representation.name, this.phase);
+        this.phase = RENDERER_PHASES.COMPLETING;
         this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
@@ -1446,7 +1467,16 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
-        this.end();
+        if (debugPhase) logger.info('PHASE destroying', this._representation.name, this.phase);
+        if (this.phase === RENDERER_PHASES.DESTROYED) {
+            // eslint-disable-next-line max-len
+            if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.name, this.phase);
+            return false;
+        }
+        if (!this.phase === RENDERER_PHASES.ENDED) {
+            if (debugPhase) logger.info('PHASE destroying need to end first');
+            this.end();
+        }
         this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
@@ -1454,6 +1484,7 @@ export default class BaseRenderer extends EventEmitter {
         // we didn't find any behaviours to run, so emit completion event
         this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
+        return true;
     }
 
     isSrcIosPlayoutEngine() {

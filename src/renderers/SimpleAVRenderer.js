@@ -40,6 +40,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _shouldShowScrubBar: boolean;
 
+    _hasEnded: boolean;
+
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -74,11 +76,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderVideoElement();
+            this.phase = RENDERER_PHASES.CONSTRUCTED;
         }
         catch(e) {
             logger.error(e, 'could not initiate video renderer');
+            // TODO: need to work out how we handle these
+            // if this renderer is used, it will break the experience
+            // might get away with it if this is in a branch that isn't taken
         }
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
     _endedEventListener() {
@@ -163,6 +168,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._hasEnded = false;
         // set timer to sync mode until really ready
         this._timer.setSyncing(true);
         const setStartToInTime = () => {
@@ -193,11 +199,12 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
 
         logger.info(`Ended: ${this._representation.id}`);
-
+        this._hasEnded = true;
+        this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
         this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
@@ -207,11 +214,14 @@ export default class SimpleAVRenderer extends BaseRenderer {
         } catch (e) {
             logger.info(e);
         }
+        return true;
     }
 
     async renderVideoElement() {
         if (this._representation.asset_collections.foreground_id) {
-            const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+            const fg = await this._fetchAssetCollection(
+                this._representation.asset_collections.foreground_id,
+            );
             this._testShowScrubBar(fg);
             if (fg.assets.av_src) {
                 if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
@@ -303,10 +313,10 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this.end();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
 
         this._playoutEngine.unqueuePlayout(this._rendererId);
-
-        super.destroy();
+        return true;
     }
 }

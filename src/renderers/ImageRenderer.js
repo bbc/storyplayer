@@ -69,7 +69,7 @@ export default class ImageRenderer extends BaseRenderer {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
             this._disableScrubBar();
-            this._hasEnded = true; // so link choices still work
+            this.phase = RENDERER_PHASES.MEDIA_FINISHED; // so link choices still work
         } else if (this._duration === 0) {
             logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();
@@ -90,7 +90,9 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         this._visible = false;
         // Hack to make image transitions smooth (preventing showing of black background with
         // loading wheel). For some reason the DOM transition on images is slow, not sure why this
@@ -100,6 +102,7 @@ export default class ImageRenderer extends BaseRenderer {
                 this._setVisibility(false);
             }
         }, 100);
+        return true;
     }
 
     async renderImageElement() {
@@ -107,7 +110,9 @@ export default class ImageRenderer extends BaseRenderer {
         this._imageElement.className = 'romper-render-image';
         this._setVisibility(false);
         if (this._representation.asset_collections.foreground_id) {
-            const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+            const fg = await this._fetchAssetCollection(
+                this._representation.asset_collections.foreground_id,
+            );
             if (fg.assets.image_src) {
                 try {
                     const mediaUrl = await this._fetchMedia(fg.assets.image_src);
@@ -139,9 +144,10 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this.end();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
 
         if (this._imageElement) this._target.removeChild(this._imageElement);
-        super.destroy();
+        return true;
     }
 }
