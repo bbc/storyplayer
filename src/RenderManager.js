@@ -863,6 +863,8 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
+        Object.keys(this._backgroundRenderers).forEach(bgrId =>
+            this._backgroundRenderers[bgrId].destroy());
         this._currentRenderer = null;
     }
 }
