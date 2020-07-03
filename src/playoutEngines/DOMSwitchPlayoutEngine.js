@@ -454,7 +454,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (this._useHlsJs) {
                         // Using HLS.js
                         rendererPlayoutObj._hls.config = {
-                            
+
                             ...rendererPlayoutObj._hls.config,
                             ...this._activeConfig.hls,
                         };
@@ -589,7 +589,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (this._useHlsJs) {
                         // Using HLS.js
                         rendererPlayoutObj._hls.config = {
-                            
+
                             ...rendererPlayoutObj._hls.config,
                             ...this._inactiveConfig.hls,
                         };
@@ -637,17 +637,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    _play(rendererId: string) {
-        const { mediaElement } = this._media[rendererId];
-        const promise = mediaElement.play();
-        if (promise !== undefined) {
-            promise.then(() => {}).catch((error) => {
-                logger.warn(error, 'DOMSwitchPlayotEngine Not got permission to play');
-                // Auto-play was prevented
-            });
-        }
-    }
-
     play() {
         this._playing = true;
         this._hasStarted = true;
@@ -655,26 +644,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         Object.keys(this._media)
             .filter(key => this._media[key].active)
             .forEach((key) => {
-                const { mediaElement } = this._media[key];
-                if (!mediaElement) {
-                    setTimeout(() => { this._play(key); }, 500);
-                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-                    this._play(key);
-                } else {
-                    // loadeddata event seems not to be reliable
-                    // this hack avoids it
-                    const timeoutId = setInterval(() => {
-                        mediaElement.play()
-                            .then(() => {
-                                clearInterval(timeoutId);
-                            })
-                            .catch((error) => {
-                                logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
-                                // Auto-play was prevented
-                                clearInterval(timeoutId);
-                            });
-                    }, 100);
-                }
+                this.playRenderer(key)
             });
     }
 
@@ -693,7 +663,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                this._media[key].mediaElement.pause();
+                this.pauseRenderer(key)
             });
     }
 
@@ -712,7 +682,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                this._media[key].mediaElement.pause();
+                this.pauseRenderer(key)
             });
     }
 
@@ -727,25 +697,53 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                const { mediaElement } = this._media[key];
-                const playCallback = () => {
-                    mediaElement.removeEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                    this._play(key);
-                };
-                if (!mediaElement) {
-                    setTimeout(() => { this._play(key); }, 500);
-                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-                    this._play(key);
-                } else {
-                    mediaElement.addEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                }
+                this.playRenderer(key)
             });
+    }
+
+    playRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
+            return;
+        }
+        const {mediaElement} = rendererPlayoutObj;
+        const play = () => {
+            const promise = mediaElement.play();
+            if (promise !== undefined) {
+                promise.then(() => {}).catch((error) => {
+                    logger.warn(error, 'DOMSwitchPlayotEngine Not got permission to play');
+                    // Auto-play was prevented
+                });
+            }
+        }
+        if (!mediaElement) {
+            setTimeout(() => { play(); }, 500);
+        } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
+            play();
+        } else {
+            // loadeddata event seems not to be reliable
+            // this hack avoids it
+            const timeoutId = setInterval(() => {
+                mediaElement.play()
+                    .then(() => {
+                        clearInterval(timeoutId);
+                    })
+                    .catch((error) => {
+                        logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
+                        // Auto-play was prevented
+                        clearInterval(timeoutId);
+                    });
+            }, 100);
+        }
+    }
+
+    pauseRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
+            return;
+        }
+        const {mediaElement} = rendererPlayoutObj;
+        mediaElement.pause()
     }
 
     getCurrentTime(rendererId: string) {

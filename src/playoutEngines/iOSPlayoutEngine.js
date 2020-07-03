@@ -252,6 +252,34 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    playRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        if(rendererPlayoutObj.active) {
+            if(rendererPlayoutObj.media.type === MEDIA_TYPES.BACKGROUND_A) {
+                this._backgroundMediaElement.play()
+            } else {
+                this._foregroundMediaElement.play()
+            }
+        }
+    }
+
+    pauseRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        if(rendererPlayoutObj.active) {
+            if(rendererPlayoutObj.media.type === MEDIA_TYPES.BACKGROUND_A) {
+                this._backgroundMediaElement.pause()
+            } else {
+                this._foregroundMediaElement.pause()
+            }
+        }
+    }
+
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
