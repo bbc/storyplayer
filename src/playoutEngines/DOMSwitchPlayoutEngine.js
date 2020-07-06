@@ -331,8 +331,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.id =  mediaObj.id;
         }
         if(mediaObj.loop) {
-            // rendererPlayoutObj.mediaElement.loop = true;
-            super.setLoopAttribute(rendererId, mediaObj.loop, rendererPlayoutObj.mediaElement);
+            super.setLoopAttribute(rendererId, mediaObj.loop);
         }
         if (mediaObj.inTime) {
             rendererPlayoutObj.mediaElement.currentTime = mediaObj.inTime;
@@ -632,7 +631,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.pause();
             rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
             super.setPlayoutInactive(rendererId);
-            super.removeLoopAttribute(rendererId);
+            super.setLoopAttribute(rendererId, false);
             this._player.removeVolumeControl(rendererId);
         }
     }

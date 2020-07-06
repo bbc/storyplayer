@@ -121,7 +121,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj.queuedEvents = []
                 }
                 if (mediaObj.loop) {
-                    super.setLoopAttribute(rendererId, mediaObj.loop, mediaElement);
+                    super.setLoopAttribute(rendererId, mediaObj.loop);
                 }
             }
             if (mediaObj.subs_url) {
@@ -204,7 +204,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             this.removeEverythingFromActive(rendererId)
         }
         super.setPlayoutInactive(rendererId);
-        super.removeLoopAttribute(rendererId);
+        super.setLoopAttribute(rendererId, false);
     }
 
     // nothing to do here - only one media element that is always visible

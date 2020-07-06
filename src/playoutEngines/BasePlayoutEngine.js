@@ -182,9 +182,8 @@ export default class BasePlayoutEngine {
         return this._getMediaElement(rendererId)
     }
 
-    // TODO: Check for uses where element is passed
-    setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
-        const mediaElement = element || this._getMediaElement(rendererId);
+    setLoopAttribute(rendererId: string, loop: ?boolean) {
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
             if(loop) {
                 mediaElement.loop = true;
@@ -192,13 +191,6 @@ export default class BasePlayoutEngine {
             else {
                 mediaElement.removeAttribute('loop');
             }
-        }
-    }
-
-    removeLoopAttribute(rendererId: string) {
-        const mediaElement = this._getMediaElement(rendererId);
-        if (mediaElement) {
-            mediaElement.removeAttribute('loop');
         }
     }
 
