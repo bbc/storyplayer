@@ -2,7 +2,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 import Player from '../Player';
-import { checkAddDetailsOverride } from '../utils';
+import { getSetting, ADD_DETAILS_FLAG } from '../utils';
+
+
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
@@ -81,7 +83,7 @@ export default class BasePlayoutEngine {
         }
         // eslint-disable-next-line max-len
         const foregroundId = this._player._currentRenderer._representation.asset_collections.foreground_id;
-        if(checkAddDetailsOverride() && foregroundId) {
+        if(getSetting(ADD_DETAILS_FLAG) && foregroundId) {
             this._player._currentRenderer._fetchAssetCollection(foregroundId).then(fg => {
                 this._player.addAssetCollectionDetails(fg);
             });

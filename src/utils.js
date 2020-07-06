@@ -9,60 +9,43 @@ export const inSMPWrapper = () => {
     return false
 }
 
-export const checkAddDetailsOverride = () => {
-    const override = new URLSearchParams(window.location.search).get('addDetails');
-    return (override === 'true');
-};
+export const ADD_DETAILS_FLAG = "addDetails"
+export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
+export const FACEBOOK_BOOK_FLAG = "overrideFacebookBlock"
+export const WEBVIEW_DEBUG_FLAG = "webviewDebug"
+export const UA_DEBUG_FLAG = "debugUA"
+export const DISABLE_LOOKAHEAD_FLAG = "disableLookahead"
 
-export const fetchOverridePlayout = () => {
-    return new URLSearchParams(window.location.search).get('overridePlayout');
-};
+export const OVERRIDE_PLAYOUT = "overridePlayout"
+export const OVERRIDE_PLAYOUT_FORMAT = "overridePlayoutFormat"
+export const SHAKA_DEBUG_LEVEL = "shakaDebugLevel"
+export const OVERRIDE_ACTIVE_BUFFERING = "activeBufferingOverride"
+export const OVERRIDE_INACTIVE_BUFFERING = "inactiveBufferingOverride"
 
-export const checkDebugPlayout = () => {
-    const override = new URLSearchParams(window.location.search).get('debugPlayout');
-    return (override === 'true');
-};
-
-export const checkOverrideFacebookBlock = () => {
-    const override = new URLSearchParams(window.location.search).get('overrideFacebookBlock');
-    return (override === 'true');
-};
-
-export const checkWebviewDebug = () => {
-    const override = new URLSearchParams(window.location.search).get('webviewDebug');
-    return (override === 'true');
-};
-
-export const checkDebugUA = () => {
-    const override = new URLSearchParams(window.location.search).get('debugUA');
-    return (override === 'true');
-};
-
-export const fetchShakaDebugLevel = () => {
-    return new URLSearchParams(window.location.search).get('shakaDebugLevel');
-};
-
-export const fetchActiveBufferingOverride = () => {
-    return new URLSearchParams(window.location.search).get('activeBufferingOverride')
-};
-
-export const fetchInactiveBufferingOverride = () => {
-    return new URLSearchParams(window.location.search).get('inactiveBufferingOverride')
-};
-
-export const checkDisableLookahead = () => {
-    const disableLookahead = new URLSearchParams(window.location.search).get('disableLookahead');
-    return (disableLookahead === 'true');;
-};
-
-export const checkOverrideFormat = (format: ?string) => {
-    return format && (format === 'hls' || format === 'dash');
+export const getSetting = (settingName) => {
+    const settingValue = new URLSearchParams(window.location.search).get('settingName');
+    switch(settingName) {
+    case ADD_DETAILS_FLAG:
+    case DEBUG_PLAYOUT_FLAG:
+    case FACEBOOK_BOOK_FLAG:
+    case WEBVIEW_DEBUG_FLAG:
+    case UA_DEBUG_FLAG:
+    case DISABLE_LOOKAHEAD_FLAG:
+        return (settingValue === 'true');
+    default:
+        return settingValue
+    }
 }
 
-export const getOverrideFormat =() => {
-    const overrideFormat = new URLSearchParams(window.location.search).get('overridePlayoutFormat');
-    return checkOverrideFormat(overrideFormat) ? overrideFormat : null;
-};
+export const getCurrentUrl = () => {
+    return window.location.href
+}
+
+export const getVariableSetting = () => {
+    const varName = new URLSearchParams(window.location.search).get('varName');
+    const varVal = new URLSearchParams(window.location.search).get('varVal');
+    return [varName, varVal]
+}
 
 export const copySelection = (e: Object) => {
     e.target.select();
