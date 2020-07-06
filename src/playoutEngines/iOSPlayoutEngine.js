@@ -288,7 +288,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj.active) {
             return 0;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -303,7 +303,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return false;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (!mediaElement) {
             return false;
         }
@@ -344,7 +344,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 }
                 rendererPlayoutObj._endedCallback = callback
             }
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (mediaElement && rendererPlayoutObj.active) {
                 // This renderer is using the on screen video element
                 // so add event listener directly
@@ -372,7 +372,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 // eslint-disable-next-line no-param-reassign
                 callback = rendererPlayoutObj._endedCallback;
             }
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (mediaElement && rendererPlayoutObj.active) {
                 mediaElement.removeEventListener(event, callback);
             } else if (rendererPlayoutObj.queuedEvents) {
@@ -387,7 +387,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string): ? HTMLMediaElement {
+    _getMediaElement(rendererId: string): ? HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.media || !rendererPlayoutObj.media.type) {
             return undefined;
@@ -431,7 +431,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _handleVolumeClicked(event: Object): void {
         const rendererPlayoutObj = this._media[event.id];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(event.id);
+            const mediaElement = this._getMediaElement(event.id);
             if (mediaElement) {
                 mediaElement.volume = event.value;
             }
@@ -441,7 +441,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _toggleMute(event: Object) {
         const rendererPlayoutObj = this._media[event.id];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(event.id);
+            const mediaElement = this._getMediaElement(event.id);
             if (mediaElement) {
                 mediaElement.muted = event.muted;
             }
@@ -454,7 +454,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
             mediaElement.addEventListener('loadedmetadata', () => {
                 this._showHideSubtitles(rendererId);
@@ -471,7 +471,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (!mediaElement) {
             return;
         }
@@ -495,7 +495,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
         this._cleanUpSubtitles(rendererId);
         if (rendererPlayoutObj.active) {
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (!mediaElement) {
                 return;
             }

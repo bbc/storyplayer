@@ -766,7 +766,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return undefined;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -818,7 +818,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string): ?HTMLMediaElement {
+    _getMediaElement(rendererId: string): ?HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return document.createElement('video');

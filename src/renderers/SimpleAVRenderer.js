@@ -81,6 +81,9 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.seekEventHandler(this._inTime);
     }
 
+    // TODO: Move this out to a TimedMediaRenderer
+    // (BaseRenderer -> TimedMediaRenderer -> SimpleAV/audio)
+    // As this is used in SimpleAV, SimpleAudio and ThreeJsVideo 
     _outTimeEventListener() {
         const { duration } = this.getCurrentTime();
         let { currentTime } = this.getCurrentTime();
@@ -257,11 +260,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            const { blur } = behaviour;
-            videoElement.style.filter = `blur(${blur}px)`;
-        }
+        const { blur } = behaviour;
+        this._playoutEngine.applyStyle(this._rendererId, "filter", `blur(${blur}px)`)
         callback();
     }
 
@@ -275,10 +275,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _clearBehaviourElements() {
         super._clearBehaviourElements();
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            videoElement.style.filter = '';
-        }
+        this._playoutEngine.clearStyle(this._rendererId, "filter")
     }
 
     destroy() {
