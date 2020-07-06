@@ -2,6 +2,13 @@ import logger from './logger';
 
 // @flow
 
+export const inSMPWrapper = () => {
+    if (window.publicApi && window.playerInterface) {
+        return true;
+    }
+    return false
+}
+
 export const checkAddDetailsOverride = () => {
     const override = new URLSearchParams(window.location.search).get('addDetails');
     return (override === 'true');

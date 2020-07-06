@@ -81,11 +81,6 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
     start() {
         super.start();
         this._setImageVisibility(true);
-
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            mediaElement.classList.add('romper-audio-element');
-        }
     }
 
     end() {
@@ -93,11 +88,6 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
         if (!needToEnd) return false;
 
         this._setImageVisibility(false);
-
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            mediaElement.classList.remove('romper-audio-element');
-        }
         return true;
     }
 
@@ -105,9 +95,7 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
             try {
-                const fg = await this._fetchAssetCollection(
-                    this._representation.asset_collections.foreground_id,
-                );
+                const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                     this._setInTime(parseFloat(fg.meta.romper.in));
                 }
@@ -115,19 +103,28 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
                     this._setOutTime(parseFloat(fg.meta.romper.out));
                 }
                 if (fg.assets.audio_src) {
-                    const mediaUrl = await this._fetchMedia(fg.assets.audio_src, {
-                        mediaFormat: MediaFormats.getFormat(), 
+                    this._fetchMedia(fg.assets.audio_src, {
+                        mediaFormat: MediaFormats.getFormat(),
                         mediaType: AUDIO
-                    });
-                    this.populateAudioElement(mediaUrl, fg.loop);
+                    })
+                        .then((mediaUrl) => {
+                            this.populateAudioElement(mediaUrl, fg.loop);
+                        })
+                        .catch((err) => {
+                            logger.error(err, 'audio not found');
+                        });
                 }
                 if (fg.assets.sub_src) {
-                    try {
-                        const subsUrl = await this._fetchMedia(fg.assets.sub_src);
-                        this.populateAudioSubs(subsUrl);
-                    } catch(err) {
-                        logger.error(err, 'Subs not found');
-                    }
+                    this._fetchMedia(fg.assets.sub_src)
+                        .then((mediaUrl) => {
+                            this.populateAudioSubs(mediaUrl);
+                        })
+                        .catch((err) => {
+                            logger.error(err, 'Subs not found');
+                            // this._subtitlesExist = false;
+                        });
+                } else {
+                    // this._subtitlesExist = false;
                 }
             } catch (err) {
                 throw new Error('Could not get audio assets');
@@ -176,7 +173,6 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
         const needToDestroy = super.destroy();
         if(!needToDestroy) return false;
 
-        this._playoutEngine.unqueuePlayout(this._rendererId);
         if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
         return true;
     }

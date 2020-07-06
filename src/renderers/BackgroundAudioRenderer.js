@@ -42,7 +42,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         });
         this._renderBackgroundAudio();
     }
-    
+
     start() {
         super.start();
         this._fadedOut = false;
@@ -53,23 +53,26 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         } else {
             logger.info(`Continuing background audio ${this._getDescriptionString()}`);
         }
-        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (audioElement) {
-            if (this._assetCollection && this._assetCollection.asset_collection_type
-                === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0') {
-                audioElement.setAttribute('loop', 'true');
-            }
-            audioElement.volume = 0;
-            this._volFadeInterval = setInterval(() => {
-                if (audioElement.volume >= (1 - (FADE_STEP_LENGTH / FADE_IN_TIME))
-                    && this._volFadeInterval) {
-                    clearInterval(this._volFadeInterval);
-                    this._volFadeInterval = null;
-                } else {
-                    audioElement.volume += (FADE_STEP_LENGTH / FADE_IN_TIME);
-                }
-            }, FADE_STEP_LENGTH);
+
+        // TODO: The below should probably be a const somewhere
+        if (
+            this._assetCollection && this._assetCollection.asset_collection_type
+            === 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0'
+        ) {
+            this._playoutEngine.setLoopAttribute(this._rendererId, true);
         }
+        this._playoutEngine.setVolume(this._rendererId, 0)
+        this._volFadeInterval = setInterval(() => {
+            const volume = this._playoutEngine.getVolume(this._rendererId)
+            if (volume >= (1 - (FADE_STEP_LENGTH / FADE_IN_TIME))
+                && this._volFadeInterval) {
+                clearInterval(this._volFadeInterval);
+                this._volFadeInterval = null;
+            } else {
+                const newVolume = volume + (FADE_STEP_LENGTH / FADE_IN_TIME);
+                this._playoutEngine.setVolume(this._rendererId, newVolume)
+            }
+        }, FADE_STEP_LENGTH);
     }
 
     _getDescriptionString(): string {
@@ -119,16 +122,17 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             clearInterval(this._volFadeInterval);
             this._volFadeInterval = null;
         }
-        const audioElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (audioElement && !this._fadeIntervalId) {
+        if (!this._fadeIntervalId) {
             const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
-                if (audioElement.volume >= (1 / interval) && this._fadeIntervalId) {
+                const volume = this._playoutEngine.getVolume(this._rendererId)
+                if (volume >= (1 / interval) && this._fadeIntervalId) {
                     if (!this._fadePaused) {
-                        audioElement.volume -= (1 / interval);
+                        const newVolume = volume - (1 / interval);
+                        this._playoutEngine.setVolume(this._rendererId, newVolume)
                     }
                 } else if (this._fadeIntervalId) {
-                    audioElement.volume = 0;
+                    this._playoutEngine.setVolume(this._rendererId, 0)
                     clearInterval(this._fadeIntervalId);
                     this._fadeIntervalId = null;
                     this._fadedOut = true;
@@ -140,7 +144,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
             this._fetchMedia(this._assetCollection.assets.audio_src, {
-                mediaFormat: MediaFormats.getFormat(), 
+                mediaFormat: MediaFormats.getFormat(),
                 mediaType: AUDIO
             })
                 .then((mediaUrl) => {
@@ -164,7 +168,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this.end();
         const destroyFunc = () => {
             this._playoutEngine.unqueuePlayout(this._rendererId);
-            super.destroy();           
+            super.destroy();
         };
         if (this._fadedOut) {
             destroyFunc();

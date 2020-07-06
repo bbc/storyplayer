@@ -6,10 +6,10 @@ import Controller from './Controller';
 import type { AssetUrls } from './romper';
 import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
-import SrcSwitchPlayoutEngine from './playoutEngines/SrcSwitchPlayoutEngine';
 import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
 import logger from './logger';
-import { BrowserUserAgent, PLAYOUT_ENGINES, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
+import { BrowserUserAgent, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
+import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import {
@@ -725,10 +725,6 @@ class Player extends EventEmitter {
         logger.info('Using playout engine: ', playoutToUse);
 
         switch (playoutToUse) {
-        case PLAYOUT_ENGINES.SRC_SWITCH_PLAYOUT:
-            // Use craptastic iOS playout engine
-            this.playoutEngine = new SrcSwitchPlayoutEngine(this, debugPlayout);
-            break;
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
             this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
@@ -737,6 +733,9 @@ class Player extends EventEmitter {
             // Refactored iOS playout engine
             this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
             break;
+        case PLAYOUT_ENGINES.SMP_PLAYOUT:
+            // SMP playout engine
+            throw new Error("Not Implemented Yet!")
         default:
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');

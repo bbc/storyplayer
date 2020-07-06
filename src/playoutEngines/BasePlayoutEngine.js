@@ -20,7 +20,7 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-    
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
@@ -49,6 +49,7 @@ export default class BasePlayoutEngine {
         } else {
             this._media[rendererId].media = mediaObj;
         }
+
     }
 
     unqueuePlayout(rendererId: string) {
@@ -60,7 +61,7 @@ export default class BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(rendererId)
+            const mediaElement = this._getMediaElement(rendererId)
             if(mediaElement) {
                 mediaElement.classList.remove('romper-media-element-queued');
             }
@@ -85,11 +86,24 @@ export default class BasePlayoutEngine {
                 this._player.addAssetCollectionDetails(fg);
             });
         }
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            const mediaElement = this._getMediaElement(rendererId);
+            if (mediaElement) {
+                mediaElement.classList.add('romper-audio-element');
+            }
+        }
     }
 
     setPlayoutInactive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = false;
+        }
+
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            const mediaElement = this._getMediaElement(rendererId);
+            if (mediaElement) {
+                mediaElement.classList.remove('romper-audio-element');
+            }
         }
     }
 
@@ -117,8 +131,16 @@ export default class BasePlayoutEngine {
 
     }
 
+    playRenderer(rendererId: string) {
+
+    }
+
+    pauseRenderer(rendererId: string) {
+
+    }
+
     getCurrentTime(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -129,7 +151,7 @@ export default class BasePlayoutEngine {
     }
 
     getDuration(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -152,12 +174,16 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    getMediaElement(rendererId: string): ?HTMLMediaElement {
+    _getMediaElement(rendererId: string): ?HTMLMediaElement {
         return undefined;
     }
 
-    setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
-        const mediaElement = element || this.getMediaElement(rendererId);
+    getMediaElementFor360(rendererId: string): ?HTMLMediaElement {
+        return this._getMediaElement(rendererId)
+    }
+
+    setLoopAttribute(rendererId: string, loop: ?boolean) {
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
             if(loop) {
                 mediaElement.loop = true;
@@ -168,15 +194,37 @@ export default class BasePlayoutEngine {
         }
     }
 
-    removeLoopAttribute(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+    checkIsLooping(rendererId: string) {
+        const mediaElement = this._getMediaElement(rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
+    }
+
+    applyStyle(rendererId: string, key: string, value: string) {
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
-            mediaElement.removeAttribute('loop');
+            mediaElement.style[key] = value;
         }
     }
 
-    checkIsLooping(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
-        return mediaElement && mediaElement.hasAttribute('loop');
+    clearStyle(rendererId: string, key: string) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.style[key] = '';
+        }
+    }
+
+    setVolume(rendererId: string, volume: number) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.volume = volume;
+        }
+    }
+
+    getVolume(rendererId: string, volume: number) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            return mediaElement.volume;
+        }
+        return -1
     }
 }
