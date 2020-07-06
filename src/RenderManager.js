@@ -475,10 +475,8 @@ export default class RenderManager extends EventEmitter {
             this._analytics,
             this._controller,
         );
-        
+
         if (newRenderer) {
-            // now it has been constructed, start fetching all the media and building the components
-            newRenderer.init();
             newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                 this.refreshOnwardIcons();
                 newRenderer.start();

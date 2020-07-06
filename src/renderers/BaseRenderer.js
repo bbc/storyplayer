@@ -269,10 +269,6 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
-    init() {
-        // run any code that may be asynchronous
-    }
-
     /**
      * An event which fires when this renderer has completed it's part of the experience
      * (e.g., video finished, or the user has clicked 'skip', etc)
