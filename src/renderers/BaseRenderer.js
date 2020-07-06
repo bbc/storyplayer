@@ -256,7 +256,7 @@ export default class BaseRenderer extends EventEmitter {
             return false;
         }
         // eslint-disable-next-line max-len
-        if (debugPhase) logger.info('PHASE will starting', this._representation.name, this.phase);
+        if (debugPhase) logger.info('PHASE will starting', this._representation.id, this.phase);
         this.phase = RENDERER_PHASES.START;
         this.inVariablePanel = false;
 
@@ -302,7 +302,7 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
-        if (debugPhase) logger.info('PHASE starting', this._representation.name, this.phase);
+        if (debugPhase) logger.info('PHASE starting', this._representation.id, this.phase);
         this.phase = RENDERER_PHASES.MAIN;
         this.emit(RendererEvents.STARTED);
         this._timer.start();
@@ -324,12 +324,12 @@ export default class BaseRenderer extends EventEmitter {
         case (RENDERER_PHASES.ENDED):
         case (RENDERER_PHASES.DESTROYED):
             // eslint-disable-next-line max-len
-            if (debugPhase) logger.info('PHASE base ended already', this._representation.name, this.phase);
+            if (debugPhase) logger.info('PHASE base ended already', this._representation.id, this.phase);
             return false;
         default:
             break;
         };
-        if (debugPhase) logger.info('PHASE base ending', this._representation.name, this.phase);
+        if (debugPhase) logger.info('PHASE base ending', this._representation.id, this.phase);
         this._player.disconnectScrubBar(this);
         try{
             this._clearBehaviourElements()
@@ -337,7 +337,6 @@ export default class BaseRenderer extends EventEmitter {
             logger.info(e);
         }
         this._reapplyLinkConditions();
-        clearTimeout(this._linkFadeTimeout);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -627,7 +626,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        if (debugPhase) logger.info('PHASE completing', this._representation.name, this.phase);
+        if (debugPhase) logger.info('PHASE completing', this._representation.id, this.phase);
         this.phase = RENDERER_PHASES.COMPLETING;
         this._timer.pause();
         if (!this._linkBehaviour ||
@@ -1251,6 +1250,7 @@ export default class BaseRenderer extends EventEmitter {
     _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         const behaviourElement = document.getElementById(behaviourId);
+        if (this._linkFadeTimeout) clearTimeout(this._linkFadeTimeout);
         if(behaviourElement) {
             this._linkFadeTimeout = setTimeout(() => {
                 behaviourElement.classList.remove('romper-icon-fade');
@@ -1464,10 +1464,10 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
-        if (debugPhase) logger.info('PHASE destroying', this._representation.name, this.phase);
+        if (debugPhase) logger.info('PHASE destroying', this._representation.id, this.phase);
         if (this.phase === RENDERER_PHASES.DESTROYED) {
             // eslint-disable-next-line max-len
-            if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.name, this.phase);
+            if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.id, this.phase);
             return false;
         }
         if (this.phase !== RENDERER_PHASES.ENDED) {
