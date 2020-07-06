@@ -513,23 +513,19 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         // if we have a media element, set that time and pause the timer until playhead has synced
-        if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
-            const isPaused = this._timer._paused;
-            const sync = () => {
-                const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
-                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
-                    this._timer.setTime(playheadTime - this._inTime);
-                    this._timer.setSyncing(false);
-                    if (isPaused) this._timer.pause();  // don't restart if we were paused
-                    this._playoutEngine.off(this._rendererId,'timeupdate', sync);
-                }
-            };
-            this._timer.setSyncing(true);
-            this._playoutEngine.on(this._rendererId,'timeupdate', sync);
-            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
-        } else {
-            this._timer.setTime(time);
-        }
+        const isPaused = this._timer._paused;
+        const sync = () => {
+            const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+            if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
+                this._timer.setTime(playheadTime - this._inTime);
+                this._timer.setSyncing(false);
+                if (isPaused) this._timer.pause();  // don't restart if we were paused
+                this._playoutEngine.off(this._rendererId,'timeupdate', sync);
+            }
+        };
+        this._timer.setSyncing(true);
+        this._playoutEngine.on(this._rendererId,'timeupdate', sync);
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
     }
 
     _togglePause() {
