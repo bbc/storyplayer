@@ -6,6 +6,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import { RENDERER_PHASES } from './BaseRenderer';
 
 const THREE = require('three');
 
@@ -53,10 +54,19 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this.renderImageElement();
         this._timeElapsed = 0;
         this._duration = Infinity;
         this._timedEvents = {};
+    }
+
+    async init() {
+        try {
+            await this.renderImageElement();
+        }
+        catch(e) {
+            logger.error(e, 'could not initiate 360 image renderer');
+        }
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
     start() {
@@ -74,6 +84,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
         } else {
+            this.phase = RENDERER_PHASES.MEDIA_FINISHED;
             this._startTimer();
         }
         this._disableScrubBar();
@@ -129,11 +140,14 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
         this._timedEvents = {};
+        return true;
     }
 
     _showImage() {

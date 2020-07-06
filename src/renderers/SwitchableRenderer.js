@@ -1,6 +1,6 @@
 // @flow
 import Player, { PlayerEvents } from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
@@ -54,8 +54,14 @@ export default class SwitchableRenderer extends BaseRenderer {
         this._controller = controller;
 
         this._preloadSwitchIcons();
-        this._preloadedSwitchIcons = [];
+        this._preloadedSwitchIcons = []; // TODO: should this be here????
     }
+
+    async init() {
+        // TODO: need some stuff in here - not considered switchables yet in refactor
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+    }
+
 
     _updateChoiceRenderers() {
         let choiceRenderers = [];
@@ -126,14 +132,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
+                    cr.init();
                     cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
                     });
-                }
-            });
-            choices.forEach((choiceRenderer) => {
-                if (choiceRenderer) {
-                    const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
                             this.complete();
@@ -170,14 +172,10 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
+                    cr.init();
                     cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                         cr.start();
                     });
-                }
-            });
-            choices.forEach((choiceRenderer) => {
-                if (choiceRenderer) {
-                    const cr = choiceRenderer;
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
                             this.complete();
@@ -371,7 +369,9 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         if (this._switchableIsQueuedNotPlaying === false) {
             this._switchableIsQueuedNotPlaying = true;
             this._updateChoiceRenderers();
@@ -389,6 +389,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         );
         this._inCompleteBehaviours = false;
         this._nodeCompleted = false;
+        return true;
     }
 
     _handleChoiceClicked(event: Object): void {
@@ -421,11 +422,13 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     destroy() {
-        super.destroy();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
 
         this._choiceRenderers.forEach((choice) => {
             if (choice) choice.destroy();
         });
         this._choiceRenderers = [];
+        return true;
     }
 }

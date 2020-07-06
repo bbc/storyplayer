@@ -44,6 +44,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     start() {
+        super.start();
         this._fadedOut = false;
         this._fadePaused = false;
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {

@@ -2,6 +2,8 @@
 
 import Player from '../Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
+
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -16,6 +18,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
+
+    _hasEnded: boolean;
 
     _outTimeEventListener: Function;
 
@@ -51,6 +55,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             analytics,
             controller,
         );
+
+        this._hasEnded = false;
         this._endedEventListener = this._endedEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
@@ -65,8 +71,16 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._inTime = 0;
         this._outTime = -1;
         this._lastSetTime = 0;
+    }
 
-        this.renderVideoElement();
+    async init() {
+        try {
+            await this.renderVideoElement();
+        }
+        catch(e) {
+            logger.error(e, 'could not initiate 360 video renderer');
+        }
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
     _endedEventListener() {
@@ -212,17 +226,23 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
 
+        this._hasEnded = true;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        return true;
     }
 
     destroy() {
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
+
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        super.destroy();
+        return true;
     }
 }

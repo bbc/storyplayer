@@ -1,46 +1,20 @@
 // @flow
 
 import Player from '../Player';
-import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
+import TimedMediaRenderer from './TimedMediaRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
-import { MediaFormats } from '../browserCapabilities';
-
-import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import Controller from '../Controller';
-import logger from '../logger';
+
+import { MediaFormats } from '../browserCapabilities';
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import { AUDIO } from '../utils';
 
+import logger from '../logger';
 
-export type HTMLTrackElement = HTMLElement & {
-    kind: string,
-    label: string,
-    srclang: string,
-    src: string,
-    mode: string,
-    default: boolean,
-}
-
-export default class SimpleAudioRenderer extends BaseRenderer {
+export default class SimpleAudioRenderer extends TimedMediaRenderer {
     _fetchMedia: MediaFetcher;
-
-    _audioTrack: HTMLTrackElement;
-
-    _handlePlayPauseButtonClicked: Function;
-
-    _lastSetTime: number
-
-    _inTime: number;
-
-    _outTime: number;
-
-    _outTimeEventListener: Function;
-
-    _endedEventListener: Function;
-
-    _seekEventHandler: Function;
-
-    _hasEnded: boolean;
 
     _backgroundImage: ?HTMLElement;
 
@@ -60,159 +34,104 @@ export default class SimpleAudioRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-        this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
-        this._outTimeEventListener = this._outTimeEventListener.bind(this);
-        this._endedEventListener = this._endedEventListener.bind(this);
-        this._seekEventHandler = this._seekEventHandler.bind(this);
-
-        this.renderAudioElement();
-        this._renderBackgroundImage();
-
-        this._lastSetTime = 0;
-
-        this._inTime = 0;
-        this._outTime = -1;
-
+        
         this._playoutEngine.queuePlayout(this._rendererId, {
             type: MEDIA_TYPES.FOREGROUND_A,
             id: this._representation.asset_collections.foreground_id,
-            playPauseHandler: this._handlePlayPauseButtonClicked,
         });
     }
 
-    _endedEventListener() {
-        if (!this._hasEnded) {
-            this._hasEnded = true;
-            super.complete();
+    async init() {
+        try {
+            await Promise.all([
+                this._renderAudioElement(),
+                this._renderBackgroundImage(),
+            ]);
+            this.phase = RENDERER_PHASES.CONSTRUCTED;
+        } catch(e) {
+            logger.error(e, 'could not initiate audio renderer');
         }
     }
 
-    _outTimeEventListener() {
-        const { duration } = this.getCurrentTime();
-        let { currentTime } = this.getCurrentTime();
-        const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if (!this.checkIsLooping()) {
-            // if not looping use video time to allow for buffering delays
-            currentTime = playheadTime - this._inTime;
-            // and sync timer
-            this._timer.setTime(currentTime);
-        } else if (this._outTime > 0) {
-            // if looping, use timer
-            // if looping with in/out points, need to manually re-initiate loop
-            if (playheadTime >= this._outTime) {
-                this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
-                this._playoutEngine.playRenderer(this._rendererId);
-            }
-        }
-        // have we reached the end?
-        // either timer past specified duration (for looping)
-        // or video time past out time
-        if (currentTime > duration) {
-            this._playoutEngine.pauseRenderer(this._rendererId);
-            this._endedEventListener();
-        }
-    }
-
-    _seekEventHandler() {
-        super.seekEventHandler(this._inTime);
-    }
-
-    _renderBackgroundImage() {
+    async _renderBackgroundImage() {
         // eslint-disable-next-line max-len
         logger.info(`Rendering background image for audio representation ${this._representation.id}`);
         if (this._representation.asset_collections.background_image) {
-            const assetCollectionId = this._representation.asset_collections.background_image;
-            this._fetchAssetCollection(assetCollectionId).then((image) => {
+            try {
+                const assetCollectionId = this._representation.asset_collections.background_image;
+                const image = await this._fetchAssetCollection(assetCollectionId);
                 if (image.assets.image_src) {
-                    return this._fetchMedia(image.assets.image_src);
+                    const imageUrl = await this._fetchMedia(image.assets.image_src);
+                    this._backgroundImage = document.createElement('img');
+                    this._backgroundImage.className = 'romper-render-image';
+                    this._backgroundImage.src = imageUrl;
+                    if (this.phase !== RENDERER_PHASES.MAIN) {
+                        this._setImageVisibility(false);
+                    } else {
+                        this._setImageVisibility(true);
+                    }
+                    this._target.appendChild(this._backgroundImage);
                 }
-                return Promise.resolve();
-            }).then((imageUrl: string) => {
-                this._backgroundImage = document.createElement('img');
-                this._backgroundImage.className = 'romper-render-image';
-                this._backgroundImage.src = imageUrl;
-                if (this.phase !== RENDERER_PHASES.MAIN) {
-                    this._setImageVisibility(false);
-                } else {
-                    this._setImageVisibility(true);
-                }
-                this._target.appendChild(this._backgroundImage);
-            }).catch((err) => { logger.error(err, 'Notfound'); });
+            } catch (err) {
+                logger.error(err, 'Background image not found'); 
+            }
         }
     }
 
     start() {
         super.start();
         this._setImageVisibility(true);
-        this._playoutEngine.setPlayoutActive(this._rendererId);
-
-        logger.info(`Started: ${this._representation.id}`);
-
-        // automatically move on at audio end
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
-        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-
-        this._player.enablePlayButton();
-        this._player.enableScrubBar();
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         this._setImageVisibility(false);
-        this._lastSetTime = 0;
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
-
-        logger.info(`Ended: ${this._representation.id}`);
-
-        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-
-        try {
-            this._clearBehaviourElements();
-        } catch (e) {
-            //
-        }
+        return true;
     }
 
-    renderAudioElement() {
+    async _renderAudioElement() {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                        this._setInTime(parseFloat(fg.meta.romper.in));
-                    }
-                    if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                        this._setOutTime(parseFloat(fg.meta.romper.out));
-                    }
-                    if (fg.assets.audio_src) {
-                        this._fetchMedia(fg.assets.audio_src, {
-                            mediaFormat: MediaFormats.getFormat(),
-                            mediaType: AUDIO
+            try {
+                const fg = await this._fetchAssetCollection(
+                    this._representation.asset_collections.foreground_id);
+                if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                    this._setInTime(parseFloat(fg.meta.romper.in));
+                }
+                if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                    this._setOutTime(parseFloat(fg.meta.romper.out));
+                }
+                if (fg.assets.audio_src) {
+                    this._fetchMedia(fg.assets.audio_src, {
+                        mediaFormat: MediaFormats.getFormat(),
+                        mediaType: AUDIO
+                    })
+                        .then((mediaUrl) => {
+                            this.populateAudioElement(mediaUrl, fg.loop);
                         })
-                            .then((mediaUrl) => {
-                                this.populateAudioElement(mediaUrl, fg.loop);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'audio not found');
-                            });
-                    }
-                    if (fg.assets.sub_src) {
-                        this._fetchMedia(fg.assets.sub_src)
-                            .then((mediaUrl) => {
-                                this.populateAudioSubs(mediaUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Subs not found');
-                                // this._subtitlesExist = false;
-                            });
-                    } else {
-                        // this._subtitlesExist = false;
-                    }
-                });
+                        .catch((err) => {
+                            logger.error(err, 'audio not found');
+                        });
+                }
+                if (fg.assets.sub_src) {
+                    this._fetchMedia(fg.assets.sub_src)
+                        .then((mediaUrl) => {
+                            this.populateAudioSubs(mediaUrl);
+                        })
+                        .catch((err) => {
+                            logger.error(err, 'Subs not found');
+                            // this._subtitlesExist = false;
+                        });
+                } else {
+                    // this._subtitlesExist = false;
+                }
+            } catch (err) {
+                throw new Error('Could not get audio assets');
+            }
+        } else {
+            throw new Error('No foreground asset collection for audio representation');
         }
     }
 
@@ -252,11 +171,10 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     }
 
     destroy() {
-        this.end();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
 
-        this._playoutEngine.unqueuePlayout(this._rendererId);
         if (this._backgroundImage) this._target.removeChild(this._backgroundImage);
-
-        super.destroy();
+        return true;
     }
 }

@@ -1654,28 +1654,30 @@ class Player extends EventEmitter {
         if (overlayClass && !(overlayClass in behaviourElement.classList)) {
             behaviourElement.classList.add(overlayClass);
         }
-        return Promise.all(promisesArray).then((icons) => {
-            icons.forEach((iconObj, id) => {
-                const { icon, uuid, container } = iconObj;
-                if (activeLinkId && uuid === activeLinkId) {
-                    icon.classList.add('default');
-                }
-                const clickHandler = () => {
-                    // set classes to show which is selected
-                    behaviourOverlay.setActive(`${id}`);
-                };
-                icon.onclick = clickHandler;
-                icon.addEventListener(
-                    'touchend',
-                    handleButtonTouchEvent(clickHandler),
-                );
-                behaviourOverlay.add(id, icon);
-                if(behaviourElement){
-                    behaviourElement.appendChild(icon);
-                }
-                this._visibleChoices[id + 1] = container;
+        // promise.all ensures all the dom elements are created before showing them
+        return Promise.all(promisesArray)
+            .then((icons) => {
+                icons.forEach((iconObj, id) => {
+                    const { icon, uuid, container } = iconObj;
+                    if (activeLinkId && uuid === activeLinkId) {
+                        icon.classList.add('default');
+                    }
+                    const clickHandler = () => {
+                        // set classes to show which is selected
+                        behaviourOverlay.setActive(`${id}`);
+                    };
+                    icon.onclick = clickHandler;
+                    icon.addEventListener(
+                        'touchend',
+                        handleButtonTouchEvent(clickHandler),
+                    );
+                    behaviourOverlay.add(id, icon);
+                    if(behaviourElement){
+                        behaviourElement.appendChild(icon);
+                    }
+                    this._visibleChoices[id + 1] = container;
+                });
             });
-        });
     }
 
     // eslint-disable-next-line class-methods-use-this
