@@ -91,28 +91,25 @@ export default class SimpleAudioRenderer extends BaseRenderer {
     _outTimeEventListener() {
         const { duration } = this.getCurrentTime();
         let { currentTime } = this.getCurrentTime();
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (!this.checkIsLooping()) {
             // if not looping use video time to allow for buffering delays
             currentTime = playheadTime - this._inTime;
             // and sync timer
             this._timer.setTime(currentTime);
-        } else if (this._outTime > 0 && videoElement) {
+        } else if (this._outTime > 0) {
             // if looping, use timer
             // if looping with in/out points, need to manually re-initiate loop
             if (playheadTime >= this._outTime) {
-                videoElement.currentTime = this._inTime;
-                videoElement.play();
+                this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
+                this._playoutEngine.playRenderer(this._rendererId);
             }
         }
         // have we reached the end?
         // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
-            if (videoElement) {
-                videoElement.pause();
-            }
+            this._playoutEngine.pauseRenderer(this._rendererId);
             this._endedEventListener();
         }
     }
@@ -157,10 +154,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
 
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            mediaElement.classList.add('romper-audio-element');
-        }
         this._player.enablePlayButton();
         this._player.enableScrubBar();
     }
@@ -182,11 +175,6 @@ export default class SimpleAudioRenderer extends BaseRenderer {
         } catch (e) {
             //
         }
-
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement) {
-            mediaElement.classList.remove('romper-audio-element');
-        }
     }
 
     renderAudioElement() {
@@ -202,7 +190,7 @@ export default class SimpleAudioRenderer extends BaseRenderer {
                     }
                     if (fg.assets.audio_src) {
                         this._fetchMedia(fg.assets.audio_src, {
-                            mediaFormat: MediaFormats.getFormat(), 
+                            mediaFormat: MediaFormats.getFormat(),
                             mediaType: AUDIO
                         })
                             .then((mediaUrl) => {

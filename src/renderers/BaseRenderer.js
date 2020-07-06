@@ -18,7 +18,6 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
-import SrcSwitchPlayoutEngine from '../playoutEngines/SrcSwitchPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
 
@@ -117,7 +116,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _timer: TimeManager;
 
-    isSrcIosPlayoutEngine: Function;
+    isIosPlayoutEngine: Function;
 
     _cleanupSingleDuringBehaviour: Function;
 
@@ -128,7 +127,7 @@ export default class BaseRenderer extends EventEmitter {
     addTimeEventListener: Function;
 
     _addPauseHandlersForTimer: Function;
-    
+
     _removePauseHandlersForTimer: Function;
 
     _handlePlayPauseButtonClicked: Function;
@@ -190,11 +189,11 @@ export default class BaseRenderer extends EventEmitter {
         this._togglePause = this._togglePause.bind(this);
         this.seekEventHandler = this.seekEventHandler.bind(this);
         this.checkIsLooping = this.checkIsLooping.bind(this);
-        this.isSrcIosPlayoutEngine = this.isSrcIosPlayoutEngine.bind(this);
+        this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
 
 
-        this._willHideControls = this._willHideControls.bind(this); 
+        this._willHideControls = this._willHideControls.bind(this);
         this._hideControls = this._hideControls.bind(this);
         this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
@@ -203,7 +202,7 @@ export default class BaseRenderer extends EventEmitter {
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
         this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
         this._removePauseHandlersForTimer = this._removePauseHandlersForTimer.bind(this);
- 
+
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -399,7 +398,7 @@ export default class BaseRenderer extends EventEmitter {
         if (duration !== undefined && duration !== null) {
             if (duration < 0) duration = Infinity;
             this._duration = duration;
-            return this._duration;    
+            return this._duration;
         }
 
         // otherwise need to work out
@@ -476,20 +475,19 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         // if we have a media element, set that time and pause the timer until playhead has synced
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement && mediaElement.id && mediaElement.src) {
+        if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
             const isPaused = this._timer._paused;
             const sync = () => {
-                const playheadTime = mediaElement.currentTime;
+                const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
                 if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
                     this._timer.setTime(playheadTime - this._inTime);
                     this._timer.setSyncing(false);
                     if (isPaused) this._timer.pause();  // don't restart if we were paused
-                    mediaElement.removeEventListener('timeupdate', sync);
+                    this._playoutEngine.off(this._rendererId,'timeupdate', sync);
                 }
             };
             this._timer.setSyncing(true);
-            mediaElement.addEventListener('timeupdate', sync);
+            this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
         } else {
             this._timer.setTime(time);
@@ -519,10 +517,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _handlePlayPauseButtonClicked(): void {
-        if (this._timer._paused) { 
-            this._timer.resume(); 
-        } else { 
-            this._timer.pause(); 
+        if (this._timer._paused) {
+            this._timer.resume();
+        } else {
+            this._timer.pause();
         }
         if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
@@ -562,7 +560,7 @@ export default class BaseRenderer extends EventEmitter {
         if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
             this.exitStartPauseBehaviour();
-        }    
+        }
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime + SEEK_TIME;
@@ -850,7 +848,7 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         const behaviourOverlay = this._linkChoiceBehaviourOverlay;
-            
+
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
             if (choiceIconNEObjects !== null) {
@@ -1188,7 +1186,7 @@ export default class BaseRenderer extends EventEmitter {
                 ne.targetNeId === link.target_narrative_element_id).length > 0);
 
         const defaultLink = validLinks[0];
-        
+
         return defaultLink && defaultLink.target_narrative_element_id;
     }
 
@@ -1390,9 +1388,9 @@ export default class BaseRenderer extends EventEmitter {
             if (currentTime !== undefined && currentTime <= 0.002) {
                 if(inTime !== 0) {
                     this.setCurrentTime(inTime);
-                } 
+                }
                 // this.resetPlayer();
-                if(this.isSrcIosPlayoutEngine()) {
+                if(this.isIosPlayoutEngine()) {
                     if(this._playoutEngine._playing
                         && this._playoutEngine._foregroundMediaElement.paused) {
                         this._playoutEngine.play();
@@ -1401,10 +1399,9 @@ export default class BaseRenderer extends EventEmitter {
             }
         }
     }
-    
+
     checkIsLooping() {
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        return mediaElement && mediaElement.hasAttribute('loop');
+        return this._playoutEngine.checkIsLooping(this._rendererId);
     }
 
     /**
@@ -1424,9 +1421,8 @@ export default class BaseRenderer extends EventEmitter {
         this._destroyed = true;
     }
 
-    isSrcIosPlayoutEngine() {
-        return (this._playoutEngine instanceof iOSPlayoutEngine || 
-            this._playoutEngine instanceof SrcSwitchPlayoutEngine)
+    isIosPlayoutEngine() {
+        return (this._playoutEngine instanceof iOSPlayoutEngine)
     }
 
     getController(): Controller {

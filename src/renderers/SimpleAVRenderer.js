@@ -81,31 +81,31 @@ export default class SimpleAVRenderer extends BaseRenderer {
         super.seekEventHandler(this._inTime);
     }
 
+    // TODO: Move this out to a TimedMediaRenderer
+    // (BaseRenderer -> TimedMediaRenderer -> SimpleAV/audio)
+    // As this is used in SimpleAV, SimpleAudio and ThreeJsVideo 
     _outTimeEventListener() {
         const { duration } = this.getCurrentTime();
         let { currentTime } = this.getCurrentTime();
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (!this.checkIsLooping()) {
             // if not looping use video time to allow for buffering delays
             currentTime = playheadTime - this._inTime;
             // and sync timer
             this._timer.setTime(currentTime);
-        } else if (this._outTime > 0 && videoElement) {
+        } else if (this._outTime > 0) {
             // if looping, use timer
             // if looping with in/out points, need to manually re-initiate loop
             if (playheadTime >= this._outTime) {
-                videoElement.currentTime = this._inTime;
-                videoElement.play();
+                this._playoutEngine.setCurrentTime(this._rendererId, this._inTime)
+                this._playoutEngine.playRenderer(this._rendererId)
             }
         }
         // have we reached the end?
-        // either timer past specified duration (for looping) 
+        // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
-            if (videoElement) {
-                videoElement.pause();
-            }
+            this._playoutEngine.pauseRenderer(this._rendererId)
             this._endedEventListener();
         }
         if (currentTime > (duration - 1)) {
@@ -260,11 +260,8 @@ export default class SimpleAVRenderer extends BaseRenderer {
     }
 
     _applyBlurBehaviour(behaviour: Object, callback: () => mixed) {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            const { blur } = behaviour;
-            videoElement.style.filter = `blur(${blur}px)`;
-        }
+        const { blur } = behaviour;
+        this._playoutEngine.applyStyle(this._rendererId, "filter", `blur(${blur}px)`)
         callback();
     }
 
@@ -278,10 +275,7 @@ export default class SimpleAVRenderer extends BaseRenderer {
 
     _clearBehaviourElements() {
         super._clearBehaviourElements();
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (videoElement) {
-            videoElement.style.filter = '';
-        }
+        this._playoutEngine.clearStyle(this._rendererId, "filter")
     }
 
     destroy() {
