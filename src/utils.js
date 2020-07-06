@@ -11,7 +11,7 @@ export const inSMPWrapper = () => {
 
 export const ADD_DETAILS_FLAG = "addDetails"
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
-export const FACEBOOK_BOOK_FLAG = "overrideFacebookBlock"
+export const FACEBOOK_BLOCK_FLAG = "overrideFacebookBlock"
 export const WEBVIEW_DEBUG_FLAG = "webviewDebug"
 export const UA_DEBUG_FLAG = "debugUA"
 export const DISABLE_LOOKAHEAD_FLAG = "disableLookahead"
@@ -27,7 +27,7 @@ export const getSetting = (settingName) => {
     switch(settingName) {
     case ADD_DETAILS_FLAG:
     case DEBUG_PLAYOUT_FLAG:
-    case FACEBOOK_BOOK_FLAG:
+    case FACEBOOK_BLOCK_FLAG:
     case WEBVIEW_DEBUG_FLAG:
     case UA_DEBUG_FLAG:
     case DISABLE_LOOKAHEAD_FLAG:

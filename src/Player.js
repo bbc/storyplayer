@@ -15,7 +15,7 @@ import { SESSION_STATE } from './SessionManager';
 import {
     getSetting,
     DEBUG_PLAYOUT_FLAG,
-    FACEBOOK_BOOK_FLAG,
+    FACEBOOK_BLOCK_FLAG,
     addDetail,
     scrollToTop,
     preventEventDefault,
@@ -622,7 +622,7 @@ class Player extends EventEmitter {
 
 
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
-        const overrideFacebookBlock = getSetting(FACEBOOK_BOOK_FLAG);
+        const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
 
         if(facebookiOSWebview && !overrideFacebookBlock) {
             const fbWebviewDiv = document.createElement('div');
