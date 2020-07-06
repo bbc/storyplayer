@@ -9,9 +9,10 @@ import logger from '../logger';
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
 import { SHAKA_EVENTS } from '../Events';
 import {
-    fetchShakaDebugLevel,
-    fetchActiveBufferingOverride,
-    fetchInactiveBufferingOverride
+    getSetting,
+    SHAKA_DEBUG_LEVEL,
+    OVERRIDE_ACTIVE_BUFFERING,
+    OVERRIDE_INACTIVE_BUFFERING,
 } from '../utils';
 
 const MediaTypesArray = [
@@ -91,7 +92,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
         };
 
-        const activeBufferingOverride = fetchActiveBufferingOverride();
+        const activeBufferingOverride = getSetting(OVERRIDE_ACTIVE_BUFFERING);
         if (activeBufferingOverride) {
             logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
             this._activeConfig.dash.bufferingGoal = parseInt(activeBufferingOverride, 10)
@@ -113,14 +114,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         // bits/second (Set to 1gbps connection to get highest adaptation)
         this._estimatedBandwidth = 1000000000
 
-        const inactiveBufferingOverride = fetchInactiveBufferingOverride();
+        const inactiveBufferingOverride = getSetting(OVERRIDE_INACTIVE_BUFFERING);
         if (inactiveBufferingOverride) {
             logger.info(`inactiveBufferingOverride: ${inactiveBufferingOverride}`)
             this._inactiveConfig.dash.bufferingGoal = parseInt(inactiveBufferingOverride, 10)
         }
 
         // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
-        const shakaDebugLevel = fetchShakaDebugLevel();
+        const shakaDebugLevel = getSetting(SHAKA_DEBUG_LEVEL);
         if (shaka.log && this._debugPlayout && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);

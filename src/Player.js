@@ -13,8 +13,9 @@ import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import {
-    checkDebugPlayout,
-    checkOverrideFacebookBlock,
+    getSetting,
+    DEBUG_PLAYOUT_FLAG,
+    FACEBOOK_BLOCK_FLAG,
     addDetail,
     scrollToTop,
     preventEventDefault,
@@ -621,7 +622,8 @@ class Player extends EventEmitter {
 
 
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
-        const overrideFacebookBlock = checkOverrideFacebookBlock();
+        const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
+
         if(facebookiOSWebview && !overrideFacebookBlock) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
@@ -717,7 +719,7 @@ class Player extends EventEmitter {
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
-        const debugPlayout = checkDebugPlayout();
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }

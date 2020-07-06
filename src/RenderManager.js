@@ -21,7 +21,7 @@ import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import { REASONER_EVENTS } from './Events';
-import { checkDisableLookahead } from './utils';
+import { getSetting, DISABLE_LOOKAHEAD_FLAG } from './utils';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -651,7 +651,7 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
-        if(checkDisableLookahead()) {
+        if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
             return Promise.resolve();
         }
         return Promise.all([

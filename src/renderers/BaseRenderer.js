@@ -11,7 +11,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
-import { checkAddDetailsOverride } from '../utils';
+import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 import { VARIABLE_EVENTS } from '../Events';
 import { buildPanel } from '../behaviours/VariablePanelHelper';
 
@@ -247,7 +247,7 @@ export default class BaseRenderer extends EventEmitter {
 
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(checkAddDetailsOverride()) {
+        if(getSetting(ADD_DETAILS_FLAG)) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
         }
