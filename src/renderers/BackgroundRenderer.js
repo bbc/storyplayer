@@ -7,6 +7,7 @@ import uuid from 'uuid/v4';
 import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
+import { RENDERER_PHASES } from './BaseRenderer';
 
 export default class BackgroundRenderer extends EventEmitter {
     _rendererId: string;
@@ -21,12 +22,15 @@ export default class BackgroundRenderer extends EventEmitter {
 
     _disabled: boolean;
 
+    phase: string;
+
     constructor(
         assetCollection: AssetCollection,
         mediaFetcher: MediaFetcher,
         player: Player,
     ) {
         super();
+        this.phase = RENDERER_PHASES.CONSTRUCTING;
         this._fetchMedia = mediaFetcher;
         this._rendererId = uuid();
         this._player = player;
@@ -35,7 +39,16 @@ export default class BackgroundRenderer extends EventEmitter {
         this._disabled = false;
     }
 
-    start() { }
+    async init() {
+        // throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
+        this.phase = RENDERER_PHASES.CONSTRUCTED;
+    }
+
+    start() {
+        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
+            setTimeout(() => this.start(), 100);
+        }
+    }
 
     end() { }
 

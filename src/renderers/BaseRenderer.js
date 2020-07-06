@@ -332,7 +332,11 @@ export default class BaseRenderer extends EventEmitter {
         };
         if (debugPhase) logger.info('PHASE base ending', this._representation.name, this.phase);
         this._player.disconnectScrubBar(this);
-        this._clearBehaviourElements()
+        try{
+            this._clearBehaviourElements()
+        } catch (e) {
+            logger.info(e);
+        }
         this._reapplyLinkConditions();
         clearTimeout(this._linkFadeTimeout);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
