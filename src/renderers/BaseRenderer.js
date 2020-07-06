@@ -256,7 +256,7 @@ export default class BaseRenderer extends EventEmitter {
             return false;
         }
         // eslint-disable-next-line max-len
-        if (debugPhase) logger.info('PHASE will starting', this._representation.name, this.phase);        
+        if (debugPhase) logger.info('PHASE will starting', this._representation.name, this.phase);
         this.phase = RENDERER_PHASES.START;
         this.inVariablePanel = false;
 
@@ -970,7 +970,7 @@ export default class BaseRenderer extends EventEmitter {
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         if(this.checkIsLooping()) {
-            this._playoutEngine.removeLoopAttribute(this._rendererId);
+            this._playoutEngine.setLoopAttribute(this._rendererId, false);
         }
         this._followLink(eventObject.id, eventObject.behaviourId);
     }

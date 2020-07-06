@@ -45,7 +45,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
         this._endedEventListener = this._endedEventListener.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
         this._seekEventHandler = this._seekEventHandler.bind(this);
-        
+
         this._shouldShowScrubBar = true;
     }
 
@@ -69,7 +69,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
             currentTime = playheadTime - this._inTime;
             // and sync timer
             this._timer.setTime(currentTime);
-        } else if (this._outTime) {
+        } else if (this._outTime && this._outTime !== -1) {
             // if looping, use timer
             // if looping with in/out points, need to manually re-initiate loop
             if (playheadTime >= this._outTime) {
@@ -78,7 +78,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
             }
         }
         // have we reached the end?
-        // either timer past specified duration (for looping) 
+        // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
             this._playoutEngine.pauseRenderer(this._rendererId);
@@ -110,7 +110,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
         }
     }
 
-    // given the forground asset collection, determine whether or not 
+    // given the forground asset collection, determine whether or not
     // scrub bar should be shown
     _testShowScrubBar(foregroundAssetCollection) {
         if (!foregroundAssetCollection.loop) {
