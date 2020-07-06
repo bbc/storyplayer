@@ -95,7 +95,8 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
         // set audio source
         if (this._representation.asset_collections.foreground_id) {
             try {
-                const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+                const fg = await this._fetchAssetCollection(
+                    this._representation.asset_collections.foreground_id);
                 if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
                     this._setInTime(parseFloat(fg.meta.romper.in));
                 }

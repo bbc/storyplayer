@@ -40,15 +40,12 @@ export default class BackgroundRenderer extends EventEmitter {
     }
 
     async init() {
+        // TODO: use init and phases in background renderers
         // throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
         this.phase = RENDERER_PHASES.CONSTRUCTED;
     }
 
-    start() {
-        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
-            setTimeout(() => this.start(), 100);
-        }
-    }
+    start() { }
 
     end() { }
 
