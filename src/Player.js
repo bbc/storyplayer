@@ -735,7 +735,7 @@ class Player extends EventEmitter {
             break;
         case PLAYOUT_ENGINES.SMP_PLAYOUT:
             // SMP playout engine
-            break;
+            throw new Error("Not Implemented Yet!")
         default:
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');

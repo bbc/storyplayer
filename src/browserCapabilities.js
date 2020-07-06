@@ -217,7 +217,7 @@ export class MediaFormats {
             return overridePlayout
         }
 
-        if(inSMPWrapper) {
+        if(inSMPWrapper()) {
             return PLAYOUT_ENGINES.SMP_PLAYOUT
         }
 
