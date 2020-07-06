@@ -41,10 +41,18 @@ export const getCurrentUrl = () => {
     return window.location.href
 }
 
-export const getVariableSetting = () => {
-    const varName = new URLSearchParams(window.location.search).get('varName');
-    const varVal = new URLSearchParams(window.location.search).get('varVal');
-    return [varName, varVal]
+export const getVariableOverrides = () => {
+    const varNames = new URLSearchParams(window.location.search).getAll('varName');
+    const varVals = new URLSearchParams(window.location.search).getAll('varVal');
+    if(varNames.length !== varVals.length) {
+        logger.info(`Query Parameter variable failed - number of name and value does not match`);
+        return []
+    }
+    if(varNames.length === 0) {
+        return []
+    }
+    const varArray = varNames.map((name, index) => [name, varVals[index]])
+    return varArray
 }
 
 export const copySelection = (e: Object) => {

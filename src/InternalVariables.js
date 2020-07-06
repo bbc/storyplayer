@@ -2,7 +2,7 @@
 
 import type { DataResolver } from './romper';
 import logger from './logger';
-import { getVariableSetting } from './utils'
+import { getVariableOverrides } from './utils'
 
 export const InternalVariableNames = {
     DAY_OF_WEEK: '_day_of_week',
@@ -89,11 +89,12 @@ export default class InternalVariables {
     }
 
     setQueryParameterVariables(storyVars: Object){
-        const [varName, varVal] = getVariableSetting()
-        if (!(varName && varVal)) {
-            logger.info(`Query Parameter variable failed - need name and value`);
+        const variableOverrides = getVariableOverrides()
+        if(variableOverrides.length === 0) {
             return;
         }
+        // TODO: Handle multiple values returned from getVariableOverrides
+        const [varName, varVal] = variableOverrides[0];
         // variable must be defined in story or as internal var
         let isValid = false;
         if (storyVars[varName]) {
