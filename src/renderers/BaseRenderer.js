@@ -1212,7 +1212,7 @@ export default class BaseRenderer extends EventEmitter {
             });
 
             // if already ended, follow immediately
-            if (this._hasEnded) {
+            if (this.hasMediaEnded()) {
                 this._hideChoiceIcons(narrativeElementId, behaviourId);
             // do we keep the choice open?
             } else if (this._linkBehaviour && this._linkBehaviour.oneShot) {
@@ -1474,7 +1474,7 @@ export default class BaseRenderer extends EventEmitter {
             if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.name, this.phase);
             return false;
         }
-        if (!this.phase === RENDERER_PHASES.ENDED) {
+        if (this.phase !== RENDERER_PHASES.ENDED) {
             if (debugPhase) logger.info('PHASE destroying need to end first');
             this.end();
         }
