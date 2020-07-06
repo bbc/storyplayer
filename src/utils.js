@@ -37,6 +37,8 @@ export const getSetting = (settingName) => {
     }
 }
 
+
+
 export const getCurrentUrl = () => {
     return window.location.href
 }
@@ -108,7 +110,7 @@ export const preventEventDefault = (event: Event) => {
 
 export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
-        if(checkDebugPlayout()) {
+        if(getSetting(DEBUG_PLAYOUT_FLAG)) {
             logger.info('Event Captured:', event);
             console.log('Touch Event Captured:', touchEvent);
         }
