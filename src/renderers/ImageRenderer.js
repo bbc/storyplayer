@@ -48,7 +48,7 @@ export default class ImageRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderImageElement();
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(e) {
             logger.error(e, 'Could not construct image renderer');
         }
@@ -69,7 +69,7 @@ export default class ImageRenderer extends BaseRenderer {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
             this._disableScrubBar();
-            this.phase = RENDERER_PHASES.MEDIA_FINISHED; // so link choices still work
+            this._setPhase(RENDERER_PHASES.MEDIA_FINISHED); // so link choices still work
         } else if (this._duration === 0) {
             logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();

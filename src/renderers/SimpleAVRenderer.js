@@ -47,7 +47,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
     async init() {
         try {
             await this.renderVideoElement();
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         }
         catch(e) {
             logger.error(e, 'could not initiate video renderer');

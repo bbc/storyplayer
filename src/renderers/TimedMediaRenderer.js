@@ -1,6 +1,6 @@
 // @flow
 import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import Controller from '../Controller';
 import logger from '../logger';
 
@@ -50,6 +50,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
         this._timer.pause();
         if (!this._hasEnded) {
             super.complete();

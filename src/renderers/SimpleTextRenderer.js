@@ -52,7 +52,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderTextElement()
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(err) {
             logger.error(err, 'could not initiate text renderer');
         }
@@ -71,7 +71,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     start() {
         super.start();
         // no duration, so ends immediately
-        this.phase = RENDERER_PHASES.MEDIA_FINISHED;
+        this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
     }
 
     end() {
