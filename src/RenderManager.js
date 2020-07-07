@@ -560,7 +560,11 @@ export default class RenderManager extends EventEmitter {
         }
 
         if (oldRenderer) {
-            oldRenderer.end();
+            if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
+                oldRenderer.destroy();
+            } else {
+                oldRenderer.end();
+            }
         }
 
         // Update availability of back and next buttons.
