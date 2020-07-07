@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import shaka from 'shaka-player';
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -163,6 +163,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         );
 
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return true
+        default:
+            return super.supports(feature)
+        }
     }
 
     _shakaUpdateBandwidth(rendererId: string) {

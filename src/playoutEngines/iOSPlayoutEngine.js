@@ -1,6 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -82,6 +82,15 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         );
 
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return true
+        default:
+            return super.supports(feature)
+        }
     }
 
     setPermissionToPlay(value: boolean) {

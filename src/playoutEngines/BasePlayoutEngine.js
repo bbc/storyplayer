@@ -12,6 +12,10 @@ export const MEDIA_TYPES = {
     BACKGROUND_A: 'background_a',
 };
 
+export const SUPPORT_FLAGS = {
+    SUPPORTS_360: 'supports_360'
+}
+
 export default class BasePlayoutEngine {
     _player: Player
 
@@ -33,6 +37,15 @@ export default class BasePlayoutEngine {
         if(this._debugPlayout) {
             window.playoutMedia = this._media;
             window.playout = this;
+        }
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return false
+        default:
+            return false
         }
     }
 

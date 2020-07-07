@@ -4,6 +4,9 @@ import BaseRenderer from './BaseRenderer';
 import Controller from '../Controller';
 import logger from '../logger';
 
+import { MediaFormats } from '../browserCapabilities';
+import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
+import { VIDEO, AUDIO } from '../utils';
 
 export default class TimedMediaRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
@@ -47,6 +50,65 @@ export default class TimedMediaRenderer extends BaseRenderer {
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
         this._shouldShowScrubBar = true;
+    }
+
+    async _queueMedia(mediaObjOverride, assetKey, subtitleKey = "sub_src") {
+        if (this._representation.asset_collections.foreground_id) {
+            const fg = await this._fetchAssetCollection(
+                this._representation.asset_collections.foreground_id,
+            );
+            this._testShowScrubBar(fg);
+            if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                this._setInTime(parseFloat(fg.meta.romper.in));
+            }
+            if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                this._setOutTime(parseFloat(fg.meta.romper.out));
+            }
+            if (fg.assets[assetKey]) {
+                const mediaObj = {
+                    type: undefined,
+                    loop: fg.loop,
+                    id: fg.id,
+                    inTime: this._inTime,
+                    ...mediaObjOverride
+                }
+                let mediaType;
+                switch(mediaObj.type){
+                case MEDIA_TYPES.FOREGROUND_AV:
+                    mediaType = VIDEO
+                    break;
+                case MEDIA_TYPES.FOREGROUND_A:
+                    mediaType = AUDIO
+                    break
+                default:
+                    throw new Error("Invalid MDIA_TYPE")
+                }
+                const options = { mediaFormat: MediaFormats.getFormat(), mediaType };
+                const mediaUrl = await this._fetchMedia(fg.assets[assetKey], options);
+                if (fg.assets[subtitleKey]) {
+                    const subsUrl = await this._fetchMedia(fg.assets[subtitleKey]);
+                    mediaObj.subs_url = subsUrl
+                }
+                let appendedUrl = mediaUrl;
+                if (this._inTime > 0 || this._outTime > 0) {
+                    let mediaFragment = `#t=${this._inTime}`;
+                    if (this._outTime > 0) {
+                        mediaFragment = `${mediaFragment},${this._outTime}`;
+                    }
+                    appendedUrl = `${mediaUrl}${mediaFragment}`;
+                }
+                if (this._destroyed) {
+                    logger.warn('trying to populate video element that has been destroyed');
+                } else {
+                    mediaObj.url = appendedUrl
+                    this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
+                }
+            } else {
+                throw new Error('No av source for video');
+            }
+        } else {
+            throw new Error('No foreground asset id for video');
+        }
     }
 
     _endedEventListener() {
