@@ -99,6 +99,9 @@ export const SLIDER_CLASS = 'slider-input';
 export const VIDEO = 'video';
 export const AUDIO = 'audio';
 
+// eslint-disable-next-line max-len
+export const LOOPING_AUDIO_AC_TYPE = 'urn:x-object-based-media:asset-collection-types:looping-audio/v1.0';
+
 export const preventEventDefault = (event: Event) => {
     // if the event doesn't come from the scrub bar we suppress the touch moves
     if(event && event.target && event.target.classList) {
