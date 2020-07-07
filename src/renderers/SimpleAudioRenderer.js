@@ -20,7 +20,7 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
                 this._queueMedia({ type: MEDIA_TYPES.FOREGROUND_A }, "audio_src"),
                 this._renderBackgroundImage(),
             ]);
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(e) {
             logger.error(e, 'could not initiate audio renderer');
         }

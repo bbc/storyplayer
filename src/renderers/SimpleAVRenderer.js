@@ -41,7 +41,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
     async init() {
         try {
             await this._queueMedia({ type: MEDIA_TYPES.FOREGROUND_AV }, "av_src");
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         }
         catch(e) {
             logger.error(e, 'could not initiate video renderer');

@@ -560,14 +560,7 @@ export default class RenderManager extends EventEmitter {
         }
 
         if (oldRenderer) {
-            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
-                .some((renderer) => {
-                    if (renderer === oldRenderer) {
-                        return true;
-                    }
-                    return false;
-                });
-            if (!currentRendererInUpcoming) {
+            if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
                 oldRenderer.destroy();
             } else {
                 oldRenderer.end();

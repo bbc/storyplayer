@@ -59,7 +59,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     async init() {
         // TODO: need some stuff in here - not considered switchables yet in refactor
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        this._setPhase(RENDERER_PHASES.CONSTRUCTED);
     }
 
 

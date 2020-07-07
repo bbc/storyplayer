@@ -41,6 +41,8 @@ export const RENDERER_PHASES = {
     COMPLETING: 'COMPLETING',
     ENDED: 'ENDED',
     DESTROYED: 'DESTROYED',
+    BG_FADE_IN: 'BG_FADE_IN',
+    BG_FADE_OUT: 'BG_FADE_OUT',
     MEDIA_FINISHED: 'MEDIA_FINISHED', // done all its rendering and ready to move on, but not ended
 };
 
@@ -240,7 +242,7 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadIconAssets().catch(e =>
             logger.warn(e, 'Could not preload icon assets'));
         this._loopCounter = 0;
-        this.phase = RENDERER_PHASES.CONSTRUCTING;
+        this._setPhase(RENDERER_PHASES.CONSTRUCTING);
         this._inPauseBehaviourState = false;
     }
 
@@ -256,8 +258,7 @@ export default class BaseRenderer extends EventEmitter {
             return false;
         }
         // eslint-disable-next-line max-len
-        if (debugPhase) logger.info('PHASE will starting', this._representation.id, this.phase);
-        this.phase = RENDERER_PHASES.START;
+        this._setPhase(RENDERER_PHASES.START);
         this.inVariablePanel = false;
 
         this._runStartBehaviours();
@@ -302,8 +303,7 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
-        if (debugPhase) logger.info('PHASE starting', this._representation.id, this.phase);
-        this.phase = RENDERER_PHASES.MAIN;
+        this._setPhase(RENDERER_PHASES.MAIN);
         this.emit(RendererEvents.STARTED);
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
@@ -348,7 +348,7 @@ export default class BaseRenderer extends EventEmitter {
             this._handlePlayPauseButtonClicked,
         );
         this._lastSetTime = 0;
-        this.phase = RENDERER_PHASES.ENDED;
+        this._setPhase(RENDERER_PHASES.ENDED);
         return true;
     }
 
@@ -626,8 +626,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        if (debugPhase) logger.info('PHASE completing', this._representation.id, this.phase);
-        this.phase = RENDERER_PHASES.COMPLETING;
+        this._setPhase(RENDERER_PHASES.COMPLETING);
         this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
@@ -1490,5 +1489,11 @@ export default class BaseRenderer extends EventEmitter {
 
     getController(): Controller {
         return this._controller;
+    }
+
+    _setPhase(phase: string) {
+        // eslint-disable-next-line max-len
+        if (debugPhase) logger.info(`Renderer ${this._rendererId} for representation ${this._representation.id} entering ${phase} phase`);
+        this.phase = phase;
     }
 }
