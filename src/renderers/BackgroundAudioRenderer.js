@@ -37,12 +37,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     ) {
         super(assetCollection, mediaFetcher, player);
         this._target = this._player.backgroundTarget;
-
-        this._playoutEngine.queuePlayout(this._rendererId, {
-            type: MEDIA_TYPES.BACKGROUND_A,
-        });
     }
-    
+
     async init() {
         await this._renderBackgroundAudio();
         this._setPhase(RENDERER_PHASES.CONSTRUCTED);
@@ -52,7 +48,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         const readyToStart = super.start();
         if (!readyToStart || this.phase === RENDERER_PHASES.BG_FADE_IN) return false;
         this._setPhase(RENDERER_PHASES.BG_FADE_IN);
-        
+
         this._fadePaused = false;
 
         if (!this._playoutEngine.getPlayoutActive(this._rendererId)) {
@@ -124,8 +120,8 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
                 const volume = this._playoutEngine.getVolume(this._rendererId)
-                if (volume >= (1 / interval) 
-                    && this._fadeIntervalId 
+                if (volume >= (1 / interval)
+                    && this._fadeIntervalId
                     && this.phase === RENDERER_PHASES.BG_FADE_OUT) {
                     if (!this._fadePaused) {
                         const newVolume = volume - (1 / interval);
@@ -141,32 +137,28 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         }
     }
 
-    _renderBackgroundAudio() {
+    async _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
-            this._fetchMedia(this._assetCollection.assets.audio_src, {
+            const mediaUrl = await this._fetchMedia(this._assetCollection.assets.audio_src, {
                 mediaFormat: MediaFormats.getFormat(),
                 mediaType: AUDIO
             })
-                .then((mediaUrl) => {
-                    this._populateAudioElement(mediaUrl);
-                }).catch((err) => { logger.error(err, 'Notfound'); });
-        }
-    }
-
-    _populateAudioElement(mediaUrl: string, loop: ?boolean) {
-        if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
-            logger.warn('trying to populate audio element that has been destroyed');
-        } else {
-            this._playoutEngine.queuePlayout(this._rendererId, {
-                url: mediaUrl,
-                loop,
-            });
+            if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
+                logger.warn('trying to populate audio element that has been destroyed');
+            } else {
+                this._playoutEngine.queuePlayout(this._rendererId, {
+                    id: this._assetCollection.id,
+                    type: MEDIA_TYPES.BACKGROUND_A,
+                    url: mediaUrl,
+                    loop: this._assetCollection.loop,
+                });
+            }
         }
     }
 
     destroy(): boolean {
         // this will start end (if not already done) and move to BG_FADE_OUT or ENDED phase
-        const shouldDestroy = super.destroy(); 
+        const shouldDestroy = super.destroy();
         if (!shouldDestroy) return false;
 
         // if ended already, just destroy

@@ -11,7 +11,7 @@
         "id": "a4b68f78-b752-47fe-8e7d-9e023f547d92",
         "object_class": "STORY",
         "name": "MediaSelector PIDS ",
-        "description": "...",
+        "description": "Story with MS PIDS in. This is only useful for SMP",
         "version": "1593613986:382000000",
         "meta": {},
         "tags": {

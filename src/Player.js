@@ -743,6 +743,28 @@ class Player extends EventEmitter {
             throw new Error('Invalid Playout Engine');
         }
 
+        if(debugPlayout) {
+            // Print all calls to PlayoutEngine along with their arguments
+            const playoutEngineHandler = {
+                get (getTarget, getProp) {
+                    // eslint-disable-next-line func-names
+                    return function() {
+                        /* eslint-disable prefer-rest-params */
+                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
+                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
+                        // eslint-disable-next-line prefer-spread
+                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
+                        /* eslint-enable prefer-rest-params */
+
+                        return ret
+                    }
+                },
+            };
+            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
+        }
+
+
         this._showErrorLayer = this._showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this._showBufferingLayer = this._showBufferingLayer.bind(this);
