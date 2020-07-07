@@ -560,18 +560,7 @@ export default class RenderManager extends EventEmitter {
         }
 
         if (oldRenderer) {
-            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
-                .some((renderer) => {
-                    if (renderer === oldRenderer) {
-                        return true;
-                    }
-                    return false;
-                });
-            if (!currentRendererInUpcoming) {
-                oldRenderer.destroy();
-            } else {
-                oldRenderer.end();
-            }
+            oldRenderer.end();
         }
 
         // Update availability of back and next buttons.
