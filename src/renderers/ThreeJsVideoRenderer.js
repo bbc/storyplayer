@@ -74,7 +74,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                 throw new Error("Playout Engine does not support 360")
             }
             await this._queueVideoElement();
-            this.phase = RENDERER_PHASES.CONSTRUCTED;
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         }
         catch(e) {
             logger.error(e, 'could not initiate 360 video renderer');
@@ -114,8 +114,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                     }
                     appendedUrl = `${mediaUrl}${mediaFragment}`;
                 }
-                if (this._destroyed) {
-                    logger.warn('trying to populate video element that has been destroyed');
+                if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
+                    logger.warn('trying to populate video element at the wrong time');
                 } else {
                     mediaObj.url = appendedUrl
                     this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
@@ -165,6 +165,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     start() {
         super.start();
+        this._setPhase(RENDERER_PHASES.MAIN);
         this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
         this._player.enablePlayButton();
@@ -231,6 +232,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         const needToEnd = super.end();
         if (!needToEnd) return false;
 
+        this._setPhase(RENDERER_PHASES.ENDED);
         this._hasEnded = true;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
@@ -241,10 +243,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     destroy() {
         const needToDestroy = super.destroy();
         if(!needToDestroy) return false;
-
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
-        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        
+        this._setPhase(RENDERER_PHASES.DESTROYED);
         return true;
     }
 }
