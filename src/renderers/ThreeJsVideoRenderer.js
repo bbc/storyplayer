@@ -75,7 +75,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
 
     async init() {
         try {
-            await this.renderVideoElement();
+            await this.queueVideoElement();
         }
         catch(e) {
             logger.error(e, 'could not initiate 360 video renderer');
@@ -148,7 +148,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._animate();
     }
 
-    renderVideoElement() {
+    queueVideoElement() {
         // set video source
         if (this._representation.asset_collections.foreground_id) {
             this._fetchAssetCollection(this._representation.asset_collections.foreground_id)

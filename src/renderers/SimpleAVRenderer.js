@@ -46,7 +46,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
 
     async init() {
         try {
-            await this.renderVideoElement();
+            await this.queueVideoElement();
             this.phase = RENDERER_PHASES.CONSTRUCTED;
         }
         catch(e) {
@@ -57,7 +57,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
         }
     }
 
-    async renderVideoElement() {
+    async queueVideoElement() {
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(
                 this._representation.asset_collections.foreground_id,
