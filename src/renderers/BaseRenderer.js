@@ -41,6 +41,8 @@ export const RENDERER_PHASES = {
     COMPLETING: 'COMPLETING',
     ENDED: 'ENDED',
     DESTROYED: 'DESTROYED',
+    BG_FADE_IN: 'BG_FADE_IN',
+    BG_FADE_OUT: 'BG_FADE_OUT',
     MEDIA_FINISHED: 'MEDIA_FINISHED', // done all its rendering and ready to move on, but not ended
 };
 
