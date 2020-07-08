@@ -132,11 +132,11 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     switchFrom() {
-        this.end();
+        this._setVisibility(false);
     }
 
     switchTo() {
-        this.start();
+        this._setVisibility(true);
     }
 
     _setVisibility(visible: boolean) {
@@ -147,7 +147,13 @@ export default class ImageRenderer extends BaseRenderer {
         const needToDestroy = super.destroy();
         if(!needToDestroy) return false;
 
-        if (this._imageElement) this._target.removeChild(this._imageElement);
+        if (this._imageElement) {
+            try {
+                this._target.removeChild(this._imageElement);
+            } catch(e) {
+                logger.warn(`Could not remove image on destroy: ${e}`);
+            }
+        }
         return true;
     }
 }
