@@ -341,11 +341,19 @@ export default class Controller extends EventEmitter {
     }
 
     _handleRendererCompletedEvent() {
-        if (this._reasoner) this._reasoner.next();
+        if (this._reasoner) try {
+            this._reasoner.next();
+        } catch (e) {
+            logger.warn(e.message);
+        }
     }
 
     _handleRendererNextButtonEvent() {
-        if (this._reasoner) this._reasoner.next();
+        if (this._reasoner) try {
+            this._reasoner.next();
+        } catch (e) {
+            logger.warn(e.message);
+        }
     }
 
     _handleRendererPreviousButtonEvent() {

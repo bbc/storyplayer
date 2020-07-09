@@ -356,6 +356,7 @@ export default class BaseRenderer extends EventEmitter {
     hasMediaEnded(): boolean {
         return (
             this.phase === RENDERER_PHASES.MEDIA_FINISHED
+            || this.phase === RENDERER_PHASES.COMPLETING
             || this.phase === RENDERER_PHASES.ENDED
             || this.phase === RENDERER_PHASES.DESTROYED
         );
