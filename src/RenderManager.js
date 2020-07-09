@@ -511,7 +511,8 @@ export default class RenderManager extends EventEmitter {
                     // Set index of each queued switchable
                     Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
                         const renderer = this._upcomingRenderers[rendererNEId];
-                        if (renderer instanceof SwitchableRenderer) {
+                        if (renderer instanceof SwitchableRenderer
+                            && this._rendererState.lastSwitchableLabel) {
                             // eslint-disable-next-line max-len
                             renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
                         }
@@ -521,7 +522,8 @@ export default class RenderManager extends EventEmitter {
                 },
             );
 
-            if (newRenderer instanceof SwitchableRenderer) {
+            if (newRenderer instanceof SwitchableRenderer
+                && this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
                 newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
             }
@@ -552,11 +554,10 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
-        if (newRenderer instanceof SwitchableRenderer) {
-            if (this._rendererState.lastSwitchableLabel) {
-                // eslint-disable-next-line max-len
-                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
-            }
+        if (newRenderer instanceof SwitchableRenderer 
+            && this._rendererState.lastSwitchableLabel) {
+            // eslint-disable-next-line max-len
+            newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
         }
 
         if (oldRenderer) {
