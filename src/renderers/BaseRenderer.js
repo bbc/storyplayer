@@ -523,9 +523,12 @@ export default class BaseRenderer extends EventEmitter {
                 this._playoutEngine.off(this._rendererId,'timeupdate', sync);
             }
         };
-        this._timer.setSyncing(true);
-        this._playoutEngine.on(this._rendererId,'timeupdate', sync);
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        // only try to sync if playout engine has time
+        if (this._playoutEngine.getCurrentTime(this._rendererId)) {
+            this._timer.setSyncing(true);
+            this._playoutEngine.on(this._rendererId,'timeupdate', sync);
+            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        }
     }
 
     _togglePause() {
