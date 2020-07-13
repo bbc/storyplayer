@@ -2,9 +2,10 @@
 
 import Hls from 'hls.js';
 import {
-    checkDebugPlayout,
-    getOverrideFormat,
-    fetchOverridePlayout,
+    getSetting,
+    DEBUG_PLAYOUT_FLAG,
+    OVERRIDE_PLAYOUT,
+    OVERRIDE_PLAYOUT_FORMAT,
     inSMPWrapper
 } from './utils';
 import logger from './logger';
@@ -171,9 +172,9 @@ export class BrowserCapabilities {
 export class MediaFormats {
 
     static getFormat() {
-        const overrideFormat = getOverrideFormat();
-        const debugPlayout = checkDebugPlayout();
-        if(overrideFormat) {
+        const overrideFormat = getSetting(OVERRIDE_PLAYOUT_FORMAT)
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG)
+        if(['hls','dash'].includes(overrideFormat)) {
             logger.info(`Overriding media selector format: , ${overrideFormat}`)
             return overrideFormat;
         }
@@ -210,14 +211,14 @@ export class MediaFormats {
     }
 
     static getPlayoutEngine(noSMP = false) {
-        const overridePlayout = fetchOverridePlayout();
-        const debugPlayout = checkDebugPlayout();
+        const overridePlayout = getSetting(OVERRIDE_PLAYOUT);
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
             logger.info("Overriding playout engine: ", overridePlayout);
             return overridePlayout
         }
 
-        if(inSMPWrapper && noSMP === false) {
+        if(inSMPWrapper() && noSMP === false) {
             return PLAYOUT_ENGINES.SMP_PLAYOUT
         }
 

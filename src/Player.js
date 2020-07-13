@@ -14,8 +14,9 @@ import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
 import BaseRenderer from './renderers/BaseRenderer';
 import { SESSION_STATE } from './SessionManager';
 import {
-    checkDebugPlayout,
-    checkOverrideFacebookBlock,
+    getSetting,
+    DEBUG_PLAYOUT_FLAG,
+    FACEBOOK_BLOCK_FLAG,
     addDetail,
     scrollToTop,
     preventEventDefault,
@@ -622,7 +623,8 @@ class Player extends EventEmitter {
 
 
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
-        const overrideFacebookBlock = checkOverrideFacebookBlock();
+        const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
+
         if(facebookiOSWebview && !overrideFacebookBlock) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
@@ -722,7 +724,7 @@ class Player extends EventEmitter {
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
-        const debugPlayout = checkDebugPlayout();
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }
@@ -746,6 +748,28 @@ class Player extends EventEmitter {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
+
+        if(debugPlayout) {
+            // Print all calls to PlayoutEngine along with their arguments
+            const playoutEngineHandler = {
+                get (getTarget, getProp) {
+                    // eslint-disable-next-line func-names
+                    return function() {
+                        /* eslint-disable prefer-rest-params */
+                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
+                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
+                        // eslint-disable-next-line prefer-spread
+                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
+                        /* eslint-enable prefer-rest-params */
+
+                        return ret
+                    }
+                },
+            };
+            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
+        }
+
 
         this._showErrorLayer = this._showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
@@ -1658,28 +1682,30 @@ class Player extends EventEmitter {
         if (overlayClass && !(overlayClass in behaviourElement.classList)) {
             behaviourElement.classList.add(overlayClass);
         }
-        return Promise.all(promisesArray).then((icons) => {
-            icons.forEach((iconObj, id) => {
-                const { icon, uuid, container } = iconObj;
-                if (activeLinkId && uuid === activeLinkId) {
-                    icon.classList.add('default');
-                }
-                const clickHandler = () => {
-                    // set classes to show which is selected
-                    behaviourOverlay.setActive(`${id}`);
-                };
-                icon.onclick = clickHandler;
-                icon.addEventListener(
-                    'touchend',
-                    handleButtonTouchEvent(clickHandler),
-                );
-                behaviourOverlay.add(id, icon);
-                if(behaviourElement){
-                    behaviourElement.appendChild(icon);
-                }
-                this._visibleChoices[id + 1] = container;
+        // promise.all ensures all the dom elements are created before showing them
+        return Promise.all(promisesArray)
+            .then((icons) => {
+                icons.forEach((iconObj, id) => {
+                    const { icon, uuid, container } = iconObj;
+                    if (activeLinkId && uuid === activeLinkId) {
+                        icon.classList.add('default');
+                    }
+                    const clickHandler = () => {
+                        // set classes to show which is selected
+                        behaviourOverlay.setActive(`${id}`);
+                    };
+                    icon.onclick = clickHandler;
+                    icon.addEventListener(
+                        'touchend',
+                        handleButtonTouchEvent(clickHandler),
+                    );
+                    behaviourOverlay.add(id, icon);
+                    if(behaviourElement){
+                        behaviourElement.appendChild(icon);
+                    }
+                    this._visibleChoices[id + 1] = container;
+                });
             });
-        });
     }
 
     // eslint-disable-next-line class-methods-use-this

@@ -2,6 +2,7 @@
 
 import type { DataResolver } from './romper';
 import logger from './logger';
+import { getVariableOverrides } from './utils'
 
 export const InternalVariableNames = {
     DAY_OF_WEEK: '_day_of_week',
@@ -88,12 +89,12 @@ export default class InternalVariables {
     }
 
     setQueryParameterVariables(storyVars: Object){
-        const varName = new URLSearchParams(window.location.search).get('varName');
-        const varVal = new URLSearchParams(window.location.search).get('varVal');
-        if (!(varName && varVal)) {
-            logger.info(`Query Parameter variable failed - need name and value`);
+        const variableOverrides = getVariableOverrides()
+        if(variableOverrides.length === 0) {
             return;
         }
+        // TODO: Handle multiple values returned from getVariableOverrides
+        const [varName, varVal] = variableOverrides[0];
         // variable must be defined in story or as internal var
         let isValid = false;
         if (storyVars[varName]) {
@@ -102,7 +103,7 @@ export default class InternalVariables {
             isValid = this._validateInternalVariable(varName, varVal);
         } else {
             logger.info(`Query Parameter variable failed - invalid variable name`);
-            return;            
+            return;
         }
 
         if (isValid) {
@@ -132,7 +133,7 @@ export default class InternalVariables {
                 if (isNaN(numVal) || numVal === null) { // eslint-disable-line no-restricted-globals
                     isValidType = false;
                 } else {
-                    isValidType = (numVal > varDef.range.min_val 
+                    isValidType = (numVal > varDef.range.min_val
                         && numVal < varDef.range.max_val);
                 }
             }

@@ -7,6 +7,8 @@ import uuid from 'uuid/v4';
 import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
+import { RENDERER_PHASES } from './BaseRenderer';
+import logger from '../logger';
 
 export default class BackgroundRenderer extends EventEmitter {
     _rendererId: string;
@@ -19,7 +21,7 @@ export default class BackgroundRenderer extends EventEmitter {
 
     _playoutEngine: PlayoutEngine;
 
-    _disabled: boolean;
+    phase: string;
 
     constructor(
         assetCollection: AssetCollection,
@@ -32,12 +34,33 @@ export default class BackgroundRenderer extends EventEmitter {
         this._player = player;
         this._playoutEngine = player.playoutEngine;
         this._assetCollection = assetCollection;
-        this._disabled = false;
+        this._setPhase(RENDERER_PHASES.CONSTRUCTING);
+        this.init();
     }
 
-    start() { }
+    async init() {
+        // eslint-disable-next-line max-len
+        throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
+    }
 
-    end() { }
+    start() { 
+        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
+            setTimeout(() => this.start(), 100);
+            return false;
+        }
+        return true;
+    }
+
+    end() {
+        switch (this.phase) {
+        case (RENDERER_PHASES.ENDED):
+        case (RENDERER_PHASES.DESTROYED):
+            return false;
+        default:
+            break;
+        };
+        return true;
+    }
 
     cancelFade() { }
 
@@ -48,6 +71,17 @@ export default class BackgroundRenderer extends EventEmitter {
     resumeFade() { }
 
     destroy() {
-        this._disabled = true;
+        if (this.phase === RENDERER_PHASES.DESTROYED) {
+            return false;
+        }
+        if (this.phase !== RENDERER_PHASES.ENDED) {
+            this.end();
+        }
+        return true;
+    }
+
+    _setPhase(phase: string) {
+        logger.info(`Background Renderer ${this._rendererId}  in ${phase}`);
+        this.phase = phase;
     }
 }

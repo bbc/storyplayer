@@ -1,6 +1,6 @@
 // @flow
 /* eslint-disable class-methods-use-this */
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../Player';
 import logger from '../logger';
 
@@ -84,6 +84,15 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
     }
 
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return true
+        default:
+            return super.supports(feature)
+        }
+    }
+
     setPermissionToPlay(value: boolean) {
         this._backgroundMediaElement.play();
         this._foregroundMediaElement.play();
@@ -121,7 +130,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj.queuedEvents = []
                 }
                 if (mediaObj.loop) {
-                    super.setLoopAttribute(rendererId, mediaObj.loop, mediaElement);
+                    super.setLoopAttribute(rendererId, mediaObj.loop);
                 }
             }
             if (mediaObj.subs_url) {
@@ -204,7 +213,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             this.removeEverythingFromActive(rendererId)
         }
         super.setPlayoutInactive(rendererId);
-        super.removeLoopAttribute(rendererId);
+        super.setLoopAttribute(rendererId, false);
     }
 
     // nothing to do here - only one media element that is always visible
@@ -249,6 +258,34 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    playRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        if(rendererPlayoutObj.active) {
+            if(rendererPlayoutObj.media.type === MEDIA_TYPES.BACKGROUND_A) {
+                this._backgroundMediaElement.play()
+            } else {
+                this._foregroundMediaElement.play()
+            }
+        }
+    }
+
+    pauseRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        if(rendererPlayoutObj.active) {
+            if(rendererPlayoutObj.media.type === MEDIA_TYPES.BACKGROUND_A) {
+                this._backgroundMediaElement.pause()
+            } else {
+                this._foregroundMediaElement.pause()
+            }
+        }
+    }
+
     getCurrentTime(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
@@ -257,7 +294,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj.active) {
             return 0;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -272,7 +309,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return false;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (!mediaElement) {
             return false;
         }
@@ -313,7 +350,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 }
                 rendererPlayoutObj._endedCallback = callback
             }
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (mediaElement && rendererPlayoutObj.active) {
                 // This renderer is using the on screen video element
                 // so add event listener directly
@@ -341,7 +378,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 // eslint-disable-next-line no-param-reassign
                 callback = rendererPlayoutObj._endedCallback;
             }
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (mediaElement && rendererPlayoutObj.active) {
                 mediaElement.removeEventListener(event, callback);
             } else if (rendererPlayoutObj.queuedEvents) {
@@ -356,7 +393,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string): ? HTMLMediaElement {
+    _getMediaElement(rendererId: string): ? HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.media || !rendererPlayoutObj.media.type) {
             return undefined;
@@ -400,7 +437,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _handleVolumeClicked(event: Object): void {
         const rendererPlayoutObj = this._media[event.id];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(event.id);
+            const mediaElement = this._getMediaElement(event.id);
             if (mediaElement) {
                 mediaElement.volume = event.value;
             }
@@ -410,7 +447,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _toggleMute(event: Object) {
         const rendererPlayoutObj = this._media[event.id];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(event.id);
+            const mediaElement = this._getMediaElement(event.id);
             if (mediaElement) {
                 mediaElement.muted = event.muted;
             }
@@ -423,7 +460,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             return;
         }
 
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
             mediaElement.addEventListener('loadedmetadata', () => {
                 this._showHideSubtitles(rendererId);
@@ -440,7 +477,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj) {
             return;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (!mediaElement) {
             return;
         }
@@ -464,7 +501,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
         this._cleanUpSubtitles(rendererId);
         if (rendererPlayoutObj.active) {
-            const mediaElement = this.getMediaElement(rendererId);
+            const mediaElement = this._getMediaElement(rendererId);
             if (!mediaElement) {
                 return;
             }

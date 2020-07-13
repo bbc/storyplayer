@@ -21,7 +21,7 @@ import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './Player';
 import { REASONER_EVENTS } from './Events';
-import { checkDisableLookahead } from './utils';
+import { getSetting, DISABLE_LOOKAHEAD_FLAG } from './utils';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -213,7 +213,7 @@ export default class RenderManager extends EventEmitter {
             // pause the timer for the current representation
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
-                if (this._currentRenderer && !this._currentRenderer.hasEnded()) {
+                if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                     if (this._currentRenderer) this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
@@ -272,29 +272,38 @@ export default class RenderManager extends EventEmitter {
                 if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
                     onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
                     return this._fetchers
-                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
+                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id)
+                        .then((fg) => {
+                            if (fg.assets.image_src) {
+                                return this._fetchers.mediaFetcher(fg.assets.image_src);
+                            }
+                            return Promise.reject(
+                                new Error('Could not find splash image Asset Collection'),
+                            );
+                        })
+                        .then((mediaUrl) => {
+                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                            this._player.setupExperienceOverlays(Object.assign(
+                                onLaunchConfig,
+                                { background_art: mediaUrl },
+                            ));
+                        })
+                        .catch((err) => {
+                            logger.error(err, `Could not resolve splash image asset: ${err}`);
+                            this._player.setupExperienceOverlays(Object.assign(
+                                onLaunchConfig,
+                                { background_art: this._assetUrls.noBackgroundAssetUrl },
+                            ));
+                        });
                 }
-                return Promise.reject(new Error('No onLaunch options in Story'));
-            })
-            .then((fg) => {
-                if (fg.assets.image_src) {
-                    return this._fetchers.mediaFetcher(fg.assets.image_src);
-                }
-                return Promise.reject(new Error('Could not find Asset Collection'));
-            })
-            .then((mediaUrl) => {
-                logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                this._player.setupExperienceOverlays(Object.assign(
-                    onLaunchConfig,
-                    { background_art: mediaUrl },
-                ));
-            })
-            .catch((err) => {
-                logger.error(err, 'Could not get url from asset collection uuid');
-                this._player.setupExperienceOverlays(Object.assign(
+                logger.warn('No onLaunch config in story meta');
+                return this._player.setupExperienceOverlays(Object.assign(
                     onLaunchConfig,
                     { background_art: this._assetUrls.noBackgroundAssetUrl },
                 ));
+            })
+            .catch((err) => {
+                logger.error(err, `Could not get fetch story ${err}`);
             });
     }
 
@@ -475,8 +484,10 @@ export default class RenderManager extends EventEmitter {
             this._analytics,
             this._controller,
         );
-
+        
         if (newRenderer) {
+            // now it has been constructed, start fetching all the media and building the components
+            newRenderer.init();
             newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
                 this.refreshOnwardIcons();
                 newRenderer.start();
@@ -500,7 +511,8 @@ export default class RenderManager extends EventEmitter {
                     // Set index of each queued switchable
                     Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
                         const renderer = this._upcomingRenderers[rendererNEId];
-                        if (renderer instanceof SwitchableRenderer) {
+                        if (renderer instanceof SwitchableRenderer
+                            && this._rendererState.lastSwitchableLabel) {
                             // eslint-disable-next-line max-len
                             renderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
                         }
@@ -510,7 +522,8 @@ export default class RenderManager extends EventEmitter {
                 },
             );
 
-            if (newRenderer instanceof SwitchableRenderer) {
+            if (newRenderer instanceof SwitchableRenderer
+                && this._rendererState.lastSwitchableLabel) {
                 // eslint-disable-next-line max-len
                 newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
             }
@@ -541,22 +554,14 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
-        if (newRenderer instanceof SwitchableRenderer) {
-            if (this._rendererState.lastSwitchableLabel) {
-                // eslint-disable-next-line max-len
-                newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
-            }
+        if (newRenderer instanceof SwitchableRenderer 
+            && this._rendererState.lastSwitchableLabel) {
+            // eslint-disable-next-line max-len
+            newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
         }
 
         if (oldRenderer) {
-            const currentRendererInUpcoming = Object.values(this._upcomingRenderers)
-                .some((renderer) => {
-                    if (renderer === oldRenderer) {
-                        return true;
-                    }
-                    return false;
-                });
-            if (!currentRendererInUpcoming) {
+            if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
                 oldRenderer.destroy();
             } else {
                 oldRenderer.end();
@@ -642,7 +647,7 @@ export default class RenderManager extends EventEmitter {
 
     // create reasoners for the NEs that follow narrativeElement
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
-        if(checkDisableLookahead()) {
+        if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
             return Promise.resolve();
         }
         return Promise.all([
@@ -854,6 +859,8 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();
         }
+        Object.keys(this._backgroundRenderers).forEach(bgrId =>
+            this._backgroundRenderers[bgrId].destroy());
         this._currentRenderer = null;
     }
 }

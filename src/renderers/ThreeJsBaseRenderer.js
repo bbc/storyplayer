@@ -45,8 +45,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
     _userDragging: boolean;
 
-    _hasEnded: boolean;
-
     _started: boolean;
 
     _rendered: boolean;
@@ -122,7 +120,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
-        this._hasEnded = false;
         this._started = true;
         if (this._controller.handleKeys) {
             document.addEventListener('keydown', this._onKeyDown);
@@ -436,7 +433,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
 
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
@@ -461,9 +459,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._started = false;
         this._rendered = false;
-    }
-
-    destroy() {
-        super.destroy();
+        return true;
     }
 }

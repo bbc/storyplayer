@@ -6,6 +6,7 @@ import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../ro
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
+import { RENDERER_PHASES } from './BaseRenderer';
 
 const THREE = require('three');
 
@@ -53,18 +54,26 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this.renderImageElement();
         this._timeElapsed = 0;
         this._duration = Infinity;
         this._timedEvents = {};
     }
 
+    async init() {
+        try {
+            await this.renderImageElement();
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
+        }
+        catch(e) {
+            logger.error(e, 'could not initiate 360 image renderer');
+        }
+    }
+
     start() {
         super.start();
         logger.info('Starting ThreeJs image');
-        if (this._rendered) {
-            this._showImage();
-        }
+        this._setPhase(RENDERER_PHASES.MAIN);
+        this._showImage();
         if (this._representation.duration && this._representation.duration > 0){
             this._duration = this._representation.duration;
             this._timeElapsed = 0;
@@ -74,6 +83,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
         } else {
+            this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
             this._startTimer();
         }
         this._disableScrubBar();
@@ -129,11 +139,15 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
+        this._setPhase(RENDERER_PHASES.ENDED);
         if (this._imageTimer){
             clearInterval(this._imageTimer);
         }
         this._timedEvents = {};
+        return true;
     }
 
     _showImage() {
@@ -141,21 +155,20 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._animate();
     }
 
-    renderImageElement() {
+    async renderImageElement() {
         // set image source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (fg.assets.image_src) {
-                        this._fetchMedia(fg.assets.image_src)
-                            .then(mediaUrl =>
-                                this.populateImageElement(mediaUrl)
-                            )
-                            .catch((err) => {
-                                logger.error(err, 'Image not found');
-                            });
-                    }
-                });
+            const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
+            if (fg.assets.image_src) {
+                try {
+                    const mediaUrl = await this._fetchMedia(fg.assets.image_src);
+                    this.populateImageElement(mediaUrl)
+                } catch(err) {
+                    throw new Error('Could not resolve media source for 360 image');
+                }
+            } else {
+                throw new Error('No image source for 360 image asset collectoin');
+            }
         }
     }
 
@@ -170,9 +183,5 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         geometry.scale(-1, 1, 1);
 
         this._imageMesh = new THREE.Mesh(geometry, material);
-        this._rendered = true;
-        if(this._started) {
-            this._showImage();
-        }
     }
 }

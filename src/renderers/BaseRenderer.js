@@ -11,7 +11,7 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
-import { checkAddDetailsOverride } from '../utils';
+import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 import { VARIABLE_EVENTS } from '../Events';
 import { buildPanel } from '../behaviours/VariablePanelHelper';
 
@@ -23,6 +23,8 @@ import PauseBehaviour from '../behaviours/PauseBehaviour';
 
 const SEEK_TIME = 10;
 
+const debugPhase = true;
+
 const getBehaviourEndTime = (behaviour: Object) => {
     if(behaviour.duration !== undefined) {
         const endTime = behaviour.start_time + behaviour.duration;
@@ -32,11 +34,16 @@ const getBehaviourEndTime = (behaviour: Object) => {
 }
 
 export const RENDERER_PHASES = {
+    CONSTRUCTING: 'CONSTRUCTING',
     CONSTRUCTED: 'CONSTRUCTED',
     START: 'START',
     MAIN: 'MAIN',
-    END: 'END',
+    COMPLETING: 'COMPLETING',
     ENDED: 'ENDED',
+    DESTROYED: 'DESTROYED',
+    BG_FADE_IN: 'BG_FADE_IN',
+    BG_FADE_OUT: 'BG_FADE_OUT',
+    MEDIA_FINISHED: 'MEDIA_FINISHED', // done all its rendering and ready to move on, but not ended
 };
 
 export default class BaseRenderer extends EventEmitter {
@@ -95,8 +102,6 @@ export default class BaseRenderer extends EventEmitter {
     _choiceBehaviourData: Object;
 
     _linkBehaviour: Object;
-
-    _hasEnded: boolean;
 
     inVariablePanel: boolean;
 
@@ -232,25 +237,39 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._preloadedBehaviourAssets = [];
-        this._preloadBehaviourAssets();
-        this._preloadIconAssets();
+        this._preloadBehaviourAssets().catch(e =>
+            logger.warn(e, 'Could not preload behaviour assets'));
+        this._preloadIconAssets().catch(e =>
+            logger.warn(e, 'Could not preload icon assets'));
         this._loopCounter = 0;
-        this.phase = RENDERER_PHASES.CONSTRUCTED;
+        this._setPhase(RENDERER_PHASES.CONSTRUCTING);
         this._inPauseBehaviourState = false;
     }
 
-    willStart(elementName: ?string, elementId: ?string) {
+    // run any code that may be asynchronous
+    async init() {
+        // eslint-disable-next-line max-len
+        throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
+    }
+
+    willStart(elementName: ?string, elementId: ?string): boolean {
+        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
+            setTimeout(() => this.willStart(elementName, elementId), 100);
+            return false;
+        }
+        // eslint-disable-next-line max-len
+        this._setPhase(RENDERER_PHASES.START);
         this.inVariablePanel = false;
-        this.phase = RENDERER_PHASES.START;
 
         this._runStartBehaviours();
 
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(checkAddDetailsOverride()) {
+        if(getSetting(ADD_DETAILS_FLAG)) {
             const { name, id } = this._representation;
             this._player.addDetails(elementName, elementId, name, id)
         }
+        return true;
     }
 
     _runStartBehaviours() {
@@ -284,9 +303,8 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
-        this.phase = RENDERER_PHASES.MAIN;
+        this._setPhase(RENDERER_PHASES.MAIN);
         this.emit(RendererEvents.STARTED);
-        this._hasEnded = false;
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
             this._timer.pause();
@@ -301,12 +319,24 @@ export default class BaseRenderer extends EventEmitter {
         this._runDuringBehaviours();
     }
 
-    end() {
-        this.phase = RENDERER_PHASES.ENDED;
+    end(): boolean {
+        switch (this.phase) {
+        case (RENDERER_PHASES.ENDED):
+        case (RENDERER_PHASES.DESTROYED):
+            // eslint-disable-next-line max-len
+            if (debugPhase) logger.info('PHASE base ended already', this._representation.id, this.phase);
+            return false;
+        default:
+            break;
+        };
+        if (debugPhase) logger.info('PHASE base ending', this._representation.id, this.phase);
         this._player.disconnectScrubBar(this);
-        this._clearBehaviourElements()
+        try{
+            this._clearBehaviourElements()
+        } catch (e) {
+            logger.info(e);
+        }
         this._reapplyLinkConditions();
-        clearTimeout(this._linkFadeTimeout);
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -318,10 +348,18 @@ export default class BaseRenderer extends EventEmitter {
             this._handlePlayPauseButtonClicked,
         );
         this._lastSetTime = 0;
+        this._setPhase(RENDERER_PHASES.ENDED);
+        return true;
     }
 
-    hasEnded(): boolean {
-        return this._hasEnded;
+    // has the media finished?
+    hasMediaEnded(): boolean {
+        return (
+            this.phase === RENDERER_PHASES.MEDIA_FINISHED
+            || this.phase === RENDERER_PHASES.COMPLETING
+            || this.phase === RENDERER_PHASES.ENDED
+            || this.phase === RENDERER_PHASES.DESTROYED
+        );
     }
 
     // if we have any start pauses, complete those behaviours early
@@ -475,24 +513,19 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         // if we have a media element, set that time and pause the timer until playhead has synced
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        if (mediaElement && mediaElement.id && mediaElement.src) {
-            const isPaused = this._timer._paused;
-            const sync = () => {
-                const playheadTime = mediaElement.currentTime;
-                if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
-                    this._timer.setTime(playheadTime - this._inTime);
-                    this._timer.setSyncing(false);
-                    if (isPaused) this._timer.pause();  // don't restart if we were paused
-                    mediaElement.removeEventListener('timeupdate', sync);
-                }
-            };
-            this._timer.setSyncing(true);
-            mediaElement.addEventListener('timeupdate', sync);
-            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
-        } else {
-            this._timer.setTime(time);
-        }
+        const isPaused = this._timer._paused;
+        const sync = () => {
+            const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
+            if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
+                this._timer.setTime(playheadTime - this._inTime);
+                this._timer.setSyncing(false);
+                if (isPaused) this._timer.pause();  // don't restart if we were paused
+                this._playoutEngine.off(this._rendererId,'timeupdate', sync);
+            }
+        };
+        this._timer.setSyncing(true);
+        this._playoutEngine.on(this._rendererId,'timeupdate', sync);
+        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
     }
 
     _togglePause() {
@@ -594,8 +627,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        this.phase = RENDERER_PHASES.END;
-        this._hasEnded = true;
+        this._setPhase(RENDERER_PHASES.COMPLETING);
         this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
@@ -628,8 +660,9 @@ export default class BaseRenderer extends EventEmitter {
         this._preloadedBehaviourAssets = [];
         const assetCollectionIds = this._representation.asset_collections.behaviours ?
             this._representation.asset_collections.behaviours : [];
-        assetCollectionIds.forEach((behaviour) => {
-            this._fetchAssetCollection(behaviour.asset_collection_id)
+        return Promise.all(assetCollectionIds.map((behaviour) => {
+        // assetCollectionIds.forEach((behaviour) => {
+            return this._fetchAssetCollection(behaviour.asset_collection_id)
                 .then((assetCollection) => {
                     if (assetCollection.assets.image_src) {
                         return this._fetchMedia(assetCollection.assets.image_src);
@@ -642,8 +675,11 @@ export default class BaseRenderer extends EventEmitter {
                         image.src = imageUrl;
                         this._preloadedBehaviourAssets.push(image);
                     }
+                }).catch((err) => {
+                    logger.error(err,
+                        `could not preload behaviour asset ${behaviour.asset_collection_id}`);
                 });
-        });
+        }));
     }
 
     _preloadIconAssets() {
@@ -672,6 +708,8 @@ export default class BaseRenderer extends EventEmitter {
                         logger.info(`Preloading icon ${imageUrl}`);
                         this._preloadedIconAssets.push(image);
                     }
+                }).catch((err) => {
+                    logger.error(err, `could not preload icon asset ${iconAssetCollection}`);
                 });
         }));
     }
@@ -881,50 +919,53 @@ export default class BaseRenderer extends EventEmitter {
                 return Promise.resolve();
             }
 
-            // build icons
-            const iconSrcPromises = this._getIconSourceUrls(narrativeElementObjects, behaviour);
-
             // find out which link is default
             const defaultLinkId = this._getDefaultLink(narrativeElementObjects);
 
             // go through asset collections and render icons
-            return iconSrcPromises.then((iconObjects) => {
+            return this._getIconSourceUrls(narrativeElementObjects, behaviour)
+                .then((iconObjects) => {
 
-                this._player.clearLinkChoices();
-                iconObjects.forEach((iconSpecObject) => {
-
-                    this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
-                });
-                if (iconObjects.length > 1 || showIfOneLink) {
-                    this._showChoiceIcons({
-                        defaultLinkId, // id for link to highlight at start
-                        forceChoice, // do we highlight
-                        disableControls, // are controls disabled while icons shown
-                        countdown, // do we animate countdown
-                        iconOverlayClass, // css classes to apply to overlay
-
-                        behaviourOverlay,
-                        choiceCount: iconObjects.length,
+                    this._player.clearLinkChoices();
+                    iconObjects.forEach((iconSpecObject) => {
+                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
                     });
+                    if (iconObjects.length > 1 || showIfOneLink) {
+                        this._showChoiceIcons({
+                            defaultLinkId, // id for link to highlight at start
+                            forceChoice, // do we highlight
+                            disableControls, // are controls disabled while icons shown
+                            countdown, // do we animate countdown
+                            iconOverlayClass, // css classes to apply to overlay
 
-                    // callback to say behaviour is done, but not if user can
-                    // change their mind
-                    if (!forceChoice) {
+                            behaviourOverlay,
+                            choiceCount: iconObjects.length,
+                        });
+
+                        // callback to say behaviour is done, but not if user can
+                        // change their mind
+                        if (!forceChoice) {
+                            callback();
+                        }
+                    } else {
+                        logger.info('Link Choice behaviour ignored - only one link');
+                        this._linkBehaviour.forceChoice = false;
                         callback();
                     }
-                } else {
-                    logger.info('Link Choice behaviour ignored - only one link');
-                    this._linkBehaviour.forceChoice = false;
+                }).catch((err) => {
+                    logger.error(err, 'could not get assets for rendering link icons');
                     callback();
-                }
-            });
+                });
+        }).catch((err) => {
+            logger.error(err, 'Could not get next steps for rendering links');
+            callback();
         });
     }
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
         if(this.checkIsLooping()) {
-            this._playoutEngine.removeLoopAttribute(this._rendererId);
+            this._playoutEngine.setLoopAttribute(this._rendererId, false);
         }
         this._followLink(eventObject.id, eventObject.behaviourId);
     }
@@ -1133,15 +1174,18 @@ export default class BaseRenderer extends EventEmitter {
             iconOverlayClass,
             behaviourOverlay,
             choiceCount,
-        );
-        this._player.enableLinkChoiceControl();
-        if (disableControls) {
-            // disable transport controls
-            this._player.disableControls();
-        }
-        if (countdown) {
-            this._player.startChoiceCountdown(this);
-        }
+        ).then(() => {
+            if (disableControls) {
+                // disable transport controls
+                this._player.disableControls();
+            }
+            if (countdown) {
+                this._player.startChoiceCountdown(this);
+            }
+            this._player.enableLinkChoiceControl();
+        }).catch((err) => { // REFACTOR: this returns a promise
+            logger.error(err, 'could not render link choice icons')  ;
+        });
     }
 
     // user has made a choice of link to follow - do it
@@ -1163,7 +1207,7 @@ export default class BaseRenderer extends EventEmitter {
             });
 
             // if already ended, follow immediately
-            if (this._hasEnded) {
+            if (this.hasMediaEnded()) {
                 this._hideChoiceIcons(narrativeElementId, behaviourId);
             // do we keep the choice open?
             } else if (this._linkBehaviour && this._linkBehaviour.oneShot) {
@@ -1206,6 +1250,7 @@ export default class BaseRenderer extends EventEmitter {
     _hideChoiceIcons(narrativeElementId: ?string, behaviourId: string) {
         if (narrativeElementId) { this._reapplyLinkConditions(); }
         const behaviourElement = document.getElementById(behaviourId);
+        if (this._linkFadeTimeout) clearTimeout(this._linkFadeTimeout);
         if(behaviourElement) {
             this._linkFadeTimeout = setTimeout(() => {
                 behaviourElement.classList.remove('romper-icon-fade');
@@ -1233,6 +1278,8 @@ export default class BaseRenderer extends EventEmitter {
         callback();
     }
 
+    // REFACTOR note: these are called by the behaviour, without knowing what will happen
+    // via behaviour map
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
         const behaviourAssetCollectionMappingId = behaviour.image;
         const assetCollectionId =
@@ -1250,7 +1297,12 @@ export default class BaseRenderer extends EventEmitter {
                         this._overlayImage(imageUrl, behaviour.id);
                     }
                     callback();
+                })
+                .catch((err) => {
+                    logger.error(err, 'could not get image for show image behaviour');
                 });
+        } else {
+            logger.error('No asset collection id for show image behaviour');
         }
     }
 
@@ -1320,8 +1372,8 @@ export default class BaseRenderer extends EventEmitter {
             this._analytics,
         );
     }
-
     // //////////// end of variables panel choice behaviour
+
     _clearBehaviourElements() {
         const behaviourElements =
             document.querySelectorAll(`[behaviour-renderer="${this._rendererId}"]`);
@@ -1402,9 +1454,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     checkIsLooping() {
-        return false
-        const mediaElement = this._playoutEngine.getMediaElement(this._rendererId);
-        return mediaElement && mediaElement.hasAttribute('loop');
+        return this._playoutEngine.checkIsLooping(this._rendererId);
     }
 
     /**
@@ -1414,7 +1464,16 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
-        this.end();
+        if (debugPhase) logger.info('PHASE destroying', this._representation.id, this.phase);
+        if (this.phase === RENDERER_PHASES.DESTROYED) {
+            // eslint-disable-next-line max-len
+            if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.id, this.phase);
+            return false;
+        }
+        if (this.phase !== RENDERER_PHASES.ENDED) {
+            if (debugPhase) logger.info('PHASE destroying need to end first');
+            this.end();
+        }
         this._clearBehaviourElements();
         if (this._behaviourRunner) {
             this._behaviourRunner.destroyBehaviours();
@@ -1422,6 +1481,7 @@ export default class BaseRenderer extends EventEmitter {
         // we didn't find any behaviours to run, so emit completion event
         this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
+        return true;
     }
 
     isIosPlayoutEngine() {
@@ -1430,5 +1490,11 @@ export default class BaseRenderer extends EventEmitter {
 
     getController(): Controller {
         return this._controller;
+    }
+
+    _setPhase(phase: string) {
+        // eslint-disable-next-line max-len
+        if (debugPhase) logger.info(`Renderer ${this._rendererId} for representation ${this._representation.id} entering ${phase} phase`);
+        this.phase = phase;
     }
 }
