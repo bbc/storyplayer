@@ -184,15 +184,15 @@ export default class BasePlayoutEngine {
 
 
     on(rendererId: string, event: string, callback: Function) {
-        return undefined;
+        throw new Error("on method should be overriden");
     }
 
     off(rendererId: string, event: string, callback: Function) {
-        return undefined;
+        throw new Error("off method should be overriden");
     }
 
     _getMediaElement(rendererId: string): ?HTMLMediaElement {
-        return undefined;
+        throw new Error("getMediaElement method should be overriden");
     }
 
     getMediaElementFor360(rendererId: string): ?HTMLMediaElement {

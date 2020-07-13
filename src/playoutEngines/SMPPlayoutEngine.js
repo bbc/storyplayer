@@ -2,11 +2,10 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 import Player from '../Player';
-import { checkAddDetailsOverride } from '../utils';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities'
 import { PLAYOUT_ENGINES } from './playoutEngineConsts'
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
+import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from './iOSPlayoutEngine';
 
@@ -39,6 +38,15 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         default:
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
+        }
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return false
+        default:
+            return false
         }
     }
 
@@ -123,9 +131,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
-            return this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
+            this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
         }
-        return super.setPlayoutVisible(rendererId)
     }
 
     getPlayoutActive(rendererId: string): boolean {
@@ -139,7 +146,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
-            this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
+            this._secondaryPlayoutEngine.setPlayoutActive(rendererId)
         }
         if("url" in rendererPlayoutObj.media && this._permissionToPlay) {
             this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, true)
@@ -162,7 +169,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // TODO
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
-            return this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
+            return this._secondaryPlayoutEngine.setPlayoutInactive(rendererId)
         }
         // TODO: Clear SMP Player for case when we go from SMP to Image renderer
         return super.setPlayoutInactive(rendererId)
@@ -230,8 +237,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.setCurrentTime(rendererId, time)
         }
-        this._smpPlayerInterface.setTime(time);
-        return true;
+        if(rendererPlayoutObj.active) {
+            this._smpPlayerInterface.currentTime = time;
+            return true
+        }
+        logger.warn("Cannot set duration of non active")
+        return false;
     }
 
 
@@ -278,39 +289,45 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return false
     }
 
-    getMediaElement(rendererId: string): ?HTMLMediaElement {
-        return document.createElement('video');
+    _getMediaElement(rendererId: string): ?HTMLMediaElement {
+        throw new Error("SMP RenderEngine doesn't allow access to HTML Media Element");
     }
 
     setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
         return false
     }
 
-    removeLoopAttribute(rendererId: string) {
-        return false
-    }
-
     checkIsLooping(rendererId: string) {
         return false
     }
-}
 
-// // Proxy through any unimplementd functions to playout engine
-// const getSMPPlayOutEngine = (player: Player, debugPlayout: boolean) => {
-//     const playoutEngine = new SMPPlayoutEngine(player, debugPlayout);
-//     const playoutEngineProxied = new Proxy(playoutEngine, {
-//         get(target, name, receiver) {
-//             if (name in target.__proto__) { // assume methods live on the prototype
-//                 return function(...args) {
-//                     target._secondaryPlayoutEngine[name](...args)
-//                     console.log(`Using Proxied Function: ${name}`)
-//                 };
-//             }
-//             return target[name];
-//
-//         }
-//     })
-//     return playoutEngineProxied
-// }
+    applyStyle(rendererId: string, key: string, value: string) {
+        throw new Error("SMP RenderEngine doesn't allow setting style");
+    }
+
+    clearStyle(rendererId: string, key: string) {
+    }
+
+    setVolume(rendererId: string, volume: number) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if(!rendererPlayoutObj) {
+            this._secondaryPlayoutEngine.setVolume(rendererId, volume)
+        }
+        if(rendererPlayoutObj.active) {
+            this._smpPlayerInterface.volume = volume
+        }
+    }
+
+    getVolume(rendererId: string, volume: number) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if(!rendererPlayoutObj) {
+            return this._secondaryPlayoutEngine.getVolume(rendererId)
+        }
+        if(rendererPlayoutObj.active) {
+            return this._smpPlayerInterface.volume
+        }
+        return 1
+    }
+}
 
 export default SMPPlayoutEngine;

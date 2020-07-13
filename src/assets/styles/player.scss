@@ -1581,7 +1581,8 @@ $start-button-size: 15vw;
       >.center {
         border-top: 1px solid $white;
         bottom: $romper-button-height + 15px;
-        height: $romper-button-height + 15px;
+        // TODO: Put following line back to $romper-button-height + 15px;
+        height: $romper-button-height + 200px + 15px;
         padding: 10px 0 0;
         position: absolute;
         width: 100%;

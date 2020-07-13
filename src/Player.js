@@ -673,6 +673,7 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(this._nextButtonClicked.bind(this)),
         );
 
+        // TODO: Remove these as only needed for debug 
         window.SPnext = this._nextButtonClicked.bind(this);
         window.SPback = this._backButtonClicked.bind(this);
 
