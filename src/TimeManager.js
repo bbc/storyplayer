@@ -17,7 +17,7 @@ export default class TimeManager extends EventEmitter {
 
     _syncing: boolean;
 
-    _debug: false;
+    _debug: boolean;
 
     constructor() {
         super();
@@ -36,7 +36,7 @@ export default class TimeManager extends EventEmitter {
                 this._timeElapsed += TIMER_INTERVAL/1000;
                 this._testForEvents();
             }
-            if (this._debug && this._timeElapsed % 200 === 0) {
+            if (this._debug && this._timeElapsed > 0 && this._timeElapsed % 200 === 0) {
                 logger.info('timer', this._timeElapsed);
             }
         }, TIMER_INTERVAL);
