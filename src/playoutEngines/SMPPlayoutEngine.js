@@ -11,8 +11,6 @@ import DOMSwitchPlayoutEngine from './DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from './iOSPlayoutEngine';
 
 
-// let queueOnce = false
-
 class SMPPlayoutEngine extends BasePlayoutEngine {
     _secondaryPlayoutEngine: BasePlayoutEngine
 
@@ -85,23 +83,21 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         })
 
         const controlBar = document.querySelector('.p_playerControlBarHolder');
-        const button = document.createElement('button');
-        button.classList.add("p_button")
-        button.classList.add("p_controlBarButton")
-        button.classList.add("chapterButton")
-        button.setAttribute("role", "button")
-        button.setAttribute("aria-live", "polite")
-        button.setAttribute("aria-label", "Toggle Chapter Menu")
-        button.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg focusable="false" viewBox="0 0 44 44" class="p_svg  p_padlock"><use xlink:href="#fullscreen-enter"></use></svg></div>'
-        controlBar.appendChild(button)
-        // <button class="p_button p_controlBarButton p_fullscreenButton" role="button" aria-live="polite" aria-label="Enter full screen" title="Enter full screen"><span class="p_hiddenElement" aria-hidden="true">Enter full screen</span><div class="p_iconHolder"><svg focusable="false" viewBox="0 0 44 44" class="p_svg  p_fullscreen-enterIcon"><use xlink:href="#fullscreen-enter"></use></svg></div></button>
-        // const _nicontrolBar = document.querySelector('.p_controlBarFiller');
-        // const _nipluginButton = document.createElement('div');
-        // _nipluginButton.innerHTML = '<input type="range" min="1" max="100" value="100" class="_nislider" id="niSlider" name="nislider">';
-        // _nipluginButton.className = 'plugin_button';
-        // _nicontrolBar.appendChild(_nipluginButton);
-        //
-
+        const chapterButton = document.createElement('button');
+        chapterButton.classList.add("p_button")
+        chapterButton.classList.add("p_controlBarButton")
+        chapterButton.classList.add("chapterButton")
+        chapterButton.setAttribute("role", "button")
+        chapterButton.setAttribute("aria-live", "polite")
+        chapterButton.setAttribute("aria-label", "Toggle Chapter Menu")
+        chapterButton.onmouseover = () => {
+            chapterButton.classList.add("p_buttonHover")
+        }
+        chapterButton.onmouseout = () => {
+            chapterButton.classList.remove("p_buttonHover")
+        }
+        chapterButton.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapterIcon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/></svg></div>'
+        controlBar.insertBefore(chapterButton, document.querySelector(".p_fullscreenButton"))
 
         // TODO: first active playout is not set to autoplay so we have to
         // manually start it here. We will need to test this on iOS as I'd
@@ -175,15 +171,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._smpPlayerInterface.readyPlaylist(playlist)
         logger.info(`SMP-SP preloadFromCollection: ${rendererId}`)
         this._smpPlayerInterface.preloadFromCollection(rendererId)
-
-        // // TODO: Set next as actual next renderer
-        // if(!queueOnce) {
-        //     this._smpPlayerInterface.queuePlaylist({
-        //         playlist,
-        //         options: { preloadImmediately: true }
-        //     });
-        //     queueOnce = true
-        // }
     }
 
     unqueuePlayout(rendererId: string) {
@@ -229,7 +216,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     startNonAVPlayout() {
         const playlist = {
-            // id: `${uuid()}`,
+            id: `${uuid()}`,
             items: [{
                 fake: true,
                 vpid: `fakeitem`,
@@ -242,7 +229,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             // switching it off
             ondemandWebcastData:false,
             webcastData: {},
-            autoplay: false,
+            autoplay: true,
             startTime : this._inTime
         }
         logger.info(`SMP-SP loadPlaylist (Fake)`)
@@ -253,7 +240,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         let timer;
         let time = 0;
         const td = function() {
-            if (time++>2000) {
+            time += 1
+            if (time > 2000) {
                 playerInterface.dispatchEvent( { type:"ended",fake:true,fakeEnded:true } );
                 time = 0;
             } else {
