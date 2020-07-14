@@ -603,7 +603,6 @@ export default class BaseRenderer extends EventEmitter {
         }
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
-            console.log('ANDY seeking forward');
             let targetTime = currentTime + SEEK_TIME;
             const choiceTime = this.getChoiceTime();
             if (choiceTime > 0 && choiceTime < targetTime) {

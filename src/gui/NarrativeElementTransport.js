@@ -23,13 +23,13 @@ class NarrativeElementTransport extends EventEmitter {
 
     _backNextWaiting: boolean; // flag to stop spamming of buttons
 
-    logUserInteraction: Function;
+    _logUserInteraction: Function;
 
     constructor(
         logUserInteraction: Function,
     ) {
         super();
-        this.logUserInteraction = logUserInteraction;
+        this._logUserInteraction = logUserInteraction;
         this._container = document.createElement('div');
         this._container.classList.add('romper-narrative-element-transport');
 
@@ -194,7 +194,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _playPauseButtonClicked() {
         this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED);
-        this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
     }
 
     _seekForwardButtonClicked() {
@@ -219,7 +219,7 @@ class NarrativeElementTransport extends EventEmitter {
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
-        this.logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
     }
 
     _nextButtonClicked() {
@@ -228,7 +228,7 @@ class NarrativeElementTransport extends EventEmitter {
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
-        this.logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+        this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
     }
 }
 

@@ -19,12 +19,12 @@ import {
     addDetail,
     scrollToTop,
     preventEventDefault,
-    SLIDER_CLASS,
     handleButtonTouchEvent
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from '../Events';
 import Buttons, { ButtonEvents } from './Buttons';
-import Overlay, { OVERLAY_CLICK_EVENT } from './Overlay';
+import Overlay, { OVERLAY_BUTTON_CLICK_EVENT } from './Overlay';
+import ScrubBar from './ScrubBar';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -108,7 +108,9 @@ class Player extends EventEmitter {
 
     _linkChoice: Object;
 
-    _scrubBar: HTMLInputElement;
+    _scrubBar: ScrubBar;
+
+    _scrubBarElement: HTMLInputElement;
 
     _timeFeedback: HTMLDivElement;
 
@@ -123,8 +125,6 @@ class Player extends EventEmitter {
     _logUserInteraction: Function;
 
     _volumeEventTimeouts: Object;
-
-    _scrubbedEventTimeout: TimeoutID;
 
     _showRomperButtonsTimeout: TimeoutID;
 
@@ -180,9 +180,11 @@ class Player extends EventEmitter {
 
     _startButtonHandler: Function;
 
-    _controller: Controller;
+    createBehaviourOverlay: Function;
 
-    _scrubTimePoller: ?IntervalID;
+    _addCountdownToElement: Function;
+
+    _controller: Controller;
 
     constructor(
         target: HTMLElement,
@@ -192,28 +194,39 @@ class Player extends EventEmitter {
     ) {
         super();
 
-        this._overlays = [];
+        this._playerParent = target;
+        this._analytics = analytics;
+        this._assetUrls = assetUrls;
         this._controller = controller;
+
+        this._overlays = [];
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._visibleChoices = {}
         this._volumeEventTimeouts = {};
         this._RomperButtonsShowing = false;
         this._countdownTotal = 0;
-
         this._userInteractionStarted = false;
         this._controlsDisabled = false;
+        this._aspectRatio = 16 / 9;
+        this._inFullScreen = false;
 
-        this._analytics = analytics;
-        this._assetUrls = assetUrls;
-
+        // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
+        this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
+        this._showErrorLayer = this._showErrorLayer.bind(this);
+        this._removeErrorLayer = this._removeErrorLayer.bind(this);
+        this.showBufferingLayer = this.showBufferingLayer.bind(this);
+        this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
+        this._addContinueModal = this._addContinueModal.bind(this);
+        this._startButtonHandler = this._startButtonHandler.bind(this);
+        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
+        this._addCountdownToElement = this._addCountdownToElement.bind(this);
+
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
         this._player.classList.add('noselect');
-
-        this._playerParent = target;
 
         this._backgroundLayer = document.createElement('div');
         this._backgroundLayer.classList.add('romper-background');
@@ -230,7 +243,6 @@ class Player extends EventEmitter {
         this._loadingLayer.appendChild(loadingLayerInner);
         this._mediaLayer.appendChild(this._loadingLayer);
 
-        this._aspectRatio = 16 / 9;
         this._guiLayer = document.createElement('div');
         this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
@@ -259,101 +271,84 @@ class Player extends EventEmitter {
         this._overlaysElement = document.createElement('div');
         this._overlaysElement.classList.add('romper-overlays');
         this._overlaysElement.classList.add('buttons-hidden');
-        /*
-                <narrativeElementTransport>
-                    <previous, repeat, next />
-                <buttons>
-                    <scrub />
-                    <lower section>
-                        <play vol representations icons time sub FS>
-                    </lowersection>
-        */
 
         this._buttonsActivateArea = document.createElement('div');
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
         this._buttonsActivateArea.classList.add('hide');
 
-        this._buttons = document.createElement('div'); // pull in here
+        this._buttons = document.createElement('div'); // pull in here??
         this._buttons.classList.add('romper-buttons');
         this._buttons.onmousemove = this._activateRomperButtons.bind(this);
 
         this._guiLayer.appendChild(this._overlaysElement);
-        this._guiLayer.appendChild(this._buttons); // THIS!
+        this._guiLayer.appendChild(this._buttons); // THIS has all the UI we may want to swap out
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
-        this._scrubBar = document.createElement('input');
-        this._scrubBar.setAttribute('title', 'Seek bar');
-        this._scrubBar.setAttribute('aria-label', 'Seek bar');
-        this._scrubBar.setAttribute('data-required-controls', 'false');
-        this._scrubBar.type = 'range';
-        this._scrubBar.id = 'scrub-bar';
-        this._scrubBar.value = '0';
-        this._scrubBar.className = 'romper-scrub-bar';
-        this._scrubBar.classList.add(SLIDER_CLASS);
-        this._buttons.appendChild(this._scrubBar);
+        /* create the UI components */
+        // create the button manager
+        this._buttonControls = this._createButtons();
+        this._setupButtonHandling();
+        // create the scrub bar
+        this._scrubBar = new ScrubBar(this._logUserInteraction);
+        this._scrubBarElement = this._scrubBar.getScrubBarElement();
 
+        // Create the overlays.
+        this._volume = this._createOverlay('volume', this._logUserInteraction);
+        this._icon = this._createOverlay('icon', this._logUserInteraction);
+        this._representation = this._createOverlay('representation', this._logUserInteraction);
+        // pass their buttons to the button manager
+        this._buttonControls.setVolumeButton(this._volume.getButton());
+        this._buttonControls.setChapterButton(this._icon.getButton());
+        this._buttonControls.setSwitchableButton(this._representation.getButton());
+        
+        /* build components together into right DOM */
+        // create the container divs
         this._mediaTransport = document.createElement('div');
         this._mediaTransport.classList.add('romper-media-transport');
-
         const mediaTransportLeft = document.createElement('div');
         mediaTransportLeft.classList.add('left');
-
         const mediaTransportCenter = document.createElement('div');
         mediaTransportCenter.classList.add('center');
-
-        // NEW STUFF
-        // create the buttons
-        this._buttonControls = this._createButtons();
-        // set up event handling for buttons
-        this._setupButtonHandling();
-        // END OF NEW STUFF
-        
-        this._narrativeElementTransport = this._buttonControls.getTransportControls();
-        mediaTransportCenter.appendChild(this._narrativeElementTransport);
-
         const mediaTransportRight = document.createElement('div');
         mediaTransportRight.classList.add('right');
         this._mediaTransport.appendChild(mediaTransportLeft);
         this._mediaTransport.appendChild(mediaTransportCenter);
         this._mediaTransport.appendChild(mediaTransportRight);
-
-        // Create the overlays.
+        // to hold icon and representation toggles:
         this._overlayToggleButtons = document.createElement('div');
         this._overlayToggleButtons.classList.add('romper-overlay-controls');
         this._overlayToggleButtons.classList.add('romper-inactive');
-        mediaTransportRight.appendChild(this._overlayToggleButtons);
 
-        this._volume = this._createOverlay('volume', this._logUserInteraction);
+        // add transport control buttons and scrub bar
+        this._buttons.appendChild(this._scrubBarElement);
+        this._buttons.appendChild(this._mediaTransport);
+
+        // add the buttons to the appropriate container divs
+        // volume on left
+        mediaTransportLeft.appendChild(this._buttonControls.getVolumeButton());
         mediaTransportLeft.appendChild(this._volume.getOverlay());
-        mediaTransportLeft.appendChild(this._volume.getButton());
 
-        this._representation = this._createOverlay('representation', this._logUserInteraction);
+        // back, seek, play, seek, next in center
+        this._narrativeElementTransport = this._buttonControls.getTransportControls();
+        mediaTransportCenter.appendChild(this._narrativeElementTransport);
+
+        // switchable, chapter, subtitles, fullscreen on right
         mediaTransportRight.appendChild(this._representation.getOverlay());
-        this._overlayToggleButtons.appendChild(this._representation.getButton());
-
-        this._icon = this._createOverlay('icon', this._logUserInteraction);
         mediaTransportRight.appendChild(this._icon.getOverlay());
-        this._overlayToggleButtons.appendChild(this._icon.getButton());
-
-        // no need for toggle button
-        this._countdownContainer = document.createElement('div');
-        this._countdownContainer.classList.add('romper-ux-divider');
-        this._countdowner = document.createElement('div');
-        this._countdowner.classList.add('romper-ux-countdown');
-        this._countdownContainer.appendChild(this._countdowner);
-
+        this._overlayToggleButtons.appendChild(this._buttonControls.getSwitchableButton());
+        this._overlayToggleButtons.appendChild(this._buttonControls.getChapterButton());
+        mediaTransportRight.appendChild(this._overlayToggleButtons);
         const subtitlesButton = this._buttonControls.getSubtitlesButton();
         mediaTransportRight.appendChild(subtitlesButton);
-
         this._fullscreenButton = this._buttonControls.getFullscreenButton();
         mediaTransportRight.appendChild(this._fullscreenButton);
 
-        this._buttons.appendChild(this._mediaTransport);
-
-
+        // choice countdown
+        this._createCountdownElement();
+        
+        // facebook problem workaround
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
         const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
-
         if(facebookiOSWebview && !overrideFacebookBlock) {
             const fbWebviewDiv = document.createElement('div');
             fbWebviewDiv.className = "webview-error";
@@ -390,7 +385,6 @@ class Player extends EventEmitter {
         );
 
         this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
-        this._inFullScreen = false;
 
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
 
@@ -402,8 +396,6 @@ class Player extends EventEmitter {
         );
         this._buttonsActivateArea.onclick = this._activateRomperButtons.bind(this);
         this._buttons.onmouseleave = this._hideRomperButtons.bind(this);
-
-        this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
@@ -451,17 +443,15 @@ class Player extends EventEmitter {
             };
             this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
         }
+    }
 
-
-        this._showErrorLayer = this._showErrorLayer.bind(this);
-        this._removeErrorLayer = this._removeErrorLayer.bind(this);
-        this.showBufferingLayer = this.showBufferingLayer.bind(this);
-        this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
-        this._addContinueModal = this._addContinueModal.bind(this);
-        this._startButtonHandler = this._startButtonHandler.bind(this);
-
-        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
-        this._addCountdownToElement = this._addCountdownToElement.bind(this);
+    // create an element ready for rendering countdown
+    _createCountdownElement() {
+        this._countdownContainer = document.createElement('div');
+        this._countdownContainer.classList.add('romper-ux-divider');
+        this._countdowner = document.createElement('div');
+        this._countdowner.classList.add('romper-ux-countdown');
+        this._countdownContainer.appendChild(this._countdowner);
     }
 
     _createOverlay(name: string, logFunction: Function) {
@@ -469,7 +459,7 @@ class Player extends EventEmitter {
         this._overlays.push(overlay);
     
         // when clicking on one, deactivate all other overlays
-        overlay.on(OVERLAY_CLICK_EVENT, (clickedName) => {
+        overlay.on(OVERLAY_BUTTON_CLICK_EVENT, (clickedName) => {
             this._overlays.filter(o => o.getName() !== clickedName)
                 .forEach(o => o.deactivateOverlay());
         });
@@ -1170,6 +1160,7 @@ class Player extends EventEmitter {
     }
     /* End of volume handling */
 
+    /* Representation overlay (switchables) */
     clearAllRepresentationControls() {
         this._representation.clearAll();
     }
@@ -1211,6 +1202,23 @@ class Player extends EventEmitter {
 
         this._representation.add(id, representationControl);
     }
+
+    activateRepresentationControl(id: string) {
+        this._representation.removeClass(id, 'romper-control-disabled');
+    }
+
+    deactivateRepresentationControl(id: string) {
+        this._representation.addClass(id, 'romper-control-disabled');
+    }
+
+    removeRepresentationControl(id: string) {
+        this._representation.remove(id);
+    }
+
+    setActiveRepresentationControl(id: string) {
+        this._representation.setActive(id);
+    }
+    /* end of Representation overlay */
 
     createBehaviourOverlay(behaviour: Object) {
         const behaviourOverlay = this._createOverlay('link-choice', this._logUserInteraction);
@@ -1367,11 +1375,6 @@ class Player extends EventEmitter {
             });
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    getActiveChoiceIcon(): ?HTMLDivElement {
-        return document.querySelectorAll('[data-link-choice="active"]')[0];
-    }
-
     // start animation to reflect choice remaining
     startChoiceCountdown(currentRenderer: BaseRenderer) {
         if (this._choiceCountdownTimeout) {
@@ -1385,13 +1388,13 @@ class Player extends EventEmitter {
             this._countdownTotal = remainingTime;
         }
         this._choiceCountdownTimeout = setTimeout(() => {
-            this.reflectTimeout(currentRenderer);
+            this._reflectTimeout(currentRenderer);
         }, 10);
         this._countdownContainer.classList.add('show');
         // }
     }
 
-    reflectTimeout(currentRenderer: BaseRenderer) {
+    _reflectTimeout(currentRenderer: BaseRenderer) {
         const { remainingTime } = currentRenderer.getCurrentTime();
         const { style } = this._countdowner;
         const percentRemain = 100 * (remainingTime / this._countdownTotal);
@@ -1399,7 +1402,7 @@ class Player extends EventEmitter {
             style.width = `${percentRemain}%`;
             style.marginLeft = `${(100 - percentRemain)/2}%`;
             this._choiceCountdownTimeout = setTimeout(() => {
-                this.reflectTimeout(currentRenderer);
+                this._reflectTimeout(currentRenderer);
 
             }, 10);
         } else {
@@ -1409,18 +1412,6 @@ class Player extends EventEmitter {
             style.width = '0';
             style.marginLeft = '49%';
         }
-    }
-
-    activateRepresentationControl(id: string) {
-        this._representation.removeClass(id, 'romper-control-disabled');
-    }
-
-    deactivateRepresentationControl(id: string) {
-        this._representation.addClass(id, 'romper-control-disabled');
-    }
-
-    removeRepresentationControl(id: string) {
-        this._representation.remove(id);
     }
 
     addIconControl(
@@ -1500,15 +1491,11 @@ class Player extends EventEmitter {
         this._icon.remove(id);
     }
 
-    setActiveRepresentationControl(id: string) {
-        this._representation.setActive(id);
-    }
-
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
         this.disablePlayButton();
-        this.disableRepresentationControl();
+        this._disableRepresentationControl();
     }
 
     enterStartBehaviourPhase(renderer: BaseRenderer) {
@@ -1522,7 +1509,7 @@ class Player extends EventEmitter {
         this.showSeekButtons();
         this.enablePlayButton();
         this.enableScrubBar();
-        this.enableRepresentationControl();
+        this._enableRepresentationControl();
     }
 
     enableLinkChoiceControl() {
@@ -1567,11 +1554,11 @@ class Player extends EventEmitter {
         return full? linkChoices : [linkChoices[0]];
     }
 
-    enableRepresentationControl() {
+    _enableRepresentationControl() {
         this._representation.enableButton();
     }
 
-    disableRepresentationControl() {
+    _disableRepresentationControl() {
         this._representation.disableButton();
     }
 
@@ -1591,110 +1578,30 @@ class Player extends EventEmitter {
 
     // SCRUB BAR
     hideScrubBar() {
-        this._scrubBar.style.display = 'none';
+        this._scrubBar.hide()
     }
 
     showScrubBar() {
-        this._scrubBar.style.display = 'block';
+        this._scrubBar.show();
     }
 
     enableScrubBar() {
-        this._scrubBar.removeAttribute('disabled');
-        this._scrubBar.classList.remove('romper-control-disabled');
+        this._scrubBar.enable();
     }
 
     disableScrubBar() {
-        this._scrubBar.setAttribute('disabled', 'true');
-        this._scrubBar.classList.add('romper-control-disabled');
+        this._scrubBar.disable();
     }
 
     disconnectScrubBar(renderer: BaseRenderer) {
         if (renderer !== this._currentRenderer) {
             return;
         }
-        if (this._scrubBar) {
-            const scrubBar = this._scrubBar;
-            // Remove event listeners on scrub bar by cloning and replacing old scrubBar
-            const newScrubBar = scrubBar.cloneNode(true);
-            this._buttons.replaceChild(newScrubBar, scrubBar);
-            this._scrubBar = newScrubBar;
-        }
-        if (this._scrubTimePoller) {
-            clearInterval(this._scrubTimePoller);
-            this._scrubTimePoller = null;
-        }
+        this._scrubBar.disconnect(this._buttons);
     }
 
     connectScrubBar(renderer: BaseRenderer) {
-        const scrubBar = this._scrubBar;
-
-        let isSyncing = false; // do we need to wait for everything to sync?
-
-        const scrubBarChangeFunc = () => {
-            // Calculate the new time
-            const { duration, currentTime } = renderer.getCurrentTime();
-            const scrubStartTime = currentTime;
-            const time = duration * (parseInt(scrubBar.value, 10) / 100);
-            isSyncing = true;
-            renderer.setCurrentTime(time);
-
-            // Don't spam analtics with lots of changes
-            // Wait 1 second after volume stops changing before sending analytics
-            if (this._scrubbedEventTimeout) {
-                clearTimeout(this._scrubbedEventTimeout);
-            }
-            this._scrubbedEventTimeout = setTimeout(() => {
-                this._logUserInteraction(
-                    AnalyticEvents.names.VIDEO_SCRUBBED,
-                    scrubStartTime.toString(),
-                    time.toString(),
-                );
-            }, 1000);
-        };
-
-        // update scrub bar position as media plays
-        scrubBar.oninput = scrubBarChangeFunc;
-        scrubBar.onchange = scrubBarChangeFunc;
-
-        // allow clicking the scrub bar to seek to a media position
-        scrubBar.addEventListener('click', (e: MouseEvent) => {
-            isSyncing = true;
-            const percent = e.offsetX / scrubBar.offsetWidth;
-            const { duration } = renderer.getCurrentTime();
-            // Update the media time
-            const newTime = percent * duration;
-            renderer.setCurrentTime(newTime);
-        });
-
-        let isDragging = false;
-        // Pause the media when the slider handle is being dragged
-        scrubBar.addEventListener('mousedown', () => {
-            isDragging = true;
-        });
-
-        // Play the media when the slider handle is dropped (if it was previously playing)
-        scrubBar.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        // clear any existing polling
-        if (this._scrubTimePoller) clearInterval(this._scrubTimePoller);
-
-        // Update the seek bar as the media plays
-        this._scrubTimePoller = setInterval(
-            () => {
-                const { currentTime, duration, timersSyncing } = renderer.getCurrentTime();
-                const value = ((100 / duration) * currentTime);
-                // Update the slider value
-                if (!(isDragging || isSyncing)) {
-                    scrubBar.value = value.toString();
-                }
-                if (isSyncing && !timersSyncing) {
-                    isSyncing = false;
-                }
-            },
-            200,
-        );
+        this._scrubBar.connect(renderer);
     }
     // SCRUB BAR END
 

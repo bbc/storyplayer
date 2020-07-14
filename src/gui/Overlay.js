@@ -4,7 +4,7 @@ import { handleButtonTouchEvent } from '../utils';
 
 const buttonClassPrefix = 'romper-overlay-button-choice-';
 
-const OVERLAY_CLICK_EVENT = 'overlay-click-event';
+const OVERLAY_BUTTON_CLICK_EVENT = 'overlay-click-event';
 
 class Overlay extends EventEmitter {
 
@@ -38,12 +38,20 @@ class Overlay extends EventEmitter {
     }
 
     _buttonClickHandler() {
-        this.emit(OVERLAY_CLICK_EVENT, { name: this._name });
+        this.emit(OVERLAY_BUTTON_CLICK_EVENT, { name: this._name });
         if (this._overlay.classList.contains('romper-inactive')) {
-            this._logFunction('OVERLAY_BUTTON_CLICKED', `${this._name} hidden`, `${this._name} visible`);
+            this._logFunction(
+                'OVERLAY_BUTTON_CLICKED',
+                `${this._name} hidden`,
+                `${this._name} visible`,
+            );
             this._button.classList.add('romper-button-selected');
         } else {
-            this._logFunction('OVERLAY_BUTTON_CLICKED', `${this._name} visible`, `${this._name} hidden`);
+            this._logFunction(
+                'OVERLAY_BUTTON_CLICKED',
+                `${this._name} visible`,
+                `${this._name} hidden`,
+            );
             this._button.classList.remove('romper-button-selected');
         }
         this._overlay.classList.toggle('romper-inactive');
@@ -63,7 +71,9 @@ class Overlay extends EventEmitter {
     _createButton(): HTMLButtonElement {
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
+        // eslint-disable-next-line max-len
         button.setAttribute('title', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
+        // eslint-disable-next-line max-len
         button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
         button.classList.add('romper-button');
         button.classList.add(`romper-${this._name}-button`);
@@ -92,7 +102,11 @@ class Overlay extends EventEmitter {
 
     deactivateOverlay() {
         if (!this._overlay.classList.contains('romper-inactive')) {
-            this._logFunction('OVERLAY_DEACTIVATED', `${this._name} visible`, `${this._name} hidden`);
+            this._logFunction(
+                'OVERLAY_DEACTIVATED', 
+                `${this._name} visible`,
+                `${this._name} hidden`,
+            );
             this._overlay.classList.add('romper-inactive');
         }
         if (this._button.classList.contains('romper-button-selected')) {
@@ -220,4 +234,4 @@ class Overlay extends EventEmitter {
 }
 
 export default Overlay;
-export { OVERLAY_CLICK_EVENT };
+export { OVERLAY_BUTTON_CLICK_EVENT };

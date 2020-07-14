@@ -24,6 +24,7 @@ const ButtonEvents = [
 
 //
 // Component containing UI for all buttons
+// currently manages everything except buttons for overlays
 //
 class Buttons extends EventEmitter {
 
@@ -32,6 +33,12 @@ class Buttons extends EventEmitter {
     showingSubtitles: boolean;
 
     _fullscreenButton: HTMLButtonElement;
+
+    _volumeButton: HTMLButtonElement;
+
+    _chapterButton: HTMLButtonElement;
+
+    _switchableButton: HTMLButtonElement;
 
     _transportControls: NarrativeElementTransport;
 
@@ -48,7 +55,7 @@ class Buttons extends EventEmitter {
         this._transportControls = this._initiateTransportControls();
     }
 
-    // creating stuff
+    /* creating stuff */
     _createSubtitlesButton(): HTMLButtonElement {
         const subsButton = document.createElement('button');
         subsButton.setAttribute('type', 'button');
@@ -92,15 +99,20 @@ class Buttons extends EventEmitter {
 
     _initiateTransportControls(): NarrativeElementTransport {
         const transportControls = new NarrativeElementTransport(this._logUserInteraction);
-        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED,
+            () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED,
+            () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED,
+            () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED,
+            () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
         return transportControls;
     }
 
-    // handling clicks
+    /* handling clicks */
     _handleFullScreenButton() {
         this.emit(ButtonEvents.FULLSCREEN_BUTTON_CLICKED);
     }
@@ -127,7 +139,22 @@ class Buttons extends EventEmitter {
         );
     }
 
-    // getters
+    /* setters for overlay buttons */
+    setVolumeButton(button: HTMLButtonElement) {
+        this._volumeButton = button;
+    }
+
+    setChapterButton(button: HTMLButtonElement) {
+        this._chapterButton = button;
+    }
+
+    setSwitchableButton(button: HTMLButtonElement) {
+        this._switchableButton = button;
+    }
+
+    /* getters */
+
+    // get div with back, seeek back, play/pause, seek fwd, next
     getTransportControls() {
         return this._transportControls.getControls();
     }
@@ -140,7 +167,19 @@ class Buttons extends EventEmitter {
         return this._subtitlesButton;
     }
 
-    // exposing functionality to change how buttons look/feel
+    getVolumeButton(): HTMLButtonElement {
+        return this._volumeButton;
+    }
+
+    getChapterButton(): HTMLButtonElement {
+        return this._chapterButton;
+    }
+
+    getSwitchableButton(): HTMLButtonElement {
+        return this._switchableButton;    
+    }
+
+    /* exposing functionality to change how buttons look/feel */
     showTransportControls() {
         this._transportControls.show();
     }
