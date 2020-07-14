@@ -1,5 +1,5 @@
 import BaseRenderer from "../renderers/BaseRenderer";
-import Player from "../Player";
+import Player from '../gui/Player';
 import AnalyticEvents from '../AnalyticEvents';
 
 // @flow

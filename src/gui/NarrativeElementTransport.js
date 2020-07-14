@@ -1,9 +1,8 @@
 // @flow
 import EventEmitter from 'events';
-import AnalyticEvents from './AnalyticEvents';
-import { handleButtonTouchEvent } from './utils';
+import AnalyticEvents from '../AnalyticEvents';
+import { handleButtonTouchEvent } from '../utils';
 import { PlayerEvents } from './Player';
-
 
 //
 // Component containing UI for Narrative Element controls

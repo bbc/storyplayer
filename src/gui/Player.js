@@ -1,17 +1,17 @@
 // @flow
 import EventEmitter from 'events';
-import AnalyticEvents from './AnalyticEvents';
-import type { AnalyticsLogger, AnalyticEventName } from './AnalyticEvents';
-import Controller from './Controller';
-import type { AssetUrls } from './romper';
-import BasePlayoutEngine from './playoutEngines/BasePlayoutEngine';
-import DOMSwitchPlayoutEngine from './playoutEngines/DOMSwitchPlayoutEngine';
-import IOSPlayoutEngine from './playoutEngines/iOSPlayoutEngine';
-import logger from './logger';
-import { BrowserUserAgent, MediaFormats } from './browserCapabilities'; // eslint-disable-line max-len
-import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
-import BaseRenderer from './renderers/BaseRenderer';
-import { SESSION_STATE } from './SessionManager';
+import AnalyticEvents from '../AnalyticEvents';
+import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
+import Controller from '../Controller';
+import type { AssetUrls } from '../romper';
+import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
+import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
+import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
+import logger from '../logger';
+import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
+import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
+import BaseRenderer from '../renderers/BaseRenderer';
+import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
     DEBUG_PLAYOUT_FLAG,
@@ -21,8 +21,8 @@ import {
     preventEventDefault,
     SLIDER_CLASS,
     handleButtonTouchEvent
-} from './utils'; // eslint-disable-line max-len
-import { REASONER_EVENTS } from './Events';
+} from '../utils'; // eslint-disable-line max-len
+import { REASONER_EVENTS } from '../Events';
 import NarrativeElementTransport from './NarrativeElementTransport';
 
 const PlayerEvents = [

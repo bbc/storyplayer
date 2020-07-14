@@ -5,7 +5,7 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';

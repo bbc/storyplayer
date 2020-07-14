@@ -1,5 +1,5 @@
 // @flow
-import Player from '../Player';
+import Player from '../gui/Player';
 import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import Controller from '../Controller';
 import logger from '../logger';

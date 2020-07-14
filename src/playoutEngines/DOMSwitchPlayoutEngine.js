@@ -3,7 +3,7 @@
 import Hls from 'hls.js';
 import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'

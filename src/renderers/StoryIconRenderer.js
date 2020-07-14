@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
 import { REASONER_EVENTS } from '../Events';
 import type { StoryPathItem } from '../StoryPathWalker';

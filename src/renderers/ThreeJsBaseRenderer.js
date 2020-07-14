@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
