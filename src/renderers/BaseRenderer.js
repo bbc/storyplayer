@@ -486,6 +486,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
+        const { timeBased } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
             return (value < 0 || value === Infinity || Number.isNaN(value))
         };
@@ -528,6 +529,8 @@ export default class BaseRenderer extends EventEmitter {
             this._timer.setSyncing(true);
             this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        } else if (timeBased) {
+            this._timer.setTime(targetTime);
         }
     }
 
@@ -600,6 +603,7 @@ export default class BaseRenderer extends EventEmitter {
         }
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
+            console.log('ANDY seeking forward');
             let targetTime = currentTime + SEEK_TIME;
             const choiceTime = this.getChoiceTime();
             if (choiceTime > 0 && choiceTime < targetTime) {
