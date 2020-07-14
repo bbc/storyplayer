@@ -24,6 +24,7 @@ import {
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from '../Events';
 import NarrativeElementTransport from './NarrativeElementTransport';
+import Overlay, { OVERLAY_CLICK_EVENT } from './Overlay';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -47,191 +48,6 @@ const PlayerEvents = [
     events[eventName] = eventName;
     return events;
 }, {});
-
-const overlays = [];
-
-function createOverlay(name: string, logFunction: Function) {
-    const overlay = document.createElement('div');
-    overlay.classList.add('romper-overlay');
-    overlay.classList.add(`romper-${name}-overlay`);
-    overlay.classList.add('romper-inactive');
-    overlay.onclick = (e) => {
-        e.stopPropagation();
-    };
-
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-
-    const deactivateOverlay = () => {
-        if (!overlay.classList.contains('romper-inactive')) {
-            logFunction('OVERLAY_DEACTIVATED', `${name} visible`, `${name} hidden`);
-            overlay.classList.add('romper-inactive');
-        }
-        if (button.classList.contains('romper-button-selected')) {
-            button.classList.remove('romper-button-selected');
-        }
-    };
-
-    overlays.push({ overlay, deactivateOverlay });
-
-    button.setAttribute('title', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
-    button.setAttribute('aria-label', `${name.charAt(0).toUpperCase() + name.slice(1)} Button`);
-    button.classList.add('romper-button');
-    button.classList.add(`romper-${name}-button`);
-    button.classList.add('romper-inactive');
-    const onClick = () => {
-        overlays.filter(overlayObj => overlayObj.overlay !== overlay)
-            .forEach(overlayObj => overlayObj.deactivateOverlay());
-        if (overlay.parentElement) {
-            Array.prototype.slice
-                .call(overlay.parentElement.querySelectorAll('.romper-overlay'))
-                .filter(el => el !== overlay)
-                .forEach(el => el.classList.add('romper-inactive'));
-            if (overlay.classList.contains('romper-inactive')) {
-                logFunction('OVERLAY_BUTTON_CLICKED', `${name} hidden`, `${name} visible`);
-                button.classList.add('romper-button-selected');
-            } else {
-                logFunction('OVERLAY_BUTTON_CLICKED', `${name} visible`, `${name} hidden`);
-                button.classList.remove('romper-button-selected');
-            }
-            overlay.classList.toggle('romper-inactive');
-        }
-    };
-    button.onclick = onClick;
-    button.addEventListener(
-        'touchend',
-        handleButtonTouchEvent(onClick),
-    );
-    const buttonIconDiv = document.createElement('div');
-    buttonIconDiv.classList.add('romper-button-icon-div');
-    buttonIconDiv.classList.add(`romper-${name}-button-icon-div`);
-    button.appendChild(buttonIconDiv);
-
-    const elements = {};
-    const labels = {};
-    let activeIconId = null;
-
-    const getCount = () => Object.keys(elements).length;
-
-    const add = (id: string, el: HTMLElement, label?: string) => {
-        overlay.classList.remove(`count-${getCount()}`);
-        elements[id] = el;
-        if (label) {
-            labels[label] = id;
-        }
-        el.classList.add('romper-control-unselected');
-        overlay.appendChild(el);
-        button.classList.remove('romper-inactive');
-        overlay.classList.add(`count-${getCount()}`);
-    };
-
-    const get = (id: string) => elements[id];
-
-    const getIdForLabel = (label: string) => {
-        if (labels[label]) {
-            return labels[label];
-        }
-        return null;
-    };
-
-    const remove = (id: string) => {
-        overlay.classList.remove(`count-${getCount()}`);
-        if (elements[id]) {
-            overlay.removeChild(elements[id]);
-            delete elements[id];
-            if (Object.keys(elements).length === 0) {
-                button.classList.add('romper-inactive');
-            }
-        }
-        overlay.classList.add(`count-${getCount()}`);
-    };
-
-    const setActive = (id: string) => {
-        activeIconId = id;
-        Object.keys(elements).forEach((key) => {
-            if (key === id) {
-                elements[key].setAttribute('data-link-choice', 'active');
-                elements[key].classList.add('romper-control-selected');
-                elements[key].classList.remove('romper-control-unselected');
-                elements[key].classList.remove('default');
-            } else {
-                elements[key].setAttribute('data-link-choice', 'inactive');
-                elements[key].classList.add('romper-control-unselected');
-                elements[key].classList.remove('romper-control-selected');
-                elements[key].classList.remove('default');
-            }
-        });
-    };
-
-    const getActive = () => {
-        let activeIconElement = null;
-        if (activeIconId) {
-            activeIconElement = elements[activeIconId];
-        }
-        return activeIconElement;
-    };
-
-    const addClass = (id: string, classname: string) => {
-        Object.keys(elements).forEach((key) => {
-            if (key === id) {
-                elements[key].classList.add(classname);
-            }
-        });
-    };
-
-    const removeClass = (id: string, classname: string) => {
-        Object.keys(elements).forEach((key) => {
-            if (key === id) {
-                elements[key].classList.remove(classname);
-            }
-        });
-    };
-
-    const buttonClassPrefix = 'romper-overlay-button-choice-';
-
-    const clearButtonClass = () => {
-        button.classList.forEach((buttonClass) => {
-            if (buttonClass.indexOf(buttonClassPrefix) === 0) {
-                button.classList.remove(buttonClass);
-            }
-        });
-    };
-
-    const setButtonClass = (classname: string) => {
-        clearButtonClass();
-        button.classList.add(`${buttonClassPrefix}${classname}`);
-    };
-
-    const clearAll = () => {
-        overlay.classList.remove(`count-${getCount()}`);
-        Object.keys(elements).forEach((key) => {
-            overlay.removeChild(elements[key]);
-            delete elements[key];
-            delete labels[key];
-        });
-        overlay.classList.add(`count-${getCount()}`);
-    };
-
-    // Consider a set or select method.
-
-    return {
-        overlay,
-        button,
-        add,
-        remove,
-        get,
-        setActive,
-        getActive,
-        addClass,
-        removeClass,
-        deactivateOverlay,
-        getIdForLabel,
-        setButtonClass,
-        clearAll,
-        getCount,
-    };
-}
-
 
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
@@ -260,7 +76,9 @@ class Player extends EventEmitter {
 
     showingSubtitles: boolean;
 
-    _overlays: HTMLDivElement;
+    _overlaysElement: HTMLDivElement;
+
+    _overlays: Array<Overlay>;
 
     _overlayToggleButtons: HTMLDivElement;
 
@@ -377,6 +195,8 @@ class Player extends EventEmitter {
         controller: Controller,
     ) {
         super();
+
+        this._overlays = [];
         this._controller = controller;
         this._numChoices = 0;
         this._choiceIconSet = {};
@@ -442,9 +262,9 @@ class Player extends EventEmitter {
         this._player.appendChild(this._errorLayer);
         this._guiLayer.appendChild(this._continueModalLayer);
 
-        this._overlays = document.createElement('div');
-        this._overlays.classList.add('romper-overlays');
-        this._overlays.classList.add('buttons-hidden');
+        this._overlaysElement = document.createElement('div');
+        this._overlaysElement.classList.add('romper-overlays');
+        this._overlaysElement.classList.add('buttons-hidden');
         /*
                 <narrativeElementTransport>
                     <previous, repeat, next />
@@ -463,7 +283,7 @@ class Player extends EventEmitter {
         this._buttons.classList.add('romper-buttons');
         this._buttons.onmousemove = this._activateRomperButtons.bind(this);
 
-        this._guiLayer.appendChild(this._overlays);
+        this._guiLayer.appendChild(this._overlaysElement);
         this._guiLayer.appendChild(this._buttons); // THIS!
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
@@ -503,17 +323,17 @@ class Player extends EventEmitter {
         this._overlayToggleButtons.classList.add('romper-inactive');
         mediaTransportRight.appendChild(this._overlayToggleButtons);
 
-        this._volume = createOverlay('volume', this._logUserInteraction);
-        mediaTransportLeft.appendChild(this._volume.overlay);
-        mediaTransportLeft.appendChild(this._volume.button);
+        this._volume = this._createOverlay('volume', this._logUserInteraction);
+        mediaTransportLeft.appendChild(this._volume.getOverlay());
+        mediaTransportLeft.appendChild(this._volume.getButton());
 
-        this._representation = createOverlay('representation', this._logUserInteraction);
-        mediaTransportRight.appendChild(this._representation.overlay);
-        this._overlayToggleButtons.appendChild(this._representation.button);
+        this._representation = this._createOverlay('representation', this._logUserInteraction);
+        mediaTransportRight.appendChild(this._representation.getOverlay());
+        this._overlayToggleButtons.appendChild(this._representation.getButton());
 
-        this._icon = createOverlay('icon', this._logUserInteraction);
-        mediaTransportRight.appendChild(this._icon.overlay);
-        this._overlayToggleButtons.appendChild(this._icon.button);
+        this._icon = this._createOverlay('icon', this._logUserInteraction);
+        mediaTransportRight.appendChild(this._icon.getOverlay());
+        this._overlayToggleButtons.appendChild(this._icon.getButton());
 
         // no need for toggle button
         this._countdownContainer = document.createElement('div');
@@ -566,7 +386,7 @@ class Player extends EventEmitter {
         }
 
         // Hide gui elements until start clicked
-        this._overlays.classList.add('romper-inactive');
+        this._overlaysElement.classList.add('romper-inactive');
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
 
@@ -582,8 +402,8 @@ class Player extends EventEmitter {
         }
 
         // mouse/touch
-        this._overlays.onclick = this._handleOverlayClick.bind(this);
-        this._overlays.addEventListener(
+        this._overlaysElement.onclick = this._handleOverlayClick.bind(this);
+        this._overlaysElement.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
@@ -672,6 +492,22 @@ class Player extends EventEmitter {
 
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
+    }
+
+    _createOverlay(name: string, logFunction: Function) {
+        const overlay = new Overlay(name, logFunction);
+        this._overlays.push(overlay);
+    
+        // when clicking on one, deactivate all other overlays
+        overlay.on(OVERLAY_CLICK_EVENT, (name) => {
+            this._overlays.filter(o => o.getName() !== name)
+            .forEach(o => o.deactivateOverlay());
+        });
+        return overlay;
+    }
+
+    getOverlayElement() {
+        return this._overlaysElement;
     }
 
     // key listener
@@ -877,7 +713,7 @@ class Player extends EventEmitter {
         if (!this._RomperButtonsShowing) {
             // Open romper buttons if user touches anywhere on screen that is background
             const openTriggerElements = [
-                this._overlays,
+                this._overlaysElement,
                 this._narrativeElementTransport,
                 this._buttonsActivateArea,
             ];
@@ -893,7 +729,7 @@ class Player extends EventEmitter {
         } else {
             // Close romper buttons if user touches anywhere above buttons bar
             const closeTriggerElements = [
-                this._overlays,
+                this._overlaysElement,
                 this._narrativeElementTransport,
             ];
             // Prevent touch being converted to click on button bar
@@ -937,8 +773,8 @@ class Player extends EventEmitter {
         this._buttons.classList.add('show');
         this._transportControls.show();
         this._buttonsActivateArea.classList.add('hide');
-        this._overlays.classList.remove('buttons-hidden');
-        this._overlays.classList.add('buttons-showing');
+        this._overlaysElement.classList.remove('buttons-hidden');
+        this._overlaysElement.classList.add('buttons-showing');
     }
 
     _hideRomperButtons() {
@@ -948,8 +784,8 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('show');
         this._transportControls.hide();
         this._buttonsActivateArea.classList.remove('hide');
-        this._overlays.classList.add('buttons-hidden');
-        this._overlays.classList.remove('buttons-showing');
+        this._overlaysElement.classList.add('buttons-hidden');
+        this._overlaysElement.classList.remove('buttons-showing');
     }
 
     _hideModalLayer() {
@@ -1138,7 +974,7 @@ class Player extends EventEmitter {
 
     _disableUserInteraction() {
         this._userInteractionStarted = false;
-        this._overlays.classList.add('romper-inactive');
+        this._overlaysElement.classList.add('romper-inactive');
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
         this._overlayToggleButtons.classList.add('romper-inactive');
@@ -1152,7 +988,7 @@ class Player extends EventEmitter {
         }
 
         this._userInteractionStarted = true;
-        this._overlays.classList.remove('romper-inactive');
+        this._overlaysElement.classList.remove('romper-inactive');
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('hide');
@@ -1425,12 +1261,12 @@ class Player extends EventEmitter {
     }
 
     createBehaviourOverlay(behaviour: Object) {
-        const behaviourOverlay = createOverlay('link-choice', this._logUserInteraction);
-        const behaviourElement = behaviourOverlay.overlay
+        const behaviourOverlay = this._createOverlay('link-choice', this._logUserInteraction);
+        const behaviourElement = behaviourOverlay.getOverlay()
         behaviourElement.id = behaviour.id;
 
         this._addCountdownToElement(behaviourElement);
-        this._overlays.appendChild(behaviourElement);
+        this._overlaysElement.appendChild(behaviourElement);
         return behaviourOverlay;
     }
 
@@ -1533,7 +1369,7 @@ class Player extends EventEmitter {
 
     hideChoiceIcons(){
         this._buttons.classList.add('icons-showing');
-        this._overlays.classList.add('romper-inactive');
+        this._overlaysElement.classList.add('romper-inactive');
     }
 
     // show the choice icons
@@ -1541,7 +1377,7 @@ class Player extends EventEmitter {
     // optionally apply a class to the overlay
     showChoiceIcons(activeLinkId: ?string, overlayClass: ?string, behaviourOverlay: Object, choiceCount: number) { // eslint-disable-line max-len
         this._hideRomperButtons();
-        const behaviourElement = behaviourOverlay.overlay
+        const behaviourElement = behaviourOverlay.getOverlay()
         this._buttons.classList.add('icons-showing');
         behaviourElement.classList.remove('romper-inactive');
         behaviourElement.classList.add(`choices-${choiceCount}`);
@@ -1786,13 +1622,13 @@ class Player extends EventEmitter {
     }
 
     enableRepresentationControl() {
-        this._representation.button.removeAttribute('disabled');
-        this._representation.button.classList.remove('romper-control-disabled');
+        this._representation.getButton().removeAttribute('disabled');
+        this._representation.getButton().classList.remove('romper-control-disabled');
     }
 
     disableRepresentationControl() {
-        this._representation.button.setAttribute('disabled', 'true');
-        this._representation.button.classList.add('romper-control-disabled');
+        this._representation.getButton().setAttribute('disabled', 'true');
+        this._representation.getButton().classList.add('romper-control-disabled');
     }
 
     disableControls() {

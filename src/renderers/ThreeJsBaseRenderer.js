@@ -175,7 +175,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._addReticle();
 
-        const uiLayer = this._player._overlays;
+        const uiLayer = this._player.getOverlayElement();
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
         uiLayer.addEventListener('mouseup', this._onMouseUp, false);
         uiLayer.addEventListener('mousemove', this._onMouseMove, false);
@@ -444,7 +444,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._readyToShowIcons = false;
 
         // remove drag view handler
-        const uiLayer = this._player._overlays;
+        const uiLayer = this._player.getOverlayElement();
         uiLayer.removeEventListener('mousedown', this._onMouseDown);
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
         uiLayer.removeEventListener('mousemove', this._onMouseMove);

@@ -1326,7 +1326,7 @@ export default class BaseRenderer extends EventEmitter {
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderSocialPopup(
             behaviour,
-            this._player._overlays,
+            this._player.getOverlayElement(),
             callback,
             this._analytics,
         );
@@ -1337,7 +1337,7 @@ export default class BaseRenderer extends EventEmitter {
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderLinkoutPopup(
             behaviour,
-            this._player._overlays,
+            this._player.getOverlayElement(),
             callback,
             this._analytics,
         );
