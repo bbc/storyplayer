@@ -1,32 +1,13 @@
 // @flow
-import EventEmitter from 'events';
 import { handleButtonTouchEvent } from '../utils';
 import AnalyticEvents from '../AnalyticEvents';
 import NarrativeElementTransport from './NarrativeElementTransport';
-
-const ButtonEvents = [
-    'BACK_BUTTON_CLICKED',
-    'NEXT_BUTTON_CLICKED',
-    'PLAY_PAUSE_BUTTON_CLICKED',
-    'SEEK_FORWARD_BUTTON_CLICKED',
-    'SEEK_BACKWARD_BUTTON_CLICKED',
-    'SUBTITLES_BUTTON_CLICKED',
-    'FULLSCREEN_BUTTON_CLICKED',
-    'REPEAT_BUTTON_CLICKED',
-    'SCRUB_BAR_MOUSE_DOWN',
-    'SCRUB_BAR_CHANGED',
-    'SCRUB_BAR_MOUSE_UP',
-].reduce((events, eventName) => {
-    // eslint-disable-next-line no-param-reassign
-    events[eventName] = eventName;
-    return events;
-}, {});
+import BaseButtons, { ButtonEvents } from './BaseButtons';
 
 //
 // Component containing UI for all buttons
-// currently manages everything except buttons for overlays
 //
-class Buttons extends EventEmitter {
+class Buttons extends BaseButtons {
 
     _subtitlesButton: HTMLButtonElement;
 
@@ -34,19 +15,10 @@ class Buttons extends EventEmitter {
 
     _fullscreenButton: HTMLButtonElement;
 
-    _volumeButton: HTMLButtonElement;
-
-    _chapterButton: HTMLButtonElement;
-
-    _switchableButton: HTMLButtonElement;
-
     _transportControls: NarrativeElementTransport;
 
-    _logUserInteraction: Function;
-
     constructor(logUserInteraction: Function) {
-        super();
-        this._logUserInteraction = logUserInteraction;
+        super(logUserInteraction);
 
         this._subtitlesButton = this._createSubtitlesButton();
         this.showingSubtitles = false;
@@ -139,19 +111,6 @@ class Buttons extends EventEmitter {
         );
     }
 
-    /* setters for overlay buttons */
-    setVolumeButton(button: HTMLButtonElement) {
-        this._volumeButton = button;
-    }
-
-    setChapterButton(button: HTMLButtonElement) {
-        this._chapterButton = button;
-    }
-
-    setSwitchableButton(button: HTMLButtonElement) {
-        this._switchableButton = button;
-    }
-
     /* getters */
 
     // get div with back, seeek back, play/pause, seek fwd, next
@@ -165,18 +124,6 @@ class Buttons extends EventEmitter {
 
     getSubtitlesButton() {
         return this._subtitlesButton;
-    }
-
-    getVolumeButton(): HTMLButtonElement {
-        return this._volumeButton;
-    }
-
-    getChapterButton(): HTMLButtonElement {
-        return this._chapterButton;
-    }
-
-    getSwitchableButton(): HTMLButtonElement {
-        return this._switchableButton;    
     }
 
     /* exposing functionality to change how buttons look/feel */
