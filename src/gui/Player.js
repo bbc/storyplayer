@@ -88,8 +88,6 @@ class Player extends EventEmitter {
 
     _buttonControls: Buttons;
 
-    _transportControls: NarrativeElementTransport;
-
     _mediaTransport: HTMLDivElement;
 
     _startExperienceButton: HTMLButtonElement;
@@ -304,11 +302,13 @@ class Player extends EventEmitter {
         mediaTransportCenter.classList.add('center');
 
         // NEW STUFF
-        this._buttonControls = this._initiateButtons();
-        this._transportControls = this._initiateTransportControls();
-        this._narrativeElementTransport = this._transportControls.getControls();
+        // create the buttons
+        this._buttonControls = this._createButtons();
+        // set up event handling for buttons
+        this._setupButtonHandling();
         // END OF NEW STUFF
-
+        
+        this._narrativeElementTransport = this._buttonControls.getTransportControls();
         mediaTransportCenter.appendChild(this._narrativeElementTransport);
 
         const mediaTransportRight = document.createElement('div');
@@ -505,20 +505,20 @@ class Player extends EventEmitter {
         this._currentRenderer = renderer;
     }
 
-    _initiateButtons(): Buttons {
+    _createButtons(): Buttons {
+        // create buttons
         const buttonControls = new Buttons(this._logUserInteraction);
-        buttonControls.disableSubtitlesButton();
-        buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED, () => this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED));
-        buttonControls.on(ButtonEvents.FULLSCREEN_BUTTON_CLICKED, () => this._toggleFullScreen());
         return buttonControls;
     }
 
-    _initiateTransportControls(): NarrativeElementTransport {
-        const transportControls = this._buttonControls.getTransportControls();
-        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => {
+    _setupButtonHandling() {
+        this._buttonControls.disableSubtitlesButton();
+        this._buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED, () => this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED));
+        this._buttonControls.on(ButtonEvents.FULLSCREEN_BUTTON_CLICKED, () => this._toggleFullScreen());
+        this._buttonControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        this._buttonControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
+        this._buttonControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
+        this._buttonControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => {
             this._hideAllOverlays();
             let currentSegmentTime = 0;
             if (this._currentRenderer) {
@@ -531,14 +531,14 @@ class Player extends EventEmitter {
                 this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
             }
         });
-        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => {
+        this._buttonControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => {
             if (!this._userInteractionStarted) {
                 this._enableUserInteraction();
             }
             this._hideAllOverlays();
             this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
         });
-        return transportControls;
+
     }
 
     setAspectRatio(aspectRatio: number) {
@@ -630,7 +630,7 @@ class Player extends EventEmitter {
         cancelButtonHolder.appendChild(cancelButtonDiv);
 
         const cancelButtonHandler = () => {
-            this._transportControls.setActive();
+            this._buttonControls.setTransportControlsActive();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
             this._controller.deleteExistingSession();
@@ -648,7 +648,7 @@ class Player extends EventEmitter {
         const resumeExperienceButtonHandler = () => {
             this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            this._transportControls.setActive();
+            this._buttonControls.setTransportControlsActive();
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
@@ -749,7 +749,7 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.BUTTONS_ACTIVATED);
         this._RomperButtonsShowing = true;
         this._buttons.classList.add('show');
-        this._transportControls.show();
+        this._buttonControls.showTransportControls()
         this._buttonsActivateArea.classList.add('hide');
         this._overlaysElement.classList.remove('buttons-hidden');
         this._overlaysElement.classList.add('buttons-showing');
@@ -760,7 +760,7 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.BUTTONS_DEACTIVATED);
         this._RomperButtonsShowing = false;
         this._buttons.classList.remove('show');
-        this._transportControls.hide();
+        this._buttonControls.hideTransportControls()
         this._buttonsActivateArea.classList.remove('hide');
         this._overlaysElement.classList.add('buttons-hidden');
         this._overlaysElement.classList.remove('buttons-showing');
@@ -844,18 +844,18 @@ class Player extends EventEmitter {
     setupExperienceOverlays(options: Object) {
         switch (this._controller.getSessionState()) {
         case SESSION_STATE.RESUME:
-            this._transportControls.setActive();
+            this._buttonControls.setTransportControlsActive();
             break;
         case SESSION_STATE.EXISTING:
             this._createResumeOverlays(options);
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
-                this._transportControls.setInactive();
+                this._buttonControls.setTransportControlsInactive();
             }
             break;
         case SESSION_STATE.RESTART:
-            this._transportControls.setActive();
+            this._buttonControls.setTransportControlsActive();
             break
         case SESSION_STATE.NEW:
             this._createStartOverlays(options);
@@ -864,7 +864,7 @@ class Player extends EventEmitter {
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
-                this._transportControls.setInactive();
+                this._buttonControls.setTransportControlsInactive();
             }
             this._createStartOverlays(options);
             break;
@@ -909,7 +909,7 @@ class Player extends EventEmitter {
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
         this._enableUserInteraction();
-        this._transportControls.setActive();
+        this._buttonControls.setTransportControlsActive();
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
     }
@@ -1034,7 +1034,6 @@ class Player extends EventEmitter {
     }
 
     /* Volume handling */
-
     setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
         const overlay = this._volume.get(id);
@@ -1169,7 +1168,6 @@ class Player extends EventEmitter {
     removeVolumeControl(id: string) {
         this._volume.remove(id);
     }
-
     /* End of volume handling */
 
     clearAllRepresentationControls() {
@@ -1498,6 +1496,10 @@ class Player extends EventEmitter {
         }
     }
 
+    removeIconControl(id: string) {
+        this._icon.remove(id);
+    }
+
     setActiveRepresentationControl(id: string) {
         this._representation.setActive(id);
     }
@@ -1523,7 +1525,6 @@ class Player extends EventEmitter {
         this.enableRepresentationControl();
     }
 
-
     enableLinkChoiceControl() {
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.remove('romper-inactive');
@@ -1533,15 +1534,6 @@ class Player extends EventEmitter {
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.add('romper-inactive');
     }
-
-    hideScrubBar() {
-        this._scrubBar.style.display = 'none';
-    }
-
-    showScrubBar() {
-        this._scrubBar.style.display = 'block';
-    }
-
 
     resetControls() {
         // this.clearLinkChoices();
@@ -1576,13 +1568,11 @@ class Player extends EventEmitter {
     }
 
     enableRepresentationControl() {
-        this._representation.getButton().removeAttribute('disabled');
-        this._representation.getButton().classList.remove('romper-control-disabled');
+        this._representation.enableButton();
     }
 
     disableRepresentationControl() {
-        this._representation.getButton().setAttribute('disabled', 'true');
-        this._representation.getButton().classList.add('romper-control-disabled');
+        this._representation.disableButton();
     }
 
     disableControls() {
@@ -1595,13 +1585,17 @@ class Player extends EventEmitter {
 
     // eslint-disable-next-line class-methods-use-this
     showSeekButtons() {
-        this._transportControls.showSeekButtons();
-        // and do the scrub bar:
-        const nonEssential = document.querySelectorAll('[data-required-controls="false"]');
-        nonEssential.forEach(control => {
-            // eslint-disable-next-line no-param-reassign
-            control.style.display = 'block';
-        });
+        this._buttonControls.showSeekButtons();
+        this.showScrubBar();
+    }
+
+    // SCRUB BAR
+    hideScrubBar() {
+        this._scrubBar.style.display = 'none';
+    }
+
+    showScrubBar() {
+        this._scrubBar.style.display = 'block';
     }
 
     enableScrubBar() {
@@ -1702,40 +1696,26 @@ class Player extends EventEmitter {
             200,
         );
     }
-
-    static _formatTime(time: number): string {
-        let seconds = parseInt(time, 10);
-        if (Number.isNaN(seconds)) {
-            return '0:00';
-        }
-        const minutes = Math.floor(seconds / 60);
-        seconds %= 60;
-        seconds = seconds < 10 ? `0${seconds}` : seconds;
-        return `${minutes}:${seconds}`;
-    }
+    // SCRUB BAR END
 
     disablePlayButton() {
-        this._transportControls.disablePlayButton();
+        this._buttonControls.disablePlayButton();
     }
 
     enablePlayButton() {
-        this._transportControls.enablePlayButton();
-    }
-
-    removeIconControl(id: string) {
-        this._icon.remove(id);
+        this._buttonControls.enablePlayButton();
     }
 
     setPlaying(isPlaying: boolean) {
-        this._transportControls.setPlaying(isPlaying);
+        this._buttonControls.setPlaying(isPlaying);
     }
 
     setNextAvailable(isNextAvailable: boolean) {
-        this._transportControls.setNextAvailable(isNextAvailable);
+        this._buttonControls.setNextAvailable(isNextAvailable);
     }
 
     setBackAvailable(isBackAvailable: boolean) {
-        this._transportControls.setBackAvailable(isBackAvailable);
+        this._buttonControls.setBackAvailable(isBackAvailable);
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {

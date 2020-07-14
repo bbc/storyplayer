@@ -1,6 +1,5 @@
 // @flow
 import EventEmitter from 'events';
-// import AnalyticEvents from '../AnalyticEvents';
 import { handleButtonTouchEvent } from '../utils';
 import AnalyticEvents from '../AnalyticEvents';
 import NarrativeElementTransport from './NarrativeElementTransport';
@@ -38,7 +37,7 @@ class Buttons extends EventEmitter {
 
     _logUserInteraction: Function;
 
-    constructor(logUserInteraction) {
+    constructor(logUserInteraction: Function) {
         super();
         this._logUserInteraction = logUserInteraction;
 
@@ -49,46 +48,7 @@ class Buttons extends EventEmitter {
         this._transportControls = this._initiateTransportControls();
     }
 
-    _initiateTransportControls(): NarrativeElementTransport {
-        const transportControls = new NarrativeElementTransport(this._logUserInteraction);
-        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
-        return transportControls;
-    }
-
-    getTransportControls() {
-        return this._transportControls;
-    }
-
-    getSubtitlesButton() {
-        return this._subtitlesButton;
-    }
-
-    _setSubtitlesButtonSelected(selected: boolean) {
-        if (selected) {
-            this._subtitlesButton.classList.add('romper-button-selected');
-        } else {
-            this._subtitlesButton.classList.remove('romper-button-selected');
-        }
-    }
-
-    enableSubtitlesButton() {
-        this._subtitlesButton.classList.remove('romper-control-disabled');
-        this._subtitlesButton.removeAttribute('disabled');
-    }
-
-    disableSubtitlesButton() {
-        this._subtitlesButton.classList.add('romper-control-disabled');
-        this._subtitlesButton.setAttribute('disabled', 'true');
-    }
-
-    getFullscreenButton() { 
-        return this._fullscreenButton;
-    }
-
+    // creating stuff
     _createSubtitlesButton(): HTMLButtonElement {
         const subsButton = document.createElement('button');
         subsButton.setAttribute('type', 'button');
@@ -130,13 +90,28 @@ class Buttons extends EventEmitter {
         return fsButton;
     }
 
+    _initiateTransportControls(): NarrativeElementTransport {
+        const transportControls = new NarrativeElementTransport(this._logUserInteraction);
+        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
+        return transportControls;
+    }
+
+    // handling clicks
     _handleFullScreenButton() {
         this.emit(ButtonEvents.FULLSCREEN_BUTTON_CLICKED);
     }
 
     _handleSubtitlesButton() {
         this.showingSubtitles = !this.showingSubtitles;
-        this._setSubtitlesButtonSelected(this.showingSubtitles);
+        if (this.showingSubtitles) {
+            this._subtitlesButton.classList.add('romper-button-selected');
+        } else {
+            this._subtitlesButton.classList.remove('romper-button-selected');
+        }
         
         const showingSubtitlesIntToString = [
             'hidden',
@@ -152,6 +127,69 @@ class Buttons extends EventEmitter {
         );
     }
 
+    // getters
+    getTransportControls() {
+        return this._transportControls.getControls();
+    }
+
+    getFullscreenButton() { 
+        return this._fullscreenButton;
+    }
+
+    getSubtitlesButton() {
+        return this._subtitlesButton;
+    }
+
+    // exposing functionality to change how buttons look/feel
+    showTransportControls() {
+        this._transportControls.show();
+    }
+
+    hideTransportControls() {
+        this._transportControls.hide();
+    }
+
+    setTransportControlsActive() {
+        this._transportControls.setActive();
+    }
+
+    setTransportControlsInactive() {
+        this._transportControls.setInactive();
+    }
+
+    showSeekButtons(){
+        this._transportControls.showSeekButtons();
+    }
+
+    enablePlayButton() {
+        this._transportControls.enablePlayButton();
+    }
+
+    disablePlayButton() {
+        this._transportControls.disablePlayButton();
+    }
+
+    setPlaying(isPlaying: boolean){
+        this._transportControls.setPlaying(isPlaying);
+    }
+
+    setNextAvailable(isNextAvailable: boolean) {
+        this._transportControls.setNextAvailable(isNextAvailable);
+    }
+
+    setBackAvailable(isBackAvailable: boolean) {
+        this._transportControls.setBackAvailable(isBackAvailable);
+    }
+
+    enableSubtitlesButton() {
+        this._subtitlesButton.classList.remove('romper-control-disabled');
+        this._subtitlesButton.removeAttribute('disabled');
+    }
+
+    disableSubtitlesButton() {
+        this._subtitlesButton.classList.add('romper-control-disabled');
+        this._subtitlesButton.setAttribute('disabled', 'true');
+    }
 }
 
 export { ButtonEvents };

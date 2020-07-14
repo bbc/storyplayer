@@ -207,6 +207,16 @@ class Overlay extends EventEmitter {
         });
         this._overlay.classList.add(`count-${this.getCount()}`);
     }
+
+    disableButton() {
+        this._button.setAttribute('disabled', 'true');
+        this._button.classList.add('romper-control-disabled');
+    }
+
+    enableButton() {
+        this._button.removeAttribute('disabled');
+        this._button.classList.remove('romper-control-disabled');
+    }
 }
 
 export default Overlay;
