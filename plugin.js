@@ -22,6 +22,7 @@ var smpPlugin = (function () {
             playerInterface = utils.playerInterface;
             pluginUtils = utils;
             pluginUtils.loadCSS('dist/romper.css');
+            pluginUtils.loadCSS("plugin.css");
 
             require.config({
                 paths: {

@@ -23,7 +23,15 @@ export const OVERRIDE_ACTIVE_BUFFERING = "activeBufferingOverride"
 export const OVERRIDE_INACTIVE_BUFFERING = "inactiveBufferingOverride"
 
 export const getSetting = (settingName) => {
-    const settingValue = new URLSearchParams(window.location.search).get(settingName);
+    let settingValue;
+    if(inSMPWrapper()) {
+        settingValue = new URLSearchParams(
+            window.playerInterface.datastore.get("querystring")
+        ).get(settingName);
+    } else {
+        settingValue = new URLSearchParams(window.location.search).get(settingName);
+    }
+
     switch(settingName) {
     case ADD_DETAILS_FLAG:
     case DEBUG_PLAYOUT_FLAG:

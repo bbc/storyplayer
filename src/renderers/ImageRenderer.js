@@ -65,6 +65,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     start() {
         super.start();
+        this._playoutEngine.startNonAVPlayout()
         if (this._duration === Infinity || this._duration < 0) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
@@ -84,13 +85,14 @@ export default class ImageRenderer extends BaseRenderer {
                     // eslint-disable-next-line max-len
                     logger.info(`Image representation ${this._representation.id} completed time`);
                     this.complete();
-                },  
+                },
             );
         }
     }
 
     end() {
         const needToEnd = super.end();
+        this._playoutEngine.stopNonAVPlayout()
         if (!needToEnd) return false;
 
         this._visible = false;
@@ -119,7 +121,7 @@ export default class ImageRenderer extends BaseRenderer {
                     logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                     this._imageElement.src = mediaUrl;
                 }
-                catch(err) { 
+                catch(err) {
                     logger.error(err, 'Notfound');
                     throw new Error('Image media not found');
                 }

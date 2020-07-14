@@ -464,7 +464,8 @@
         "loop": false,
         "schema_version": "0.3.6",
         "assets": {
-            "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
+            "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v",
+            "sub_src": "https://rduxmedia.files.bbci.co.uk/live/subtitle/01_Inf_Ch00D_TopTen_190617.xml"
         }
     }, {
         "id": "531f6bc5-d9ce-4798-9cc7-10f7f986eb1e",
@@ -496,7 +497,8 @@
         "loop": false,
         "schema_version": "0.3.6",
         "assets": {
-            "av_src": "https://rdux.files.bbci.co.uk/romper/step1a.m4v"
+            "av_src": "https://rdux.files.bbci.co.uk/romper/step1a.m4v",
+            "sub_src": "https://rduxmedia.files.bbci.co.uk/live/subtitle/01_Inf_Ch00D_TopTen_190617.xml"
         }
     }, {
         "id": "373c0b09-c6b6-4a62-8793-0a27096ee561",
@@ -512,7 +514,8 @@
         "loop": false,
         "schema_version": "0.3.6",
         "assets": {
-            "av_src": "https://rdux.files.bbci.co.uk/romper/step1a.m4v"
+            "av_src": "https://rdux.files.bbci.co.uk/romper/step1a.m4v",
+            "sub_src": "https://rduxmedia.files.bbci.co.uk/live/subtitle/01_Inf_Ch00D_TopTen_190617.xml"
         }
     }]
 }

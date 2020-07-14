@@ -39,10 +39,21 @@ function loadIt(json) {
   noAutomaticNextQueued: false,
   ui:{
     controls:{
-      enabled:true,
-      spaceControlsPlayback:true,
-      availableOnMediaEnded: true
+      enabled: true,
+      spaceControlsPlayback: true,
+      availableOnMediaEnded: true,
+      includeNextButton: true,
+      includePreviousButton: true,
+      // previousNextJustEvents not used in StoryKit Button Calls
+      // previousNextJustEvents: true,
+      // TODO: Get these controlled from playout engine
+      includeBackIntervalButton: true,
+      includeForwardIntervalButton: true,
+      alwaysEnablePreviousButton: false,
+      alwaysEnableNextButton: false,
+      // ----
     },
+    skin: "storykit",
     playbackSettingsPanel:{enabled:true},
     cta:{enabled:false},
     colour:'#3cffd5',
