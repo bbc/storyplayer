@@ -23,6 +23,7 @@ import {
     handleButtonTouchEvent
 } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
+import NarrativeElementTransport from './NarrativeElementTransport';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -269,6 +270,8 @@ class Player extends EventEmitter {
 
     _narrativeElementTransport: HTMLDivElement;
 
+    _transportControls: NarrativeElementTransport;
+
     _mediaTransport: HTMLDivElement;
 
     _startExperienceButton: HTMLButtonElement;
@@ -276,16 +279,6 @@ class Player extends EventEmitter {
     _resumeExperienceButton: HTMLButtonElement;
 
     _startExperienceImage: HTMLDivElement;
-
-    _playPauseButton: HTMLButtonElement;
-
-    _backButton: HTMLButtonElement;
-
-    _seekBackButton: HTMLButtonElement;
-
-    _seekForwardButton: HTMLButtonElement;
-
-    _nextButton: HTMLButtonElement;
 
     _subtitlesButton: HTMLButtonElement;
 
@@ -359,8 +352,6 @@ class Player extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
-    _backNextWaiting: boolean; // flag to stop spamming of buttons
-
     _showErrorLayer: Function;
 
     _removeErrorLayer: Function;
@@ -396,7 +387,6 @@ class Player extends EventEmitter {
 
         this._userInteractionStarted = false;
         this._controlsDisabled = false;
-        this._backNextWaiting = false;
 
         this.showingSubtitles = false;
 
@@ -469,76 +459,12 @@ class Player extends EventEmitter {
         this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
         this._buttonsActivateArea.classList.add('hide');
 
-        this._buttons = document.createElement('div');
+        this._buttons = document.createElement('div'); // pull in here
         this._buttons.classList.add('romper-buttons');
         this._buttons.onmousemove = this._activateRomperButtons.bind(this);
 
-        this._narrativeElementTransport = document.createElement('div');
-        this._narrativeElementTransport.classList.add('romper-narrative-element-transport');
-
-        this._backButton = document.createElement('button');
-        this._backButton.setAttribute('type', 'button');
-        this._backButton.classList.add('romper-button');
-        this._backButton.classList.add('romper-back-button');
-        this._backButton.setAttribute('title', 'Back Button');
-        this._backButton.setAttribute('aria-label', 'Back Button');
-        this._backButton.setAttribute('data-required-controls', 'false');
-        const backButtonIconDiv = document.createElement('div');
-        backButtonIconDiv.classList.add('romper-button-icon-div');
-        backButtonIconDiv.classList.add('romper-back-button-icon-div');
-        this._backButton.appendChild(backButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._backButton);
-
-        this._seekBackButton = document.createElement('button');
-        this._seekBackButton.setAttribute('type', 'button');
-        this._seekBackButton.classList.add('romper-button');
-        this._seekBackButton.classList.add('romper-seek-back-button');
-        this._seekBackButton.setAttribute('title', 'Seek Back Button');
-        this._seekBackButton.setAttribute('aria-label', 'Seek Back Button');
-        this._seekBackButton.setAttribute('data-required-controls', 'false');
-        const seekBackButtonIconDiv = document.createElement('div');
-        seekBackButtonIconDiv.classList.add('romper-button-icon-div');
-        this._seekBackButton.appendChild(seekBackButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._seekBackButton);
-
-        this._playPauseButton = document.createElement('button');
-        this._playPauseButton.setAttribute('type', 'button');
-        this._playPauseButton.classList.add('romper-button');
-        this._playPauseButton.classList.add('romper-play-button');
-        this._playPauseButton.setAttribute('title', 'Play Pause Button');
-        this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
-        this._playPauseButton.setAttribute('data-required-controls', 'true');
-        const playPauseButtonIconDiv = document.createElement('div');
-        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
-        this._playPauseButton.appendChild(playPauseButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._playPauseButton);
-
-        this._seekForwardButton = document.createElement('button');
-        this._seekForwardButton.setAttribute('type', 'button');
-        this._seekForwardButton.classList.add('romper-button');
-        this._seekForwardButton.classList.add('romper-seek-fwd-button');
-        this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
-        this._seekForwardButton.setAttribute('aria-label', 'Seek Forward Button');
-        this._seekForwardButton.setAttribute('data-required-controls', 'false');
-        const seekForwardButtonIconDiv = document.createElement('div');
-        seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
-        this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
-        this._narrativeElementTransport.appendChild(this._seekForwardButton);
-
-        this._nextButton = document.createElement('button');
-        this._nextButton.setAttribute('type', 'button');
-        this._nextButton.classList.add('romper-button');
-        this._nextButton.classList.add('romper-next-button');
-        this._nextButton.setAttribute('title', 'Next Button');
-        this._nextButton.setAttribute('aria-label', 'Next Button');
-        this._nextButton.setAttribute('data-required-controls', 'false');
-        this._narrativeElementTransport.appendChild(this._nextButton);
-        const nextButtonIconDiv = document.createElement('div');
-        nextButtonIconDiv.classList.add('romper-button-icon-div');
-        this._nextButton.appendChild(nextButtonIconDiv);
-
         this._guiLayer.appendChild(this._overlays);
-        this._guiLayer.appendChild(this._buttons);
+        this._guiLayer.appendChild(this._buttons); // THIS!
         this._guiLayer.appendChild(this._buttonsActivateArea);
 
         this._scrubBar = document.createElement('input');
@@ -560,6 +486,9 @@ class Player extends EventEmitter {
 
         const mediaTransportCenter = document.createElement('div');
         mediaTransportCenter.classList.add('center');
+
+        this._transportControls = this._initiateTransportControls();
+        this._narrativeElementTransport = this._transportControls.getControls();
         mediaTransportCenter.appendChild(this._narrativeElementTransport);
 
         const mediaTransportRight = document.createElement('div');
@@ -657,37 +586,6 @@ class Player extends EventEmitter {
         this._overlays.addEventListener(
             'touchend',
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
-        );
-
-        this._backButton.onclick = this._backButtonClicked.bind(this);
-        this._backButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._backButtonClicked.bind(this)),
-        );
-
-        this._nextButton.onclick = this._nextButtonClicked.bind(this);
-        this._nextButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._nextButtonClicked.bind(this)),
-        );
-
-        this._playPauseButton.onclick = this._playPauseButtonClicked.bind(this);
-
-        this._playPauseButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._playPauseButtonClicked.bind(this)),
-        );
-
-        this._seekBackButton.onclick = this._seekBackwardButtonClicked.bind(this);
-        this._seekBackButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._seekBackwardButtonClicked.bind(this)),
-        );
-
-        this._seekForwardButton.onclick = this._seekForwardButtonClicked.bind(this);
-        this._seekForwardButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._seekForwardButtonClicked.bind(this)),
         );
 
         this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
@@ -801,6 +699,34 @@ class Player extends EventEmitter {
         this._currentRenderer = renderer;
     }
 
+    _initiateTransportControls(): NarrativeElementTransport {
+        const transportControls = new NarrativeElementTransport(this._logUserInteraction);
+        transportControls.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        transportControls.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
+        transportControls.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
+        transportControls.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
+            this._hideAllOverlays();
+            let currentSegmentTime = 0;
+            if (this._currentRenderer) {
+                const { currentTime } = this._currentRenderer.getCurrentTime();
+                currentSegmentTime = currentTime;
+            }
+            if (currentSegmentTime < 2) {
+                this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+            } else {
+                this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
+            }
+        });
+        transportControls.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
+            if (!this._userInteractionStarted) {
+                this._enableUserInteraction();
+            }
+            this._hideAllOverlays();
+            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+            });
+        return transportControls;
+    }
+
     setAspectRatio(aspectRatio: number) {
         logger.info(`Setting aspect ratio to ${aspectRatio}`);
         this._aspectRatio = aspectRatio;
@@ -890,7 +816,7 @@ class Player extends EventEmitter {
         cancelButtonHolder.appendChild(cancelButtonDiv);
 
         const cancelButtonHandler = () => {
-            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._transportControls.setActive();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
             this._controller.deleteExistingSession();
@@ -908,7 +834,7 @@ class Player extends EventEmitter {
         const resumeExperienceButtonHandler = () => {
             this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
-            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._transportControls.setActive();
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart(this._controller._storyId);
             this._hideModalLayer();
@@ -1009,7 +935,7 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.BUTTONS_ACTIVATED);
         this._RomperButtonsShowing = true;
         this._buttons.classList.add('show');
-        this._narrativeElementTransport.classList.add('show');
+        this._transportControls.show();
         this._buttonsActivateArea.classList.add('hide');
         this._overlays.classList.remove('buttons-hidden');
         this._overlays.classList.add('buttons-showing');
@@ -1020,7 +946,7 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.BUTTONS_DEACTIVATED);
         this._RomperButtonsShowing = false;
         this._buttons.classList.remove('show');
-        this._narrativeElementTransport.classList.remove('show');
+        this._transportControls.hide();
         this._buttonsActivateArea.classList.remove('hide');
         this._overlays.classList.add('buttons-hidden');
         this._overlays.classList.remove('buttons-showing');
@@ -1104,18 +1030,18 @@ class Player extends EventEmitter {
     setupExperienceOverlays(options: Object) {
         switch (this._controller.getSessionState()) {
         case SESSION_STATE.RESUME:
-            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._transportControls.setActive();
             break;
         case SESSION_STATE.EXISTING:
             this._createResumeOverlays(options);
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
-                this._narrativeElementTransport.classList.add('romper-inactive');
+                this._transportControls.setInactive();
             }
             break;
         case SESSION_STATE.RESTART:
-            this._narrativeElementTransport.classList.remove('romper-inactive');
+            this._transportControls.setActive();
             break
         case SESSION_STATE.NEW:
             this._createStartOverlays(options);
@@ -1124,7 +1050,7 @@ class Player extends EventEmitter {
             if (options.hide_narrative_buttons) {
                 // can't use player.setNextAvailable
                 // as this may get reset after this by NE change handling
-                this._narrativeElementTransport.classList.add('romper-inactive');
+                this._transportControls.setInactive();
             }
             this._createStartOverlays(options);
             break;
@@ -1169,7 +1095,7 @@ class Player extends EventEmitter {
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
         this._enableUserInteraction();
-        this._narrativeElementTransport.classList.remove('romper-inactive');
+        this._transportControls.setActive();
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
     }
@@ -1235,60 +1161,7 @@ class Player extends EventEmitter {
         this.playoutEngine.setPermissionToPlay(true);
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
-        this._playPauseButtonClicked();
-    }
-
-    _playPauseButtonClicked() {
         this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
-        this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
-    }
-
-    _seekForwardButtonClicked() {
-        if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
-            this._backNextWaiting = true;
-            setTimeout(() => { this._backNextWaiting = false; }, 500);
-        }
-    }
-
-    _seekBackwardButtonClicked() {
-        if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
-            this._backNextWaiting = true;
-            setTimeout(() => { this._backNextWaiting = false; }, 500);
-        }
-    }
-
-    _backButtonClicked() {
-        this._hideAllOverlays();
-        if (!this._backNextWaiting) {
-            let currentSegmentTime = 0;
-            if (this._currentRenderer) {
-                const { currentTime } = this._currentRenderer.getCurrentTime();
-                currentSegmentTime = currentTime;
-            }
-            if (currentSegmentTime < 2) {
-                this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
-            } else {
-                this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
-            }
-            this._backNextWaiting = true;
-            setTimeout(() => { this._backNextWaiting = false; }, 500);
-        }
-        this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
-    }
-
-    _nextButtonClicked() {
-        if (!this._userInteractionStarted) {
-            this._enableUserInteraction();
-        }
-        if (!this._backNextWaiting) {
-            this._hideAllOverlays();
-            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
-            this._backNextWaiting = true;
-            setTimeout(() => { this._backNextWaiting = false; }, 500);
-        }
-        this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
     }
 
     _handleOverlayClick(event: Object) {
@@ -1369,6 +1242,8 @@ class Player extends EventEmitter {
         };
         this._analytics(logData);
     }
+
+    /* Volume handling */
 
     setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
@@ -1504,6 +1379,8 @@ class Player extends EventEmitter {
     removeVolumeControl(id: string) {
         this._volume.remove(id);
     }
+
+    /* End of volume handling */
 
     clearAllRepresentationControls() {
         this._representation.clearAll();
@@ -1928,6 +1805,8 @@ class Player extends EventEmitter {
 
     // eslint-disable-next-line class-methods-use-this
     showSeekButtons() {
+        this._transportControls.showSeekButtons();
+        // and do the scrub bar:
         const nonEssential = document.querySelectorAll('[data-required-controls="false"]');
         nonEssential.forEach(control => {
             // eslint-disable-next-line no-param-reassign
@@ -2046,13 +1925,11 @@ class Player extends EventEmitter {
     }
 
     disablePlayButton() {
-        this._playPauseButton.classList.add('romper-control-disabled');
-        this._playPauseButton.setAttribute('disabled', 'true');
+        this._transportControls.disablePlayButton();
     }
 
     enablePlayButton() {
-        this._playPauseButton.classList.remove('romper-control-disabled');
-        this._playPauseButton.removeAttribute('disabled');
+        this._transportControls.enablePlayButton();
     }
 
     removeIconControl(id: string) {
@@ -2060,29 +1937,15 @@ class Player extends EventEmitter {
     }
 
     setPlaying(isPlaying: boolean) {
-        if (isPlaying) {
-            this._playPauseButton.classList.add('romper-pause-button');
-            this._playPauseButton.classList.remove('romper-play-button');
-        } else {
-            this._playPauseButton.classList.add('romper-play-button');
-            this._playPauseButton.classList.remove('romper-pause-button');
-        }
+        this._transportControls.setPlaying(isPlaying);
     }
 
     setNextAvailable(isNextAvailable: boolean) {
-        if (isNextAvailable) {
-            this._nextButton.classList.remove('romper-unavailable');
-        } else {
-            this._nextButton.classList.add('romper-unavailable');
-        }
+        this._transportControls.setNextAvailable(isNextAvailable);
     }
 
     setBackAvailable(isBackAvailable: boolean) {
-        if (isBackAvailable) {
-            this._backButton.classList.remove('romper-unavailable');
-        } else {
-            this._backButton.classList.add('romper-unavailable');
-        }
+        this._transportControls.setBackAvailable(isBackAvailable);
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {
