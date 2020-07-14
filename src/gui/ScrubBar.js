@@ -2,8 +2,9 @@
 import { SLIDER_CLASS } from '../utils';
 import BaseRenderer from '../renderers/BaseRenderer';
 import AnalyticEvents from '../AnalyticEvents';
+import BaseScrubBar from './BaseScrubBar';
 
-class ScrubBar {
+class ScrubBar extends BaseScrubBar {
 
     _scrubBar: HTMLInputElement;
 
@@ -11,10 +12,8 @@ class ScrubBar {
 
     _scrubTimePoller: ?IntervalID;
 
-    _logUserInteraction: Function;
-
     constructor(logUserInteraction: Function) {
-        this._logUserInteraction = logUserInteraction;
+        super(logUserInteraction);
         this._createScrubBar();
     }
 

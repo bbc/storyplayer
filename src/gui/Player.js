@@ -26,6 +26,7 @@ import BaseButtons, { ButtonEvents } from './BaseButtons';
 import Buttons from './Buttons';
 import Overlay, { OVERLAY_BUTTON_CLICK_EVENT } from './Overlay';
 import ScrubBar from './ScrubBar';
+import BaseScrubBar from './BaseScrubBar';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -109,7 +110,7 @@ class Player extends EventEmitter {
 
     _linkChoice: Object;
 
-    _scrubBar: ScrubBar;
+    _scrubBar: BaseScrubBar;
 
     _timeFeedback: HTMLDivElement;
 
