@@ -23,7 +23,7 @@ import {
     handleButtonTouchEvent
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from '../Events';
-import NarrativeElementTransport from './NarrativeElementTransport';
+import Buttons, { ButtonEvents } from './Buttons';
 import Overlay, { OVERLAY_CLICK_EVENT } from './Overlay';
 
 const PlayerEvents = [
@@ -74,8 +74,6 @@ class Player extends EventEmitter {
 
     guiTarget: HTMLDivElement;
 
-    showingSubtitles: boolean;
-
     _overlaysElement: HTMLDivElement;
 
     _overlays: Array<Overlay>;
@@ -88,6 +86,8 @@ class Player extends EventEmitter {
 
     _narrativeElementTransport: HTMLDivElement;
 
+    _buttonControls: Buttons;
+
     _transportControls: NarrativeElementTransport;
 
     _mediaTransport: HTMLDivElement;
@@ -97,8 +97,6 @@ class Player extends EventEmitter {
     _resumeExperienceButton: HTMLButtonElement;
 
     _startExperienceImage: HTMLDivElement;
-
-    _subtitlesButton: HTMLButtonElement;
 
     _fullscreenButton: HTMLButtonElement;
 
@@ -174,9 +172,9 @@ class Player extends EventEmitter {
 
     _removeErrorLayer: Function;
 
-    _showBufferingLayer: Function;
+    showBufferingLayer: Function;
 
-    _removeBufferingLayer: Function;
+    removeBufferingLayer: Function;
 
     _addContinueModal: Function;
 
@@ -207,8 +205,6 @@ class Player extends EventEmitter {
 
         this._userInteractionStarted = false;
         this._controlsDisabled = false;
-
-        this.showingSubtitles = false;
 
         this._analytics = analytics;
         this._assetUrls = assetUrls;
@@ -307,8 +303,12 @@ class Player extends EventEmitter {
         const mediaTransportCenter = document.createElement('div');
         mediaTransportCenter.classList.add('center');
 
+        // NEW STUFF
+        this._buttonControls = this._initiateButtons();
         this._transportControls = this._initiateTransportControls();
         this._narrativeElementTransport = this._transportControls.getControls();
+        // END OF NEW STUFF
+
         mediaTransportCenter.appendChild(this._narrativeElementTransport);
 
         const mediaTransportRight = document.createElement('div');
@@ -342,29 +342,10 @@ class Player extends EventEmitter {
         this._countdowner.classList.add('romper-ux-countdown');
         this._countdownContainer.appendChild(this._countdowner);
 
-        this._subtitlesButton = document.createElement('button');
-        this._subtitlesButton.setAttribute('type', 'button');
-        this._subtitlesButton.classList.add('romper-button');
-        this._subtitlesButton.setAttribute('title', 'Subtitles Button');
-        this._subtitlesButton.setAttribute('aria-label', 'Subtitles Button');
-        this._subtitlesButton.classList.add('romper-subtitles-button');
-        this.disableSubtitlesControl();
-        const subtitlesButtonIconDiv = document.createElement('div');
-        subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
-        subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
-        this._subtitlesButton.appendChild(subtitlesButtonIconDiv);
-        mediaTransportRight.appendChild(this._subtitlesButton);
+        const subtitlesButton = this._buttonControls.getSubtitlesButton();
+        mediaTransportRight.appendChild(subtitlesButton);
 
-        this._fullscreenButton = document.createElement('button');
-        this._fullscreenButton.setAttribute('type', 'button');
-        this._fullscreenButton.classList.add('romper-button');
-        this._fullscreenButton.classList.add('romper-fullscreen-button');
-        this._fullscreenButton.setAttribute('title', 'Fullscreen Button');
-        this._fullscreenButton.setAttribute('aria-label', 'Fullscreen Button');
-        const fullscreenButtonIconDiv = document.createElement('div');
-        fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
-        fullscreenButtonIconDiv.classList.add('romper-fullscreen-button-icon-div');
-        this._fullscreenButton.appendChild(fullscreenButtonIconDiv);
+        this._fullscreenButton = this._buttonControls.getFullscreenButton();
         mediaTransportRight.appendChild(this._fullscreenButton);
 
         this._buttons.appendChild(this._mediaTransport);
@@ -408,17 +389,6 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
 
-        this._subtitlesButton.onclick = this._subtitlesButtonClicked.bind(this);
-        this._subtitlesButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._subtitlesButtonClicked.bind(this)),
-        );
-
-        this._fullscreenButton.onclick = this._toggleFullScreen.bind(this);
-        this._fullscreenButton.addEventListener(
-            'touchend',
-            handleButtonTouchEvent(this._toggleFullScreen.bind(this)),
-        );
         this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
         this._inFullScreen = false;
 
@@ -485,8 +455,8 @@ class Player extends EventEmitter {
 
         this._showErrorLayer = this._showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
-        this._showBufferingLayer = this._showBufferingLayer.bind(this);
-        this._removeBufferingLayer = this._removeBufferingLayer.bind(this);
+        this.showBufferingLayer = this.showBufferingLayer.bind(this);
+        this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
         this._addContinueModal = this._addContinueModal.bind(this);
         this._startButtonHandler = this._startButtonHandler.bind(this);
 
@@ -499,9 +469,9 @@ class Player extends EventEmitter {
         this._overlays.push(overlay);
     
         // when clicking on one, deactivate all other overlays
-        overlay.on(OVERLAY_CLICK_EVENT, (name) => {
-            this._overlays.filter(o => o.getName() !== name)
-            .forEach(o => o.deactivateOverlay());
+        overlay.on(OVERLAY_CLICK_EVENT, (clickedName) => {
+            this._overlays.filter(o => o.getName() !== clickedName)
+                .forEach(o => o.deactivateOverlay());
         });
         return overlay;
     }
@@ -535,12 +505,20 @@ class Player extends EventEmitter {
         this._currentRenderer = renderer;
     }
 
+    _initiateButtons(): Buttons {
+        const buttonControls = new Buttons(this._logUserInteraction);
+        buttonControls.disableSubtitlesButton();
+        buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED, () => this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED));
+        buttonControls.on(ButtonEvents.FULLSCREEN_BUTTON_CLICKED, () => this._toggleFullScreen());
+        return buttonControls;
+    }
+
     _initiateTransportControls(): NarrativeElementTransport {
-        const transportControls = new NarrativeElementTransport(this._logUserInteraction);
-        transportControls.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        transportControls.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        transportControls.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        transportControls.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
+        const transportControls = this._buttonControls.getTransportControls();
+        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
+        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED, () => {
             this._hideAllOverlays();
             let currentSegmentTime = 0;
             if (this._currentRenderer) {
@@ -553,13 +531,13 @@ class Player extends EventEmitter {
                 this.emit(PlayerEvents.REPEAT_BUTTON_CLICKED);
             }
         });
-        transportControls.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
+        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED, () => {
             if (!this._userInteractionStarted) {
                 this._enableUserInteraction();
             }
             this._hideAllOverlays();
             this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
-            });
+        });
         return transportControls;
     }
 
@@ -803,11 +781,11 @@ class Player extends EventEmitter {
         }
     }
 
-    _showBufferingLayer() {
+    showBufferingLayer() {
         this._loadingLayer.classList.add('show');
     }
 
-    _removeBufferingLayer() {
+    removeBufferingLayer() {
         this._loadingLayer.classList.remove('show');
     }
 
@@ -1021,36 +999,12 @@ class Player extends EventEmitter {
         }
     }
 
-    _subtitlesButtonClicked() {
-        this.showingSubtitles = !this.showingSubtitles;
-        if (this.showingSubtitles) {
-            this._subtitlesButton.classList.add('romper-button-selected');
-        } else {
-            this._subtitlesButton.classList.remove('romper-button-selected');
-        }
-
-        const showingSubtitlesIntToString = [
-            'hidden',
-            'showing',
-        ];
-
-        this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED);
-        // The + here converts bool to int
-        this._logUserInteraction(
-            AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED,
-            showingSubtitlesIntToString[+!this.showingSubtitles],
-            showingSubtitlesIntToString[+this.showingSubtitles],
-        );
-    }
-
     enableSubtitlesControl() {
-        this._subtitlesButton.classList.remove('romper-control-disabled');
-        this._subtitlesButton.removeAttribute('disabled');
+        this._buttonControls.enableSubtitlesButton()
     }
 
     disableSubtitlesControl() {
-        this._subtitlesButton.classList.add('romper-control-disabled');
-        this._subtitlesButton.setAttribute('disabled', 'true');
+        this._buttonControls.disableSubtitlesButton()
     }
 
     _logUserInteraction(

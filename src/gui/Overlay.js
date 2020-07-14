@@ -39,7 +39,7 @@ class Overlay extends EventEmitter {
 
     _buttonClickHandler() {
         this.emit(OVERLAY_CLICK_EVENT, { name: this._name });
-       if (this._overlay.classList.contains('romper-inactive')) {
+        if (this._overlay.classList.contains('romper-inactive')) {
             this._logFunction('OVERLAY_BUTTON_CLICKED', `${this._name} hidden`, `${this._name} visible`);
             this._button.classList.add('romper-button-selected');
         } else {

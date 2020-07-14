@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import AnalyticEvents from '../AnalyticEvents';
 import { handleButtonTouchEvent } from '../utils';
-import { PlayerEvents } from './Player';
+import { ButtonEvents } from './Buttons';
 
 //
 // Component containing UI for Narrative Element controls
@@ -193,13 +193,13 @@ class NarrativeElementTransport extends EventEmitter {
     }
 
     _playPauseButtonClicked() {
-        this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
+        this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED);
         this.logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
     }
 
     _seekForwardButtonClicked() {
         if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED);
+            this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED);
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
@@ -207,7 +207,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _seekBackwardButtonClicked() {
         if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED);
+            this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED);
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
@@ -215,7 +215,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _backButtonClicked() {
         if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.BACK_BUTTON_CLICKED);
+            this.emit(ButtonEvents.BACK_BUTTON_CLICKED);
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
@@ -224,7 +224,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _nextButtonClicked() {
         if (!this._backNextWaiting) {
-            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+            this.emit(ButtonEvents.NEXT_BUTTON_CLICKED);
             this._backNextWaiting = true;
             setTimeout(() => { this._backNextWaiting = false; }, 500);
         }
