@@ -58,7 +58,7 @@ pipeline {
     }
 
     stage('Discover package versions') {
-      when { branch 'master' }
+      when { branch 'master-smp' }
       steps {
         script {
           env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
@@ -95,7 +95,7 @@ pipeline {
     stage('Publish to NPMjs Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'master-smp';
           not { equals expected: env.git_version, actual: env.npm_version }
         }
       }
@@ -111,7 +111,7 @@ pipeline {
     stage('Publish to Artifactory Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'master-smp';
           not { equals expected: env.git_version, actual: env.artifactory_version }
         }
       }
@@ -119,40 +119,6 @@ pipeline {
         // credential ID lifted from https://github.com/bbc/rd-apmm-groovy-ci-library/blob/a4251d7b3fed3511bbcf045a51cfdc86384eb44f/vars/bbcParallelPublishNpm.groovy#L32
         withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
           sh 'npm publish --reg "$artifactory_publish" --email=support@rd.bbc.co.uk --_auth="$artifactory_bearer_token"'
-        }
-        withBBCGithubSSHAgent {
-          sh '''
-            git config --global user.name "Jenkins"
-            git config --global user.email jenkins-slave@rd.bbc.co.uk
-            git clone git@github.com:bbc/rd-ux-storyplayer-harness.git
-            git clone git@github.com:bbc/rd-ux-storyformer.git
-          '''
-
-          dir('rd-ux-storyplayer-harness') {
-            sh '''
-              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
-              git add package.json yarn.lock
-              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
-
-${commit_messages}
-"
-              git pull --rebase
-              git push origin master --tags
-            '''
-          }
-
-          dir('rd-ux-storyformer') {
-            sh '''
-              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
-              git add package.json yarn.lock
-              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
-
-${commit_messages}
-"
-              git pull --rebase
-              git push origin master --tags
-            '''
-          }
         }
       }
     }
