@@ -7,11 +7,16 @@ const JavaScriptObfuscator = require('webpack-obfuscator');
 const productionBuild = process.env.NODE_ENV === 'production';
 
 module.exports = env => {
+    const entry = {
+        romper: './src/romper.js'
+    }
+    // Plugin only used for demo code. Distributed plugin is built in SPH
+    if(!productionBuild) {
+        entry.plugin = './smp-example/plugin/plugin.js'
+    }
+
     const config = {
-        entry: {
-            romper: './src/romper.js',
-            plugin: './smp-example/plugin/plugin.js'
-        },
+        entry,
         devtool: 'source-map',
         output: {
             path: path.resolve(__dirname, 'dist'),
