@@ -80,8 +80,6 @@ class Player extends EventEmitter {
 
     _overlays: Array<Overlay>;
 
-    _overlayToggleButtons: HTMLDivElement;
-
     _buttons: HTMLDivElement;
 
     _buttonsActivateArea: HTMLDivElement;
@@ -89,8 +87,6 @@ class Player extends EventEmitter {
     _narrativeElementTransport: HTMLDivElement;
 
     _buttonControls: BaseButtons;
-
-    _mediaTransport: HTMLDivElement;
 
     _startExperienceButton: HTMLButtonElement;
 
@@ -304,14 +300,8 @@ class Player extends EventEmitter {
         // this._scrubBar = new SMPScrubBar(this._logUserInteraction);
         // it can choose to use the buttons created by the overlays or make its own
         default:
-            this._buttonControls = new Buttons(this._logUserInteraction);
-            this._scrubBar = new ScrubBar(this._logUserInteraction);
-            // pass the overlay buttons to the button manager
-            this._buttonControls.setVolumeButton(this._volume.getButton());
-            this._buttonControls.setChapterButton(this._icon.getButton());
-            this._buttonControls.setSwitchableButton(this._representation.getButton());
-            // put all the buttons together (wonder if this should be in Buttons?)
-            this._buildButtonsDOM();
+            // use normal built-in scrub bar, buttons, etc
+            this._buildStandardControls();
         }
 
         // listen for button events and handle them
@@ -412,48 +402,27 @@ class Player extends EventEmitter {
         }
     }
 
-    // build button components together into right DOM
-    _buildButtonsDOM() {
-        // create the container divs
-        this._mediaTransport = document.createElement('div');
-        this._mediaTransport.classList.add('romper-media-transport');
-        const mediaTransportLeft = document.createElement('div');
-        mediaTransportLeft.classList.add('left');
-        const mediaTransportCenter = document.createElement('div');
-        mediaTransportCenter.classList.add('center');
-        const mediaTransportRight = document.createElement('div');
-        mediaTransportRight.classList.add('right');
-        this._mediaTransport.appendChild(mediaTransportLeft);
-        this._mediaTransport.appendChild(mediaTransportCenter);
-        this._mediaTransport.appendChild(mediaTransportRight);
-        // to hold icon and representation toggles:
-        this._overlayToggleButtons = document.createElement('div');
-        this._overlayToggleButtons.classList.add('romper-overlay-controls');
-        this._overlayToggleButtons.classList.add('romper-inactive');
+    // build UI components
+    _buildStandardControls() {
+        this._buttonControls = new Buttons(this._logUserInteraction);
+        // next is needed for activating buttons area
+        this._narrativeElementTransport = this._buttonControls.getTransportControls();
+        this._scrubBar = new ScrubBar(this._logUserInteraction);
+        // pass the overlay buttons to the button manager
+        this._buttonControls.setVolumeButton(this._volume.getButton());
+        this._buttonControls.setChapterButton(this._icon.getButton());
+        this._buttonControls.setSwitchableButton(this._representation.getButton());
+
+        // build the control structure
+        const mediaTransport = this._buttonControls.getControlsDiv(
+            this._volume.getOverlay(),
+            this._icon.getOverlay(),
+            this._representation.getOverlay(),
+        );
 
         // add transport control buttons and scrub bar
         this._buttons.appendChild(this._scrubBar.getScrubBarElement());
-        this._buttons.appendChild(this._mediaTransport);
-
-        // add the buttons to the appropriate container divs
-        // volume on left
-        mediaTransportLeft.appendChild(this._buttonControls.getVolumeButton());
-        mediaTransportLeft.appendChild(this._volume.getOverlay());
-
-        // back, seek, play, seek, next in center
-        this._narrativeElementTransport = this._buttonControls.getTransportControls();
-        mediaTransportCenter.appendChild(this._narrativeElementTransport);
-
-        // switchable, chapter, subtitles, fullscreen on right
-        mediaTransportRight.appendChild(this._representation.getOverlay());
-        mediaTransportRight.appendChild(this._icon.getOverlay());
-        this._overlayToggleButtons.appendChild(this._buttonControls.getSwitchableButton());
-        this._overlayToggleButtons.appendChild(this._buttonControls.getChapterButton());
-        mediaTransportRight.appendChild(this._overlayToggleButtons);
-        const subtitlesButton = this._buttonControls.getSubtitlesButton();
-        mediaTransportRight.appendChild(subtitlesButton);
-        this._fullscreenButton = this._buttonControls.getFullscreenButton();
-        mediaTransportRight.appendChild(this._fullscreenButton);
+        this._buttons.appendChild(mediaTransport);
     }
 
     // create an element ready for rendering countdown
@@ -950,8 +919,6 @@ class Player extends EventEmitter {
         this._overlaysElement.classList.add('romper-inactive');
         this._buttons.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
-        this._overlayToggleButtons.classList.add('romper-inactive');
-
         this.playoutEngine.setPermissionToPlay(false);
     }
 
@@ -965,8 +932,6 @@ class Player extends EventEmitter {
         this._buttons.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('hide');
-        this._overlayToggleButtons.classList.remove('romper-inactive');
-
         this.playoutEngine.setPermissionToPlay(true);
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);

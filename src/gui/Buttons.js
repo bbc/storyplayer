@@ -126,7 +126,55 @@ class Buttons extends BaseButtons {
         return this._subtitlesButton;
     }
 
+    // get an HTML DIV element that contains all the UI, including buttons
+    // and overlays, but not the scrub bar
+    // nor the button activation controls
+    getControlsDiv(
+        volumeOverlay: HTMLDivElement,
+        chapterOverlay: HTMLDivElement,
+        switchableOverlay: HTMLDivElement,
+    ): HTMLDivElement {
+        // create the container divs
+        const mediaTransport = document.createElement('div');
+        mediaTransport.classList.add('romper-media-transport');
+        const mediaTransportLeft = document.createElement('div');
+        mediaTransportLeft.classList.add('left');
+        const mediaTransportCenter = document.createElement('div');
+        mediaTransportCenter.classList.add('center');
+        const mediaTransportRight = document.createElement('div');
+        mediaTransportRight.classList.add('right');
+        mediaTransport.appendChild(mediaTransportLeft);
+        mediaTransport.appendChild(mediaTransportCenter);
+        mediaTransport.appendChild(mediaTransportRight);
+        // to hold icon and representation toggles:
+        const overlayToggleButtons = document.createElement('div');
+        overlayToggleButtons.classList.add('romper-overlay-controls');
+
+        // add the buttons to the appropriate container divs
+        // volume on left
+        mediaTransportLeft.appendChild(this.getVolumeButton());
+        mediaTransportLeft.appendChild(volumeOverlay);
+
+        // back, seek, play, seek, next in center
+        mediaTransportCenter.appendChild(this.getTransportControls());
+
+        // switchable, chapter, subtitles, fullscreen on right
+        mediaTransportRight.appendChild(switchableOverlay);
+        mediaTransportRight.appendChild(chapterOverlay);
+        overlayToggleButtons.appendChild(this.getSwitchableButton());
+        overlayToggleButtons.appendChild(this.getChapterButton());
+        mediaTransportRight.appendChild(overlayToggleButtons);
+        const subtitlesButton = this.getSubtitlesButton();
+        mediaTransportRight.appendChild(subtitlesButton);
+        this._fullscreenButton = this.getFullscreenButton();
+        mediaTransportRight.appendChild(this._fullscreenButton);
+
+        return mediaTransport;
+    }
+
     /* exposing functionality to change how buttons look/feel */
+
+    // show/hide
     showTransportControls() {
         this._transportControls.show();
     }

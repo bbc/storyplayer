@@ -2,6 +2,8 @@
 import EventEmitter from 'events';
 
 /* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
+
 const ButtonEvents = [
     'BACK_BUTTON_CLICKED',
     'NEXT_BUTTON_CLICKED',
@@ -52,6 +54,15 @@ class BaseButtons extends EventEmitter {
     }
 
     /* getters */
+    
+    // get the whole lot organised in a DIV
+    getControlsDiv(
+        volumeOverlay: HTMLDivElement,
+        chapterOverlay: HTMLDivElement,
+        switchableOverlay: HTMLDivElement,
+    ): HTMLDivElement {
+        return document.createElement('div');
+    }
 
     // get div with back, seeek back, play/pause, seek fwd, next
     getTransportControls(): HTMLDivElement {
@@ -93,13 +104,10 @@ class BaseButtons extends EventEmitter {
 
     disablePlayButton() { }
 
-    // eslint-disable-next-line no-unused-vars
     setPlaying(isPlaying: boolean){ }
 
-    // eslint-disable-next-line no-unused-vars
     setNextAvailable(isNextAvailable: boolean) { }
 
-    // eslint-disable-next-line no-unused-vars
     setBackAvailable(isBackAvailable: boolean) { }
 
     enableSubtitlesButton() { }
