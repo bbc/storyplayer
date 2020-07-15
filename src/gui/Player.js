@@ -92,7 +92,7 @@ class Player extends EventEmitter {
 
     _resumeExperienceButton: HTMLButtonElement;
 
-    _startExperienceImage: HTMLDivElement;
+    _startExperienceImage: HTMLImgElement;
 
     _fullscreenButton: HTMLButtonElement;
 
@@ -598,7 +598,7 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
             this._controller.deleteExistingSession();
-            this._controller.resetStory(this._controller._storyId);
+            this._controller.resetStory();
             this._hideModalLayer();
             this._startButtonHandler();
         };
@@ -614,7 +614,7 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
             this._buttonControls.setTransportControlsActive();
             this._controller.setSessionState(SESSION_STATE.RESUME);
-            this._controller.restart(this._controller._storyId);
+            this._controller.restart();
             this._hideModalLayer();
             this._enableUserInteraction();
         };
@@ -865,7 +865,11 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._startExperienceButton);
         this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
-            'touchend', (event) => {handleButtonTouchEvent(this._startButtonHandler, event)}, false,
+            'touchend',
+            (event: TouchEvent) => {
+                handleButtonTouchEvent(this._startButtonHandler, event);
+            },
+            false,
         );
     }
 
