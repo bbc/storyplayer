@@ -24,7 +24,7 @@ import {
 import { REASONER_EVENTS } from '../Events';
 import BaseButtons, { ButtonEvents } from './BaseButtons';
 import Buttons from './Buttons';
-import Overlay, { OVERLAY_BUTTON_CLICK_EVENT } from './Overlay';
+import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import ScrubBar from './ScrubBar';
 import BaseScrubBar from './BaseScrubBar';
 
@@ -302,6 +302,7 @@ class Player extends EventEmitter {
         // SMP connect its own transport buttons and scrub bar
         // this._buttonControls = new SMPButtons(this._logUserInteraction);
         // this._scrubBar = new SMPScrubBar(this._logUserInteraction);
+        // it can choose to use the buttons created by the overlays or make its own
         default:
             this._buttonControls = new Buttons(this._logUserInteraction);
             this._scrubBar = new ScrubBar(this._logUserInteraction);
@@ -309,7 +310,7 @@ class Player extends EventEmitter {
             this._buttonControls.setVolumeButton(this._volume.getButton());
             this._buttonControls.setChapterButton(this._icon.getButton());
             this._buttonControls.setSwitchableButton(this._representation.getButton());
-            // put all the buttons together
+            // put all the buttons together (wonder if this should be in Buttons?)
             this._buildButtonsDOM();
         }
 
@@ -468,10 +469,10 @@ class Player extends EventEmitter {
         const overlay = new Overlay(name, logFunction);
         this._overlays.push(overlay);
     
-        // when clicking on one, deactivate all other overlays
-        overlay.on(OVERLAY_BUTTON_CLICK_EVENT, (clickedName) => {
+        // one overlay has been activated, disactivate all other overlays
+        overlay.on(OVERLAY_ACTIVATED_EVENT, (clickedName) => {
             this._overlays.filter(o => o.getName() !== clickedName)
-                .forEach(o => o.deactivateOverlay());
+                .forEach(o => o.disactivateOverlay());
         });
         return overlay;
     }
@@ -983,13 +984,13 @@ class Player extends EventEmitter {
 
     _hideAllOverlays() {
         if (this._representation) {
-            this._representation.deactivateOverlay();
+            this._representation.disactivateOverlay();
         }
         if (this._volume) {
-            this._volume.deactivateOverlay();
+            this._volume.disactivateOverlay();
         }
         if (this._icon) {
-            this._icon.deactivateOverlay();
+            this._icon.disactivateOverlay();
         }
     }
 
@@ -1030,13 +1031,13 @@ class Player extends EventEmitter {
     /* Volume handling */
     setVolumeControlLevel(label: string, value: number) {
         const id = this._volume.getIdForLabel(label);
-        const overlay = this._volume.get(id);
-        if (overlay) {
-            if (overlay.childNodes[1] && overlay.childNodes[1].childNodes[2]) {
+        const volumeControl = this._volume.get(id);
+        if (volumeControl) {
+            if (volumeControl.childNodes[1] && volumeControl.childNodes[1].childNodes[2]) {
                 // set slider value
-                overlay.childNodes[1].childNodes[1].value = value;
+                volumeControl.childNodes[1].childNodes[1].value = value;
                 // and feedback div
-                overlay.childNodes[1].childNodes[2].textContent = `${Math.floor(10 * value)}`;
+                volumeControl.childNodes[1].childNodes[2].textContent = `${Math.floor(10 * value)}`;
             }
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
         }
@@ -1044,8 +1045,8 @@ class Player extends EventEmitter {
 
     setMuted(label: string, muted: boolean) {
         const id = this._volume.getIdForLabel(label);
-        const overlay = this._volume.get(id);
-        if(overlay) {
+        const volumeControl = this._volume.get(id);
+        if(volumeControl) {
             const muteButton = document.getElementById(`mute-button-${id}`);
             if(muted && muteButton) {
                 this._volume.get(id).classList.add('romper-muted');
@@ -1189,8 +1190,8 @@ class Player extends EventEmitter {
         representationIcon.setAttribute('draggable', 'false');
         const representationIconClick = () => {
             this.emit(PlayerEvents.REPRESENTATION_CLICKED, { id });
-            this._representation.deactivateOverlay();
-            this._representation.setActive(id);
+            this._representation.disactivateOverlay();
+            this._representation.setElementActive(id);
             this._representation.setButtonClass(`${id}`);
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
@@ -1208,11 +1209,11 @@ class Player extends EventEmitter {
     }
 
     activateRepresentationControl(id: string) {
-        this._representation.removeClass(id, 'romper-control-disabled');
+        this._representation.removeClassFromElement(id, 'romper-control-disabled');
     }
 
     deactivateRepresentationControl(id: string) {
-        this._representation.addClass(id, 'romper-control-disabled');
+        this._representation.addClassToElement(id, 'romper-control-disabled');
     }
 
     removeRepresentationControl(id: string) {
@@ -1220,7 +1221,7 @@ class Player extends EventEmitter {
     }
 
     setActiveRepresentationControl(id: string) {
-        this._representation.setActive(id);
+        this._representation.setElementActive(id);
     }
     /* end of Representation overlay */
 
@@ -1363,7 +1364,7 @@ class Player extends EventEmitter {
                     }
                     const clickHandler = () => {
                         // set classes to show which is selected
-                        behaviourOverlay.setActive(`${id}`);
+                        behaviourOverlay.setElementActive(`${id}`);
                     };
                     icon.onclick = clickHandler;
                     icon.addEventListener(
@@ -1447,7 +1448,7 @@ class Player extends EventEmitter {
         }
         const iconClick = () => {
             this.emit(PlayerEvents.ICON_CLICKED, { id });
-            this._icon.deactivateOverlay();
+            this._icon.disactivateOverlay();
             this._icon.setButtonClass(id);
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };

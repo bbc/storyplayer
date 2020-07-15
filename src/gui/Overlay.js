@@ -4,7 +4,7 @@ import { handleButtonTouchEvent } from '../utils';
 
 const buttonClassPrefix = 'romper-overlay-button-choice-';
 
-const OVERLAY_BUTTON_CLICK_EVENT = 'overlay-click-event';
+const OVERLAY_ACTIVATED_EVENT = 'overlay-click-event';
 
 class Overlay extends EventEmitter {
 
@@ -38,23 +38,21 @@ class Overlay extends EventEmitter {
     }
 
     _buttonClickHandler() {
-        this.emit(OVERLAY_BUTTON_CLICK_EVENT, { name: this._name });
-        if (this._overlay.classList.contains('romper-inactive')) {
+        if (this._isActive()) {
             this._logFunction(
                 'OVERLAY_BUTTON_CLICKED',
-                `${this._name} hidden`,
                 `${this._name} visible`,
+                `${this._name} hidden`,
             );
-            this._button.classList.add('romper-button-selected');
+            this.disactivateOverlay();
         } else {
             this._logFunction(
                 'OVERLAY_BUTTON_CLICKED',
-                `${this._name} visible`,
                 `${this._name} hidden`,
+                `${this._name} visible`,
             );
-            this._button.classList.remove('romper-button-selected');
+            this.activateOverlay();
         }
-        this._overlay.classList.toggle('romper-inactive');
     }
 
     _createOverlay(): HTMLDivElement {
@@ -66,6 +64,11 @@ class Overlay extends EventEmitter {
             e.stopPropagation();
         };
         return overlayDiv;
+    }
+
+    // is the overlay showing?
+    _isActive(): boolean {
+        return !this._overlay.classList.contains('romper-inactive');
     }
 
     _createButton(): HTMLButtonElement {
@@ -92,15 +95,33 @@ class Overlay extends EventEmitter {
         return button;
     }
 
-    getButton() {
+    // the overlay creates its own button that activates and
+    // disactivates the overlay
+    // it also toggles its own state between selected and deselected
+    // get this button here
+    //
+    // other buttons may be used, but will need to manage their own state
+    // they can call the activateOverlay() and disactivateOverlay()
+    // functions and should also lot their own analytics
+    getButton(): HTMLButtonElement {
         return this._button;
     }
 
-    getOverlay() {
+    // get the DIV element that is the overlay content
+    getOverlay(): HTMLDivElement {
         return this._overlay;
     }
 
-    deactivateOverlay() {
+    // activate this overlay - show the div
+    // emits the OVERLAY_ACTIVATED_EVENT so that other overlays can
+    // be disactivated
+    activateOverlay() {
+        this.emit(OVERLAY_ACTIVATED_EVENT, { name: this._name });
+        this._overlay.classList.remove('romper-inactive');       
+        this._button.classList.add('romper-button-selected');
+    }
+
+    disactivateOverlay() {
         if (!this._overlay.classList.contains('romper-inactive')) {
             this._logFunction(
                 'OVERLAY_DEACTIVATED', 
@@ -114,14 +135,15 @@ class Overlay extends EventEmitter {
         }
     }
 
-    getName() {
+    getName(): string {
         return this._name;
     }
 
-    getCount() {
+    getCount(): number {
         return Object.keys(this._elements).length;
     }
 
+    // add a child element to the overlay
     add(id: string, el: HTMLElement, label?: string) {
         this._overlay.classList.remove(`count-${this.getCount()}`);
         this._elements[id] = el;
@@ -134,17 +156,19 @@ class Overlay extends EventEmitter {
         this._overlay.classList.add(`count-${this.getCount()}`);
     }
 
-    get(id: string) {
+    // get one of the overlay children using its id
+    get(id: string): HTMLElement {
         return this._elements[id];
     }
 
-    getIdForLabel(label: string) {
+    getIdForLabel(label: string): string {
         if (this._labels[label]) {
             return this._labels[label];
         }
         return null;
     }
 
+    // remove a child
     remove(id: string) {
         this._overlay.classList.remove(`count-${this.getCount()}`);
         if (this._elements[id]) {
@@ -157,7 +181,8 @@ class Overlay extends EventEmitter {
         this._overlay.classList.add(`count-${this.getCount()}`);
     }
 
-    setActive(id: string) {
+    // set a child as active
+    setElementActive(id: string) {
         this._activeIconId = id;
         Object.keys(this._elements).forEach((key) => {
             if (key === id) {
@@ -174,15 +199,7 @@ class Overlay extends EventEmitter {
         });
     }
 
-    getActive() {
-        let activeIconElement = null;
-        if (this._activeIconId) {
-            activeIconElement = this._elements[this._activeIconId];
-        }
-        return activeIconElement;
-    }
-
-    addClass(id: string, classname: string) {
+    addClassToElement(id: string, classname: string) {
         Object.keys(this._elements).forEach((key) => {
             if (key === id) {
                 this._elements[key].classList.add(classname);
@@ -190,7 +207,7 @@ class Overlay extends EventEmitter {
         });
     }
 
-    removeClass(id: string, classname: string) {
+    removeClassFromElement(id: string, classname: string) {
         Object.keys(this._elements).forEach((key) => {
             if (key === id) {
                 this._elements[key].classList.remove(classname);
@@ -199,7 +216,7 @@ class Overlay extends EventEmitter {
     }
 
  
-    clearButtonClass() {
+    _clearButtonClass() {
         this._button.classList.forEach((buttonClass) => {
             if (buttonClass.indexOf(buttonClassPrefix) === 0) {
                 this._button.classList.remove(buttonClass);
@@ -208,7 +225,7 @@ class Overlay extends EventEmitter {
     }
 
     setButtonClass(classname: string) {
-        this.clearButtonClass();
+        this._clearButtonClass();
         this._button.classList.add(`${buttonClassPrefix}${classname}`);
     }
 
@@ -234,4 +251,4 @@ class Overlay extends EventEmitter {
 }
 
 export default Overlay;
-export { OVERLAY_BUTTON_CLICK_EVENT };
+export { OVERLAY_ACTIVATED_EVENT };
