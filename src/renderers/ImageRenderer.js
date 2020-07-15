@@ -57,7 +57,7 @@ export default class ImageRenderer extends BaseRenderer {
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
-
+        this._playoutEngine.startNonAVPlayout()
         this._visible = true;
         this._setVisibility(true);
         return true;
@@ -65,7 +65,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._playoutEngine.startNonAVPlayout()
+
         if (this._duration === Infinity || this._duration < 0) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();

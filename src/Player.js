@@ -21,7 +21,8 @@ import {
     scrollToTop,
     preventEventDefault,
     SLIDER_CLASS,
-    handleButtonTouchEvent
+    handleButtonTouchEvent,
+    inSMPWrapper
 } from './utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from './Events';
 
@@ -419,13 +420,17 @@ class Player extends EventEmitter {
         this._mediaLayer.id = 'media-layer';
         this._mediaLayer.classList.add('romper-media');
 
-        this._loadingLayer = document.createElement('div');
-        this._loadingLayer.id = 'loading-layer';
-        this._loadingLayer.classList.add('romper-loading');
-        const loadingLayerInner = document.createElement('div');
-        loadingLayerInner.classList.add('romper-loading-inner');
-        this._loadingLayer.appendChild(loadingLayerInner);
-        this._mediaLayer.appendChild(this._loadingLayer);
+        if(!inSMPWrapper()) {
+            this._loadingLayer = document.createElement('div');
+            this._loadingLayer.id = 'loading-layer';
+            this._loadingLayer.classList.add('romper-loading');
+            const loadingLayerInner = document.createElement('div');
+            loadingLayerInner.classList.add('romper-loading-inner');
+            this._loadingLayer.appendChild(loadingLayerInner);
+            this._mediaLayer.appendChild(this._loadingLayer);
+        }
+
+
 
         this._aspectRatio = 16 / 9;
         this._guiLayer = document.createElement('div');
@@ -673,7 +678,7 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(this._nextButtonClicked.bind(this)),
         );
 
-        // TODO: Remove these as only needed for debug 
+        // TODO: Remove these as only needed for debug
         window.SPnext = this._nextButtonClicked.bind(this);
         window.SPback = this._backButtonClicked.bind(this);
 
@@ -1049,11 +1054,19 @@ class Player extends EventEmitter {
     }
 
     _showBufferingLayer() {
-        this._loadingLayer.classList.add('show');
+        if(!inSMPWrapper()) {
+            this._loadingLayer.classList.add('show');
+        } else {
+            throw new Error("Shouldn't be using this from SMP")
+        }
     }
 
     _removeBufferingLayer() {
-        this._loadingLayer.classList.remove('show');
+        if(!inSMPWrapper()) {
+            this._loadingLayer.classList.remove('show');
+        } else {
+            throw new Error("Shouldn't be using this from SMP")
+        }
     }
 
     _removeErrorLayer() {

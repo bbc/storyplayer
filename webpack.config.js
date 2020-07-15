@@ -8,11 +8,14 @@ const productionBuild = process.env.NODE_ENV === 'production';
 
 module.exports = env => {
     const config = {
-        entry: './src/romper.js',
+        entry: {
+            romper: './src/romper.js',
+            plugin: './smp-example/plugin/plugin.js'
+        },
         devtool: 'source-map',
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'romper.js',
+            filename: '[name].js',
             library: 'Romper',
             libraryTarget: 'umd'
         },
@@ -48,7 +51,7 @@ module.exports = env => {
         },
         plugins: [
             new MiniCssExtractPlugin({
-                filename: 'romper.css',
+                filename: '[name].css',
             }),
         ],
     };

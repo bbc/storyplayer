@@ -200,6 +200,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setPlayoutActive(rendererId)
+            return
         }
 
         this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, this._permissionToPlay)
@@ -424,6 +425,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setVolume(rendererId, volume)
+            return 
         }
         if(rendererPlayoutObj.active) {
             this._smpPlayerInterface.volume = volume
