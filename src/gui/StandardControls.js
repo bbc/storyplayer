@@ -1,8 +1,9 @@
 // @flow
-import BaseControls from './BaseControls';
+import BaseControls, { ControlEvents } from './BaseControls';
 import Buttons, { ButtonEvents } from './Buttons';
 import ScrubBar from './ScrubBar';
 import Overlay from './Overlay';
+import { handleButtonTouchEvent } from '../utils';
 
 //
 // Component containing UI for all buttons
@@ -15,9 +16,15 @@ class StandardControls extends BaseControls {
 
     _buttonsActivateArea: HTMLDivElement;
 
+    _showRomperButtonsTimeout: TimeoutID;
+
+    _hideTimeout: ?TimeoutID;
+
     _narrativeElementTransport: HTMLDivElement;
 
     _buttonControls: BaseButtons;
+
+    _controlsDisabled: boolean;
 
     _logUserInteraction: Function;
 
@@ -35,6 +42,23 @@ class StandardControls extends BaseControls {
         this._forwardButtonEvents();
         this._scrubBar = new ScrubBar(this._logUserInteraction);
 
+        this._buttonsActivateArea = document.createElement('div');
+        this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
+        this._buttonsActivateArea.classList.add('hide');
+        this._buttonsActivateArea.classList.add('romper-inactive');
+        this._buttonsActivateArea.onmouseenter = () => {
+            this.activateRomperButtons();
+        };
+        this._buttonsActivateArea.onmousemove = () => {
+            this.activateRomperButtons();
+        };
+        this._buttonsActivateArea.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this.activateRomperButtons.bind(this)),
+        );
+        this._buttonsActivateArea.onclick = this.activateRomperButtons.bind(this);
+
+        
         // next is needed for activating buttons area
         this._narrativeElementTransport = this._buttonControls.getTransportControls();
 
@@ -55,6 +79,12 @@ class StandardControls extends BaseControls {
         this._containerDiv.classList.add('romper-buttons');
         this._containerDiv.appendChild(this._scrubBar.getScrubBarElement());
         this._containerDiv.appendChild(mediaTransport);
+        this._containerDiv.onmousemove = () => {
+            this.activateRomperButtons();
+        };
+        this._containerDiv.onmouseleave = () => {
+            this.hideControls();
+        };
     }
     
     // pass on any events
@@ -75,25 +105,90 @@ class StandardControls extends BaseControls {
             () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
     }
 
+    activateRomperButtons(event: ?Object, override: ?boolean) {
+        if(event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        if (!override && this._controlsDisabled) {
+            return;
+        }
+        if (!this.getShowing()) {
+            this.showControls();
+        }
+        if(override) {
+            return;
+        }
+        if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
+        this._showRomperButtonsTimeout = setTimeout(() => this.hideControls(), 5000);
+    }
+
     // get the whole lot organised in a DIV
     getControls(): HTMLDivElement {
         return this._containerDiv;
     }
 
-    showControls() {
-        this._containerDiv.classList.add('show');
+    getActivator(): HTMLDivElement {
+        return this._buttonsActivateArea;
     }
 
+    // this stops activation from proceeding
+    disableControls() {
+        this._controlsDisabled = true;
+    }
+
+    enableControls() {
+        this._controlsDisabled = false;
+    }
+
+    getShowing(): boolean {
+        return this._containerDiv.classList.contains('show');
+    }
+
+    // make the controls visible
+    showControls() {
+        if (this._hideTimeout) {
+            // has only just hidden - don't emit either event
+            clearTimeout(this._hideTimeout);
+        } else {
+            this.emit(ControlEvents.SHOWING_BUTTONS);
+        }
+        this._containerDiv.classList.add('show');
+        this._buttonControls.showTransportControls();
+        this._buttonsActivateArea.classList.add('hide');
+    }
+    
+    // make the controls disappear
     hideControls() {
+        if (!this.getShowing()) return;
+        if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
         this._containerDiv.classList.remove('show');
+        this._buttonControls.hideTransportControls();
+        this._buttonsActivateArea.classList.remove('hide');
+        // hiding the controls causes the mouse to trigger a new show event
+        // we don't want to spam the Player with show/hide events
+        // when the controls are basically staying visible
+        // so emit event after a short timeout; if the buttons show again
+        // clear the timeout
+        this._hideTimeout = setTimeout(() => {
+            if (!this.getShowing()) {
+                this.emit(ControlEvents.HIDING_BUTTONS);
+                this._hideTimeout = null;
+            }
+        }, 300);
+    }
+
+    // this is like disableControls, but also has the effect of getting rid
+    // of the activate area, so other things can be clicked on (e.g., start button)
+    setControlsInactive() {
+        this._containerDiv.classList.add('romper-inactive');
+        this._buttonsActivateArea.classList.add('romper-inactive');
     }
 
     setControlsActive() {
         this._containerDiv.classList.remove('romper-inactive');
-    }
-
-    setControlsInactive() {
-        this._containerDiv.classList.add('romper-inactive');
+        this._buttonsActivateArea.classList.remove('romper-inactive');
+        this._buttonsActivateArea.classList.remove('hide');
     }
 
     setFullscreenOn() {
@@ -129,14 +224,6 @@ class StandardControls extends BaseControls {
     }
 
     /* exposing functionality to change how buttons look/feel */
-    showTransportControls() {
-        this._buttonControls.showTransportControls();
-    }
-
-    hideTransportControls() {
-        this._buttonControls.hideTransportControls();
-    }
-
     setTransportControlsActive() {
         this._buttonControls.setTransportControlsActive();
     }

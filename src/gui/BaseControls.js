@@ -4,6 +4,16 @@ import EventEmitter from 'events';
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 
+const ControlEvents = [
+    'SHOWING_BUTTONS',
+    'HIDING_BUTTONS',
+].reduce((events, eventName) => {
+    // eslint-disable-next-line no-param-reassign
+    events[eventName] = eventName;
+    return events;
+}, {});
+
+
 //
 // Component containing UI for all buttons
 //
@@ -35,7 +45,17 @@ class BaseControls extends EventEmitter {
         return document.createElement('div');
     }
 
+    // get a div that activates the buttons
+    getActivator(): HTMLDivElement { }
+
+    // are the controls showing
+    getShowing(): boolean { }
+
     /* exposing functionality to change how buttons look/feel */
+    disableControls() { }
+
+    enableControls() { }
+
     showControls() { }
 
     hideControls() { }
@@ -60,10 +80,6 @@ class BaseControls extends EventEmitter {
 
     disconnectScrubBar() { }
 
-    showTransportControls() {  }
-
-    hideTransportControls() { }
-
     setTransportControlsActive() { }
 
     setTransportControlsInactive() { }
@@ -85,4 +101,5 @@ class BaseControls extends EventEmitter {
     disableSubtitlesButton() { }
 }
 
+export { ControlEvents };
 export default BaseControls;
