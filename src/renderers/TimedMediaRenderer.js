@@ -27,8 +27,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
     _shouldShowScrubBar: boolean;
 
-    _hasEnded: boolean;
-
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,
@@ -112,11 +110,10 @@ export default class TimedMediaRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        if (this._testEndStallTimeout) clearTimeout(this._testEndStallTimeout);
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
         this._timer.pause();
-        if (!this._hasEnded) {
-            super.complete();
-        }
+        super.complete();
     }
 
     _seekEventHandler() {
@@ -146,13 +143,14 @@ export default class TimedMediaRenderer extends BaseRenderer {
         if (currentTime > duration) {
             this._playoutEngine.pauseRenderer(this._rendererId);
             this._endedEventListener();
+            return;
         }
         if (currentTime > (duration - 1)) {
             const nowTime = currentTime;
             if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
                 this._testEndStallTimeout = setTimeout(() => {
                     const time = this._playoutEngine.getCurrentTime(this._rendererId);
-                    if (time && !this._hasEnded) {
+                    if (time) {
                         // eslint-disable-next-line max-len
                         logger.info(`Checked video end for stall, run for 2s at ${nowTime}, reached ${time}`);
                         if (time >= nowTime && time <= nowTime + 1.9) {
@@ -191,7 +189,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
     start() {
         super.start();
-        this._hasEnded = false;
         // set timer to sync mode until really ready
         this._timer.setSyncing(true);
         const setStartToInTime = () => {
@@ -226,7 +223,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
         if (!needToEnd) return false;
 
         logger.info(`Ended: ${this._representation.id}`);
-        this._hasEnded = true;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
