@@ -1101,7 +1101,7 @@ class Player extends EventEmitter {
     }
     /* end of Representation overlay */
 
-    createBehaviourOverlay(behaviour: Object) {
+    createBehaviourOverlay(behaviour: Object): Overlay {
         const behaviourOverlay = this._createOverlay('link-choice', this._logUserInteraction);
         const behaviourElement = behaviourOverlay.getOverlay()
         behaviourElement.id = behaviour.id;

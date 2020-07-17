@@ -20,6 +20,7 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
+import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
 
@@ -123,6 +124,10 @@ export default class BaseRenderer extends EventEmitter {
 
     isIosPlayoutEngine: Function;
 
+    _setBehaviourElementAttribute: Function;
+
+    _linkChoiceBehaviourOverlay: Overlay;
+
     _cleanupSingleDuringBehaviour: Function;
 
     _runSingleDuringBehaviour: Function;
@@ -196,7 +201,7 @@ export default class BaseRenderer extends EventEmitter {
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
+        this._setBehaviourElementAttribute = this._setBehaviourElementAttribute.bind(this);
 
         this._willHideControls = this._willHideControls.bind(this);
         this._hideControls = this._hideControls.bind(this);
@@ -843,7 +848,8 @@ export default class BaseRenderer extends EventEmitter {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
-        this._setBehaviourElementAttribute(this._linkChoiceBehaviourOverlay.overlay, 'link-choice');
+        this._setBehaviourElementAttribute(
+            this._linkChoiceBehaviourOverlay.getOverlay(), 'link-choice');
 
         this._choiceBehaviourData = {
             choiceIconNEObjects: null,
@@ -934,7 +940,7 @@ export default class BaseRenderer extends EventEmitter {
 
                     this._player.clearLinkChoices();
                     iconObjects.forEach((iconSpecObject) => {
-                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
+                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.getOverlay());
                     });
                     if (iconObjects.length > 1 || showIfOneLink) {
                         this._showChoiceIcons({
