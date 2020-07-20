@@ -4,8 +4,6 @@ import Overlay from './Overlay';
 import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
 
-// TODO: Create Queue for updateUiConfig calls and handle them in correct order
-
 /* eslint-disable class-methods-use-this */
 
 class SMPControls extends BaseControls {
@@ -77,8 +75,6 @@ class SMPControls extends BaseControls {
         chapterOverlay.useCustomButton(this._chapterButton)
 
         this._setDefaultSMPControlsConfig()
-
-
     }
 
     _uiUpdate(controlsConfig) {
@@ -240,7 +236,7 @@ class SMPControls extends BaseControls {
         // TODO: Not sure we can disable Play Button
     }
 
-    setPlaying(isPlaying: boolean){ }
+    setPlaying(){ }
 
     setNextAvailable(isNextAvailable: boolean) {
         if(this._nextEnabled !== isNextAvailable) {
