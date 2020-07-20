@@ -3,7 +3,7 @@
 import Hls from 'hls.js';
 import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
@@ -507,10 +507,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.addEventListener(
                         'buffering', (e) => {
                             if(rendererPlayoutObj._shaka.isBuffering()) {
-                                this._player._showBufferingLayer();
+                                this._player.showBufferingLayer();
                             }
                             if(!e.buffering) {
-                                this._player._removeBufferingLayer();
+                                this._player.removeBufferingLayer();
                             }
                         }
                     );
@@ -535,7 +535,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         'adaptation', this._player._removeErrorLayer
                     );
                     rendererPlayoutObj._shaka.addEventListener(
-                        'adaptation', this._player._removeBufferingLayer
+                        'adaptation', this._player.removeBufferingLayer
                     );
 
 
@@ -624,9 +624,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.error,
                         this._player._showErrorLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.buffering,
-                        this._player._showBufferingLayer);
+                        this._player.showBufferingLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
-                        this._player._removeBufferingLayer);
+                        this._player.removeBufferingLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
                         this._player._removeErrorLayer);
 

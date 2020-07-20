@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
-import Player from '../Player';
+import Player from '../gui/Player';
 import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 
 

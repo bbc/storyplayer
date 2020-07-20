@@ -5,7 +5,7 @@ import BehaviourRunner from '../behaviours/BehaviourRunner';
 import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
@@ -20,6 +20,7 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
+import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
 
@@ -123,6 +124,10 @@ export default class BaseRenderer extends EventEmitter {
 
     isIosPlayoutEngine: Function;
 
+    _setBehaviourElementAttribute: Function;
+
+    _linkChoiceBehaviourOverlay: Overlay;
+
     _cleanupSingleDuringBehaviour: Function;
 
     _runSingleDuringBehaviour: Function;
@@ -196,7 +201,7 @@ export default class BaseRenderer extends EventEmitter {
         this.checkIsLooping = this.checkIsLooping.bind(this);
         this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
-
+        this._setBehaviourElementAttribute = this._setBehaviourElementAttribute.bind(this);
 
         this._willHideControls = this._willHideControls.bind(this);
         this._hideControls = this._hideControls.bind(this);
@@ -486,6 +491,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
+        const { timeBased } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
             return (value < 0 || value === Infinity || Number.isNaN(value))
         };
@@ -523,9 +529,14 @@ export default class BaseRenderer extends EventEmitter {
                 this._playoutEngine.off(this._rendererId,'timeupdate', sync);
             }
         };
-        this._timer.setSyncing(true);
-        this._playoutEngine.on(this._rendererId,'timeupdate', sync);
-        this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        // only try to sync if playout engine has time
+        if (this._playoutEngine.getCurrentTime(this._rendererId)) {
+            this._timer.setSyncing(true);
+            this._playoutEngine.on(this._rendererId,'timeupdate', sync);
+            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
+        } else if (timeBased) {
+            this._timer.setTime(targetTime);
+        }
     }
 
     _togglePause() {
@@ -837,7 +848,8 @@ export default class BaseRenderer extends EventEmitter {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);
-        this._setBehaviourElementAttribute(this._linkChoiceBehaviourOverlay.overlay, 'link-choice');
+        this._setBehaviourElementAttribute(
+            this._linkChoiceBehaviourOverlay.getOverlay(), 'link-choice');
 
         this._choiceBehaviourData = {
             choiceIconNEObjects: null,
@@ -928,7 +940,7 @@ export default class BaseRenderer extends EventEmitter {
 
                     this._player.clearLinkChoices();
                     iconObjects.forEach((iconSpecObject) => {
-                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.overlay);
+                        this._buildLinkIcon(iconSpecObject, behaviourOverlay.getOverlay());
                     });
                     if (iconObjects.length > 1 || showIfOneLink) {
                         this._showChoiceIcons({
@@ -1319,7 +1331,7 @@ export default class BaseRenderer extends EventEmitter {
     _applySocialSharePanelBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderSocialPopup(
             behaviour,
-            this._player._overlays,
+            this._player.getOverlayElement(),
             callback,
             this._analytics,
         );
@@ -1330,7 +1342,7 @@ export default class BaseRenderer extends EventEmitter {
     _applyLinkOutBehaviour(behaviour: Object, callback: () => mixed) {
         const modalElement = renderLinkoutPopup(
             behaviour,
-            this._player._overlays,
+            this._player.getOverlayElement(),
             callback,
             this._analytics,
         );

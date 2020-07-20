@@ -9,7 +9,7 @@ import SimpleTextRenderer from './SimpleTextRenderer';
 import SwitchableRenderer from './SwitchableRenderer';
 import ThreeJsVideoRenderer from './ThreeJsVideoRenderer';
 import ThreeJsImageRenderer from './ThreeJsImageRenderer';
-import Player from '../Player';
+import Player from '../gui/Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';

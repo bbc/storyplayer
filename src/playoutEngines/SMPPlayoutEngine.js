@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 import uuid from 'uuid/v4'
-import Player from '../Player';
+import Player from '../gui/Player';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities'
 import { PLAYOUT_ENGINES } from './playoutEngineConsts'
@@ -425,7 +425,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setVolume(rendererId, volume)
-            return 
+            return
         }
         if(rendererPlayoutObj.active) {
             this._smpPlayerInterface.volume = volume

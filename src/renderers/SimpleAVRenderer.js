@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import TimedMediaRenderer from './TimedMediaRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';

@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
 

@@ -5,7 +5,7 @@
 import EventEmitter from 'events';
 import uuid from 'uuid/v4';
 import type { AssetCollection, MediaFetcher } from '../romper';
-import Player from '../Player';
+import Player from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import { RENDERER_PHASES } from './BaseRenderer';
 import logger from '../logger';

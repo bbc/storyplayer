@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
-import Player, { PlayerEvents } from '../Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 
 export default class iOSPlayoutEngine extends BasePlayoutEngine {

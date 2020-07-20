@@ -74,17 +74,26 @@ export default class Controller extends EventEmitter {
         this._analyticsHandler.handleAnalyticsEvent(logData);
     }
 
-    restart(storyId: string, initialState?: Object = {}) {
+    restart(storyId?: ?string = null, initialState?: Object = {}) {
+        let restartStoryId;
+        if (storyId) {
+            restartStoryId = storyId;
+        } else if (this._storyId) {
+            restartStoryId = this._storyId;
+        } else {
+            logger.error('Could not restart - no story id');
+            return;
+        }
         this._reasoner = null;
         this._prepareRenderManagerForRestart();
         if(this._sessionManager) {
             if(Object.keys(initialState).length === 0) {
                 this._sessionManager.fetchExistingSessionState().then(resumeState => {
-                    this.start(storyId, resumeState);
+                    this.start(restartStoryId, resumeState);
                 });
             }
         } else {
-            this.start(storyId, initialState);
+            this.start(restartStoryId, initialState);
         }
     }
 
@@ -98,10 +107,19 @@ export default class Controller extends EventEmitter {
      * Reset the story and keep the reasoner for it.
      * @param  {string} storyId story to reset
      */
-    resetStory(storyId: string){
+    resetStory(storyId?: ?string = null){
+        let restartStoryId;
+        if (storyId) {
+            restartStoryId = storyId;
+        } else if (this._storyId) {
+            restartStoryId = this._storyId;
+        } else {
+            logger.error('Could not reset - no story id');
+            return;
+        }
         // we're just resetting
         this._prepareRenderManagerForRestart();
-        this.start(storyId);
+        this.start(restartStoryId);
     }
 
 
@@ -987,7 +1005,7 @@ export default class Controller extends EventEmitter {
         }
         return this.getVariableValue(InternalVariableNames.PATH_HISTORY)
             .then((history) => {
-                if (history.length > 1) {
+                if (history && history.length > 1) {
                     const lastVisitedId = history[history.length - 2];
                     return this._fetchers.narrativeElementFetcher(lastVisitedId);
                 }
