@@ -69,28 +69,36 @@ The build steps for each platform read from the `build` key in the package.json 
 
 ## Code Signing
 
-To sign the application we user certificates from BBC for windows loaded via ENV vars and [SOME OTHER PROCESS] for MacOS. 
-
 ### Windows
-The easiest way to tell electron to user certs is via environment variables. The `build:release` command will load the config.env file, this is explicitly ignored and MUST NOT BE CHECKED INTO SOURCE CONTROL. Don't rely on the `.gitignre` file,  you should ALWAYS check it isnt in the staged commits.
+The easiest way to tell electron to user certs is via environment variables. The `build:release` command will load the config.env file.
+This is explicitly ignored and MUST NOT BE CHECKED INTO SOURCE CONTROL. Don't rely on the `.gitignore` file, you should ALWAYS check it isn't in the staged commits.
 
-The cert and password are loaded into the environment variables on MacOS for signing the windows code.
 ```bash
 export WIN_CSC_LINK=./path/to/mycert/cert.p12 # windows code signing cert 
-export WIN_CSC_KEY_PASSWORD='my-passowrd' # windows code signing cert password
+export WIN_CSC_KEY_PASSWORD='my-password' # windows code signing cert password
 ```
-
 ### MacOS 
 
-To sign the MacOS application code, we may be using a similar process, though [NOT SURE YET]. The env variables look like this if we are using a digial cert. If they come from the keychain then the process will be different.
+## Building
+There are no specific prerequisites for building the MacOS application code.
 
-```bash
-export CSC_NAME='[certificatename]' #example 1A3JKJD89O
-export CSC_LINK=./path/to/mycert/cert.p12 # macos code signing cert
-export CSC_KEY_PASSWORD='my-passowrd' # macos code signing cert password
-# if this is true we'll use a valid and appropriate identity from the keychain in macos
-export CSC_IDENTITY_AUTO_DISCOVERY=true 
+## Signing and Notarizing
+To sign and notarize the MacOS application code, you will need an Apple ID, and access to a paid-for Apple Developer account.
+In the Security section of your Developer account at https://appleid.apple.com/account/manage, generate an app-specific password.
+Add your developer account ID (e.g. jimmy.blobs@bbc.co.uk) and your app-specific password to a file named .env in the storyplayer-electron folder.
 ```
+APPLEID=[your Apple ID]
+APPLEIDPASS=[your app-specific password]
+```
+
+Other steps need to be taken inside the Apple Developer system in order for the notarization process to work.
+
+* Once you have a free dev account, retrieve an “Apple Development” cert from the apple dev website and import to your keychain.
+* You'll need an invite from a team that has a paid-for Apple Developer account, so you can notarize the application. The team account holder can generate this for you.
+* The account holder will need to generate a new App ID for this app
+* The account holder will need to generate a Mac Developer cert for you as a team member
+* Once you have this cert, you will need to generate a CSR (Keychain access->Certificate Assistant->Request a certificate from a certificate authority) and send this back to the account holder.
+* The account holder can then generate a Developer ID Application cert which will be used for signing. You can download this from the developer portal once it's been generated.
 
 ## Publishing
 
