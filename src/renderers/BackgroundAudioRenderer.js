@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';

@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';

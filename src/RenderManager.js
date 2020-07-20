@@ -19,7 +19,7 @@ import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
-import Player, { PlayerEvents } from './Player';
+import Player, { PlayerEvents } from './gui/Player';
 import { REASONER_EVENTS } from './Events';
 import { getSetting, DISABLE_LOOKAHEAD_FLAG } from './utils';
 
