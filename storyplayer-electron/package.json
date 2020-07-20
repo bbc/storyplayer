@@ -1,11 +1,11 @@
 {
   "name": "StoryPlayer",
-  "productName": "storyplayer-electron",
-  "version": "0.9.51",
+  "productName": "BBC StoryPlayer",
+  "version": "0.9.6",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
-  "author": "FXT",
+  "author": "BBC Research & Development",
   "license": "MIT",
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
