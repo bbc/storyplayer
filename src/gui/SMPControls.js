@@ -1,10 +1,12 @@
 // @flow
-import BaseControls, { ControlEvents } from './BaseControls';
+import BaseControls from './BaseControls';
 import Overlay from './Overlay';
 import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
 
 // TODO: Create Queue for updateUiConfig calls and handle them in correct order
+
+/* eslint-disable class-methods-use-this */
 
 class SMPControls extends BaseControls {
 
@@ -20,7 +22,11 @@ class SMPControls extends BaseControls {
 
     _containerDiv: HTMLDivElement;
 
-    _chapterButton: HTMLButtonElement
+    _chapterButton: HTMLButtonElement;
+
+    _uiUpdateQueue: Array<Object>;
+
+    _uiUpdateQueueTimer: Number;
 
     constructor(
         logUserInteraction: Function,
@@ -42,6 +48,20 @@ class SMPControls extends BaseControls {
             this.emit(ButtonEvents.NEXT_BUTTON_CLICKED)
         })
 
+        // Pause Button
+        this._smpPlayerInterface.addEventListener("pause", (event) => {
+            if(!event.ended) {
+                this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED)
+            }
+        })
+
+        // Play Button
+        this._smpPlayerInterface.addEventListener("playing", () => {
+            // TODO: This picks up all play events not just the ones triggered
+            // from the play button. Requires review by Andy B
+            this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED)
+        })
+
         // Controls enabled by default
         this._controlsEnabled = true
 
@@ -51,8 +71,61 @@ class SMPControls extends BaseControls {
         this._containerDiv.classList.add('show');
         this._containerDiv.appendChild(chapterOverlay.getOverlay());
 
+        this._uiUpdateQueue = []
+
         this._createChapterButton()
         chapterOverlay.useCustomButton(this._chapterButton)
+
+        this._setDefaultSMPControlsConfig()
+
+
+    }
+
+    _uiUpdate(controlsConfig) {
+        this._uiUpdateQueue.push(controlsConfig)
+        this._processUiUpdateQueue()
+    }
+
+    _processUiUpdateQueue() {
+        if(this._uiUpdateQueueTimer) {
+            clearTimeout(this._uiUpdateQueueTimer)
+            this._uiUpdateQueueTimer = null;
+        }
+        if(this._smpPlayerInterface.playlist === null) {
+            this._uiUpdateQueueTimer = setTimeout(() => {this._processUiUpdateQueue()}, 1000)
+            return
+        }
+
+        // Apply all UI config changes in one go by combining settings
+        const controlsConfig = this._uiUpdateQueue.reduce((combinedConfig, nextValue) => {
+            return {
+                ...combinedConfig,
+                ...nextValue,
+            }
+        }, {})
+        this._uiUpdateQueue = []
+
+        this._smpPlayerInterface.updateUiConfig({
+            controls: controlsConfig
+        })
+    }
+
+    _setDefaultSMPControlsConfig() {
+        // Setup Default Controls Settings
+        this._uiUpdate({
+            enabled: true,
+            spaceControlsPlayback: true,
+            // TODO: Should controls disappear at end?
+            availableOnMediaEnded: false,
+            includeNextButton: true,
+            includePreviousButton: true,
+            // previousNextJustEvents not used in StoryKit Button Calls
+            // previousNextJustEvents: true,
+            includeBackIntervalButton: true,
+            includeForwardIntervalButton: true,
+            alwaysEnablePreviousButton: false,
+            alwaysEnableNextButton: false,
+        })
     }
 
     _createChapterButton() {
@@ -92,32 +165,18 @@ class SMPControls extends BaseControls {
 
     /* exposing functionality to change how buttons look/feel */
     disableControls() {
-        if(this._smpPlayerInterface.playlist === null) {
-            setTimeout(() => {this.disableControls()}, 1000)
-            return
-        }
-
         if(this._controlsEnabled !== false) {
-            this._smpPlayerInterface.updateUiConfig({
-                controls:{
-                    enabled: false,
-                }
+            this._uiUpdate({
+                enabled: false,
             })
             this._controlsEnabled = false
         }
     }
 
     enableControls() {
-        if(this._smpPlayerInterface.playlist === null) {
-            setTimeout(() => {this.enableControls()}, 1000)
-            return
-        }
-
         if(this._controlsEnabled !== true) {
-            this._smpPlayerInterface.updateUiConfig({
-                controls:{
-                    enabled: false,
-                }
+            this._uiUpdate({
+                enabled: true,
             })
             this._controlsEnabled = true
         }
@@ -145,13 +204,21 @@ class SMPControls extends BaseControls {
 
     setFullscreenOff() { }
 
-    hideScrubBar() { }
+    hideScrubBar() {
+        // Not used, might be required for hideSeekButtons in player
+    }
 
-    showScrubBar() { }
+    showScrubBar() {
+        // Called from showSeekButtons in player
+    }
 
-    enableScrubBar() { }
+    enableScrubBar() {
+        // TODO: Not sure we can disable scrub bar
+    }
 
-    disableScrubBar() { }
+    disableScrubBar() {
+        // TODO: Not sure we can disable scrub bar
+    }
 
     connectScrubBar() { }
 
@@ -161,7 +228,7 @@ class SMPControls extends BaseControls {
 
     setTransportControlsInactive() { }
 
-    showSeekButtons(){
+    showSeekButtons() {
         // TODO: Where is hideSeekButtons?!
     }
 
@@ -176,16 +243,9 @@ class SMPControls extends BaseControls {
     setPlaying(isPlaying: boolean){ }
 
     setNextAvailable(isNextAvailable: boolean) {
-        if(this._smpPlayerInterface.playlist === null) {
-            setTimeout(() => {this.setNextAvailable(isNextAvailable)}, 1000)
-            return
-        }
-
         if(this._nextEnabled !== isNextAvailable) {
-            this._smpPlayerInterface.updateUiConfig({
-                controls:{
-                    alwaysEnableNextButton: isNextAvailable,
-                }
+            this._uiUpdate({
+                alwaysEnableNextButton: isNextAvailable,
             })
             this._nextEnabled = isNextAvailable
         }
@@ -193,16 +253,9 @@ class SMPControls extends BaseControls {
     }
 
     setBackAvailable(isBackAvailable: boolean) {
-        if(this._smpPlayerInterface.playlist === null) {
-            setTimeout(() => {this.setBackAvailable(isBackAvailable)}, 1000)
-            return
-        }
-
         if(this._backButton !== isBackAvailable) {
-            this._smpPlayerInterface.updateUiConfig({
-                controls:{
-                    alwaysEnablePreviousButton: isBackAvailable,
-                }
+            this._uiUpdate({
+                alwaysEnablePreviousButton: isBackAvailable,
             })
             this._backButton = isBackAvailable;
         }

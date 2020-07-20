@@ -1485,6 +1485,7 @@ class Player extends EventEmitter {
 
     // SCRUB BAR
     hideScrubBar() {
+        // TODO: Function not used!?
         this._controls.hideScrubBar()
     }
 

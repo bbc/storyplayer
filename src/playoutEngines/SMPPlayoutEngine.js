@@ -41,6 +41,19 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
+
+        this._smpPlayerInterface.addEventListener("pause", () => {
+            // this._playing = false;
+            // Cludy hack to update playing status
+            this.pause(false)
+        })
+
+        // Play Button
+        this._smpPlayerInterface.addEventListener("playing", () => {
+            // this._playing = true;
+            // Cludy hack to update playing status
+            this.play(false)
+        })
     }
 
     supports(feature) {
@@ -55,20 +68,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     setPermissionToPlay(value: boolean) {
         this._secondaryPlayoutEngine.setPermissionToPlay(value)
         super.setPermissionToPlay(value)
-
-        // Example of changing button status
-        // TODO: Interval buttons should be shown only for video
-        // TODO: Enable buttons should be enabled/disabled based on lookahead/previous
-        // ISSUE: includeBackIntervalButton, includeForwardIntervalButton don't seem to toggle buttons
-        // NOTE: This cannot be called in constructor
-        // this._smpPlayerInterface.updateUiConfig({
-        //     controls:{
-        //         includeBackIntervalButton: false,
-        //         includeForwardIntervalButton: false,
-        //         alwaysEnablePreviousButton: true,
-        //         alwaysEnableNextButton: true,
-        //     }
-        // })
 
         // TODO: first active playout is not set to autoplay so we have to
         // manually start it here. We will need to test this on iOS as I'd
@@ -257,18 +256,22 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return super.setPlayoutInactive(rendererId)
     }
 
-    play() {
+    play(changeSMP = true) {
         this._playing = true;
         this._hasStarted = true;
         this._secondaryPlayoutEngine.play();
-        this._smpPlayerInterface.play();
+        if(changeSMP) {
+            this._smpPlayerInterface.play();
+        }
         super.play()
     }
 
-    pause() {
+    pause(changeSMP = true) {
         this._playing = false;
         this._secondaryPlayoutEngine.pause();
-        this._smpPlayerInterface.pause();
+        if(changeSMP) {
+            this._smpPlayerInterface.pause();
+        }
         super.pause()
     }
 
