@@ -230,7 +230,7 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         this._behaviourElements = [];
-        this._timer = new TimeManager();
+        this._timer = new TimeManager(this._rendererId);
 
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
@@ -249,6 +249,9 @@ export default class BaseRenderer extends EventEmitter {
         this._loopCounter = 0;
         this._setPhase(RENDERER_PHASES.CONSTRUCTING);
         this._inPauseBehaviourState = false;
+
+        this._pauseHandlerForTimer = this._pauseHandlerForTimer.bind(this)
+        this._playHandlerForTimer = this._playHandlerForTimer.bind(this)
     }
 
     // run any code that may be asynchronous
@@ -547,26 +550,38 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    _pauseHandlerForTimer() {
+        this._timer.pause()
+    }
+
+    _playHandlerForTimer() {
+        this._timer.resume()
+    }
+
+    // Both _addPauseHandlersForTimer AND _handlePlayPauseButtonClicked are
+    // handling timer changes because _handlePlayPauseButtonClicked is
+    // required in non SMP version to catch play/pause on images
     _addPauseHandlersForTimer() {
         if (this._timer) {
-            this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
-            this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.on(this._rendererId, 'pause', this._pauseHandlerForTimer);
+            this._playoutEngine.on(this._rendererId, 'play', this._playHandlerForTimer);
         }
     }
 
     _removePauseHandlersForTimer() {
         if (this._timer) {
-            this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
-            this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.off(this._rendererId, 'pause', this._pauseHandlerForTimer);
+            this._playoutEngine.off(this._rendererId, 'play', this._playHandlerForTimer);
         }
     }
 
-    _handlePlayPauseButtonClicked(): void {
-        if (this._timer._paused) {
+    _handlePlayPauseButtonClicked(eventData): void {
+        if ((eventData && eventData.playButtonClicked)){
             this._timer.resume();
-        } else {
+        } else if((eventData && eventData.pauseButtonClicked)){
             this._timer.pause();
         }
+
         if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);

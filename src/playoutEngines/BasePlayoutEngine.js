@@ -129,7 +129,7 @@ export default class BasePlayoutEngine {
     }
 
     stopNonAVPlayout() {
-        
+
     }
 
     play() {
@@ -236,6 +236,13 @@ export default class BasePlayoutEngine {
         if (mediaElement) {
             mediaElement.style[key] = '';
         }
+    }
+
+    setAllVolume(volume: number) {
+        Object.keys(this._media)
+            .forEach((key) => {
+                this.setVolume(key, volume)
+            });
     }
 
     setVolume(rendererId: string, volume: number) {

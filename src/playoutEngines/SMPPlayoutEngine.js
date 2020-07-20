@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 import uuid from 'uuid/v4'
+import EventEmitter from 'events';
 import Player from '../gui/Player';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities'
@@ -21,6 +22,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     _fakeItemRendererId: string
 
     _fakeItemDuration: Number
+
+    _fakeItemLoaded: boolean
+
+    _fakeEventEmitter: Object
 
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
@@ -46,23 +51,41 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             throw new Error('Invalid Playout Engine');
         }
 
-        this._smpPlayerInterface.addEventListener("pause", () => {
-            // this._playing = false;
-            // Cludy hack to update playing status
-            this.pause(false)
+        this._smpPlayerInterface.addEventListener("pause", (event) => {
+            // Hack to update playing status from SMP
+            if(!event.ended && event.paused) {
+                this.pause(false)
+            }
         })
 
         // Play Button
-        this._smpPlayerInterface.addEventListener("playing", () => {
-            // this._playing = true;
-            // Cludy hack to update playing status
+        this._smpPlayerInterface.addEventListener("play", () => {
+            // Hack to update playing status from SMP
             this.play(false)
         })
 
         this._fakeItemRendererId = null
         this._fakeItemDuration = -1
+        this._fakeItemLoaded = false
+        this._fakeEventEmitter = new EventEmitter();
+
+        this._smpPlayerInterface.addEventListener("play", (e) => {
+            this._fakeEventEmitter.emit("play", e)
+        });
+        this._smpPlayerInterface.addEventListener("pause", (e) => {
+            this._fakeEventEmitter.emit("pause", e)
+        });
+        this._smpPlayerInterface.addEventListener("volumechange", (e) => {
+            let { volume } = e
+            if(e.muted) {
+                volume = 0
+            }
+            this._secondaryPlayoutEngine.setAllVolume(volume)
+        });
 
         this._smpFakePlay = this._smpFakePlay.bind(this);
+        this._smpFakePause = this._smpFakePause.bind(this);
+        this._smpFakeLoad = this._smpFakeLoad.bind(this);
     }
 
     supports(feature) {
@@ -182,7 +205,22 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return
         }
 
-        this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, this._permissionToPlay)
+        if(this._permissionToPlay) {
+            // If permission to play granted then autostart playlist and
+            // then pause if we are not currently playing
+            this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, true);
+            if(!this._playing) {
+                const pauseFunction = () => {
+                    this._smpPlayerInterface.removeEventListener("playing", pauseFunction)
+                    this._smpPlayerInterface.pause()
+                }
+                this._smpPlayerInterface.addEventListener("playing", pauseFunction)
+            }
+        } else {
+            // If permission to play not granted then just load playlist without
+            // playing
+            this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, false);
+        }
         if (!rendererPlayoutObj.active) {
             logger.info(`Applying queued events for ${rendererId}`)
             rendererPlayoutObj.queuedEvents.forEach((qe) => {
@@ -201,10 +239,51 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
                 type: "playing",
                 fake: true
             });
+            if(this._fakeItemLoaded === false) {
+                // This is playRequested event when playlist is first queued. We
+                // don't want to emit play or change the playout engine playing
+                // status for this first event
+                this._fakeItemLoaded = true
+            } else {
+                this._fakeEventEmitter.emit("play")
+                this.play(false)
+            }
+        }
+    }
+
+    _smpFakePause() {
+        const mi = this._smpPlayerInterface.currentItem;
+        if (mi && mi.fake) {
+            this._fakeEventEmitter.emit("pause")
+            this._smpPlayerInterface.dispatchEvent({
+                type: "pause",
+                fake: true
+            });
+            this.pause(false)
+        }
+    }
+
+    _smpFakeLoad() {
+        // Event called after the first playRequested event is sent. This is the
+        // only valid place to dispatch the pause event to get the play/pause
+        // button to change
+        if(!this._playing) {
+            this._smpPlayerInterface.dispatchEvent({
+                type: "pause",
+                fake: true
+            });
+        }
+    }
+
+    setNonAVPlayoutTime(rendererId, time) {
+        if(
+            rendererId === this._fakeItemRendererId &&
+            this._fakeItemDuration > 0
+        ) {
             this._smpPlayerInterface.dispatchEvent({
                 type: "timeupdate",
                 override: true,
-                time: 0,
+                time,
                 duration: this._fakeItemDuration
             })
         }
@@ -213,6 +292,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     startNonAVPlayout(rendererId, duration = 0) {
         this._fakeItemRendererId = rendererId
         this._fakeItemDuration = duration
+        this._fakeItemLoaded = false;
 
         const playlist = {
             id: `${uuid()}`,
@@ -233,49 +313,16 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         logger.info(`SMP-SP loadPlaylist (Fake)`)
         this._smpPlayerInterface.loadPlaylist(playlist, config);
 
+        // Turn off SMP loading wheel
         this._smpPlayerInterface.updateUiConfig({
             buffer: {
                 enabled: false
             }
         })
 
-        // TODO: Could put these in constructor as function only works if fake item is found
-        this._smpPlayerInterface.addEventListener("mediaItemInfoChanged", this._smpFakePlay);
         this._smpPlayerInterface.addEventListener("playRequested", this._smpFakePlay);
-
-        // const playerInterface = this._smpPlayerInterface
-        //
-        // let timer;
-        // let time = 0;
-        // const td = function() {
-        //     time += 1
-        //     if (time > 2000) {
-        //         playerInterface.dispatchEvent( { type:"ended",fake:true,fakeEnded:true } );
-        //         time = 0;
-        //     } else {
-        //         playerInterface.dispatchEvent( { type:"timeupdate",override:true,time: time/20,duration:100});
-        //         clearTimeout(timer);
-        //         timer = setTimeout(td,50);
-        //     }
-        // }
-        // playerInterface.addEventListener("seekRequested", function(e){
-        //     time=e.time;
-        //     td();
-        // });
-        // playerInterface.addEventListener("pauseRequested", function(){
-        //     clearTimeout(timer)
-        // });
-        // const play = function(){
-        //     const mi=playerInterface.currentItem;
-        //     if (mi) {
-        //         if (mi.fake) {
-        //             playerInterface.dispatchEvent( {type:"playing",fake:true});
-        //             timer = setTimeout(td,1000);
-        //         }
-        //     }
-        // }
-        // playerInterface.addEventListener("mediaItemInfoChanged", play);
-        // playerInterface.addEventListener("playRequested", play);
+        this._smpPlayerInterface.addEventListener("pauseRequested", this._smpFakePause);
+        this._smpPlayerInterface.addEventListener("mediaItemInfoChanged", this._smpFakeLoad)
     }
 
     stopNonAVPlayout(rendererId) {
@@ -284,9 +331,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             this._fakeItemRendererId = null
             this._fakeItemDuration = -1
 
-            this._smpPlayerInterface.removeEventListener("mediaItemInfoChanged", this._smpFakePlay);
             this._smpPlayerInterface.removeEventListener("playRequested", this._smpFakePlay);
+            this._smpPlayerInterface.removeEventListener("pauseRequested", this._smpFakePause);
+            this._smpPlayerInterface.removeEventListener("mediaItemInfoChanged", this._smpFakeLoad)
 
+            // Restore SMP loading wheel
             this._smpPlayerInterface.updateUiConfig({
                 buffer: {
                     enabled: true
@@ -296,13 +345,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutInactive(rendererId: string) {
-        // TODO
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.setPlayoutInactive(rendererId)
         }
 
-        // TODO: Clear SMP Player for case when we go from SMP to Image renderer
         return super.setPlayoutInactive(rendererId)
     }
 
@@ -350,7 +397,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if(rendererPlayoutObj.active) {
             return this._smpPlayerInterface.currentTime;
         }
-        return 0;
+        return undefined;
 
     }
 
@@ -368,7 +415,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     setCurrentTime(rendererId: string, time: number) {
-        console.log("ANALY setCurrentTime")
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.setCurrentTime(rendererId, time)
@@ -383,6 +429,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
 
     on(rendererId: string, event: string, callback: Function) {
+        // TODO: This is a horrible hack as non av don't exist in the playout engine
+        // yet
+        if(event === "play" || event === "pause") {
+            this._fakeEventEmitter.addListener(event, callback)
+            return false
+        }
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.on(rendererId, event, callback)
@@ -407,6 +459,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     off(rendererId: string, event: string, callback: Function) {
+        if(event === "play" || event === "pause") {
+            this._fakeEventEmitter.removeListener(event, callback)
+            return false
+        }
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.off(rendererId, event, callback)

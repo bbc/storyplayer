@@ -3,7 +3,8 @@ import BaseControls from './BaseControls';
 import Overlay from './Overlay';
 import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
-
+import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
+import logger from '../logger';
 /* eslint-disable class-methods-use-this */
 
 class SMPControls extends BaseControls {
@@ -26,18 +27,25 @@ class SMPControls extends BaseControls {
 
     _uiUpdateQueueTimer: Number;
 
+    _scrubTimePoller: ?IntervalID;
+
+    _playoutEngine: BasePlayoutEngine;
+
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
+        playoutEngine: BasePlayoutEngine,
     ) {
         super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
-        this._smpPlayerInterface = getSMPInterface()
+
+        this._playoutEngine = playoutEngine;
+
+        this._smpPlayerInterface = getSMPInterface();
 
         // Previous Button
         this._smpPlayerInterface.addEventListener("previousRequested", () => {
-            // TODO: Fix issue where back is available on first node
             this.emit(ButtonEvents.BACK_BUTTON_CLICKED)
         })
 
@@ -46,19 +54,18 @@ class SMPControls extends BaseControls {
             this.emit(ButtonEvents.NEXT_BUTTON_CLICKED)
         })
 
-        // Pause Button
-        this._smpPlayerInterface.addEventListener("pause", (event) => {
-            if(!event.ended) {
-                this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED)
-            }
-        })
-
-        // Play Button
-        this._smpPlayerInterface.addEventListener("playing", () => {
-            // TODO: This picks up all play events not just the ones triggered
-            // from the play button. Requires review by Andy B
-            this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED)
-        })
+        // TODO: Fix analytics for PlayPause button in SMP
+        // // Pause Button
+        // this._smpPlayerInterface.addEventListener("pauseRequested", () => {
+        //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {pauseButtonClicked: true})
+        // })
+        //
+        // // Play Button
+        // this._smpPlayerInterface.addEventListener("playRequested", () => {
+        //     // TODO: This picks up all play events not just the ones triggered
+        //     // from the play button. Requires review by Andy B
+        //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {playButtonClicked: true})
+        // })
 
         // Controls enabled by default
         this._controlsEnabled = true
@@ -112,7 +119,7 @@ class SMPControls extends BaseControls {
             enabled: true,
             spaceControlsPlayback: true,
             // TODO: Should controls disappear at end?
-            availableOnMediaEnded: false,
+            availableOnMediaEnded: true,
             includeNextButton: true,
             includePreviousButton: true,
             // previousNextJustEvents not used in StoryKit Button Calls
@@ -157,7 +164,9 @@ class SMPControls extends BaseControls {
     getActivator(): HTMLDivElement { }
 
     // are the controls showing
-    getShowing(): boolean { }
+    getShowing(): boolean {
+        return true
+    }
 
     /* exposing functionality to change how buttons look/feel */
     disableControls() {
@@ -226,9 +235,39 @@ class SMPControls extends BaseControls {
         }
     }
 
-    connectScrubBar() { }
+    connectScrubBar(renderer: BaseRenderer) {
+        // clear any existing polling
+        if (this._scrubTimePoller) clearInterval(this._scrubTimePoller);
 
-    disconnectScrubBar() { }
+        // Update the seek bar as the media plays
+        this._scrubTimePoller = setInterval(
+            () => {
+                const { currentTime } = renderer.getCurrentTime();
+                this._playoutEngine.setNonAVPlayoutTime(renderer._rendererId, currentTime);
+            },
+            200,
+        );
+
+        this._smpPlayerInterface.addEventListener("seekRequested", (event) => {
+            const { currentTime, duration } = renderer.getCurrentTime();
+            let seekTo = event.time;
+            // Hack as SMP doesn't have time whilst playing fake item so detect is
+            // seek is due to scrub or +/- 20s buttons
+            if(seekTo === this._smpPlayerInterface.currentTime + 20) {
+                seekTo = Math.min(currentTime + 20, duration);
+            } else if(seekTo === 0 && this._smpPlayerInterface.currentTime <= 20) {
+                seekTo = Math.max(currentTime - 20, 0);
+            }
+            renderer.setCurrentTime(seekTo);
+        })
+
+        // TODO: Finish timing here, connect up the SMP seek to be able to set the Timer
+    }
+
+    disconnectScrubBar() {
+        // clear any existing polling
+        if (this._scrubTimePoller) clearInterval(this._scrubTimePoller);
+    }
 
     setTransportControlsActive() { }
 
@@ -239,11 +278,23 @@ class SMPControls extends BaseControls {
     }
 
     enablePlayButton() {
-        // TODO: Not sure we can disable Play Button
+        // Hack: SMP may change element id at anytime which is why it's in a
+        // catch statement
+        try {
+            document.getElementById("p_audioui_playpause").removeAttribute('disabled');
+        } catch (error) {
+            logger.warn("Cannot find play button: ", error)
+        }
     }
 
     disablePlayButton() {
-        // TODO: Not sure we can disable Play Button
+        // Hack: SMP may change element id at anytime which is why it's in a
+        // catch statement
+        try {
+            document.getElementById("p_audioui_playpause").setAttribute('disabled', 'true');
+        } catch (error) {
+            logger.warn("Cannot find play button: ", error)
+        }
     }
 
     setPlaying(){ }

@@ -25,6 +25,8 @@ class NarrativeElementTransport extends EventEmitter {
 
     _logUserInteraction: Function;
 
+    _isPlaying: boolean;
+
     constructor(
         logUserInteraction: Function,
     ) {
@@ -121,6 +123,7 @@ class NarrativeElementTransport extends EventEmitter {
             handleButtonTouchEvent(this._seekForwardButtonClicked.bind(this)),
         );
 
+        this._isPlaying = false;
     }
 
     // get the HTML <div> container with the buttons
@@ -160,6 +163,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     // switch the play pause button between play and pause states
     setPlaying(isPlaying: boolean) {
+        this._isPlaying = isPlaying
         if (isPlaying) {
             this._playPauseButton.classList.add('romper-pause-button');
             this._playPauseButton.classList.remove('romper-play-button');
@@ -193,7 +197,11 @@ class NarrativeElementTransport extends EventEmitter {
     }
 
     _playPauseButtonClicked() {
-        this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED);
+        if(this._isPlaying) {
+            this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {pauseButtonClicked: true});
+        } else {
+            this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {playButtonClicked: true});
+        }
         this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED);
     }
 

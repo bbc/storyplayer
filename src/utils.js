@@ -125,7 +125,7 @@ export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | 
     return (event: Object) => {
         if(getSetting(DEBUG_PLAYOUT_FLAG)) {
             logger.info('Event Captured:', event);
-            console.log('Touch Event Captured:', touchEvent);
+            logger.info('Touch Event Captured:', touchEvent);
         }
         // handle multiple touch points?
         if(event.touches !== undefined && event.touches && event.touches.length > 1) {

@@ -189,6 +189,52 @@ class Player extends EventEmitter {
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
+        if (debugPlayout) {
+            logger.info("Playout debugging: ON")
+        }
+
+        logger.info('Using playout engine: ', playoutToUse);
+
+        switch (playoutToUse) {
+        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
+            // Use shiny source switching engine.... smooth.
+            this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
+            break;
+        case PLAYOUT_ENGINES.IOS_PLAYOUT:
+            // Refactored iOS playout engine
+            this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
+            break;
+        case PLAYOUT_ENGINES.SMP_PLAYOUT:
+            // SMP playout engine
+            this.playoutEngine = new SMPPlayoutEngine(this, debugPlayout);
+            break;
+        default:
+            logger.fatal('Invalid Playout Engine');
+            throw new Error('Invalid Playout Engine');
+        }
+
+        if(debugPlayout) {
+            // Print all calls to PlayoutEngine along with their arguments
+            const playoutEngineHandler = {
+                get (getTarget, getProp) {
+                    // eslint-disable-next-line func-names
+                    return function() {
+                        /* eslint-disable prefer-rest-params */
+                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
+                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
+                        // eslint-disable-next-line prefer-spread
+                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
+                        /* eslint-enable prefer-rest-params */
+
+                        return ret
+                    }
+                },
+            };
+            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
+        }
+
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
@@ -315,53 +361,7 @@ class Player extends EventEmitter {
 
         this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
 
-        this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
 
-        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
-        if (debugPlayout) {
-            logger.info("Playout debugging: ON")
-        }
-
-        logger.info('Using playout engine: ', playoutToUse);
-
-        switch (playoutToUse) {
-        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
-            // Use shiny source switching engine.... smooth.
-            this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
-            break;
-        case PLAYOUT_ENGINES.IOS_PLAYOUT:
-            // Refactored iOS playout engine
-            this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
-            break;
-        case PLAYOUT_ENGINES.SMP_PLAYOUT:
-            // SMP playout engine
-            this.playoutEngine = new SMPPlayoutEngine(this, debugPlayout);
-            break;
-        default:
-            logger.fatal('Invalid Playout Engine');
-            throw new Error('Invalid Playout Engine');
-        }
-
-        if(debugPlayout) {
-            // Print all calls to PlayoutEngine along with their arguments
-            const playoutEngineHandler = {
-                get (getTarget, getProp) {
-                    // eslint-disable-next-line func-names
-                    return function() {
-                        /* eslint-disable prefer-rest-params */
-                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
-                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
-                        // eslint-disable-next-line prefer-spread
-                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
-                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
-                        /* eslint-enable prefer-rest-params */
-
-                        return ret
-                    }
-                },
-            };
-            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
-        }
     }
 
     // build UI components
@@ -371,6 +371,7 @@ class Player extends EventEmitter {
             this._volume,
             this._icon,
             this._representation,
+            this.playoutEngine,
         );
         this._guiLayer.appendChild(this._controls.getControls());
     }
@@ -385,6 +386,8 @@ class Player extends EventEmitter {
         );
         this._guiLayer.appendChild(this._controls.getControls());
         this._guiLayer.appendChild(this._controls.getActivator());
+
+        this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
     }
 
     // create an element ready for rendering countdown
@@ -442,7 +445,7 @@ class Player extends EventEmitter {
         /* eslint-disable max-len */
         this._controls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED, () => this.emit(PlayerEvents.SUBTITLES_BUTTON_CLICKED));
         this._controls.on(ButtonEvents.FULLSCREEN_BUTTON_CLICKED, () => this._toggleFullScreen());
-        this._controls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, () => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED));
+        this._controls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, (e) => this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, e));
         this._controls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED));
         this._controls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED, () => this.emit(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED));
         /* eslint-enable max-len */
@@ -611,6 +614,7 @@ class Player extends EventEmitter {
     }
 
     // TODO: this needs proper testing!
+    // This function is StandardControls Specific
     _handleTouchEndEvent(event: Object) {
         // Get the element that was clicked on
         const endTarget = document.elementFromPoint(
