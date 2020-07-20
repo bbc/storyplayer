@@ -44,7 +44,6 @@ The build steps for each platform read from the `build` key in the package.json 
 {
     "build": {
         "productName": "StoryPlayer", // name of the application
-        "appId": "com.bbc.storyplayer", // id used by each platform
         // mac specific config
         "mac": {
             "category": "public.app-category.video", // what do we define our app as for apple to sort
@@ -53,13 +52,16 @@ The build steps for each platform read from the `build` key in the package.json 
             "icon": " path to icon.icns", // path to the icon for the application
             "darkModeSupport": false, // no dark mode as we don't support it in the player
             "type": "distribution" // building for distribution not testing
+            "appId": "uk.co.bbc.rd.storyplayerosx", // id used by each platform
+
         },
         // windows specific config
         "win": {
             "target": "nsis", // we only target this, the others aren't needed
             "asar": true, // package it up like macos
             "icon": "path to icon.icns", // icon path too
-            "publisherName": "Name of the publisher"
+            "publisherName": "Name of the publisher",
+            "appId": "uk.co.bbc.rd.storyplayerwin", // id used by each platform
         }
     }
 }

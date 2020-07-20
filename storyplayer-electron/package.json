@@ -17,12 +17,12 @@
   "postinstall": "electron-builder install-app-deps",
   "build": {
     "productName": "BBC StoryPlayer",
-    "appId": "uk.co.bbc.rd.storyplayerosx",
     "afterSign": "scripts/notarize.js",
     "dmg": {
       "sign": false
     },
     "mac": {
+      "appId": "uk.co.bbc.rd.storyplayerosx",
       "category": "public.app-category.video",
       "asar": true,
       "target": "dmg",
@@ -34,6 +34,7 @@
       "hardenedRuntime": true
     },
     "win": {
+      "appId": "uk.co.bbc.rd.storyplayerwin",
       "target": "nsis",
       "asar": true
     }
