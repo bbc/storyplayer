@@ -209,11 +209,21 @@ class SMPControls extends BaseControls {
     }
 
     enableScrubBar() {
-        // TODO: Not sure we can disable scrub bar
+        if(this._scrubEnabled !== true) {
+            this._uiUpdate({
+                mode: "default",
+            })
+            this._scrubEnabled = true
+        }
     }
 
     disableScrubBar() {
-        // TODO: Not sure we can disable scrub bar
+        if(this._scrubEnabled !== false) {
+            this._uiUpdate({
+                mode: "controls",
+            })
+            this._scrubEnabled = false
+        }
     }
 
     connectScrubBar() { }

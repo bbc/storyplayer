@@ -18,6 +18,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     _smpPlayerInterface: Object
 
+    _fakeItemRendererId: string
+
+    _fakeItemDuration: Number
+
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
 
@@ -54,6 +58,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             // Cludy hack to update playing status
             this.play(false)
         })
+
+        this._fakeItemRendererId = null
+        this._fakeItemDuration = -1
+
+        this._smpFakePlay = this._smpFakePlay.bind(this);
     }
 
     supports(feature) {
@@ -185,13 +194,32 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         logger.info(`SMP-SP setPlayoutActive: ${rendererId}`)
     }
 
-    startNonAVPlayout() {
+    _smpFakePlay() {
+        const mi = this._smpPlayerInterface.currentItem;
+        if (mi && mi.fake) {
+            this._smpPlayerInterface.dispatchEvent({
+                type: "playing",
+                fake: true
+            });
+            this._smpPlayerInterface.dispatchEvent({
+                type: "timeupdate",
+                override: true,
+                time: 0,
+                duration: this._fakeItemDuration
+            })
+        }
+    }
+
+    startNonAVPlayout(rendererId, duration = 0) {
+        this._fakeItemRendererId = rendererId
+        this._fakeItemDuration = duration
+
         const playlist = {
             id: `${uuid()}`,
             items: [{
                 fake: true,
                 vpid: `fakeitem`,
-                duration: 100
+                duration: this._fakeItemDuration,
             }]
         }
 
@@ -200,49 +228,71 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             // switching it off
             ondemandWebcastData:false,
             webcastData: {},
-            autoplay: true,
-            startTime : this._inTime
+            autoplay: true
         }
         logger.info(`SMP-SP loadPlaylist (Fake)`)
         this._smpPlayerInterface.loadPlaylist(playlist, config);
 
-        const playerInterface = this._smpPlayerInterface
+        this._smpPlayerInterface.updateUiConfig({
+            buffer: {
+                enabled: false
+            }
+        })
 
-        let timer;
-        let time = 0;
-        const td = function() {
-            time += 1
-            if (time > 2000) {
-                playerInterface.dispatchEvent( { type:"ended",fake:true,fakeEnded:true } );
-                time = 0;
-            } else {
-                playerInterface.dispatchEvent( { type:"timeupdate",override:true,time: time/20,duration:100});
-                clearTimeout(timer);
-                timer = setTimeout(td,50);
-            }
-        }
-        playerInterface.addEventListener("seekRequested", function(e){
-            time=e.time;
-            td();
-        });
-        playerInterface.addEventListener("pauseRequested", function(){
-            clearTimeout(timer)
-        });
-        const play = function(){
-            const mi=playerInterface.currentItem;
-            if (mi) {
-                if (mi.fake) {
-                    playerInterface.dispatchEvent( {type:"playing",fake:true});
-                    timer = setTimeout(td,1000);
-                }
-            }
-        }
-        playerInterface.addEventListener("mediaItemInfoChanged", play);
-        playerInterface.addEventListener("playRequested", play);
+        // TODO: Could put these in constructor as function only works if fake item is found
+        this._smpPlayerInterface.addEventListener("mediaItemInfoChanged", this._smpFakePlay);
+        this._smpPlayerInterface.addEventListener("playRequested", this._smpFakePlay);
+
+        // const playerInterface = this._smpPlayerInterface
+        //
+        // let timer;
+        // let time = 0;
+        // const td = function() {
+        //     time += 1
+        //     if (time > 2000) {
+        //         playerInterface.dispatchEvent( { type:"ended",fake:true,fakeEnded:true } );
+        //         time = 0;
+        //     } else {
+        //         playerInterface.dispatchEvent( { type:"timeupdate",override:true,time: time/20,duration:100});
+        //         clearTimeout(timer);
+        //         timer = setTimeout(td,50);
+        //     }
+        // }
+        // playerInterface.addEventListener("seekRequested", function(e){
+        //     time=e.time;
+        //     td();
+        // });
+        // playerInterface.addEventListener("pauseRequested", function(){
+        //     clearTimeout(timer)
+        // });
+        // const play = function(){
+        //     const mi=playerInterface.currentItem;
+        //     if (mi) {
+        //         if (mi.fake) {
+        //             playerInterface.dispatchEvent( {type:"playing",fake:true});
+        //             timer = setTimeout(td,1000);
+        //         }
+        //     }
+        // }
+        // playerInterface.addEventListener("mediaItemInfoChanged", play);
+        // playerInterface.addEventListener("playRequested", play);
     }
 
-    stopNonAVPlayout() {
+    stopNonAVPlayout(rendererId) {
+        // If stop comes after another nonav renderer has started, ignore
+        if(rendererId === this._fakeItemRendererId) {
+            this._fakeItemRendererId = null
+            this._fakeItemDuration = -1
 
+            this._smpPlayerInterface.removeEventListener("mediaItemInfoChanged", this._smpFakePlay);
+            this._smpPlayerInterface.removeEventListener("playRequested", this._smpFakePlay);
+
+            this._smpPlayerInterface.updateUiConfig({
+                buffer: {
+                    enabled: true
+                }
+            })
+        }
     }
 
     setPlayoutInactive(rendererId: string) {
@@ -318,6 +368,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     setCurrentTime(rendererId: string, time: number) {
+        console.log("ANALY setCurrentTime")
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.setCurrentTime(rendererId, time)

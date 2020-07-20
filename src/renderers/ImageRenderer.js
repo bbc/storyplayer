@@ -57,7 +57,7 @@ export default class ImageRenderer extends BaseRenderer {
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
-        this._playoutEngine.startNonAVPlayout()
+        this._playoutEngine.startNonAVPlayout(this._rendererId, this._duration)
         this._visible = true;
         this._setVisibility(true);
         return true;
@@ -92,8 +92,8 @@ export default class ImageRenderer extends BaseRenderer {
 
     end() {
         const needToEnd = super.end();
-        this._playoutEngine.stopNonAVPlayout()
         if (!needToEnd) return false;
+        this._playoutEngine.stopNonAVPlayout(this._rendererId)
 
         this._visible = false;
         // Hack to make image transitions smooth (preventing showing of black background with

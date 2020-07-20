@@ -124,6 +124,14 @@ export default class BasePlayoutEngine {
         }
     }
 
+    startNonAVPlayout() {
+
+    }
+
+    stopNonAVPlayout() {
+        
+    }
+
     play() {
 
     }
