@@ -43,27 +43,27 @@ The build steps for each platform read from the `build` key in the package.json 
 ```js
 {
     "build": {
-        "productName": "StoryPlayer", // name of the application
-        // mac specific config
+        "productName": "BBC StoryPlayer",                   // name of the application
         "mac": {
-            "category": "public.app-category.video", // what do we define our app as for apple to sort
-            "asar": true, // zip this up into an archive
-            "target": "dmg", // we only target dmg
-            "icon": " path to icon.icns", // path to the icon for the application
-            "darkModeSupport": false, // no dark mode as we don't support it in the player
-            "type": "distribution" // building for distribution not testing
-            "appId": "uk.co.bbc.rd.storyplayerosx", // id used by each platform
-
+            "dmg": {                                        
+                "sign": false                               // do not sign the DMG, just the app
+            },
+            "afterSign": "scripts/notarize.js",             // send app to Apple for notarization
+            "appId": "uk.co.bbc.rd.storyplayerosx",         // do not change - tied to signing process
+            "category": "public.app-category.video",        // apple store category, presumably not relevant
+            "asar": true,                                   // zip up into an archive
+            "target": "dmg",                                // target dmg
+            "hardenedRuntime": true,                        // hardened runtimes are a prerequisite for notarisation
+            "entitlements": "entitlements.mac.plist",       // required for Electron apps
+            "entitlementsInherit": "entitlements.mac.plist",// required for Electron apps
+            "gatekeeperAssess": false                       // do not let electron-osx-sign validate the signin (will cause notarization to fail)
         },
-        // windows specific config
         "win": {
-            "target": "nsis", // we only target this, the others aren't needed
-            "asar": true, // package it up like macos
-            "icon": "path to icon.icns", // icon path too
-            "publisherName": "Name of the publisher",
-            "appId": "uk.co.bbc.rd.storyplayerwin", // id used by each platform
+            "appId": "uk.co.bbc.rd.storyplayerwin",
+            "target": "nsis",
+            "asar": true
         }
-    }
+  },
 }
 ```
 

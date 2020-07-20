@@ -1,7 +1,7 @@
 {
   "name": "StoryPlayer",
   "productName": "storyplayer-electron",
-  "version": "0.9.5",
+  "version": "0.9.51",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
@@ -30,8 +30,7 @@
       "darkModeSupport": false,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist",
-      "gatekeeperAssess": false,
-      "hardenedRuntime": true
+      "gatekeeperAssess": false 
     },
     "win": {
       "appId": "uk.co.bbc.rd.storyplayerwin",
