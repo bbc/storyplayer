@@ -34,8 +34,7 @@ class StandardControls extends BaseControls {
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
     ) {
-        super(logUserInteraction);
-        this._logUserInteraction = logUserInteraction;
+        super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
 
         // create button manager and scrub bar
         this._buttonControls = new Buttons(this._logUserInteraction);
@@ -58,7 +57,7 @@ class StandardControls extends BaseControls {
         );
         this._buttonsActivateArea.onclick = this.activateRomperButtons.bind(this);
 
-        
+
         // next is needed for activating buttons area
         this._narrativeElementTransport = this._buttonControls.getTransportControls();
 
@@ -86,7 +85,7 @@ class StandardControls extends BaseControls {
             this.hideControls();
         };
     }
-    
+
     // pass on any events
     _forwardButtonEvents() {
         this._buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED,
@@ -157,7 +156,7 @@ class StandardControls extends BaseControls {
         this._buttonControls.showTransportControls();
         this._buttonsActivateArea.classList.add('hide');
     }
-    
+
     // make the controls disappear
     hideControls() {
         if (!this.getShowing()) return;
@@ -215,7 +214,7 @@ class StandardControls extends BaseControls {
         this._scrubBar.disable();
     }
 
-    connectScrubBar(renderer: BaseRenderer) { 
+    connectScrubBar(renderer: BaseRenderer) {
         this._scrubBar.connect(renderer);
     }
 

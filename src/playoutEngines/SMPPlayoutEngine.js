@@ -9,7 +9,7 @@ import { PLAYOUT_ENGINES } from './playoutEngineConsts'
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from './DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from './iOSPlayoutEngine';
-
+import { getSMPInterface } from '../utils'
 
 class SMPPlayoutEngine extends BasePlayoutEngine {
     _secondaryPlayoutEngine: BasePlayoutEngine
@@ -26,7 +26,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         logger.info('SMP: Using backup playout engine: ', playoutToUse);
 
-        this._smpPlayerInterface = window.playerInterface;
+        this._smpPlayerInterface = getSMPInterface();
 
         switch (playoutToUse) {
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
@@ -41,18 +41,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
-
-        // TODO: Hook in buttons into playback
-        // Probably should be moved into Player (or a file called from Player)
-        this._smpPlayerInterface.addEventListener("previousRequested", () => {
-            console.log("SMP PREVIOUS")
-            this._player._backButtonClicked.bind(this._player)();
-        })
-
-        this._smpPlayerInterface.addEventListener("nextRequested", () => {
-            console.log("SMP NEXT")
-            this._player._nextButtonClicked.bind(this._player)();
-        })
     }
 
     supports(feature) {
@@ -73,31 +61,14 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // TODO: Enable buttons should be enabled/disabled based on lookahead/previous
         // ISSUE: includeBackIntervalButton, includeForwardIntervalButton don't seem to toggle buttons
         // NOTE: This cannot be called in constructor
-        this._smpPlayerInterface.updateUiConfig({
-            controls:{
-                includeBackIntervalButton: false,
-                includeForwardIntervalButton: false,
-                alwaysEnablePreviousButton: true,
-                alwaysEnableNextButton: true,
-            }
-        })
-
-        const controlBar = document.querySelector('.p_playerControlBarHolder');
-        const chapterButton = document.createElement('button');
-        chapterButton.classList.add("p_button")
-        chapterButton.classList.add("p_controlBarButton")
-        chapterButton.classList.add("chapterButton")
-        chapterButton.setAttribute("role", "button")
-        chapterButton.setAttribute("aria-live", "polite")
-        chapterButton.setAttribute("aria-label", "Toggle Chapter Menu")
-        chapterButton.onmouseover = () => {
-            chapterButton.classList.add("p_buttonHover")
-        }
-        chapterButton.onmouseout = () => {
-            chapterButton.classList.remove("p_buttonHover")
-        }
-        chapterButton.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapterIcon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/></svg></div>'
-        controlBar.insertBefore(chapterButton, document.querySelector(".p_fullscreenButton"))
+        // this._smpPlayerInterface.updateUiConfig({
+        //     controls:{
+        //         includeBackIntervalButton: false,
+        //         includeForwardIntervalButton: false,
+        //         alwaysEnablePreviousButton: true,
+        //         alwaysEnableNextButton: true,
+        //     }
+        // })
 
         // TODO: first active playout is not set to autoplay so we have to
         // manually start it here. We will need to test this on iOS as I'd

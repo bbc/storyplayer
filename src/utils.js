@@ -9,6 +9,10 @@ export const inSMPWrapper = () => {
     return false
 }
 
+export const getSMPInterface = () => {
+    return window.playerInterface;
+}
+
 export const ADD_DETAILS_FLAG = "addDetails"
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
 export const FACEBOOK_BLOCK_FLAG = "overrideFacebookBlock"

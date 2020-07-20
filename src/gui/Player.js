@@ -27,6 +27,7 @@ import { REASONER_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
+import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
 
 const PlayerEvents = [
@@ -264,11 +265,10 @@ class Player extends EventEmitter {
 
         // create the button manager and scrub bar according to playout engine
         switch (playoutToUse) {
-        // case PLAYOUT_ENGINES.SMP_PLAYOUT:
-        // SMP connect its own transport buttons and scrub bar
-        // this._buttonControls = new SMPButtons(this._logUserInteraction);
-        // this._scrubBar = new SMPScrubBar(this._logUserInteraction);
-        // it can choose to use the buttons created by the overlays or make its own
+        case PLAYOUT_ENGINES.SMP_PLAYOUT:
+            // SMP connect its own transport buttons and scrub bar
+            this._buildSMPControls();
+            break;
         default:
             // use normal built-in scrub bar, buttons, etc
             this._buildStandardControls();
@@ -362,6 +362,17 @@ class Player extends EventEmitter {
             };
             this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
         }
+    }
+
+    // build UI components
+    _buildSMPControls() {
+        this._controls = new SMPControls(
+            this._logUserInteraction,
+            this._volume,
+            this._icon,
+            this._representation,
+        );
+        this._guiLayer.appendChild(this._controls.getControls());
     }
 
     // build UI components
@@ -1529,6 +1540,7 @@ class Player extends EventEmitter {
         callback();
     }
 
+    // TODO: Abstract this away as SMP handles it
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
             this._logUserInteraction(

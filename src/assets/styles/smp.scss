@@ -1,5 +1,9 @@
 .chapterButton {
     right: 90px;
+
+    &.romper-inactive {
+        display: none;
+    }
 }
 
 .chapterIcon {
