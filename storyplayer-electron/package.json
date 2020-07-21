@@ -1,11 +1,11 @@
 {
   "name": "StoryPlayer",
-  "productName": "storyplayer-electron",
-  "version": "0.9.5",
+  "productName": "BBC StoryPlayer",
+  "version": "0.9.6",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
-  "author": "FXT",
+  "author": "BBC Research & Development",
   "license": "MIT",
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
@@ -17,22 +17,32 @@
   "postinstall": "electron-builder install-app-deps",
   "build": {
     "productName": "BBC StoryPlayer",
-    "appId": "com.bbc.storyplayer",
+    "afterSign": "scripts/notarize.js",
+    "dmg": {
+      "sign": false
+    },
     "mac": {
+      "appId": "uk.co.bbc.rd.storyplayerosx",
       "category": "public.app-category.video",
-      "identity": null,
       "asar": true,
       "target": "dmg",
-      "darkModeSupport": false
+      "hardenedRuntime": true,
+      "darkModeSupport": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "gatekeeperAssess": false 
     },
     "win": {
+      "appId": "uk.co.bbc.rd.storyplayerwin",
       "target": "nsis",
       "asar": true
     }
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "electron": "^8.2.1",
     "electron-builder": "^22.4.1",
+    "electron-notarize": "^1.0.0",
     "esm": "^3.2.25"
   },
   "dependencies": {
