@@ -1,3 +1,33 @@
+# StoryPlayer SMP Testing
+
+## Install Deps:
+```
+yarn install
+```
+
+## Setup Hosts file
+Follow https://www.howtogeek.com/howto/27350/beginner-geek-how-to-edit-your-hosts-file/ to add the following to your hosts file:
+```
+127.0.0.1       localhost.bbc.co.uk
+```
+
+## Run Code:
+```
+yarn demo
+```
+
+## Open in Browser:
+
+### Standard SP:
+Load webpage http://localhost.bbc.co.uk:3000/examples/, go to `Select Story`, select a story, go to `Render`. The stories in this website will be shown based on their name/description in the JSON not their filename.
+
+
+### SMP SP:
+Load webpage http://localhost.bbc.co.uk:3000/smp-example/#examples/[DEMO_FILENAME_HERE]
+Where: [DEMO_FILENAME_HERE] is the filename of a demo in the examples folder e.g. `demo10`. You'll need to refresh the website whenever you load another example.
+
+
+
 StoryPlayer
 ======
 
@@ -168,7 +198,7 @@ StoryPlayer uses local storage to record how far a user has got through an exper
 
 The `Controller` creates a `SessionManager` to handle this, which lasts for the duration of the page. When the page is reloaded the `SessionManager` is created again; the controller will check the existing state of the session and give the user options to resume current session or restart and create a new session.
 
-The session state is one of the following enums 
+The session state is one of the following enums
 - ```'NEW'```: There is a new session created.
 - ```'EXISTING'```: There is an existing session that can be resumed.
 - ```'RESUME'```: A Session has been resumed
@@ -289,7 +319,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `SOCIAL_SHARE_CLICKED` | The user has clicked a social media share icon | "not_set" | Platform id, e.g., "twitter", "facebook" | - | `socialmodal/v1.0` behaviour |
 | `OUTWARD_LINK_CLICKED` | The user has clicked an outward link | "not_set" | URL of link |  | `linkout/v1.0` behaviour |
 
-### `SEGMENT_COMPLETION` 
+### `SEGMENT_COMPLETION`
 
 Segment completion events are events that are fired each time a Narrative Element completes.  They return summary data about user activity during the NE.  This is compiled client-side, so should contain all events.
 
