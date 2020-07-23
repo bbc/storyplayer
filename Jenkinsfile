@@ -120,6 +120,26 @@ pipeline {
         withCredentials([string(credentialsId: '5b6641fe-5581-4c8c-9cdf-71f17452c065', variable: 'artifactory_bearer_token')]) {
           sh 'npm publish --reg "$artifactory_publish" --email=support@rd.bbc.co.uk --_auth="$artifactory_bearer_token"'
         }
+        withBBCGithubSSHAgent {
+          sh '''
+            git config --global user.name "Jenkins"
+            git config --global user.email jenkins-slave@rd.bbc.co.uk
+            git clone --single-branch --branch master-smp git@github.com:bbc/rd-ux-storyplayer-harness.git
+          '''
+
+          dir('rd-ux-storyplayer-harness') {
+            sh '''
+              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer-smp@latest
+              git add package.json yarn.lock
+              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer-smp to ${git_version} and version bump to %s
+
+        ${commit_messages}
+        "
+              git pull --rebase
+              git push origin master-smp --tags
+            '''
+          }
+        }
       }
     }
   }
