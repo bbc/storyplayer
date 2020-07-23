@@ -260,8 +260,6 @@ class SMPControls extends BaseControls {
             }
             renderer.setCurrentTime(seekTo);
         })
-
-        // TODO: Finish timing here, connect up the SMP seek to be able to set the Timer
     }
 
     disconnectScrubBar() {
