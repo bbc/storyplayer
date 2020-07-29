@@ -21,7 +21,7 @@ const createLink = (behaviour) => {
     const linkElement = document.createElement('a');
 
     // if the link isn't absolute ie http or https we are going to assume authors want https absolute links
-    if(!linkUrl.startsWith('http://') || !linkUrl.startsWith('https://')) {
+    if(!(linkUrl.startsWith('http://') || linkUrl.startsWith('https://'))) {
         // set to be https and let the external website handle any failing or redirects
         linkUrl = `https://${linkURl}`;
     }
