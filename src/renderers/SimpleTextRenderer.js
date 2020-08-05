@@ -114,9 +114,41 @@ export default class SimpleTextRenderer extends BaseRenderer {
             });
     }
 
+    _replaceEscapedVariables(textContent: string): Promise<string> {
+        const varRefs = textContent.match(/\$\{(.*?)\}/g);
+        if (varRefs) {
+            return this._controller.getVariableState().then((vState) => {
+                const getVal = (vName) => {
+                    if (vState[vName]) {
+                        /* eslint-disable camelcase */
+                        const { variable_type, value } = vState[vName];
+                        switch(variable_type) {
+                        case 'number':
+                            return value.toString();
+                        case 'boolean':
+                            return value ? 'yes' : 'no';
+                        case 'list':
+                        case 'string':
+                        default:
+                            return encodeURI(value);
+                        }
+                        /* eslint-enable camelcase */
+                    }
+                    return '';
+                };
+                const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
+                return replacedText;
+            });
+        }
+        return Promise.resolve(textContent);
+    }
+
     populateTextElement(textContent: string) {
-        this._textDiv.innerHTML = textContent;
-        this._target.appendChild(this._textDiv);
+        this._replaceEscapedVariables(textContent)
+            .then((newText) => {
+                this._textDiv.innerHTML = newText;
+                this._target.appendChild(this._textDiv);
+            });
     }
 
     destroy() {
