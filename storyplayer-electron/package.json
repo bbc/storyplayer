@@ -11,6 +11,8 @@
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
     "build": "electron-builder build",
+    "build:windows": "electron-builder build -w",
+    "build:mac": "electron-builder build -m",
     "build:all": "electron-builder build -mw",
     "build:release": "export $(cat config.env | xargs) && electron-builder build -mwl"
   },
