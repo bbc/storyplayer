@@ -1,7 +1,7 @@
 {
   "name": "StoryPlayer",
-  "productName": "BBC StoryPlayer",
   "version": "0.9.6",
+  "productName": "BBC StoryPlayer",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
   "keywords": [],
@@ -10,11 +10,9 @@
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
-    "build": "electron-builder build",
-    "build:windows": "electron-builder build -w",
-    "build:mac": "electron-builder build -m",
-    "build:all": "electron-builder build -mw",
-    "build:release": "export $(cat config.env | xargs) && electron-builder build -mwl"
+    "build": "export $(cat .env | xargs) && electron-builder build -mw",
+    "build:windows": "export $(cat .env | xargs) && electron-builder build -w",
+    "build:mac": "export $(cat .env | xargs) && electron-builder build -m"
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {
