@@ -17,7 +17,7 @@
   "postinstall": "electron-builder install-app-deps",
   "build": {
     "productName": "BBC StoryPlayer",
-    "afterSign": "scripts/notarize.js",    
+    "afterSign": "scripts/notarize.js",
     "dmg": {
       "sign": false
     },
@@ -33,7 +33,7 @@
       "gatekeeperAssess": false 
     },
     "win": {
-      "appId": "uk.co.bbc.rd.storyplayerwin",      
+      "appId": "uk.co.bbc.rd.storyplayerwin",
       "target": "nsis",
       "asar": true
     }
