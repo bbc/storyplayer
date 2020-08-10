@@ -22,7 +22,7 @@ These commands are run from the root `rd-ux-storyplayer`folder.
 
 The first step to build this is to build the storyplayer code and minify it. This builds and copies the code across to the storyplayer-electron folder. 
 * Running `yarn build:electron` will build the player library and copy this and the assets across to the right folders for the electron app to use. 
-* Adding `yarn build:electorn -m` will attempt to mangle/obfuscate the code. Should not be used until we're sure the player is functioning with this option in testing.
+* Adding `yarn build:electron -m` will attempt to mangle/obfuscate the code. Should not be used until we're sure the player is functioning with this option in testing.
 
 ### Building the electron application
 
@@ -32,73 +32,90 @@ The following should be run from the `storyplayer-electron` folder.
 * The application build steps are platform agnostic, but if you are to build and publish the application on MacOS, it must be built on MacOS.
 
 To build/package and publish the application we are using the `electron-builder` npm package. This allows us to package our code as an electron application. The module has various cli arguements we use to achieve this.
-* `compile`, compiles the application in dev mode.
-* `build`, builds on the current platform. Note this will not perform code signing.
-* `build:all` builds the application for all platforms, (windows, mac, linux)
-* `build:release` create the release version with code signing. This will need extra configuration, noted below.
 
-For development, the  `"identity": null` property may be set we set in the mac build configuration of the package.json. To sign the code this property must be removed so electron-builder knows to pass an identity from the user keychain to sign the application. Steps to do this will follow, oce we know how to.
+Both the Windows and Mac applications can be built on a Mac.
+The Mac application cannot be built from Linux or Windows.
 
-The build steps for each platform read from the `build` key in the package.json for the electron-app. These are outlined below for the mac and 
+* `compile` - compiles the application in dev mode.
+* `build` - builds the Mac and Windows applications. 
+* `build:windows` - build for Windows only
+* `build:mac` - build for Mac only
+* `sign` - build and sign the Mac and Windows applications. 
+* `sign:windows` - build and sign for Windows only
+* `sign:mac` - build and sign for Mac only
+
+The build steps for each platform read from the `build` key in the package.json for the electron-app. 
 ```js
 {
     "build": {
         "productName": "BBC StoryPlayer",                   // name of the application
-        "mac": {
-            "dmg": {                                        
-                "sign": false                               // do not sign the DMG, just the app
-            },
-            "afterSign": "scripts/notarize.js",             // send app to Apple for notarization
-            "appId": "uk.co.bbc.rd.storyplayerosx",         // do not change - tied to signing process
-            "category": "public.app-category.video",        // apple store category, presumably not relevant
-            "asar": true,                                   // zip up into an archive
-            "target": "dmg",                                // target dmg
-            "hardenedRuntime": true,                        // hardened runtimes are a prerequisite for notarisation
-            "entitlements": "entitlements.mac.plist",       // required for Electron apps
-            "entitlementsInherit": "entitlements.mac.plist",// required for Electron apps
-            "gatekeeperAssess": false                       // do not let electron-osx-sign validate the signin (will cause notarization to fail)
+        "afterSign": "scripts/notarize.js",                 // afterSign hook notarizes mac version (returns without action for windows version)
+        "dmg": {
+          "sign": false                                     // do not sign DMG
         },
-        "win": {
-            "appId": "uk.co.bbc.rd.storyplayerwin",
-            "target": "nsis",
-            "asar": true
-        }
+        "mac": {
+          "appId": "uk.co.bbc.rd.storyplayerosx",           // Corresponds to appId of provisioning profile at https://developer.apple.com/account/resources/profiles/ 
+        "category": "public.app-category.video",            // Not relevant - app store category
+        "asar": true,                                       // package into an archive
+        "target": "dmg",                                    // target dmg
+        "hardenedRuntime": true,                            // hardened runtimes are a prerequisite for notarisation
+        "darkModeSupport": false,                           // We don't have a dark mode
+        "entitlements": "entitlements.mac.plist",           // required for Electron apps
+        "entitlementsInherit": "entitlements.mac.plist",    // required for Electron apps
+        "gatekeeperAssess": false                           // do not let electron-osx-sign validate the signin (will cause notarization to fail)
+    },
+    "win": {
+        "appId": "uk.co.bbc.rd.storyplayerwin",             // Not sure this is used
+        "target": "nsis",                                   // Use NSIS to create Windows installer 
+        "asar": true                                        // package into an archive
+    }
   },
-}
 ```
 
 ## Code Signing
 
+To give our end users confidence in the standalone StoryPlayer app, we sign it for Windows and Mac, so it appears trusted to the host OS.
+This process is automatic, providing you have the appropriate credentials in place.
+
 ### Windows
-The easiest way to tell electron to user certs is via environment variables. The `build:release` command will load the config.env file.
-This is explicitly ignored and MUST NOT BE CHECKED INTO SOURCE CONTROL. Don't rely on the `.gitignore` file, you should ALWAYS check it isn't in the staged commits.
+Prerequisites here are that you have access to the BBC's signing certificate and knowledge of the password. 
+See this ticket for details. https://jira.dev.bbc.co.uk/browse/SECUREKEY-60
+This certificate should only be stored on an encrypted USB stick which itself needs to be stored securely - the original USB stick is stored in a physical safe.
 
-```bash
-export WIN_CSC_LINK=./path/to/mycert/cert.p12 # windows code signing cert 
-export WIN_CSC_KEY_PASSWORD='my-password' # windows code signing cert password
-```
-### MacOS 
-
-## Building
-There are no specific prerequisites for building the MacOS application code.
-
-## Signing and Notarizing
+### MacOS
 To sign and notarize the MacOS application code, you will need an Apple ID, and access to a paid-for Apple Developer account.
-In the Security section of your Developer account at https://appleid.apple.com/account/manage, generate an app-specific password.
-Add your developer account ID (e.g. jimmy.blobs@bbc.co.uk) and your app-specific password to a file named .env in the storyplayer-electron folder.
+
+* You'll need an invite from a team that has a paid-for Apple Developer account. The team account holder can generate this for you.
+* Once you have set up a developer account, retrieve an “Apple Development” certificate and import to your keychain.
+* The account holder will need to generate a new App ID for this app.
+* The account holder will need to generate a Mac Developer cert for you as a team member. Import it to your keychain.
+* Once you have this certificate, you will need to generate a CSR (Keychain access->Certificate Assistant->Request a certificate from a certificate authority) and send this back to the account holder.
+* The account holder can then generate a Developer ID Application cert which will be used for signing. You can download this from the developer portal once it's been generated. Import it to your keychain. Electron-builder should find it automatically.
+
+### Credentials
+
+Signing credentials for Windows and MacOS should be stored in a `.env` file in the root of this folder.
+This is explicitly ignored and MUST NOT BE CHECKED INTO SOURCE CONTROL.
+Don't rely on the `.gitignore` file - check it isn't in the staged commits.
+You do *not* want to commit your app-specific password, or the password for the BBC's Windows signing certificate.
+
+It should look something like this:
 ```
-APPLEID=[your Apple ID]
-APPLEIDPASS=[your app-specific password]
+export APPLEID=myAppleDevAccount@mac.com
+export APPLEIDPASS=app-specific-password
+export WIN_CSC_LINK=/Volumes/USBStick/Name-of-BBC-signing-certificate.pfx
+export WIN_CSC_KEY_PASSWORD='quoted-password-for-BBC-signing-certificate'
 ```
 
-Other steps need to be taken inside the Apple Developer system in order for the notarization process to work.
+An explanation of the fields:
 
-* Once you have a free dev account, retrieve an “Apple Development” cert from the apple dev website and import to your keychain.
-* You'll need an invite from a team that has a paid-for Apple Developer account, so you can notarize the application. The team account holder can generate this for you.
-* The account holder will need to generate a new App ID for this app
-* The account holder will need to generate a Mac Developer cert for you as a team member
-* Once you have this cert, you will need to generate a CSR (Keychain access->Certificate Assistant->Request a certificate from a certificate authority) and send this back to the account holder.
-* The account holder can then generate a Developer ID Application cert which will be used for signing. You can download this from the developer portal once it's been generated.
+APPLEID:                Set to your Apple developer account email.
+
+APPLEIDPASS:            Set to your app-specific password, as detailed here https://support.apple.com/en-gb/HT204397
+
+WIN_CSC_LINK:           Path to the Windows signing certificate. Keep on an external USB stick and plug in only to sign.
+
+WIN_CSC_KEY_PASSWORD:   Password for BBC signing certificate, must be quoted.
 
 ## Publishing
 
