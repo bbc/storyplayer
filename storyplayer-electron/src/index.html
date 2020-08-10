@@ -12,26 +12,26 @@
 <body>
     <div id="home-page">
         <div class="navbar">
-            <div class="home-button-container">
-                <button id="home-button" class="home-buttons">Home page</button>
-                <button id="reload-button" class="home-buttons">Refresh list</button>
-            </div>
-            <h1 class="title" id="title">BBC StoryPlayer</h1>
+            <h1 class="player-title"><span class="rd">BBC R&amp;D</span><span id="home-button">StoryPlayer</span></h1>
+            <h1 class="story-title" id="title"></h1>
+
         </div>
         <div id="error-message"></div>
         <div id="main-content">
             <div id="content-container">
-                <div id="instructions">
-                    <h2>
-                        How to Use BBC StoryPlayer
-                    </h2>
-                    <div class="terms-content">
-                        <p>StoryPlayer looks for Stories in a folder named 'storyplayer', inside your <span id="documents-folder">My Documents folder.</span></p>
-                        <p>Create a folder inside 'storyplayer' for each Story, and add the story.json file and associated media files to it.</p>
-                        <p>All stories that StoryPlayer can find are listed below. Clicking Refresh List in the top left of this window will rescan the storyplayer folder.</p>
-                    </div>
+                <div class='stories-header'>
+                    <h2>Stories</h2>
+                    <button id="reload-button" class="home-buttons"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32"><title>refresh</title><path d="M32,0H20V12h4V7.1A12,12,0,0,1,16,28v4A16,16,0,0,0,26.6,4H32Z"/><path d="M8,24.9A12,12,0,0,1,16,4V0A16,16,0,0,0,5.4,28H0v4H12V20H8Z"/></svg> <span>&nbsp;Rescan Folder</span></button>
                 </div>
                 <div id="story-selector-container"></div>
+                <h2>
+                    How to Use BBC StoryPlayer
+                </h2>
+                <div id="instructions" class="terms-content">
+                    <p>StoryPlayer looks for Stories in a folder named 'storyplayer', inside your <span id="documents-folder">My Documents folder.</span></p>
+                    <p>Create a folder inside 'storyplayer' for each Story, and add the story.json file and associated media files to it.</p>
+                    <p>All stories that StoryPlayer can find are listed above. Clicking Rescan Folder will rescan the storyplayer folder.</p>
+                </div>
             </div>
         </div>
     </div>

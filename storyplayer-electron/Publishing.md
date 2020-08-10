@@ -22,7 +22,7 @@ These commands are run from the root `rd-ux-storyplayer`folder.
 
 The first step to build this is to build the storyplayer code and minify it. This builds and copies the code across to the storyplayer-electron folder. 
 * Running `yarn build:electron` will build the player library and copy this and the assets across to the right folders for the electron app to use. 
-* Adding `yarn build:electorn -m` will attempt to mangle/obfuscate the code. Should not be used until we're sure the player is functioning with this option in testing.
+* Adding `yarn build:electron -m` will attempt to mangle/obfuscate the code. Should not be used until we're sure the player is functioning with this option in testing.
 
 ### Building the electron application
 
