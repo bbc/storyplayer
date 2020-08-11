@@ -10,9 +10,12 @@
   "scripts": {
     "compile": "electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
-    "build": "export $(cat .env | xargs) && electron-builder build -mw",
-    "build:windows": "export $(cat .env | xargs) && electron-builder build -w",
-    "build:mac": "export $(cat .env | xargs) && electron-builder build -m"
+    "build": "export CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder build -mw",
+    "build:mac": "export CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder build -m",
+    "build:windows": "electron-builder build -w",
+    "sign": "export $(cat .env | xargs) && electron-builder build -mw",
+    "sign:mac": "export $(cat .env | xargs) && electron-builder build -m",
+    "sign:windows": "export $(cat .env | xargs) && electron-builder build -w"
   },
   "postinstall": "electron-builder install-app-deps",
   "build": {

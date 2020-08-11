@@ -6,9 +6,12 @@ exports.default = async function notarizing(context) {
     if (electronPlatformName !== 'darwin') {
         return;
     }
-
+    if (process.env.CSC_IDENTITY_AUTO_DISCOVERY === 'false') {
+        return;
+    }
+    console.log('Notarizing. Please wait...');
     const appName = context.packager.appInfo.productFilename;
-
+    
     await notarize({
         appBundleId: 'uk.co.bbc.rd.storyplayerosx',
         appPath: `${appOutDir}/${appName}.app`,
