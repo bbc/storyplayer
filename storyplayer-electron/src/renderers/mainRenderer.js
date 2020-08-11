@@ -52,6 +52,9 @@ const hideMainInterface = () => {
     if(mainInterface) {
         mainInterface.style.display = 'none';
     }
+    const homeButton = document.getElementById('home-button');
+    homeButton.classList.add('disabled');
+    homeButton.classList.remove('home-buttons');
 };
 
 const showMainInterface = () => {
@@ -59,6 +62,9 @@ const showMainInterface = () => {
     if(mainInterface) {
         mainInterface.style.display = 'block';
     }
+    const homeButton = document.getElementById('home-button');
+    homeButton.classList.remove('disabled');
+    homeButton.classList.add('home-buttons');
 }
 
 const hideHomePage = () => {

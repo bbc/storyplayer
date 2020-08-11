@@ -36,14 +36,26 @@ h2 {
 }
 
 .story-title {
+  left: 0;
   margin: 0;
   position: absolute;
-  right: 95px;
+  text-align: center;
+  width: 100%;
 }
 
 .romper-player {
   height: calc(100vh - 70px);
   width: 100vw;
+}
+
+.home-button {
+  cursor: pointer;
+  position: absolute;
+  right: 95px;
+}
+
+.disabled {
+  display: none;
 }
 
 #error-message {
@@ -129,23 +141,19 @@ h2 {
   padding-right: 1rem;
 }
 
-#home-button {
+.sp-span {
   border-left: 1px solid white;
   color: #00cfff;
   padding-left: 1rem;
 }
 
-#instructions {
+.terms-content {
   background: white;
   border: 1px solid #ccc;
+  color: #2a0f34;
   margin-top: 1vh;
   max-width: 45vw;
-  padding: 20px;
-}
-
-
-.terms-content {
-  color: #2a0f34;
   max-height: 50vh;
   overflow: auto;
+  padding: 20px;
 }
