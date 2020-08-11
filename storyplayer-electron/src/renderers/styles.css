@@ -2,6 +2,34 @@
   display: none;
 }
 
+@font-face {
+  font-family: 'ReithSans';
+  font-style: normal;
+  font-weight: normal;
+  src: url('../../fonts/reith/BBCReithSans_W_Rg.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'ReithSans';
+  font-style: italic;
+  font-weight: normal;
+  src: url('../../fonts/reith/BBCReithSans_W_It.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'ReithSans';
+  font-style: normal;
+  font-weight: bold;
+  src: url('../../fonts/reith/BBCReithSans_W_Bd.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'ReithSans';
+  font-style: italic;
+  font-weight: bold;
+  src: url('../../fonts/reith/BBCReithSans_W_BdIt.woff') format('woff');
+}
+
 html {
   height: 100%;
   margin: 0;
@@ -10,7 +38,7 @@ html {
 
 body {
   background: #ededed;
-  font-family: system-ui;
+  font-family: 'ReithSans';
   height: 100%;
   margin: 0;
   padding: 0;
