@@ -26,6 +26,21 @@ body {
   position: relative;
 }
 
+.player-title {
+  display: flex;
+}
+
+.sp-span {
+  color: #00cfff;
+  font-size: 24px;
+  line-height: 24px;
+  margin-left: 10px;
+}
+
+.rdux-masthead__logo {
+  height: 24px;
+}
+
 .navbar h1 {
   font-weight: normal;
   font-size: large;
@@ -139,12 +154,6 @@ h2 {
 
 .rd {
   padding-right: 1rem;
-}
-
-.sp-span {
-  border-left: 1px solid white;
-  color: #00cfff;
-  padding-left: 1rem;
 }
 
 .terms-content {
