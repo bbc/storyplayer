@@ -1,7 +1,7 @@
 // @flow
 
-import Player from '../Player';
-import BaseRenderer from './BaseRenderer';
+import Player from '../gui/Player';
+import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -49,20 +49,35 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target = player.mediaTarget;
     }
 
+    async init() {
+        try {
+            await this.renderTextElement()
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
+        } catch(err) {
+            logger.error(err, 'could not initiate text renderer');
+        }
+    }
+
     willStart() {
-        super.willStart();
-        this.renderTextElement();
+        const ready = super.willStart();
+        if (!ready) return false;
+
+        this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
+        return true;
     }
 
     start() {
         super.start();
-        this._hasEnded = true;
+        // no duration, so ends immediately
+        this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
+
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
@@ -71,6 +86,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         }
         this._player.enablePlayButton();
         this._player.enableScrubBar();
+        return true;
     }
 
     renderTextElement() {
@@ -79,24 +95,23 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         // set text source
         if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
+            return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.text_src) {
-                        this._fetchMedia(fg.assets.text_src)
+                        return this._fetchMedia(fg.assets.text_src)
                             .then((textFileUrl) => {
                                 this._fetchTextContent(textFileUrl);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'text not found');
                             });
-                    } else {
-                        logger.warn('No text content found');
                     }
+                    return Promise.reject(new Error('No text_src in foreground asset collection'));
                 });
-        } else if (this._representation.description) {
+        }
+        if (this._representation.description) {
             this.populateTextElement(this._representation.description);
             logger.warn('Text Renderer has no asset collection - rendering description');
+            return Promise.resolve();
         }
+        return Promise.reject(new Error('No text to render'));
     }
 
     _fetchTextContent(mediaUrl: string) {
@@ -151,8 +166,4 @@ export default class SimpleTextRenderer extends BaseRenderer {
             });
     }
 
-    destroy() {
-        this.end();
-        super.destroy();
-    }
 }

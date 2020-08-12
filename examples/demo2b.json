@@ -227,7 +227,17 @@
                         "type": "urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0",
                         "one_shot": true,
                         "disable_controls": true,
-                        "force_choice": true
+                        "force_choice": true,
+                        "link_icons": [
+                            {
+                                "text": "Long",
+                                "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
+                            },
+                            {
+                                "text": "Short",
+                                "target_narrative_element_id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
+                            }                                        
+                        ]
                     }
                 ]
             }

@@ -1,14 +1,20 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
-import Player from '../Player';
-import { checkAddDetailsOverride } from '../utils';
+import Player from '../gui/Player';
+import { getSetting, ADD_DETAILS_FLAG } from '../utils';
+
+
 
 export const MEDIA_TYPES = {
     FOREGROUND_AV: 'foreground_av',
     FOREGROUND_A: 'foreground_a',
     BACKGROUND_A: 'background_a',
 };
+
+export const SUPPORT_FLAGS = {
+    SUPPORTS_360: 'supports_360'
+}
 
 export default class BasePlayoutEngine {
     _player: Player
@@ -20,7 +26,7 @@ export default class BasePlayoutEngine {
     _permissionToPlay: boolean;
 
     _hasStarted: boolean;
-    
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
@@ -31,6 +37,15 @@ export default class BasePlayoutEngine {
         if(this._debugPlayout) {
             window.playoutMedia = this._media;
             window.playout = this;
+        }
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return false
+        default:
+            return false
         }
     }
 
@@ -49,6 +64,7 @@ export default class BasePlayoutEngine {
         } else {
             this._media[rendererId].media = mediaObj;
         }
+
     }
 
     unqueuePlayout(rendererId: string) {
@@ -60,7 +76,7 @@ export default class BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (rendererPlayoutObj) {
-            const mediaElement = this.getMediaElement(rendererId)
+            const mediaElement = this._getMediaElement(rendererId)
             if(mediaElement) {
                 mediaElement.classList.remove('romper-media-element-queued');
             }
@@ -78,18 +94,33 @@ export default class BasePlayoutEngine {
         if (this._media[rendererId]) {
             this._media[rendererId].active = true;
         }
-        // eslint-disable-next-line max-len
-        const foregroundId = this._player._currentRenderer._representation.asset_collections.foreground_id;
-        if(checkAddDetailsOverride() && foregroundId) {
-            this._player._currentRenderer._fetchAssetCollection(foregroundId).then(fg => {
-                this._player.addAssetCollectionDetails(fg);
-            });
+        if(this._media[rendererId].media.type !== MEDIA_TYPES.BACKGROUND_A) {
+            // eslint-disable-next-line max-len
+            const foregroundId = this._player._currentRenderer._representation.asset_collections.foreground_id;
+            if(getSetting(ADD_DETAILS_FLAG) && foregroundId) {
+                this._player._currentRenderer._fetchAssetCollection(foregroundId).then(fg => {
+                    this._player.addAssetCollectionDetails(fg);
+                });
+            }
+        }
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            const mediaElement = this._getMediaElement(rendererId);
+            if (mediaElement) {
+                mediaElement.classList.add('romper-audio-element');
+            }
         }
     }
 
     setPlayoutInactive(rendererId: string) {
         if (this._media[rendererId]) {
             this._media[rendererId].active = false;
+        }
+
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            const mediaElement = this._getMediaElement(rendererId);
+            if (mediaElement) {
+                mediaElement.classList.remove('romper-audio-element');
+            }
         }
     }
 
@@ -117,8 +148,16 @@ export default class BasePlayoutEngine {
 
     }
 
+    playRenderer(rendererId: string) {
+
+    }
+
+    pauseRenderer(rendererId: string) {
+
+    }
+
     getCurrentTime(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -129,7 +168,7 @@ export default class BasePlayoutEngine {
     }
 
     getDuration(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -152,12 +191,16 @@ export default class BasePlayoutEngine {
         return undefined;
     }
 
-    getMediaElement(rendererId: string): ?HTMLMediaElement {
+    _getMediaElement(rendererId: string): ?HTMLMediaElement {
         return undefined;
     }
 
-    setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
-        const mediaElement = element || this.getMediaElement(rendererId);
+    getMediaElementFor360(rendererId: string): ?HTMLMediaElement {
+        return this._getMediaElement(rendererId)
+    }
+
+    setLoopAttribute(rendererId: string, loop: ?boolean) {
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
             if(loop) {
                 mediaElement.loop = true;
@@ -168,15 +211,37 @@ export default class BasePlayoutEngine {
         }
     }
 
-    removeLoopAttribute(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
+    checkIsLooping(rendererId: string) {
+        const mediaElement = this._getMediaElement(rendererId);
+        return mediaElement && mediaElement.hasAttribute('loop');
+    }
+
+    applyStyle(rendererId: string, key: string, value: string) {
+        const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
-            mediaElement.removeAttribute('loop');
+            mediaElement.style[key] = value;
         }
     }
 
-    checkIsLooping(rendererId: string) {
-        const mediaElement = this.getMediaElement(rendererId);
-        return mediaElement && mediaElement.hasAttribute('loop');
+    clearStyle(rendererId: string, key: string) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.style[key] = '';
+        }
+    }
+
+    setVolume(rendererId: string, volume: number) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.volume = volume;
+        }
+    }
+
+    getVolume(rendererId: string, volume: number) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            return mediaElement.volume;
+        }
+        return -1
     }
 }

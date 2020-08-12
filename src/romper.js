@@ -11,7 +11,11 @@ import MediaFetcher from './fetchers/MediaFetcher';
 import logger from './logger';
 
 import { BrowserCapabilities,  BrowserUserAgent, MediaFormats } from './browserCapabilities';
-import { checkWebviewDebug, checkDebugUA } from './utils'
+import {
+    getSetting,
+    WEBVIEW_DEBUG_FLAG,
+    UA_DEBUG_FLAG,
+} from './utils'
 
 import Package from '../package.json';
 
@@ -48,7 +52,7 @@ const DEFAULT_SETTINGS = {
 };
 
 // Limited Debugging for iOS webviews
-if(checkWebviewDebug()) {
+if(getSetting(WEBVIEW_DEBUG_FLAG)) {
     document.getElementById('debug-div').classList.add("debug-div-shown");
 
     /* eslint-disable */
@@ -80,7 +84,7 @@ if(checkWebviewDebug()) {
     /* eslint-enable */
 }
 
-if(checkDebugUA()) {
+if(getSetting(UA_DEBUG_FLAG)) {
     document.getElementById('debug-div').classList.add("debug-div-shown");
     document.getElementById('debug-div').innerHTML += `<h3>platform</h3>`
         + `<p>${window.navigator.platform}</p>`

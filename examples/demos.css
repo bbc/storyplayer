@@ -1,20 +1,21 @@
 body {
   font-family: system-ui;
+  min-width: 35rem;
 }
 
-h1 {
-  padding: 10px;
-  text-align: center;
-  width: 780px;
+.romper-container {
+  height: 500px;
+  overflow: auto;
+  resize: both;
 }
 
 .romper-player {
-  height: 500px;
+  height: 100%;
   width: 100%;
 }
 
 .story-title {
-  background: lightgray;
+  margin: 0 0 10px 0;
   padding: 10px;
   text-align: center;
 }
@@ -38,9 +39,7 @@ h1 {
 }
 
 .selection {
-  background-color: #eee;
-  padding: 10px 10px 20px 30px;
-  width: 760px;
+  padding: 0 10px 10px 10px;
 }
 
 .selection div {
@@ -66,6 +65,15 @@ h1 {
   padding: 10px 34px;
   text-align: center;
   text-decoration: none;
+  margin: 1em 0;
+}
+
+.selection button {
+  margin-top: 0;
+}
+
+.jsoneditor {
+  min-height: 500px;
 }
 
 .selection button, .jsoncontent button.active, .restart-button.active {
@@ -74,8 +82,8 @@ h1 {
 
  /* Style the tab */
  .tab {
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
+  border-bottom: 1px solid #ccc;
+  /* background-color: #f1f1f1; */
   margin-top: 20px;
   overflow: hidden;
 }
@@ -83,13 +91,21 @@ h1 {
 /* Style the buttons that are used to open the tab content */
 .tab button {
   background-color: inherit;
-  border: none;
+  border-left: none;
+  border-bottom: none;
+  border-right: 1px solid #ccc;
+  border-top: 1px solid #ccc;
   cursor: pointer;
   float: left;
-  font-size: 130%;
+  font-size: 100%;
   outline: none;
   padding: 14px 16px;
   transition: 0.3s;
+
+}
+
+button:first-child {
+  border-left: 1px solid #ccc;
 }
 
 /* Change background color of buttons on hover */
@@ -116,10 +132,11 @@ h1 {
   border: 1px solid #ccc;
   border-top: none;
   display: none;
-  height: 75%;
-  overflow-y: scroll;
-  padding: 6px 5%;
-  width: 90%;
+  padding: 6px;
+}
+
+.tabcontent.active {
+  display: block;
 }
 
 .switch {

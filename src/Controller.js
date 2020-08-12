@@ -19,7 +19,7 @@ import { InternalVariableNames } from './InternalVariables';
 
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
-import { checkDebugPlayout } from './utils';
+import { getSetting, DEBUG_PLAYOUT_FLAG } from './utils';
 import AnalyticsHandler from './AnalyticsHandler';
 
 export const PLACEHOLDER_REPRESENTATION = {
@@ -58,7 +58,7 @@ export default class Controller extends EventEmitter {
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
-        
+
         this._analyticsHandler = new AnalyticsHandler(analytics, this);
         this._handleAnalytics = this._handleAnalytics.bind(this);
 
@@ -73,35 +73,53 @@ export default class Controller extends EventEmitter {
     _handleAnalytics(logData: AnalyticsPayload): mixed {
         this._analyticsHandler.handleAnalyticsEvent(logData);
     }
- 
-    restart(storyId: string, initialState?: Object = {}) {
+
+    restart(storyId?: ?string = null, initialState?: Object = {}) {
+        let restartStoryId;
+        if (storyId) {
+            restartStoryId = storyId;
+        } else if (this._storyId) {
+            restartStoryId = this._storyId;
+        } else {
+            logger.error('Could not restart - no story id');
+            return;
+        }
         this._reasoner = null;
         this._prepareRenderManagerForRestart();
         if(this._sessionManager) {
             if(Object.keys(initialState).length === 0) {
                 this._sessionManager.fetchExistingSessionState().then(resumeState => {
-                    this.start(storyId, resumeState);
+                    this.start(restartStoryId, resumeState);
                 });
             }
         } else {
-            this.start(storyId, initialState);
-        }        
+            this.start(restartStoryId, initialState);
+        }
     }
-    
+
     // get render manager to tidy up
     _prepareRenderManagerForRestart() {
         this._removeListenersFromRenderManager();
         this._renderManager.prepareForRestart();
     }
-    
+
     /**
      * Reset the story and keep the reasoner for it.
      * @param  {string} storyId story to reset
      */
-    resetStory(storyId: string){
+    resetStory(storyId?: ?string = null){
+        let restartStoryId;
+        if (storyId) {
+            restartStoryId = storyId;
+        } else if (this._storyId) {
+            restartStoryId = this._storyId;
+        } else {
+            logger.error('Could not reset - no story id');
+            return;
+        }
         // we're just resetting
         this._prepareRenderManagerForRestart();
-        this.start(storyId);
+        this.start(restartStoryId);
     }
 
 
@@ -213,7 +231,7 @@ export default class Controller extends EventEmitter {
                 } else {
                     this.walkPathHistory(this._storyId, lastVisited, pathHistory);
                 }
-            } 
+            }
         });
     }
 
@@ -273,7 +291,7 @@ export default class Controller extends EventEmitter {
             },
         };
 
-        if(checkDebugPlayout()) {
+        if(getSetting(DEBUG_PLAYOUT_FLAG)) {
             // we want to check which devices can olay what
             logger.info('playing capabilities', data);
         }
@@ -341,11 +359,19 @@ export default class Controller extends EventEmitter {
     }
 
     _handleRendererCompletedEvent() {
-        if (this._reasoner) this._reasoner.next();
+        if (this._reasoner) try {
+            this._reasoner.next();
+        } catch (e) {
+            logger.warn(e.message);
+        }
     }
 
     _handleRendererNextButtonEvent() {
-        if (this._reasoner) this._reasoner.next();
+        if (this._reasoner) try {
+            this._reasoner.next();
+        } catch (e) {
+            logger.warn(e.message);
+        }
     }
 
     _handleRendererPreviousButtonEvent() {
@@ -373,7 +399,7 @@ export default class Controller extends EventEmitter {
     _startStoryEventListener() {
         const hide = this._reasoner._story.meta && this._reasoner._story.meta.storyplayer &&
             this._reasoner._story.meta.storyplayer.taster && this._reasoner._story.meta.storyplayer.taster.hideDuringExperience || false;
-        
+
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED, {
             hide
         });
@@ -539,7 +565,7 @@ export default class Controller extends EventEmitter {
                     _shadowHandleStoryEnd();
                     return;
                 }
-                
+
                 visitedArray.push(narrativeElement.id);
                 if (narrativeElement.id === targetNeId) {
                     // remove event listeners for the original reasoner
@@ -979,7 +1005,7 @@ export default class Controller extends EventEmitter {
         }
         return this.getVariableValue(InternalVariableNames.PATH_HISTORY)
             .then((history) => {
-                if (history.length > 1) {
+                if (history && history.length > 1) {
                     const lastVisitedId = history[history.length - 2];
                     return this._fetchers.narrativeElementFetcher(lastVisitedId);
                 }
@@ -1098,7 +1124,7 @@ export default class Controller extends EventEmitter {
                 this.reset();
 
                 this._storyId = storyId;
-                // apply appropriate listeners to this reasoner                
+                // apply appropriate listeners to this reasoner
                 this._handleNarrativeElementChanged = (ne: NarrativeElement) => {
                     this._handleNEChange(newReasoner, ne);
                 };
@@ -1118,7 +1144,7 @@ export default class Controller extends EventEmitter {
             pathHistory.forEach(element => {
                 newReasoner._shadowWalkPath(element, pathHistory);
             });
-           
+
         });
     }
 
@@ -1210,6 +1236,6 @@ export default class Controller extends EventEmitter {
     _handleRendererPreviousButtonEvent: Function;
 
     handleKeys: ?boolean;
-    
+
     _analyticsHandler: AnalyticsHandler;
 }

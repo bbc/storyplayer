@@ -1,7 +1,7 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import AnalyticEvents from '../AnalyticEvents';
-import { handleButtonTouchEvent } from '../utils';
+import { handleButtonTouchEvent, getCurrentUrl } from '../utils';
 
 const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
@@ -101,7 +101,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     modalElement.appendChild(closeButton);
 
     const shareText = encodeURIComponent(behaviour.share_text);
-    let shareUrl = window.location.href;
+    let shareUrl = getCurrentUrl();
     if (behaviour.share_url) {
         shareUrl = encodeURIComponent(behaviour.share_url);
     }

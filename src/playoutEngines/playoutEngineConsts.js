@@ -1,3 +1,9 @@
+export const PLAYOUT_ENGINES = {
+    DOM_SWITCH_PLAYOUT: 'dom',
+    IOS_PLAYOUT: 'ios',
+    SMP_PLAYOUT: 'smp'
+};
+
 export const allHlsEvents = [
     "MEDIA_ATTACHING",
     "MEDIA_ATTACHED",
