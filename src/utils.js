@@ -30,7 +30,7 @@ export const getSetting = (settingName) => {
     let settingValue;
     if(inSMPWrapper()) {
         settingValue = new URLSearchParams(
-            window.playerInterface.datastore.get("querystring")
+            window.playerInterface.datastore.get("queryString")
         ).get(settingName);
     } else {
         settingValue = new URLSearchParams(window.location.search).get(settingName);
