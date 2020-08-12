@@ -501,13 +501,13 @@ export default class BaseRenderer extends EventEmitter {
         targetTime = Math.min(targetTime, duration)
 
         // ensure that we are setting a valid time
-        if (timeIsInvalid(time)) {
-            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
+        if (timeIsInvalid(targetTime)) {
+            logger.warn(`Setting time for renderer out of range (${targetTime}).  Ignoring`);
             return;
         }
 
         const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < time) {
+        if (choiceTime >= 0 && choiceTime < targetTime) {
             targetTime = choiceTime;
         }
         // convert to absolute time into video
@@ -515,7 +515,7 @@ export default class BaseRenderer extends EventEmitter {
         targetTime += this._inTime;
 
         // test again to make sure calculations haven't resulted in invalid time
-        if (timeIsInvalid(time)) {
+        if (timeIsInvalid(targetTime)) {
             logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
             return;
         }
