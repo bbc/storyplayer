@@ -20,6 +20,28 @@
                 }
             },
             "object_class": "STORY",
+            "variables": {
+                "counter": {
+                    "default_value": 1,
+                    "description": "does the user get an in-depth version",
+                    "variable_type": "number"
+                },
+                "bool": {
+                    "default_value": true,
+                    "description": "does the user get an in-depth version",
+                    "variable_type": "boolean"
+                },
+                "mylist": {
+                    "default_value": "red",
+                    "description": "does the user get an in-depth version",
+                    "variable_type": "list"
+                },
+                "score": {
+                    "default_value": 21,
+                    "description": "does the user get an in-depth version",
+                    "variable_type": "number"
+                }
+            },
             "narrative_element_ids": [
                 "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
                 "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
@@ -31,7 +53,7 @@
         {
             "id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
             "name": "Narrative Element 1",
-            "description": "The first part of the story",
+            "description": "Part ${counter} of the story.  Your score is ${score}, colour is ${mylist}, and choice is  ${bool}",
             "version": "0:0",
             "tags": {},
             "meta": {
@@ -115,12 +137,7 @@
             "meta": {},
             "version": "0:0",
             "name": "Narrative Element ",
-            "representations": [
-                {
-                    "representation_id": "3ab4c455-5165-4ffc-9152-05755282dad0",
-                    "condition": {"==": [1,1]}
-                }
-            ]
+            "representations": []
         },
         {
             "id": "d9d8b449-da99-4936-a803-7a1bdf91bbe8",
