@@ -468,7 +468,7 @@ export default class Controller extends EventEmitter {
             if (previous) {
                 this._jumpToNarrativeElement(previous);
             } else {
-                logger.error('ANDY cannot resolve previous node to go to');
+                logger.error('cannot resolve previous node to go to');
             }
         });
     }
