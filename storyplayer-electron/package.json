@@ -39,6 +39,9 @@
       "appId": "uk.co.bbc.rd.storyplayerwin",
       "target": "nsis",
       "asar": true
+    },
+    "nsis": {
+      "license" : "build/license_en.txt"
     }
   },
   "devDependencies": {
