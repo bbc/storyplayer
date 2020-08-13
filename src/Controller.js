@@ -448,6 +448,11 @@ export default class Controller extends EventEmitter {
             this.getIdOfPreviousNode(),
             this.getVariableValue(InternalVariableNames.PATH_HISTORY),
         ]).then(([previous, history]) => {
+            if (history.length <= 1) {
+                // trying to go back but on first element, so just skip to start instead
+                this.repeatStep();
+                return; 
+            }
             // remove the current NE from history
             history.pop();
             // remove the one we're going to - it'll be added again
@@ -463,7 +468,7 @@ export default class Controller extends EventEmitter {
             if (previous) {
                 this._jumpToNarrativeElement(previous);
             } else {
-                logger.error('cannot resolve previous node to go to');
+                logger.error('ANDY cannot resolve previous node to go to');
             }
         });
     }
@@ -487,7 +492,14 @@ export default class Controller extends EventEmitter {
             obj: narrativeElement,
         }, 'Narrative Element');
         if (this._reasoner && !resuming) {
-            this._reasoner.appendToHistory(narrativeElement.id);
+            if (!this._currentNarrativeElement) { 
+                // setting first element - so record in history
+                this._reasoner.appendToHistory(narrativeElement.id);
+            } else if (narrativeElement.id !== this._currentNarrativeElement.id) { 
+                // _handleNEChange is used to repeat an element
+                // only add to history if changing
+                this._reasoner.appendToHistory(narrativeElement.id);
+            }
             this._logNEChange(this._currentNarrativeElement, narrativeElement);
         }
         this._currentNarrativeElement = narrativeElement;
