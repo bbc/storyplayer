@@ -1,6 +1,6 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import BaseRenderer from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import AnalyticEvents from '../AnalyticEvents';
@@ -44,8 +44,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     _userInteracting: boolean;
 
     _userDragging: boolean;
-
-    _hasEnded: boolean;
 
     _started: boolean;
 
@@ -122,7 +120,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     start() {
         super.start();
         logger.info(`Started: ${this._representation.id}`);
-        this._hasEnded = false;
         this._started = true;
         if (this._controller.handleKeys) {
             document.addEventListener('keydown', this._onKeyDown);
@@ -178,7 +175,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._addReticle();
 
-        const uiLayer = this._player._overlays;
+        const uiLayer = this._player.getOverlayElement();
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
         uiLayer.addEventListener('mouseup', this._onMouseUp, false);
         uiLayer.addEventListener('mousemove', this._onMouseMove, false);
@@ -436,7 +433,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
 
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
@@ -446,7 +444,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._readyToShowIcons = false;
 
         // remove drag view handler
-        const uiLayer = this._player._overlays;
+        const uiLayer = this._player.getOverlayElement();
         uiLayer.removeEventListener('mousedown', this._onMouseDown);
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
         uiLayer.removeEventListener('mousemove', this._onMouseMove);
@@ -461,9 +459,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._started = false;
         this._rendered = false;
-    }
-
-    destroy() {
-        super.destroy();
+        return true;
     }
 }

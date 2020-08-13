@@ -2,16 +2,17 @@
 /* eslint-disable class-methods-use-this */
 import Hls from 'hls.js';
 import shaka from 'shaka-player';
-import BasePlayoutEngine, { MEDIA_TYPES } from './BasePlayoutEngine';
-import Player, { PlayerEvents } from '../Player';
+import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
+import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 
 import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
 import { SHAKA_EVENTS } from '../Events';
 import {
-    fetchShakaDebugLevel,
-    fetchActiveBufferingOverride,
-    fetchInactiveBufferingOverride
+    getSetting,
+    SHAKA_DEBUG_LEVEL,
+    OVERRIDE_ACTIVE_BUFFERING,
+    OVERRIDE_INACTIVE_BUFFERING,
 } from '../utils';
 
 const MediaTypesArray = [
@@ -91,7 +92,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
         };
 
-        const activeBufferingOverride = fetchActiveBufferingOverride();
+        const activeBufferingOverride = getSetting(OVERRIDE_ACTIVE_BUFFERING);
         if (activeBufferingOverride) {
             logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
             this._activeConfig.dash.bufferingGoal = parseInt(activeBufferingOverride, 10)
@@ -113,14 +114,14 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         // bits/second (Set to 1gbps connection to get highest adaptation)
         this._estimatedBandwidth = 1000000000
 
-        const inactiveBufferingOverride = fetchInactiveBufferingOverride();
+        const inactiveBufferingOverride = getSetting(OVERRIDE_INACTIVE_BUFFERING);
         if (inactiveBufferingOverride) {
             logger.info(`inactiveBufferingOverride: ${inactiveBufferingOverride}`)
             this._inactiveConfig.dash.bufferingGoal = parseInt(inactiveBufferingOverride, 10)
         }
 
         // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
-        const shakaDebugLevel = fetchShakaDebugLevel();
+        const shakaDebugLevel = getSetting(SHAKA_DEBUG_LEVEL);
         if (shaka.log && this._debugPlayout && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);
@@ -162,6 +163,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         );
 
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, this._toggleMute);
+    }
+
+    supports(feature) {
+        switch(feature) {
+        case SUPPORT_FLAGS.SUPPORTS_360:
+            return true
+        default:
+            return super.supports(feature)
+        }
     }
 
     _shakaUpdateBandwidth(rendererId: string) {
@@ -331,8 +341,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.id =  mediaObj.id;
         }
         if(mediaObj.loop) {
-            // rendererPlayoutObj.mediaElement.loop = true;
-            super.setLoopAttribute(rendererId, mediaObj.loop, rendererPlayoutObj.mediaElement);
+            super.setLoopAttribute(rendererId, mediaObj.loop);
         }
         if (mediaObj.inTime) {
             rendererPlayoutObj.mediaElement.currentTime = mediaObj.inTime;
@@ -454,7 +463,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (this._useHlsJs) {
                         // Using HLS.js
                         rendererPlayoutObj._hls.config = {
-                            
+
                             ...rendererPlayoutObj._hls.config,
                             ...this._activeConfig.hls,
                         };
@@ -498,10 +507,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.addEventListener(
                         'buffering', (e) => {
                             if(rendererPlayoutObj._shaka.isBuffering()) {
-                                this._player._showBufferingLayer();
+                                this._player.showBufferingLayer();
                             }
                             if(!e.buffering) {
-                                this._player._removeBufferingLayer();
+                                this._player.removeBufferingLayer();
                             }
                         }
                     );
@@ -526,7 +535,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         'adaptation', this._player._removeErrorLayer
                     );
                     rendererPlayoutObj._shaka.addEventListener(
-                        'adaptation', this._player._removeBufferingLayer
+                        'adaptation', this._player.removeBufferingLayer
                     );
 
 
@@ -589,7 +598,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     if (this._useHlsJs) {
                         // Using HLS.js
                         rendererPlayoutObj._hls.config = {
-                            
+
                             ...rendererPlayoutObj._hls.config,
                             ...this._inactiveConfig.hls,
                         };
@@ -615,9 +624,9 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.error,
                         this._player._showErrorLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.buffering,
-                        this._player._showBufferingLayer);
+                        this._player.showBufferingLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
-                        this._player._removeBufferingLayer);
+                        this._player.removeBufferingLayer);
                     rendererPlayoutObj._shaka.removeEventListener(SHAKA_EVENTS.adaptation,
                         this._player._removeErrorLayer);
 
@@ -632,19 +641,8 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.pause();
             rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
             super.setPlayoutInactive(rendererId);
-            super.removeLoopAttribute(rendererId);
+            super.setLoopAttribute(rendererId, false);
             this._player.removeVolumeControl(rendererId);
-        }
-    }
-
-    _play(rendererId: string) {
-        const { mediaElement } = this._media[rendererId];
-        const promise = mediaElement.play();
-        if (promise !== undefined) {
-            promise.then(() => {}).catch((error) => {
-                logger.warn(error, 'DOMSwitchPlayotEngine Not got permission to play');
-                // Auto-play was prevented
-            });
         }
     }
 
@@ -655,26 +653,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         Object.keys(this._media)
             .filter(key => this._media[key].active)
             .forEach((key) => {
-                const { mediaElement } = this._media[key];
-                if (!mediaElement) {
-                    setTimeout(() => { this._play(key); }, 500);
-                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-                    this._play(key);
-                } else {
-                    // loadeddata event seems not to be reliable
-                    // this hack avoids it
-                    const timeoutId = setInterval(() => {
-                        mediaElement.play()
-                            .then(() => {
-                                clearInterval(timeoutId);
-                            })
-                            .catch((error) => {
-                                logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
-                                // Auto-play was prevented
-                                clearInterval(timeoutId);
-                            });
-                    }, 100);
-                }
+                this.playRenderer(key)
             });
     }
 
@@ -693,7 +672,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                this._media[key].mediaElement.pause();
+                this.pauseRenderer(key)
             });
     }
 
@@ -712,7 +691,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                this._media[key].mediaElement.pause();
+                this.pauseRenderer(key)
             });
     }
 
@@ -727,25 +706,53 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 return false;
             })
             .forEach((key) => {
-                const { mediaElement } = this._media[key];
-                const playCallback = () => {
-                    mediaElement.removeEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                    this._play(key);
-                };
-                if (!mediaElement) {
-                    setTimeout(() => { this._play(key); }, 500);
-                } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-                    this._play(key);
-                } else {
-                    mediaElement.addEventListener(
-                        'loadeddata',
-                        playCallback,
-                    );
-                }
+                this.playRenderer(key)
             });
+    }
+
+    playRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
+            return;
+        }
+        const {mediaElement} = rendererPlayoutObj;
+        const play = () => {
+            const promise = mediaElement.play();
+            if (promise !== undefined) {
+                promise.then(() => {}).catch((error) => {
+                    logger.warn(error, 'DOMSwitchPlayotEngine Not got permission to play');
+                    // Auto-play was prevented
+                });
+            }
+        }
+        if (!mediaElement) {
+            setTimeout(() => { play(); }, 500);
+        } else if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
+            play();
+        } else {
+            // loadeddata event seems not to be reliable
+            // this hack avoids it
+            const timeoutId = setInterval(() => {
+                mediaElement.play()
+                    .then(() => {
+                        clearInterval(timeoutId);
+                    })
+                    .catch((error) => {
+                        logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
+                        // Auto-play was prevented
+                        clearInterval(timeoutId);
+                    });
+            }, 100);
+        }
+    }
+
+    pauseRenderer(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
+            return;
+        }
+        const {mediaElement} = rendererPlayoutObj;
+        mediaElement.pause()
     }
 
     getCurrentTime(rendererId: string) {
@@ -768,7 +775,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return undefined;
         }
-        const mediaElement = this.getMediaElement(rendererId);
+        const mediaElement = this._getMediaElement(rendererId);
         if (
             !mediaElement ||
             mediaElement.readyState < mediaElement.HAVE_CURRENT_DATA
@@ -820,7 +827,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    getMediaElement(rendererId: string): ?HTMLMediaElement {
+    _getMediaElement(rendererId: string): ?HTMLMediaElement {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj || !rendererPlayoutObj.mediaElement) {
             return document.createElement('video');

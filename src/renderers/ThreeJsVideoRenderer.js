@@ -1,11 +1,13 @@
 // @flow
 
-import Player from '../Player';
+import Player from '../gui/Player';
 import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
+
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
-import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
+import { MEDIA_TYPES, SUPPORT_FLAGS } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities';
 import { VIDEO } from '../utils';
@@ -16,6 +18,8 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _fetchMedia: MediaFetcher;
 
     _endedEventListener: Function;
+
+    _hasEnded: boolean;
 
     _outTimeEventListener: Function;
 
@@ -51,23 +55,79 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             analytics,
             controller,
         );
+
+        this._hasEnded = false;
         this._endedEventListener = this._endedEventListener.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._outTimeEventListener = this._outTimeEventListener.bind(this);
-
-        this._playoutEngine.queuePlayout(this._rendererId, {
-            type: MEDIA_TYPES.FOREGROUND_AV,
-            playPauseHandler: this._handlePlayPauseButtonClicked,
-        });
 
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
         this._inTime = 0;
         this._outTime = -1;
         this._lastSetTime = 0;
-
-        this.renderVideoElement();
     }
+
+    async init() {
+        try {
+            if(!this._playoutEngine.supports(SUPPORT_FLAGS.SUPPORTS_360)) {
+                throw new Error("Playout Engine does not support 360")
+            }
+            await this._queueVideoElement();
+            this._setPhase(RENDERER_PHASES.CONSTRUCTED);
+        }
+        catch(e) {
+            logger.error(e, 'could not initiate 360 video renderer');
+        }
+    }
+
+    async _queueVideoElement() {
+        if (this._representation.asset_collections.foreground_id) {
+            const fg = await this._fetchAssetCollection(
+                this._representation.asset_collections.foreground_id,
+            );
+            if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
+                this._setInTime(parseFloat(fg.meta.romper.in));
+            }
+            if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
+                this._setOutTime(parseFloat(fg.meta.romper.out));
+            }
+            if (fg.assets.av_src) {
+                const mediaObj = {
+                    type: MEDIA_TYPES.FOREGROUND_AV,
+                    playPauseHandler: this._handlePlayPauseButtonClicked,
+                    loop: fg.loop,
+                    id: fg.id,
+                    inTime: this._inTime,
+                }
+                const options = { mediaFormat: MediaFormats.getFormat(), mediaType: VIDEO };
+                const mediaUrl = await this._fetchMedia(fg.assets.av_src, options);
+                if (fg.assets.sub_src) {
+                    const subsUrl = await this._fetchMedia(fg.assets.sub_src);
+                    mediaObj.subs_url = subsUrl
+                }
+                let appendedUrl = mediaUrl;
+                if (this._inTime > 0 || this._outTime > 0) {
+                    let mediaFragment = `#t=${this._inTime}`;
+                    if (this._outTime > 0) {
+                        mediaFragment = `${mediaFragment},${this._outTime}`;
+                    }
+                    appendedUrl = `${mediaUrl}${mediaFragment}`;
+                }
+                if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
+                    logger.warn('trying to populate video element at the wrong time');
+                } else {
+                    mediaObj.url = appendedUrl
+                    this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
+                }
+            } else {
+                throw new Error('No av source for video');
+            }
+        } else {
+            throw new Error('No foreground asset id for video');
+        }
+    }
+
 
     _endedEventListener() {
         logger.info('360 video ended');
@@ -80,42 +140,41 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     _outTimeEventListener() {
         const { duration } = this.getCurrentTime();
         let { currentTime } = this.getCurrentTime();
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
         const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
         if (!this.checkIsLooping()) {
             // if not looping use video time to allow for buffering delays
             currentTime = playheadTime - this._inTime;
             // and sync timer
             this._timer.setTime(currentTime);
-        } else if (this._outTime > 0 && videoElement) {
+        } else if (this._outTime > 0) {
             // if looping, use timer
             // if looping with in/out points, need to manually re-initiate loop
             if (playheadTime >= this._outTime) {
-                videoElement.currentTime = this._inTime;
-                videoElement.play();
+                this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
+                this._playoutEngine.playRenderer(this._rendererId);
             }
         }
         // have we reached the end?
-        // either timer past specified duration (for looping) 
+        // either timer past specified duration (for looping)
         // or video time past out time
         if (currentTime > duration) {
-            if (videoElement) {
-                videoElement.pause();
-            }
+            this._playoutEngine.pauseRenderer(this._rendererId);
             this._endedEventListener();
         }
     }
 
     start() {
         super.start();
+        this._setPhase(RENDERER_PHASES.MAIN);
         this._startThreeSixtyVideo();
         this.setCurrentTime(this._lastSetTime);
         this._player.enablePlayButton();
         this._player.enableScrubBar();
+        this._player.showSeekButtons();
     }
 
     _startThreeSixtyVideo() {
-        const videoElement = this._playoutEngine.getMediaElement(this._rendererId);
+        const videoElement = this._playoutEngine.getMediaElementFor360(this._rendererId);
         const texture = new THREE.VideoTexture(videoElement);
         const material = new THREE.MeshBasicMaterial({ map: texture });
 
@@ -135,50 +194,6 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             videoElement.style.visibility = 'hidden';
         }
         this._animate();
-    }
-
-    renderVideoElement() {
-        // set video source
-        if (this._representation.asset_collections.foreground_id) {
-            this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
-                .then((fg) => {
-                    if (fg.assets.av_src) {
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                            this._setInTime(parseFloat(fg.meta.romper.in));
-                        }
-                        if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                            this._setOutTime(parseFloat(fg.meta.romper.out));
-                        }
-                        const options = { mediaFormat: MediaFormats.getFormat(), mediaType: VIDEO };
-                        this._fetchMedia(fg.assets.av_src, options)
-                            .then((mediaUrl) => {
-                                let appendedUrl = mediaUrl;
-                                if (this._inTime > 0 || this._outTime > 0) {
-                                    let mediaFragment = `#t=${this._inTime}`;
-                                    if (this._outTime > 0) {
-                                        mediaFragment = `${mediaFragment},${this._outTime}`;
-                                    }
-                                    appendedUrl = `${mediaUrl}${mediaFragment}`;
-                                }
-                                this.populateVideoElement(appendedUrl, fg.loop);
-                            })
-                            .catch((err) => {
-                                logger.error(err, 'Video not found');
-                            });
-                    }
-                });
-        }
-    }
-
-    populateVideoElement(mediaUrl: string, loop: ?boolean) {
-        if (this._destroyed) {
-            logger.warn('trying to populate video element that has been destroyed');
-        } else {
-            this._playoutEngine.queuePlayout(this._rendererId, {
-                url: mediaUrl,
-                loop,
-            });
-        }
     }
 
     // set how far into the segment this video should be (relative to in-point)
@@ -215,17 +230,22 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
     }
 
     end() {
-        super.end();
+        const needToEnd = super.end();
+        if (!needToEnd) return false;
 
+        this._setPhase(RENDERER_PHASES.ENDED);
+        this._hasEnded = true;
         this._playoutEngine.setPlayoutInactive(this._rendererId);
         this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
         this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
+        return true;
     }
 
     destroy() {
-        this._playoutEngine.setPlayoutInactive(this._rendererId);
-        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        super.destroy();
+        const needToDestroy = super.destroy();
+        if(!needToDestroy) return false;
+        
+        this._setPhase(RENDERER_PHASES.DESTROYED);
+        return true;
     }
 }

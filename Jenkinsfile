@@ -140,19 +140,6 @@ ${commit_messages}
               git push origin master --tags
             '''
           }
-
-          dir('rd-ux-storyformer') {
-            sh '''
-              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
-              git add package.json yarn.lock
-              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
-
-${commit_messages}
-"
-              git pull --rebase
-              git push origin master --tags
-            '''
-          }
         }
       }
     }

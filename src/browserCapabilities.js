@@ -1,14 +1,16 @@
 // @flow
 
 import Hls from 'hls.js';
-import { checkDebugPlayout, getOverrideFormat, fetchOverridePlayout } from './utils';
+import {
+    getSetting,
+    DEBUG_PLAYOUT_FLAG,
+    OVERRIDE_PLAYOUT,
+    OVERRIDE_PLAYOUT_FORMAT,
+    inSMPWrapper
+} from './utils';
 import logger from './logger';
 
-export const PLAYOUT_ENGINES = {
-    SRC_SWITCH_PLAYOUT: 'src',
-    DOM_SWITCH_PLAYOUT: 'dom',
-    IOS_PLAYOUT: 'ios',
-};
+import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
 
 export class BrowserUserAgent {
     static facebookWebview() {
@@ -165,12 +167,14 @@ export class BrowserCapabilities {
 
 }
 
+
+
 export class MediaFormats {
 
     static getFormat() {
-        const overrideFormat = getOverrideFormat();
-        const debugPlayout = checkDebugPlayout();
-        if(overrideFormat) {
+        const overrideFormat = getSetting(OVERRIDE_PLAYOUT_FORMAT)
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG)
+        if(['hls','dash'].includes(overrideFormat)) {
             logger.info(`Overriding media selector format: , ${overrideFormat}`)
             return overrideFormat;
         }
@@ -207,23 +211,24 @@ export class MediaFormats {
     }
 
     static getPlayoutEngine() {
-        const overridePlayout = fetchOverridePlayout();
-        const debugPlayout = checkDebugPlayout();
+        const overridePlayout = getSetting(OVERRIDE_PLAYOUT);
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
             logger.info("Overriding playout engine: ", overridePlayout);
-            if(overridePlayout === 'src') {
-                logger.warn('Cannot use source engine');
-                return 'ios';
-            }
             return overridePlayout
         }
+
+        if(inSMPWrapper()) {
+            return PLAYOUT_ENGINES.SMP_PLAYOUT
+        }
+
         if(BrowserCapabilities.dashSupport()) {
             if(BrowserUserAgent.isSafariDesktop()) {
                 // Safari Desktop
                 if (debugPlayout) {
                     logger.info("getPlayoutEngine: DashSupport + isSafariDesktop = True")
                 }
-                return 'dom';
+                return PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT;
             }
             if (BrowserUserAgent.safari()) {
                 // Safari iOS
@@ -235,20 +240,20 @@ export class MediaFormats {
             if (debugPlayout) {
                 logger.info("getPlayoutEngine: DashSupport + not safari = True")
             }
-            return 'dom';
+            return PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT;
         }
         if(BrowserCapabilities.hlsSupport()) {
             // Safari Mobile
             if (debugPlayout) {
                 logger.info("getPlayoutEngine: HlsSupport = True")
             }
-            return 'ios';
+            return PLAYOUT_ENGINES.IOS_PLAYOUT;
         }
 
         if (debugPlayout) {
             logger.info("getPlayoutEngine: No DashSupport or HlsSupport")
         }
         // default?
-        return 'dom';
+        return PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT;
     }
 }

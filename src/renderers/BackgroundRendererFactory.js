@@ -3,7 +3,7 @@
 import type BackgroundRenderer from './BackgroundRenderer';
 import type { MediaFetcher, AssetCollection } from '../romper';
 import BackgroundAudioRenderer from './BackgroundAudioRenderer';
-import Player from '../Player';
+import Player from '../gui/Player';
 import logger from '../logger';
 
 export default function BackgroundRendererFactory(

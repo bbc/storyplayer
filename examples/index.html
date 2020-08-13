@@ -15,9 +15,9 @@
 
     <!-- tab switcher -->
     <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'chooser')">Select story</button>
-        <button class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
-        <button class="tablinks active" id='rendertab' onclick="openTab(event, 'renderer')">Render</button>
+        <button id="choosetab" class="tablinks" onclick="openTab(event, 'chooser')">Select story</button>
+        <button id="jsontab" class="tablinks" onclick="openTab(event, 'jsoncontent')">View Data Model JSON</button>
+        <button id="rendertab" class="tablinks" onclick="openTab(event, 'renderer')">Render</button>
     </div>
 
     <!-- Select a story -->
@@ -26,32 +26,29 @@
     </div>
 
     <!-- View rendered content -->
-    <div id='renderer' class='tabcontent'  style='display: block;'>
+    <div id='renderer' class='tabcontent'>
         <h2 id='story-title' class='story-title'>No story selected</h2>
-        <div class='romper-target' id="romper-target">
-            <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+        <div class='romper-container'>
+            <div class='romper-target' id="romper-target">
+                <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+            </div>
         </div>
-
         <div><!-- restart button -->
-            <p>
-                <button id="restart-button" class="restart-button" onclick="restart()" disabled>Restart story</button>
-            </p>
+            <button id="restart-button" class="restart-button" onclick="restart()" disabled>Restart story</button>
         </div>
 
         <!-- Allow user to modify variables -->
-        <div id='variable-pane'class='variable-setter active'>
+        <!-- <div id='variable-pane'class='variable-setter active'>
             <h3>Modify variable values here</h3>
             <p>The first Narrative Element is already loaded, so the story will need to be restarted to apply changes.</p>
             <div id='variables-generic'>Load a story to see its variables.</div>
-        </div>
+        </div> -->
     </div>
 
     <!-- View/edit json -->
     <div id='jsoncontent' class='jsoncontent tabcontent'>
-        <div id='json-view'>
-            <p>Select a demo story and the story json will be shown here.</p>
-        </div>
-        <p><button id='runjson' onclick="runEditedJson()" disabled>Run</button></p>
+        <div id='json-view'></div>
+        <button id='runjson' onclick="runEditedJson()" disabled>Run</button>
     </div>
 
     <!-- information for users -->
@@ -68,7 +65,19 @@
         }
 
         // load demo stories
-        const stories = ['demo1.json', 'demo2.json', 'demo3.json', 'demo2b.json', 'demo4.json', 'demo-form.json', 'threesixty.json'];
+        const stories = [
+            'demo1.json',
+            'demo2.json',
+            'demo3.json',
+            'demo2b.json',
+            'demo4.json',
+            'demo5.json',
+            'demo-form.json',
+            'threesixty.json',
+            'demo6.json',
+            'demo7.json',
+            'demo8.json'
+        ];
 
         const promises = []
         stories.forEach(storyFilename => promises.push(fetchFile(storyFilename)));
@@ -113,15 +122,13 @@
             title.textContent = storyName;
             const desc = document.createElement('p');
             desc.textContent = storyDescription;
-            const selectPar = document.createElement('p');
             const selectButton = document.createElement('button');
             selectButton.onclick = () => loadStory(filename);
             selectButton.textContent = "Select";
 
-            selectPar.appendChild(selectButton);
             storyDiv.appendChild(title);
             storyDiv.appendChild(desc);
-            storyDiv.appendChild(selectPar);
+            storyDiv.appendChild(selectButton);
             return storyDiv;
         }
 
@@ -149,6 +156,12 @@
                 console.warn(`could not load GET story content`);
             });
             loadStory(getFilename);
+            document.getElementById('renderer').classList.add('active');
+            document.getElementById('rendertab').classList.add('active');
+            
+        } else {
+            document.getElementById('chooser').classList.add('active');
+            document.getElementById('choosetab').classList.add('active');
         }
 
         // display a message to the user
@@ -174,7 +187,7 @@
             // Get all elements with class="tabcontent" and hide them
             var tabcontent = document.getElementsByClassName("tabcontent");
             for (var i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove('active');
             }
 
             // Get all elements with class="tablinks" and remove the class "active"
@@ -184,7 +197,7 @@
             }
 
             // Show the current tab, and add an "active" class to the button that opened the tab
-            document.getElementById(demoName).style.display = "block";
+            document.getElementById(demoName).classList.add("active");
             evt.currentTarget.className += " active";
 
             if (evt.currentTarget.id === 'rendertab') {
@@ -243,9 +256,9 @@
             });
 
             romperInstance.start(config.stories[0].id, getVariablesState());
-            romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
-                addVariableControls(config.stories[0].id);
-            });
+            // romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
+            //     addVariableControls(config.stories[0].id);
+            // });
         }
 
         function restart() {
