@@ -1,35 +1,42 @@
 const { ipcRenderer } = require('electron');
 
-
-/**
- * Creates the button for the story using the name and the directory the story is in
+/** 
+ * Generates a single html option element using the story dir as value
  * @param {Object} storyName 
  */
-const generateButton = (storyName) => {
-    const button = document.createElement('button');
-    button.onclick = () => ipcRenderer.send('get-story', storyName.dirName);
-    button.classList.add('story-button');
-    button.textContent = storyName.name;
-    return button;
+generateOption = (storyName) => {
+    const option = document.createElement('option');
+    option.setAttribute('value', storyName.dirName);
+    option.textContent = storyName.name;
+    return option;
 };
 
 /**
- * Returns back an array of storyName objects to generate buttons for
+ * Returns an html select element with a placeholder option
+ * and an option for each story in data
  * @param {Array} data 
  */
-const generateButtons = (data) => {
+generateDropdown = (data) => {
     const home = document.getElementById('story-selector-container');
     const storySelector = document.createElement('div');
-    storySelector.classList.add('story-selectors')
+    storySelector.classList.add('story-selectors');
+    const dropdown = document.createElement('select');
+    storySelector.appendChild(dropdown);
+    const placeholder = document.createElement('option');
+    placeholder.setAttribute('value', '');
+    placeholder.textContent = 'Select a story';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    dropdown.appendChild(placeholder);
     data.forEach(async (storyName) => {
-        storySelector.appendChild(generateButton(storyName))
+        dropdown.appendChild(generateOption(storyName))
     });
+    dropdown.onchange = () => ipcRenderer.send('get-story', dropdown.value);
     home.appendChild(storySelector);
 };
 
-
 ipcRenderer.on('list-stories', (event, data) => {
     console.log('data', data);
-    generateButtons(data)
+    generateDropdown(data);
 });
 

@@ -52,6 +52,9 @@ const hideMainInterface = () => {
     if(mainInterface) {
         mainInterface.style.display = 'none';
     }
+    const homeButton = document.getElementById('home-button');
+    homeButton.classList.add('disabled');
+    homeButton.classList.remove('home-buttons');
 };
 
 const showMainInterface = () => {
@@ -59,6 +62,9 @@ const showMainInterface = () => {
     if(mainInterface) {
         mainInterface.style.display = 'block';
     }
+    const homeButton = document.getElementById('home-button');
+    homeButton.classList.remove('disabled');
+    homeButton.classList.add('home-buttons');
 }
 
 const hideHomePage = () => {
@@ -71,7 +77,7 @@ const hideHomePage = () => {
 const showHomePage = () => {
     destroyStoryPlayer();
     const homePage = document.getElementById('main-content');
-    replaceTitle('StoryPlayer');
+    replaceTitle('');
     if(homePage) {
         homePage.style.display = "block"; 
     }
@@ -152,6 +158,8 @@ ipcRenderer.on('found-story', (event, data) => {
         const firstStory = data.stories[0];
         if (firstStory.meta && firstStory.meta.storyplayer && firstStory.meta.storyplayer.htmltitle) {
             replaceTitle(firstStory.meta.storyplayer.htmltitle);
+        } else {
+            replaceTitle(firstStory.name);
         }
         initializeStoryPlayer(data);
     }
