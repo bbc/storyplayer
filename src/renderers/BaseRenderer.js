@@ -449,13 +449,11 @@ export default class BaseRenderer extends EventEmitter {
         if (this._duration && this._duration !== Infinity) {
             return this._duration; // if value stored, return
         }
+
         if (duration === undefined || duration === null) {
             // if not, check playout engine
             duration = Infinity;
-            if (this.checkIsLooping()){
-                // looping, and not specified in rep => infinite
-                duration = Infinity;
-            } else {
+            if (!this.checkIsLooping()){
                 // if we have playout engine duration, use
                 duration = this._playoutEngine.getDuration(this._rendererId);
                 if (duration === undefined || duration === null) {
@@ -469,6 +467,7 @@ export default class BaseRenderer extends EventEmitter {
             duration -= this._inTime;
         }
         this._duration = duration;
+
         return this._duration;
     }
 
@@ -492,21 +491,24 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        const { timeBased } = this.getCurrentTime();
+        const { timeBased, duration } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
-            return (value < 0 || value === Infinity || Number.isNaN(value))
+            return (value === Infinity || Number.isNaN(value))
         };
-
-        // ensure that we are setting a valid time
-        if (timeIsInvalid(time)) {
-            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
-            return;
-        }
 
         // work out what time we actually need to go to, given what was asked for
         let targetTime = time;
+        targetTime = Math.max(0, targetTime)
+        targetTime = Math.min(targetTime, duration)
+
+        // ensure that we are setting a valid time
+        if (timeIsInvalid(targetTime)) {
+            logger.warn(`Setting time for renderer out of range (${targetTime}).  Ignoring`);
+            return;
+        }
+
         const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < time) {
+        if (choiceTime >= 0 && choiceTime < targetTime) {
             targetTime = choiceTime;
         }
         // convert to absolute time into video
@@ -514,7 +516,7 @@ export default class BaseRenderer extends EventEmitter {
         targetTime += this._inTime;
 
         // test again to make sure calculations haven't resulted in invalid time
-        if (timeIsInvalid(time)) {
+        if (timeIsInvalid(targetTime)) {
             logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
             return;
         }
@@ -531,7 +533,7 @@ export default class BaseRenderer extends EventEmitter {
             }
         };
         // only try to sync if playout engine has time
-        if (this._playoutEngine.getCurrentTime(this._rendererId)) {
+        if (this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
             this._timer.setSyncing(true);
             this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
@@ -607,9 +609,9 @@ export default class BaseRenderer extends EventEmitter {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
             this.exitStartPauseBehaviour();
         }
-        const { timeBased, currentTime } = this.getCurrentTime();
+        const { timeBased, currentTime, duration } = this.getCurrentTime();
         if (timeBased) {
-            let targetTime = currentTime + SEEK_TIME;
+            let targetTime = Math.min(currentTime + SEEK_TIME, duration);
             const choiceTime = this.getChoiceTime();
             if (choiceTime > 0 && choiceTime < targetTime) {
                 targetTime = choiceTime;
