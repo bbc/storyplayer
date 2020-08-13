@@ -322,6 +322,7 @@ export default class BaseRenderer extends EventEmitter {
         // set time to last set time (relative to click start)
         this.setCurrentTime(this._lastSetTime);
         this._runDuringBehaviours();
+        this._player.hideSeekButtons();
     }
 
     end(): boolean {
