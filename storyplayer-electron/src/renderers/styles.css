@@ -37,7 +37,7 @@ html {
 }
 
 body {
-  background: #ededed;
+  background: #fafafa;
   font-family: 'ReithSans';
   height: 100%;
   margin: 0;
@@ -46,7 +46,7 @@ body {
 
 .navbar {
   align-items: center;
-  background: #2a0f34;
+  background: #271131;
   color: white;
   display: flex;
   padding: 3px 95px;
@@ -78,7 +78,7 @@ body {
 }
 
 h2 {
-  color: #2a0f34;
+  color: #271131;
 }
 
 .story-title {
@@ -113,7 +113,7 @@ h2 {
 }
 
 #home-page {
-  background-color: #ededed;
+  background-color: #fafafa;
   display: flex;
   flex-direction: column;
   max-height: fit-content;
@@ -128,8 +128,9 @@ h2 {
 }
 
 .story-selectors select{
+  background: white;
   border: none;
-  color: #2a0f34;
+  color: #271131;
   font-size: 100%;
   height: 50px;
   width: 100%;
@@ -137,7 +138,6 @@ h2 {
 
 #story-selector-container {
   border: 1px solid #ccc;
-  background: white;
   margin-bottom: 3vw;
   margin-top: 0.5vw;
 }
@@ -159,9 +159,9 @@ h2 {
 }
 
 .home-buttons {
-  background-color: #00cfff;
-  border: solid 1px #00cfff;
-  color: #2a0f34;
+  background-color: #00ceff;
+  border: solid 1px #00ceff;
+  color: #271131;
   cursor: pointer;
   display: flex;
   align-content: center;
@@ -190,7 +190,7 @@ h2 {
 .terms-content {
   background: white;
   border: 1px solid #ccc;
-  color: #2a0f34;
+  color: #271131;
   margin-top: 1vh;
   max-width: 45vw;
   max-height: 50vh;
