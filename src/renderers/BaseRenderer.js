@@ -609,7 +609,6 @@ export default class BaseRenderer extends EventEmitter {
             this.exitStartPauseBehaviour();
         }
         const { timeBased, currentTime, duration } = this.getCurrentTime();
-        console.log("DURATION: ", duration)
         if (timeBased) {
             let targetTime = Math.min(currentTime + SEEK_TIME, duration);
             const choiceTime = this.getChoiceTime();
