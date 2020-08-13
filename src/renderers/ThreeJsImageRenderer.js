@@ -79,6 +79,7 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
             this._timeElapsed = 0;
             // eslint-disable-next-line max-len
             logger.info(`360 Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
+            this._player.showSeekButtons();
         }
         if (this._representation.duration && this._representation.duration === 0) {
             this.complete();
