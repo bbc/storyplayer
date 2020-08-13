@@ -209,6 +209,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
         // // set time to last set time (relative to click start)
         this._player.enablePlayButton();
+        this._player.showSeekButtons();
 
         // show/hide scrub bar
         if (this._shouldShowScrubBar) {

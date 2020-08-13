@@ -186,10 +186,17 @@ class NarrativeElementTransport extends EventEmitter {
     }
 
     showSeekButtons() {
-        this._seekBackButton.style.display = 'block';
-        this._seekForwardButton.style.display = 'block';
-        this._backButton.style.display = 'block';
-        this._nextButton.style.display = 'block';
+        this._seekBackButton.classList.remove('romper-control-disabled');
+        this._seekBackButton.removeAttribute('disabled');
+        this._seekForwardButton.classList.remove('romper-control-disabled');
+        this._seekForwardButton.removeAttribute('disabled');
+    }
+
+    hideSeekButtons() {
+        this._seekBackButton.classList.add('romper-control-disabled');
+        this._seekBackButton.setAttribute('disabled', 'true');
+        this._seekForwardButton.classList.add('romper-control-disabled');
+        this._seekForwardButton.setAttribute('disabled', 'true');
     }
 
     _playPauseButtonClicked() {
