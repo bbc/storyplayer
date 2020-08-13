@@ -22,6 +22,8 @@ class NarrativeElementTransport extends EventEmitter {
     _container: HTMLDivElement;
 
     _backNextWaiting: boolean; // flag to stop spamming of buttons
+    
+    _backClickedOnce: boolean; // but allow double click on back
 
     _logUserInteraction: Function;
 
@@ -89,6 +91,7 @@ class NarrativeElementTransport extends EventEmitter {
         nextButtonIconDiv.classList.add('romper-button-icon-div');
         this._nextButton.appendChild(nextButtonIconDiv);
         this._backNextWaiting = false;
+        this._backClickedOnce = false;
 
         this._backButton.onclick = this._backButtonClicked.bind(this);
         this._backButton.addEventListener(
@@ -221,11 +224,21 @@ class NarrativeElementTransport extends EventEmitter {
     }
 
     _backButtonClicked() {
-        if (!this._backNextWaiting) {
+        if (!this._backClickedOnce) {
+            this.emit(ButtonEvents.BACK_BUTTON_CLICKED);
+            this._backClickedOnce = true;
+            setTimeout(() => { 
+                this._backClickedOnce = false;
+            }, 1000);
+        } else if (!this._backNextWaiting) {
             this.emit(ButtonEvents.BACK_BUTTON_CLICKED);
             this._backNextWaiting = true;
-            setTimeout(() => { this._backNextWaiting = false; }, 500);
+            setTimeout(() => { 
+                this._backNextWaiting = false;
+                this._backClickedOnce = false;
+            }, 500);
         }
+
         this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
     }
 
