@@ -1260,8 +1260,9 @@ export default class Controller extends EventEmitter {
         };
         this._handleAnalytics(logData);
         if(this._storyId) {
-            logger.warn(`Story id ${this._storyId} ended`);
-            this.restart(this._storyId);
+            this.setSessionState(SESSION_STATE.RESTART);
+            logger.warn(`Story id ${this._storyId} ended, resetting`);
+            this.resetStory(this._storyId);
         }
         this.emit(REASONER_EVENTS.STORY_END);
     }
