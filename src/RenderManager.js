@@ -202,6 +202,10 @@ export default class RenderManager extends EventEmitter {
         this._player.prepareForRestart();
     }
 
+    /**
+     * Event handler for when the visibility of the tab changes
+     * @param {boolean} isVisible 
+     */
     _handleVisibilityChange(isVisible: boolean) {
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
@@ -235,7 +239,9 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // handle browser close
+    /**
+    * intercepts the browser/tab close / back button event and logs this event in the analytics
+    */
     _handleClose() {
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
@@ -245,7 +251,11 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    handleStoryStart(storyId: string) {
+    /**
+     * Fetches the start image and calls the Player to setup the overlays
+     * @param {Object} story top level story
+     */
+    async fetchStartImage(story: Object) {
         let onLaunchConfig = {
             background_art_asset_collection_id: '',
             button_class: 'romper-start-button',
@@ -254,57 +264,69 @@ export default class RenderManager extends EventEmitter {
             background_art: this._assetUrls.noBackgroundAssetUrl,
             privacy_notice: this._privacyNotice,
         };
-        this._fetchers.storyFetcher(storyId)
-            .then((story) => {
-                this._setAspectRatio(story);
-                if (story.meta && story.meta.romper && story.meta.romper.dog) {
-                    const dog = Object.assign(story.meta.romper.dog);
-                    this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
-                        .then((fg) => {
-                            if (fg.assets.image_src) {
-                                return this._fetchers.mediaFetcher(fg.assets.image_src);
-                            }
-                            return Promise.reject(new Error("Failed to fetch AC with image_src"));
-                        })
-                        .then(mediaurl => this._player.addDog(mediaurl, dog.position))
-                        .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));
-                }
-                if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
-                    onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
-                    return this._fetchers
-                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id)
-                        .then((fg) => {
-                            if (fg.assets.image_src) {
-                                return this._fetchers.mediaFetcher(fg.assets.image_src);
-                            }
-                            return Promise.reject(
-                                new Error('Could not find splash image Asset Collection'),
-                            );
-                        })
-                        .then((mediaUrl) => {
-                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                            this._player.setupExperienceOverlays(Object.assign(
-                                onLaunchConfig,
-                                { background_art: mediaUrl },
-                            ));
-                        })
-                        .catch((err) => {
-                            logger.error(err, `Could not resolve splash image asset: ${err}`);
-                            this._player.setupExperienceOverlays(Object.assign(
-                                onLaunchConfig,
-                                { background_art: this._assetUrls.noBackgroundAssetUrl },
-                            ));
-                        });
-                }
-                logger.warn('No onLaunch config in story meta');
-                return this._player.setupExperienceOverlays(Object.assign(
-                    onLaunchConfig,
-                    { background_art: this._assetUrls.noBackgroundAssetUrl },
+        if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
+            onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
+            try {
+                const fg = await this._fetchers.assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
+                if (fg.assets.image_src) {
+                    const mediaUrl = await this._fetchers.mediaFetcher(fg.assets.image_src);
+                    logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                    return this._player.setupExperienceOverlays(Object.assign(
+                        onLaunchConfig, {
+                            background_art: mediaUrl
+                        },
+                    ));
+                } 
+                throw new Error('Could not find splash image Asset Collection');     
+            } catch (err) {
+                logger.error(err, `Could not resolve splash image asset: ${err}`);
+                this._player.setupExperienceOverlays(Object.assign(
+                    onLaunchConfig, {
+                        background_art: this._assetUrls.noBackgroundAssetUrl
+                    },
                 ));
-            })
-            .catch((err) => {
-                logger.error(err, `Could not get fetch story ${err}`);
-            });
+            }
+        }
+        logger.warn('No onLaunch config in story meta');
+        return this._player.setupExperienceOverlays(Object.assign(
+            onLaunchConfig,
+            { background_art: this._assetUrls.noBackgroundAssetUrl },
+        ));
+    }
+
+    /**
+     * Fetches the DOG if there is one then 
+     * @param {Object} story - top level story
+     */
+    async fetchDog(story: Object) {
+        if (story.meta && story.meta.romper && story.meta.romper.dog) {
+            try {
+                const dog = Object.assign(story.meta.romper.dog);
+                const fg = await this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
+                if (fg.assets.image_src) {
+                    const mediaUrl = await this._fetchers.mediaFetcher(fg.assets.image_src);
+                    this._player.addDog(mediaUrl, dog.position);
+                }
+            } catch (err) {
+                logger.error(`Cannot resolve DOG asset: ${err}`)
+            }
+        }
+    }
+
+    /**
+     * Handle starting the story by fetching the story annd setting the aspect ratio, dog and start image
+     * @param {string} storyId Top level story Id
+     */
+    async handleStoryStart(storyId: string) {
+        try {
+            const story = await this._fetchers.storyFetcher(storyId);
+            this._setAspectRatio(story);
+            await this.fetchDog(story)
+            return await this.fetchStartImage(story);
+        } catch (err) {
+            logger.error(err, `Could not get fetch story ${err}`);
+            return null;
+        }
     }
 
     _setAspectRatio(story: Object) {
@@ -376,7 +398,10 @@ export default class RenderManager extends EventEmitter {
         return this._currentRenderer;
     }
 
-    // create and start a StoryIconRenderer
+    /**
+     * Creates the story icons and starts the renderer
+     * @param {Array<StoryPathItem>} storyItemPath Array of path items for the icons and target narrative elements
+     */
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
         this._renderStory = new StoryIconRenderer(
             storyItemPath,
@@ -394,11 +419,15 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // given a new representation, handle the background rendering
-    // either:
-    //     stop if there is no background
-    //     continue with the current one (do nothing) if background is same asset_collection
-    //  or start a new background renderer
+
+    /**
+     * given a new representation, handle the background rendering
+     * either:
+     *      stop if there is no background
+     *      continue with the current one (do nothing) if background is same asset_collection
+     *      or start a new background renderer
+     * @param {*} representation 
+     */
     _handleBackgroundRendering(representation: Representation): Promise<any> {
         let newBackgrounds = [];
         if (representation
@@ -468,14 +497,15 @@ export default class RenderManager extends EventEmitter {
 
     /**
      * Move on to the next node of this story.
+     * create a new renderer for the given representation, and attach
+     * the standard listeners to it
      *
      * @fires RenderManager#complete
      * @fires RenderManager#nextButtonClicked
      * @fires RenderManager#PreviousButtonClicked
+     * @param {*} representation 
      */
-    // create a new renderer for the given representation, and attach
-    // the standard listeners to it
-    _createNewRenderer(representation: Representation): ?BaseRenderer {
+    _createNewRenderer(representation: Representation): ? BaseRenderer {
         const newRenderer = RendererFactory(
             representation,
             this._fetchers.assetCollectionFetcher,
@@ -546,9 +576,13 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // swap the renderers over
-    // it's here we might want to be clever with retaining elements if
-    // Renderers are of the same type
+    /**
+     * swap the renderers over
+     * it's here we might want to be clever with retaining elements if
+     * Renderers are of the same type
+     * @param {*} newRenderer Instance of the new renderer to swap to
+     * @param {*} newNarrativeElement New narrative element to swap to
+     */
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
         this._currentRenderer = newRenderer;
@@ -592,8 +626,10 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // show next button, or icons if choice
-    // ... but if there is only one choice, show next!
+    /**
+     *  show next button, or icons if choice
+     * ... but if there is only one choice, show next!
+     */
     refreshOnwardIcons() {
         if (this._currentRenderer) {
             const rend = this._currentRenderer;
@@ -617,8 +653,13 @@ export default class RenderManager extends EventEmitter {
         return Promise.resolve();
     }
 
-    // get a renderer for the given NE, and its Representation
-    // see if we've created one in advance, otherwise create a fresh one
+
+    /**
+     *  get a renderer for the given NE, and its Representation
+     * see if we've created one in advance, otherwise create a fresh one
+     * @param {*} narrativeElement narrative element 
+     * @param {*} representation representation for narrative element
+     */
     _getRenderer(
         narrativeElement: NarrativeElement,
         representation: Representation,
@@ -645,7 +686,11 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // create reasoners for the NEs that follow narrativeElement
+
+    /**
+     * create reasoners for the NEs that follow narrativeElement
+     * @param {*} narrativeElement 
+     */
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
         if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
             return Promise.resolve();
@@ -733,8 +778,10 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // evaluate queued renderers for any backgrounds that need to be played
-    // and queue up BackgroundRenderers for these
+    /**
+     * evaluate queued renderers for any backgrounds that need to be played
+     * and queue up BackgroundRenderers for these
+     */
     _runBackgroundLookahead() {
         // get all unique ids
         const backgroundIds = []; // all we may want to render
@@ -807,8 +854,11 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // look over current background renderers - if they are not in the supplied
-    // list of upcoming renderers (excluding user going back), then fade out
+    /**
+     * look over current background renderers - if they are not in the supplied
+     * list of upcoming renderers (excluding user going back), then fade out
+     * @param {*} fwdRenderers upcomming renderers to use
+     */
     _setBackgroundFades(fwdRenderers: { [key: string]: BaseRenderer }) {
         // set fade outs for the current background renderers
         Object.keys(this._backgroundRenderers).forEach((id) => {
@@ -842,6 +892,9 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
+    /**
+     * Initialize the render manager
+     */
     _initialise() {
         this._currentRenderer = null;
         this._upcomingRenderers = {};
@@ -855,6 +908,9 @@ export default class RenderManager extends EventEmitter {
         };
     }
 
+    /**
+     * Reset the renderers and destroy the current one
+     */
     reset() {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();

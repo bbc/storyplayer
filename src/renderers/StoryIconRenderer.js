@@ -7,7 +7,7 @@ import { REASONER_EVENTS } from '../Events';
 import type { StoryPathItem } from '../StoryPathWalker';
 
 export type IconUrlPair = {
-    default: ?sring,
+    default: ?string,
     active: ?string,
 };
 
