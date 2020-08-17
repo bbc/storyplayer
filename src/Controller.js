@@ -124,6 +124,8 @@ export default class Controller extends EventEmitter {
             logger.error('Could not reset - no story id');
             return;
         }
+        // set this to restart just in case
+        this.setSessionState(SESSION_STATE.RESTART);
         // we're just resetting
         this._prepareRenderManagerForRestart();
         this.start(restartStoryId);
@@ -666,10 +668,7 @@ export default class Controller extends EventEmitter {
             };
             shadowReasoner.on(REASONER_EVENTS.STORY_END, _shadowHandleStoryEnd);
 
-            // the 'normal' event listeners
-            const _handleStoryEnd = () => {
-                logger.warn('Story ended!');
-            };
+
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
             };
@@ -694,7 +693,7 @@ export default class Controller extends EventEmitter {
 
                     // apply appropriate listeners to this reasoner
                     this._storyId = storyId;
-                    shadowReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
+                    shadowReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
                     shadowReasoner.removeListener(
                         REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         shadowHandleNarrativeElementChanged,
@@ -1246,6 +1245,7 @@ export default class Controller extends EventEmitter {
     }
 
 
+
     /**
      * Handles when we finish the story, this function should be called when we have 
      * finished the main story if there are sub stories too.
@@ -1260,7 +1260,6 @@ export default class Controller extends EventEmitter {
         };
         this._handleAnalytics(logData);
         if(this._storyId) {
-            this.setSessionState(SESSION_STATE.RESTART);
             logger.warn(`Story id ${this._storyId} ended, resetting`);
             this.resetStory(this._storyId);
         }
