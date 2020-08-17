@@ -205,16 +205,17 @@ export default class RenderManager extends EventEmitter {
     _handleVisibilityChange(isVisible: boolean) {
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
-            this._player.playoutEngine.pause();
+            if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
+                // if not waiting at the end, pause the timer for the current representation
+                this._currentRenderer.pause();
+                this._player.playoutEngine.pause();
+            }
             this._player.playoutEngine.pauseBackgrounds();
-            // pause the timer for the current representation
-            if (this._currentRenderer) this._currentRenderer.pause();
         } else {
-            // pause the timer for the current representation
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
-                    if (this._currentRenderer) this._currentRenderer.play();
+                    this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
             }

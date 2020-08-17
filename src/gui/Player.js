@@ -1487,6 +1487,10 @@ class Player extends EventEmitter {
         this.showScrubBar();
     }
 
+    hideSeekButtons() {
+        this._controls.hideSeekButtons();
+    }
+
     // SCRUB BAR
     hideScrubBar() {
         // TODO: Function not used!?

@@ -79,6 +79,8 @@ class BaseControls extends EventEmitter {
 
     showSeekButtons(){ }
 
+    hideSeekButtons(){ }
+
     enablePlayButton() { }
 
     disablePlayButton() { }

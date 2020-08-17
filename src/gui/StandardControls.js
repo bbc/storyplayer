@@ -228,8 +228,12 @@ class StandardControls extends BaseControls {
         this._buttonControls.setTransportControlsInactive();
     }
 
-    showSeekButtons(){
+    showSeekButtons() {
         this._buttonControls.showSeekButtons();
+    }
+
+    hideSeekButtons() {
+        this._buttonControls.hideSeekButtons();
     }
 
     enablePlayButton() {

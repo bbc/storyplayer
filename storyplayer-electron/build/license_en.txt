@@ -1,0 +1,21 @@
+StoryPlayer is experimental BBC technology and it is used by independent creators for the purpose of educational or technical demonstration of non-BBC content that was created using BBC software tools. 
+
+The BBC does not control the demonstrations and therefore is not responsible for them in any way. 
+
+In particular, the BBC does not guarantee: any rights to use any content; the accuracy, integrity and quality of any content; and the functionality of StoryPlayer or its fitness for a particular purpose. 
+
+Nothing herein constitutes an invitation or recommendation from the BBC.
+
+StoryPlayer cannot be used by either you or the creator for any purpose that is unlawful or inconsistent with any BBC guidelines, policies and standards. 
+
+You can only install StoryPlayer on your personal computer to view content that was provided to you as part of a non-commercial demonstration of its creator. 
+
+You must immediately stop using StoryPlayer where the BBC asks you to do so for any reason.
+
+Do not copy, adapt, reverse engineer, de-compile, disassemble or modify StoryPlayer without the BBC’s prior written permission.
+
+If you install StoryPlayer you also accept the BBC Terms of Use, at https://www.bbc.co.uk/terms.
+
+StoryPlayer should not be used to process any personal data of individuals who use it to view content. 
+
+Find out about your privacy rights and the BBC's Privacy and Cookies Policy at https://www.bbc.co.uk/privacy.

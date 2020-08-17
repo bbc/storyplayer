@@ -1,6 +1,6 @@
 {
   "name": "StoryPlayer",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "productName": "BBC StoryPlayer",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
@@ -39,6 +39,9 @@
       "appId": "uk.co.bbc.rd.storyplayerwin",
       "target": "nsis",
       "asar": true
+    },
+    "nsis": {
+      "license" : "build/license_en.txt"
     }
   },
   "devDependencies": {
