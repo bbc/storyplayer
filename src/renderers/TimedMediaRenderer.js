@@ -111,6 +111,12 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
     _endedEventListener() {
         if (this._testEndStallTimeout) clearTimeout(this._testEndStallTimeout);
+        // Race Condition: ended and timeupdate events firing at same time from
+        // a playoutEngine cause this function to be run twice, resulting in two
+        // NE skips. Only allow function to run if in MAIN phase.
+        if(this.phase !== RENDERER_PHASES.MAIN) {
+            return
+        }
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
         this._timer.pause();
         super.complete();
