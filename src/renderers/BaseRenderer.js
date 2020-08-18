@@ -673,9 +673,7 @@ export default class BaseRenderer extends EventEmitter {
         const assetCollectionIds = this._representation.asset_collections.behaviours ?
             this._representation.asset_collections.behaviours : [];
 
-        await assetCollectionIds.forEach(async (behaviour) => {
-        // return Promise.all(assetCollectionIds.map((behaviour) => {
-        // assetCollectionIds.forEach((behaviour) => {
+        await Promise.all(assetCollectionIds.map(async (behaviour) => {
             try {
                 const assetCollection = await this._fetchAssetCollection(behaviour.asset_collection_id);
                 if (assetCollection.assets.image_src) {
@@ -690,7 +688,7 @@ export default class BaseRenderer extends EventEmitter {
                 logger.error(err,
                     `could not preload behaviour asset ${behaviour.asset_collection_id}`);
             }
-        });
+        }));
     }
 
     _preloadIconAssets() {
