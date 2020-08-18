@@ -156,19 +156,32 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         const playlist = {
             summary: rendererId,
+            options: {
+            },
             config: {
                 // XXX ondemandwebcast data probably needed later, for now
                 // switching it off
                 ondemandWebcastData:false,
                 webcastData: {},
                 autoplay: true,
-                startTime : this._inTime
+                startTime : this._inTime,
             },
             playlist: {
                 id: rendererId,
                 items:[playlistItem]
             }
         }
+
+        const dataStore = this._smpPlayerInterface.datastore;
+        const baseUrl = dataStore.get("baseUrl");
+        const includeCredentials = dataStore.get("includeCredentials") === true
+
+        if(url.indexOf(baseUrl) === 0 && includeCredentials) {
+            playlist.options.useCredentials = "MPD"
+        } else {
+            playlist.options.useCredentials = "none"
+        }
+
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
         this._smpPlayerInterface.readyPlaylist(playlist)
         logger.info(`SMP-SP preloadFromCollection: ${rendererId}`)
