@@ -48,6 +48,7 @@ export default class ImageRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderImageElement();
+            await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(e) {
             logger.error(e, 'Could not construct image renderer');
