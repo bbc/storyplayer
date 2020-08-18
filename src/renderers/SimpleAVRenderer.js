@@ -34,6 +34,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
             controller,
         );
 
+        this._applyBlurBehaviour = this._applyBlurBehaviour.bind(this);
         // eslint-disable-next-line max-len
         this._behaviourRendererMap['urn:x-object-based-media:representation-behaviour:blur/v1.0'] = this._applyBlurBehaviour;
     }
@@ -41,6 +42,7 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
     async init() {
         try {
             await this._queueMedia({ type: MEDIA_TYPES.FOREGROUND_AV }, "av_src");
+            await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         }
         catch(e) {
