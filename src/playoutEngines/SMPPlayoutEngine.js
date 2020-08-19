@@ -177,7 +177,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         const includeCredentials = dataStore.get("includeCredentials") === true
 
         if(url.indexOf(baseUrl) === 0 && includeCredentials) {
-            playlist.options.useCredentials = "MPD"
+            playlist.options.useCredentials = "MPD,InitializationSegment,MediaSegment"
         } else {
             playlist.options.useCredentials = "none"
         }
