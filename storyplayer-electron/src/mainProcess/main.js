@@ -40,7 +40,7 @@ app.on('ready', () => {
     createAppMenu();
 
     // create the analytics folders/file
-    createAnalyticsLogFile();
+    // remove-analytics createAnalyticsLogFile();
 
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
@@ -54,9 +54,10 @@ app.on('ready', () => {
     });
 
     // analytics handlers
-    ipcMain.on('analyticsEvent', (event, data) => {
-        logToFile(data);
-    })
+    // remove-analytics 
+    // ipcMain.on('analyticsEvent', (event, data) => {
+    //     logToFile(data);
+    // })
 
     logger.info('Application ready');
     // create the window
