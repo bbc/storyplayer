@@ -52,6 +52,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderTextElement()
+            await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(err) {
             logger.error(err, 'could not initiate text renderer');

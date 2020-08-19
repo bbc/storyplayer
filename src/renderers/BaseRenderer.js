@@ -242,8 +242,6 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._preloadedBehaviourAssets = [];
-        this._preloadBehaviourAssets().catch(e =>
-            logger.warn(e, 'Could not preload behaviour assets'));
         this._preloadIconAssets().catch(e =>
             logger.warn(e, 'Could not preload icon assets'));
         this._loopCounter = 0;
@@ -685,29 +683,26 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
-    _preloadBehaviourAssets() {
+    async _preloadBehaviourAssets() {
         this._preloadedBehaviourAssets = [];
         const assetCollectionIds = this._representation.asset_collections.behaviours ?
             this._representation.asset_collections.behaviours : [];
-        return Promise.all(assetCollectionIds.map((behaviour) => {
-        // assetCollectionIds.forEach((behaviour) => {
-            return this._fetchAssetCollection(behaviour.asset_collection_id)
-                .then((assetCollection) => {
-                    if (assetCollection.assets.image_src) {
-                        return this._fetchMedia(assetCollection.assets.image_src);
-                    }
-                    return Promise.resolve();
-                })
-                .then((imageUrl) => {
+
+        await Promise.all(assetCollectionIds.map(async (behaviour) => {
+            try {
+                const assetCollection = await this._fetchAssetCollection(behaviour.asset_collection_id);
+                if (assetCollection.assets.image_src) {
+                    const imageUrl = await this._fetchMedia(assetCollection.assets.image_src);
                     if (imageUrl) {
                         const image = new Image();
                         image.src = imageUrl;
                         this._preloadedBehaviourAssets.push(image);
                     }
-                }).catch((err) => {
-                    logger.error(err,
-                        `could not preload behaviour asset ${behaviour.asset_collection_id}`);
-                });
+                }
+            } catch (err) {
+                logger.error(err,
+                    `could not preload behaviour asset ${behaviour.asset_collection_id}`);
+            }
         }));
     }
 
