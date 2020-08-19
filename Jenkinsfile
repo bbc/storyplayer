@@ -92,22 +92,6 @@ pipeline {
       }
     }
 
-    stage('Publish to NPMjs Private') {
-      when {
-        allOf {
-          branch 'master';
-          not { equals expected: env.git_version, actual: env.npm_version }
-        }
-      }
-      steps {
-        script {
-          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
-            sh 'npm publish --access restricted'
-          }
-        }
-      }
-    }
-
     stage('Publish to Artifactory Private') {
       when {
         allOf {
@@ -143,6 +127,22 @@ ${commit_messages}
         }
       }
     }
+
+    stage('Publish to NPMjs Private') {
+      when {
+        allOf {
+          branch 'master';
+          not { equals expected: env.git_version, actual: env.npm_version }
+        }
+      }
+      steps {
+        script {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
+            sh 'npm publish --access restricted'
+          }
+        }
+      }
+    }    
   }
   post {
     always {
