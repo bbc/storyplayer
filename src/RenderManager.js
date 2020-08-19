@@ -62,7 +62,7 @@ export default class RenderManager extends EventEmitter {
         muted: { [key: string]: boolean},
     };
 
-    _upcomingRenderers: { [key: string]: BaseRenderer };
+    _activeRenderers: { [key: string]: BaseRenderer };
 
     _upcomingBackgroundRenderers: { [key: string]: BackgroundRenderer };
 
@@ -209,16 +209,17 @@ export default class RenderManager extends EventEmitter {
     _handleVisibilityChange(isVisible: boolean) {
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
-            this._player.playoutEngine.pause();
+            if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
+                // if not waiting at the end, pause the timer for the current representation
+                this._currentRenderer.pause();
+                this._player.playoutEngine.pause();
+            }
             this._player.playoutEngine.pauseBackgrounds();
-            // pause the timer for the current representation
-            if (this._currentRenderer) this._currentRenderer.pause();
         } else {
-            // pause the timer for the current representation
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
-                    if (this._currentRenderer) this._currentRenderer.play();
+                    this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
             }
@@ -539,8 +540,8 @@ export default class RenderManager extends EventEmitter {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
                     // Set index of each queued switchable
-                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
-                        const renderer = this._upcomingRenderers[rendererNEId];
+                    Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+                        const renderer = this._activeRenderers[rendererNEId];
                         if (renderer instanceof SwitchableRenderer
                             && this._rendererState.lastSwitchableLabel) {
                             // eslint-disable-next-line max-len
@@ -665,17 +666,21 @@ export default class RenderManager extends EventEmitter {
         representation: Representation,
     ): ?BaseRenderer {
         let newRenderer;
-        // have we already got a renderer?
-        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
-            if (rendererNEId === narrativeElement.id) {
+        // have we already got a renderer for this NE and the right representation ?
+        Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+            if (rendererNEId === narrativeElement.id &&
+                this._activeRenderers[rendererNEId]._representation.id ===
+                representation.id)
+            {
                 // this is the correct one - use it
-                newRenderer = this._upcomingRenderers[rendererNEId];
+                newRenderer = this._activeRenderers[rendererNEId];
             }
         });
 
-        // create the new Renderer if we need to
+        // create the new Renderer if we need to and put it in active list
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
+            if (newRenderer) this._activeRenderers[narrativeElement.id] = newRenderer;
         }
         return newRenderer;
     }
@@ -706,57 +711,40 @@ export default class RenderManager extends EventEmitter {
             } else {
                 allIds = nextIds;
             }
+            if (
+                this._currentRenderer &&
+                this._currentNarrativeElement
+            ) {
+                // add current neid
+                allIds.push(this._currentNarrativeElement.id);
+            }
 
-            // Generate new renderers for any that are missing
+            // get renderers for all nes in the list
+            // any that aren't in the active list will be created
             const renderPromises = allIds
                 .map((neid) => {
-                    // Check to see if required NE renderer is the one currently being shown
-                    if (
-                        this._currentRenderer &&
-                        this._currentNarrativeElement &&
-                        this._currentNarrativeElement.id === neid
-                    ) {
-                        this._upcomingRenderers[neid] = this._currentRenderer;
-                    } else {
-                        // get the actual NarrativeElement object
-                        const neObj = this._controller._getNarrativeElement(neid);
-                        if (neObj && neObj.body.representation_collection_target_id) {
-                            return this._fetchers
-                                // eslint-disable-next-line max-len
-                                .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                                .then((representationCollection) => {
-                                    if (representationCollection.representations.length > 0) {
-                                        return this._representationReasoner(representationCollection); // eslint-disable-line max-len
-                                    }
-                                    // need to render description only as placeholder
-                                    const dummyRep = {
-                                        ...PLACEHOLDER_REPRESENTATION,
-                                        description: neObj.description,
-                                        id: neObj.id,
-                                    };
-                                    return Promise.resolve(dummyRep);
-                                })
-                                .then((representation) => {
-                                    // create the new Renderer
-                                    if (this._upcomingRenderers[neid]) {
-                                        if (this._upcomingRenderers[neid]._representation.id !==
-                                            representation.id) {
-                                            const newRenderer = this
-                                                ._createNewRenderer(representation);
-                                            if (newRenderer) {
-                                                this._upcomingRenderers[neid] = newRenderer;
-                                            }
-                                        }
-                                    } else {
-                                        const newRenderer = this
-                                            ._createNewRenderer(representation);
-                                        if (newRenderer) {
-                                            this._upcomingRenderers[neid] = newRenderer;
-                                        }
-                                    }
-                                });
-                        }
-                        return Promise.resolve();
+                    // get the actual NarrativeElement object
+                    const neObj = this._controller._getNarrativeElement(neid);
+                    if (neObj && neObj.body.representation_collection_target_id) {
+                        return this._fetchers
+                            // eslint-disable-next-line max-len
+                            .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                            .then((representationCollection) => {
+                                if (representationCollection.representations.length > 0) {
+                                    return this._representationReasoner(representationCollection); // eslint-disable-line max-len
+                                }
+                                // need to render description only as placeholder
+                                const dummyRep = {
+                                    ...PLACEHOLDER_REPRESENTATION,
+                                    description: neObj.description,
+                                    id: neObj.id,
+                                };
+                                return Promise.resolve(dummyRep);
+                            })
+                            .then((representation) => {
+                                // get the new Renderer (will create if neccessary)
+                                this._getRenderer(neObj, representation);
+                            });
                     }
                     return Promise.resolve();
                 });
@@ -765,13 +753,13 @@ export default class RenderManager extends EventEmitter {
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
-                    Object.keys(this._upcomingRenderers)
+                    Object.keys(this._activeRenderers)
                         .filter(neid => allIds.indexOf(neid) === -1)
                         .forEach((neid) => {
                             if (narrativeElement.id !== neid) {
-                                this._upcomingRenderers[neid].destroy();
+                                this._activeRenderers[neid].destroy();
                             }
-                            delete this._upcomingRenderers[neid];
+                            delete this._activeRenderers[neid];
                         });
                     this._runBackgroundLookahead();
                 });
@@ -786,8 +774,8 @@ export default class RenderManager extends EventEmitter {
         // get all unique ids
         const backgroundIds = []; // all we may want to render
         const fwdBackgroundAcIds = []; // only those in forward direction
-        Object.keys(this._upcomingRenderers).forEach((neid) => {
-            const renderer = this._upcomingRenderers[neid];
+        Object.keys(this._activeRenderers).forEach((neid) => {
+            const renderer = this._activeRenderers[neid];
             const representation = renderer.getRepresentation();
             if (representation.asset_collections.background_ids) {
                 // eslint-disable-next-line max-len
@@ -897,7 +885,7 @@ export default class RenderManager extends EventEmitter {
      */
     _initialise() {
         this._currentRenderer = null;
-        this._upcomingRenderers = {};
+        this._activeRenderers = {};
         this._upcomingBackgroundRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
