@@ -94,6 +94,9 @@ const getTooExperienceId = (experience) => {
     return topStory.id || 'noID';
 }
 
+const analyticsHandler = (analyticsEvent) => {
+    ipcRenderer.send('analyticsEvent', analyticsEvent);
+};
 
 /**
  * initializes storyplayer 
@@ -106,8 +109,11 @@ const initializeStoryPlayer = (experience) => {
     storyPlayer = StoryPlayer.init({
         target: storyPlayerTarget,
         staticImageBaseUrl: imagePath,
-        // remove-analytics
-        analyticsLogger: () => undefined,
+        analyticsLogger: (eventData) => {
+            // eslint-disable-next-line no-param-reassign
+            eventData.experienceId = experienceId;
+            analyticsHandler(eventData);
+        },
         mediaFetcher: mediaResolver({}),
         
         storyFetcher: id => Promise.resolve(experience.stories.find(story => story.id === id)),
