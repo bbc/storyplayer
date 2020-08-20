@@ -38,8 +38,6 @@ const createWindow = () => {
 app.on('ready', () => {
     createAppMenu();
 
-    // create the analytics folders/file
-    // remove-analytics createAnalyticsLogFile();
 
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
