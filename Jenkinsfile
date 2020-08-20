@@ -115,8 +115,9 @@ pipeline {
           dir('rd-ux-storyplayer-harness') {
             sh '''
               yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
+              yarn version --patch --no-git-tag-version
               git add package.json yarn.lock
-              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
+              git commit --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
 
 ${commit_messages}
 "
@@ -142,7 +143,7 @@ ${commit_messages}
           }
         }
       }
-    }    
+    }
   }
   post {
     always {
