@@ -67,8 +67,8 @@ class SMPControls extends BaseControls {
         //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {playButtonClicked: true})
         // })
 
-        // Controls enabled by default
-        this._controlsEnabled = true
+        // Controls disbled by default (until start button clicked)
+        this._controlsEnabled = false
 
         // Setup Chapter Overlay and attach Custom SMP button to it
         this._containerDiv = document.createElement('div');
@@ -198,11 +198,11 @@ class SMPControls extends BaseControls {
     }
 
     setControlsActive() {
-        this.enableControls()
+        this._controlsEnabled = true
     }
 
     setControlsInactive() {
-        this.disableControls()
+        this._controlsEnabled = false
     }
 
     setFullscreenOn() { }
