@@ -2,7 +2,6 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const logger = require('electron-log');
 const { getStory, listStories }  = require('./utilities');
-const { logToFile, createAnalyticsLogFile }  = require('./analyticsLogger');
 const { createAppMenu } = require('./menu');
 
 
@@ -53,11 +52,6 @@ app.on('ready', () => {
         mainWindow.reload();
     });
 
-    // analytics handlers
-    // remove-analytics 
-    // ipcMain.on('analyticsEvent', (event, data) => {
-    //     logToFile(data);
-    // })
 
     logger.info('Application ready');
     // create the window
