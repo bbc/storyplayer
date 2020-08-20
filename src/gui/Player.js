@@ -719,13 +719,18 @@ class Player extends EventEmitter {
         startButtonIconHolder.appendChild(startButtonIconDiv);
     }
 
+    /**
+     * Creates a start image if we don't have one then appends it to the DOM
+     * @param {Object} options 
+     */
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
             this._startExperienceImage = document.createElement('img');
             this._startExperienceImage.className = 'romper-start-image';
             this._startExperienceImage.src = options.background_art;
-            this._mediaLayer.appendChild(this._startExperienceImage);
         }
+        this._mediaLayer.appendChild(this._startExperienceImage);
+        
     }
 
     _createResumeExperienceButton(options: Object) {
@@ -745,6 +750,10 @@ class Player extends EventEmitter {
         resumeButtonHolder.appendChild(resumeButtonDiv);
     }
 
+    /**
+     * Sets up the overlays for the start/resume buttons and start image image
+     * @param {Object} options - options for start overlays
+     */
     setupExperienceOverlays(options: Object) {
         switch (this._controller.getSessionState()) {
         case SESSION_STATE.RESUME:
@@ -774,6 +783,7 @@ class Player extends EventEmitter {
             break;
         }
     }
+
 
     _createPrivacyNotice(options: Object) {
         if (options.privacy_notice !== null) {

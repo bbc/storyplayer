@@ -74,6 +74,11 @@ export default class Controller extends EventEmitter {
         this._analyticsHandler.handleAnalyticsEvent(logData);
     }
 
+    /**
+     * Restarts the story
+     * @param {string} storyId story id
+     * @param {*} initialState initial state of variables
+     */
     restart(storyId?: ?string = null, initialState?: Object = {}) {
         let restartStoryId;
         if (storyId) {
@@ -97,7 +102,9 @@ export default class Controller extends EventEmitter {
         }
     }
 
-    // get render manager to tidy up
+    /**
+     * get render manager to tidy up
+     */
     _prepareRenderManagerForRestart() {
         this._removeListenersFromRenderManager();
         this._renderManager.prepareForRestart();
@@ -117,12 +124,19 @@ export default class Controller extends EventEmitter {
             logger.error('Could not reset - no story id');
             return;
         }
+        // set this to restart just in case
+        this.setSessionState(SESSION_STATE.RESTART);
         // we're just resetting
         this._prepareRenderManagerForRestart();
         this.start(restartStoryId);
     }
 
-
+    /**
+     * Start the story
+     * Entry point comsumer of the Controller (likely the page hosting the player)
+     * @param {string} storyId  top level story id
+     * @param {Object} initialState initial state to start from
+     */
     start(storyId: string, initialState?: Object) {
         this._storyId = storyId;
         if (this._saveSession) {
@@ -146,6 +160,11 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Resume the story from some known state
+     * @param {string} storyId top level story id
+     * @param {Object} initialState resule state
+     */
     resumeStoryFromState(storyId: string, initialState?: Object) {
         if (initialState && Object.keys(initialState).length > 0) {
             this.startStory(storyId, initialState);
@@ -161,6 +180,11 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Start story from default state
+     * @param {string} storyId top level story id
+     * @param {*} initialState initial variable state
+     */
     startFromDefaultState(storyId: string, initialState?: Object) {
         if (initialState && Object.keys(initialState).length > 0) {
             this.startStory(storyId, initialState);
@@ -177,6 +201,14 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Starts the story by testing for linearity and building a story renderer
+     * checking if the story is playable
+     * attaching the event listeners to the reasoner created
+     * and calling this._renderManager.handleStoryStart(storyId);
+     * @param {string} storyId top level story id
+     * @param {Object?} initialState initial state for the story variables
+     */
     startStory(storyId: string, initialState?: Object = {}) {
         this._getAllNarrativeElements().then((neList) => {
             this._allNarrativeElements = neList;
@@ -220,6 +252,9 @@ export default class Controller extends EventEmitter {
             });
     }
 
+    /**
+     * Chooses the element to resume from if we have a resume state and path history
+     */
     _chooseResumeElement() {
         this._sessionManager.fetchPathHistory().then(pathHistory => {
             if(!pathHistory) {
@@ -235,6 +270,9 @@ export default class Controller extends EventEmitter {
         });
     }
 
+    /**
+     * Chooses the beginning element based on the session state
+     */
     _chooseBeginningElement() {
         // if we don't have a session manager get the beginning and return
         if(!this._sessionManager) {
@@ -257,7 +295,9 @@ export default class Controller extends EventEmitter {
         }
     }
 
-    // get the current and next narrative elements
+    /**
+     * Gets the current and next narrative elements
+     */
     getStatus(): Promise<Object> {
         const currentNarrativeElement = this._renderManager.getCurrentNarrativeElement();
         let nextNarrativeElement = null;
@@ -277,6 +317,12 @@ export default class Controller extends EventEmitter {
             });
     }
 
+    /**
+     * checks requirements to satisfy for story to be playable
+     * returns a 0 or -1 for some reason? should be a bool?
+     * @returns number
+     * @param {Array<Object>} requirements requirements to satisfy for story to be playable
+     */
     _checkStoryPlayable(requirements: Array<Object>) {
         const data = {
             supports: {
@@ -321,7 +367,9 @@ export default class Controller extends EventEmitter {
         return 0;
     }
 
-    // create a manager to handle the rendering
+    /**
+     * Creates a render manager to handle rendering
+     */
     _createRenderManager() {
         this._renderManager = new RenderManager(
             this,
@@ -334,6 +382,10 @@ export default class Controller extends EventEmitter {
         );
     }
 
+    /**
+     * Creaters the state machine to hold user session data
+     * @param {string} storyId top level story id
+     */
     _createSessionManager(storyId: string) {
         this._sessionManager = new SessionManager(storyId);
         if (this.getSessionState() !== SESSION_STATE.NEW) {
@@ -350,14 +402,25 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Gets current renderer
+     * @returns BaseRenderer
+     */
     getCurrentRenderer(): ?BaseRenderer {
         return this._renderManager.getCurrentRenderer();
     }
 
+    /**
+     * gets the current narrative Element
+     * @returns NarrativeElement
+     */
     getCurrentNarrativeElement(): NarrativeElement {
         return this._currentNarrativeElement;
     }
 
+    /**
+     * handle RendererEvents.COMPLETED event
+     */
     _handleRendererCompletedEvent() {
         if (this._reasoner) try {
             this._reasoner.next();
@@ -366,6 +429,9 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Handle RendererEvents.NEXT_BUTTON_CLICKED
+     */
     _handleRendererNextButtonEvent() {
         if (this._reasoner) try {
             this._reasoner.next();
@@ -374,12 +440,17 @@ export default class Controller extends EventEmitter {
         }
     }
 
+    /**
+     * Handle RendererEvents.PREVIOUS_BUTTON_CLICKED event
+     */
     _handleRendererPreviousButtonEvent() {
         this._goBackOneStepInStory();
     }
 
     /* eslint-disable max-len */
-    // add event listeners to manager
+    /**
+     * Add event listeners to render manager
+     */
     _addListenersToRenderManager() {
         this._renderManager.on(REASONER_EVENTS.ROMPER_STORY_STARTED, this._startStoryEventListener);
 
@@ -388,7 +459,9 @@ export default class Controller extends EventEmitter {
         this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
     }
 
-    // remove event listeners to manager
+    /**
+     * Remove event listeners from render manager
+     */
     _removeListenersFromRenderManager() {
         this._renderManager.off(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
@@ -396,9 +469,22 @@ export default class Controller extends EventEmitter {
     }
 
 
-    _startStoryEventListener() {
-        const hide = this._reasoner._story.meta && this._reasoner._story.meta.storyplayer &&
+    /**
+     * Hide the taster badge or not
+     * @returns boolean
+     */
+    _hideTasterBadge(): boolean {
+        return this._reasoner._story.meta && this._reasoner._story.meta.storyplayer &&
             this._reasoner._story.meta.storyplayer.taster && this._reasoner._story.meta.storyplayer.taster.hideDuringExperience || false;
+    }
+
+    /**
+     * Start story event listener, fired when reasoner emits REASONER_EVENTS.ROMPER_STORY_STARTED
+     * emits with a boolean to hide the taster badge
+     * @fires "REASONER_EVENTS.ROMPER_STORY_STARTED"
+     */
+    _startStoryEventListener() {
+        const hide = this._hideTasterBadge();
 
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED, {
             hide
@@ -406,8 +492,12 @@ export default class Controller extends EventEmitter {
     }
 
     /* eslint-enable max-len */
-    // see if we have a linear story
-    // and if we do, create a StoryIconRenderer
+
+    /**
+     *  see if we have a linear story
+     * and if we do, create a StoryIconRenderer
+     * @param {string} storyId Top level story id
+     */
     _testForLinearityAndBuildStoryRenderer(storyId: string): Promise<any> {
         // create an spw to see if the story is linear or not
         const spw = new StoryPathWalker(
@@ -440,9 +530,9 @@ export default class Controller extends EventEmitter {
         });
     }
 
-    //
-    // go to previous node in the current story, if we can
-    //
+    /**
+     * Go to previous node in story if we can
+     */
     _goBackOneStepInStory() {
         return Promise.all([
             this.getIdOfPreviousNode(),
@@ -473,9 +563,10 @@ export default class Controller extends EventEmitter {
         });
     }
 
-    //
-    // repeat the current node in the current story, if we can
-    //
+    /**
+     * repeat the current node in the current story, if we can
+     * calls this._handleNEChange with current element if we have one
+     */
     repeatStep() {
         const current = this._currentNarrativeElement;
         if (this._reasoner && current) {
@@ -485,7 +576,13 @@ export default class Controller extends EventEmitter {
         }
     }
 
-    // respond to a change in the Narrative Element: update the renderers
+
+    /**
+     * respond to a change in the Narrative Element: update the renderers
+     * @param {StoryReasoner} reasoner 
+     * @param {NarrativeElement} narrativeElement 
+     * @param {Boolean} resuming are wqe resuming a previously watched experience or not.
+     */
     // eslint-disable-next-line max-len
     _handleNEChange(reasoner: StoryReasoner, narrativeElement: NarrativeElement, resuming?: boolean) {
         logger.info({
@@ -506,6 +603,12 @@ export default class Controller extends EventEmitter {
         return this._renderManager.handleNEChange(narrativeElement);
     }
 
+    /**
+     * Log changing from the old to the new narrative element
+     * @fires REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED
+     * @param {NarrativeElement} oldNarrativeElement previous narrative Element
+     * @param {NarrativeElement} newNarrativeElement current narrative element
+     */
     _logNEChange(oldNarrativeElement: NarrativeElement, newNarrativeElement: NarrativeElement) {
         let oldName = 'null';
         let oldId = 'null';
@@ -527,25 +630,33 @@ export default class Controller extends EventEmitter {
         this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, newNarrativeElement);
     }
 
-    // try to get the narrative element object with the given id
-    // returns NE or null if not found
-    _getNarrativeElement(neid: string): ?NarrativeElement {
+    /**
+     *  try to get the narrative element object with the given id
+     * returns NE or null if not found
+     * @param {string} narrativeElementId 
+     */
+    _getNarrativeElement(narrativeElementId: string): ?NarrativeElement {
         let neObj;
         if (this._allNarrativeElements) {
-            [neObj] = this._allNarrativeElements.filter(ne => ne.id === neid);
+            [neObj] = this._allNarrativeElements.filter(ne => ne.id === narrativeElementId);
         } else if (this._reasoner) {
             // get the actual NarrativeElement object
-            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(neid);
+            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(narrativeElementId);
             if (subReasoner) {
-                neObj = subReasoner._narrativeElements[neid];
+                neObj = subReasoner._narrativeElements[narrativeElementId];
             }
         }
         return neObj;
     }
 
-    // create a reasoner to do a shadow walk of the story graph
-    // when it reaches a target node, it boots out the original reasoner
-    // and takes its place (with suitable event listeners)
+ 
+    /**
+     * create a reasoner to do a shadow walk of the story graph
+     * when it reaches a target node, it boots out the original reasoner
+     * and takes its place (with suitable event listeners)
+     * @param {string} storyId stop level story id
+     * @param {*} targetNeId target narrative element id
+     */
     _jumpToNarrativeElementUsingShadowReasoner(storyId: string, targetNeId: string) {
         this._storyReasonerFactory(storyId).then((shadowReasoner) => {
             if (this._storyId !== storyId) {
@@ -557,10 +668,7 @@ export default class Controller extends EventEmitter {
             };
             shadowReasoner.on(REASONER_EVENTS.STORY_END, _shadowHandleStoryEnd);
 
-            // the 'normal' event listeners
-            const _handleStoryEnd = () => {
-                logger.warn('Story ended!');
-            };
+
             const _handleError = (err) => {
                 logger.warn(`Error: ${err}`);
             };
@@ -585,7 +693,7 @@ export default class Controller extends EventEmitter {
 
                     // apply appropriate listeners to this reasoner
                     this._storyId = storyId;
-                    shadowReasoner.on(REASONER_EVENTS.STORY_END, _handleStoryEnd);
+                    shadowReasoner.on(REASONER_EVENTS.STORY_END, this._handleStoryEnd);
                     shadowReasoner.removeListener(
                         REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
                         shadowHandleNarrativeElementChanged,
@@ -614,7 +722,11 @@ export default class Controller extends EventEmitter {
         });
     }
 
-    // follow link from the narrative element to one following it
+    /**
+     *  follow link from the narrative element
+     * By getting the sub reasoner containing the narrative element and following the link
+     * @param {string} narrativeElementId 
+     */
     followLink(narrativeElementId: string) {
         this._currentNarrativeElement.links.forEach((link) => {
             if (link.target_narrative_element_id === narrativeElementId) {
@@ -662,7 +774,6 @@ export default class Controller extends EventEmitter {
 
     /**
      * Get the variables and their state present in the story
-     * @param {*} No parameters, it uses the story Id
      * recurses into substories
      */
     getVariableState(): Promise<Object> {
@@ -706,9 +817,7 @@ export default class Controller extends EventEmitter {
 
     _getStoryDefaultVariableState(storyId: string) {
         return this._fetchers.storyFetcher(storyId).then((story) => {
-            const {
-                variables
-            } = story;
+            const { variables} = story;
             if (variables) {
                 return Object.keys(variables).map(variable => {
                     return {
@@ -721,7 +830,11 @@ export default class Controller extends EventEmitter {
         });
     }
 
-    // get the ids of every story nested within the one given
+    /**
+     * get the ids of every story nested within the one given
+     * @param {string} storyId top level story
+     * @param {array<string>} doneAlready stories looked at
+     */
     _getAllStories(storyId: string, doneAlready: Array<string> = []): Promise<Array<string>> {
         return this._fetchers.storyFetcher(storyId)
             .then((story) => {
@@ -757,7 +870,10 @@ export default class Controller extends EventEmitter {
             });
     }
 
-    // get all the variables for the story given
+    /**
+     * get all the variables for the story given
+     * @param {string} storyId story to get variables for
+     */
     _getVariableStateForStory(storyId: string) {
         let variables;
         return this._fetchers.storyFetcher(storyId)
@@ -820,6 +936,9 @@ export default class Controller extends EventEmitter {
         this._renderManager.refreshLookahead();
     }
 
+    /**
+     * Fetch all the narrative elements for the story and sub stories
+     */
     _getAllNarrativeElements(): Promise<Array<NarrativeElement>> {
         if (!this._storyId) {
             return Promise.resolve([]);
@@ -848,9 +967,10 @@ export default class Controller extends EventEmitter {
             });
     }
 
-    //
-    // go to an arbitrary node in the current story
-    // @param neid: id of narrative element to jump to
+    /**
+     * go to an arbitrary node in the current story
+     * @param {string} narrativeElementId Id of node to jum to
+     */
     _jumpToNarrativeElement(narrativeElementId: string) {
         if (!this._reasoner) {
             logger.error('no reasoner');
@@ -874,7 +994,9 @@ export default class Controller extends EventEmitter {
         }
     }
 
-    // is the current Narrative Element followed by another?
+    /**
+     * is the current Narrative Element followed by another?
+     */
     hasUniqueNextNode(): Promise<boolean> {
         if (this._reasoner) {
             return this._reasoner.hasNextNode()
@@ -883,14 +1005,18 @@ export default class Controller extends EventEmitter {
         return Promise.resolve(false);
     }
 
-    // find what the next steps in the story can be
-    // returns array of objects, each containing
-    // targetNeId: the id of the ne linked to
-    // ne: the narrative element
-    // the first is the link, the second is the actual NE when
-    // first is a story ne (it resolves into substory)
-    // eslint-disable-next-line max-len
-    // this looks into NEs to make sure that they also have valid representations
+
+    /**
+     * find what the next steps in the story can be
+     * returns array of objects, each containing
+     * targetNeId: the id of the ne linked to
+     * ne: the narrative element
+     * the first is the link, the second is the actual NE when
+     * first is a story ne (it resolves into substory)
+     * eslint-disable-next-line max-len
+     * this looks into NEs to make sure that they also have valid representations
+     * @param {string} narrativeElementId Find the next valid steps using the reasoner
+     */
     getValidNextSteps(narrativeElementId: ?string = null): Promise<Array<Object>> {
         let neId = narrativeElementId;
         if (neId === null && this._currentNarrativeElement) {
@@ -993,10 +1119,12 @@ export default class Controller extends EventEmitter {
         this._renderManager.refreshOnwardIcons();
     }
 
-    // get the id of the previous node
-    // if it's a linear path, will use the linearStoryPath to identify
-    // if not will ask reasoner to try within ths substory
-    // otherwise, returns null.
+    /**
+     * get the id of the previous node
+     * if it's a linear path, will use the linearStoryPath to identify
+     * if not will ask reasoner to try within ths substory
+     * otherwise, returns null.
+     */
     getIdOfPreviousNode(): Promise<?string> {
         let matchingId = null;
         if (this._linearStoryPath) {
@@ -1032,6 +1160,11 @@ export default class Controller extends EventEmitter {
     }
 
     // get an array of ids of the NarrativeElements that follow narrativeElement
+    /**
+     * Fetches an array of the narrative elements which follow on from the given element
+     * @fires REASONER_EVENTS.NEXT_ELEMENTS
+     * @param {NarrativeElement} narrativeElement 
+     */
     getIdsOfNextNodes(narrativeElement: NarrativeElement): Promise<Array<string>> {
         return this.getValidNextSteps(narrativeElement.id)
             .then((nextNarrativeElements) => {
@@ -1042,8 +1175,10 @@ export default class Controller extends EventEmitter {
             });
     }
 
-    // given the NE id, reason to find a representation
-    // reasons into sub story if necessary
+    /**
+     * Reason over the narrative elements representations to find the one we need
+     * @param {string} narrativeElementId 
+     */
     getRepresentationForNarrativeElementId(narrativeElementId: string): Promise<?Representation> {
         return this._fetchers.narrativeElementFetcher(narrativeElementId)
             .then((narrativeElement) => {
@@ -1110,6 +1245,12 @@ export default class Controller extends EventEmitter {
     }
 
 
+
+    /**
+     * Handles when we finish the story, this function should be called when we have 
+     * finished the main story if there are sub stories too.
+     * @fires REASONER_EVENTS.STORY_END
+     */
     _handleStoryEnd() {
         const logData = {
             type: AnalyticEvents.types.STORY_NAVIGATION,
@@ -1118,7 +1259,10 @@ export default class Controller extends EventEmitter {
             to: 'STORY_END',
         };
         this._handleAnalytics(logData);
-        logger.warn('Story Ended!');
+        if(this._storyId) {
+            logger.warn(`Story id ${this._storyId} ended, resetting`);
+            this.resetStory(this._storyId);
+        }
         this.emit(REASONER_EVENTS.STORY_END);
     }
 
@@ -1250,4 +1394,6 @@ export default class Controller extends EventEmitter {
     handleKeys: ?boolean;
 
     _analyticsHandler: AnalyticsHandler;
+
+    _hideTasterBadge: Function;
 }

@@ -778,7 +778,7 @@ export default class BaseRenderer extends EventEmitter {
     _willHideControls(behaviour: Object) {
         return behaviour.type ===
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
-            && behaviour.disable_controls && behaviour.show_if_one_choice;
+            && behaviour.disable_controls;
     }
 
     _hideControls(startTime: number) {
@@ -912,6 +912,11 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         const behaviourOverlay = this._linkChoiceBehaviourOverlay;
+        if (disableControls) {
+            // if during behaviour, this should have happened already
+            // if start/end behaviour then not
+            this._player.disableControls();
+        }
 
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {
