@@ -358,7 +358,6 @@ class Player extends EventEmitter {
             this._representation,
             this.playoutEngine,
         );
-        this._controls = proxyWrapper("SMPControls", this._controls);
         this._guiLayer.appendChild(this._controls.getControls());
     }
 

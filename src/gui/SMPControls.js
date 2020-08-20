@@ -67,8 +67,8 @@ class SMPControls extends BaseControls {
         //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {playButtonClicked: true})
         // })
 
-        // Controls disbled by default (until start button clicked)
-        this._controlsEnabled = false
+        // Controls enabled by default
+        this._controlsEnabled = true
 
         // Setup Chapter Overlay and attach Custom SMP button to it
         this._containerDiv = document.createElement('div');
@@ -198,11 +198,14 @@ class SMPControls extends BaseControls {
     }
 
     setControlsActive() {
-        this._controlsEnabled = true
+        // Handled by SMP
     }
 
     setControlsInactive() {
-        this._controlsEnabled = false
+        // called when restarting an experience and throwing up new splash screen
+        // and play button
+        // TODO: need to test properly
+        this.disableControls();
     }
 
     setFullscreenOn() { }
