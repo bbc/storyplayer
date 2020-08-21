@@ -116,8 +116,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         // TODO: Get MediaFetcher to not resolve pids
         super.queuePlayout(rendererId, mediaObj);
+
+        const options = {};
         if("loop" in this._media[rendererId].media && this._media[rendererId].media.loop) {
             this.setLoopAttribute(rendererId, true);
+            options.loop = true;
         }
 
         const { url } = this._media[rendererId].media
@@ -156,8 +159,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         const playlist = {
             summary: rendererId,
-            options: {
-            },
+            options,
             config: {
                 // XXX ondemandwebcast data probably needed later, for now
                 // switching it off
