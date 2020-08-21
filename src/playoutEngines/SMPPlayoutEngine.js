@@ -117,7 +117,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // TODO: Get MediaFetcher to not resolve pids
         super.queuePlayout(rendererId, mediaObj);
         if("loop" in this._media[rendererId].media && this._media[rendererId].media.loop) {
-            logger.warn("SMP doesn't support Looping yet!")
+            this.setLoopAttribute(rendererId, true);
         }
 
         const { url } = this._media[rendererId].media
@@ -498,11 +498,22 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         throw new Error("SMP RenderEngine doesn't allow access to HTML Media Element");
     }
 
-    setLoopAttribute(rendererId: string, loop: ?boolean, element: ?HTMLMediaElement) {
-        return false
+    setLoopAttribute(rendererId: string, loop: ?boolean) {
+        const mediaObject = this._media[rendererId];
+        if (mediaObject) {
+            if (loop) {
+                mediaObject.loop = true;
+            }
+            else {
+                mediaObject.loop = false;
+            }
+        }
     }
 
     checkIsLooping(rendererId: string) {
+        if (this._media[rendererId] && 'loop' in this._media[rendererId]) {
+            return this._media[rendererId].loop;
+        }
         return false
     }
 
