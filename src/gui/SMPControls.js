@@ -162,6 +162,9 @@ class SMPControls extends BaseControls {
             case('next_button'):
                 this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
                 break;
+            // case('subtitles'):  // TODO - what is event for subtitles?
+            //     this._logUserInteraction(AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED);
+            //     break;
             default:
                 break;
             }
