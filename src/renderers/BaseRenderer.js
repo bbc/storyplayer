@@ -341,6 +341,7 @@ export default class BaseRenderer extends EventEmitter {
             logger.info(e);
         }
         this._reapplyLinkConditions();
+        this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);

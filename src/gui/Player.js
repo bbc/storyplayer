@@ -159,6 +159,8 @@ class Player extends EventEmitter {
 
     _addCountdownToElement: Function;
 
+    _isPausedForBehaviours: boolean;
+
     _controller: Controller;
 
     constructor(
@@ -315,6 +317,8 @@ class Player extends EventEmitter {
         if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }
+        this._isPausedForBehaviours = false;
+    }
 
         logger.info('Using playout engine: ', playoutToUse);
 
@@ -1384,13 +1388,28 @@ class Player extends EventEmitter {
 
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
+        if (this.playoutEngine.isPlaying()) {
+            this._isPausedForBehaviours = true;
+            this.playoutEngine.pause();
+        }
         this.disableScrubBar();
         this.disablePlayButton();
         this._disableRepresentationControl();
     }
 
+    exitCompleteBehaviourPhase() {
+        if (this._isPausedForBehaviours) {
+            this._isPausedForBehaviours = false;
+            this.playoutEngine.play();
+        }
+    }
+
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this.setCurrentRenderer(renderer);
+        if (this.playoutEngine.isPlaying()) {
+            this._isPausedForBehaviours = true;
+            this.playoutEngine.pause();
+        }
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
 
@@ -1401,6 +1420,10 @@ class Player extends EventEmitter {
         this.enablePlayButton();
         this.enableScrubBar();
         this._enableRepresentationControl();
+        if (this._isPausedForBehaviours) {
+            this._isPausedForBehaviours = false;
+            this.playoutEngine.play();
+        }
     }
 
     enableLinkChoiceControl() {
