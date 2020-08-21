@@ -489,7 +489,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        const { timeBased, duration } = this.getCurrentTime();
+        const { duration } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
             return (value === Infinity || Number.isNaN(value))
         };
