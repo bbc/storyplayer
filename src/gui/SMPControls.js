@@ -87,11 +87,11 @@ class SMPControls extends BaseControls {
         /* eslint-disable max-len */
         this._smpPlayerInterface.addEventListener("SonarUserActionEvent", (e) => {
             switch(e.controlId) {
-            case('back_interval_button'):
+            case('back_interval_button'): {
                 let seekBackFrom = 'not_set';
                 let seekBackTo = 'not_set';
                 if (e.labels) {
-                    let { beforeTime, afterTime } = e.labels;
+                    const { beforeTime, afterTime } = e.labels;
                     if (beforeTime !== undefined) { seekBackFrom = beforeTime }
                     if (afterTime !== undefined) { seekBackTo = afterTime }
                 }
@@ -101,11 +101,12 @@ class SMPControls extends BaseControls {
                     `${seekBackTo}`,
                 );
                 break;
-            case('forward_interval_button'):
+            }
+            case('forward_interval_button'): {
                 let seekFrom = 'not_set';
                 let seekTo = 'not_set';
                 if (e.labels) {
-                    let { beforeTime, afterTime } = e.labels;
+                    const { beforeTime, afterTime } = e.labels;
                     if (beforeTime !== undefined) { seekFrom = beforeTime }
                     if (afterTime !== undefined) { seekTo = afterTime }
                 }
@@ -115,13 +116,16 @@ class SMPControls extends BaseControls {
                     `${seekTo}`,
                 );
                 break;
-            case('seek_bar'):
+            }
+            case('seek_bar'): {
                 let scrubFrom = 'not_set';
                 let scrubTo = 'not_set';
                 if (e.labels) {
-                    let { before_seek_time, seek_time } = e.labels;
+                    /* eslint-disable camelcase */
+                    const { before_seek_time, seek_time } = e.labels; 
                     if (before_seek_time !== undefined) { scrubFrom = before_seek_time }
                     if (seek_time !== undefined) { scrubTo = seek_time }
+                    /* eslint-enable camelcase */
                 }
                 this._logUserInteraction(
                     AnalyticEvents.names.VIDEO_SCRUBBED,
@@ -129,6 +133,7 @@ class SMPControls extends BaseControls {
                     `${scrubTo}`,
                 );
                 break;
+            }
             case('pause'):
                 this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED, 'play' , 'pause');
                 break;
