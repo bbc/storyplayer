@@ -89,6 +89,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (!shouldEnd || this.phase === RENDERER_PHASES.BG_FADE_OUT) return false;
         this._setPhase(RENDERER_PHASES.BG_FADE_OUT);
 
+        this._player.removeVolumeControl(this._rendererId);
         this.fadeOut(HARD_FADE_OUT_TIME/1000);
         return true;
     }
@@ -131,6 +132,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                     this._playoutEngine.setVolume(this._rendererId, 0)
                     clearInterval(this._fadeIntervalId);
                     this._fadeIntervalId = null;
+                    this._playoutEngine.setPlayoutInactive(this._rendererId);
                     this._setPhase(RENDERER_PHASES.ENDED);
                 }
             }, FADE_STEP_LENGTH);
