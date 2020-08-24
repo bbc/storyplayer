@@ -489,7 +489,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        const { timeBased, duration } = this.getCurrentTime();
+        const { duration } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
             return (value === Infinity || Number.isNaN(value))
         };
@@ -497,7 +497,10 @@ export default class BaseRenderer extends EventEmitter {
         // work out what time we actually need to go to, given what was asked for
         let targetTime = time;
         targetTime = Math.max(0, targetTime)
-        targetTime = Math.min(targetTime, duration)
+        // duration is not always reported 100% accurately
+        // if we seek past actual duration, video will go to 1s beyond end
+        // hack to seek to JUST before end to avoid this
+        targetTime = Math.min(targetTime, duration - 0.01)
 
         // ensure that we are setting a valid time
         if (timeIsInvalid(targetTime)) {
@@ -535,7 +538,7 @@ export default class BaseRenderer extends EventEmitter {
             this._timer.setSyncing(true);
             this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
-        } else if (timeBased) {
+        } else {
             this._timer.setTime(targetTime);
         }
     }
