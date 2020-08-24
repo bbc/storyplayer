@@ -344,6 +344,7 @@ export default class BaseRenderer extends EventEmitter {
             logger.info(e);
         }
         this._reapplyLinkConditions();
+        this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -379,6 +380,16 @@ export default class BaseRenderer extends EventEmitter {
             }
         }));
         this.setInPause(false);
+    }
+
+    exitCompletePauseBehaviour() {
+        if (!this._behaviourRunner || this._behaviourRunner.eventCounters.completed === 0 ) return;
+        const endBehaviours = this._behaviourRunner.behaviours;
+        endBehaviours.forEach((behaviour => {
+            if (behaviour instanceof PauseBehaviour) {
+                behaviour.handleTimeout();
+            }
+        }));
     }
 
     // does this renderer have a show variable panel behaviour
@@ -606,6 +617,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekBack() {
+        if (this.phase === RENDERER_PHASES.START ||
+            this.phase === RENDERER_PHASES.COMPLETING) {
+            logger.info('Seek backward button clicked during behaviours - ignoring'); // eslint-disable-line max-len
+            return;
+        }
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime - SEEK_TIME;
@@ -621,9 +637,15 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
-        if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
+        if (this.phase === RENDERER_PHASES.START) {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
             this.exitStartPauseBehaviour();
+            return;
+        }
+        if (this.phase === RENDERER_PHASES.COMPLETING) {
+            logger.info('Seek forward button clicked during infinite end pause - ending element'); // eslint-disable-line max-len
+            this.exitCompletePauseBehaviour();
+            return;
         }
         const { timeBased, currentTime, duration } = this.getCurrentTime();
         if (timeBased) {

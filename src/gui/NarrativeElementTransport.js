@@ -206,6 +206,16 @@ class NarrativeElementTransport extends EventEmitter {
         this._seekForwardButton.setAttribute('disabled', 'true');
     }
 
+    enableSeekBack() {
+        this._seekBackButton.classList.remove('romper-control-disabled');
+        this._seekBackButton.removeAttribute('disabled');
+    }
+
+    disableSeekBack() {        
+        this._seekBackButton.classList.add('romper-control-disabled');
+        this._seekBackButton.setAttribute('disabled', 'true');
+    }
+
     _playPauseButtonClicked() {
         if(this._isPlaying) {
             this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {pauseButtonClicked: true});

@@ -236,6 +236,14 @@ class StandardControls extends BaseControls {
         this._buttonControls.hideSeekButtons();
     }
 
+    enableSeekBack() {
+        this._buttonControls.enableSeekBack();
+    }
+
+    disableSeekBack() {
+        this._buttonControls.disableSeekBack();
+    }
+
     enablePlayButton() {
         this._buttonControls.enablePlayButton();
     }

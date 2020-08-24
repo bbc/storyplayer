@@ -163,6 +163,8 @@ class Player extends EventEmitter {
 
     _addCountdownToElement: Function;
 
+    _isPausedForBehaviours: boolean;
+
     _controller: Controller;
 
     constructor(
@@ -194,6 +196,7 @@ class Player extends EventEmitter {
         if (debugPlayout) {
             logger.info("Playout debugging: ON")
         }
+        this._isPausedForBehaviours = false;
 
         logger.info('Using playout engine: ', playoutToUse);
 
@@ -219,6 +222,7 @@ class Player extends EventEmitter {
             // Print all calls to PlayoutEngine along with their arguments
             this.playoutEngine = proxyWrapper("PlayoutEngine", this.playoutEngine);
         }
+
 
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
@@ -706,7 +710,7 @@ class Player extends EventEmitter {
 
     /**
      * Creates a start image if we don't have one then appends it to the DOM
-     * @param {Object} options 
+     * @param {Object} options
      */
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
@@ -715,7 +719,7 @@ class Player extends EventEmitter {
             this._startExperienceImage.src = options.background_art;
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
-        
+
     }
 
     _createResumeExperienceButton(options: Object) {
@@ -1400,12 +1404,37 @@ class Player extends EventEmitter {
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
+        this._controls.disableSeekBack();
+        this._pauseForBehaviours();
         this.disablePlayButton();
         this._disableRepresentationControl();
     }
 
+    _pauseForBehaviours() {
+        if (this.playoutEngine.isPlaying()) {
+            this._isPausedForBehaviours = true;
+            this.playoutEngine.pause();
+        }
+        this._controls.disablePlayButton();
+    }
+
+    _unpauseAfterBehaviours() {
+        if (this._isPausedForBehaviours) {
+            this._isPausedForBehaviours = false;
+            this.playoutEngine.play();
+        }
+        this._controls.enablePlayButton();
+    }
+
+    exitCompleteBehaviourPhase() {
+        this._controls.enableSeekBack();
+        this._unpauseAfterBehaviours();
+    }
+
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this.setCurrentRenderer(renderer);
+        this._controls.disableSeekBack();
+        this._pauseForBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
 
@@ -1416,6 +1445,7 @@ class Player extends EventEmitter {
         this.enablePlayButton();
         this.enableScrubBar();
         this._enableRepresentationControl();
+        this._unpauseAfterBehaviours();
     }
 
     enableLinkChoiceControl() {
