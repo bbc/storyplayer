@@ -622,7 +622,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
-        // if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
         if (this.phase === RENDERER_PHASES.START) {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
             this.exitStartPauseBehaviour();
