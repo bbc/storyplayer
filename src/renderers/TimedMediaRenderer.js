@@ -87,18 +87,10 @@ export default class TimedMediaRenderer extends BaseRenderer {
                     const subsUrl = await this._fetchMedia(fg.assets[subtitleKey]);
                     mediaObj.subs_url = subsUrl
                 }
-                let appendedUrl = mediaUrl;
-                if (this._inTime > 0 || this._outTime > 0) {
-                    let mediaFragment = `#t=${this._inTime}`;
-                    if (this._outTime > 0) {
-                        mediaFragment = `${mediaFragment},${this._outTime}`;
-                    }
-                    appendedUrl = `${mediaUrl}${mediaFragment}`;
-                }
                 if (this._destroyed) {
                     logger.warn('trying to populate video element that has been destroyed');
                 } else {
-                    mediaObj.url = appendedUrl
+                    mediaObj.url = mediaUrl
                     this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
                 }
             } else {
