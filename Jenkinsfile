@@ -92,22 +92,6 @@ pipeline {
       }
     }
 
-    stage('Publish to NPMjs Private') {
-      when {
-        allOf {
-          branch 'master-smp';
-          not { equals expected: env.git_version, actual: env.npm_version }
-        }
-      }
-      steps {
-        script {
-          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
-            sh 'npm publish --access restricted'
-          }
-        }
-      }
-    }
-
     stage('Publish to Artifactory Private') {
       when {
         allOf {
@@ -130,14 +114,31 @@ pipeline {
           dir('rd-ux-storyplayer-harness') {
             sh '''
               yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer-smp@latest
+              yarn version --patch --no-git-tag-version
               git add package.json yarn.lock
-              yarn version --patch --message  "chore: Upgrade rd-ux-storyplayer-smp to ${git_version} and version bump to %s
+              git commit --message  "chore: Upgrade rd-ux-storyplayer-smp to ${git_version} and version bump to %s
 
         ${commit_messages}
         "
               git pull --rebase
               git push origin master-smp --tags
             '''
+          }
+        }
+      }
+    }
+
+    stage('Publish to NPMjs Private') {
+      when {
+        allOf {
+          branch 'master-smp';
+          not { equals expected: env.git_version, actual: env.npm_version }
+        }
+      }
+      steps {
+        script {
+          withCredentials([string(credentialsId: 'npm-auth-token', variable: 'npm_token')]) {
+            sh 'npm publish --access restricted'
           }
         }
       }
