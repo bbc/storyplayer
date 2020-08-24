@@ -10,4 +10,3 @@ package-lock.json
 storyplayer_electron/node_modules
 storyplayer_electron/dist/
 storyplayer_electron/src/dist/
-examples/

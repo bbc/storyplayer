@@ -1388,28 +1388,33 @@ class Player extends EventEmitter {
 
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
-        if (this.playoutEngine.isPlaying()) {
-            this._isPausedForBehaviours = true;
-            this.playoutEngine.pause();
-        }
         this.disableScrubBar();
+        this._pausedForBehaviours();
         this.disablePlayButton();
         this._disableRepresentationControl();
     }
 
-    exitCompleteBehaviourPhase() {
+    _pausedForBehaviours() {
+        if (this.playoutEngine.isPlaying()) {
+            this._isPausedForBehaviours = true;
+            this.playoutEngine.pause();
+        }
+    }
+
+    _unpauseAfterBehaviours() {
         if (this._isPausedForBehaviours) {
             this._isPausedForBehaviours = false;
             this.playoutEngine.play();
         }
     }
 
+    exitCompleteBehaviourPhase() {
+        this._unpauseAfterBehaviours();
+    }
+
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this.setCurrentRenderer(renderer);
-        if (this.playoutEngine.isPlaying()) {
-            this._isPausedForBehaviours = true;
-            this.playoutEngine.pause();
-        }
+        this._pausedForBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
 
@@ -1420,10 +1425,7 @@ class Player extends EventEmitter {
         this.enablePlayButton();
         this.enableScrubBar();
         this._enableRepresentationControl();
-        if (this._isPausedForBehaviours) {
-            this._isPausedForBehaviours = false;
-            this.playoutEngine.play();
-        }
+        this._unpauseAfterBehaviours();
     }
 
     enableLinkChoiceControl() {
