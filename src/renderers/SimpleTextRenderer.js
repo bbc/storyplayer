@@ -165,7 +165,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._replaceEscapedVariables(textContent)
             .then((newText) => {
                 this._textDiv.innerHTML = newText;
-                this._target.appendChild(this._textDiv);
             });
     }
 
