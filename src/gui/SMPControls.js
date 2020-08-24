@@ -294,11 +294,14 @@ class SMPControls extends BaseControls {
     }
 
     setControlsActive() {
-        this.enableControls()
+        // Handled by SMP
     }
 
     setControlsInactive() {
-        this.disableControls()
+        // called when restarting an experience and throwing up new splash screen
+        // and play button
+        // TODO: need to test properly
+        this.disableControls();
     }
 
     setFullscreenOn() { }

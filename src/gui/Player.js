@@ -21,7 +21,8 @@ import {
     scrollToTop,
     preventEventDefault,
     handleButtonTouchEvent,
-    inSMPWrapper
+    inSMPWrapper,
+    proxyWrapper,
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
@@ -216,23 +217,7 @@ class Player extends EventEmitter {
 
         if(debugPlayout) {
             // Print all calls to PlayoutEngine along with their arguments
-            const playoutEngineHandler = {
-                get (getTarget, getProp) {
-                    // eslint-disable-next-line func-names
-                    return function() {
-                        /* eslint-disable prefer-rest-params */
-                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
-                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
-                        // eslint-disable-next-line prefer-spread
-                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
-                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
-                        /* eslint-enable prefer-rest-params */
-
-                        return ret
-                    }
-                },
-            };
-            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
+            this.playoutEngine = proxyWrapper("PlayoutEngine", this.playoutEngine);
         }
 
         // bind various functions

@@ -2,6 +2,43 @@ import logger from './logger';
 
 // @flow
 
+export const proxyWrapper = (text, classInstance) => {
+    const handler = {
+        get (getTarget, getProp) {
+            // eslint-disable-next-line func-names
+            return function() {
+                /* eslint-disable prefer-rest-params */
+                try {
+                    logger.info( `(C) ${text} call: ${getProp} (${arguments.length})` );
+                } catch {
+                    logger.info( `(C) ${text} call: ${getProp} logger failed`)
+                }
+                try {
+                    logger.info( `(C+A) ${text} call: ${getProp}`, ...arguments );
+                } catch {
+                    logger.info( `(C+A) ${text} call: ${getProp} logger failed`)
+                }
+                // eslint-disable-next-line prefer-spread
+                const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                try {
+                    logger.info( `(C+R) ${text} call: ${getProp}`, ret );
+                } catch {
+                    logger.info( `(C+R) ${text} call: ${getProp} logger failed`)
+                }
+                try {
+                    logger.info( `(C+A+R) ${text} call: ${getProp}`, ...arguments, ret );
+                } catch {
+                    logger.info( `(C+A+R) ${text} call: ${getProp} logger failed`)
+                }
+                /* eslint-enable prefer-rest-params */
+
+                return ret
+            }
+        },
+    };
+    return new Proxy(classInstance, handler);
+}
+
 export const inSMPWrapper = () => {
     if (window.publicApi && window.playerInterface) {
         return true;
