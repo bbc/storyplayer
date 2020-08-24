@@ -117,6 +117,13 @@ export default class TimedMediaRenderer extends BaseRenderer {
         if(this.phase !== RENDERER_PHASES.MAIN) {
             return
         }
+        if (this.checkIsLooping()) {
+            // eslint-disable-next-line max-len
+            logger.warn(`received ended event for looping media on rep ${ this._rendererId} - need to loop manually`);
+            this.setCurrentTime(0);
+            this.play();
+            return;
+        }
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
         this._timer.pause();
         super.complete();
