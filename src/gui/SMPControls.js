@@ -5,6 +5,8 @@ import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
 import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
+import AnalyticEvents from '../AnalyticEvents';
+
 /* eslint-disable class-methods-use-this */
 
 class SMPControls extends BaseControls {
@@ -46,7 +48,7 @@ class SMPControls extends BaseControls {
 
         // Previous Button
         this._smpPlayerInterface.addEventListener("previousRequested", () => {
-            this.emit(ButtonEvents.BACK_BUTTON_CLICKED)
+            this.emit(ButtonEvents.BACK_BUTTON_CLICKED);
         })
 
         // Next Button
@@ -54,18 +56,7 @@ class SMPControls extends BaseControls {
             this.emit(ButtonEvents.NEXT_BUTTON_CLICKED)
         })
 
-        // TODO: Fix analytics for PlayPause button in SMP
-        // // Pause Button
-        // this._smpPlayerInterface.addEventListener("pauseRequested", () => {
-        //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {pauseButtonClicked: true})
-        // })
-        //
-        // // Play Button
-        // this._smpPlayerInterface.addEventListener("playRequested", () => {
-        //     // TODO: This picks up all play events not just the ones triggered
-        //     // from the play button. Requires review by Andy B
-        //     this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED, {playButtonClicked: true})
-        // })
+        this._setupAnalytics();
 
         // Controls enabled by default
         this._controlsEnabled = true
@@ -82,6 +73,111 @@ class SMPControls extends BaseControls {
         chapterOverlay.useCustomButton(this._chapterButton)
 
         this._setDefaultSMPControlsConfig()
+    }
+
+    /**
+     * Sets up the analytics logging so we listen to what the SMP
+     * controls are doing and report to our system.
+     * 
+     * Currently lacks RendererActions:
+     *  - VIDEO_PAUSE and VIDEO_UNPAUSE
+     *  - BUTTONS_ACTIVATED and BUTTONS_DEACTIVATED
+     */
+    _setupAnalytics() {
+        /* eslint-disable max-len */
+        this._smpPlayerInterface.addEventListener("SonarUserActionEvent", (e) => {
+            switch(e.controlId) {
+            case('back_interval_button'): {
+                let seekBackFrom = 'not_set';
+                let seekBackTo = 'not_set';
+                if (e.labels) {
+                    const { beforeTime, afterTime } = e.labels;
+                    if (beforeTime !== undefined) { seekBackFrom = beforeTime }
+                    if (afterTime !== undefined) { seekBackTo = afterTime }
+                }
+                this._logUserInteraction(
+                    AnalyticEvents.names.SEEK_BACKWARD_BUTTON_CLICKED,
+                    `${seekBackFrom}`,
+                    `${seekBackTo}`,
+                );
+                break;
+            }
+            case('forward_interval_button'): {
+                let seekFrom = 'not_set';
+                let seekTo = 'not_set';
+                if (e.labels) {
+                    const { beforeTime, afterTime } = e.labels;
+                    if (beforeTime !== undefined) { seekFrom = beforeTime }
+                    if (afterTime !== undefined) { seekTo = afterTime }
+                }
+                this._logUserInteraction(
+                    AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
+                    `${seekFrom}`, 
+                    `${seekTo}`,
+                );
+                break;
+            }
+            case('seek_bar'): {
+                let scrubFrom = 'not_set';
+                let scrubTo = 'not_set';
+                if (e.labels) {
+                    /* eslint-disable camelcase */
+                    const { before_seek_time, seek_time } = e.labels; 
+                    if (before_seek_time !== undefined) { scrubFrom = before_seek_time }
+                    if (seek_time !== undefined) { scrubTo = seek_time }
+                    /* eslint-enable camelcase */
+                }
+                this._logUserInteraction(
+                    AnalyticEvents.names.VIDEO_SCRUBBED,
+                    `${scrubFrom}`, 
+                    `${scrubTo}`,
+                );
+                break;
+            }
+            case('pause'):
+                this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED, 'play' , 'pause');
+                break;
+            case('play'):
+                this._logUserInteraction(AnalyticEvents.names.PLAY_PAUSE_BUTTON_CLICKED, 'pause', 'play');
+                break;
+            case('mute'):
+                this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: true');
+                break;
+            case('unmute'):
+                this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: false');
+                break;
+            case('volume_slider'):
+                this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, '', `default: ${e.labels.volume}`);
+                break;
+            case('enter_picture_in_picture_mode'):
+                this._logUserInteraction(AnalyticEvents.names.PIP_MODE_CHANGED, 'normal', 'pip');
+                break;
+            case('exit_picture_in_picture_mode'):
+                this._logUserInteraction(AnalyticEvents.names.PIP_MODE_CHANGED, 'pip', 'normal');
+                break;
+            case('enter_full_screen'):
+                this._logUserInteraction(AnalyticEvents.names.FULLSCREEN_BUTTON_CLICKED, 'not-fullscreen', 'fullscreen');
+                break;
+            case('exit_full_screen'):
+                this._logUserInteraction(AnalyticEvents.names.FULLSCREEN_BUTTON_CLICKED, 'fullscreen', 'not-fullscreen');
+                break;
+            case('previous_button'):
+                this._logUserInteraction(AnalyticEvents.names.BACK_BUTTON_CLICKED);
+                break;
+            case('next_button'):
+                this._logUserInteraction(AnalyticEvents.names.NEXT_BUTTON_CLICKED);
+                break;
+            case('subtitles_on'):
+                this._logUserInteraction(AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED, 'off', 'on');
+                break;
+            case('subtitles_off'):
+                this._logUserInteraction(AnalyticEvents.names.SUBTITLES_BUTTON_CLICKED, 'on', 'off');
+                break;
+            default:
+                break;
+            }
+        })
+        /* eslint-enable max-len */
     }
 
     _uiUpdate(controlsConfig) {
