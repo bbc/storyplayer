@@ -1388,16 +1388,17 @@ class Player extends EventEmitter {
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
-        this._pausedForBehaviours();
+        this._pauseForBehaviours();
         this.disablePlayButton();
         this._disableRepresentationControl();
     }
 
-    _pausedForBehaviours() {
+    _pauseForBehaviours() {
         if (this.playoutEngine.isPlaying()) {
             this._isPausedForBehaviours = true;
             this.playoutEngine.pause();
         }
+        this._controls.disablePlayButton();
     }
 
     _unpauseAfterBehaviours() {
@@ -1405,6 +1406,7 @@ class Player extends EventEmitter {
             this._isPausedForBehaviours = false;
             this.playoutEngine.play();
         }
+        this._controls.enablePlayButton();
     }
 
     exitCompleteBehaviourPhase() {
@@ -1413,7 +1415,7 @@ class Player extends EventEmitter {
 
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this.setCurrentRenderer(renderer);
-        this._pausedForBehaviours();
+        this._pauseForBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
 
