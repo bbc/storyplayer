@@ -318,7 +318,6 @@ class Player extends EventEmitter {
             logger.info("Playout debugging: ON")
         }
         this._isPausedForBehaviours = false;
-    }
 
         logger.info('Using playout engine: ', playoutToUse);
 
