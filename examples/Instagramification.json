@@ -1,5 +1,91 @@
 {
   "stories": [
+      {
+        "narrative_element_ids": [
+          "98d5a10d-c552-4152-b43b-73be43b0f683",
+          "15c8edc6-aa40-4fae-9997-c981b9f2229d",
+          "2cd6a5f2-87e0-47c1-af16-afef93b7ab8e",
+          "5e525659-1e47-469f-bf28-cc3f301237fa",
+          "88943582-281f-49b7-babc-f03f78cbbae7"
+        ],
+        "beginnings": [
+          {
+            "id": "f8c915f7-f8f4-41e5-ae8b-a14010a62f8a",
+            "condition": { "==": [1, 1] },
+            "narrative_element_id": "15c8edc6-aa40-4fae-9997-c981b9f2229d"
+          }
+        ],
+        "id": "6d5e38b5-ba14-4f06-9562-0fdbb1d00fe1",
+        "object_class": "STORY",
+        "name": "19E007_Instagrammification_19-06-20",
+        "description": "...",
+        "version": "1564654217:012000000",
+        "meta": {
+          "romper": {
+            "onLaunch": {
+              "background_art_asset_collection_id": "25aab6f4-10ed-4c07-8319-a9f062aef1b3"
+            }
+          },
+          "storyplayer": {
+              "taster": {
+                  "active": true,
+                  "url": "https://www.bbc.co.uk/taster/projects/instagramification/offsite/wide",
+                  "wide": true
+              },
+              "territories": ["uk"],
+              "archived": false,
+              "archivedVersion": -1,
+              "htmltitle": "Instagramification",
+          "metaTags": [
+            {
+              "property": "og:image",
+              "content": "https://rduxmedia.files.bbci.co.uk/live/image/Insta_promo_wide.jpg"
+            },
+            { "property": "og:title", "content": "Instagramification" },
+            { "property": "og:type", "content": "video.tv_show" },
+            {
+              "property": "og:description",
+              "content": "Experience a personalised documentary about the good, the bad and the ugly of the world’s fastest growing social network where the story adapts around you and your preferences."
+            },
+            { "content": "Instagramification", "itemProp": "name" },
+            { "content": "TVEpisode", "itemProp": "additionalType" },
+            {
+              "content": "BBC Research & Development",
+              "itemProp": "creator author copyrightHolder"
+            },
+            { "content": "BBC Research & Development", "itemProp": "publisher" },
+            {
+              "content": "Requires HTML5 support, including video",
+              "itemProp": "browserRequirements"
+            },
+            { "content": "2019", "itemProp": "copyrightYear" },
+            { "content": "Interactive TV", "itemProp": "applicationCategory" },
+            { "content": "Multimedia", "itemProp": "applicationCategory" },
+            { "content": "Entertainment", "itemProp": "applicationCategory" },
+            { "content": "Education", "itemProp": "applicationCategory" },
+            { "content": "Learning", "itemProp": "applicationCategory" },
+            { "content": "Web", "itemProp": "operatingSystem" },
+            { "name": "twitter:card", "content": "summary_large_image" },
+            { "name": "twitter:site", "content": "@BBCTaster" },
+            { "name": "twitter:creator", "content": "@BBCTaster" },
+            { "name": "twitter:title", "content": "“Instagramification" },
+            {
+              "name": "twitter:description",
+              "content": "Experience a personalised documentary about the good, the bad and the ugly of the world’s fastest growing social network where the story adapts around you and your preferences.",
+              "itemProp": "description"
+            },
+            {
+              "name": "twitter:image",
+              "content": "https://rduxmedia.files.bbci.co.uk/live/image/Insta_promo_wide.jpg",
+              "itemProp": "image"
+            }
+          ]
+          }
+        },
+        "tags": { "project": ["instagrammification"] },
+        "variables": {},
+        "schema_version": "0.2.15"
+      },
     {
       "narrative_element_ids": [
         "cf0ecfa0-e310-410e-8a0f-b4a14ec7de34",
@@ -373,92 +459,6 @@
           "description": ""
         }
       },
-      "schema_version": "0.2.15"
-    },
-    {
-      "narrative_element_ids": [
-        "98d5a10d-c552-4152-b43b-73be43b0f683",
-        "15c8edc6-aa40-4fae-9997-c981b9f2229d",
-        "2cd6a5f2-87e0-47c1-af16-afef93b7ab8e",
-        "5e525659-1e47-469f-bf28-cc3f301237fa",
-        "88943582-281f-49b7-babc-f03f78cbbae7"
-      ],
-      "beginnings": [
-        {
-          "id": "f8c915f7-f8f4-41e5-ae8b-a14010a62f8a",
-          "condition": { "==": [1, 1] },
-          "narrative_element_id": "15c8edc6-aa40-4fae-9997-c981b9f2229d"
-        }
-      ],
-      "id": "6d5e38b5-ba14-4f06-9562-0fdbb1d00fe1",
-      "object_class": "STORY",
-      "name": "19E007_Instagrammification_19-06-20",
-      "description": "...",
-      "version": "1564654217:012000000",
-      "meta": {
-        "romper": {
-          "onLaunch": {
-            "background_art_asset_collection_id": "25aab6f4-10ed-4c07-8319-a9f062aef1b3"
-          }
-        },
-        "storyplayer": {
-            "taster": {
-                "active": true,
-                "url": "https://www.bbc.co.uk/taster/projects/instagramification/offsite/wide",
-                "wide": true
-            },
-            "territories": ["uk"],
-            "archived": false,
-            "archivedVersion": -1,
-            "htmltitle": "Instagramification",
-        "metaTags": [
-          {
-            "property": "og:image",
-            "content": "https://rduxmedia.files.bbci.co.uk/live/image/Insta_promo_wide.jpg"
-          },
-          { "property": "og:title", "content": "Instagramification" },
-          { "property": "og:type", "content": "video.tv_show" },
-          {
-            "property": "og:description",
-            "content": "Experience a personalised documentary about the good, the bad and the ugly of the world’s fastest growing social network where the story adapts around you and your preferences."
-          },
-          { "content": "Instagramification", "itemProp": "name" },
-          { "content": "TVEpisode", "itemProp": "additionalType" },
-          {
-            "content": "BBC Research & Development",
-            "itemProp": "creator author copyrightHolder"
-          },
-          { "content": "BBC Research & Development", "itemProp": "publisher" },
-          {
-            "content": "Requires HTML5 support, including video",
-            "itemProp": "browserRequirements"
-          },
-          { "content": "2019", "itemProp": "copyrightYear" },
-          { "content": "Interactive TV", "itemProp": "applicationCategory" },
-          { "content": "Multimedia", "itemProp": "applicationCategory" },
-          { "content": "Entertainment", "itemProp": "applicationCategory" },
-          { "content": "Education", "itemProp": "applicationCategory" },
-          { "content": "Learning", "itemProp": "applicationCategory" },
-          { "content": "Web", "itemProp": "operatingSystem" },
-          { "name": "twitter:card", "content": "summary_large_image" },
-          { "name": "twitter:site", "content": "@BBCTaster" },
-          { "name": "twitter:creator", "content": "@BBCTaster" },
-          { "name": "twitter:title", "content": "“Instagramification" },
-          {
-            "name": "twitter:description",
-            "content": "Experience a personalised documentary about the good, the bad and the ugly of the world’s fastest growing social network where the story adapts around you and your preferences.",
-            "itemProp": "description"
-          },
-          {
-            "name": "twitter:image",
-            "content": "https://rduxmedia.files.bbci.co.uk/live/image/Insta_promo_wide.jpg",
-            "itemProp": "image"
-          }
-        ]
-        }
-      },
-      "tags": { "project": ["instagrammification"] },
-      "variables": {},
       "schema_version": "0.2.15"
     },
     {
