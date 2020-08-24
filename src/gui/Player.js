@@ -1388,6 +1388,7 @@ class Player extends EventEmitter {
     enterCompleteBehavourPhase() {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
+        this._controls.disableSeekBack();
         this._pauseForBehaviours();
         this.disablePlayButton();
         this._disableRepresentationControl();
@@ -1410,11 +1411,13 @@ class Player extends EventEmitter {
     }
 
     exitCompleteBehaviourPhase() {
+        this._controls.enableSeekBack();
         this._unpauseAfterBehaviours();
     }
 
     enterStartBehaviourPhase(renderer: BaseRenderer) {
         this.setCurrentRenderer(renderer);
+        this._controls.disableSeekBack();
         this._pauseForBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
     }
