@@ -199,6 +199,14 @@ class Buttons extends BaseButtons {
         this._transportControls.hideSeekButtons();
     }
 
+    enableSeekBack() {
+        this._transportControls.enableSeekBack();
+    }
+
+    disableSeekBack() {
+        this._transportControls.disableSeekBack();
+    }
+
     enablePlayButton() {
         this._transportControls.enablePlayButton();
     }
