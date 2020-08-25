@@ -63,7 +63,6 @@ class SMPControls extends BaseControls {
 
         // Setup Chapter Overlay and attach Custom SMP button to it
         this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons');
         this._containerDiv.classList.add('romper-buttons-smp');
         this._containerDiv.classList.add('show');
         this._containerDiv.appendChild(chapterOverlay.getOverlay());
