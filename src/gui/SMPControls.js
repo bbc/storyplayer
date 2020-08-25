@@ -228,7 +228,7 @@ class SMPControls extends BaseControls {
     }
 
     _createChapterButton() {
-        const controlBar = document.querySelector('.p_playerControlBarHolder');
+        const controlBar = document.querySelector('.mediaContainer');
         const chapterButton = document.createElement('button');
         chapterButton.classList.add("p_button")
         chapterButton.classList.add("p_controlBarButton")
@@ -244,7 +244,7 @@ class SMPControls extends BaseControls {
             chapterButton.classList.remove("p_buttonHover")
         }
         chapterButton.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapterIcon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/></svg></div>'
-        controlBar.insertBefore(chapterButton, document.querySelector(".p_fullscreenButton"))
+        controlBar.appendChild(chapterButton)
 
         this._chapterButton = chapterButton;
     }
