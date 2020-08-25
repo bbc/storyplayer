@@ -194,7 +194,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
                 logger.warn('video not synced to in time, resetting');
                 this.setCurrentTime(0);
             }
-            this._timer.setSyncing(false);
             this._playoutEngine.off(this._rendererId, 'playing', setStartToInTime);
         };
         this._playoutEngine.on(this._rendererId, 'playing', setStartToInTime);
