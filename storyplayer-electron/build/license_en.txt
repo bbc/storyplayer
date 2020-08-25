@@ -1,21 +1,27 @@
-StoryPlayer is experimental BBC technology and it is used by independent creators for the purpose of educational or technical demonstration of non-BBC content that was created using BBC software tools. 
+What are the rules for using BBC StoryPlayer?
 
-The BBC does not control the demonstrations and therefore is not responsible for them in any way. 
+StoryPlayer is a new experimental media player that can play responsive and interactive stories created by StoryFormer, a BBC production tool. 
 
-In particular, the BBC does not guarantee: any rights to use any content; the accuracy, integrity and quality of any content; and the functionality of StoryPlayer or its fitness for a particular purpose. 
+To play an interactive story that a creator has made with StoryFormer you need to install StoryPlayer. 
 
-Nothing herein constitutes an invitation or recommendation from the BBC.
+Keep in mind that the BBC did not create and is not responsible for the interactive stories that are available to play on StoryPlayer. 
 
-StoryPlayer cannot be used by either you or the creator for any purpose that is unlawful or inconsistent with any BBC guidelines, policies and standards. 
+The creator that makes available an interactive story for you to view through StoryPlayer is responsible for the content. 
 
-You can only install StoryPlayer on your personal computer to view content that was provided to you as part of a non-commercial demonstration of its creator. 
+If you see any interactive story that you believe infringes another party’s copyright or is inappropriate or offensive or illegal then you can report it to the creator. 
 
-You must immediately stop using StoryPlayer where the BBC asks you to do so for any reason.
+You may access and play interactive stories created by StoryFormer on StoryPlayer, as long as your use is lawful and you comply with these terms of use:
 
-Do not copy, adapt, reverse engineer, de-compile, disassemble or modify StoryPlayer without the BBC’s prior written permission.
+You can only use StoryPlayer to view an interactive story created by StoryFormer. 
 
-If you install StoryPlayer you also accept the BBC Terms of Use, at https://www.bbc.co.uk/terms.
+You cannot modify StoryPlayer or decompile or reverse engineer it.
 
-StoryPlayer should not be used to process any personal data of individuals who use it to view content. 
+You can only use the StoryPlayer for non-commercial personal use on your personal device. 
+
+Don’t copy, distribute or license StoryPlayer to anyone else. 
+
+You must immediately stop using StoryPlayer where the BBC asks to do so for any reason.
+
+If you install StoryPlayer you also accept the BBC Terms of Use at https://www.bbc.co.uk/terms. 
 
 Find out about your privacy rights and the BBC's Privacy and Cookies Policy at https://www.bbc.co.uk/privacy.
