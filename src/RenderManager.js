@@ -198,10 +198,6 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    prepareForRestart() {
-        this._player.prepareForRestart();
-    }
-
     /**
      * Event handler for when the visibility of the tab changes
      * @param {boolean} isVisible 
@@ -878,6 +874,24 @@ export default class RenderManager extends EventEmitter {
                 }
             }
         });
+    }
+
+    /**
+     * Prepare the render manager to restart the story
+     */
+    prepareForRestart() {
+        Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+            const renderer = this._activeRenderers[rendererNEId];
+            renderer.destroy();
+        });
+        Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
+            this._backgroundRenderers[rendererSrc].destroy();
+        });
+        Object.keys(this._upcomingBackgroundRenderers).forEach((src) => {
+            this._upcomingBackgroundRenderers[src].destroy();
+        });
+        this._initialise();
+        this._player.prepareForRestart();
     }
 
     /**
