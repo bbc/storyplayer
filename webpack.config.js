@@ -4,7 +4,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const JavaScriptObfuscator = require('webpack-obfuscator');
 
+
 const productionBuild = process.env.NODE_ENV === 'production';
+
+// Source maps are useful for debugging but in some cases they double the time
+// required to compile so may not be that *useful*
+const SOURCE_MAPS_ENABLED = false && !productionBuild;
+
+const cacheLoaderSourceMapArray = [];
 
 module.exports = env => {
     const config = {
@@ -52,6 +59,23 @@ module.exports = env => {
             }),
         ],
     };
+
+    if (!productionBuild) {
+        console.log('building in dev mode');
+        console.log('generating source maps');
+        config.module.rules.push({
+            test: /\.js$/,
+            use: cacheLoaderSourceMapArray.concat([
+                'source-map-loader'
+            ]),
+            enforce: 'pre',
+            exclude: [
+                /node_modules\/apollo/
+            ]
+        });
+        config.devtool = 'eval-source-map';
+
+    }
 
     if (env && env.platform === 'electron') {
         config.optimization = {
