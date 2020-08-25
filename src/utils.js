@@ -39,6 +39,9 @@ export const proxyWrapper = (text, classInstance) => {
     return new Proxy(classInstance, handler);
 }
 
+/**
+ * Are we in the SMP iframe or not
+ */
 export const inSMPWrapper = () => {
     if (window.publicApi && window.playerInterface) {
         return true;
@@ -46,6 +49,9 @@ export const inSMPWrapper = () => {
     return false
 }
 
+/**
+ * Returns the SMP interface
+ */
 export const getSMPInterface = () => {
     return window.playerInterface;
 }
@@ -158,6 +164,11 @@ export const preventEventDefault = (event: Event) => {
     }
 };
 
+/**
+ * Adds an event handler to the event called
+ * @param {Function} callback callback to execute on the event
+ * @param {string} touchEvent Event to attach listener to
+ */
 export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
         if(getSetting(DEBUG_PLAYOUT_FLAG)) {
