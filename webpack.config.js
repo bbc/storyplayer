@@ -67,7 +67,7 @@ module.exports = env => {
             ]),
             enforce: 'pre',
             exclude: [
-                /node_modules\/apollo/
+                /node_modules\/shaka-player/
             ]
         });
         config.devtool = 'eval-source-map';
