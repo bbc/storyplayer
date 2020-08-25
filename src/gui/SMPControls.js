@@ -63,7 +63,7 @@ class SMPControls extends BaseControls {
 
         // Setup Chapter Overlay and attach Custom SMP button to it
         this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons');
+        this._containerDiv.classList.add('romper-buttons-smp');
         this._containerDiv.classList.add('show');
         this._containerDiv.appendChild(chapterOverlay.getOverlay());
 
@@ -78,7 +78,7 @@ class SMPControls extends BaseControls {
     /**
      * Sets up the analytics logging so we listen to what the SMP
      * controls are doing and report to our system.
-     * 
+     *
      * Currently lacks RendererActions:
      *  - VIDEO_PAUSE and VIDEO_UNPAUSE
      *  - BUTTONS_ACTIVATED and BUTTONS_DEACTIVATED
@@ -112,7 +112,7 @@ class SMPControls extends BaseControls {
                 }
                 this._logUserInteraction(
                     AnalyticEvents.names.SEEK_FORWARD_BUTTON_CLICKED,
-                    `${seekFrom}`, 
+                    `${seekFrom}`,
                     `${seekTo}`,
                 );
                 break;
@@ -122,14 +122,14 @@ class SMPControls extends BaseControls {
                 let scrubTo = 'not_set';
                 if (e.labels) {
                     /* eslint-disable camelcase */
-                    const { before_seek_time, seek_time } = e.labels; 
+                    const { before_seek_time, seek_time } = e.labels;
                     if (before_seek_time !== undefined) { scrubFrom = before_seek_time }
                     if (seek_time !== undefined) { scrubTo = seek_time }
                     /* eslint-enable camelcase */
                 }
                 this._logUserInteraction(
                     AnalyticEvents.names.VIDEO_SCRUBBED,
-                    `${scrubFrom}`, 
+                    `${scrubFrom}`,
                     `${scrubTo}`,
                 );
                 break;
