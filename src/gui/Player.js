@@ -1439,13 +1439,13 @@ class Player extends EventEmitter {
     }
 
     exitStartBehaviourPhase() {
+        this._unpauseAfterBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
         this.enableControls();
         this.showSeekButtons();
         this.enablePlayButton();
         this.enableScrubBar();
         this._enableRepresentationControl();
-        this._unpauseAfterBehaviours();
     }
 
     enableLinkChoiceControl() {
