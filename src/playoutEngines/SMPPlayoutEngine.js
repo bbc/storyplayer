@@ -117,7 +117,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // TODO: Get MediaFetcher to not resolve pids
         super.queuePlayout(rendererId, mediaObj);
 
-        const options = {};
+        const options = {
+            loop: false,
+        };
         if("loop" in this._media[rendererId].media && this._media[rendererId].media.loop) {
             this.setLoopAttribute(rendererId, true);
             options.loop = true;
