@@ -7,9 +7,6 @@ const JavaScriptObfuscator = require('webpack-obfuscator');
 
 const productionBuild = process.env.NODE_ENV === 'production';
 
-// Source maps are useful for debugging but in some cases they double the time
-// required to compile so may not be that *useful*
-const SOURCE_MAPS_ENABLED = false && !productionBuild;
 
 const cacheLoaderSourceMapArray = [];
 
