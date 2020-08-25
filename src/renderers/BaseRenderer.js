@@ -307,13 +307,13 @@ export default class BaseRenderer extends EventEmitter {
 
     start() {
         this._setPhase(RENDERER_PHASES.MAIN);
+        this._player.exitStartBehaviourPhase();
         this.emit(RendererEvents.STARTED);
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
             this._timer.pause();
         }
         this._addPauseHandlersForTimer();
-        this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
