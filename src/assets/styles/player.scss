@@ -882,6 +882,10 @@ $start-button-size: 15vw;
     transition: all 1s ease;
     z-index: 10;
 
+    &.romper-buttons-smp {
+      background: unset;
+    }
+
     &.icons-showing {
       background: linear-gradient($transparent 0, $black 30%, $black 100%);
     }
