@@ -144,7 +144,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
             const mediaUrl = await this._fetchMedia(this._assetCollection.assets.audio_src, {
                 mediaFormat: MediaFormats.getFormat(),
                 mediaType: AUDIO,
-                resolvePid: false,
+                returnPid: false,
             })
             if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
                 logger.warn('trying to populate audio element that has been destroyed');
