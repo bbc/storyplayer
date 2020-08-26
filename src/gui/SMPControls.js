@@ -229,8 +229,6 @@ class SMPControls extends BaseControls {
     }
 
     _createFbMixSlider() {
-        // <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-
         const controlBar = document.querySelector('.p_volumeControls');
 
         const fbMixSliderLabel = document.createElement('div');
