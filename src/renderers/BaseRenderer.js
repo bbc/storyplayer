@@ -547,8 +547,8 @@ export default class BaseRenderer extends EventEmitter {
                 this._playoutEngine.off(this._rendererId,'timeupdate', sync);
             }
         };
-        // only try to sync if playout engine has time
-        if (this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
+        // only try to sync if playout engine has time and we're not looping
+        if (!this.checkIsLooping() && this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
             this._timer.setSyncing(true);
             this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);

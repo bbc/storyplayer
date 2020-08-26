@@ -195,7 +195,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
     start() {
         super.start();
         // set timer to sync mode until really ready
-        this._timer.setSyncing(true);
+        if (!this.checkIsLooping()) this._timer.setSyncing(true);
         const setStartToInTime = () => {
             if (this._playoutEngine.getCurrentTime(this._rendererId) < this._inTime) {
                 logger.warn('video not synced to in time, resetting');
