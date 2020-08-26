@@ -1,9 +1,21 @@
+// .p_volumeControls.p_open {
+//     width: 500px;
+// }
+
 .controlsFadedOut {
     .chapterButton {
         display: none;
     }
 
     .romper-overlay {
+        display: none;
+    }
+
+    .audioMixSlider {
+        display: none;
+    }
+
+    .audioMixSliderLabel {
         display: none;
     }
 }
@@ -16,6 +28,24 @@
         &.romper-inactive {
             display: none;
         }
+    }
+
+    .audioMixSlider {
+        position: absolute;
+        width: 170px;
+        height: 30px;
+        margin-top: 14px;
+        left: 200px;
+    }
+
+    .audioMixSliderLabel {
+        position: absolute;
+        width: 170px;
+        height: 44px;
+        left: 200px;
+        color: white;
+        text-align: center;
+        line-height: 1;
     }
 }
 
