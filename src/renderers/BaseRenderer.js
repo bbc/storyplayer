@@ -311,7 +311,6 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.STARTED);
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
-            console.log('ANDY not playing, so pausing');
             this._timer.pause();
         }
         this._addPauseHandlersForTimer();
