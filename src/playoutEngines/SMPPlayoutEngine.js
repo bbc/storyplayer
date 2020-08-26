@@ -19,9 +19,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     _smpPlayerInterface: Object
 
-    _fakeItemRendererId: string
+    _fakeItemRendererId: ?string
 
-    _fakeItemDuration: Number
+    _fakeItemDuration: number
 
     _fakeItemLoaded: boolean
 
@@ -94,7 +94,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._fbMix = fbMixValue
     }
 
-    supports(feature) {
+    supports(feature: string) {
         switch(feature) {
         case SUPPORT_FLAGS.SUPPORTS_360:
             return false
@@ -348,12 +348,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._smpPlayerInterface.addEventListener("mediaItemInfoChanged", this._smpFakeLoad)
     }
 
-    stopNonAVPlayout(rendererId) {
+    stopNonAVPlayout(rendererId: ?string) {
         // If stop comes after another nonav renderer has started, ignore
         if(rendererId === this._fakeItemRendererId) {
-            this._fakeItemRendererId = null
-            this._fakeItemDuration = -1
-
+            this._fakeItemRendererId = null;
+            this._fakeItemDuration = -1;
             this._smpPlayerInterface.removeEventListener("playRequested", this._smpFakePlay);
             this._smpPlayerInterface.removeEventListener("pauseRequested", this._smpFakePause);
             this._smpPlayerInterface.removeEventListener("mediaItemInfoChanged", this._smpFakeLoad)
@@ -379,16 +378,20 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     play(changeSMP = true) {
         this._playing = true;
         this._hasStarted = true;
-        this._secondaryPlayoutEngine.play();
+        this.playBackgrounds();
         if(changeSMP) {
             this._smpPlayerInterface.play();
         }
         super.play()
     }
 
-    pause(changeSMP = true) {
+    /**
+     * Pauses the player and backgrounds
+     * @param {boolean} changeSMP do we change the SMP player state or not
+     */
+    pause(changeSMP: boolean = true) {
         this._playing = false;
-        this._secondaryPlayoutEngine.pause();
+        this.pauseBackgrounds();
         if(changeSMP) {
             this._smpPlayerInterface.pause();
         }
@@ -404,11 +407,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     pauseBackgrounds() {
-        this._secondaryPlayoutEngine.pauseBackgrounds()
+        this._secondaryPlayoutEngine.pauseBackgrounds();
     }
 
     playBackgrounds() {
-        this._secondaryPlayoutEngine.playBackgrounds()
+        this._secondaryPlayoutEngine.playBackgrounds();
     }
 
     getCurrentTime(rendererId: string) {
