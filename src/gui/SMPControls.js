@@ -70,6 +70,7 @@ class SMPControls extends BaseControls {
         this._uiUpdateQueue = []
 
         this._createChapterButton()
+        this._createFbMixSlider()
         chapterOverlay.useCustomButton(this._chapterButton)
 
         this._setDefaultSMPControlsConfig()
@@ -225,6 +226,50 @@ class SMPControls extends BaseControls {
             alwaysEnablePreviousButton: false,
             alwaysEnableNextButton: false,
         })
+    }
+
+    _createFbMixSlider() {
+        // <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+
+        const controlBar = document.querySelector('.p_volumeControls');
+
+        const fbMixSliderLabel = document.createElement('div');
+        fbMixSliderLabel.classList.add("audioMixSliderLabel")
+        fbMixSliderLabel.innerHTML = "Default"
+        controlBar.appendChild(fbMixSliderLabel)
+
+        const fbMixSlider = document.createElement('input');
+        fbMixSlider.classList.add("audioMixSlider")
+
+        fbMixSlider.type = 'range';
+        fbMixSlider.min = -1;
+        fbMixSlider.max = 1;
+        fbMixSlider.value = 0;
+        fbMixSlider.step = 0.5;
+        fbMixSlider.addEventListener("change", (e) => {
+            this._playoutEngine.setFbMix(parseFloat(e.target.value))
+        })
+
+        fbMixSlider.addEventListener("input", (e) => {
+            const sliderValue = parseFloat(e.target.value)
+            const label = document.querySelector('.audioMixSliderLabel')
+            if(sliderValue < -0.5) {
+                label.innerHTML = "Background Only"
+            } else if(sliderValue >= -0.5 && sliderValue < 0) {
+                label.innerHTML = "Background favouring"
+            } else if(sliderValue === 0) {
+                label.innerHTML = "Default"
+            } else if(sliderValue > 0 && sliderValue <= 0.5) {
+                label.innerHTML = "Foreground favouring"
+            } else if(sliderValue > 0.5) {
+                label.innerHTML = "Foreground Only"
+            } else {
+                logger.warn("Invalid mix slider value: ")
+            }
+        })
+
+        controlBar.appendChild(fbMixSlider)
+
     }
 
     _createChapterButton() {

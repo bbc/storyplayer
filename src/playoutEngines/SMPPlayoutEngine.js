@@ -86,6 +86,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._smpFakePlay = this._smpFakePlay.bind(this);
         this._smpFakePause = this._smpFakePause.bind(this);
         this._smpFakeLoad = this._smpFakeLoad.bind(this);
+
+        this._fbMix = 0
+    }
+
+    setFbMix(fbMixValue) {
+        this._fbMix = fbMixValue
     }
 
     supports(feature) {
