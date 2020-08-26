@@ -208,7 +208,7 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                 // if not waiting at the end, pause the timer for the current representation
                 this._currentRenderer.pause();
-                this._player.playoutEngine.pause(true);
+                this._player.playoutEngine.pause();
             }
             this._player.playoutEngine.pauseBackgrounds();
         } else {
@@ -216,7 +216,7 @@ export default class RenderManager extends EventEmitter {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                     this._currentRenderer.play();
-                    this._player.playoutEngine.play(true);
+                    this._player.playoutEngine.play();
                 }
             }
             if (this._player.playoutEngine.hasStarted()) {
