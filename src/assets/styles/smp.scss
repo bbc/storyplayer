@@ -3,8 +3,11 @@
         display: none;
     }
 
-    .romper-overlay {
-        display: none;
+    // Hide Chapter Overlay when SMP Controls are not there
+    .romper-buttons-smp {
+        .romper-overlay {
+            display: none;
+        }
     }
 
     .audioMixSlider {

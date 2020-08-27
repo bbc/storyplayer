@@ -545,6 +545,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     clearStyle(rendererId: string, key: string) {
     }
 
+    // TODO: Background Audio Renderer fades in to volume 1
+    // So both the mix and overall volume control is ignored when background
+    // audio starts playing
     setVolume(rendererId: string, volume: number) {
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
