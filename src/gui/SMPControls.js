@@ -74,6 +74,13 @@ class SMPControls extends BaseControls {
         chapterOverlay.useCustomButton(this._chapterButton)
 
         this._setDefaultSMPControlsConfig()
+
+        // Set SMP Audio Bar to have extra width to contain our new control
+        this._smpPlayerInterface.updateUiConfig({
+            controls:{
+                extraVolumeWidth:170
+            }
+        })
     }
 
     /**
@@ -240,10 +247,10 @@ class SMPControls extends BaseControls {
         fbMixSlider.classList.add("audioMixSlider")
 
         fbMixSlider.type = 'range';
-        fbMixSlider.min = -1;
+        fbMixSlider.min = 0;
         fbMixSlider.max = 1;
-        fbMixSlider.value = 0;
-        fbMixSlider.step = 0.5;
+        fbMixSlider.value = 1;
+        fbMixSlider.step = 0.25;
         fbMixSlider.addEventListener("change", (e) => {
             this._playoutEngine.setFbMix(parseFloat(e.target.value))
         })
@@ -251,16 +258,12 @@ class SMPControls extends BaseControls {
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
             const label = document.querySelector('.audioMixSliderLabel')
-            if(sliderValue < -0.5) {
-                label.innerHTML = "Background Only"
-            } else if(sliderValue >= -0.5 && sliderValue < 0) {
-                label.innerHTML = "Background favouring"
-            } else if(sliderValue === 0) {
-                label.innerHTML = "Default"
-            } else if(sliderValue > 0 && sliderValue <= 0.5) {
-                label.innerHTML = "Foreground favouring"
-            } else if(sliderValue > 0.5) {
-                label.innerHTML = "Foreground Only"
+            if(sliderValue <= 0.5) {
+                label.innerHTML = "Accessible Mix"
+            } else if(sliderValue > 0.5 && sliderValue < 0.75) {
+                label.innerHTML = "Enhanced Mix"
+            } else if(sliderValue >= 0.75) {
+                label.innerHTML = "Default Mix"
             } else {
                 logger.warn("Invalid mix slider value: ")
             }

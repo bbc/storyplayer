@@ -75,23 +75,29 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._smpPlayerInterface.addEventListener("pause", (e) => {
             this._fakeEventEmitter.emit("pause", e)
         });
+
+        this._volume = 1
+        this._backgroundMix = 1
+
         this._smpPlayerInterface.addEventListener("volumechange", (e) => {
             let { volume } = e
             if(e.muted) {
                 volume = 0
             }
-            this._secondaryPlayoutEngine.setAllVolume(volume)
+            this._volume = volume
+            const backgroundAudioVolume = this._volume * this._backgroundMix
+            this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
         });
 
         this._smpFakePlay = this._smpFakePlay.bind(this);
         this._smpFakePause = this._smpFakePause.bind(this);
         this._smpFakeLoad = this._smpFakeLoad.bind(this);
-
-        this._fbMix = 0
     }
 
     setFbMix(fbMixValue) {
-        this._fbMix = fbMixValue
+        this._backgroundMix = fbMixValue
+        const backgroundAudioVolume = this._volume * this._backgroundMix
+        this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
     }
 
     supports(feature: string) {
@@ -556,7 +562,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return this._secondaryPlayoutEngine.getVolume(rendererId)
         }
         if(rendererPlayoutObj.active) {
-            return this._smpPlayerInterface.volume
+            return this._volume
         }
         return 1
     }
