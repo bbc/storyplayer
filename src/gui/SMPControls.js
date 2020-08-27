@@ -250,13 +250,15 @@ class SMPControls extends BaseControls {
         fbMixSlider.min = 0;
         fbMixSlider.max = 1;
         fbMixSlider.value = 1;
-        fbMixSlider.step = 0.25;
+        fbMixSlider.step = 0.1;
         fbMixSlider.addEventListener("change", (e) => {
-            this._playoutEngine.setFbMix(parseFloat(e.target.value))
+            const sliderValue = parseFloat(e.target.value)
+            this._playoutEngine.setFbMix(sliderValue)
         })
 
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
+            this._playoutEngine.setFbMix(sliderValue)
             const label = document.querySelector('.audioMixSliderLabel')
             if(sliderValue <= 0.5) {
                 label.innerHTML = "Accessible Mix"
