@@ -55,14 +55,11 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         this._setGUILayerCSS = this._setGUILayerCSS.bind(this);
 
-        // we have a one time event listener as we remove the prestart classname from the media element to indicate we have started
-        // otherwise the GUI is shrunk and buttons disappear
+        // we have a one time event listener as we remove the prestart classname from the media element
+        // to indicate we have started otherwise the GUI is shrunk and buttons disappear
         this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, this._setGUILayerCSS);
         window.addEventListener('resize', () => {
-            console.log(this._target.clientHeight)
             this.MAX_HEIGHT = this._target.clientHeight;
-            console.log('max height')
-            console.log(this._target.getBoundingClientRect())
             this._setGUILayerCSS();
         });
 
@@ -88,7 +85,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
-        this._setGUILayerCSS(this);
+        this._setGUILayerCSS();
         return true;
     }
 
@@ -206,15 +203,11 @@ export default class SimpleTextRenderer extends BaseRenderer {
         if(!this._textDiv.parentNode) return;
         if (this.isOverflown()) {
             if (this.isNotPreStart()) {
-                // eslint-disable-next-line no-param-reassign
-                guiLayer.style.top = '';
                 guiLayer.classList.add('overflowing-text');
                 this._textDiv.style.overflow = 'auto';
                 this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 20%)`;
             }
         } else {
-            // eslint-disable-next-line no-param-reassign
-            guiLayer.style.top = '0';
             guiLayer.classList.remove('overflowing-text');
             this._textDiv.style.overflow = '';
             this._textDiv.style['max-height'] = '';

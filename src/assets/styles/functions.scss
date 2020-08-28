@@ -4,5 +4,5 @@
 }
 
 @function css-max($numbers...) {
-  @return m#{a}x(#{$numbers})
+  @return m#{a}x(#{$numbers});
 }
