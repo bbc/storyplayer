@@ -206,11 +206,15 @@ export default class SimpleTextRenderer extends BaseRenderer {
         if(!this._textDiv.parentNode) return;
         if (this.isOverflown()) {
             if (this.isNotPreStart()) {
+                // eslint-disable-next-line no-param-reassign
+                guiLayer.style.top = '';
                 guiLayer.classList.add('overflowing-text');
                 this._textDiv.style.overflow = 'auto';
-                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 10em)`;
+                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 20%)`;
             }
         } else {
+            // eslint-disable-next-line no-param-reassign
+            guiLayer.style.top = '0';
             guiLayer.classList.remove('overflowing-text');
             this._textDiv.style.overflow = '';
             this._textDiv.style['max-height'] = '';
