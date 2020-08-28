@@ -228,7 +228,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     /**
      * Populates the text element with the string provided
-     * And sets the GUI to be the bottom 20% of the screen
      * @param {string} textContent 
      */
     populateTextElement(textContent: string) {
