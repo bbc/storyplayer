@@ -50,11 +50,22 @@ export default class SimpleTextRenderer extends BaseRenderer {
             controller,
         );
         this._target = player.mediaTarget;
+
+        this.MAX_HEIGHT = this._target.clientHeight || 720;;
+
         this._setGUILayerCSS = this._setGUILayerCSS.bind(this);
 
         // we have a one time event listener as we remove the prestart classname from the media element to indicate we have started
         // otherwise the GUI is shrunk and buttons disappear
         this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, this._setGUILayerCSS);
+        window.addEventListener('resize', () => {
+            console.log(this._target.clientHeight)
+            this.MAX_HEIGHT = this._target.clientHeight;
+            console.log('max height')
+            console.log(this._target.getBoundingClientRect())
+            this._setGUILayerCSS();
+        });
+
     }
 
     async init() {
@@ -77,7 +88,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
-        this._setGUILayerCSS();
+        this._setGUILayerCSS(this);
         return true;
     }
 
@@ -192,11 +203,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
      * @param {HTMLElement} guiLayer 
      */
     setOverflowStyle(guiLayer: HTMLElement) {
+        if(!this._textDiv.parentNode) return;
         if (this.isOverflown()) {
             if (this.isNotPreStart()) {
                 guiLayer.classList.add('overflowing-text');
-                this._textDiv.style.overflow = 'scroll';
-                this._textDiv.style['max-height'] = `${this.MAX_HEIGHT}px`;
+                this._textDiv.style.overflow = 'auto';
+                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 10em)`;
             }
         } else {
             guiLayer.classList.remove('overflowing-text');
