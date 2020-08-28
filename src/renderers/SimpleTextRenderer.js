@@ -229,12 +229,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
         if (this.isOverflown()) {
             if (this.isNotPreStart()) {
                 guiLayer.classList.add('overflowing-text');
-                this._textDiv.style.overflow = 'auto';
-                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 20%)`;
+                this._textDiv.classList.add('overflowing-text')
+                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 4em)`;
             }
         } else {
             guiLayer.classList.remove('overflowing-text');
-            this._textDiv.style.overflow = '';
+            this._textDiv.classList.remove('overflowing-text');
             this._textDiv.style['max-height'] = '';
         }       
     }
