@@ -18,6 +18,10 @@ export type HTMLTrackElement = HTMLElement & {
     default: boolean,
 }
 
+/**
+ * Simple text renderer displays a HTML element populated with the description 
+ * or asset collection text_src
+ */
 export default class SimpleTextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
@@ -65,6 +69,9 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     }
 
+    /**
+     * Inits this renderer
+     */
     async init() {
         try {
             await this.renderTextElement()
@@ -118,6 +125,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return true;
     }
 
+    /**
+     * Creates the text element and calls the populateTextElement function to 
+     * populate it with the inner html
+     */
     renderTextElement() {
         this._textDiv = document.createElement('div');
         this._textDiv.classList.add('romper-text-element');
@@ -143,6 +154,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return Promise.reject(new Error('No text to render'));
     }
 
+    /**
+     * Fetches the text assets from the mediaUrl passed in
+     * @param {string} mediaUrl url to text asset collection
+     */
     _fetchTextContent(mediaUrl: string) {
         fetch(mediaUrl)
             .then((response) => {
@@ -158,6 +173,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
             });
     }
 
+    /**
+     * replaces the escaped variables so we can display them onscreen
+     * @param {string} textContent text to replace 
+     */
     _replaceEscapedVariables(textContent: string): Promise<string> {
         const varRefs = textContent.match(/\$\{(.*?)\}/g);
         if (varRefs) {
@@ -187,10 +206,16 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return Promise.resolve(textContent);
     }
 
+    /**
+     * check the text element is overflown
+     */
     isOverflown() {
         return this._textDiv.scrollHeight > this._textDiv.clientHeight;
     }
 
+    /**
+     * Check we aren't in the pre start phase
+     */
     isNotPreStart() {
         return !this._target.classList.contains('romper-prestart');
     }
