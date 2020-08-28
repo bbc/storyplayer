@@ -1,5 +1,6 @@
 @import './colours';
 @import './social';
+@import './mixins';
 
 $romper-button-height: 25px;
 $romper-button-width: 25px;
@@ -138,6 +139,22 @@ $start-button-size: 15vw;
     top: 0;
   }
 
+  .romper-media {
+
+  }
+
+  .romper-gui {
+    &.overflowing-text {
+      bottom: 0;
+      height: css-max(20%, 11.5rem);
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 80%;
+      }
+  }
+
+
   .romper-dog {
     background-position: center;
     background-repeat: no-repeat;
@@ -265,6 +282,7 @@ $start-button-size: 15vw;
     font-size: xx-large;
     height: 100%;
     margin: 0;
+    overflow: scroll;
     padding: 10%;
     position: absolute;
     text-align: center;
