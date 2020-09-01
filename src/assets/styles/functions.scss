@@ -1,0 +1,8 @@
+// Override Sass min() with css min()
+@function css-min($numbers...) {
+  @return m#{i}n(#{$numbers});
+}
+
+@function css-max($numbers...) {
+  @return m#{a}x(#{$numbers});
+}

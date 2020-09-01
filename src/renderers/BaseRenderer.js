@@ -825,6 +825,9 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    /**
+     * Runs the single during behaviour
+     */
     _runSingleDuringBehaviour(behaviour: Object) {
         const behaviourRunner = this.getBehaviourRenderer(behaviour.behaviour.type);
         if (behaviourRunner) {
