@@ -33,9 +33,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     _textDiv: HTMLDivElement;
 
-    _setGUILayerCSS: Function;
+    _setOverflowStyling: Function;
 
-    MAX_HEIGHT: number;
 
     constructor(
         representation: Representation,
@@ -55,16 +54,13 @@ export default class SimpleTextRenderer extends BaseRenderer {
         );
         this._target = player.mediaTarget;
 
-        this.MAX_HEIGHT = this._target.clientHeight || 720;;
-
-        this._setGUILayerCSS = this._setGUILayerCSS.bind(this);
+        this._setOverflowStyling = this._setOverflowStyling.bind(this);
 
         // we have a one time event listener as we remove the prestart classname from the media element
         // to indicate we have started otherwise the GUI is shrunk and buttons disappear
-        this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, this._setGUILayerCSS);
+        this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () => this._setOverflowStyling(this._target.clientHeight || 720));
         window.addEventListener('resize', () => {
-            this.MAX_HEIGHT = this._target.clientHeight;
-            this._setGUILayerCSS();
+            this._setOverflowStyling(this._target.clientHeight);
         });
 
     }
@@ -92,7 +88,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
-        this._setGUILayerCSS();
+        this._setOverflowStyling(this._target.clientHeight);
         return true;
     }
 
@@ -117,6 +113,9 @@ export default class SimpleTextRenderer extends BaseRenderer {
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
+            const guiLayer = document.getElementById('gui-layer');
+            if(guiLayer)
+                guiLayer.classList.remove('overflowing-text');
         } catch (e) {
             logger.warn('could not remove text renderer element');
         }
@@ -221,33 +220,41 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     /**
+     * Remove overflow styling from the player
+     * @param {HTMLElement} guiLayer 
+     */
+    _removeOverflowStyle(guiLayer: HTMLElement) {
+        guiLayer.classList.remove('overflowing-text');
+        this._textDiv.classList.remove('overflowing-text');
+        this._textDiv.style['max-height'] = '';
+    }
+
+
+
+    /**
      * Sets the overflow style for the text, on the gui layer and the text div too
      * @param {HTMLElement} guiLayer 
      */
-    setOverflowStyle(guiLayer: HTMLElement) {
-        if(!this._textDiv.parentNode) return;
-        if (this.isOverflown()) {
-            if (this.isNotPreStart()) {
-                guiLayer.classList.add('overflowing-text');
-                this._textDiv.classList.add('overflowing-text')
-                this._textDiv.style['max-height'] = `calc(${this.MAX_HEIGHT}px - 4em)`;
-            }
-        } else {
-            guiLayer.classList.remove('overflowing-text');
-            this._textDiv.classList.remove('overflowing-text');
-            this._textDiv.style['max-height'] = '';
-        }       
+    _addOverflowStyle(guiLayer: HTMLElement, maxHeight: number) {
+        if (this.isNotPreStart()) {
+            guiLayer.classList.add('overflowing-text');
+            this._textDiv.classList.add('overflowing-text')
+            this._textDiv.style['max-height'] = `calc(${maxHeight}px - 4em)`;
+        }
     }
     
     /**
      * Gets the gui layer and checks we have added the text node to the parent, 
      * then sets the CSS style appropriately
      */
-    // eslint-disable-next-line class-methods-use-this
-    _setGUILayerCSS() {
+    _setOverflowStyling(maxHeight: number) {
         const guiLayer = document.getElementById('gui-layer');
         if(guiLayer && this._textDiv.parentNode) {
-            this.setOverflowStyle(guiLayer);
+            if (this.isOverflown()) {
+                this._addOverflowStyle(guiLayer, maxHeight);
+            } else {
+                this._removeOverflowStyle(guiLayer);
+            }     
         }
     }
 
