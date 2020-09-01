@@ -252,7 +252,7 @@ class Player extends EventEmitter {
 
         // Hide gui elements until start clicked
         this._overlaysElement.classList.add('romper-inactive');
-        
+
         // Create the overlays.
         this._volume = this._createOverlay('volume', this._logUserInteraction);
         this._icon = this._createOverlay('icon', this._logUserInteraction);
@@ -271,11 +271,11 @@ class Player extends EventEmitter {
         }
 
         // listen for button events and handle them
-        this._setupButtonHandling();        
+        this._setupButtonHandling();
 
         // choice countdown
         this._createCountdownElement();
-        
+
         // facebook problem workaround
         const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
         const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
@@ -367,7 +367,7 @@ class Player extends EventEmitter {
             this._volume,
             this._icon,
             this._representation,
-        ); 
+        );
         this._guiLayer.appendChild(this._controls.getControls());
         this._guiLayer.appendChild(this._controls.getActivator());
     }
@@ -384,7 +384,7 @@ class Player extends EventEmitter {
     _createOverlay(name: string, logFunction: Function) {
         const overlay = new Overlay(name, logFunction);
         this._overlays.push(overlay);
-    
+
         // one overlay has been activated, disactivate all other overlays
         overlay.on(OVERLAY_ACTIVATED_EVENT, (clickedName) => {
             this._overlays.filter(o => o.getName() !== clickedName)
@@ -694,7 +694,7 @@ class Player extends EventEmitter {
 
     /**
      * Creates a start image if we don't have one then appends it to the DOM
-     * @param {Object} options 
+     * @param {Object} options
      */
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
@@ -703,7 +703,7 @@ class Player extends EventEmitter {
             this._startExperienceImage.src = options.background_art;
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
-        
+
     }
 
     _createResumeExperienceButton(options: Object) {
@@ -1165,7 +1165,6 @@ class Player extends EventEmitter {
 
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(
                     AnalyticEvents.names.LINK_CHOICE_CLICKED,
