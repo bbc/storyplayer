@@ -56,12 +56,16 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         this._setOverflowStyling = this._setOverflowStyling.bind(this);
 
-        // we have a one time event listener as we remove the prestart classname from the media element
-        // to indicate we have started otherwise the GUI is shrunk and buttons disappear
-        this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () => this._setOverflowStyling(this._target.clientHeight || 720));
-        window.addEventListener('resize', () => {
-            this._setOverflowStyling(this._target.clientHeight);
-        });
+        // we have a one time event listener as we remove the prestart classname from the media element indicating we've started playing so 
+        // we should resize if we need to otherwise the GUI is shrunk and buttons disappear 
+        this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () =>
+            this._setOverflowStyling(this._target.clientHeight || 720)
+        );
+    
+        // Resize event listener to dynamically resize the text element and apply overflow style rules
+        window.addEventListener('resize', () =>
+            this._setOverflowStyling(this._target.clientHeight)
+        );
 
     }
 
@@ -213,7 +217,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     /**
-     * Check we aren't in the pre start phase
+     * Check we aren't in the pre start phase - stiry is yet to start here
      */
     isPreStartPhase() {
         return this._target.classList.contains('romper-prestart');
@@ -221,7 +225,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     /**
      * Remove overflow styling from the player
-     * @param {HTMLElement} guiLayer 
+     * @param {HTMLElement} guiLayer div element containing the buttons and clickable links etc
      */
     _removeOverflowStyle(guiLayer: HTMLElement) {
         guiLayer.classList.remove('overflowing-text');
@@ -233,7 +237,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     /**
      * Sets the overflow style for the text element and sets gui layer height so only the button activate area is present
-     * @param {HTMLElement} guiLayer gui layer div, contains the buttons and clickable links etc
+     * @param {HTMLElement} guiLayer div element containing the buttons and clickable links etc
      */
     _addOverflowStyle(guiLayer: HTMLElement, maxHeight: number) {
         if (!this.isPreStartPhase()) {
@@ -245,7 +249,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     
     /**
      * Gets the gui layer and checks we have added the text node to the parent, 
-     * then sets the CSS style appropriately
+     * then sets the CSS style appropriately whether we should overflow and scroll or not
      * @param {number} maxHeight the max height of the player target div, used to set the max height of the text element
      */
     _setOverflowStyling(maxHeight: number) {
