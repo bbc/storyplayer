@@ -522,11 +522,21 @@ class Player extends EventEmitter {
         this._details.appendChild(assetCollectionDetail);
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    _createButtonLabel(text: string) {
+        const buttonSpan = document.createElement('span');
+        buttonSpan.innerHTML = text;
+        buttonSpan.classList.add('button-label');
+        return buttonSpan;
+    }
+
     _addContinueModal(options: Object) {
         this._createResumeExperienceButton(options);
 
         this._resumeExperienceButton.setAttribute('title', 'Resume and accept terms');
         this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
+
+        this._resumeExperienceButton.appendChild(this._createButtonLabel('Resume'))
 
         const cancelButton = document.createElement('button');
         cancelButton.setAttribute('type', 'button');
@@ -542,6 +552,9 @@ class Player extends EventEmitter {
         cancelButtonDiv.classList.add('romper-button-icon-div');
         cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
         cancelButtonHolder.appendChild(cancelButtonDiv);
+
+        cancelButton.appendChild(this._createButtonLabel('Restart'));
+        
 
         const cancelButtonHandler = () => {
             this._controls.setTransportControlsActive();

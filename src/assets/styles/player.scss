@@ -777,6 +777,15 @@ $start-button-size: 15vw;
       >div {
         background-color: $highlight-invert;
       }
+
+      .button-label {
+        background-color: $transparent;
+        color: $highlight-invert;
+      }
+    }
+
+    .button-label {
+      color: $white;
     }
 
     .romper-start-button-icon {
@@ -826,6 +835,15 @@ $start-button-size: 15vw;
       >div {
         background-color: $highlight-invert;
       }
+
+      .button-label {
+        background-color: $transparent;
+        color: $highlight-invert;
+      }
+    }
+
+    .button-label {
+      color: $white;
     }
 
     .romper-reset-button-icon {
