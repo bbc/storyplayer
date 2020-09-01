@@ -177,6 +177,7 @@ export default class BaseRenderer extends EventEmitter {
         controller: Controller,
     ) {
         super();
+
         this._representation = representation;
         this._rendererId = this._representation.id;
         this._fetchAssetCollection = assetCollectionFetcher;
@@ -324,6 +325,9 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     end(): boolean {
+        // WONT FIX: End is called even if a renderer hasn't been started
+        // this will likely result in issues but we've not encountered any
+        // and fixing will cause more issues so it's being left as it is
         switch (this.phase) {
         case (RENDERER_PHASES.ENDED):
         case (RENDERER_PHASES.DESTROYED):
@@ -871,6 +875,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(behaviour: Object, callback: () => mixed) {
+
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
 
         this._linkChoiceBehaviourOverlay = this._player.createBehaviourOverlay(behaviour);

@@ -1,6 +1,6 @@
 {
   "name": "StoryPlayer",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "productName": "BBC StoryPlayer",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
@@ -33,7 +33,7 @@
       "darkModeSupport": false,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist",
-      "gatekeeperAssess": false 
+      "gatekeeperAssess": false
     },
     "win": {
       "appId": "uk.co.bbc.rd.storyplayerwin",
@@ -41,7 +41,7 @@
       "asar": true
     },
     "nsis": {
-      "license" : "build/license_en.txt"
+      "license": "build/license_en.txt"
     }
   },
   "devDependencies": {
