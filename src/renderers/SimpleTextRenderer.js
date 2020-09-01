@@ -52,6 +52,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     async init() {
         try {
             await this.renderTextElement()
+            await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(err) {
             logger.error(err, 'could not initiate text renderer');
@@ -162,7 +163,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._replaceEscapedVariables(textContent)
             .then((newText) => {
                 this._textDiv.innerHTML = newText;
-                this._target.appendChild(this._textDiv);
             });
     }
 

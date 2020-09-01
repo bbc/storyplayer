@@ -56,6 +56,7 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     async init() {
         this._choiceRenderers = this._constructChoiceRenderers();
+        await this._preloadBehaviourAssets();
         await this._initChosenRenderer();
         this._setPhase(RENDERER_PHASES.CONSTRUCTED);
     }

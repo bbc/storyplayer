@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "0.12.31",
+  "version": "0.14.11",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -66,6 +66,7 @@
     "sass-loader": "^8.0.0",
     "sinon": "^8.0.2",
     "sinon-chai": "^3.4.0",
+    "source-map-loader": "^1.0.2",
     "style-loader": "^1.1.2",
     "terser-webpack-plugin": "^3.0.1",
     "webpack": "^4.41.5",

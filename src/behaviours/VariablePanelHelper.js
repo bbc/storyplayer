@@ -350,6 +350,8 @@ export const buildPanel = (
         statusSpan,
     } = createVarPanelElements(behaviour.panel_label, behaviour.background_colour);
 
+    player.disableControls();
+
     overlayImageElement.id = behaviour.id;
     renderer._setBehaviourElementAttribute(overlayImageElement, 'variable-panel');
 
@@ -409,6 +411,7 @@ export const buildPanel = (
                     renderer.inVariablePanel = false; // eslint-disable-line no-param-reassign
                     // complete NE when fade out done
                     setTimeout(() => {
+                        player.enableControls();
                         player.setNextAvailable(true);
                         return callback();
                     }, 700);

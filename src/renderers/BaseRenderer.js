@@ -242,8 +242,6 @@ export default class BaseRenderer extends EventEmitter {
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._preloadedBehaviourAssets = [];
-        this._preloadBehaviourAssets().catch(e =>
-            logger.warn(e, 'Could not preload behaviour assets'));
         this._preloadIconAssets().catch(e =>
             logger.warn(e, 'Could not preload icon assets'));
         this._loopCounter = 0;
@@ -309,13 +307,13 @@ export default class BaseRenderer extends EventEmitter {
 
     start() {
         this._setPhase(RENDERER_PHASES.MAIN);
+        this._player.exitStartBehaviourPhase();
         this.emit(RendererEvents.STARTED);
         this._timer.start();
         if (!this._playoutEngine.isPlaying()) {
             this._timer.pause();
         }
         this._addPauseHandlersForTimer();
-        this._player.exitStartBehaviourPhase();
         this._clearBehaviourElements();
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
@@ -343,6 +341,7 @@ export default class BaseRenderer extends EventEmitter {
             logger.info(e);
         }
         this._reapplyLinkConditions();
+        this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
@@ -378,6 +377,16 @@ export default class BaseRenderer extends EventEmitter {
             }
         }));
         this.setInPause(false);
+    }
+
+    exitCompletePauseBehaviour() {
+        if (!this._behaviourRunner || this._behaviourRunner.eventCounters.completed === 0 ) return;
+        const endBehaviours = this._behaviourRunner.behaviours;
+        endBehaviours.forEach((behaviour => {
+            if (behaviour instanceof PauseBehaviour) {
+                behaviour.handleTimeout();
+            }
+        }));
     }
 
     // does this renderer have a show variable panel behaviour
@@ -491,7 +500,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     setCurrentTime(time: number) {
-        const { timeBased, duration } = this.getCurrentTime();
+        const { duration } = this.getCurrentTime();
         const timeIsInvalid = (value) => {
             return (value === Infinity || Number.isNaN(value))
         };
@@ -499,7 +508,10 @@ export default class BaseRenderer extends EventEmitter {
         // work out what time we actually need to go to, given what was asked for
         let targetTime = time;
         targetTime = Math.max(0, targetTime)
-        targetTime = Math.min(targetTime, duration)
+        // duration is not always reported 100% accurately
+        // if we seek past actual duration, video will go to 1s beyond end
+        // hack to seek to JUST before end to avoid this
+        targetTime = Math.min(targetTime, duration - 0.01)
 
         // ensure that we are setting a valid time
         if (timeIsInvalid(targetTime)) {
@@ -532,12 +544,12 @@ export default class BaseRenderer extends EventEmitter {
                 this._playoutEngine.off(this._rendererId,'timeupdate', sync);
             }
         };
-        // only try to sync if playout engine has time
-        if (this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
+        // only try to sync if playout engine has time and we're not looping
+        if (!this.checkIsLooping() && this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
             this._timer.setSyncing(true);
             this._playoutEngine.on(this._rendererId,'timeupdate', sync);
             this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
-        } else if (timeBased) {
+        } else {
             this._timer.setTime(targetTime);
         }
     }
@@ -590,6 +602,11 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekBack() {
+        if (this.phase === RENDERER_PHASES.START ||
+            this.phase === RENDERER_PHASES.COMPLETING) {
+            logger.info('Seek backward button clicked during behaviours - ignoring'); // eslint-disable-line max-len
+            return;
+        }
         const { timeBased, currentTime } = this.getCurrentTime();
         if (timeBased) {
             let targetTime = currentTime - SEEK_TIME;
@@ -605,9 +622,15 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
-        if (this.getInPause() && this.phase === RENDERER_PHASES.START) {
+        if (this.phase === RENDERER_PHASES.START) {
             logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
             this.exitStartPauseBehaviour();
+            return;
+        }
+        if (this.phase === RENDERER_PHASES.COMPLETING) {
+            logger.info('Seek forward button clicked during infinite end pause - ending element'); // eslint-disable-line max-len
+            this.exitCompletePauseBehaviour();
+            return;
         }
         const { timeBased, currentTime, duration } = this.getCurrentTime();
         if (timeBased) {
@@ -670,29 +693,26 @@ export default class BaseRenderer extends EventEmitter {
         this.start();
     }
 
-    _preloadBehaviourAssets() {
+    async _preloadBehaviourAssets() {
         this._preloadedBehaviourAssets = [];
         const assetCollectionIds = this._representation.asset_collections.behaviours ?
             this._representation.asset_collections.behaviours : [];
-        return Promise.all(assetCollectionIds.map((behaviour) => {
-        // assetCollectionIds.forEach((behaviour) => {
-            return this._fetchAssetCollection(behaviour.asset_collection_id)
-                .then((assetCollection) => {
-                    if (assetCollection.assets.image_src) {
-                        return this._fetchMedia(assetCollection.assets.image_src);
-                    }
-                    return Promise.resolve();
-                })
-                .then((imageUrl) => {
+
+        await Promise.all(assetCollectionIds.map(async (behaviour) => {
+            try {
+                const assetCollection = await this._fetchAssetCollection(behaviour.asset_collection_id);
+                if (assetCollection.assets.image_src) {
+                    const imageUrl = await this._fetchMedia(assetCollection.assets.image_src);
                     if (imageUrl) {
                         const image = new Image();
                         image.src = imageUrl;
                         this._preloadedBehaviourAssets.push(image);
                     }
-                }).catch((err) => {
-                    logger.error(err,
-                        `could not preload behaviour asset ${behaviour.asset_collection_id}`);
-                });
+                }
+            } catch (err) {
+                logger.error(err,
+                    `could not preload behaviour asset ${behaviour.asset_collection_id}`);
+            }
         }));
     }
 
@@ -768,7 +788,7 @@ export default class BaseRenderer extends EventEmitter {
     _willHideControls(behaviour: Object) {
         return behaviour.type ===
             'urn:x-object-based-media:representation-behaviour:showlinkchoices/v1.0' // eslint-disable-line max-len
-            && behaviour.disable_controls && behaviour.show_if_one_choice;
+            && behaviour.disable_controls;
     }
 
     _hideControls(startTime: number) {
@@ -902,6 +922,11 @@ export default class BaseRenderer extends EventEmitter {
         };
 
         const behaviourOverlay = this._linkChoiceBehaviourOverlay;
+        if (disableControls) {
+            // if during behaviour, this should have happened already
+            // if start/end behaviour then not
+            this._player.disableControls();
+        }
 
         // get valid links
         return this._controller.getValidNextSteps().then((narrativeElementObjects) => {

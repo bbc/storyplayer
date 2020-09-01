@@ -102,6 +102,10 @@ class BaseButtons extends EventEmitter {
 
     hideSeekButtons(){ }
 
+    enableSeekBack() { }
+
+    disableSeekBack() { }
+
     enablePlayButton() { }
 
     disablePlayButton() { }

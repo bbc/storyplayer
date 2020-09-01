@@ -62,7 +62,7 @@ export default class RenderManager extends EventEmitter {
         muted: { [key: string]: boolean},
     };
 
-    _upcomingRenderers: { [key: string]: BaseRenderer };
+    _activeRenderers: { [key: string]: BaseRenderer };
 
     _upcomingBackgroundRenderers: { [key: string]: BackgroundRenderer };
 
@@ -198,23 +198,24 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    prepareForRestart() {
-        this._player.prepareForRestart();
-    }
-
+    /**
+     * Event handler for when the visibility of the tab changes
+     * @param {boolean} isVisible 
+     */
     _handleVisibilityChange(isVisible: boolean) {
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
-            this._player.playoutEngine.pause();
+            if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
+                // if not waiting at the end, pause the timer for the current representation
+                this._currentRenderer.pause();
+                this._player.playoutEngine.pause();
+            }
             this._player.playoutEngine.pauseBackgrounds();
-            // pause the timer for the current representation
-            if (this._currentRenderer) this._currentRenderer.pause();
         } else {
-            // pause the timer for the current representation
             if (this._isPlaying) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
-                    if (this._currentRenderer) this._currentRenderer.play();
+                    this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
             }
@@ -235,7 +236,9 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // handle browser close
+    /**
+    * intercepts the browser/tab close / back button event and logs this event in the analytics
+    */
     _handleClose() {
         this._analytics({
             type: AnalyticEvents.types.RENDERER_ACTION,
@@ -245,7 +248,11 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    handleStoryStart(storyId: string) {
+    /**
+     * Fetches the start image and calls the Player to setup the overlays
+     * @param {Object} story top level story
+     */
+    async fetchStartImage(story: Object) {
         let onLaunchConfig = {
             background_art_asset_collection_id: '',
             button_class: 'romper-start-button',
@@ -254,57 +261,69 @@ export default class RenderManager extends EventEmitter {
             background_art: this._assetUrls.noBackgroundAssetUrl,
             privacy_notice: this._privacyNotice,
         };
-        this._fetchers.storyFetcher(storyId)
-            .then((story) => {
-                this._setAspectRatio(story);
-                if (story.meta && story.meta.romper && story.meta.romper.dog) {
-                    const dog = Object.assign(story.meta.romper.dog);
-                    this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
-                        .then((fg) => {
-                            if (fg.assets.image_src) {
-                                return this._fetchers.mediaFetcher(fg.assets.image_src);
-                            }
-                            return Promise.reject(new Error("Failed to fetch AC with image_src"));
-                        })
-                        .then(mediaurl => this._player.addDog(mediaurl, dog.position))
-                        .catch(err => logger.error(`Cannot resolve DOG asset: ${err}`));
-                }
-                if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
-                    onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
-                    return this._fetchers
-                        .assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id)
-                        .then((fg) => {
-                            if (fg.assets.image_src) {
-                                return this._fetchers.mediaFetcher(fg.assets.image_src);
-                            }
-                            return Promise.reject(
-                                new Error('Could not find splash image Asset Collection'),
-                            );
-                        })
-                        .then((mediaUrl) => {
-                            logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
-                            this._player.setupExperienceOverlays(Object.assign(
-                                onLaunchConfig,
-                                { background_art: mediaUrl },
-                            ));
-                        })
-                        .catch((err) => {
-                            logger.error(err, `Could not resolve splash image asset: ${err}`);
-                            this._player.setupExperienceOverlays(Object.assign(
-                                onLaunchConfig,
-                                { background_art: this._assetUrls.noBackgroundAssetUrl },
-                            ));
-                        });
-                }
-                logger.warn('No onLaunch config in story meta');
-                return this._player.setupExperienceOverlays(Object.assign(
-                    onLaunchConfig,
-                    { background_art: this._assetUrls.noBackgroundAssetUrl },
+        if (story.meta && story.meta.romper && story.meta.romper.onLaunch) {
+            onLaunchConfig = Object.assign(onLaunchConfig, story.meta.romper.onLaunch);
+            try {
+                const fg = await this._fetchers.assetCollectionFetcher(onLaunchConfig.background_art_asset_collection_id);
+                if (fg.assets.image_src) {
+                    const mediaUrl = await this._fetchers.mediaFetcher(fg.assets.image_src);
+                    logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
+                    return this._player.setupExperienceOverlays(Object.assign(
+                        onLaunchConfig, {
+                            background_art: mediaUrl
+                        },
+                    ));
+                } 
+                throw new Error('Could not find splash image Asset Collection');     
+            } catch (err) {
+                logger.error(err, `Could not resolve splash image asset: ${err}`);
+                this._player.setupExperienceOverlays(Object.assign(
+                    onLaunchConfig, {
+                        background_art: this._assetUrls.noBackgroundAssetUrl
+                    },
                 ));
-            })
-            .catch((err) => {
-                logger.error(err, `Could not get fetch story ${err}`);
-            });
+            }
+        }
+        logger.warn('No onLaunch config in story meta');
+        return this._player.setupExperienceOverlays(Object.assign(
+            onLaunchConfig,
+            { background_art: this._assetUrls.noBackgroundAssetUrl },
+        ));
+    }
+
+    /**
+     * Fetches the DOG if there is one then 
+     * @param {Object} story - top level story
+     */
+    async fetchDog(story: Object) {
+        if (story.meta && story.meta.romper && story.meta.romper.dog) {
+            try {
+                const dog = Object.assign(story.meta.romper.dog);
+                const fg = await this._fetchers.assetCollectionFetcher(dog.asset_collection_id)
+                if (fg.assets.image_src) {
+                    const mediaUrl = await this._fetchers.mediaFetcher(fg.assets.image_src);
+                    this._player.addDog(mediaUrl, dog.position);
+                }
+            } catch (err) {
+                logger.error(`Cannot resolve DOG asset: ${err}`)
+            }
+        }
+    }
+
+    /**
+     * Handle starting the story by fetching the story annd setting the aspect ratio, dog and start image
+     * @param {string} storyId Top level story Id
+     */
+    async handleStoryStart(storyId: string) {
+        try {
+            const story = await this._fetchers.storyFetcher(storyId);
+            this._setAspectRatio(story);
+            await this.fetchDog(story)
+            return await this.fetchStartImage(story);
+        } catch (err) {
+            logger.error(err, `Could not get fetch story ${err}`);
+            return null;
+        }
     }
 
     _setAspectRatio(story: Object) {
@@ -376,7 +395,10 @@ export default class RenderManager extends EventEmitter {
         return this._currentRenderer;
     }
 
-    // create and start a StoryIconRenderer
+    /**
+     * Creates the story icons and starts the renderer
+     * @param {Array<StoryPathItem>} storyItemPath Array of path items for the icons and target narrative elements
+     */
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
         this._renderStory = new StoryIconRenderer(
             storyItemPath,
@@ -394,11 +416,15 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // given a new representation, handle the background rendering
-    // either:
-    //     stop if there is no background
-    //     continue with the current one (do nothing) if background is same asset_collection
-    //  or start a new background renderer
+
+    /**
+     * given a new representation, handle the background rendering
+     * either:
+     *      stop if there is no background
+     *      continue with the current one (do nothing) if background is same asset_collection
+     *      or start a new background renderer
+     * @param {*} representation 
+     */
     _handleBackgroundRendering(representation: Representation): Promise<any> {
         let newBackgrounds = [];
         if (representation
@@ -468,14 +494,15 @@ export default class RenderManager extends EventEmitter {
 
     /**
      * Move on to the next node of this story.
+     * create a new renderer for the given representation, and attach
+     * the standard listeners to it
      *
      * @fires RenderManager#complete
      * @fires RenderManager#nextButtonClicked
      * @fires RenderManager#PreviousButtonClicked
+     * @param {*} representation 
      */
-    // create a new renderer for the given representation, and attach
-    // the standard listeners to it
-    _createNewRenderer(representation: Representation): ?BaseRenderer {
+    _createNewRenderer(representation: Representation): ? BaseRenderer {
         const newRenderer = RendererFactory(
             representation,
             this._fetchers.assetCollectionFetcher,
@@ -509,8 +536,8 @@ export default class RenderManager extends EventEmitter {
                         this._handleBackgroundRendering(choice.choice_representation);
                     }
                     // Set index of each queued switchable
-                    Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
-                        const renderer = this._upcomingRenderers[rendererNEId];
+                    Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+                        const renderer = this._activeRenderers[rendererNEId];
                         if (renderer instanceof SwitchableRenderer
                             && this._rendererState.lastSwitchableLabel) {
                             // eslint-disable-next-line max-len
@@ -546,9 +573,13 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // swap the renderers over
-    // it's here we might want to be clever with retaining elements if
-    // Renderers are of the same type
+    /**
+     * swap the renderers over
+     * it's here we might want to be clever with retaining elements if
+     * Renderers are of the same type
+     * @param {*} newRenderer Instance of the new renderer to swap to
+     * @param {*} newNarrativeElement New narrative element to swap to
+     */
     _swapRenderers(newRenderer: BaseRenderer, newNarrativeElement: NarrativeElement) {
         const oldRenderer = this._currentRenderer;
         this._currentRenderer = newRenderer;
@@ -592,8 +623,10 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // show next button, or icons if choice
-    // ... but if there is only one choice, show next!
+    /**
+     *  show next button, or icons if choice
+     * ... but if there is only one choice, show next!
+     */
     refreshOnwardIcons() {
         if (this._currentRenderer) {
             const rend = this._currentRenderer;
@@ -617,24 +650,33 @@ export default class RenderManager extends EventEmitter {
         return Promise.resolve();
     }
 
-    // get a renderer for the given NE, and its Representation
-    // see if we've created one in advance, otherwise create a fresh one
+
+    /**
+     *  get a renderer for the given NE, and its Representation
+     * see if we've created one in advance, otherwise create a fresh one
+     * @param {*} narrativeElement narrative element 
+     * @param {*} representation representation for narrative element
+     */
     _getRenderer(
         narrativeElement: NarrativeElement,
         representation: Representation,
     ): ?BaseRenderer {
         let newRenderer;
-        // have we already got a renderer?
-        Object.keys(this._upcomingRenderers).forEach((rendererNEId) => {
-            if (rendererNEId === narrativeElement.id) {
+        // have we already got a renderer for this NE and the right representation ?
+        Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+            if (rendererNEId === narrativeElement.id &&
+                this._activeRenderers[rendererNEId]._representation.id ===
+                representation.id)
+            {
                 // this is the correct one - use it
-                newRenderer = this._upcomingRenderers[rendererNEId];
+                newRenderer = this._activeRenderers[rendererNEId];
             }
         });
 
-        // create the new Renderer if we need to
+        // create the new Renderer if we need to and put it in active list
         if (!newRenderer) {
             newRenderer = this._createNewRenderer(representation);
+            if (newRenderer) this._activeRenderers[narrativeElement.id] = newRenderer;
         }
         return newRenderer;
     }
@@ -645,7 +687,11 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-    // create reasoners for the NEs that follow narrativeElement
+
+    /**
+     * create reasoners for the NEs that follow narrativeElement
+     * @param {*} narrativeElement 
+     */
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
         if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {
             return Promise.resolve();
@@ -661,57 +707,40 @@ export default class RenderManager extends EventEmitter {
             } else {
                 allIds = nextIds;
             }
+            if (
+                this._currentRenderer &&
+                this._currentNarrativeElement
+            ) {
+                // add current neid
+                allIds.push(this._currentNarrativeElement.id);
+            }
 
-            // Generate new renderers for any that are missing
+            // get renderers for all nes in the list
+            // any that aren't in the active list will be created
             const renderPromises = allIds
                 .map((neid) => {
-                    // Check to see if required NE renderer is the one currently being shown
-                    if (
-                        this._currentRenderer &&
-                        this._currentNarrativeElement &&
-                        this._currentNarrativeElement.id === neid
-                    ) {
-                        this._upcomingRenderers[neid] = this._currentRenderer;
-                    } else {
-                        // get the actual NarrativeElement object
-                        const neObj = this._controller._getNarrativeElement(neid);
-                        if (neObj && neObj.body.representation_collection_target_id) {
-                            return this._fetchers
-                                // eslint-disable-next-line max-len
-                                .representationCollectionFetcher(neObj.body.representation_collection_target_id)
-                                .then((representationCollection) => {
-                                    if (representationCollection.representations.length > 0) {
-                                        return this._representationReasoner(representationCollection); // eslint-disable-line max-len
-                                    }
-                                    // need to render description only as placeholder
-                                    const dummyRep = {
-                                        ...PLACEHOLDER_REPRESENTATION,
-                                        description: neObj.description,
-                                        id: neObj.id,
-                                    };
-                                    return Promise.resolve(dummyRep);
-                                })
-                                .then((representation) => {
-                                    // create the new Renderer
-                                    if (this._upcomingRenderers[neid]) {
-                                        if (this._upcomingRenderers[neid]._representation.id !==
-                                            representation.id) {
-                                            const newRenderer = this
-                                                ._createNewRenderer(representation);
-                                            if (newRenderer) {
-                                                this._upcomingRenderers[neid] = newRenderer;
-                                            }
-                                        }
-                                    } else {
-                                        const newRenderer = this
-                                            ._createNewRenderer(representation);
-                                        if (newRenderer) {
-                                            this._upcomingRenderers[neid] = newRenderer;
-                                        }
-                                    }
-                                });
-                        }
-                        return Promise.resolve();
+                    // get the actual NarrativeElement object
+                    const neObj = this._controller._getNarrativeElement(neid);
+                    if (neObj && neObj.body.representation_collection_target_id) {
+                        return this._fetchers
+                            // eslint-disable-next-line max-len
+                            .representationCollectionFetcher(neObj.body.representation_collection_target_id)
+                            .then((representationCollection) => {
+                                if (representationCollection.representations.length > 0) {
+                                    return this._representationReasoner(representationCollection); // eslint-disable-line max-len
+                                }
+                                // need to render description only as placeholder
+                                const dummyRep = {
+                                    ...PLACEHOLDER_REPRESENTATION,
+                                    description: neObj.description,
+                                    id: neObj.id,
+                                };
+                                return Promise.resolve(dummyRep);
+                            })
+                            .then((representation) => {
+                                // get the new Renderer (will create if neccessary)
+                                this._getRenderer(neObj, representation);
+                            });
                     }
                     return Promise.resolve();
                 });
@@ -720,27 +749,29 @@ export default class RenderManager extends EventEmitter {
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
-                    Object.keys(this._upcomingRenderers)
+                    Object.keys(this._activeRenderers)
                         .filter(neid => allIds.indexOf(neid) === -1)
                         .forEach((neid) => {
                             if (narrativeElement.id !== neid) {
-                                this._upcomingRenderers[neid].destroy();
+                                this._activeRenderers[neid].destroy();
                             }
-                            delete this._upcomingRenderers[neid];
+                            delete this._activeRenderers[neid];
                         });
                     this._runBackgroundLookahead();
                 });
         });
     }
 
-    // evaluate queued renderers for any backgrounds that need to be played
-    // and queue up BackgroundRenderers for these
+    /**
+     * evaluate queued renderers for any backgrounds that need to be played
+     * and queue up BackgroundRenderers for these
+     */
     _runBackgroundLookahead() {
         // get all unique ids
         const backgroundIds = []; // all we may want to render
         const fwdBackgroundAcIds = []; // only those in forward direction
-        Object.keys(this._upcomingRenderers).forEach((neid) => {
-            const renderer = this._upcomingRenderers[neid];
+        Object.keys(this._activeRenderers).forEach((neid) => {
+            const renderer = this._activeRenderers[neid];
             const representation = renderer.getRepresentation();
             if (representation.asset_collections.background_ids) {
                 // eslint-disable-next-line max-len
@@ -807,8 +838,11 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-    // look over current background renderers - if they are not in the supplied
-    // list of upcoming renderers (excluding user going back), then fade out
+    /**
+     * look over current background renderers - if they are not in the supplied
+     * list of upcoming renderers (excluding user going back), then fade out
+     * @param {*} fwdRenderers upcomming renderers to use
+     */
     _setBackgroundFades(fwdRenderers: { [key: string]: BaseRenderer }) {
         // set fade outs for the current background renderers
         Object.keys(this._backgroundRenderers).forEach((id) => {
@@ -842,9 +876,30 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
+    /**
+     * Prepare the render manager to restart the story
+     */
+    prepareForRestart() {
+        Object.keys(this._activeRenderers).forEach((rendererNEId) => {
+            const renderer = this._activeRenderers[rendererNEId];
+            renderer.destroy();
+        });
+        Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
+            this._backgroundRenderers[rendererSrc].destroy();
+        });
+        Object.keys(this._upcomingBackgroundRenderers).forEach((src) => {
+            this._upcomingBackgroundRenderers[src].destroy();
+        });
+        this._initialise();
+        this._player.prepareForRestart();
+    }
+
+    /**
+     * Initialize the render manager
+     */
     _initialise() {
         this._currentRenderer = null;
-        this._upcomingRenderers = {};
+        this._activeRenderers = {};
         this._upcomingBackgroundRenderers = {};
         this._backgroundRenderers = {};
         this._rendererState = {
@@ -855,6 +910,9 @@ export default class RenderManager extends EventEmitter {
         };
     }
 
+    /**
+     * Reset the renderers and destroy the current one
+     */
     reset() {
         if (this._currentRenderer) {
             this._currentRenderer.destroy();

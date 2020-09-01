@@ -87,18 +87,10 @@ export default class TimedMediaRenderer extends BaseRenderer {
                     const subsUrl = await this._fetchMedia(fg.assets[subtitleKey]);
                     mediaObj.subs_url = subsUrl
                 }
-                let appendedUrl = mediaUrl;
-                if (this._inTime > 0 || this._outTime > 0) {
-                    let mediaFragment = `#t=${this._inTime}`;
-                    if (this._outTime > 0) {
-                        mediaFragment = `${mediaFragment},${this._outTime}`;
-                    }
-                    appendedUrl = `${mediaUrl}${mediaFragment}`;
-                }
                 if (this._destroyed) {
                     logger.warn('trying to populate video element that has been destroyed');
                 } else {
-                    mediaObj.url = appendedUrl
+                    mediaObj.url = mediaUrl
                     this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
                 }
             } else {
@@ -111,6 +103,12 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
     _endedEventListener() {
         if (this._testEndStallTimeout) clearTimeout(this._testEndStallTimeout);
+        // Race Condition: ended and timeupdate events firing at same time from
+        // a playoutEngine cause this function to be run twice, resulting in two
+        // NE skips. Only allow function to run if in MAIN phase.
+        if(this.phase !== RENDERER_PHASES.MAIN) {
+            return
+        }
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
         this._timer.pause();
         super.complete();
@@ -190,13 +188,12 @@ export default class TimedMediaRenderer extends BaseRenderer {
     start() {
         super.start();
         // set timer to sync mode until really ready
-        this._timer.setSyncing(true);
+        if (!this.checkIsLooping()) this._timer.setSyncing(true);
         const setStartToInTime = () => {
             if (this._playoutEngine.getCurrentTime(this._rendererId) < this._inTime) {
                 logger.warn('video not synced to in time, resetting');
                 this.setCurrentTime(0);
             }
-            this._timer.setSyncing(false);
             this._playoutEngine.off(this._rendererId, 'playing', setStartToInTime);
         };
         this._playoutEngine.on(this._rendererId, 'playing', setStartToInTime);
