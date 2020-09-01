@@ -122,7 +122,7 @@ export default class RenderManager extends EventEmitter {
                 }
                 else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
-                    rend.setCurrentTime(choiceTime - 0.25);
+                    rend.setCurrentTime(choiceTime);
                 } else if (rend.hasVariablePanelBehaviour()
                     || (rend.hasShowIconBehaviour() && choiceTime < 0)) {
                     // choices or var panel as end behaviour
@@ -134,7 +134,7 @@ export default class RenderManager extends EventEmitter {
                     if (currentTime && duration) {
                         const playout = this._player.playoutEngine;
                         // skip to 1/4 s before end
-                        playout.setCurrentTime(representationId, duration - 0.25);
+                        playout.setCurrentTime(representationId, duration);
                     } else if (this._currentRenderer) {
                         this._currentRenderer.complete();
                     }
@@ -200,7 +200,7 @@ export default class RenderManager extends EventEmitter {
 
     /**
      * Event handler for when the visibility of the tab changes
-     * @param {boolean} isVisible 
+     * @param {boolean} isVisible
      */
     _handleVisibilityChange(isVisible: boolean) {
         if (!isVisible) {
@@ -273,8 +273,8 @@ export default class RenderManager extends EventEmitter {
                             background_art: mediaUrl
                         },
                     ));
-                } 
-                throw new Error('Could not find splash image Asset Collection');     
+                }
+                throw new Error('Could not find splash image Asset Collection');
             } catch (err) {
                 logger.error(err, `Could not resolve splash image asset: ${err}`);
                 this._player.setupExperienceOverlays(Object.assign(
@@ -292,7 +292,7 @@ export default class RenderManager extends EventEmitter {
     }
 
     /**
-     * Fetches the DOG if there is one then 
+     * Fetches the DOG if there is one then
      * @param {Object} story - top level story
      */
     async fetchDog(story: Object) {
@@ -423,7 +423,7 @@ export default class RenderManager extends EventEmitter {
      *      stop if there is no background
      *      continue with the current one (do nothing) if background is same asset_collection
      *      or start a new background renderer
-     * @param {*} representation 
+     * @param {*} representation
      */
     _handleBackgroundRendering(representation: Representation): Promise<any> {
         let newBackgrounds = [];
@@ -500,7 +500,7 @@ export default class RenderManager extends EventEmitter {
      * @fires RenderManager#complete
      * @fires RenderManager#nextButtonClicked
      * @fires RenderManager#PreviousButtonClicked
-     * @param {*} representation 
+     * @param {*} representation
      */
     _createNewRenderer(representation: Representation): ? BaseRenderer {
         const newRenderer = RendererFactory(
@@ -511,7 +511,7 @@ export default class RenderManager extends EventEmitter {
             this._analytics,
             this._controller,
         );
-        
+
         if (newRenderer) {
             // now it has been constructed, start fetching all the media and building the components
             newRenderer.init();
@@ -585,7 +585,7 @@ export default class RenderManager extends EventEmitter {
         this._currentRenderer = newRenderer;
         this._currentNarrativeElement = newNarrativeElement;
 
-        if (newRenderer instanceof SwitchableRenderer 
+        if (newRenderer instanceof SwitchableRenderer
             && this._rendererState.lastSwitchableLabel) {
             // eslint-disable-next-line max-len
             newRenderer.setChoiceToRepresentationWithLabel(this._rendererState.lastSwitchableLabel);
@@ -654,7 +654,7 @@ export default class RenderManager extends EventEmitter {
     /**
      *  get a renderer for the given NE, and its Representation
      * see if we've created one in advance, otherwise create a fresh one
-     * @param {*} narrativeElement narrative element 
+     * @param {*} narrativeElement narrative element
      * @param {*} representation representation for narrative element
      */
     _getRenderer(
@@ -690,7 +690,7 @@ export default class RenderManager extends EventEmitter {
 
     /**
      * create reasoners for the NEs that follow narrativeElement
-     * @param {*} narrativeElement 
+     * @param {*} narrativeElement
      */
     _rendererLookahead(narrativeElement: NarrativeElement): Promise<any> {
         if(getSetting(DISABLE_LOOKAHEAD_FLAG)) {

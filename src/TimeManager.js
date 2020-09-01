@@ -30,7 +30,7 @@ export default class TimeManager extends EventEmitter {
     start() {
         if (this._debug) logger.info('timer start');
         this.clear();
-        
+
         this._timer = setInterval(() => {
             if (!(this._paused || this._syncing)) {
                 this._timeElapsed += TIMER_INTERVAL/1000;
@@ -45,7 +45,7 @@ export default class TimeManager extends EventEmitter {
 
     _testForEvents() {
         Object.keys(this._timedEvents).forEach((timeEventId) => {
-            const { 
+            const {
                 startTime,
                 startCallback,
                 isRunning,
@@ -53,14 +53,14 @@ export default class TimeManager extends EventEmitter {
                 clearCallback,
             } = this._timedEvents[timeEventId];
             // handle starting event
-            if (this._timeElapsed >= startTime && this._timeElapsed < endTime
+            if (this._timeElapsed >= startTime && this._timeElapsed <= endTime
                 && !isRunning){
                 logger.info(`timer running timed event ${timeEventId}`);
-                startCallback();
                 this._timedEvents[timeEventId].isRunning = true;
+                startCallback();
             }
             // handle clearing event
-            if ((this._timeElapsed <= startTime || this._timeElapsed > endTime)
+            if ((this._timeElapsed < startTime || this._timeElapsed > endTime)
                 && isRunning) {
                 try {
                     if (clearCallback) clearCallback();
@@ -104,7 +104,7 @@ export default class TimeManager extends EventEmitter {
 
     clear() {
         if (this._debug) logger.info('timer clear');
-        if (this._timer) { 
+        if (this._timer) {
             clearInterval(this._timer);
         }
 
@@ -114,11 +114,14 @@ export default class TimeManager extends EventEmitter {
     }
 
     setTime(newTime: number) {
-        if (this._debug) {
-            logger.info(`timer set to ${newTime}, current timer is ${this._timeElapsed}`);
+        // Only update if time changed
+        if(this._timeElapsed !== newTime) {
+            if (this._debug) {
+                logger.info(`timer set to ${newTime}, current timer is ${this._timeElapsed}`);
+            }
+            this._timeElapsed = newTime;
+            this._testForEvents();
         }
-        this._timeElapsed = newTime;
-        this._testForEvents();
     }
 
     getTime() {
@@ -133,7 +136,7 @@ export default class TimeManager extends EventEmitter {
         clearCallback: ?Function,
     ) {
         if (this._debug) logger.info(`timer: Added event for ${startTime}`);
-        this._timedEvents[listenerId] = { 
+        this._timedEvents[listenerId] = {
             startTime,
             endTime,
             startCallback,
