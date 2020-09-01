@@ -215,8 +215,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
     /**
      * Check we aren't in the pre start phase
      */
-    isNotPreStart() {
-        return !this._target.classList.contains('romper-prestart');
+    isPreStartPhase() {
+        return this._target.classList.contains('romper-prestart');
     }
 
     /**
@@ -232,11 +232,11 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
 
     /**
-     * Sets the overflow style for the text, on the gui layer and the text div too
-     * @param {HTMLElement} guiLayer 
+     * Sets the overflow style for the text element and sets gui layer height so only the button activate area is present
+     * @param {HTMLElement} guiLayer gui layer div, contains the buttons and clickable links etc
      */
     _addOverflowStyle(guiLayer: HTMLElement, maxHeight: number) {
-        if (this.isNotPreStart()) {
+        if (!this.isPreStartPhase()) {
             guiLayer.classList.add('overflowing-text');
             this._textDiv.classList.add('overflowing-text')
             this._textDiv.style['max-height'] = `calc(${maxHeight}px - 4em)`;
@@ -246,6 +246,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     /**
      * Gets the gui layer and checks we have added the text node to the parent, 
      * then sets the CSS style appropriately
+     * @param {number} maxHeight the max height of the player target div, used to set the max height of the text element
      */
     _setOverflowStyling(maxHeight: number) {
         const guiLayer = document.getElementById('gui-layer');
