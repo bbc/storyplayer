@@ -19,7 +19,8 @@ import {
     addDetail,
     scrollToTop,
     preventEventDefault,
-    handleButtonTouchEvent
+    handleButtonTouchEvent,
+    leftGreaterThanRight
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
@@ -89,7 +90,6 @@ class Player extends EventEmitter {
 
     _fullscreenButton: HTMLButtonElement;
 
-    _inFullScreen: boolean
 
     _volume: Object;
 
@@ -115,7 +115,6 @@ class Player extends EventEmitter {
 
     setupExperienceOverlays: Function;
 
-    _handleFullScreenChange: Function;
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
@@ -184,7 +183,6 @@ class Player extends EventEmitter {
         this._countdownTotal = 0;
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
-        this._inFullScreen = false;
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
@@ -199,6 +197,14 @@ class Player extends EventEmitter {
         this._startButtonHandler = this._startButtonHandler.bind(this);
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
+
+
+        // add fullscreen handling
+        this._toggleFullScreen = this._toggleFullScreen.bind(this);
+        this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
+        this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
+
+        this._addFullscreenListeners();
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -309,7 +315,6 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
 
-        this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
 
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
 
@@ -477,7 +482,7 @@ class Player extends EventEmitter {
     _setDogPosition(position: Object) {
         const { top, left, width, height } = position;
         const guiAspect = this._guiLayer.clientWidth / this._guiLayer.clientHeight;
-        if (guiAspect > this._aspectRatio) {
+        if (leftGreaterThanRight(guiAspect, this._aspectRatio)) {
             const mediaWidth = (this._aspectRatio * this._guiLayer.clientHeight);
             const sideGap = (this._guiLayer.clientWidth - mediaWidth) / 2;
             this._dogImage.style.left = `${sideGap + ((left/100) * mediaWidth)}px`;
@@ -1483,6 +1488,7 @@ class Player extends EventEmitter {
     // eslint-disable-next-line class-methods-use-this
     getLinkChoiceElement(full: ?boolean): [HTMLElement] {
         const linkChoices = document.querySelectorAll('[data-behaviour="link-choice"]');
+        // @flowignore
         return full? linkChoices : [linkChoices[0]];
     }
 
@@ -1569,6 +1575,32 @@ class Player extends EventEmitter {
         callback();
     }
 
+    static _isFullScreen() {
+        let isFullScreen = false;
+        if (document.fullscreenElement) {
+            isFullScreen = (document.fullscreenElement != null);
+        }
+        // @flowignore
+        if (document.webkitFullscreenElement) {
+            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
+        }
+        // @flowignore
+        if (document.mozFullScreenElement) {
+            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
+        }
+        // @flowignore
+        if (document.msFullscreenElement) {
+            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
+        }
+        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
+            isFullScreen = true;
+        }
+        return isFullScreen;
+    }
+
+    /**
+     * Toggles fullscreen using our controls button
+     */
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
             this._logUserInteraction(
@@ -1587,98 +1619,55 @@ class Player extends EventEmitter {
         }
     }
 
-    static _isFullScreen() {
-        let isFullScreen = false;
-        if (document.fullscreenElement) {
-            isFullScreen = (document.fullscreenElement != null);
-        }
-        if (document.webkitFullscreenElement) {
-            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
-        }
-        if (document.mozFullScreenElement) {
-            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
-        }
-        if (document.msFullscreenElement) {
-            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
-        }
-        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
-            isFullScreen = true;
-        }
-        return isFullScreen;
-    }
-
+    /**
+     * enters fullscreen from the player
+     * in ios we handle this ourselves
+     * @fires fullscreenchange event we listen to unless on ios 
+     */
     _enterFullScreen() {
-        this._controls.setFullscreenOn();
-        this._player.classList.add('romper-player-fullscreen');
-
         if (this._playerParent.requestFullscreen) {
             // @flowignore
             this._playerParent.requestFullscreen();
+            // @flowignore
         } else if (this._playerParent.mozRequestFullScreen) {
             // @flowignore
             this._playerParent.mozRequestFullScreen(); // Firefox
+            // @flowignore
         } else if (this._playerParent.webkitRequestFullscreen) {
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
-            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
+            this._playerParent.classList.add('romer-target-fullscreen'); // iOS
         }
 
-        // fit player to size, so all UI remains within media
-        const windowAspect = window.innerWidth / window.innerHeight;
-        const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
-        if (windowAspect > this._aspectRatio) { // too wide
-            const width = this._aspectRatio * 100 * scaleFactor;
-            this._player.style.height = `${100 * scaleFactor}vh`;
-            this._player.style.width = `${width}vh`;
-            this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
-        } else { // too tall
-            const height = (100 * scaleFactor) / this._aspectRatio;
-            this._player.style.height = `${height}vw`;
-            this._player.style.width = `${100 * scaleFactor}vw`;
-            this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
-        }
-
-        this._inFullScreen = false;
-        // if we are an iphone capture these events;
-        if(BrowserUserAgent.iOS()) {
+        // ios is special handle these separately;
+        if (BrowserUserAgent.iOS()) {
             this._playerParent.addEventListener('touchmove', preventEventDefault);
             this._player.classList.add('ios-fullscreen'); // iOS
         }
-        document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('MSFullscreenChange', this._handleFullScreenChange);
     }
 
-
-    _handleFullScreenChange() {
-        if (!Player._isFullScreen()) {
-            this._controls.setFullscreenOff();
-            this._player.classList.remove('romper-player-fullscreen');
-
-            document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
-        }
-    }
-
+    /**
+     * exits fullscreen from the player
+     * in ios we handle this ourselves
+     * @fires fullscreenchange event we listen to
+     */
     _exitFullScreen() {
-        this._controls.setFullscreenOff();
-        this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
-        if ((document: any).exitFullscreen) {
+        if (document.exitFullscreen) {
             // @flowignore
             document.exitFullscreen();
-        } else if ((document: any).mozCancelFullScreen) {
+        // @flowignore
+        } else if (document.mozCancelFullScreen) {
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
-        } else if ((document: any).webkitExitFullscreen) {
+        // @flowignore    
+        } else if (document.webkitExitFullscreen) {
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
-        } else if ((document: any).msExitFullscreen) {
+        // @flowignore
+        } else if (document.msExitFullscreen) {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
         } else {
@@ -1686,16 +1675,50 @@ class Player extends EventEmitter {
         }
         scrollToTop();
 
-        this._player.removeAttribute('style');
-
+        // ios is special handle these events separately
         if(BrowserUserAgent.iOS()) {
             this._playerParent.removeEventListener('touchmove', preventEventDefault);
             this._player.classList.remove('ios-fullscreen'); // iOS
         }
-        document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
+    }
+
+    /**
+     * Relies on the document 'fullscreenchange' event firing, then sets the style for the player accordingly
+     * handles iOS fullscreen behaviour too.
+     */
+    _handleFullScreenEvent() {
+        if(Player._isFullScreen()) {
+            // srtup controls and styling
+            this._controls.setFullscreenOn();
+            this._player.classList.add('romper-player-fullscreen');
+
+            // fit player to size, so all UI remains within media
+            const windowAspect = window.innerWidth / window.innerHeight;
+            const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
+            if (leftGreaterThanRight(windowAspect, this._aspectRatio)) { // too wide
+                const width = this._aspectRatio * 100 * scaleFactor;
+                this._player.style.height = `${100 * scaleFactor}vh`;
+                this._player.style.width = `${width}vh`;
+                this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
+            } else { // too tall
+                const height = (100 * scaleFactor) / this._aspectRatio;
+                this._player.style.height = `${height}vw`;
+                this._player.style.width = `${100 * scaleFactor}vw`;
+                this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+            }
+        } else {
+            this._controls.setFullscreenOff();
+            this._player.classList.remove('romper-player-fullscreen');
+            this._player.removeAttribute('style');
+        }
+    }
+
+
+    _addFullscreenListeners() {
+        document.addEventListener('webkitfullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('mozfullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('fullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('MSFullscreenChange', this._handleFullScreenEvent);
     }
 }
 
