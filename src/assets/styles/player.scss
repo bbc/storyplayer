@@ -1669,6 +1669,7 @@ $start-button-size: 15vw;
 
 .webview-error-div {
   -ms-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
   margin: 0;
   position: absolute;
   top: 50%;
