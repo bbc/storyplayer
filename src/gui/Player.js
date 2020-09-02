@@ -1638,7 +1638,7 @@ class Player extends EventEmitter {
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
-            this._playerParent.classList.add('romer-target-fullscreen'); // iOS
+            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
         }
 
         // ios is special handle these separately;
