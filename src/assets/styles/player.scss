@@ -122,6 +122,10 @@ $start-button-size: 15vw;
   }
 
   &.romper-player-fullscreen {
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
     height: 100%;
     left: 50%;
     position: absolute;
