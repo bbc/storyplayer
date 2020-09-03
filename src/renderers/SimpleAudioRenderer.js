@@ -17,10 +17,8 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
     async init() {
         try {
             await this._preloadBehaviourAssets();
-            await Promise.all([
-                this._queueMedia({ type: MEDIA_TYPES.FOREGROUND_A }, "audio_src"),
-                this._renderBackgroundImage(),
-            ]);
+            await this._queueMedia({ type: MEDIA_TYPES.FOREGROUND_A }, "audio_src")
+            await this._renderBackgroundImage()
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
         } catch(e) {
             logger.error(e, 'could not initiate audio renderer');
