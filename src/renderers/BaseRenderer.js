@@ -668,6 +668,12 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
+        if (this._linkFadeTimeout) {
+            // a link has been chosen and is fading out
+            // controller will move to next element as soon as done
+            // so don't finish this one
+            return;
+        }
         this._setPhase(RENDERER_PHASES.COMPLETING);
         this._timer.pause();
         if (!this._linkBehaviour ||

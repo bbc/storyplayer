@@ -129,3 +129,23 @@ export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | 
         callback();
     };
 };
+
+/**
+ * returns a number to a desired precision using exponential notation
+ * @param {*} number number to round
+ * @param {*} decimalPlaces precision to round to
+ */
+export const precisionRound = (number: number, decimalPlaces: number) => {
+    Number(`${Math.round(`${number}e${decimalPlaces}`)}e-${decimalPlaces}`);
+}
+
+
+/**
+ * Is the left greater than the right numbers to a precision of 2dp.
+ * @param {*} left left hand number to cpmpare
+ * @param {*} right right hand number to compare
+ */
+export const leftGreaterThanRight = (left, right) => {
+    return precisionRound(left, 2) > precisionRound(right, 2);
+};
+
