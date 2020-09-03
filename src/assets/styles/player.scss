@@ -382,17 +382,6 @@ $start-button-size: 15vw;
     }
   }
 
-  .romper-reset-button {
-    @include button;
-    margin-right: 20px;
-    padding: 0;
-
-
-    .romper-button-icon-div {
-      @include button-icon('../images/reload.svg');
-    }
-  }
-
   .romper-representation-button {
     @include button;
 
@@ -800,15 +789,6 @@ $start-button-size: 15vw;
       >div {
         background-color: $highlight-invert;
       }
-
-      .button-label {
-        background-color: $transparent;
-        color: $highlight-invert;
-      }
-    }
-
-    .button-label {
-      color: $white;
     }
 
     .romper-start-button-icon {
@@ -833,63 +813,6 @@ $start-button-size: 15vw;
     }
 
     .romper-start-button-text-div {
-      color: $white;
-      font-size: 48px;
-      font-weight: bold;
-      line-height: $romper-button-height;
-      margin-top: 10px;
-      text-align: center;
-    }
-  }
-
-  .romper-reset-button {
-    bottom: calc(50% - #{(0.5 * $start-button-size)});
-    display: grid;
-    height: $start-button-size;
-    left: calc(50% - #{(0.5 * $start-button-size)});
-    margin: 0;
-    position: absolute;
-    width: $start-button-size;
-    z-index: 101;
-
-    &:hover {
-      background-color: $transparent;
-
-      >div {
-        background-color: $highlight-invert;
-      }
-
-      .button-label {
-        background-color: $transparent;
-        color: $highlight-invert;
-      }
-    }
-
-    .button-label {
-      color: $white;
-    }
-
-    .romper-reset-button-icon {
-      background-color: $transparent;
-      border: 1px solid $white;
-      border-radius: 50%;
-      height: 0.75 * $start-button-size;
-      margin-left: auto;
-      margin-right: auto;
-      max-height: 170px;
-      max-width: 170px;
-      width: 0.75 * $start-button-size;
-    }
-
-    .romper-reset-button-icon-div {
-      height: 0.75 * $start-button-size;
-      margin-top: 0;
-      max-height: 170px;
-      max-width: 100px;
-      width: 0.75 * 0.8 * $start-button-size;
-    }
-
-    .romper-reset-button-text-div {
       color: $white;
       font-size: 48px;
       font-weight: bold;
@@ -1441,19 +1364,16 @@ $start-button-size: 15vw;
   }
 
   .continue-modal-content {
-    background-color: $ninety-percent-black;
     bottom: auto;
     display: none;
     margin-left: auto;
     margin-right: auto;
-    max-height: calc(100% - 100px);
-    min-height: 130px;
-    min-width: 300px;
     padding: 2%;
     position: relative;
     text-align: center;
     top: 5%;
     width: 30%;
+    height: 50%;
 
     &.show {
       display: block;
@@ -1466,14 +1386,49 @@ $start-button-size: 15vw;
       width: 0%;
     }
 
-    .romper-start-button,
-    .romper-reset-button {
-      display: inline-block;
-      height: unset;
-      margin: 1em;
-      position: unset;
-      transform: none;
-      width: unset;
+    .romper-continue-controls {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+
+      .romper-continue-control {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0 1em;
+        flex-grow: 1;
+        flex-shrink: 1;
+
+        .romper-restart-button {
+          @include button-icon('../images/reload.svg');
+        }
+
+        .romper-resume-button {
+          @include button-icon('../images/media-play.svg');
+        }
+
+        .romper-resume-button,
+        .romper-restart-button {
+          @include button;
+          background-size: 80%;
+          border: 1px solid $white;
+          border-radius: 50%;
+          height: unset;
+          width: 100%;
+          padding: 100% 0 0 0;
+          margin: 0;
+
+          &:hover {
+            background-color: $highlight-invert;
+          }
+        }
+
+        .button-label {
+          color: $white;
+        }
+      }
     }
   }
 
@@ -1486,22 +1441,6 @@ $start-button-size: 15vw;
     display: none;
     height: 0%;
     width: 0%;
-  }
-}
-
-.cancel-resume-button {
-  background-color: $ninety-percent-black;
-  border: 1px solid $white;
-  border-radius: 0;
-  color: $white;
-  font: inherit;
-  margin: 10% 0;
-  padding: 5%;
-
-  &:hover {
-    background-color: $highlight;
-    border-color: $black;
-    color: $black;
   }
 }
 

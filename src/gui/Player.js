@@ -535,33 +535,30 @@ class Player extends EventEmitter {
         return buttonSpan;
     }
 
-    _addContinueModal(options: Object) {
-        this._createResumeExperienceButton(options);
+    _addContinueModal() {
+        const resumeButton = document.createElement('button');
+        resumeButton.setAttribute('type', 'button');
+        resumeButton.classList.add('romper-resume-button');
+        resumeButton.setAttribute('title', 'Resume and accept terms');
+        resumeButton.setAttribute('aria-label', 'Resume Button');
 
-        this._resumeExperienceButton.setAttribute('title', 'Resume and accept terms');
-        this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
+        const resumeButtonDiv = document.createElement('div');
+        resumeButtonDiv.classList.add('romper-continue-control');
+        resumeButtonDiv.appendChild(resumeButton);
+        resumeButtonDiv.appendChild(this._createButtonLabel('Resume'));
 
-        this._resumeExperienceButton.appendChild(this._createButtonLabel('Resume'))
+        const restartButton = document.createElement('button');
+        restartButton.setAttribute('type', 'button');
+        restartButton.classList.add('romper-restart-button');
+        restartButton.setAttribute('title', 'Restart and accept terms');
+        restartButton.setAttribute('aria-label', 'Restart Button');
 
-        const cancelButton = document.createElement('button');
-        cancelButton.setAttribute('type', 'button');
-        cancelButton.classList.add('romper-reset-button');
-        cancelButton.setAttribute('title', 'Restart and accept terms');
-        cancelButton.setAttribute('aria-label', 'Restart Button');
+        const restartButtonDiv = document.createElement('div');
+        restartButtonDiv.classList.add('romper-continue-control');
+        restartButtonDiv.appendChild(restartButton);
+        restartButtonDiv.appendChild(this._createButtonLabel('Restart'));
 
-        const cancelButtonHolder = document.createElement('div');
-        cancelButton.appendChild(cancelButtonHolder);
-        cancelButtonHolder.classList.add('romper-reset-button-icon');
-
-        const cancelButtonDiv = document.createElement('div');
-        cancelButtonDiv.classList.add('romper-button-icon-div');
-        cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
-        cancelButtonHolder.appendChild(cancelButtonDiv);
-
-        cancelButton.appendChild(this._createButtonLabel('Restart'));
-        
-
-        const cancelButtonHandler = () => {
+        const restartButtonHandler = () => {
             this._controls.setTransportControlsActive();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
@@ -571,10 +568,10 @@ class Player extends EventEmitter {
             this._startButtonHandler();
         };
 
-        cancelButton.onclick = cancelButtonHandler;
-        cancelButton.addEventListener(
+        restartButton.onclick = restartButtonHandler;
+        restartButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(cancelButtonHandler),
+            handleButtonTouchEvent(restartButtonHandler),
         );
 
         const resumeExperienceButtonHandler = () => {
@@ -587,25 +584,23 @@ class Player extends EventEmitter {
             this._enableUserInteraction();
         };
 
-        this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
-        this._resumeExperienceButton.addEventListener(
+        resumeButton.onclick = resumeExperienceButtonHandler;
+        resumeButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(resumeExperienceButtonHandler),
         );
 
-        // resume
         const continueMessage = document.createElement('div');
-        continueMessage.className = 'continue-experience';
         continueMessage.textContent = 'Restart or Resume?';
         continueMessage.classList.add('modal-inner-content');
 
+        const continueControls = document.createElement('div');
+        continueControls.className = 'romper-continue-controls';
+        continueControls.appendChild(restartButtonDiv);
+        continueControls.appendChild(resumeButtonDiv);
+
         this._continueModalContent.appendChild(continueMessage);
-        // restart
-        this._continueModalContent.appendChild(cancelButton);
-        // continue
-        this._continueModalContent.appendChild(this._resumeExperienceButton);
-
-
+        this._continueModalContent.appendChild(continueControls);
 
         if(this._continueModalLayer) {
             this._continueModalLayer.classList.add('show');
@@ -724,23 +719,6 @@ class Player extends EventEmitter {
 
     }
 
-    _createResumeExperienceButton(options: Object) {
-        this._resumeExperienceButton = document.createElement('button');
-        this._resumeExperienceButton.setAttribute('type', 'button');
-        this._resumeExperienceButton.classList.add(options.button_class);
-        this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
-
-        const resumeButtonHolder = document.createElement('div');
-        this._resumeExperienceButton.appendChild(resumeButtonHolder);
-        resumeButtonHolder.classList.add('romper-start-button-icon');
-
-        const resumeButtonDiv = document.createElement('div');
-        resumeButtonDiv.classList.add('romper-button-icon-div');
-        resumeButtonDiv.classList.add(`${options.button_class}-icon-div`);
-        resumeButtonHolder.appendChild(resumeButtonDiv);
-    }
-
     /**
      * Sets up the overlays for the start/resume buttons and start image image
      * @param {Object} options - options for start overlays
@@ -797,7 +775,7 @@ class Player extends EventEmitter {
 
     _createResumeOverlays(options: Object) {
         this._createSharedOverlays(options);
-        this._addContinueModal(options);
+        this._addContinueModal();
     }
 
     _createStartOverlays(options: Object) {
@@ -1191,11 +1169,6 @@ class Player extends EventEmitter {
                     { label, text, },
                 );
             };
-            iconContainer.onclick = choiceClick;
-            iconContainer.addEventListener(
-                'touchend',
-                choiceClick, // let event through to overlay
-            );
 
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
@@ -1231,6 +1204,7 @@ class Player extends EventEmitter {
                 icon: linkChoiceControl,
                 uuid: id,
                 container: iconContainer,
+                choiceAction: choiceClick,
             });
         });
 
@@ -1264,13 +1238,14 @@ class Player extends EventEmitter {
         return Promise.all(promisesArray)
             .then((icons) => {
                 icons.forEach((iconObj, id) => {
-                    const { icon, uuid, container } = iconObj;
+                    const { icon, uuid, container, choiceAction } = iconObj;
                     if (activeLinkId && uuid === activeLinkId) {
                         icon.classList.add('default');
                     }
                     const clickHandler = () => {
                         // set classes to show which is selected
                         behaviourOverlay.setElementActive(`${id}`);
+                        choiceAction();
                     };
                     icon.onclick = clickHandler;
                     icon.addEventListener(
@@ -1620,7 +1595,7 @@ class Player extends EventEmitter {
     /**
      * enters fullscreen from the player
      * in ios we handle this ourselves
-     * @fires fullscreenchange event we listen to unless on ios 
+     * @fires fullscreenchange event we listen to unless on ios
      */
     _enterFullScreen() {
         if (this._playerParent.requestFullscreen) {
@@ -1660,7 +1635,7 @@ class Player extends EventEmitter {
         } else if (document.mozCancelFullScreen) {
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
-        // @flowignore    
+        // @flowignore
         } else if (document.webkitExitFullscreen) {
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
