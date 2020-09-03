@@ -58,7 +58,7 @@ class StandardControls extends BaseControls {
         );
         this._buttonsActivateArea.onclick = this.activateRomperButtons.bind(this);
 
-        
+
         // next is needed for activating buttons area
         this._narrativeElementTransport = this._buttonControls.getTransportControls();
 
@@ -86,7 +86,7 @@ class StandardControls extends BaseControls {
             this.hideControls();
         };
     }
-    
+
     // pass on any events
     _forwardButtonEvents() {
         this._buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED,
@@ -133,8 +133,10 @@ class StandardControls extends BaseControls {
     }
 
     // this stops activation from proceeding
+    // and hides controls immediately
     disableControls() {
         this._controlsDisabled = true;
+        this.hideControls();
     }
 
     enableControls() {
@@ -157,7 +159,7 @@ class StandardControls extends BaseControls {
         this._buttonControls.showTransportControls();
         this._buttonsActivateArea.classList.add('hide');
     }
-    
+
     // make the controls disappear
     hideControls() {
         if (!this.getShowing()) return;
@@ -215,7 +217,7 @@ class StandardControls extends BaseControls {
         this._scrubBar.disable();
     }
 
-    connectScrubBar(renderer: BaseRenderer) { 
+    connectScrubBar(renderer: BaseRenderer) {
         this._scrubBar.connect(renderer);
     }
 
