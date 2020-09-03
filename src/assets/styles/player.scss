@@ -93,17 +93,7 @@ $start-button-size: 15vw;
   min-width: 320px;
   width: 100%;
 
-  &.romper-target-fullscreen {
-    background-color: $romper-background-color;
-    bottom: 0;
-    height: 100vh;
-    left: 0;
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 100vw;
-    z-index: 1;
-  }
+ 
 }
 
 .romper-threejs {
@@ -131,6 +121,14 @@ $start-button-size: 15vw;
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+    width: 100%;
+  }
+
+  &.ios-fullscreen {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
     width: 100%;
   }
 
@@ -1485,6 +1483,38 @@ $start-button-size: 15vw;
     >.romper-buttons {
       width: 100%;
     }
+  }
+}
+
+// portrait ios fullscreen devices
+@media (orientation: portrait) {
+  .ios-fullscreen-container {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .ios-target-fullscreen {
+    background-color: $romper-background-color;
+    right: 0;
+    width: 100vw;
+    z-index: 1;
+  }
+}
+
+// landscape fullscreen ios
+@media (orientation: landscape) {
+  .ios-target-fullscreen {
+    background-color: $romper-background-color;
+    bottom: 0;
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100vw;
+    z-index: 1;
   }
 }
 
