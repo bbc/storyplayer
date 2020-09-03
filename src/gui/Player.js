@@ -1191,11 +1191,6 @@ class Player extends EventEmitter {
                     { label, text, },
                 );
             };
-            // iconContainer.onclick = choiceClick;
-            // iconContainer.addEventListener(
-            //     'touchend',
-            //     choiceClick, // let event through to overlay
-            // );
 
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
