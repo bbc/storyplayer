@@ -1169,11 +1169,6 @@ class Player extends EventEmitter {
                     { label, text, },
                 );
             };
-            iconContainer.onclick = choiceClick;
-            iconContainer.addEventListener(
-                'touchend',
-                choiceClick, // let event through to overlay
-            );
 
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
@@ -1209,6 +1204,7 @@ class Player extends EventEmitter {
                 icon: linkChoiceControl,
                 uuid: id,
                 container: iconContainer,
+                choiceAction: choiceClick,
             });
         });
 
@@ -1242,13 +1238,14 @@ class Player extends EventEmitter {
         return Promise.all(promisesArray)
             .then((icons) => {
                 icons.forEach((iconObj, id) => {
-                    const { icon, uuid, container } = iconObj;
+                    const { icon, uuid, container, choiceAction } = iconObj;
                     if (activeLinkId && uuid === activeLinkId) {
                         icon.classList.add('default');
                     }
                     const clickHandler = () => {
                         // set classes to show which is selected
                         behaviourOverlay.setElementActive(`${id}`);
+                        choiceAction();
                     };
                     icon.onclick = clickHandler;
                     icon.addEventListener(
@@ -1598,7 +1595,7 @@ class Player extends EventEmitter {
     /**
      * enters fullscreen from the player
      * in ios we handle this ourselves
-     * @fires fullscreenchange event we listen to unless on ios 
+     * @fires fullscreenchange event we listen to unless on ios
      */
     _enterFullScreen() {
         if (this._playerParent.requestFullscreen) {
@@ -1638,7 +1635,7 @@ class Player extends EventEmitter {
         } else if (document.mozCancelFullScreen) {
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
-        // @flowignore    
+        // @flowignore
         } else if (document.webkitExitFullscreen) {
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
