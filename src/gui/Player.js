@@ -22,7 +22,7 @@ import {
     handleButtonTouchEvent,
     leftGreaterThanRight
 } from '../utils'; // eslint-disable-line max-len
-import { REASONER_EVENTS } from '../Events';
+import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
@@ -1565,10 +1565,38 @@ class Player extends EventEmitter {
         if (document.msFullscreenElement) {
             isFullScreen = isFullScreen || (document.msFullscreenElement != null);
         }
-        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
+        if (document.getElementsByClassName('ios-target-fullscreen').length > 0) {
             isFullScreen = true;
         }
         return isFullScreen;
+    }
+
+    /**
+     * Sets the ios fullscreen for portrait mode
+     * this is a really bad hack
+     */
+    // eslint-disable-next-line class-methods-use-this
+    _setIosFullScreen(entering: boolean) {
+        const fullscreenContainer = document.getElementsByClassName('fullscreen-container')[0];
+        if(entering) {
+            // fullscreen container hack sets the position in the centre of the screen and the parent node full height & width
+            if(fullscreenContainer && fullscreenContainer.parentNode) {
+                fullscreenContainer.classList.add('ios-fullscreen-container');
+                fullscreenContainer.parentNode.style.height = '100vh';
+                fullscreenContainer.parentNode.style.width = '100vw';
+            }
+            this._playerParent.addEventListener('touchmove', preventEventDefault);
+            this._player.classList.add('ios-fullscreen'); // iOS
+        } else {
+            this._playerParent.removeEventListener('touchmove', preventEventDefault);
+            this._player.classList.remove('ios-fullscreen'); // iOS
+            // removes the hack and tudy up
+            if(fullscreenContainer && fullscreenContainer.parentNode) {
+                fullscreenContainer.classList.remove('ios-fullscreen-container');
+                fullscreenContainer.parentNode.style.height = '';
+                fullscreenContainer.parentNode.style.width = '';
+            }
+        }
     }
 
     /**
@@ -1596,6 +1624,7 @@ class Player extends EventEmitter {
      * enters fullscreen from the player
      * in ios we handle this ourselves
      * @fires fullscreenchange event we listen to unless on ios
+     * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: true }
      */
     _enterFullScreen() {
         if (this._playerParent.requestFullscreen) {
@@ -1611,20 +1640,21 @@ class Player extends EventEmitter {
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
-            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
+            this._playerParent.classList.add('ios-target-fullscreen'); // iOS
         }
 
         // ios is special handle these separately;
         if (BrowserUserAgent.iOS()) {
-            this._playerParent.addEventListener('touchmove', preventEventDefault);
-            this._player.classList.add('ios-fullscreen'); // iOS
+            this._setIosFullScreen(true);
         }
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: true });
     }
 
     /**
      * exits fullscreen from the player
      * in ios we handle this ourselves
      * @fires fullscreenchange event we listen to
+     * * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: false }
      */
     _exitFullScreen() {
         // || document.webkitIsFullScreen);
@@ -1644,15 +1674,15 @@ class Player extends EventEmitter {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
         } else {
-            this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
+            this._playerParent.classList.remove('ios-target-fullscreen'); // iOS
         }
         scrollToTop();
 
         // ios is special handle these events separately
         if(BrowserUserAgent.iOS()) {
-            this._playerParent.removeEventListener('touchmove', preventEventDefault);
-            this._player.classList.remove('ios-fullscreen'); // iOS
+            this._setIosFullScreen(false);
         }
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: false });
     }
 
     /**
