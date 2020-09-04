@@ -20,7 +20,7 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './gui/Player';
-import { REASONER_EVENTS } from './Events';
+import { REASONER_EVENTS, DOM_EVENTS } from './Events';
 import { getSetting, DISABLE_LOOKAHEAD_FLAG } from './utils';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
@@ -186,6 +186,9 @@ export default class RenderManager extends EventEmitter {
         });
 
         this._initialise();
+
+        // send fullscreen events
+        this._player.on(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
     }
 
 

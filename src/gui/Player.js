@@ -22,7 +22,7 @@ import {
     handleButtonTouchEvent,
     leftGreaterThanRight
 } from '../utils'; // eslint-disable-line max-len
-import { REASONER_EVENTS } from '../Events';
+import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
@@ -1626,7 +1626,8 @@ class Player extends EventEmitter {
     /**
      * enters fullscreen from the player
      * in ios we handle this ourselves
-     * @fires fullscreenchange event we listen to unless on ios 
+     * @fires fullscreenchange event we listen to unless on ios
+     * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: true }
      */
     _enterFullScreen() {
         if (this._playerParent.requestFullscreen) {
@@ -1649,12 +1650,14 @@ class Player extends EventEmitter {
         if (BrowserUserAgent.iOS()) {
             this._setIosFullScreen(true);
         }
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: true });
     }
 
     /**
      * exits fullscreen from the player
      * in ios we handle this ourselves
      * @fires fullscreenchange event we listen to
+     * * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: false }
      */
     _exitFullScreen() {
         // || document.webkitIsFullScreen);
@@ -1682,6 +1685,7 @@ class Player extends EventEmitter {
         if(BrowserUserAgent.iOS()) {
             this._setIosFullScreen(false);
         }
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: false });
     }
 
     /**
