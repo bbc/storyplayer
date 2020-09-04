@@ -478,7 +478,7 @@ export default class Controller extends EventEmitter {
         this._renderManager.off(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
-        this._renderManager.off(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
+        this._renderManager.off(DOM_EVENTS.TOGGLE_FULLSCREEN, this._emitFullScreenEvent);
     }
 
 
