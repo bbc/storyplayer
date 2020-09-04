@@ -1494,12 +1494,12 @@ $start-button-size: 15vw;
     width: 100vw;
     z-index: 1;
 
-    .romper-buttons{
+    .romper-buttons {
       width: 100%;
     }
 
     .romper-media-transport {
-      height: 65px;
+      height: 80px !important;
     }
   }
 }
@@ -1516,6 +1516,10 @@ $start-button-size: 15vw;
     top: 0;
     width: 100vw;
     z-index: 1;
+
+    .romper-media-transport {
+      height: 80px !important;
+    }
   }
 }
 
