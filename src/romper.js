@@ -30,7 +30,8 @@ import './assets/images/black.png';
 // @flowignore
 import './assets/styles/player.scss';
 
-import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS} from './Events';
+import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Events';
+
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: new MediaFetcher({}),
@@ -111,6 +112,7 @@ module.exports = {
     ERROR_EVENTS,
     REASONER_EVENTS,
     VARIABLE_EVENTS,
+    DOM_EVENTS,
     init: (settings: Settings): ?Controller => {
         logger.info('StoryPlayer Version: ', Package.version);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};

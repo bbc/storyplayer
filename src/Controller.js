@@ -17,7 +17,7 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
 
-import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { getSetting, DEBUG_PLAYOUT_FLAG } from './utils';
 import AnalyticsHandler from './AnalyticsHandler';
@@ -457,6 +457,8 @@ export default class Controller extends EventEmitter {
         this._renderManager.on(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
+
+        this._renderManager.on(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
     }
 
     /**
@@ -466,6 +468,7 @@ export default class Controller extends EventEmitter {
         this._renderManager.off(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
+        this._renderManager.off(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
     }
 
 
@@ -1303,6 +1306,7 @@ export default class Controller extends EventEmitter {
 
         });
     }
+
 
     setSessionState(state: string) {
         if(this._sessionManager) {
