@@ -7,7 +7,7 @@ const DEFAULT_CSS = {
         trace: 'color: DeepPink',
         debug: 'color: GoldenRod',
         info: 'color: DarkTurquoise',
-        warn: 'color: Purple',
+        warn: 'color: Green',
         error: 'color: Crimson',
         fatal: 'color: Black',
     },
