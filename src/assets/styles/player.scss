@@ -1487,7 +1487,7 @@ $start-button-size: 15vw;
 }
 
 // portrait ios fullscreen devices
-@media (orientation: portrait) {
+@media (min-width: 320px) and (orientation: portrait) {
   .ios-fullscreen-container {
     left: 50%;
     position: absolute;
@@ -1500,11 +1500,23 @@ $start-button-size: 15vw;
     right: 0;
     width: 100vw;
     z-index: 1;
+
+    .romper-buttons{
+      width: 100%;
+    }
+
+    .romper-scrub-bar {
+      bottom: 60px;
+    }
+
+    .romper-media-transport {
+      height: 50px;
+    }
   }
 }
 
 // landscape fullscreen ios
-@media (orientation: landscape) {
+@media (min-width: 320px) and (orientation: landscape) {
   .ios-target-fullscreen {
     background-color: $romper-background-color;
     bottom: 0;
