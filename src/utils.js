@@ -136,7 +136,7 @@ export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | 
  * @param {*} decimalPlaces precision to round to
  */
 export const precisionRound = (number: number, decimalPlaces: number) => {
-    Number(`${Math.round(`${number}e${decimalPlaces}`)}e-${decimalPlaces}`);
+    return Number(`${Math.round(`${number}e${decimalPlaces}`)}e-${decimalPlaces}`);
 }
 
 
