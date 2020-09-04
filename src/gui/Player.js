@@ -1577,7 +1577,7 @@ class Player extends EventEmitter {
      */
     // eslint-disable-next-line class-methods-use-this
     _setIosFullScreen(entering: boolean) {
-        const fullscreenContainer = document.getElementsByClassName('full-screen-container')[0];
+        const fullscreenContainer = document.getElementsByClassName('fullscreen-container')[0];
         if(entering) {
             // fullscreen container hack sets the position in the centre of the screen and the parent node full height & width
             if(fullscreenContainer && fullscreenContainer.parentNode) {
