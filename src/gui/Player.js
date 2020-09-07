@@ -1713,6 +1713,7 @@ class Player extends EventEmitter {
             this._controls.setFullscreenOff();
             this._player.classList.remove('romper-player-fullscreen');
             this._player.removeAttribute('style');
+            this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: false });
         }
     }
 
