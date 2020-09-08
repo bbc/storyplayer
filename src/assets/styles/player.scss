@@ -705,7 +705,7 @@ $start-button-size: 15vw;
       width: calc(100% - #{(2 * $romper-button-border)});
 
       &:focus {
-        border-bottom: 5px solid $var-panel-border;
+        border-bottom: 2px solid $backing-colour;
         outline: none;
       }
     }
