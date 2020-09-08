@@ -92,8 +92,6 @@ $start-button-size: 15vw;
   height: 100%;
   min-width: 320px;
   width: 100%;
-
- 
 }
 
 .romper-threejs {
@@ -689,15 +687,27 @@ $start-button-size: 15vw;
     }
 
     .romper-link-control {
+      background: none;
       border-bottom-color: $transparent;
       border-bottom-style: solid;
       border-bottom-width: $romper-button-border;
+      border-left: 0;
+      border-right: 0;
+      border-top: 0;
+      color: inherit;
       cursor: pointer;
       flex: 1 1 0;
+      font-family: inherit;
+      font-size: 100%;
       height: calc(100% - #{(2 * $romper-button-border)});
       margin-bottom: 1%;
       pointer-events: all;
       width: calc(100% - #{(2 * $romper-button-border)});
+
+      &:focus {
+        border-bottom: 5px solid $var-panel-border;
+        outline: none;
+      }
     }
 
     .romper-control-selected {
@@ -1357,6 +1367,7 @@ $start-button-size: 15vw;
   .continue-modal-content {
     bottom: auto;
     display: none;
+    height: 50%;
     margin-left: auto;
     margin-right: auto;
     padding: 2%;
@@ -1364,7 +1375,6 @@ $start-button-size: 15vw;
     text-align: center;
     top: 5%;
     width: 30%;
-    height: 50%;
 
     &.show {
       display: block;
@@ -1378,19 +1388,19 @@ $start-button-size: 15vw;
     }
 
     .romper-continue-controls {
+      align-items: center;
       display: flex;
       flex-direction: row;
       justify-content: center;
-      align-items: center;
 
       .romper-continue-control {
+        align-items: center;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin: 0 1em;
         flex-grow: 1;
         flex-shrink: 1;
+        justify-content: center;
+        margin: 0 1em;
 
         .romper-restart-button {
           @include button-icon('../images/reload.svg');
@@ -1407,9 +1417,9 @@ $start-button-size: 15vw;
           border: 1px solid $white;
           border-radius: 50%;
           height: unset;
-          width: 100%;
-          padding: 100% 0 0 0;
           margin: 0;
+          padding: 100% 0 0;
+          width: 100%;
 
           &:hover {
             background-color: $highlight-invert;
