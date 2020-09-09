@@ -21,10 +21,9 @@ import {
     scrollToTop,
     preventEventDefault,
     handleButtonTouchEvent,
-    inSMPWrapper,
-    proxyWrapper,
+    leftGreaterThanRight
 } from '../utils'; // eslint-disable-line max-len
-import { REASONER_EVENTS } from '../Events';
+import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
@@ -93,7 +92,6 @@ class Player extends EventEmitter {
 
     _fullscreenButton: HTMLButtonElement;
 
-    _inFullScreen: boolean
 
     _volume: Object;
 
@@ -119,7 +117,6 @@ class Player extends EventEmitter {
 
     setupExperienceOverlays: Function;
 
-    _handleFullScreenChange: Function;
 
     _choiceIconSet: { [key: string]: Promise<Object> };
 
@@ -188,7 +185,6 @@ class Player extends EventEmitter {
         this._countdownTotal = 0;
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
-        this._inFullScreen = false;
 
         const playoutToUse = MediaFormats.getPlayoutEngine();
 
@@ -235,6 +231,14 @@ class Player extends EventEmitter {
         this._startButtonHandler = this._startButtonHandler.bind(this);
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
+
+
+        // add fullscreen handling
+        this._toggleFullScreen = this._toggleFullScreen.bind(this);
+        this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
+        this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
+
+        this._addFullscreenListeners();
 
         this._player = document.createElement('div');
         this._player.classList.add('romper-player');
@@ -348,7 +352,6 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
 
-        this._handleFullScreenChange = this._handleFullScreenChange.bind(this);
 
 
     }
@@ -484,7 +487,7 @@ class Player extends EventEmitter {
     _setDogPosition(position: Object) {
         const { top, left, width, height } = position;
         const guiAspect = this._guiLayer.clientWidth / this._guiLayer.clientHeight;
-        if (guiAspect > this._aspectRatio) {
+        if (leftGreaterThanRight(guiAspect, this._aspectRatio)) {
             const mediaWidth = (this._aspectRatio * this._guiLayer.clientHeight);
             const sideGap = (this._guiLayer.clientWidth - mediaWidth) / 2;
             this._dogImage.style.left = `${sideGap + ((left/100) * mediaWidth)}px`;
@@ -529,28 +532,38 @@ class Player extends EventEmitter {
         this._details.appendChild(assetCollectionDetail);
     }
 
-    _addContinueModal(options: Object) {
-        this._createResumeExperienceButton(options);
+    // eslint-disable-next-line class-methods-use-this
+    _createButtonLabel(text: string) {
+        const buttonSpan = document.createElement('span');
+        buttonSpan.innerHTML = text;
+        buttonSpan.classList.add('button-label');
+        return buttonSpan;
+    }
 
-        this._resumeExperienceButton.setAttribute('title', 'Resume and accept terms');
-        this._resumeExperienceButton.setAttribute('aria-label', 'Resume Button');
+    _addContinueModal() {
+        const resumeButton = document.createElement('button');
+        resumeButton.setAttribute('type', 'button');
+        resumeButton.classList.add('romper-resume-button');
+        resumeButton.setAttribute('title', 'Resume and accept terms');
+        resumeButton.setAttribute('aria-label', 'Resume Button');
 
-        const cancelButton = document.createElement('button');
-        cancelButton.setAttribute('type', 'button');
-        cancelButton.classList.add('romper-reset-button');
-        cancelButton.setAttribute('title', 'Restart and accept terms');
-        cancelButton.setAttribute('aria-label', 'Restart Button');
+        const resumeButtonDiv = document.createElement('div');
+        resumeButtonDiv.classList.add('romper-continue-control');
+        resumeButtonDiv.appendChild(resumeButton);
+        resumeButtonDiv.appendChild(this._createButtonLabel('Resume'));
 
-        const cancelButtonHolder = document.createElement('div');
-        cancelButton.appendChild(cancelButtonHolder);
-        cancelButtonHolder.classList.add('romper-reset-button-icon');
+        const restartButton = document.createElement('button');
+        restartButton.setAttribute('type', 'button');
+        restartButton.classList.add('romper-restart-button');
+        restartButton.setAttribute('title', 'Restart and accept terms');
+        restartButton.setAttribute('aria-label', 'Restart Button');
 
-        const cancelButtonDiv = document.createElement('div');
-        cancelButtonDiv.classList.add('romper-button-icon-div');
-        cancelButtonDiv.classList.add(`romper-reset-button-icon-div`);
-        cancelButtonHolder.appendChild(cancelButtonDiv);
+        const restartButtonDiv = document.createElement('div');
+        restartButtonDiv.classList.add('romper-continue-control');
+        restartButtonDiv.appendChild(restartButton);
+        restartButtonDiv.appendChild(this._createButtonLabel('Restart'));
 
-        const cancelButtonHandler = () => {
+        const restartButtonHandler = () => {
             this._controls.setTransportControlsActive();
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
@@ -560,10 +573,10 @@ class Player extends EventEmitter {
             this._startButtonHandler();
         };
 
-        cancelButton.onclick = cancelButtonHandler;
-        cancelButton.addEventListener(
+        restartButton.onclick = restartButtonHandler;
+        restartButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(cancelButtonHandler),
+            handleButtonTouchEvent(restartButtonHandler),
         );
 
         const resumeExperienceButtonHandler = () => {
@@ -576,25 +589,23 @@ class Player extends EventEmitter {
             this._enableUserInteraction();
         };
 
-        this._resumeExperienceButton.onclick = resumeExperienceButtonHandler;
-        this._resumeExperienceButton.addEventListener(
+        resumeButton.onclick = resumeExperienceButtonHandler;
+        resumeButton.addEventListener(
             'touchend',
             handleButtonTouchEvent(resumeExperienceButtonHandler),
         );
 
-        // resume
         const continueMessage = document.createElement('div');
-        continueMessage.className = 'continue-experience';
         continueMessage.textContent = 'Restart or Resume?';
         continueMessage.classList.add('modal-inner-content');
 
+        const continueControls = document.createElement('div');
+        continueControls.className = 'romper-continue-controls';
+        continueControls.appendChild(restartButtonDiv);
+        continueControls.appendChild(resumeButtonDiv);
+
         this._continueModalContent.appendChild(continueMessage);
-        // restart
-        this._continueModalContent.appendChild(cancelButton);
-        // continue
-        this._continueModalContent.appendChild(this._resumeExperienceButton);
-
-
+        this._continueModalContent.appendChild(continueControls);
 
         if(this._continueModalLayer) {
             this._continueModalLayer.classList.add('show');
@@ -722,23 +733,6 @@ class Player extends EventEmitter {
 
     }
 
-    _createResumeExperienceButton(options: Object) {
-        this._resumeExperienceButton = document.createElement('button');
-        this._resumeExperienceButton.setAttribute('type', 'button');
-        this._resumeExperienceButton.classList.add(options.button_class);
-        this._resumeExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._resumeExperienceButton.setAttribute('aria-label', 'Start Button');
-
-        const resumeButtonHolder = document.createElement('div');
-        this._resumeExperienceButton.appendChild(resumeButtonHolder);
-        resumeButtonHolder.classList.add('romper-start-button-icon');
-
-        const resumeButtonDiv = document.createElement('div');
-        resumeButtonDiv.classList.add('romper-button-icon-div');
-        resumeButtonDiv.classList.add(`${options.button_class}-icon-div`);
-        resumeButtonHolder.appendChild(resumeButtonDiv);
-    }
-
     /**
      * Sets up the overlays for the start/resume buttons and start image image
      * @param {Object} options - options for start overlays
@@ -795,7 +789,7 @@ class Player extends EventEmitter {
 
     _createResumeOverlays(options: Object) {
         this._createSharedOverlays(options);
-        this._addContinueModal(options);
+        this._addContinueModal();
     }
 
     _createStartOverlays(options: Object) {
@@ -813,8 +807,8 @@ class Player extends EventEmitter {
     }
 
     _startButtonHandler() {
-        this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._removeExperienceOverlays();
+        this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._enableUserInteraction();
         this._controls.setTransportControlsActive();
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
@@ -1170,7 +1164,8 @@ class Player extends EventEmitter {
             behaviourElement.classList.remove('threerow');
         }
 
-        const linkChoiceControl = document.createElement('div');
+        const linkChoiceControl = document.createElement('button');
+        linkChoiceControl.id = `romper-link-choice-${id}`;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
@@ -1181,7 +1176,6 @@ class Player extends EventEmitter {
 
             const iconContainer = document.createElement('div');
             const choiceClick = () => {
-
                 this.emit(PlayerEvents.LINK_CHOSEN, { id, behaviourId: behaviourElement.id  });
                 this._logUserInteraction(
                     AnalyticEvents.names.LINK_CHOICE_CLICKED,
@@ -1190,11 +1184,6 @@ class Player extends EventEmitter {
                     { label, text, },
                 );
             };
-            iconContainer.onclick = choiceClick;
-            iconContainer.addEventListener(
-                'touchend',
-                choiceClick, // let event through to overlay
-            );
 
             linkChoiceControl.appendChild(iconContainer);
             if (text && src) {
@@ -1230,6 +1219,7 @@ class Player extends EventEmitter {
                 icon: linkChoiceControl,
                 uuid: id,
                 container: iconContainer,
+                choiceAction: choiceClick,
             });
         });
 
@@ -1263,13 +1253,14 @@ class Player extends EventEmitter {
         return Promise.all(promisesArray)
             .then((icons) => {
                 icons.forEach((iconObj, id) => {
-                    const { icon, uuid, container } = iconObj;
+                    const { icon, uuid, container, choiceAction } = iconObj;
                     if (activeLinkId && uuid === activeLinkId) {
                         icon.classList.add('default');
                     }
                     const clickHandler = () => {
                         // set classes to show which is selected
                         behaviourOverlay.setElementActive(`${id}`);
+                        choiceAction();
                     };
                     icon.onclick = clickHandler;
                     icon.addEventListener(
@@ -1405,7 +1396,6 @@ class Player extends EventEmitter {
         this._logRendererAction(AnalyticEvents.names.COMPLETE_BEHAVIOUR_PHASE_STARTED);
         this.disableScrubBar();
         this._controls.disableSeekBack();
-        this._pauseForBehaviours();
         this.disablePlayButton();
         this._disableRepresentationControl();
     }
@@ -1428,7 +1418,6 @@ class Player extends EventEmitter {
 
     exitCompleteBehaviourPhase() {
         this._controls.enableSeekBack();
-        this._unpauseAfterBehaviours();
     }
 
     enterStartBehaviourPhase(renderer: BaseRenderer) {
@@ -1487,6 +1476,7 @@ class Player extends EventEmitter {
     // eslint-disable-next-line class-methods-use-this
     getLinkChoiceElement(full: ?boolean): [HTMLElement] {
         const linkChoices = document.querySelectorAll('[data-behaviour="link-choice"]');
+        // @flowignore
         return full? linkChoices : [linkChoices[0]];
     }
 
@@ -1574,7 +1564,60 @@ class Player extends EventEmitter {
         callback();
     }
 
-    // TODO: Abstract this away as SMP handles it
+    static _isFullScreen() {
+        let isFullScreen = false;
+        if (document.fullscreenElement) {
+            isFullScreen = (document.fullscreenElement != null);
+        }
+        // @flowignore
+        if (document.webkitFullscreenElement) {
+            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
+        }
+        // @flowignore
+        if (document.mozFullScreenElement) {
+            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
+        }
+        // @flowignore
+        if (document.msFullscreenElement) {
+            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
+        }
+        if (document.getElementsByClassName('ios-target-fullscreen').length > 0) {
+            isFullScreen = true;
+        }
+        return isFullScreen;
+    }
+
+    /**
+     * Sets the ios fullscreen for portrait mode
+     * this is a really bad hack
+     */
+    // eslint-disable-next-line class-methods-use-this
+    _setIosFullScreen(entering: boolean) {
+        const fullscreenContainer = document.getElementsByClassName('fullscreen-container')[0];
+        if(entering) {
+            // fullscreen container hack sets the position in the centre of the screen and the parent node full height & width
+            if(fullscreenContainer && fullscreenContainer.parentNode) {
+                fullscreenContainer.classList.add('ios-fullscreen-container');
+                fullscreenContainer.parentNode.style.height = '100vh';
+                fullscreenContainer.parentNode.style.width = '100vw';
+            }
+            this._playerParent.addEventListener('touchmove', preventEventDefault);
+            this._player.classList.add('ios-fullscreen'); // iOS
+        } else {
+            this._playerParent.removeEventListener('touchmove', preventEventDefault);
+            this._player.classList.remove('ios-fullscreen'); // iOS
+            // removes the hack and tudy up
+            if(fullscreenContainer && fullscreenContainer.parentNode) {
+                fullscreenContainer.classList.remove('ios-fullscreen-container');
+                fullscreenContainer.parentNode.style.height = '';
+                fullscreenContainer.parentNode.style.width = '';
+            }
+        }
+    }
+
+    /**
+     * Toggles fullscreen using our controls button
+     */
     _toggleFullScreen(): void {
         if (Player._isFullScreen()) {
             this._logUserInteraction(
@@ -1593,115 +1636,109 @@ class Player extends EventEmitter {
         }
     }
 
-    static _isFullScreen() {
-        let isFullScreen = false;
-        if (document.fullscreenElement) {
-            isFullScreen = (document.fullscreenElement != null);
-        }
-        if (document.webkitFullscreenElement) {
-            isFullScreen = isFullScreen || (document.webkitFullscreenElement != null);
-        }
-        if (document.mozFullScreenElement) {
-            isFullScreen = isFullScreen || (document.mozFullScreenElement != null);
-        }
-        if (document.msFullscreenElement) {
-            isFullScreen = isFullScreen || (document.msFullscreenElement != null);
-        }
-        if (document.getElementsByClassName('romper-target-fullscreen').length > 0) {
-            isFullScreen = true;
-        }
-        return isFullScreen;
-    }
-
+    /**
+     * enters fullscreen from the player
+     * in ios we handle this ourselves
+     * @fires fullscreenchange event we listen to unless on ios
+     * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: true }
+     */
     _enterFullScreen() {
-        this._controls.setFullscreenOn();
-        this._player.classList.add('romper-player-fullscreen');
-
         if (this._playerParent.requestFullscreen) {
             // @flowignore
             this._playerParent.requestFullscreen();
+            // @flowignore
         } else if (this._playerParent.mozRequestFullScreen) {
             // @flowignore
             this._playerParent.mozRequestFullScreen(); // Firefox
+            // @flowignore
         } else if (this._playerParent.webkitRequestFullscreen) {
             // @flowignore
             this._playerParent.webkitRequestFullscreen(); // Chrome and Safari
         } else {
             window.scrollTo(0, 1);
-            this._playerParent.classList.add('romper-target-fullscreen'); // iOS
+            this._playerParent.classList.add('ios-target-fullscreen'); // iOS
         }
 
-        // fit player to size, so all UI remains within media
-        const windowAspect = window.innerWidth / window.innerHeight;
-        const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
-        if (windowAspect > this._aspectRatio) { // too wide
-            const width = this._aspectRatio * 100 * scaleFactor;
-            this._player.style.height = `${100 * scaleFactor}vh`;
-            this._player.style.width = `${width}vh`;
-            this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
-        } else { // too tall
-            const height = (100 * scaleFactor) / this._aspectRatio;
-            this._player.style.height = `${height}vw`;
-            this._player.style.width = `${100 * scaleFactor}vw`;
-            this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+        // ios is special handle these separately;
+        if (BrowserUserAgent.iOS()) {
+            this._setIosFullScreen(true);
         }
-
-        this._inFullScreen = false;
-        // if we are an iphone capture these events;
-        if(BrowserUserAgent.iOS()) {
-            this._playerParent.addEventListener('touchmove', preventEventDefault);
-            this._player.classList.add('ios-fullscreen'); // iOS
-        }
-        document.addEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.addEventListener('MSFullscreenChange', this._handleFullScreenChange);
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: true });
     }
 
-
-    _handleFullScreenChange() {
-        if (!Player._isFullScreen()) {
-            this._controls.setFullscreenOff();
-            this._player.classList.remove('romper-player-fullscreen');
-
-            document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-            document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
-        }
-    }
-
+    /**
+     * exits fullscreen from the player
+     * in ios we handle this ourselves
+     * @fires fullscreenchange event we listen to
+     * * @fires DOM_EVENTS#TOGGLE_FULLSCREEN  { isFullScreen: false }
+     */
     _exitFullScreen() {
-        this._controls.setFullscreenOff();
-        this._player.classList.remove('romper-player-fullscreen');
         // || document.webkitIsFullScreen);
-        if ((document: any).exitFullscreen) {
+        if (document.exitFullscreen) {
             // @flowignore
             document.exitFullscreen();
-        } else if ((document: any).mozCancelFullScreen) {
+        // @flowignore
+        } else if (document.mozCancelFullScreen) {
             // @flowignore
             document.mozCancelFullScreen(); // Firefox
-        } else if ((document: any).webkitExitFullscreen) {
+        // @flowignore
+        } else if (document.webkitExitFullscreen) {
             // @flowignore
             document.webkitExitFullscreen(); // Chrome and Safari
-        } else if ((document: any).msExitFullscreen) {
+        // @flowignore
+        } else if (document.msExitFullscreen) {
             // @flowignore
             document.msExitFullscreen(); // Chrome and Safari
         } else {
-            this._playerParent.classList.remove('romper-target-fullscreen'); // iOS
+            this._playerParent.classList.remove('ios-target-fullscreen'); // iOS
         }
         scrollToTop();
 
-        this._player.removeAttribute('style');
-
+        // ios is special handle these events separately
         if(BrowserUserAgent.iOS()) {
-            this._playerParent.removeEventListener('touchmove', preventEventDefault);
-            this._player.classList.remove('ios-fullscreen'); // iOS
+            this._setIosFullScreen(false);
         }
-        document.removeEventListener('webkitfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('mozfullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('fullscreenchange', this._handleFullScreenChange);
-        document.removeEventListener('MSFullscreenChange', this._handleFullScreenChange);
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: false });
+    }
+
+    /**
+     * Relies on the document 'fullscreenchange' event firing, then sets the style for the player accordingly
+     * handles iOS fullscreen behaviour too.
+     */
+    _handleFullScreenEvent() {
+        if(Player._isFullScreen()) {
+            // srtup controls and styling
+            this._controls.setFullscreenOn();
+            this._player.classList.add('romper-player-fullscreen');
+
+            // fit player to size, so all UI remains within media
+            const windowAspect = window.innerWidth / window.innerHeight;
+            const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
+            if (leftGreaterThanRight(windowAspect, this._aspectRatio)) { // too wide
+                const width = this._aspectRatio * 100 * scaleFactor;
+                this._player.style.height = `${100 * scaleFactor}vh`;
+                this._player.style.width = `${width}vh`;
+                this._player.style.marginLeft = `calc((100vw - ${width}vh) / 2)`;
+            } else { // too tall
+                const height = (100 * scaleFactor) / this._aspectRatio;
+                this._player.style.height = `${height}vw`;
+                this._player.style.width = `${100 * scaleFactor}vw`;
+                this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+            }
+        } else {
+            this._controls.setFullscreenOff();
+            this._player.classList.remove('romper-player-fullscreen');
+            this._player.removeAttribute('style');
+            this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, { isFullScreen: false });
+        }
+    }
+
+
+    _addFullscreenListeners() {
+        document.addEventListener('webkitfullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('mozfullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('fullscreenchange', this._handleFullScreenEvent);
+        document.addEventListener('MSFullscreenChange', this._handleFullScreenEvent);
     }
 }
 

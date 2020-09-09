@@ -12,6 +12,12 @@ import logger from './logger';
 
 import { PLAYOUT_ENGINES } from './playoutEngines/playoutEngineConsts'
 
+
+export const MEDIA_FORMAT = {
+    DASH: 'dash',
+    HLS: 'hls'
+}
+
 export class BrowserUserAgent {
     static facebookWebview() {
         const ua = window.navigator.userAgent;
@@ -171,10 +177,15 @@ export class BrowserCapabilities {
 
 export class MediaFormats {
 
+    /**
+     * Gets the media format based on client capabilities
+     * @returns {string} 'hls' or 'dash'
+     */
     static getFormat() {
         const overrideFormat = getSetting(OVERRIDE_PLAYOUT_FORMAT)
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG)
-        if(['hls','dash'].includes(overrideFormat)) {
+
+        if(Object.values(MEDIA_FORMAT).includes(overrideFormat)) {
             logger.info(`Overriding media selector format: , ${overrideFormat}`)
             return overrideFormat;
         }
@@ -184,33 +195,38 @@ export class MediaFormats {
             if (debugPlayout) {
                 logger.info("getFormat: isSafariDesktop = True")
             }
-            return 'dash'
+            return MEDIA_FORMAT.HLS;
         }
         // iOS uses hls
         if (BrowserUserAgent.safari() && BrowserCapabilities.hlsSupport()) {
             if (debugPlayout) {
                 logger.info("getFormat: safari = True")
             }
-            return 'hls';
+            return MEDIA_FORMAT.HLS;
         }
         // otherwise we check for explicit hls or dash support
         if (BrowserCapabilities.dashSupport()) {
             if (debugPlayout) {
                 logger.info("getFormat: Dash Support = True")
             }
-            return 'dash';
+            return MEDIA_FORMAT.DASH;
         }
         if (BrowserCapabilities.hlsSupport()) {
             if (debugPlayout) {
                 logger.info("getFormat: HLS Support = True")
             }
-            return 'hls';
+            return MEDIA_FORMAT.HLS;
         }
         // if we can't support anything we return null
         return null;
     }
 
-    static getPlayoutEngine(noSMP = false) {
+    /**
+     * Returns the playout engine to use based on the client capabilities
+     * ios will only play back hls dom should play back either
+     * @returns {string} 'ios' or 'dom'
+     */
+    static getPlayoutEngine() {
         const overridePlayout = getSetting(OVERRIDE_PLAYOUT);
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if(overridePlayout && Object.values(PLAYOUT_ENGINES).includes(overridePlayout)) {
@@ -218,30 +234,35 @@ export class MediaFormats {
             return overridePlayout
         }
 
-        if(inSMPWrapper() && noSMP === false) {
+        // smp wrapper
+        if(inSMPWrapper()) {
             return PLAYOUT_ENGINES.SMP_PLAYOUT
         }
 
         if(BrowserCapabilities.dashSupport()) {
+            // safari desktop
             if(BrowserUserAgent.isSafariDesktop()) {
                 // Safari Desktop
                 if (debugPlayout) {
                     logger.info("getPlayoutEngine: DashSupport + isSafariDesktop = True")
                 }
-                return PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT;
+                return PLAYOUT_ENGINES.IOS_PLAYOUT;
             }
+            // safari other dash support (ipad?)
             if (BrowserUserAgent.safari()) {
                 // Safari iOS
                 if (debugPlayout) {
                     logger.info("getPlayoutEngine: DashSupport + safari = True")
                 }
-                return 'ios';
+                return PLAYOUT_ENGINES.IOS_PLAYOUT;
             }
+            // default for dash is DOM playout engine
             if (debugPlayout) {
                 logger.info("getPlayoutEngine: DashSupport + not safari = True")
             }
             return PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT;
         }
+        // hls for ios devices
         if(BrowserCapabilities.hlsSupport()) {
             // Safari Mobile
             if (debugPlayout) {

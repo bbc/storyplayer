@@ -17,7 +17,7 @@ import BaseRenderer from './renderers/BaseRenderer';
 import { InternalVariableNames } from './InternalVariables';
 
 
-import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
+import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { getSetting, DEBUG_PLAYOUT_FLAG } from './utils';
 import AnalyticsHandler from './AnalyticsHandler';
@@ -58,6 +58,7 @@ export default class Controller extends EventEmitter {
         this._handleRendererPreviousButtonEvent = this._handleRendererPreviousButtonEvent.bind(this); // eslint-disable-line max-len
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
+        this._emitFullScreenEvent = this._emitFullScreenEvent.bind(this);
 
         this._analyticsHandler = new AnalyticsHandler(analytics, this);
         this._handleAnalytics = this._handleAnalytics.bind(this);
@@ -447,6 +448,15 @@ export default class Controller extends EventEmitter {
         this._goBackOneStepInStory();
     }
 
+
+    /**
+     * Emits the event when we toggle fullscreen or not
+     * @fires DOM_EVENTS#TOGGLE_FULLSCREEN
+     */
+    _emitFullScreenEvent(event: Object) {
+        this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event);
+    }
+
     /* eslint-disable max-len */
     /**
      * Add event listeners to render manager
@@ -457,6 +467,8 @@ export default class Controller extends EventEmitter {
         this._renderManager.on(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.on(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
+
+        this._renderManager.on(DOM_EVENTS.TOGGLE_FULLSCREEN, this._emitFullScreenEvent);
     }
 
     /**
@@ -466,6 +478,7 @@ export default class Controller extends EventEmitter {
         this._renderManager.off(RendererEvents.COMPLETED, this._handleRendererCompletedEvent);
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
+        this._renderManager.off(DOM_EVENTS.TOGGLE_FULLSCREEN, this._emitFullScreenEvent);
     }
 
 
@@ -1303,6 +1316,7 @@ export default class Controller extends EventEmitter {
 
         });
     }
+
 
     setSessionState(state: string) {
         if(this._sessionManager) {

@@ -129,8 +129,10 @@ class StandardControls extends BaseControls {
     }
 
     // this stops activation from proceeding
+    // and hides controls immediately
     disableControls() {
         this._controlsDisabled = true;
+        this.hideControls();
     }
 
     enableControls() {

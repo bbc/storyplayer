@@ -48,4 +48,12 @@ export const SHAKA_EVENTS = [
     return events;
 }, {});
 
+export const DOM_EVENTS = [
+    'TOGGLE_FULLSCREEN',
+].reduce((events, eventName) => {
+    // eslint-disable-next-line no-param-reassign
+    events[eventName] = eventName;
+    return events;
+}, {});
+
 

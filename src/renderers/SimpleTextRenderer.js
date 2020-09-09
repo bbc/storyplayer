@@ -7,6 +7,7 @@ import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
 import logger from '../logger';
+import { REASONER_EVENTS } from '../Events';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -17,6 +18,10 @@ export type HTMLTrackElement = HTMLElement & {
     default: boolean,
 }
 
+/**
+ * Simple text renderer displays a HTML element populated with the description 
+ * or asset collection text_src
+ */
 export default class SimpleTextRenderer extends BaseRenderer {
     _fetchMedia: MediaFetcher;
 
@@ -27,6 +32,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
     _target: HTMLDivElement;
 
     _textDiv: HTMLDivElement;
+
+    _setOverflowStyling: Function;
 
 
     constructor(
@@ -45,10 +52,26 @@ export default class SimpleTextRenderer extends BaseRenderer {
             analytics,
             controller,
         );
-
         this._target = player.mediaTarget;
+
+        this._setOverflowStyling = this._setOverflowStyling.bind(this);
+
+        // we have a one time event listener as we remove the prestart classname from the media element indicating we've started playing so 
+        // we should resize if we need to otherwise the GUI is shrunk and buttons disappear 
+        this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () =>
+            this._setOverflowStyling(this._target.clientHeight || 720)
+        );
+    
+        // Resize event listener to dynamically resize the text element and apply overflow style rules
+        window.addEventListener('resize', () =>
+            this._setOverflowStyling(this._target.clientHeight)
+        );
+
     }
 
+    /**
+     * Inits this renderer
+     */
     async init() {
         try {
             await this.renderTextElement()
@@ -59,6 +82,9 @@ export default class SimpleTextRenderer extends BaseRenderer {
         }
     }
 
+    /**
+     * Called to actually start the renderer
+     */
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
@@ -67,15 +93,24 @@ export default class SimpleTextRenderer extends BaseRenderer {
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
+        this._setOverflowStyling(this._target.clientHeight);
         return true;
     }
 
+    /**
+     * Starts the renderer sets the phase to be RENDERER_PHASES.MEDIA_FINISHED
+     * @extends BaseRenderer#start()
+     */
     start() {
         super.start();
         // no duration, so ends immediately
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
     }
 
+    /**
+     * End the renderer, and clean up the css classes on the GUI later if we need to
+     * @extends baseRenderer#end()
+     */
     end() {
         const needToEnd = super.end();
         if (!needToEnd) return false;
@@ -84,6 +119,9 @@ export default class SimpleTextRenderer extends BaseRenderer {
         logger.info(`Ended: ${this._representation.id}`);
         try {
             this._target.removeChild(this._textDiv);
+            const guiLayer = document.getElementById('gui-layer');
+            if(guiLayer)
+                guiLayer.classList.remove('overflowing-text');
         } catch (e) {
             logger.warn('could not remove text renderer element');
         }
@@ -92,6 +130,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return true;
     }
 
+    /**
+     * Creates the text element and calls the populateTextElement function to 
+     * populate it with the inner html
+     */
     renderTextElement() {
         this._textDiv = document.createElement('div');
         this._textDiv.classList.add('romper-text-element');
@@ -117,6 +159,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return Promise.reject(new Error('No text to render'));
     }
 
+    /**
+     * Fetches the text assets from the mediaUrl passed in
+     * @param {string} mediaUrl url to text asset collection
+     */
     _fetchTextContent(mediaUrl: string) {
         fetch(mediaUrl)
             .then((response) => {
@@ -132,6 +178,10 @@ export default class SimpleTextRenderer extends BaseRenderer {
             });
     }
 
+    /**
+     * replaces the escaped variables so we can display them onscreen
+     * @param {string} textContent text to replace 
+     */
     _replaceEscapedVariables(textContent: string): Promise<string> {
         const varRefs = textContent.match(/\$\{(.*?)\}/g);
         if (varRefs) {
@@ -161,6 +211,64 @@ export default class SimpleTextRenderer extends BaseRenderer {
         return Promise.resolve(textContent);
     }
 
+    /**
+     * check the text element is overflown
+     */
+    isOverflown() {
+        return this._textDiv.scrollHeight > this._textDiv.clientHeight;
+    }
+
+    /**
+     * Check we aren't in the pre start phase - stiry is yet to start here
+     */
+    isPreStartPhase() {
+        return this._target.classList.contains('romper-prestart');
+    }
+
+    /**
+     * Remove overflow styling from the player
+     * @param {HTMLElement} guiLayer div element containing the buttons and clickable links etc
+     */
+    _removeOverflowStyle(guiLayer: HTMLElement) {
+        guiLayer.classList.remove('overflowing-text');
+        this._textDiv.classList.remove('overflowing-text');
+        this._textDiv.style['max-height'] = '';
+    }
+
+
+
+    /**
+     * Sets the overflow style for the text element and sets gui layer height so only the button activate area is present
+     * @param {HTMLElement} guiLayer div element containing the buttons and clickable links etc
+     */
+    _addOverflowStyle(guiLayer: HTMLElement, maxHeight: number) {
+        if (!this.isPreStartPhase()) {
+            guiLayer.classList.add('overflowing-text');
+            this._textDiv.classList.add('overflowing-text')
+            this._textDiv.style['max-height'] = `calc(${maxHeight}px - 4em)`;
+        }
+    }
+    
+    /**
+     * Gets the gui layer and checks we have added the text node to the parent, 
+     * then sets the CSS style appropriately whether we should overflow and scroll or not
+     * @param {number} maxHeight the max height of the player target div, used to set the max height of the text element
+     */
+    _setOverflowStyling(maxHeight: number) {
+        const guiLayer = document.getElementById('gui-layer');
+        if(guiLayer && this._textDiv.parentNode) {
+            if (this.isOverflown()) {
+                this._addOverflowStyle(guiLayer, maxHeight);
+            } else {
+                this._removeOverflowStyle(guiLayer);
+            }     
+        }
+    }
+
+    /**
+     * Populates the text element with the string provided
+     * @param {string} textContent 
+     */
     populateTextElement(textContent: string) {
         this._replaceEscapedVariables(textContent)
             .then((newText) => {

@@ -24,7 +24,7 @@ export default class TimeManager extends EventEmitter {
         this._timedEvents = {};
         this._paused = false;
         this._syncing = false;
-        this._debug = true;
+        this._debug = false;
         this._rendererId = rendererId;
     }
 
@@ -55,14 +55,15 @@ export default class TimeManager extends EventEmitter {
                 clearCallback,
             } = this._timedEvents[timeEventId];
             // handle starting event
-            if (this._timeElapsed >= startTime && this._timeElapsed < endTime
+            if (this._timeElapsed >= startTime && this._timeElapsed <= endTime
                 && !isRunning){
                 logger.info(`TimeManager: ${this._rendererId} timer running timed event ${timeEventId}`);
                 startCallback();
                 this._timedEvents[timeEventId].isRunning = true;
+                startCallback();
             }
             // handle clearing event
-            if ((this._timeElapsed <= startTime || this._timeElapsed > endTime)
+            if ((this._timeElapsed < startTime || this._timeElapsed > endTime)
                 && isRunning) {
                 try {
                     if (clearCallback) clearCallback();
@@ -116,11 +117,14 @@ export default class TimeManager extends EventEmitter {
     }
 
     setTime(newTime: number) {
-        if (this._debug) {
-            logger.info(`TimeManager: ${this._rendererId} timer set to ${newTime}, current timer is ${this._timeElapsed}`);
+        // Only update if time changed
+        if(this._timeElapsed !== newTime) {
+            if (this._debug) {
+                logger.info(`TimeManager: ${this._rendererId} timer set to ${newTime}, current timer is ${this._timeElapsed}`);
+            }
+            this._timeElapsed = newTime;
+            this._testForEvents();
         }
-        this._timeElapsed = newTime;
-        this._testForEvents();
     }
 
     getTime() {
