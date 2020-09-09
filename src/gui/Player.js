@@ -1150,7 +1150,8 @@ class Player extends EventEmitter {
             behaviourElement.classList.remove('threerow');
         }
 
-        const linkChoiceControl = document.createElement('div');
+        const linkChoiceControl = document.createElement('button');
+        linkChoiceControl.id = `romper-link-choice-${id}`;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
