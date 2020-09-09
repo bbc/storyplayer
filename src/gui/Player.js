@@ -21,7 +21,9 @@ import {
     scrollToTop,
     preventEventDefault,
     handleButtonTouchEvent,
-    leftGreaterThanRight
+    leftGreaterThanRight,
+    inSMPWrapper,
+    proxyWrapper,
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
