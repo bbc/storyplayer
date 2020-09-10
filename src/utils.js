@@ -167,9 +167,11 @@ export const replaceEscapedVariables = (textContent, controller) => {
             const getVal = (vName) => {
                 if (vName === InternalVariableNames.DAY_OF_WEEK) {
                     return getTodaysDay();
-                } else if (vName === InternalVariableNames.PORTION_OF_DAY) {
+                }
+                if (vName === InternalVariableNames.PORTION_OF_DAY) {
                     return getSegmentOfDay();
-                } else if (vState[vName]) {
+                }
+                if (vState[vName]) {
                     /* eslint-disable camelcase */
                     const { variable_type, value } = vState[vName];
                     switch(variable_type) {
