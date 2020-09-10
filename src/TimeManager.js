@@ -58,7 +58,6 @@ export default class TimeManager extends EventEmitter {
             if (this._timeElapsed >= startTime && this._timeElapsed <= endTime
                 && !isRunning){
                 logger.info(`TimeManager: ${this._rendererId} timer running timed event ${timeEventId}`);
-                startCallback();
                 this._timedEvents[timeEventId].isRunning = true;
                 startCallback();
             }
