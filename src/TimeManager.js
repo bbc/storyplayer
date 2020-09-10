@@ -135,7 +135,7 @@ export default class TimeManager extends EventEmitter {
         endTime: ?number = Infinity,
         clearCallback: ?Function,
     ) {
-        if (this._debug) logger.info(`timer: Added event for ${startTime}`);
+        if (this._debug) logger.info(`timer: Added event for ${listenerId} at ${startTime}`);
         this._timedEvents[listenerId] = {
             startTime,
             endTime,
