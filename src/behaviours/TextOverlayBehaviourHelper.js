@@ -32,8 +32,8 @@ export const renderTextOverlay = (behaviour, target, callback, controller) => {
         modalElement.style.backgroundColor = behaviour.background_colour;
     }
 
-    if (behaviour.font_size) {
-        modalElement.style.fontSize = behaviour.font_size;
+    if ('font_size' in behaviour) {
+        modalElement.style.fontSize = `${behaviour.font_size}%`;
     }
 
     setPosition(modalElement, behaviour);
