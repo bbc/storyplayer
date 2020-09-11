@@ -151,6 +151,7 @@ export default class AnalyticsHandler {
             from: appendedData.from,
             to: appendedData.to,
             data: this._segmentSummaryData,
+            userid: this.userid,
             current_narrative_element: appendedData.current_narrative_element,
             current_representation: appendedData.current_representation,
         };
