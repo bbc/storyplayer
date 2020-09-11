@@ -53,6 +53,10 @@ export default class BasePlayoutEngine {
         this._permissionToPlay = value;
     }
 
+    resetPlayoutEngine() {
+
+    }
+
     queuePlayout(rendererId: string, mediaObj: Object) {
         if (!this._media[rendererId]) {
             this._media[rendererId] = {

@@ -116,10 +116,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // TODO: first active playout is not set to autoplay so we have to
         // manually start it here. We will need to test this on iOS as I'd
         // expect it to not work correctly
-        this.play()
+        if (value) this.play()
     }
 
     queuePlayout(rendererId: string, mediaObj: Object) {
+        console.log('ANDY-SMP-PE QUEUE', rendererId);
         if(mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
             // Handle with Secondary Playout
             this._secondaryPlayoutEngine.queuePlayout(rendererId, mediaObj)
@@ -205,6 +206,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     unqueuePlayout(rendererId: string) {
+        console.log('ANDY-SMP-PE UNQUEUE', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.unqueuePlayout(rendererId)
@@ -227,7 +229,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return super.getPlayoutActive(rendererId)
     }
 
+    resetPlayoutEngine() {
+        this._smpPlayerInterface.stop();
+    }
+
     setPlayoutActive(rendererId: string) {
+        console.log('ANDY-SMP-PE set active', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setPlayoutActive(rendererId)

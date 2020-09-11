@@ -1021,6 +1021,7 @@ $start-button-size: 15vw;
   position: absolute;
   top: 0;
   width: 100%;
+  z-index: 1;
 }
 
 .romper-render-image {

@@ -824,9 +824,11 @@ class Player extends EventEmitter {
     }
 
     prepareForRestart() {
+        console.log('ANDY prepare player for restart');
         if (this._startExperienceButton || this._startExperienceImage) {
             this._removeExperienceOverlays();
         }
+        this.playoutEngine.resetPlayoutEngine();
         this.playoutEngine.pause();
         this._clearOverlays();
         this._disableUserInteraction();

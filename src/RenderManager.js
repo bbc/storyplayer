@@ -883,6 +883,7 @@ export default class RenderManager extends EventEmitter {
      * Prepare the render manager to restart the story
      */
     prepareForRestart() {
+        console.log('ANDY preparing render manager');
         Object.keys(this._activeRenderers).forEach((rendererNEId) => {
             const renderer = this._activeRenderers[rendererNEId];
             renderer.destroy();
