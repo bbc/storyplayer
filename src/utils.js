@@ -162,36 +162,36 @@ export const leftGreaterThanRight = (left, right) => {
  */
 export const replaceEscapedVariables = (textContent, controller) => {
     const varRefs = textContent.match(/\$\{(.*?)\}/g);
-    if (varRefs) {
-        return controller.getVariableState().then((vState) => {
-            const getVal = (vName) => {
-                if (vName === InternalVariableNames.DAY_OF_WEEK) {
-                    return getTodaysDay();
-                }
-                if (vName === InternalVariableNames.PORTION_OF_DAY) {
-                    return getSegmentOfDay();
-                }
-                if (vState[vName]) {
-                    /* eslint-disable camelcase */
-                    const { variable_type, value } = vState[vName];
-                    switch(variable_type) {
-                    case 'number':
-                        return value.toString();
-                    case 'boolean':
-                        return value ? 'yes' : 'no';
-                    case 'list':
-                    case 'string':
-                    default:
-                        return encodeURI(value);
-                    }
-                    /* eslint-enable camelcase */
-                }
-                return '';
-            };
-            const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
-            return replacedText;
-        });
+    if (!varRefs) {
+        return Promise.resolve(textContent);
     }
-    return Promise.resolve(textContent);
+    return controller.getVariableState().then((vState) => {
+        const getVal = (vName) => {
+            if (vName === InternalVariableNames.DAY_OF_WEEK) {
+                return getTodaysDay();
+            }
+            if (vName === InternalVariableNames.PORTION_OF_DAY) {
+                return getSegmentOfDay();
+            }
+            if (vState[vName]) {
+                /* eslint-disable camelcase */
+                const { variable_type, value } = vState[vName];
+                switch(variable_type) {
+                case 'number':
+                    return value.toString();
+                case 'boolean':
+                    return value ? 'yes' : 'no';
+                case 'list':
+                case 'string':
+                default:
+                    return encodeURI(value);
+                }
+                /* eslint-enable camelcase */
+            }
+            return '';
+        };
+        const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
+        return replacedText;
+    });
 };
 
