@@ -107,7 +107,6 @@ export default class Controller extends EventEmitter {
      * get render manager to tidy up
      */
     _prepareRenderManagerForRestart() {
-        console.log('ANDY resetting');
         this._removeListenersFromRenderManager();
         this._renderManager.prepareForRestart();
     }
@@ -126,7 +125,6 @@ export default class Controller extends EventEmitter {
             logger.error('Could not reset - no story id');
             return;
         }
-        console.log('ANDY in reset story');
         // set this to restart just in case
         this.setSessionState(SESSION_STATE.RESTART);
         // we're just resetting
@@ -1276,7 +1274,6 @@ export default class Controller extends EventEmitter {
         this._handleAnalytics(logData);
         if(this._storyId) {
             logger.warn(`Story id ${this._storyId} ended, resetting`);
-            console.log('ANDY story end');
             this.resetStory(this._storyId);
         }
         this.emit(REASONER_EVENTS.STORY_END);

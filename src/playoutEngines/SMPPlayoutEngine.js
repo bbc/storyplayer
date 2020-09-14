@@ -120,7 +120,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     queuePlayout(rendererId: string, mediaObj: Object) {
-        console.log('ANDY-SMP-PE QUEUE', rendererId);
         if(mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
             // Handle with Secondary Playout
             this._secondaryPlayoutEngine.queuePlayout(rendererId, mediaObj)
@@ -206,7 +205,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     unqueuePlayout(rendererId: string) {
-        console.log('ANDY-SMP-PE UNQUEUE', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.unqueuePlayout(rendererId)
@@ -234,7 +232,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutActive(rendererId: string) {
-        console.log('ANDY-SMP-PE set active', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setPlayoutActive(rendererId)
