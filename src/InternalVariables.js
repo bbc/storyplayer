@@ -39,7 +39,7 @@ export const getSegmentOfDay = () => {
     if (hourNow < 12) {
         segmentName = TimeWindowNames.MORNING;
     } else if (hourNow < 17) {
-        segmentName = TimeWindowNames.MORNING;
+        segmentName = TimeWindowNames.AFTERNOON;
     } else {
         segmentName = TimeWindowNames.EVENING;
     }
