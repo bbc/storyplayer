@@ -9,6 +9,8 @@ import AnalyticEvents from '../AnalyticEvents';
 
 /* eslint-disable class-methods-use-this */
 
+const SHOW_CHAPTER_BUTTON = false
+
 class SMPControls extends BaseControls {
 
     _logUserInteraction: Function;
@@ -61,17 +63,19 @@ class SMPControls extends BaseControls {
         // Controls enabled by default
         this._controlsEnabled = true
 
-        // Setup Chapter Overlay and attach Custom SMP button to it
-        this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons-smp');
-        this._containerDiv.classList.add('show');
-        this._containerDiv.appendChild(chapterOverlay.getOverlay());
+        if(SHOW_CHAPTER_BUTTON) {
+            // Setup Chapter Overlay and attach Custom SMP button to it
+            this._containerDiv = document.createElement('div');
+            this._containerDiv.classList.add('romper-buttons-smp');
+            this._containerDiv.classList.add('show');
+            this._containerDiv.appendChild(chapterOverlay.getOverlay());
+            this._createChapterButton()
+            chapterOverlay.useCustomButton(this._chapterButton)
+        }
 
         this._uiUpdateQueue = []
 
-        this._createChapterButton()
         this._createFbMixSlider()
-        chapterOverlay.useCustomButton(this._chapterButton)
 
         this._setDefaultSMPControlsConfig()
 
@@ -222,14 +226,9 @@ class SMPControls extends BaseControls {
         this._uiUpdate({
             enabled: true,
             spaceControlsPlayback: true,
-            // TODO: Should controls disappear at end?
             availableOnMediaEnded: true,
             includeNextButton: true,
             includePreviousButton: true,
-            // previousNextJustEvents not used in StoryKit Button Calls
-            // previousNextJustEvents: true,
-            includeBackIntervalButton: true,
-            includeForwardIntervalButton: true,
             alwaysEnablePreviousButton: false,
             alwaysEnableNextButton: false,
         })
