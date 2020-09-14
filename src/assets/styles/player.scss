@@ -684,6 +684,14 @@ $start-button-size: 15vw;
         pointer-events: none;
         transition: opacity 0.2s ease;
       }
+
+      >button{
+        &:focus {
+          border-right: none;
+          border-left: none;
+          border-top: none;
+        }
+      }
     }
 
     .romper-link-control {
