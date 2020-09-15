@@ -200,7 +200,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         }
 
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
-        logger.info(`SMP-SP readyPlaylist: ${rendererId}`, playlist)
         this._smpPlayerInterface.readyPlaylist(playlist)
         logger.info(`SMP-SP preloadFromCollection: ${rendererId}`)
         this._smpPlayerInterface.preloadFromCollection(rendererId)
