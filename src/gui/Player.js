@@ -11,7 +11,7 @@ import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
 import logger from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
-import BaseRenderer from '../renderers/BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
@@ -827,6 +827,7 @@ class Player extends EventEmitter {
         if (this._startExperienceButton || this._startExperienceImage) {
             this._removeExperienceOverlays();
         }
+        this.playoutEngine.resetPlayoutEngine();
         this.playoutEngine.pause();
         this._clearOverlays();
         this._disableUserInteraction();
@@ -857,7 +858,7 @@ class Player extends EventEmitter {
         this._userInteractionStarted = false;
         this._overlaysElement.classList.add('romper-inactive');
         this._controls.setControlsInactive()
-        this.playoutEngine.setPermissionToPlay(false);
+        this.playoutEngine.setPermissionToPlay(false, false);
     }
 
     _enableUserInteraction() {
@@ -868,7 +869,14 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
         this._controls.setControlsActive();
-        this.playoutEngine.setPermissionToPlay(true);
+        this.playoutEngine.setPermissionToPlay(
+            true,
+            this._currentRenderer.phase === RENDERER_PHASES.MAIN, // (don't start playing if in START)
+        );
+
+        if (this._currentRenderer.phase === RENDERER_PHASES.START) {
+            this._isPausedForBehaviours = true;
+        }
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
         this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);

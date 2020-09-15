@@ -109,14 +109,15 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    setPermissionToPlay(value: boolean) {
+    setPermissionToPlay(value: boolean, startNow: boolean) {
         this._secondaryPlayoutEngine.setPermissionToPlay(value)
         super.setPermissionToPlay(value)
 
         // TODO: first active playout is not set to autoplay so we have to
         // manually start it here. We will need to test this on iOS as I'd
         // expect it to not work correctly
-        this.play()
+        if (value) this.play()
+        if (!startNow) this.pause()
     }
 
     queuePlayout(rendererId: string, mediaObj: Object) {
@@ -214,6 +215,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
+        // this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, false);
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
         }
@@ -225,6 +227,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return this._secondaryPlayoutEngine.getPlayoutActive(rendererId)
         }
         return super.getPlayoutActive(rendererId)
+    }
+
+    resetPlayoutEngine() {
+        this._smpPlayerInterface.stop();
     }
 
     setPlayoutActive(rendererId: string) {

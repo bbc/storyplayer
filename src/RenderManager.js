@@ -215,7 +215,11 @@ export default class RenderManager extends EventEmitter {
             }
             this._player.playoutEngine.pauseBackgrounds();
         } else {
-            if (this._isPlaying) {
+            if (
+                this._currentRenderer
+                && this._isPlaying 
+                && this._currentRenderer.phase === RENDERER_PHASES.MAIN
+            ) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                     this._currentRenderer.play();
