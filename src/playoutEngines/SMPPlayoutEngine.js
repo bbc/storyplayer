@@ -200,6 +200,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         }
 
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
+        logger.info(`SMP-SP readyPlaylist: ${rendererId}`, playlist)
         this._smpPlayerInterface.readyPlaylist(playlist)
         logger.info(`SMP-SP preloadFromCollection: ${rendererId}`)
         this._smpPlayerInterface.preloadFromCollection(rendererId)
@@ -383,6 +384,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if(!rendererPlayoutObj) {
             return this._secondaryPlayoutEngine.setPlayoutInactive(rendererId)
         }
+
+        // We may need this renderer again so preload
+        this._smpPlayerInterface.preloadFromCollection(rendererId)
 
         return super.setPlayoutInactive(rendererId)
     }
