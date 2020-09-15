@@ -5,6 +5,7 @@ import Controller from '../Controller';
 import logger from '../logger';
 
 import { MediaFormats } from '../browserCapabilities';
+import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine'
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import { VIDEO, AUDIO } from '../utils';
 
@@ -109,6 +110,18 @@ export default class TimedMediaRenderer extends BaseRenderer {
         if(this.phase !== RENDERER_PHASES.MAIN) {
             return
         }
+        if(!this._playoutEngine.isPlaying()) {
+            // We must not end if paused. Firefox specific issue: Seeking to end
+            // on Firefox will cause end event to trigger. So if this happens
+            // we back MediaPlayer off a bit from end
+            const {currentTime} = this.getCurrentTime()
+            this.setCurrentTime(currentTime - 0.25)
+
+            // Play/Pause cycle to reset SMP to not be in a unstarted state
+            this._playoutEngine.play()
+            this._playoutEngine.pause()
+            return
+        }
         if (this.checkIsLooping()) {
             // eslint-disable-next-line max-len
             logger.warn(`received ended event for looping media on rep ${ this._rendererId} - need to loop manually`);
@@ -150,7 +163,13 @@ export default class TimedMediaRenderer extends BaseRenderer {
             this._endedEventListener();
             return;
         }
-        if (currentTime > (duration - 1)) {
+
+        // Stall Detection
+        // Only needed for non SMPPlayoutEngine
+        if (
+            !(this._playoutEngine instanceof SMPPlayoutEngine) &&
+            currentTime > (duration - 1)
+        ) {
             const nowTime = currentTime;
             if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
                 this._testEndStallTimeout = setTimeout(() => {
