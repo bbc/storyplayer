@@ -470,8 +470,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
 
     on(rendererId: string, event: string, callback: Function) {
-        // TODO: This is a horrible hack as non av don't exist in the playout engine
-        // yet
         if(event === "play" || event === "pause") {
             this._fakeEventEmitter.addListener(event, callback)
             return false

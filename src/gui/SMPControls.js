@@ -400,9 +400,9 @@ class SMPControls extends BaseControls {
             let seekTo = event.time;
             // Hack as SMP doesn't have time whilst playing fake item so detect is
             // seek is due to scrub or +/- 20s buttons
-            if(seekTo === this._smpPlayerInterface.currentTime + 20) {
+            if(seekTo === this._playoutEngine.getCurrentTime(renderer._rendererId) + 20) {
                 seekTo = Math.min(currentTime + 20, duration);
-            } else if(seekTo === 0 && this._smpPlayerInterface.currentTime <= 20) {
+            } else if(seekTo === 0 && this._playoutEngine.getCurrentTime(renderer._rendererId) <= 20) {
                 seekTo = Math.max(currentTime - 20, 0);
             }
             renderer.setCurrentTime(seekTo);
