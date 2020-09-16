@@ -110,18 +110,22 @@ export default class TimedMediaRenderer extends BaseRenderer {
         if(this.phase !== RENDERER_PHASES.MAIN) {
             return
         }
+        const {currentTime} = this.getCurrentTime()
         if(!this._playoutEngine.isPlaying()) {
             // We must not end if paused. Firefox specific issue: Seeking to end
             // on Firefox will cause end event to trigger. So if this happens
             // we back MediaPlayer off a bit from end
-            const {currentTime} = this.getCurrentTime()
-            this.setCurrentTime(currentTime - 0.25)
+            this._playoutEngine.setCurrentTime(this._rendererId, currentTime)
 
             // Play/Pause cycle to reset SMP to not be in a unstarted state
             this._playoutEngine.play()
             this._playoutEngine.pause()
             return
         }
+        // SMP returns to first frame of video on end
+        // Reset SMP back to the ending frame
+        this._playoutEngine.setCurrentTime(this._rendererId, currentTime)
+
         if (this.checkIsLooping()) {
             // eslint-disable-next-line max-len
             logger.warn(`received ended event for looping media on rep ${ this._rendererId} - need to loop manually`);
