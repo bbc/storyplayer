@@ -49,8 +49,12 @@ export default class BasePlayoutEngine {
         }
     }
 
-    setPermissionToPlay(value: boolean) {
+    setPermissionToPlay(value: boolean, startNow: boolean) {
         this._permissionToPlay = value;
+    }
+
+    resetPlayoutEngine() {
+
     }
 
     queuePlayout(rendererId: string, mediaObj: Object) {
