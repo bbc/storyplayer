@@ -1,5 +1,4 @@
-/* eslint-disable comma-dangle */
-import { SCHEMA_VERSION } from '@bbc/object-based-media-schema';
+const { SCHEMA_VERSION } = require('@bbc/object-based-media-schema');
 
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');

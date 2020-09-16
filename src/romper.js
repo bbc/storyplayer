@@ -113,12 +113,12 @@ module.exports = {
     VARIABLE_EVENTS,
     DOM_EVENTS,
     // eslint-disable-next-line no-undef
-    playerVersion: __VERSION__,
+    playerVersion: __PLAYER_VERSION__,
     // eslint-disable-next-line no-undef
     schemaVersion: __LATEST_SCHEMA_VERSION__,
     init: (settings: Settings): ?Controller => {
         // eslint-disable-next-line no-undef
-        logger.info('StoryPlayer Version: ', __VERSION__);
+        logger.info('StoryPlayer Version: ', __PLAYER_VERSION__);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
