@@ -17,7 +17,6 @@ import {
     UA_DEBUG_FLAG,
 } from './utils'
 
-import Package from '../package.json';
 
 // Import Assets for assetUrls object as they may not of been imported in CSS
 import './assets/images/media-play-8x.png';
@@ -113,8 +112,13 @@ module.exports = {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     DOM_EVENTS,
+    // eslint-disable-next-line no-undef
+    playerVersion: __VERSION__,
+    // eslint-disable-next-line no-undef
+    schemaVersion: __LATEST_SCHEMA_VERSION__,
     init: (settings: Settings): ?Controller => {
-        logger.info('StoryPlayer Version: ', Package.version);
+        // eslint-disable-next-line no-undef
+        logger.info('StoryPlayer Version: ', __VERSION__);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
