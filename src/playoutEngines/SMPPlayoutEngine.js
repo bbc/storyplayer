@@ -384,6 +384,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return this._secondaryPlayoutEngine.setPlayoutInactive(rendererId)
         }
 
+        // We may need this renderer again so preload
+        this._smpPlayerInterface.preloadFromCollection(rendererId)
+
         return super.setPlayoutInactive(rendererId)
     }
 
