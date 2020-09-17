@@ -17,6 +17,7 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
+import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
@@ -195,6 +196,7 @@ export default class BaseRenderer extends EventEmitter {
         this._handleLinkChoiceEvent = this._handleLinkChoiceEvent.bind(this);
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
+        this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._togglePause = this._togglePause.bind(this);
@@ -228,6 +230,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:socialmodal/v1.0': this._applySocialSharePanelBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
         };
 
         this._behaviourElements = [];
@@ -1392,6 +1396,16 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourElements.push(modalElement);
     }
 
+    _applyTextOverlayBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderTextOverlay(
+            behaviour,
+            this._player.getOverlayElement(),
+            callback,
+            this._controller,
+        );
+        this._setBehaviourElementAttribute(modalElement, 'text-overlay');
+        this._behaviourElements.push(modalElement);
+    }
 
     _setBehaviourElementAttribute(element: HTMLElement, attributeValue: string) {
         element.setAttribute('data-behaviour', attributeValue)
