@@ -29,6 +29,23 @@ const weekday = [
     'Saturday',
 ];
 
+export const getTodaysDay = () => {
+    return weekday[new Date().getDay()];
+}
+
+export const getSegmentOfDay = () => {
+    const hourNow = new Date().getHours();
+    let segmentName;
+    if (hourNow < 12) {
+        segmentName = TimeWindowNames.MORNING;
+    } else if (hourNow < 17) {
+        segmentName = TimeWindowNames.AFTERNOON;
+    } else {
+        segmentName = TimeWindowNames.EVENING;
+    }
+    return segmentName;
+}
+
 export default class InternalVariables {
     _dataResolver: DataResolver;
 
@@ -66,21 +83,12 @@ export default class InternalVariables {
 
     // sets the value of this variable to be a string for today's day of the week
     _setTodaysDay() {
-        this._setVariableValue(InternalVariableNames.DAY_OF_WEEK, weekday[new Date().getDay()]);
+        this._setVariableValue(InternalVariableNames.DAY_OF_WEEK, getTodaysDay());
     }
 
     // sets the value of this variable to be a string for today's time of day
     _setSegmentOfDay() {
-        const hourNow = new Date().getHours();
-        let segmentName;
-        if (hourNow < 12) {
-            segmentName = TimeWindowNames.MORNING;
-        } else if (hourNow < 17) {
-            segmentName = TimeWindowNames.MORNING;
-        } else {
-            segmentName = TimeWindowNames.EVENING;
-        }
-        this._setVariableValue(InternalVariableNames.PORTION_OF_DAY, segmentName);
+        this._setVariableValue(InternalVariableNames.PORTION_OF_DAY, getSegmentOfDay());
     }
 
     // eslint-disable-next-line class-methods-use-this

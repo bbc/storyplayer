@@ -1039,6 +1039,17 @@ $start-button-size: 15vw;
       color: inherit;
     }
   }
+
+  &.text-overlay {
+    align-items: center;
+    display: flex;
+    font-size: 150%;
+    text-align: center;
+
+    >div {
+      width: 100%;
+    }
+  }
 }
 
 .romper-close-button {
