@@ -101,7 +101,10 @@ if(getSetting(UA_DEBUG_FLAG)) {
         + `<h3>Chosen Playout</h3>`
         + `${MediaFormats.getPlayoutEngine()}`
 }
-
+// eslint-disable-next-line no-undef
+const playerVersion = __PLAYER_VERSION__;
+// eslint-disable-next-line no-undef
+const schemaVersion = __LATEST_SCHEMA_VERSION__;
 module.exports = {
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
@@ -112,13 +115,11 @@ module.exports = {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     DOM_EVENTS,
-    // eslint-disable-next-line no-undef
-    playerVersion: __PLAYER_VERSION__,
-    // eslint-disable-next-line no-undef
-    schemaVersion: __LATEST_SCHEMA_VERSION__,
+    playerVersion,
+    schemaVersion,
     init: (settings: Settings): ?Controller => {
         // eslint-disable-next-line no-undef
-        logger.info('StoryPlayer Version: ', __PLAYER_VERSION__);
+        logger.info('StoryPlayer Version: ', playerVersion, 'schema Version', schemaVersion);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
