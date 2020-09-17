@@ -40,7 +40,7 @@ app.on('ready', () => {
 
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
-        const story = await getStory(data.storyName);
+        const story = await getStory(data.storyDirectory);
 
         // Check schema of all stories
         let matchingSchema = true;

@@ -4,7 +4,7 @@ const { ipcRenderer } = require('electron');
  * Generates a single html option element using the story dir as value
  * @param {Object} storyName 
  */
-generateOption = (storyName) => {
+const generateOption = (storyName) => {
     const option = document.createElement('option');
     option.setAttribute('value', storyName.dirName);
     option.textContent = storyName.name;
@@ -14,9 +14,10 @@ generateOption = (storyName) => {
 /**
  * Returns an html select element with a placeholder option
  * and an option for each story in data
- * @param {Array} data 
+ * @param {Array} data
+ * @fires get-story with {storyDirectory, schemaVersion, playerVersion }
  */
-generateDropdown = (data) => {
+const generateDropdown = (data) => {
     const home = document.getElementById('story-selector-container');
     const storySelector = document.createElement('div');
     storySelector.classList.add('story-selectors');
@@ -32,7 +33,7 @@ generateDropdown = (data) => {
         dropdown.appendChild(generateOption(storyName))
     });
     dropdown.onchange = () => ipcRenderer.send('get-story', {
-        storyName: dropdown.value,
+        storyDirectory: dropdown.value,
         schemaVersion: window.schemaVersion,
         playerVersion: window.playerVersion
     });
@@ -40,7 +41,6 @@ generateDropdown = (data) => {
 };
 
 ipcRenderer.on('list-stories', (event, data) => {
-    console.log('data', data);
     generateDropdown(data);
 });
 
