@@ -5,7 +5,7 @@ const { getStory, listStories }  = require('./utilities');
 const { createAppMenu } = require('./menu');
 
 const playerVersion = '0.17.9';
-const schemaVersion = '0.3.7';
+const schemaVersion = '0.3.6';
 
 // create the main window variable
 let mainWindow;
