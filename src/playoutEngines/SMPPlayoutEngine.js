@@ -550,6 +550,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             else {
                 mediaObject.loop = false;
             }
+        } else {
+            this._secondaryPlayoutEngine.setLoopAttribute(rendererId, loop);
         }
     }
 
