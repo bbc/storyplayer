@@ -4,8 +4,6 @@ const logger = require('electron-log');
 const { getStory, listStories }  = require('./utilities');
 const { createAppMenu } = require('./menu');
 
-const playerVersion = '0.17.9';
-const schemaVersion = '0.3.6';
 
 // create the main window variable
 let mainWindow;
@@ -42,12 +40,12 @@ app.on('ready', () => {
 
     // on event get-story we fetch the story and reply
     ipcMain.on('get-story', async (event, data) => {
-        const story = await getStory(data);
+        const story = await getStory(data.storyName);
 
         // Check schema of all stories
         let matchingSchema = true;
         for (let i = 0; i < story.stories.length; i+=1) {
-            if (story.stories[i].schema_version !== schemaVersion)
+            if (story.stories[i].schema_version !== data.schemaVersion)
                 matchingSchema = false;
         }
 
@@ -56,7 +54,7 @@ app.on('ready', () => {
         } else {
             dialog.showMessageBoxSync({
                 type: 'error',
-                message: `This story cannot be played by StoryPlayer v${playerVersion}.\n\n`+
+                message: `This story cannot be played by StoryPlayer v${data.playerVersion}.\n\n`+
                 `Please download and install the latest StoryPlayer, re-export this story, and try again.`
             });
         }

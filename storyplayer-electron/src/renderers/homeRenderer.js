@@ -31,7 +31,11 @@ generateDropdown = (data) => {
     data.forEach(async (storyName) => {
         dropdown.appendChild(generateOption(storyName))
     });
-    dropdown.onchange = () => ipcRenderer.send('get-story', dropdown.value);
+    dropdown.onchange = () => ipcRenderer.send('get-story', {
+        storyName: dropdown.value,
+        schemaVersion: window.schemaVersion,
+        playerVersion: window.playerVersion
+    });
     home.appendChild(storySelector);
 };
 
