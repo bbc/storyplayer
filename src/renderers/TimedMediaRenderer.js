@@ -115,7 +115,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
             // We must not end if paused. Firefox specific issue: Seeking to end
             // on Firefox will cause end event to trigger. So if this happens
             // we back MediaPlayer off a bit from end
-            this._playoutEngine.setCurrentTime(this._rendererId, currentTime)
+            this._playoutEngine.setCurrentTime(this._rendererId, currentTime - 0.1)
 
             // Play/Pause cycle to reset SMP to not be in a unstarted state
             this._playoutEngine.play()
