@@ -685,11 +685,11 @@ $start-button-size: 15vw;
         transition: opacity 0.2s ease;
       }
 
-      >button{
+      >button {
         &:focus {
-          border-right: none;
-          border-left: none;
-          border-top: none;
+          border-left: unset;
+          border-right: unset;
+          border-top: unset;
         }
       }
     }
@@ -699,9 +699,9 @@ $start-button-size: 15vw;
       border-bottom-color: $transparent;
       border-bottom-style: solid;
       border-bottom-width: $romper-button-border;
-      border-left: 0;
-      border-right: 0;
-      border-top: 0;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-top: 2px solid transparent;
       color: inherit;
       cursor: pointer;
       flex: 1 1 0;
