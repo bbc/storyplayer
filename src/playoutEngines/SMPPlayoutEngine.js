@@ -552,12 +552,17 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     applyStyle(rendererId: string, key: string, value: string) {
-        // TODO: The below may help with styling
-        // this._smpPlayerInterface.requestVideoElement(true)
-        throw new Error("SMP RenderEngine doesn't allow setting style");
+        const mediaElement = this._smpPlayerInterface.requestVideoElement(true);
+        if (mediaElement) {
+            mediaElement.style[key] = value;
+        }
     }
 
     clearStyle(rendererId: string, key: string) {
+        const mediaElement = this._smpPlayerInterface.requestVideoElement(true);
+        if (mediaElement) {
+            mediaElement.style[key] = '';
+        }
     }
 
     // TODO: Background Audio Renderer fades in to volume 1
