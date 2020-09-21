@@ -31,6 +31,52 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         super(player, debugPlayout);
 
         // Get Playout Engine to use for BackgroundAudio
+        this._createSecondaryPlayoutEngine(player, debugPlayout);
+
+        this._smpPlayerInterface.addEventListener("pause", (event) => {
+            // Hack to update playing status from SMP
+            if(!event.ended && event.paused) {
+                this.pause(false);
+            }
+        })
+
+        // Play Button
+        this._smpPlayerInterface.addEventListener("play", () => {
+            // Hack to update playing status from SMP
+            this.play(false);
+        })
+
+        this._fakeItemRendererId = null
+        this._fakeItemDuration = -1
+        this._fakeItemLoaded = false
+        this._fakeEventEmitter = new EventEmitter();
+
+        this._smpPlayerInterface.addEventListener("play", (e) => {
+            this._fakeEventEmitter.emit("play", e);
+        });
+        this._smpPlayerInterface.addEventListener("pause", (e) => {
+            this._fakeEventEmitter.emit("pause", e);
+        });
+
+        this._volume = 1;
+        this._backgroundMix = 1;
+
+        this._smpPlayerInterface.addEventListener("volumechange", (e) => {
+            let { volume } = e;
+            if(e.muted) {
+                volume = 0;
+            }
+            this._volume = volume;
+            const backgroundAudioVolume = this._volume * this._backgroundMix;
+            this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
+        });
+
+        this._smpFakePlay = this._smpFakePlay.bind(this);
+        this._smpFakePause = this._smpFakePause.bind(this);
+        this._smpFakeLoad = this._smpFakeLoad.bind(this);
+    }
+
+    _createSecondaryPlayoutEngine(player: Player, debugPlayout: boolean) {
         const playoutToUse = MediaFormats.getPlayoutEngine(true);
 
         logger.info('SMP: Using backup playout engine: ', playoutToUse);
@@ -50,48 +96,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
-
-        this._smpPlayerInterface.addEventListener("pause", (event) => {
-            // Hack to update playing status from SMP
-            if(!event.ended && event.paused) {
-                this.pause(false)
-            }
-        })
-
-        // Play Button
-        this._smpPlayerInterface.addEventListener("play", () => {
-            // Hack to update playing status from SMP
-            this.play(false)
-        })
-
-        this._fakeItemRendererId = null
-        this._fakeItemDuration = -1
-        this._fakeItemLoaded = false
-        this._fakeEventEmitter = new EventEmitter();
-
-        this._smpPlayerInterface.addEventListener("play", (e) => {
-            this._fakeEventEmitter.emit("play", e)
-        });
-        this._smpPlayerInterface.addEventListener("pause", (e) => {
-            this._fakeEventEmitter.emit("pause", e)
-        });
-
-        this._volume = 1
-        this._backgroundMix = 1
-
-        this._smpPlayerInterface.addEventListener("volumechange", (e) => {
-            let { volume } = e
-            if(e.muted) {
-                volume = 0
-            }
-            this._volume = volume
-            const backgroundAudioVolume = this._volume * this._backgroundMix
-            this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
-        });
-
-        this._smpFakePlay = this._smpFakePlay.bind(this);
-        this._smpFakePause = this._smpFakePause.bind(this);
-        this._smpFakeLoad = this._smpFakeLoad.bind(this);
     }
 
     setFbMix(fbMixValue) {
