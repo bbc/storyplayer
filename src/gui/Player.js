@@ -186,6 +186,24 @@ class Player extends EventEmitter {
         this._aspectRatio = 16 / 9;
 
 
+        // bind various functions
+        this._logUserInteraction = this._logUserInteraction.bind(this);
+        this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
+        this._showErrorLayer = this._showErrorLayer.bind(this);
+        this._removeErrorLayer = this._removeErrorLayer.bind(this);
+        this.showBufferingLayer = this.showBufferingLayer.bind(this);
+        this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
+        this._addContinueModal = this._addContinueModal.bind(this);
+        this._startButtonHandler = this._startButtonHandler.bind(this);
+        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
+        this._addCountdownToElement = this._addCountdownToElement.bind(this);
+
+        // add fullscreen handling
+        this._toggleFullScreen = this._toggleFullScreen.bind(this);
+        this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
+        this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
+
+
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
             logger.info("Playout debugging: ON");
@@ -209,29 +227,7 @@ class Player extends EventEmitter {
         // create the playout engine
         this._createPlayoutEngine(debugPlayout);
 
-
-        // bind various functions
-        this._logUserInteraction = this._logUserInteraction.bind(this);
-        this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
-        this._showErrorLayer = this._showErrorLayer.bind(this);
-        this._removeErrorLayer = this._removeErrorLayer.bind(this);
-        this.showBufferingLayer = this.showBufferingLayer.bind(this);
-        this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
-        this._addContinueModal = this._addContinueModal.bind(this);
-        this._startButtonHandler = this._startButtonHandler.bind(this);
-        this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
-        this._addCountdownToElement = this._addCountdownToElement.bind(this);
-
-        // add fullscreen handling
-        this._toggleFullScreen = this._toggleFullScreen.bind(this);
-        this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
-        this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
-
         this._addFullscreenListeners();
-
-        
-        
-
 
         // listen for button events and handle them
         this._setupButtonHandling();
