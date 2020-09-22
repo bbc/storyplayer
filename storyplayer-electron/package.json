@@ -1,6 +1,6 @@
 {
   "name": "StoryPlayer",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "productName": "BBC StoryPlayer",
   "description": "Storyplayer standalone application",
   "main": "src/mainProcess/main.js",
