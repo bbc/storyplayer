@@ -119,7 +119,7 @@ module.exports = {
     schemaVersion,
     init: (settings: Settings): ?Controller => {
         // eslint-disable-next-line no-undef
-        logger.info('StoryPlayer Version: ', playerVersion, 'Schema Version', schemaVersion);
+        logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
