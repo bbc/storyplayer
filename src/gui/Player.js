@@ -189,7 +189,7 @@ class Player extends EventEmitter {
         this._countdownTotal = 0;
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
-        
+
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
@@ -213,7 +213,6 @@ class Player extends EventEmitter {
         }
         this._isPausedForBehaviours = false;
 
-
         // create the layer elements
         this._createLayerElements();
 
@@ -221,18 +220,16 @@ class Player extends EventEmitter {
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
-
-        // create the playout engine
-        this._createPlayoutEngine(debugPlayout);
-
-        this._addFullscreenListeners();
-
-        
+                
         // Create the overlays.
         this._volume = this._createOverlay('volume', this._logUserInteraction);
         this._icon = this._createOverlay('icon', this._logUserInteraction);
         this._representation = this._createOverlay('representation', this._logUserInteraction);
 
+        // create the playout engine
+        this._createPlayoutEngine(debugPlayout);
+
+        this._addFullscreenListeners();
 
         // listen for button events and handle them
         this._setupButtonHandling();
