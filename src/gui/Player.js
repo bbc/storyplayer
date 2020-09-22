@@ -10,7 +10,7 @@ import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import logger from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
-import BaseRenderer from '../renderers/BaseRenderer';
+import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
@@ -26,7 +26,9 @@ import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
+import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
+import { createElementWithClass } from '../documentUtils';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -184,7 +186,25 @@ class Player extends EventEmitter {
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
 
-        const playoutToUse = MediaFormats.getPlayoutEngine();
+
+        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
+        if (debugPlayout) {
+            logger.info("Playout debugging: ON");
+        }
+        this._isPausedForBehaviours = false;
+
+
+        // create the layer elements
+        this._createLayerElements();
+
+        // Expose the layers for external manipulation if needed.
+        this.guiTarget = this._guiLayer;
+        this.mediaTarget = this._mediaLayer;
+        this.backgroundTarget = this._backgroundLayer;
+
+        // create the playout engine
+        this._createPlayoutEngine(debugPlayout);
+
 
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
@@ -198,7 +218,6 @@ class Player extends EventEmitter {
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
 
-
         // add fullscreen handling
         this._toggleFullScreen = this._toggleFullScreen.bind(this);
         this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
@@ -206,75 +225,12 @@ class Player extends EventEmitter {
 
         this._addFullscreenListeners();
 
-        this._player = document.createElement('div');
-        this._player.classList.add('romper-player');
-        this._player.classList.add('noselect');
-
-        this._backgroundLayer = document.createElement('div');
-        this._backgroundLayer.classList.add('romper-background');
-
-        this._mediaLayer = document.createElement('div');
-        this._mediaLayer.id = 'media-layer';
-        this._mediaLayer.classList.add('romper-media');
-
-        this._loadingLayer = document.createElement('div');
-        this._loadingLayer.id = 'loading-layer';
-        this._loadingLayer.classList.add('romper-loading');
-        const loadingLayerInner = document.createElement('div');
-        loadingLayerInner.classList.add('romper-loading-inner');
-        this._loadingLayer.appendChild(loadingLayerInner);
-        this._mediaLayer.appendChild(this._loadingLayer);
-
-        this._guiLayer = document.createElement('div');
-        this._guiLayer.id = 'gui-layer';
-        this._guiLayer.classList.add('romper-gui');
-
-        this._errorLayer = document.createElement('div');
-        // eslint-disable-next-line max-len
-        const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
-        this._errorLayer.appendChild(errorMessage);
-        this._errorLayer.classList.add('romper-error');
-        this._errorLayer.classList.add('hide');
-
-        this._continueModalLayer = document.createElement('div');
-        this._continueModalLayer.id = 'continue-modal';
-        this._continueModalLayer.classList.add('continue-modal');
-
-        this._continueModalContent = document.createElement('div');
-        this._continueModalContent.classList.add('continue-modal-content');
-        this._continueModalLayer.appendChild(this._continueModalContent);
-
-        this._player.appendChild(this._backgroundLayer);
-        this._player.appendChild(this._mediaLayer);
-        this._player.appendChild(this._guiLayer);
-        this._player.appendChild(this._errorLayer);
-        this._guiLayer.appendChild(this._continueModalLayer);
-
-        this._overlaysElement = document.createElement('div');
-        this._overlaysElement.classList.add('romper-overlays');
-        this._overlaysElement.classList.add('buttons-hidden');
-
-        this._guiLayer.appendChild(this._overlaysElement);
-
-        // Hide gui elements until start clicked
-        this._overlaysElement.classList.add('romper-inactive');
-
+        
         // Create the overlays.
         this._volume = this._createOverlay('volume', this._logUserInteraction);
         this._icon = this._createOverlay('icon', this._logUserInteraction);
         this._representation = this._createOverlay('representation', this._logUserInteraction);
 
-        // create the button manager and scrub bar according to playout engine
-        switch (playoutToUse) {
-        // case PLAYOUT_ENGINES.SMP_PLAYOUT:
-        // SMP connect its own transport buttons and scrub bar
-        // this._buttonControls = new SMPButtons(this._logUserInteraction);
-        // this._scrubBar = new SMPScrubBar(this._logUserInteraction);
-        // it can choose to use the buttons created by the overlays or make its own
-        default:
-            // use normal built-in scrub bar, buttons, etc
-            this._buildStandardControls();
-        }
 
         // listen for button events and handle them
         this._setupButtonHandling();
@@ -283,25 +239,16 @@ class Player extends EventEmitter {
         this._createCountdownElement();
 
         // facebook problem workaround
-        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
-        const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
-        if(facebookiOSWebview && !overrideFacebookBlock) {
-            const fbWebviewDiv = document.createElement('div');
-            fbWebviewDiv.className = "webview-error";
-            fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"
-                + "<h1>Facebook Browser is not supported</h1>"
-                + "<p>Please click on the three dots in top right corner and click "
-                + "'Open in Safari'</p></div>";
-            target.appendChild(fbWebviewDiv);
-        } else {
-            target.appendChild(this._player);
-        }
+        this.addFacebookWebviewOverride(target);
 
-        // Expose the layers for external manipulation if needed.
-        this.guiTarget = this._guiLayer;
-        this.mediaTarget = this._mediaLayer;
-        this.backgroundTarget = this._backgroundLayer;
+        // add the event listeners to the layers
+        this._addEventListeners();
+    }
 
+    /**
+     * Adds event listeners to the document and overlays elements
+     */
+    _addEventListeners() {
         // Event Listeners
         // keyboard
         if (this._controller.handleKeys) {
@@ -314,56 +261,92 @@ class Player extends EventEmitter {
             'touchend',
             handleButtonTouchEvent(this._handleOverlayClick.bind(this)),
         );
+    }
 
 
-        this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
-
-        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
-        if (debugPlayout) {
-            logger.info("Playout debugging: ON")
-        }
-        this._isPausedForBehaviours = false;
-
+    /**
+     * Creates an instance of the playout engine to use based on the media formats
+     * @param {boolean} debugPlayout debug playout or not
+     */
+    _createPlayoutEngine(debugPlayout: boolean) {
+        const playoutToUse = MediaFormats.getPlayoutEngine();
         logger.info('Using playout engine: ', playoutToUse);
 
         switch (playoutToUse) {
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
             this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
+            this._buildStandardControls();
             break;
         case PLAYOUT_ENGINES.IOS_PLAYOUT:
             // Refactored iOS playout engine
             this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
+            this._buildStandardControls();
             break;
-        case PLAYOUT_ENGINES.SMP_PLAYOUT:
-            // SMP playout engine
-            throw new Error("Not Implemented Yet!")
         default:
             logger.fatal('Invalid Playout Engine');
             throw new Error('Invalid Playout Engine');
         }
-
-        if(debugPlayout) {
-            // Print all calls to PlayoutEngine along with their arguments
-            const playoutEngineHandler = {
-                get (getTarget, getProp) {
-                    // eslint-disable-next-line func-names
-                    return function() {
-                        /* eslint-disable prefer-rest-params */
-                        logger.info( `PlayoutEngine call (C): ${getProp} (${arguments.length})` );
-                        logger.info( `PlayoutEngine call (C+A): ${getProp}`, ...arguments );
-                        // eslint-disable-next-line prefer-spread
-                        const ret = getTarget[ getProp ].apply( getTarget, arguments );
-                        logger.info( `PlayoutEngine call (C+R): ${getProp}`, ret );
-                        /* eslint-enable prefer-rest-params */
-
-                        return ret
-                    }
-                },
-            };
-            this.playoutEngine = new Proxy(this.playoutEngine, playoutEngineHandler);
-        }
     }
+
+    _createLayerElements() {
+        // create a player element
+        this._player = createElementWithClass('div', 'storyplayer', ['romper-player']);
+        // create the background layer
+        this._backgroundLayer = createElementWithClass('div', 'storyplayer-background', ['romper-background'])
+        // create the foreground media layer
+        this._mediaLayer = createElementWithClass('div', 'media-layer', ['romper-media'])
+
+        this._loadingLayer = createElementWithClass('div', 'loading-layer', ['romper-loading']);
+        const loadingLayerInner = createElementWithClass('div', 'loading-layer-inner', ['romper-loading-inner']);
+
+        this._loadingLayer.appendChild(loadingLayerInner);
+        this._mediaLayer.appendChild(this._loadingLayer);
+        
+
+        // create gui layer we use for buttons and user interactions
+        this._guiLayer = createElementWithClass('div', 'gui-layer', ['romper-gui']);
+        // create error layer
+        this._createErrorLayer();
+        // create the start button modal layer
+        this._createModalLayer();
+        
+        this._player.appendChild(this._backgroundLayer);
+        this._player.appendChild(this._mediaLayer);
+        this._player.appendChild(this._guiLayer);
+        this._player.appendChild(this._errorLayer);
+        this._guiLayer.appendChild(this._continueModalLayer);
+
+        // Hide gui elements until start clicked with 'romper-inactive'
+        this._overlaysElement = createElementWithClass('div', 'romper-overlays', ['romper-overlays', 'buttons-hidden', 'romper-inactive']);
+
+        // append the overlays to the gui elemebt
+        this._guiLayer.appendChild(this._overlaysElement);
+    }
+
+
+    /**
+     * Creates the error layer
+     */
+    _createErrorLayer() {
+        this._errorLayer = createElementWithClass('div', 'error-layer', ['romper-error', 'hide']);
+
+        // eslint-disable-next-line max-len
+        const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
+        this._errorLayer.appendChild(errorMessage);
+    }
+
+    /**
+     * creates the start/continue modal layer
+     */
+    _createModalLayer() {
+        this._continueModalLayer = createElementWithClass('div', 'continue-modal', ['continue-modal'])
+
+        this._continueModalContent = createElementWithClass('div', 'continue-modal-content', ['continue-modal-content']);
+
+        this._continueModalLayer.appendChild(this._continueModalContent);
+    }
+
 
     // build UI components
     _buildStandardControls() {
@@ -375,6 +358,8 @@ class Player extends EventEmitter {
         );
         this._guiLayer.appendChild(this._controls.getControls());
         this._guiLayer.appendChild(this._controls.getActivator());
+
+        this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
     }
 
     // create an element ready for rendering countdown
@@ -1724,6 +1709,22 @@ class Player extends EventEmitter {
         document.addEventListener('mozfullscreenchange', this._handleFullScreenEvent);
         document.addEventListener('fullscreenchange', this._handleFullScreenEvent);
         document.addEventListener('MSFullscreenChange', this._handleFullScreenEvent);
+    }
+
+    addFacebookWebviewOverride(target: HTMLElement) {
+        const facebookiOSWebview = BrowserUserAgent.facebookWebview() && BrowserUserAgent.iOS();
+        const overrideFacebookBlock = getSetting(FACEBOOK_BLOCK_FLAG);
+        if(facebookiOSWebview && !overrideFacebookBlock) {
+            const fbWebviewDiv = document.createElement('div');
+            fbWebviewDiv.className = "webview-error";
+            fbWebviewDiv.innerHTML = "<div class=\"webview-error-div\">"
+                + "<h1>Facebook Browser is not supported</h1>"
+                + "<p>Please click on the three dots in top right corner and click "
+                + "'Open in Safari'</p></div>";
+            target.appendChild(fbWebviewDiv);
+        } else {
+            target.appendChild(this._player);
+        }
     }
 }
 
