@@ -1,6 +1,7 @@
 import BaseRenderer from "../renderers/BaseRenderer";
 import Player from '../gui/Player';
 import AnalyticEvents from '../AnalyticEvents';
+import { createElementWithClass } from "../documentUtils";
 
 // @flow
 
@@ -11,8 +12,8 @@ const _getLongListVariableSetter = (
     getVariableValue: Function,
     setVariableValue: Function,
 ) => {
-    const varInput = document.createElement('div');
-    varInput.classList.add('romper-var-form-input-container');
+    const varInputId = `${varName}-input-list`
+    const varInput = createElementWithClass('div', varInputId, ['romper-var-form-input-container']);
 
     const options = variableDecl.values;
     const varInputSelect = document.createElement('select');
@@ -42,15 +43,15 @@ const _getBooleanVariableSetter = (
     getVariableValue: Function,
     setVariableValue: Function,
 ) => {
-    const varInput = document.createElement('div');
-    varInput.classList.add('romper-var-form-input-container');
+    const varInputId = `${varName}-input-boolean`;
+    const varInput = createElementWithClass('div', varInputId, ['romper-var-form-input-container']);
 
-    const varInputSelect = document.createElement('div');
-    varInputSelect.classList.add('romper-var-form-button-div');
+    const varInputSelect = createElementWithClass('div', `${varInputId}-select`, ['romper-var-form-button-div']);
 
-    const yesElement = document.createElement('button');
+    const yesElement = createElementWithClass('button', `${varInputId}-yes`, null);
     yesElement.setAttribute('type', 'button');
-    const noElement = document.createElement('button');
+
+    const noElement = createElementWithClass('button', `${varInputId}-no`, null);
     noElement.setAttribute('type', 'button');
 
     const setSelected = (varVal) => {
@@ -90,10 +91,10 @@ const _getIntegerVariableSetter = (
     getVariableValue: Function,
     setVariableValue: Function,
 ) => {
-    const varInput = document.createElement('div');
-    varInput.classList.add('romper-var-form-input-container');
+    const varInputId = `${varName}-input-number`;
+    const varInput = createElementWithClass('div', varInputId, ['romper-var-form-input-container']);
 
-    const varIntInput = document.createElement('input');
+    const varIntInput = createElementWithClass('input', `${varInputId}-input`, null);
     varIntInput.type = 'number';
 
     getVariableValue(varName)
@@ -114,8 +115,8 @@ const _getNumberRangeVariableSetter = (
     getVariableValue: Function,
     setVariableValue: Function,
 ) => {
-    const varInput = document.createElement('div');
-    varInput.classList.add('romper-var-form-input-container');
+    const varInputId = `${varName}-input-range`;
+    const varInput = createElementWithClass('div', varInputId, ['romper-var-form-input-container']);
 
     const sliderDiv = document.createElement('div');
     sliderDiv.style.position = 'relative';
@@ -137,18 +138,14 @@ const _getNumberRangeVariableSetter = (
     const outputTest = document.createElement('div');
     outputTest.className = 'romper-var-form-range-output';
 
-    const slider = document.createElement('input');
+    const slider = createElementWithClass('input', `variable-input-${varName}`, ['romper-var-form-slider']);
     slider.type = 'range';
-    slider.classList.add('romper-var-form-slider');
-    slider.id = `variable-input-${varName}`;
 
     sliderDiv.appendChild(minSpan);
     sliderDiv.appendChild(slider);
     sliderDiv.appendChild(maxSpan);
 
-    const numberInput = document.createElement('input');
-    numberInput.classList.add('romper-var-form-slider-input');
-    numberInput.classList.add('slider-input');
+    const numberInput = createElementWithClass('input', `${varInputId}-input`, ['romper-var-form-slider-input', 'slider-input']);
     numberInput.type = 'number';
 
     const setOutputPosition = () => {
@@ -210,24 +207,20 @@ const getVariableSetter = (
     getVariableValue: Function,
     setVariableValue: Function,
 ): HTMLDivElement => {
-    const variableDiv = document.createElement('div');
-    variableDiv.className = 'romper-variable-form-item';
-    variableDiv.id = `romper-var-form-${behaviourVar.variable_name.replace('_', '-')}`;
+    const variableDivId = `romper-var-form-${behaviourVar.variable_name.replace('_', '-')}`;
+    const variableDiv = createElementWithClass('div', variableDivId, ['romper-variable-form-item']);
 
     const variableType = variableDecl.variable_type;
     const variableName = behaviourVar.variable_name;
 
-    const labelDiv = document.createElement('div');
-    labelDiv.className = 'romper-var-form-label-div';
+    const labelDiv = createElementWithClass('div', null, ['romper-var-form-label-div']);
     const labelSpan = document.createElement('span');
     labelSpan.innerHTML = behaviourVar.label;
     labelDiv.appendChild(labelSpan);
     variableDiv.appendChild(labelDiv);
 
-    const answerContainer = document.createElement('div');
-    answerContainer.className = 'romper-var-form-answer-cont-inner';
-    const answerContainerOuter = document.createElement('div');
-    answerContainerOuter.className = 'romper-var-form-answer-cont';
+    const answerContainer = createElementWithClass('div', null, ['romper-var-form-answer-cont-inner']);
+    const answerContainerOuter = createElementWithClass('div', null, ['romper-var-form-answer-cont']);
 
     answerContainerOuter.appendChild(answerContainer);
 
@@ -273,45 +266,35 @@ const getVariableSetter = (
 };
 
 const createVarPanelElements = (formTitle, backgroundColour): Object => {
-    const variablePanelElement = document.createElement('div');
-    variablePanelElement.className = 'romper-variable-panel';
+    const variablePanelElement = createElementWithClass('div', 'variable-panel', ['romper-variable-panel']);
 
     if (backgroundColour) {
         variablePanelElement.style.background = backgroundColour;
     }
 
-    const titleDiv = document.createElement('div');
+    const titleDiv = createElementWithClass('div', 'form-title', ['romper-var-form-title']);
     titleDiv.innerHTML = formTitle;
-    titleDiv.className = 'romper-var-form-title';
     variablePanelElement.appendChild(titleDiv);
 
-    const variablesFormContainer = document.createElement('div');
-    variablesFormContainer.className = 'romper-var-form-var-containers';
+    const variablesFormContainer = createElementWithClass('div', null, ['romper-var-form-var-containers']);
 
-    const carouselDiv = document.createElement('div');
-    carouselDiv.className = 'romper-var-form-carousel';
+    const carouselDiv = createElementWithClass('div', null, ['romper-var-form-carousel']);
     variablesFormContainer.appendChild(carouselDiv);
     variablePanelElement.appendChild(carouselDiv);
 
-    const okButtonContainer = document.createElement('div');
+    const okButtonContainer = createElementWithClass('div', null, ['romper-var-form-button-container']);
 
-    okButtonContainer.className = 'romper-var-form-button-container';
-    const okButton = document.createElement('input');
-    okButton.className = 'romper-var-form-button';
+    const okButton = createElementWithClass('input', 'var-next', ['romper-var-form-button', 'var-next']);
     okButton.type = 'button';
-    okButton.classList.add('var-next');
     okButton.value = 'Next';
     variablePanelElement.appendChild(okButtonContainer);
 
     // back button
-    const backButton = document.createElement('input');
+    const backButton = createElementWithClass('input', 'var-back', ['romper-var-form-button', 'var-back']);
     backButton.type = 'button';
     backButton.value = 'Back';
-    backButton.classList.add('var-back');
-    backButton.classList.add('romper-var-form-button');
 
-    const statusSpan = document.createElement('span');
-    statusSpan.classList.add('var-count');
+    const statusSpan = createElementWithClass('span', 'var-count', ['var-count']);
     statusSpan.textContent = '';
 
     okButtonContainer.appendChild(backButton);

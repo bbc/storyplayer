@@ -1,5 +1,7 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 
+import { createElementWithClass } from "../documentUtils";
+
 /* eslint-disable no-param-reassign */
 const setDefinedPosition = (modalElement, behaviour) => {
     const { top, left, width, height, bottom, right } = behaviour.position;
@@ -15,9 +17,7 @@ const setDefinedPosition = (modalElement, behaviour) => {
 const createContainer = (target) => {
     let modalOverlay = document.getElementById('modal-container');
     if (!modalOverlay) {
-        modalOverlay = document.createElement('div');
-        modalOverlay.id = 'modal-container'
-        modalOverlay.className = 'romper-modal-container';
+        modalOverlay =createElementWithClass('div', 'modal-container', ['romper-modal-container'])
         target.appendChild(modalOverlay);
     }
     return modalOverlay;

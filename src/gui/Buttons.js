@@ -3,6 +3,7 @@ import { handleButtonTouchEvent } from '../utils';
 import AnalyticEvents from '../AnalyticEvents';
 import NarrativeElementTransport from './NarrativeElementTransport';
 import BaseButtons, { ButtonEvents } from './BaseButtons';
+import { createElementWithClass } from '../documentUtils';
 
 //
 // Component containing UI for all buttons
@@ -29,16 +30,12 @@ class Buttons extends BaseButtons {
 
     /* creating stuff */
     _createSubtitlesButton(): HTMLButtonElement {
-        const subsButton = document.createElement('button');
+        const subsButton = createElementWithClass('button', 'subtitle-button', ['romper-button', 'romper-subtitles-button']);
         subsButton.setAttribute('type', 'button');
-        subsButton.classList.add('romper-button');
         subsButton.setAttribute('title', 'Subtitles Button');
         subsButton.setAttribute('aria-label', 'Subtitles Button');
-        subsButton.classList.add('romper-subtitles-button');
         // this.disableSubtitlesControl();
-        const subtitlesButtonIconDiv = document.createElement('div');
-        subtitlesButtonIconDiv.classList.add('romper-button-icon-div');
-        subtitlesButtonIconDiv.classList.add('romper-subtitles-button-icon-div');
+        const subtitlesButtonIconDiv = createElementWithClass('div', 'subtitles-icon', ['romper-button-icon-div', 'romper-subtitles-button-icon-div']);
         subsButton.appendChild(subtitlesButtonIconDiv);
 
         subsButton.onclick = this._handleSubtitlesButton.bind(this);
@@ -50,15 +47,11 @@ class Buttons extends BaseButtons {
     }
 
     _createFullscreenButton(): HTMLButtonElement {
-        const fsButton = document.createElement('button');
+        const fsButton = createElementWithClass('button', 'fullscreen-button', ['romper-button', 'romper-fullscreen-button']);
         fsButton.setAttribute('type', 'button');
-        fsButton.classList.add('romper-button');
-        fsButton.classList.add('romper-fullscreen-button');
         fsButton.setAttribute('title', 'Fullscreen Button');
         fsButton.setAttribute('aria-label', 'Fullscreen Button');
-        const fullscreenButtonIconDiv = document.createElement('div');
-        fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
-        fullscreenButtonIconDiv.classList.add('romper-fullscreen-button-icon-div');
+        const fullscreenButtonIconDiv = createElementWithClass('div', 'fullscreen-icon', ['romper-button-icon-div', 'romper-fullscreen-button-icon-div']);
         fsButton.appendChild(fullscreenButtonIconDiv);
 
         fsButton.onclick = this._handleFullScreenButton.bind(this);
@@ -135,20 +128,18 @@ class Buttons extends BaseButtons {
         switchableOverlay: HTMLDivElement,
     ): HTMLDivElement {
         // create the container divs
-        const mediaTransport = document.createElement('div');
-        mediaTransport.classList.add('romper-media-transport');
-        const mediaTransportLeft = document.createElement('div');
-        mediaTransportLeft.classList.add('left');
-        const mediaTransportCenter = document.createElement('div');
-        mediaTransportCenter.classList.add('center');
-        const mediaTransportRight = document.createElement('div');
-        mediaTransportRight.classList.add('right');
+        const mediaTransport = createElementWithClass('div', 'media-transport', ['romper-media-transport']);
+        
+        const mediaTransportLeft = createElementWithClass('div', 'media-transport-left', ['left']);
+        const mediaTransportCenter = createElementWithClass('div', 'media-transport-center', ['center']);
+        const mediaTransportRight = createElementWithClass('div', 'media-transport-right', ['right']);
+
         mediaTransport.appendChild(mediaTransportLeft);
         mediaTransport.appendChild(mediaTransportCenter);
         mediaTransport.appendChild(mediaTransportRight);
+
         // to hold icon and representation toggles:
-        const overlayToggleButtons = document.createElement('div');
-        overlayToggleButtons.classList.add('romper-overlay-controls');
+        const overlayToggleButtons = createElementWithClass('div', 'overlay-controls', ['romper-overlay-controls']);
 
         // add the buttons to the appropriate container divs
         // volume on left

@@ -3,6 +3,7 @@ import { SLIDER_CLASS } from '../utils';
 import BaseRenderer from '../renderers/BaseRenderer';
 import AnalyticEvents from '../AnalyticEvents';
 import BaseScrubBar from './BaseScrubBar';
+import { createElementWithClass } from '../documentUtils';
 
 class ScrubBar extends BaseScrubBar {
 
@@ -18,14 +19,12 @@ class ScrubBar extends BaseScrubBar {
     }
 
     _createScrubBar(): HTMLInputElement {
-        const scrubBar = document.createElement('input');
+        const scrubBar = createElementWithClass('input', 'scrub-bar', ['romper-scrub-bar']);
         scrubBar.setAttribute('title', 'Seek bar');
         scrubBar.setAttribute('aria-label', 'Seek bar');
         scrubBar.setAttribute('data-required-controls', 'false');
         scrubBar.type = 'range';
-        scrubBar.id = 'scrub-bar';
         scrubBar.value = '0';
-        scrubBar.className = 'romper-scrub-bar';
         scrubBar.classList.add(SLIDER_CLASS);
         this._scrubBar = scrubBar;
     }

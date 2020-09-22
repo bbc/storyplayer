@@ -1,5 +1,6 @@
 // @flow
 import EventEmitter from 'events';
+import { createElementWithClass } from '../documentUtils';
 import { handleButtonTouchEvent } from '../utils';
 
 const buttonClassPrefix = 'romper-overlay-button-choice-';
@@ -56,10 +57,7 @@ class Overlay extends EventEmitter {
     }
 
     _createOverlay(): HTMLDivElement {
-        const overlayDiv = document.createElement('div');
-        overlayDiv.classList.add('romper-overlay');
-        overlayDiv.classList.add(`romper-${this._name}-overlay`);
-        overlayDiv.classList.add('romper-inactive');
+        const overlayDiv = createElementWithClass('div', this._name, ['romper-overlay', `romper-${this._name}-overlay`, 'romper-inactive']);
         overlayDiv.onclick = (e) => {
             e.stopPropagation();
         };
@@ -72,19 +70,15 @@ class Overlay extends EventEmitter {
     }
 
     _createButton(): HTMLButtonElement {
-        const button = document.createElement('button');
+        const buttonId = `${this._name}-button`;
+        const button = createElementWithClass('button', buttonId, ['romper-button', `romper-${this._name}-button`, 'romper-inactive']);
         button.setAttribute('type', 'button');
         // eslint-disable-next-line max-len
         button.setAttribute('title', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
         // eslint-disable-next-line max-len
         button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
-        button.classList.add('romper-button');
-        button.classList.add(`romper-${this._name}-button`);
-        button.classList.add('romper-inactive');
 
-        const buttonIconDiv = document.createElement('div');
-        buttonIconDiv.classList.add('romper-button-icon-div');
-        buttonIconDiv.classList.add(`romper-${this._name}-button-icon-div`);
+        const buttonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div', `romper-${this._name}-button-icon-div`]);
         button.appendChild(buttonIconDiv);
 
         button.onclick = this._buttonClickHandler
@@ -130,9 +124,7 @@ class Overlay extends EventEmitter {
             );
             this._overlay.classList.add('romper-inactive');
         }
-        if (this._button.classList.contains('romper-button-selected')) {
-            this._button.classList.remove('romper-button-selected');
-        }
+        this._button.classList.remove('romper-button-selected');
     }
 
     getName(): string {

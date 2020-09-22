@@ -1,3 +1,4 @@
+import { createElementWithClass } from './documentUtils';
 import logger from './logger';
 import { 
     InternalVariableNames,
@@ -70,12 +71,10 @@ export const copySelection = (e: Object) => {
 
 // eslint-disable-next-line class-methods-use-this
 export const addDetail = (key: string, name: ? string, id : ? string) => {
-    const detail = document.createElement('div');
-    detail.className= 'detail'
+    const detail = createElementWithClass('div', 'detail-info', ['detail']);
     detail.innerText = `${key}: ${name || ''}`;
-    const detailId = document.createElement('input');
+    const detailId = createElementWithClass('input', id, ['detail-input']);
     detailId.value = `${id || ''}`;
-    detailId.readOnly = true;
     detailId.className = 'detail-input';
     detailId.onclick = copySelection;
     detail.appendChild(detailId);

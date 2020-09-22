@@ -1,9 +1,13 @@
 // @flow
 import BaseControls, { ControlEvents } from './BaseControls';
 import Buttons, { ButtonEvents } from './Buttons';
+import BaseButtons from './BaseButtons'
 import ScrubBar from './ScrubBar';
+import BaseScrubBar from './BaseScrubBar';
 import Overlay from './Overlay';
+import BaseRenderer from '../renderers/BaseRenderer';
 import { handleButtonTouchEvent } from '../utils';
+import { createElementWithClass } from '../documentUtils';
 
 //
 // Component containing UI for all buttons
@@ -42,10 +46,8 @@ class StandardControls extends BaseControls {
         this._forwardButtonEvents();
         this._scrubBar = new ScrubBar(this._logUserInteraction);
 
-        this._buttonsActivateArea = document.createElement('div');
-        this._buttonsActivateArea.classList.add('romper-buttons-activate-area');
-        this._buttonsActivateArea.classList.add('hide');
-        this._buttonsActivateArea.classList.add('romper-inactive');
+        this._buttonsActivateArea = createElementWithClass('div', 'button-activate-area', ['romper-buttons-activate-area', 'hide', 'romper-inactive']);
+
         this._buttonsActivateArea.onmouseenter = () => {
             this.activateRomperButtons();
         };
@@ -75,8 +77,8 @@ class StandardControls extends BaseControls {
         );
 
         // add transport control buttons and scrub bar
-        this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons');
+        this._containerDiv = createElementWithClass('div', 'buttons-container', ['romper-buttons']);
+
         this._containerDiv.appendChild(this._scrubBar.getScrubBarElement());
         this._containerDiv.appendChild(mediaTransport);
         this._containerDiv.onmousemove = () => {

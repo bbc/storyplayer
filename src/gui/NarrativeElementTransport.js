@@ -1,6 +1,7 @@
 // @flow
 import EventEmitter from 'events';
 import AnalyticEvents from '../AnalyticEvents';
+import { createElementWithClass } from '../documentUtils';
 import { handleButtonTouchEvent } from '../utils';
 import { ButtonEvents } from './Buttons';
 
@@ -32,63 +33,50 @@ class NarrativeElementTransport extends EventEmitter {
     ) {
         super();
         this._logUserInteraction = logUserInteraction;
-        this._container = document.createElement('div');
-        this._container.classList.add('romper-narrative-element-transport');
+        this._container = createElementWithClass('div', 'romper-narrative-element-transport', ['romper-narrative-element-transport']);
 
-        this._backButton = document.createElement('button');
+        this._backButton = createElementWithClass('button', 'back-button', ['romper-button', 'romper-back-button']);
         this._backButton.setAttribute('type', 'button');
-        this._backButton.classList.add('romper-button');
-        this._backButton.classList.add('romper-back-button');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back Button');
-        const backButtonIconDiv = document.createElement('div');
-        backButtonIconDiv.classList.add('romper-button-icon-div');
-        backButtonIconDiv.classList.add('romper-back-button-icon-div');
+        const backButtonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div', 'romper-back-button-icon-div']);
         this._backButton.appendChild(backButtonIconDiv);
         this._container.appendChild(this._backButton);
 
-        this._seekBackButton = document.createElement('button');
+        this._seekBackButton = createElementWithClass('button', 'seek-back-button', ['romper-button', 'romper-seek-back-button']);
         this._seekBackButton.setAttribute('type', 'button');
-        this._seekBackButton.classList.add('romper-button');
-        this._seekBackButton.classList.add('romper-seek-back-button');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
         this._seekBackButton.setAttribute('aria-label', 'Seek Back Button');
-        const seekBackButtonIconDiv = document.createElement('div');
-        seekBackButtonIconDiv.classList.add('romper-button-icon-div');
+
+        const seekBackButtonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div']);
         this._seekBackButton.appendChild(seekBackButtonIconDiv);
         this._container.appendChild(this._seekBackButton);
 
-        this._playPauseButton = document.createElement('button');
+        this._playPauseButton = createElementWithClass('button', 'play-button', ['romper-button', 'romper-play-button']);
         this._playPauseButton.setAttribute('type', 'button');
-        this._playPauseButton.classList.add('romper-button');
-        this._playPauseButton.classList.add('romper-play-button');
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
         this._playPauseButton.setAttribute('aria-label', 'Play Pause Button');
-        const playPauseButtonIconDiv = document.createElement('div');
-        playPauseButtonIconDiv.classList.add('romper-button-icon-div');
+
+        const playPauseButtonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div']);
         this._playPauseButton.appendChild(playPauseButtonIconDiv);
         this._container.appendChild(this._playPauseButton);
 
-        this._seekForwardButton = document.createElement('button');
+        this._seekForwardButton = createElementWithClass('button', 'seek-fwd-button', ['romper-button', 'romper-seek-fwd-button'])
         this._seekForwardButton.setAttribute('type', 'button');
-        this._seekForwardButton.classList.add('romper-button');
-        this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
         this._seekForwardButton.setAttribute('aria-label', 'Seek Forward Button');
-        const seekForwardButtonIconDiv = document.createElement('div');
-        seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
+
+        const seekForwardButtonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div']);
         this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
         this._container.appendChild(this._seekForwardButton);
 
-        this._nextButton = document.createElement('button');
+        this._nextButton = createElementWithClass('button', 'next-button', ['romper-button', 'romper-next-button']);
         this._nextButton.setAttribute('type', 'button');
-        this._nextButton.classList.add('romper-button');
-        this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._container.appendChild(this._nextButton);
-        const nextButtonIconDiv = document.createElement('div');
-        nextButtonIconDiv.classList.add('romper-button-icon-div');
+
+        const nextButtonIconDiv = createElementWithClass('div', null, ['romper-button-icon-div']);
         this._nextButton.appendChild(nextButtonIconDiv);
         this._backNextWaiting = false;
         this._backClickedOnce = false;

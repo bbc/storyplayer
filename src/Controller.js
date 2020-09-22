@@ -21,6 +21,7 @@ import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Ev
 import SessionManager, { SESSION_STATE } from './SessionManager';
 import { getSetting, DEBUG_PLAYOUT_FLAG } from './utils';
 import AnalyticsHandler from './AnalyticsHandler';
+import { createElementWithClass } from './documentUtils';
 
 export const PLACEHOLDER_REPRESENTATION = {
     object_class: 'REPRESENTATION',
@@ -343,15 +344,13 @@ export default class Controller extends EventEmitter {
             logger.info('playing capabilities', data);
         }
 
-        const anyRequirementsFailed = requirements.some((req) => {
+        const anyRequirementsFailed = requirements.some((req, index) => {
             if (JsonLogic.apply(req.logic, data) === false) {
                 this._target.innerHTML = '';
-                const warningDiv = document.createElement('div');
-                warningDiv.classList.add('romper-warning');
-                const warningDivDiv = document.createElement('div');
-                warningDivDiv.classList.add('romper-warning-div');
-                warningDivDiv.innerHTML = req.errorMsg;
-                warningDiv.appendChild(warningDivDiv);
+                const warningDiv = createElementWithClass('div', `warning-message-${index}`, ['romper-warning']);
+                const warningContent = createElementWithClass('div', `warning-content-${index}`, ['romper-warning-div']);
+                warningContent.innerHTML = req.errorMsg;
+                warningDiv.appendChild(warningContent);
                 this._target.appendChild(warningDiv);
 
                 logger.warn(`Using Data: ${JSON.stringify(data)}`);

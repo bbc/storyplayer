@@ -14,6 +14,7 @@ import {
     OVERRIDE_ACTIVE_BUFFERING,
     OVERRIDE_INACTIVE_BUFFERING,
 } from '../utils';
+import { createElementWithClass } from '../documentUtils';
 
 const MediaTypesArray = [
     'HLS',
@@ -315,20 +316,17 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.mediaElement) {
             if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
-                const videoElement = document.createElement('video');
-                videoElement.className = 'romper-video-element romper-media-element-queued';
+                const videoElement = createElementWithClass('video', rendererId, ['romper-video-element','romper-media-element-queued']);
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = videoElement;
                 this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A) {
-                const videoElement = document.createElement('video');
-                videoElement.className = 'romper-audio-element romper-media-element-queued';
+                const videoElement = createElementWithClass('video', rendererId, ['romper-audio-element','romper-media-element-queued']);
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = videoElement;
                 this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else {
-                const audioElement = document.createElement('audio');
-                audioElement.className = 'romper-audio-element romper-media-element-queued';
+                const audioElement = createElementWithClass('audio', rendererId, ['romper-audio-element','romper-media-element-queued']);
                 audioElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = audioElement;
                 this._player.backgroundTarget.appendChild(rendererPlayoutObj.mediaElement);
