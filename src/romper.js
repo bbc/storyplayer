@@ -17,7 +17,6 @@ import {
     UA_DEBUG_FLAG,
 } from './utils'
 
-import Package from '../package.json';
 
 // Import Assets for assetUrls object as they may not of been imported in CSS
 import './assets/images/media-play-8x.png';
@@ -102,7 +101,10 @@ if(getSetting(UA_DEBUG_FLAG)) {
         + `<h3>Chosen Playout</h3>`
         + `${MediaFormats.getPlayoutEngine()}`
 }
-
+// eslint-disable-next-line no-undef
+const playerVersion = __PLAYER_VERSION__;
+// eslint-disable-next-line no-undef
+const schemaVersion = __LATEST_SCHEMA_VERSION__;
 module.exports = {
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
@@ -113,8 +115,11 @@ module.exports = {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     DOM_EVENTS,
+    playerVersion,
+    schemaVersion,
     init: (settings: Settings): ?Controller => {
-        logger.info('StoryPlayer Version: ', Package.version);
+        // eslint-disable-next-line no-undef
+        logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {
