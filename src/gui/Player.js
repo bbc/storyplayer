@@ -1152,6 +1152,7 @@ class Player extends EventEmitter {
 
         const linkChoiceControl = document.createElement('button');
         linkChoiceControl.id = `romper-link-choice-${id}`;
+        linkChoiceControl.tabIndex = this._numChoices;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
@@ -1246,6 +1247,7 @@ class Player extends EventEmitter {
                     const clickHandler = () => {
                         // set classes to show which is selected
                         behaviourOverlay.setElementActive(`${id}`);
+                        icon.blur();
                         choiceAction();
                     };
                     icon.onclick = clickHandler;
