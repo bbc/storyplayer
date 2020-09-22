@@ -9,6 +9,7 @@ import { replaceEscapedVariables } from '../utils';
 
 import logger from '../logger';
 import { REASONER_EVENTS } from '../Events';
+import { createElementWithClass } from '../documentUtils';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -134,8 +135,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
      * populate it with the inner html
      */
     renderTextElement() {
-        this._textDiv = document.createElement('div');
-        this._textDiv.classList.add('romper-text-element');
+        this._textDiv = createElementWithClass('div', this._representation.id, ['romper-text-element']);
 
         // set text source
         if (this._representation.asset_collections.foreground_id) {

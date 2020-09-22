@@ -135,8 +135,7 @@ const _getNumberRangeVariableSetter = (
         maxSpan.textContent = range.max_val;
     }
 
-    const outputTest = document.createElement('div');
-    outputTest.className = 'romper-var-form-range-output';
+    const outputTest = document.createElement('div', null, ['romper-var-form-range-output']);
 
     const slider = createElementWithClass('input', `variable-input-${varName}`, ['romper-var-form-slider']);
     slider.type = 'range';

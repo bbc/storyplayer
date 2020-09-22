@@ -6,6 +6,7 @@ import Player from '../gui/Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
+import { createElementWithClass } from '../documentUtils';
 
 export default class ImageRenderer extends BaseRenderer {
     _imageElement: HTMLImgElement;
@@ -108,8 +109,7 @@ export default class ImageRenderer extends BaseRenderer {
     }
 
     async renderImageElement() {
-        this._imageElement = document.createElement('img');
-        this._imageElement.className = 'romper-render-image';
+        this._imageElement = createElementWithClass('img', this._representation.id, ['romper-render-image']);
         this._setVisibility(false);
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(

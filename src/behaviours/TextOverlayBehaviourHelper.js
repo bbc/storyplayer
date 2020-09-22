@@ -1,6 +1,7 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import { replaceEscapedVariables } from '../utils';
+import { createElementWithClass } from '../documentUtils';
 
 /* eslint-disable no-param-reassign */
 const setPosition = (modalElement, behaviour) => {
@@ -18,12 +19,10 @@ const setPosition = (modalElement, behaviour) => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderTextOverlay = (behaviour, target, callback, controller) => {
-    const modalElement = document.createElement('div');
-    modalElement.id = behaviour.id;
+    const modalElement = createElementWithClass('div', behaviour.id, ['romper-behaviour-modal','text-overlay']);
     const modalContainer = createContainer(target);
     modalContainer.appendChild(modalElement);
 
-    modalElement.className = 'romper-behaviour-modal text-overlay';
     if (behaviour.css_class) {
         modalElement.classList.add(behaviour.css_class);
     }

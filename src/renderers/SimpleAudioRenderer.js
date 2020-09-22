@@ -8,6 +8,7 @@ import type { MediaFetcher } from '../romper';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
+import { createElementWithClass } from '../documentUtils';
 
 export default class SimpleAudioRenderer extends TimedMediaRenderer {
     _fetchMedia: MediaFetcher;
@@ -34,8 +35,7 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
                 const image = await this._fetchAssetCollection(assetCollectionId);
                 if (image.assets.image_src) {
                     const imageUrl = await this._fetchMedia(image.assets.image_src);
-                    this._backgroundImage = document.createElement('img');
-                    this._backgroundImage.className = 'romper-render-image';
+                    this._backgroundImage = createElementWithClass('img', assetCollectionId, ['romper-render-image']);
                     this._backgroundImage.src = imageUrl;
                     if (this.phase !== RENDERER_PHASES.MAIN) {
                         this._setImageVisibility(false);

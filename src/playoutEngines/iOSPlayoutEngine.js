@@ -3,6 +3,7 @@
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
+import { createElementWithClass } from '../documentUtils';
 
 export default class iOSPlayoutEngine extends BasePlayoutEngine {
     _foregroundMediaElement: HTMLVideoElement
@@ -27,12 +28,10 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
     constructor(player: Player, debugPlayout: boolean) {
         super(player, debugPlayout);
-        this._foregroundMediaElement = document.createElement('video');
-        this._foregroundMediaElement.className = 'romper-video-element';
+        this._foregroundMediaElement = createElementWithClass('video', 'video-element', ['romper-video-element']);
         this._foregroundMediaElement.crossOrigin = 'anonymous';
 
-        this._backgroundMediaElement = document.createElement('audio');
-        this._backgroundMediaElement.className = 'romper-audio-element';
+        this._backgroundMediaElement = createElementWithClass('audio', 'audio-element', ['romper-audio-element']);
         this._backgroundMediaElement.crossOrigin = 'anonymous';
 
         // Permission to play not granted on iOS without the autplay tag

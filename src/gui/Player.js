@@ -10,7 +10,7 @@ import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import logger from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
-import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
+import BaseRenderer from '../renderers/BaseRenderer';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
@@ -26,7 +26,6 @@ import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
-import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
 import { createElementWithClass } from '../documentUtils';
 
@@ -197,6 +196,11 @@ class Player extends EventEmitter {
         // create the layer elements
         this._createLayerElements();
 
+        // Create the overlays.
+        this._volume = this._createOverlay('volume', this._logUserInteraction);
+        this._icon = this._createOverlay('icon', this._logUserInteraction);
+        this._representation = this._createOverlay('representation', this._logUserInteraction);
+
         // Expose the layers for external manipulation if needed.
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
@@ -226,10 +230,7 @@ class Player extends EventEmitter {
         this._addFullscreenListeners();
 
         
-        // Create the overlays.
-        this._volume = this._createOverlay('volume', this._logUserInteraction);
-        this._icon = this._createOverlay('icon', this._logUserInteraction);
-        this._representation = this._createOverlay('representation', this._logUserInteraction);
+        
 
 
         // listen for button events and handle them
@@ -364,10 +365,8 @@ class Player extends EventEmitter {
 
     // create an element ready for rendering countdown
     _createCountdownElement() {
-        this._countdownContainer = document.createElement('div');
-        this._countdownContainer.classList.add('romper-ux-divider');
-        this._countdowner = document.createElement('div');
-        this._countdowner.classList.add('romper-ux-countdown');
+        this._countdownContainer = createElementWithClass('div', null, ['romper-ux-divider']);
+        this._countdowner = createElementWithClass('div', 'countdown-element', ['romper-ux-countdown']);
         this._countdownContainer.appendChild(this._countdowner);
     }
 
@@ -486,13 +485,12 @@ class Player extends EventEmitter {
 
     addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
         if (!this._details) {
-            this._details = document.createElement('div');
+            this._details = createElementWithClass('div', 'details-container', ['details-overlay']);
         }
         // clean up then redo
         while (this._details.firstChild) {
             this._details.removeChild(this._details.firstChild);
         }
-        this._details.className = 'details-overlay';
         const narrativeElement = addDetail('NE', elementName, elementId);
         this._details.appendChild(narrativeElement);
 
@@ -504,26 +502,24 @@ class Player extends EventEmitter {
     addAssetCollectionDetails(assetCollection: Object) {
         if(!assetCollection) return;
         if (!this._details) {
-            this._details = document.createElement('div');
+            const id = `${assetCollection.id}-details`
+            this._details = createElementWithClass('div', id, ['details-overlay']);
             this._player.appendChild(this._details);
         }
-        this._details.className = 'details-overlay';
         const assetCollectionDetail = addDetail('Asset', assetCollection.name, assetCollection.id)
         this._details.appendChild(assetCollectionDetail);
     }
 
     // eslint-disable-next-line class-methods-use-this
     _createButtonLabel(text: string) {
-        const buttonSpan = document.createElement('span');
+        const buttonSpan = createElementWithClass('span', null, ['button-label']);
         buttonSpan.innerHTML = text;
-        buttonSpan.classList.add('button-label');
         return buttonSpan;
     }
 
     _addContinueModal() {
-        const resumeButton = document.createElement('button');
+        const resumeButton = createElementWithClass('button', 'resume-button', ['romper-resume-button']);
         resumeButton.setAttribute('type', 'button');
-        resumeButton.classList.add('romper-resume-button');
         resumeButton.setAttribute('title', 'Resume and accept terms');
         resumeButton.setAttribute('aria-label', 'Resume Button');
 
@@ -532,9 +528,8 @@ class Player extends EventEmitter {
         resumeButtonDiv.appendChild(resumeButton);
         resumeButtonDiv.appendChild(this._createButtonLabel('Resume'));
 
-        const restartButton = document.createElement('button');
+        const restartButton = createElementWithClass('button', 'restart-button', ['romper-restart-button']);
         restartButton.setAttribute('type', 'button');
-        restartButton.classList.add('romper-restart-button');
         restartButton.setAttribute('title', 'Restart and accept terms');
         restartButton.setAttribute('aria-label', 'Restart Button');
 
@@ -575,12 +570,10 @@ class Player extends EventEmitter {
             handleButtonTouchEvent(resumeExperienceButtonHandler),
         );
 
-        const continueMessage = document.createElement('div');
+        const continueMessage = createElementWithClass('div', 'continue-message', ['modal-inner-content']);
         continueMessage.textContent = 'Restart or Resume?';
-        continueMessage.classList.add('modal-inner-content');
 
-        const continueControls = document.createElement('div');
-        continueControls.className = 'romper-continue-controls';
+        const continueControls = createElementWithClass('div', 'continue-controls', ['romper-continue-controls']);
         continueControls.appendChild(restartButtonDiv);
         continueControls.appendChild(resumeButtonDiv);
 
@@ -674,9 +667,8 @@ class Player extends EventEmitter {
     }
 
     _createStartExperienceButton(options: Object) {
-        this._startExperienceButton = document.createElement('button');
+        this._startExperienceButton = createElementWithClass('button', 'start-button', [options.button_class]);
         this._startExperienceButton.setAttribute('type', 'button');
-        this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Start Button');
 
@@ -696,8 +688,7 @@ class Player extends EventEmitter {
      */
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
-            this._startExperienceImage = document.createElement('img');
-            this._startExperienceImage.className = 'romper-start-image';
+            this._startExperienceImage = createElementWithClass('img', 'start-image', ['romper-start-image']);
             this._startExperienceImage.src = options.background_art;
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
@@ -741,10 +732,9 @@ class Player extends EventEmitter {
 
     _createPrivacyNotice(options: Object) {
         if (options.privacy_notice !== null) {
-            const privacyPar = document.createElement('p');
+            const privacyPar = createElementWithClass('p', 'privacy-notice-text', null);
             privacyPar.innerHTML = options.privacy_notice.replace('\n', '<br/>');
-            this._privacyDiv = document.createElement('div');
-            this._privacyDiv.className = 'romper-privacy-notice';
+            this._privacyDiv = createElementWithClass('div', 'privacy-notice', ['romper-privacy-notice']);
             this._privacyDiv.appendChild(privacyPar);
             if (this._privacyDiv) {
                 this._mediaLayer.appendChild(this._privacyDiv);

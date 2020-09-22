@@ -22,6 +22,7 @@ import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
 import Overlay from '../gui/Overlay';
+import { createElementWithClass } from '../documentUtils';
 
 const SEEK_TIME = 10;
 
@@ -1327,10 +1328,9 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
         const { colour } = behaviour;
-        const overlayImageElement = document.createElement('div');
+        const overlayImageElement = createElementWithClass('div', behaviour.id, ['romper-image-overlay']);
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
-        overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
         callback();
@@ -1365,11 +1365,9 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _overlayImage(imageSrc: string, id: string) {
-        const overlayImageElement = document.createElement('img');
-        overlayImageElement.id = id;
+        const overlayImageElement = createElementWithClass('img', id, ['romper-image-overlay']);
         this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.src = imageSrc;
-        overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
     }
