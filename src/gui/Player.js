@@ -201,17 +201,19 @@ class Player extends EventEmitter {
         this._startButtonHandler = this._startButtonHandler.bind(this);
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
-
+        
         // add fullscreen handling
         this._toggleFullScreen = this._toggleFullScreen.bind(this);
         this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
         this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
+                
 
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
             logger.info("Playout debugging: ON");
         }
         this._isPausedForBehaviours = false;
+
 
         // create the layer elements
         this._createLayerElements();
@@ -220,12 +222,12 @@ class Player extends EventEmitter {
         this.guiTarget = this._guiLayer;
         this.mediaTarget = this._mediaLayer;
         this.backgroundTarget = this._backgroundLayer;
-                
+
         // Create the overlays.
         this._volume = this._createOverlay('volume', this._logUserInteraction);
         this._icon = this._createOverlay('icon', this._logUserInteraction);
         this._representation = this._createOverlay('representation', this._logUserInteraction);
-
+ 
         // create the playout engine
         this._createPlayoutEngine(debugPlayout);
 
