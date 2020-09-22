@@ -3,6 +3,8 @@ const { mediaResolver } = require('./mediaResolver.js');
 const StoryPlayer = require('../dist/romper');
 const browserLogger = require('./logger');
 
+window.playerVersion = StoryPlayer.playerVersion;
+window.schemaVersion = StoryPlayer.schemaVersion;
 
 let storyPlayer;
 
