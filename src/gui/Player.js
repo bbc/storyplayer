@@ -35,6 +35,7 @@ import { createElementWithClass } from '../documentUtils';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
+    'AUDIO_MIX_CHANGED',
     'VOLUME_MUTE_TOGGLE',
     'ICON_CLICKED',
     'REPRESENTATION_CLICKED',

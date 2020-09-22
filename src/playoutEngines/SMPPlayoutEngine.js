@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 import uuid from 'uuid/v4'
 import EventEmitter from 'events';
-import Player from '../gui/Player';
+import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 import { MediaFormats } from '../browserCapabilities'
 import { PLAYOUT_ENGINES } from './playoutEngineConsts'
@@ -11,6 +11,8 @@ import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngi
 import DOMSwitchPlayoutEngine from './DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from './iOSPlayoutEngine';
 import { getSMPInterface } from '../utils'
+
+const AUDIO_MIX_EVENT_LABEL = 'smp_mix';
 
 class SMPPlayoutEngine extends BasePlayoutEngine {
     _secondaryPlayoutEngine: BasePlayoutEngine
@@ -61,19 +63,33 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._volume = 1;
         this._backgroundMix = 1;
 
-        this._smpPlayerInterface.addEventListener("volumechange", (e) => {
-            let { volume } = e;
-            if(e.muted) {
-                volume = 0;
-            }
-            this._volume = volume;
-            const backgroundAudioVolume = this._volume * this._backgroundMix;
-            this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
-        });
+        this._handleVolumePersistence = this._handleVolumePersistence.bind(this);
+        this._handleVolumeChange = this._handleVolumeChange.bind(this);
+        this._smpPlayerInterface.addEventListener("volumechange", this._handleVolumeChange);
 
         this._smpFakePlay = this._smpFakePlay.bind(this);
         this._smpFakePause = this._smpFakePause.bind(this);
         this._smpFakeLoad = this._smpFakeLoad.bind(this);
+        this._player.on(
+            PlayerEvents.VOLUME_CHANGED,
+            this._handleVolumePersistence,
+        );
+    }
+
+    _handleVolumePersistence(e) {
+        if (e.label === AUDIO_MIX_EVENT_LABEL) {
+            this.setFbMix(e.value);
+        }
+    }
+
+    _handleVolumeChange(e) {
+        let { volume } = e
+        if(e.muted) {
+            volume = 0
+        }
+        this._volume = volume
+        const backgroundAudioVolume = this._volume * this._backgroundMix
+        this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
     }
 
     _createSecondaryPlayoutEngine(player: Player, debugPlayout: boolean) {
@@ -102,6 +118,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMix = fbMixValue
         const backgroundAudioVolume = this._volume * this._backgroundMix
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
+        this._player.emit(PlayerEvents.AUDIO_MIX_CHANGED, { id: AUDIO_MIX_EVENT_LABEL, label: AUDIO_MIX_EVENT_LABEL, value: fbMixValue });
     }
 
     supports(feature: string) {
@@ -537,6 +554,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             else {
                 mediaObject.loop = false;
             }
+        } else {
+            this._secondaryPlayoutEngine.setLoopAttribute(rendererId, loop);
         }
     }
 
