@@ -8,7 +8,7 @@
   "author": "BBC Research & Development",
   "license": "MIT",
   "scripts": {
-    "compile": "electron src/mainProcess/main.js",
+    "compile": "export ELECTRON_IS_DEV=1 && electron src/mainProcess/main.js",
     "pack": "electron-builder --dir",
     "build": "export CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder build -mw",
     "build:mac": "export CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder build -m",
@@ -52,6 +52,7 @@
     "esm": "^3.2.25"
   },
   "dependencies": {
+    "electron-is-dev": "^1.2.0",
     "electron-log": "^4.1.2"
   }
 }
