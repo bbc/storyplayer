@@ -1717,7 +1717,9 @@ class Player extends EventEmitter {
      * handles iOS fullscreen behaviour too.
      */
     _handleFullScreenEvent() {
-        if(Player._isFullScreen()) {
+        if (Player._isFullScreen() && MediaFormats.getPlayoutEngine() === PLAYOUT_ENGINES.SMP_PLAYOUT) {
+            // do nothing for SMP
+        } else if(Player._isFullScreen()) {
             // srtup controls and styling
             this._controls.setFullscreenOn();
             this._player.classList.add('romper-player-fullscreen');
