@@ -1740,7 +1740,10 @@ class Player extends EventEmitter {
                 this._player.style.width = `${100 * scaleFactor}vw`;
                 this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
                 // we need to center vertically manually for SMP
-                if (smp) this._player.style.marginTop = `calc(50vh - ${height / 2}vw)`;
+                if (smp) {
+                    this._player.style.marginTop = `calc(50vh - ${height / 2}vw)`;
+                    this._player.style.cursor = 'default';
+                }
             }
         } else {
             this._controls.setFullscreenOff();
