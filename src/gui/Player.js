@@ -1713,20 +1713,22 @@ class Player extends EventEmitter {
     }
 
     /**
-     * Relies on the document 'fullscreenchange' event firing, then sets the style for the player accordingly
+     * Relies on the document 'fullscreenchange' event firing, 
+     * then sets the style for the player accordingly
      * handles iOS fullscreen behaviour too.
      */
     _handleFullScreenEvent() {
-        if (Player._isFullScreen() && MediaFormats.getPlayoutEngine() === PLAYOUT_ENGINES.SMP_PLAYOUT) {
-            // do nothing for SMP
-        } else if(Player._isFullScreen()) {
-            // srtup controls and styling
-            this._controls.setFullscreenOn();
-            this._player.classList.add('romper-player-fullscreen');
-
-            // fit player to size, so all UI remains within media
+        if (Player._isFullScreen()) {
+            const smp = (MediaFormats.getPlayoutEngine() === PLAYOUT_ENGINES.SMP_PLAYOUT);
             const windowAspect = window.innerWidth / window.innerHeight;
             const scaleFactor = BrowserUserAgent.iOS() ? 0.8: 1; // scale80% for iOS
+
+            if (!smp) {
+                // setup controls and styling
+                this._controls.setFullscreenOn();
+                this._player.classList.add('romper-player-fullscreen');
+            }
+
             if (leftGreaterThanRight(windowAspect, this._aspectRatio)) { // too wide
                 const width = this._aspectRatio * 100 * scaleFactor;
                 this._player.style.height = `${100 * scaleFactor}vh`;
@@ -1737,6 +1739,8 @@ class Player extends EventEmitter {
                 this._player.style.height = `${height}vw`;
                 this._player.style.width = `${100 * scaleFactor}vw`;
                 this._player.style.marginLeft = `${(100 - (scaleFactor * 100)) / 2}vw`;
+                // we need to center vertically manually for SMP
+                if (smp) this._player.style.marginTop = `calc(50vh - ${height / 2}vw)`;
             }
         } else {
             this._controls.setFullscreenOff();
