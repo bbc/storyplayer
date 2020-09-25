@@ -283,15 +283,19 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours ?
             new BehaviourRunner(this._representation.behaviours, this) :
             null;
-        this._player.enterStartBehaviourPhase(this);
-        this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
                 BehaviourTimings.started,
                 RendererEvents.COMPLETE_START_BEHAVIOURS,
             )
         ) {
+            this._player.enterStartBehaviourPhase(this);
+            // move on now
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        } else {
+            this._player.enterStartBehaviourPhase(this);
+            // make sure we can see media under any start behaviours
+            this._playoutEngine.setPlayoutVisible(this._rendererId);
         }
     }
 
