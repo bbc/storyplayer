@@ -152,6 +152,10 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
 
+        this._player.on(PlayerEvents.AUDIO_MIX_CHANGED, (event) => {
+            this._rendererState.volumes[event.label] = event.value;
+        });
+
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, (event) => {
             this._rendererState.muted[event.label] = event.muted;
         });
