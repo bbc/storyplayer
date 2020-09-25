@@ -733,7 +733,7 @@
 
 "@bbc/object-based-media-schema@^0.3.8":
   version "0.3.8"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/npm/@bbc/object-based-media-schema/-/object-based-media-schema-0.3.8.tgz#53e073bb23503f003ffbd1c17d51b9d66289bc09"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@bbc/object-based-media-schema/-/@bbc/object-based-media-schema-0.3.8.tgz#53e073bb23503f003ffbd1c17d51b9d66289bc09"
   integrity sha1-U+BzuyNQPwA/+9HBfVG51mKJvAk=
   dependencies:
     jsonschema "^1.1.1"
