@@ -472,6 +472,27 @@ class SMPControls extends BaseControls {
     disableSubtitlesButton() {
         // SMP Handles Subtitles & Subtitles Button
     }
+
+    // choices are showing on screen - shift the subtitles up
+    setSubtitlesAboveElement(behaviourElement) { 
+        const choiceHeight = behaviourElement.offsetHeight;
+        const playerHeight =  this._playoutEngine._smpPlayerInterface.container.offsetHeight;
+        const maxSubsY = playerHeight - choiceHeight;
+        getSMPInterface().updateUiConfig({
+            subtitles: {
+                yOffset: maxSubsY,
+            }
+        });
+    }
+
+    // choices have been cleared - return the subtitles to normal
+    resetSubtitleHeight() {
+        getSMPInterface().updateUiConfig({
+            subtitles: { yOffset:  NaN },
+        });
+    
+    }
+
 }
 
 export default SMPControls;

@@ -98,6 +98,11 @@ class BaseControls extends EventEmitter {
     enableSubtitlesButton() { }
 
     disableSubtitlesButton() { }
+    
+    setSubtitlesAboveElement() { }
+
+    resetSubtitleHeight() { }
+
 }
 
 export { ControlEvents };
