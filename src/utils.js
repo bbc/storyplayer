@@ -25,7 +25,7 @@ export const OVERRIDE_PLAYOUT = "overrideEngine"
 export const OVERRIDE_PLAYOUT_FORMAT = "overrideFormat"
 export const SHAKA_DEBUG_LEVEL = "debugShaka"
 export const OVERRIDE_ACTIVE_BUFFERING = "overrideActiveBuffering"
-export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBufferingOverride"
+export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBuffering"
 
 export const getSetting = (settingName) => {
     const settingValue = new URLSearchParams(window.location.search).get(settingName);
