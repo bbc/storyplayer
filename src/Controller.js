@@ -1294,6 +1294,12 @@ export default class Controller extends EventEmitter {
                         true),
                 500);
                 break;
+            case REASONER_ERRORS.NO_VALID_LINKS:
+                this._renderManager.showError(
+                    err.message,
+                    true,
+                    false);
+                break;
             default:
                 logger.warn(err);
             }        
