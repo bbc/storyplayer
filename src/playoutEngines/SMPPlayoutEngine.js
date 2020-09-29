@@ -33,37 +33,19 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         super(player, debugPlayout);
 
         // Get Playout Engine to use for BackgroundAudio
-        const playoutToUse = MediaFormats.getPlayoutEngine(true);
-
-        logger.info('SMP: Using backup playout engine: ', playoutToUse);
-
-        this._smpPlayerInterface = getSMPInterface();
-
-        switch (playoutToUse) {
-        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
-            // Use shiny source switching engine.... smooth.
-            this._secondaryPlayoutEngine = new DOMSwitchPlayoutEngine(player, debugPlayout);
-            break;
-        case PLAYOUT_ENGINES.IOS_PLAYOUT:
-            // Refactored iOS playout engine
-            this._secondaryPlayoutEngine = new IOSPlayoutEngine(player, debugPlayout);
-            break;
-        default:
-            logger.fatal('Invalid Playout Engine');
-            throw new Error('Invalid Playout Engine');
-        }
+        this._createSecondaryPlayoutEngine(player, debugPlayout);
 
         this._smpPlayerInterface.addEventListener("pause", (event) => {
             // Hack to update playing status from SMP
             if(!event.ended && event.paused) {
-                this.pause(false)
+                this.pause(false);
             }
         })
 
         // Play Button
         this._smpPlayerInterface.addEventListener("play", () => {
             // Hack to update playing status from SMP
-            this.play(false)
+            this.play(false);
         })
 
         this._fakeItemRendererId = null
@@ -72,14 +54,14 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._fakeEventEmitter = new EventEmitter();
 
         this._smpPlayerInterface.addEventListener("play", (e) => {
-            this._fakeEventEmitter.emit("play", e)
+            this._fakeEventEmitter.emit("play", e);
         });
         this._smpPlayerInterface.addEventListener("pause", (e) => {
-            this._fakeEventEmitter.emit("pause", e)
+            this._fakeEventEmitter.emit("pause", e);
         });
 
-        this._volume = 1
-        this._backgroundMix = 1
+        this._volume = 1;
+        this._backgroundMix = 1;
 
         this._handleVolumePersistence = this._handleVolumePersistence.bind(this);
         this._handleVolumeChange = this._handleVolumeChange.bind(this);
@@ -108,6 +90,28 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._volume = volume
         const backgroundAudioVolume = this._volume * this._backgroundMix
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
+    }
+
+    _createSecondaryPlayoutEngine(player: Player, debugPlayout: boolean) {
+        const playoutToUse = MediaFormats.getPlayoutEngine(true);
+
+        logger.info('SMP: Using backup playout engine: ', playoutToUse);
+
+        this._smpPlayerInterface = getSMPInterface();
+
+        switch (playoutToUse) {
+        case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
+            // Use shiny source switching engine.... smooth.
+            this._secondaryPlayoutEngine = new DOMSwitchPlayoutEngine(player, debugPlayout);
+            break;
+        case PLAYOUT_ENGINES.IOS_PLAYOUT:
+            // Refactored iOS playout engine
+            this._secondaryPlayoutEngine = new IOSPlayoutEngine(player, debugPlayout);
+            break;
+        default:
+            logger.fatal('Invalid Playout Engine');
+            throw new Error('Invalid Playout Engine');
+        }
     }
 
     setFbMix(fbMixValue) {
