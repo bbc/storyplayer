@@ -131,7 +131,7 @@ export const getMediaType = (src: string): 'DASH' | 'HLS' | 'OTHER' => {
             return MediaTypes.DASH;
         }
     } catch (err) {
-        logger.error(`${src} is not a valid url`, err)
+        logger.error(err, `${src} is not a valid url`);
     }
     return MediaTypes.OTHER;
 };
