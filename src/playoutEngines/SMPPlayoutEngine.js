@@ -236,7 +236,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        // this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, false);
+        this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, true);
+        this._media[rendererId].loadedPlaylist = true;
+        this._smpPlayerInterface.pauseAt([0]);
+
         if(!rendererPlayoutObj) {
             this._secondaryPlayoutEngine.setPlayoutVisible(rendererId)
         }
@@ -264,7 +267,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if(this._permissionToPlay) {
             // If permission to play granted then autostart playlist and
             // then pause if we are not currently playing
-            this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, true);
+            if (this._media[rendererId].loadedPlaylist) {
+                // we have loaded and paused at 0; since should be autoplaying, play
+                this._smpPlayerInterface.play();
+            } else {
+                this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, true);
+            }
             if(!this._playing) {
                 const pauseFunction = () => {
                     this._smpPlayerInterface.removeEventListener("playing", pauseFunction)
@@ -272,7 +280,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
                 }
                 this._smpPlayerInterface.addEventListener("playing", pauseFunction)
             }
-        } else {
+        } else if (!this._media[rendererId].loadedPlaylist)  {
             // If permission to play not granted then just load playlist without
             // playing
             this._smpPlayerInterface.loadPlaylistFromCollection(rendererId, false);
@@ -567,12 +575,17 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     applyStyle(rendererId: string, key: string, value: string) {
-        // TODO: The below may help with styling
-        // this._smpPlayerInterface.requestVideoElement(true)
-        throw new Error("SMP RenderEngine doesn't allow setting style");
+        const mediaElement = this._smpPlayerInterface.requestVideoElement(true);
+        if (mediaElement) {
+            mediaElement.style[key] = value;
+        }
     }
 
     clearStyle(rendererId: string, key: string) {
+        const mediaElement = this._smpPlayerInterface.requestVideoElement(true);
+        if (mediaElement) {
+            mediaElement.style[key] = '';
+        }
     }
 
     // TODO: Background Audio Renderer fades in to volume 1
