@@ -12,7 +12,7 @@ import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger } from './AnalyticEvents';
 
 const ERROR_MESSAGES = {
-    'NO_BEGINNING': 'Unable to choose a valid beginning',
+    'NO_BEGINNING': 'Sorry, this story is unplayable because it has no beginning',
     'ALREADY_ENDED': 'InvalidState: this story has ended',
     'CURRENTLY_RESOLVING': 'InvalidState: currently resolving an action',
     'NOT_STARTED': 'InvalidState: this story has not yet started',

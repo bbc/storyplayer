@@ -1289,7 +1289,7 @@ export default class Controller extends EventEmitter {
                 // need to give some time before clearing
                 setTimeout(() =>
                     this._renderManager.showError(
-                        'Sorry, this story is unplayable because it has no beginning',
+                        err.message,
                         true,
                         true),
                 500);
