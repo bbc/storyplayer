@@ -16,16 +16,16 @@ export const inSMPWrapper = () => {
 
 export const ADD_DETAILS_FLAG = "addDetails"
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
-export const FACEBOOK_BLOCK_FLAG = "overrideFacebookBlock"
-export const WEBVIEW_DEBUG_FLAG = "webviewDebug"
+export const FACEBOOK_BLOCK_FLAG = "overrideWebView"
+export const WEBVIEW_DEBUG_FLAG = "debugWebview"
 export const UA_DEBUG_FLAG = "debugUA"
 export const DISABLE_LOOKAHEAD_FLAG = "disableLookahead"
 
-export const OVERRIDE_PLAYOUT = "overridePlayout"
-export const OVERRIDE_PLAYOUT_FORMAT = "overridePlayoutFormat"
-export const SHAKA_DEBUG_LEVEL = "shakaDebugLevel"
-export const OVERRIDE_ACTIVE_BUFFERING = "activeBufferingOverride"
-export const OVERRIDE_INACTIVE_BUFFERING = "inactiveBufferingOverride"
+export const OVERRIDE_PLAYOUT = "overrideEngine"
+export const OVERRIDE_PLAYOUT_FORMAT = "overrideFormat"
+export const SHAKA_DEBUG_LEVEL = "debugShaka"
+export const OVERRIDE_ACTIVE_BUFFERING = "overrideActiveBuffering"
+export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBuffering"
 
 export const getSetting = (settingName) => {
     const settingValue = new URLSearchParams(window.location.search).get(settingName);

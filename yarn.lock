@@ -731,10 +731,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@bbc/object-based-media-schema@^0.3.7":
-  version "0.3.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@bbc/object-based-media-schema/-/@bbc/object-based-media-schema-0.3.7.tgz#c7e0460a1d0f955590422d631da385a6572aa24a"
-  integrity sha1-x+BGCh0PlVWQQi1jHaOFplcqoko=
+"@bbc/object-based-media-schema@^0.3.8":
+  version "0.3.8"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@bbc/object-based-media-schema/-/@bbc/object-based-media-schema-0.3.8.tgz#53e073bb23503f003ffbd1c17d51b9d66289bc09"
+  integrity sha1-U+BzuyNQPwA/+9HBfVG51mKJvAk=
   dependencies:
     jsonschema "^1.1.1"
 
