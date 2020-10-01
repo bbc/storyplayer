@@ -701,9 +701,9 @@ $start-button-size: 15vw;
 
       >button {
         &:focus {
-          border-left: 0;
-          border-right: 0;
-          border-top: 0;
+          border-left: unset;
+          border-right: unset;
+          border-top: unset;
         }
       }
     }
@@ -713,9 +713,9 @@ $start-button-size: 15vw;
       border-bottom-color: $transparent;
       border-bottom-style: solid;
       border-bottom-width: $romper-button-border;
-      border-left: 0;
-      border-right: 0;
-      border-top: 0;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-top: 2px solid transparent;
       color: inherit;
       cursor: pointer;
       flex: 1 1 0;
@@ -1056,6 +1056,17 @@ $start-button-size: 15vw;
   a {
     &:visited {
       color: inherit;
+    }
+  }
+
+  &.text-overlay {
+    align-items: center;
+    display: flex;
+    font-size: 150%;
+    text-align: center;
+
+    >div {
+      width: 100%;
     }
   }
 }

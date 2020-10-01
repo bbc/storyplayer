@@ -1,12 +1,13 @@
-/* eslint-disable comma-dangle */
+const { SCHEMA_VERSION } = require('@bbc/object-based-media-schema');
+
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const JavaScriptObfuscator = require('webpack-obfuscator');
-
+const webpack = require('webpack');
+const Package = require('./package.json');
 
 const productionBuild = process.env.NODE_ENV === 'production';
-
 
 const cacheLoaderSourceMapArray = [];
 
@@ -62,11 +63,14 @@ module.exports = env => {
             new MiniCssExtractPlugin({
                 filename: '[name].css',
             }),
+            new webpack.DefinePlugin({
+                __PLAYER_VERSION__: `${JSON.stringify(Package.version)}`,
+                __LATEST_SCHEMA_VERSION__: `${JSON.stringify(SCHEMA_VERSION)}`,
+            }),
         ],
     };
 
     if (!productionBuild) {
-        console.log('building in dev mode');
         console.log('generating source maps');
         config.module.rules.push({
             test: /\.js$/,

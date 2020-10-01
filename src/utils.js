@@ -1,4 +1,9 @@
 import logger from './logger';
+import { 
+    InternalVariableNames,
+    getTodaysDay, 
+    getSegmentOfDay,
+} from './InternalVariables';
 
 // @flow
 
@@ -58,16 +63,16 @@ export const getSMPInterface = () => {
 
 export const ADD_DETAILS_FLAG = "addDetails"
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
-export const FACEBOOK_BLOCK_FLAG = "overrideFacebookBlock"
-export const WEBVIEW_DEBUG_FLAG = "webviewDebug"
+export const FACEBOOK_BLOCK_FLAG = "overrideWebView"
+export const WEBVIEW_DEBUG_FLAG = "debugWebview"
 export const UA_DEBUG_FLAG = "debugUA"
 export const DISABLE_LOOKAHEAD_FLAG = "disableLookahead"
 
-export const OVERRIDE_PLAYOUT = "overridePlayout"
-export const OVERRIDE_PLAYOUT_FORMAT = "overridePlayoutFormat"
-export const SHAKA_DEBUG_LEVEL = "shakaDebugLevel"
-export const OVERRIDE_ACTIVE_BUFFERING = "activeBufferingOverride"
-export const OVERRIDE_INACTIVE_BUFFERING = "inactiveBufferingOverride"
+export const OVERRIDE_PLAYOUT = "overrideEngine"
+export const OVERRIDE_PLAYOUT_FORMAT = "overrideFormat"
+export const SHAKA_DEBUG_LEVEL = "debugShaka"
+export const OVERRIDE_ACTIVE_BUFFERING = "overrideActiveBuffering"
+export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBuffering"
 
 export const getSetting = (settingName) => {
     let settingValue;
@@ -205,5 +210,46 @@ export const precisionRound = (number: number, decimalPlaces: number) => {
  */
 export const leftGreaterThanRight = (left, right) => {
     return precisionRound(left, 2) > precisionRound(right, 2);
+};
+
+/**
+ * replaces the escaped variables so we can display them onscreen
+ * returns a Promise that resolves to a string
+ * @param {string} textContent text to replace 
+ * @param {string} controller the controller 
+ */
+export const replaceEscapedVariables = (textContent, controller) => {
+    const varRefs = textContent.match(/\$\{(.*?)\}/g);
+    if (!varRefs) {
+        return Promise.resolve(textContent);
+    }
+    return controller.getVariableState().then((vState) => {
+        const getVal = (vName) => {
+            if (vName === InternalVariableNames.DAY_OF_WEEK) {
+                return getTodaysDay();
+            }
+            if (vName === InternalVariableNames.PORTION_OF_DAY) {
+                return getSegmentOfDay();
+            }
+            if (vState[vName]) {
+                /* eslint-disable camelcase */
+                const { variable_type, value } = vState[vName];
+                switch(variable_type) {
+                case 'number':
+                    return value.toString();
+                case 'boolean':
+                    return value ? 'yes' : 'no';
+                case 'list':
+                case 'string':
+                default:
+                    return encodeURI(value);
+                }
+                /* eslint-enable camelcase */
+            }
+            return '';
+        };
+        const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
+        return replacedText;
+    });
 };
 
