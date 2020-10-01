@@ -269,7 +269,7 @@ $start-button-size: 15vw;
     background: $romper-background-color;
     color: $white;
     font-size: 1.8rem;
-    height: 64%;
+    height: 64.5%;
     margin: 0;
     overflow: hidden;
     padding: 10%;
@@ -278,6 +278,7 @@ $start-button-size: 15vw;
     width: 80%;
 
     &.overflowing-text {
+      height: unset;
       overflow: auto;
       padding-bottom: 2em;
       padding-top: 2em;
