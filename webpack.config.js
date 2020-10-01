@@ -12,12 +12,20 @@ const productionBuild = process.env.NODE_ENV === 'production';
 const cacheLoaderSourceMapArray = [];
 
 module.exports = env => {
+    const entry = {
+        romper: './src/romper.js'
+    }
+    // Plugin only used for demo code. Distributed plugin is built in SPH
+    if(!productionBuild) {
+        entry.plugin = './smp-example/plugin/plugin.js'
+    }
+
     const config = {
-        entry: './src/romper.js',
+        entry,
         devtool: 'source-map',
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'romper.js',
+            filename: '[name].js',
             library: 'Romper',
             libraryTarget: 'umd'
         },
@@ -53,7 +61,7 @@ module.exports = env => {
         },
         plugins: [
             new MiniCssExtractPlugin({
-                filename: 'romper.css',
+                filename: '[name].css',
             }),
             new webpack.DefinePlugin({
                 __PLAYER_VERSION__: `${JSON.stringify(Package.version)}`,

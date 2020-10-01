@@ -71,16 +71,17 @@ class Buttons extends BaseButtons {
 
     _initiateTransportControls(): NarrativeElementTransport {
         const transportControls = new NarrativeElementTransport(this._logUserInteraction);
-        transportControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.BACK_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
-        transportControls.on(ButtonEvents.NEXT_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
+
+        [
+            ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED,
+            ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED,
+            ButtonEvents.BACK_BUTTON_CLICKED,
+            ButtonEvents.NEXT_BUTTON_CLICKED,
+        ].forEach((eventType) => {
+            transportControls.on(eventType, (e) => this.emit(eventType, e));
+        })
+        
         return transportControls;
     }
 
@@ -96,7 +97,7 @@ class Buttons extends BaseButtons {
         } else {
             this._subtitlesButton.classList.remove('romper-button-selected');
         }
-        
+
         const showingSubtitlesIntToString = [
             'hidden',
             'showing',
@@ -118,7 +119,7 @@ class Buttons extends BaseButtons {
         return this._transportControls.getControls();
     }
 
-    getFullscreenButton() { 
+    getFullscreenButton() {
         return this._fullscreenButton;
     }
 

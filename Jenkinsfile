@@ -58,7 +58,7 @@ pipeline {
     }
 
     stage('Discover package versions') {
-      when { branch 'master' }
+      when { branch 'master-smp' }
       steps {
         script {
           env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
@@ -95,7 +95,7 @@ pipeline {
     stage('Publish to Artifactory Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'master-smp';
           not { equals expected: env.git_version, actual: env.artifactory_version }
         }
       }
@@ -108,35 +108,20 @@ pipeline {
           sh '''
             git config --global user.name "Jenkins"
             git config --global user.email jenkins-slave@rd.bbc.co.uk
-            git clone git@github.com:bbc/rd-ux-storyplayer-harness.git
-            git clone git@github.com:bbc/rd-ux-storyformer.git
+            git clone --single-branch --branch master-smp git@github.com:bbc/rd-ux-storyplayer-harness.git
           '''
 
           dir('rd-ux-storyplayer-harness') {
             sh '''
-              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
+              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer-smp@latest
               yarn version --patch --no-git-tag-version
               git add package.json yarn.lock
-              git commit --message  "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
+              git commit --message  "chore: Upgrade rd-ux-storyplayer-smp to ${git_version} and version bump to %s
 
-${commit_messages}
-"
+        ${commit_messages}
+        "
               git pull --rebase
-              git push origin master --tags
-            '''
-          }
-
-          dir('rd-ux-storyformer') {
-            sh '''
-              yarn upgrade --registry "$artifactory_pull" --dev --ignore-scripts @bbc/storyplayer@latest
-              yarn version --patch --no-git-tag-version
-              git add package.json yarn.lock
-              git commit --message "chore: Upgrade rd-ux-storyplayer to ${git_version} and version bump to %s
-
-${commit_messages}
-"
-              git pull --rebase
-              git push origin master --tags
+              git push origin master-smp --tags
             '''
           }
         }
@@ -146,7 +131,7 @@ ${commit_messages}
     stage('Publish to NPMjs Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'master-smp';
           not { equals expected: env.git_version, actual: env.npm_version }
         }
       }
