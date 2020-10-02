@@ -91,8 +91,8 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
 
     setPosition(modalElement, behaviour);
 
-    const closeButtonId = 'close-social-modal'
-    const closeButton = createElementWithClass('div', closeButtonId,['romper-close-button']);
+    const closeButtonId = `close-button-${behaviour.id}`;
+    const closeButton = createElementWithClass('div', closeButtonId, ['romper-close-button']);
 
     const closeModal = () => {
         modalContainer.removeChild(modalElement);
@@ -107,8 +107,8 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
     if (behaviour.share_url) {
         shareUrl = encodeURIComponent(behaviour.share_url);
     }
-
-    const platformList = createElementWithClass('ul', 'share-list', ['romper-share-list']);
+    const platformListId = `share-list-${behaviour.id}`;
+    const platformList = createElementWithClass('ul', platformListId, ['romper-share-list']);
 
     behaviour.platforms.forEach((platformId) => {
         if (platformId === 'twitter') {

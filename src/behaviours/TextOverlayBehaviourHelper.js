@@ -19,7 +19,8 @@ const setPosition = (modalElement, behaviour) => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderTextOverlay = (behaviour, target, callback, controller) => {
-    const modalElement = createElementWithClass('div', behaviour.id, ['romper-behaviour-modal','text-overlay']);
+    const modalId = `modal-${behaviour.id}`;
+    const modalElement = createElementWithClass('div', modalId, ['romper-behaviour-modal','text-overlay']);
     const modalContainer = createContainer(target);
     modalContainer.appendChild(modalElement);
 
@@ -36,7 +37,8 @@ export const renderTextOverlay = (behaviour, target, callback, controller) => {
     }
 
     setPosition(modalElement, behaviour);
-    const sentenceDiv = document.createElement('div');
+    const contentId = `text-overlay-${behaviour.id}`;
+    const sentenceDiv = createElementWithClass('div', contentId, null);
     replaceEscapedVariables(behaviour.text, controller)
         .then((newText) => {
             sentenceDiv.textContent = newText;    

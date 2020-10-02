@@ -73,11 +73,12 @@ export const copySelection = (e: Object) => {
 export const addDetail = (key: string, name: ? string, id : ? string) => {
     const detail = createElementWithClass('div', 'detail-info', ['detail']);
     detail.innerText = `${key}: ${name || ''}`;
-    const detailId = createElementWithClass('input', id, ['detail-input']);
-    detailId.value = `${id || ''}`;
-    detailId.className = 'detail-input';
-    detailId.onclick = copySelection;
-    detail.appendChild(detailId);
+    const detailId = `detail-${id}`;
+    const detailInfo = createElementWithClass('input', detailId, ['detail-input']);
+    detailInfo.value = `${id || ''}`;
+    detailInfo.className = 'detail-input';
+    detailInfo.onclick = copySelection;
+    detail.appendChild(detailInfo);
     return detail;
 };
 

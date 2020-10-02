@@ -19,7 +19,8 @@ const setPosition = (modalElement, behaviour) => {
 const createLink = (behaviour) => {
     const linkText = behaviour.link_text;
     let linkUrl = behaviour.link_url;
-    const linkElement = createElementWithClass('a', behaviour.id, null);
+    const linkId = `link-${behaviour.id}`;
+    const linkElement = createElementWithClass('a', linkId, null);
 
     // if the link isn't absolute ie http or https we are going to assume authors want https absolute links
     if(!(linkUrl.startsWith('http://') || linkUrl.startsWith('https://'))) {
@@ -37,7 +38,8 @@ const createLink = (behaviour) => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
-    const modalElement = createElementWithClass('div', behaviour.id, ['romper-behaviour-modal link-out'])
+    const modalId = `modal-${behaviour.id}`;
+    const modalElement = createElementWithClass('div', modalId, ['romper-behaviour-modal link-out'])
     const modalContainer = createContainer(target);
     modalContainer.appendChild(modalElement);
 
@@ -46,14 +48,15 @@ export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     }
 
     if (behaviour.title) {
-        const titleSpan = createElementWithClass('div', null, ['title']);
+        const titleId = `title-${behaviour.id}`;
+        const titleSpan = createElementWithClass('div', titleId, ['title']);
         titleSpan.textContent = behaviour.title;
         modalElement.appendChild(titleSpan);
     }
 
     setPosition(modalElement, behaviour);
 
-    const buttonId = `${behaviour.id}-button`;
+    const buttonId = `close-button-${behaviour.id}`;
     const closeButton = createElementWithClass('div', buttonId, ['romper-close-button']);
 
     const closeModal = () => {
