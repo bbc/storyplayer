@@ -27,6 +27,7 @@ import { ButtonEvents } from './BaseButtons';
 import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
 import { ControlEvents } from './BaseControls';
+import ErrorControls from './ErrorControls';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -51,8 +52,6 @@ const PlayerEvents = [
     return events;
 }, {});
 
-const DEFAULT_ERROR_MESSAGE = "Sorry, there's a problem - try skipping ahead";
-
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
 
@@ -66,7 +65,7 @@ class Player extends EventEmitter {
 
     _guiLayer: HTMLDivElement;
 
-    _errorLayer: HTMLDivElement;
+    _errorControls: ErrorControls;
 
     _continueModalLayer: HTMLDivElement;
 
@@ -231,13 +230,10 @@ class Player extends EventEmitter {
         this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
 
-        this._errorLayer = document.createElement('div');
-        this._errorLayer.id = 'romper-error-layer';
-        // eslint-disable-next-line max-len
-        const errorMessage = document.createTextNode(DEFAULT_ERROR_MESSAGE);
-        this._errorLayer.appendChild(errorMessage);
-        this._errorLayer.classList.add('romper-error');
-        this._errorLayer.classList.add('hide');
+        this._errorControls = new ErrorControls(this._controller);
+        this._errorControls.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
+            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+        });
 
         this._continueModalLayer = document.createElement('div');
         this._continueModalLayer.id = 'continue-modal';
@@ -250,7 +246,7 @@ class Player extends EventEmitter {
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
-        this._player.appendChild(this._errorLayer);
+        this._player.appendChild(this._errorControls.getLayer());
         this._guiLayer.appendChild(this._continueModalLayer);
 
         this._overlaysElement = document.createElement('div');
@@ -674,14 +670,16 @@ class Player extends EventEmitter {
     /**
      *  Show an error message over all the content and UI
      *  @param {message} Optional message to render.  If null or
-     *  not given, will rendere the DEFAULT_ERROR_MESSAGE 
+     *    not given, will render a default message (see ErrorControls) 
+     *  @param {showControls} Optional boolean determining if
+     *    user is presented with ignore and skip buttons
      */
-    showErrorLayer(message) {
-        const errorMessage = message || DEFAULT_ERROR_MESSAGE;
-        const errorLayer = document.getElementById('romper-error-layer');
-        errorLayer.textContent = errorMessage;
-        this._errorLayer.classList.add('show');
-        this._errorLayer.classList.remove('hide');
+    showErrorLayer(message, showControls=false) {
+        if (showControls){
+            this._errorControls.showControls(message);
+        } else {
+            this._errorControls.showMessage(message);
+        }
         this._controls.showControls();
     }
 
@@ -694,8 +692,7 @@ class Player extends EventEmitter {
     }
 
     _removeErrorLayer() {
-        this._errorLayer.classList.remove('show');
-        this._errorLayer.classList.add('hide');
+        this._errorControls.hideMessageControls();
         this._controls.hideControls();
     }
 
