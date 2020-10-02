@@ -314,3 +314,53 @@ And the following attributes added in version 0.12.2:
 
 In 0.12.17
 * `defaultDuration` - the time (in seconds) that the media was planned to last.  This is the duration of a piece of timed media (audio, video, or image with duration), and will be null if the representation is not time-bound.
+
+
+
+## Element Ids
+
+### Messages
+
+| Element | id | created by | Description |
+| -- | -- | -- | -- |
+| Warning messages | `warning-message-${index}` | Controller.js | created by the controller if any requirements from `meta.romper.requirements` aren't satisfied. |
+| Warning Content | `warning-content-${index}` | Controller.js | Holds the content for the warning messages |
+| Detail overlay | `detail-info` | Player.js | created by the player if `addDetail` parameter is true, |
+| Detail overlay | `detail-${id}` | Player.js | created by the details overlay, each Id is the id for the object |
+
+
+
+### Behaviours 
+
+| Element | id | created by | Description |
+| -- | -- | -- | -- |
+| Link Out Link | `link-${behaviour.id}` | LinkOutBehaviour.js | Link `a` tag for the link out behaviour |
+| Link Out Modal | `modal-${behaviour.id}` | LinkOutBehaviour.js | Link out modal for the link out behaviour |
+| Link Out Modal Close button | `button-${behaviour.id}` | LinkOutBehaviour.js | Close the link out modal |
+| Link Out Modal Title | `title-${behaviour.id}` | LinkOutBehaviour.js | Title text for the behaviour |
+| Modal Overlay| `null` | ModalHelper.js | Returns a modal overlay |
+| Close Social share modal button | `close-button-${behaviour.id}`; | SocialShareBehaviourHelper.js | Close the social share modal |
+| Social share list container | `share-list-${behaviour.id}`| SocialShareBehaviourHelper.js | `ul` for all the social sharing icons |
+| Text overlay Modal | `modal-${behaviour.id}` | LinkOutBehaviour.js | Text overlay Modal |
+| text overlay Text element | `text-overlay-${behaviour.id}` | LinkOutBehaviour.js | Contains the text for the overlay |
+
+
+### Buttons
+
+
+| Element |type |  id | created by | Description |
+| -- | -- | -- | -- | -- |
+| Subtitle button | button | `subtitle-button` | Buttons.js | Subtitle button |
+| Subtitle Button Icon | div | `subtitles-icon` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button | button |`fullscreen-button` | Buttons.js | Fullscreen button |
+| media Transport element | div | `media-transport` | Buttons.js | Icon for the button SVG |
+| Media transport right | div | `media-transport-left` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `media-transport-center` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `media-transport-right` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `fullscreen` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `fullscreen` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `fullscreen` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `fullscreen` | Buttons.js | Icon for the button SVG |
+| Fullscreen Button Icon | div | `fullscreen` | Buttons.js | Icon for the button SVG |
+
+
