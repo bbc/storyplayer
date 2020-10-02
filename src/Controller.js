@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
-import StoryReasoner from './StoryReasoner';
+import StoryReasoner, { ReasonerError, REASONER_ERRORS } from './StoryReasoner';
 import type { ExperienceFetchers, NarrativeElement, AssetUrls, Representation } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
@@ -60,6 +60,7 @@ export default class Controller extends EventEmitter {
         this._startStoryEventListener = this._startStoryEventListener.bind(this);
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
         this._emitFullScreenEvent = this._emitFullScreenEvent.bind(this);
+        this._handleError = this._handleError.bind(this);
 
         this._analyticsHandler = new AnalyticsHandler(analytics, this);
         this._handleAnalytics = this._handleAnalytics.bind(this);
@@ -1280,7 +1281,31 @@ export default class Controller extends EventEmitter {
 
     // eslint-disable-next-line class-methods-use-this
     _handleError(err: Error) {
-        logger.warn(err);
+        if (err instanceof ReasonerError) {
+            switch(err.errorType) {
+            case REASONER_ERRORS.NO_BEGINNING:
+                // start button etc being created asynchronously
+                // need to give some time before clearing
+                setTimeout(() =>
+                    this._renderManager.showError(
+                        err.message,
+                        true,
+                        true),
+                500);
+                break;
+            case REASONER_ERRORS.NO_VALID_LINKS:
+                this._renderManager.showError(
+                    err.message,
+                    true,
+                    false);
+                break;
+            default:
+                logger.warn(err);
+            }        
+        }
+        else {
+            logger.warn(err);
+        }
     }
 
     walkPathHistory(storyId: string, lastVisited: string, pathHistory: [string]) {

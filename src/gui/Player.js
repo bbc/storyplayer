@@ -52,6 +52,8 @@ const PlayerEvents = [
     return events;
 }, {});
 
+const DEFAULT_ERROR_MESSAGE = "Sorry, there's a problem - try skipping ahead";
+
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
 
@@ -141,7 +143,7 @@ class Player extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
-    _showErrorLayer: Function;
+    showErrorLayer: Function;
 
     _removeErrorLayer: Function;
 
@@ -189,7 +191,7 @@ class Player extends EventEmitter {
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
-        this._showErrorLayer = this._showErrorLayer.bind(this);
+        this.showErrorLayer = this.showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this.showBufferingLayer = this.showBufferingLayer.bind(this);
         this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
@@ -642,7 +644,15 @@ class Player extends EventEmitter {
         }
     }
 
-    _showErrorLayer() {
+    /**
+     *  Show an error message over all the content and UI
+     *  @param {message} Optional message to render.  If null or
+     *  not given, will rendere the DEFAULT_ERROR_MESSAGE 
+     */
+    showErrorLayer(message) {
+        const errorMessage = message || DEFAULT_ERROR_MESSAGE;
+        const errorLayer = document.getElementById('romper-error-layer');
+        errorLayer.textContent = errorMessage;
         this._errorLayer.classList.add('show');
         this._errorLayer.classList.remove('hide');
         this._controls.showControls();
@@ -805,6 +815,17 @@ class Player extends EventEmitter {
         } catch (e) {
             logger.warn(e);
             logger.warn('could not remove _startExperienceImage');
+        }
+    }
+
+    clearStartButton() {
+        try {
+            if(this._startExperienceButton) {
+                this._guiLayer.removeChild(this._startExperienceButton);
+            }
+            this._mediaLayer.classList.remove('romper-prestart');
+        } catch (e) {
+            logger.warn(e);
         }
     }
 
