@@ -16,7 +16,7 @@ const ERROR_MESSAGES = {
     'ALREADY_ENDED': 'InvalidState: this story has ended',
     'CURRENTLY_RESOLVING': 'InvalidState: currently resolving an action',
     'NOT_STARTED': 'InvalidState: this story has not yet started',
-    'NO_VALID_LINKS': 'This story can play no further -there are no valid links',
+    'NO_VALID_LINKS': 'This story can play no further: there are no valid links',
     'INVALID_LINK_TARGET': 'Link is to an narrative object not in the graph',
 };
 
