@@ -329,6 +329,20 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
+    /**
+     * Show an error message over everything
+     * Optionally disable controls and remove start button
+     * @param {string} message The message to show
+     * @param {boolean} message Should controls be disabled
+     * @param {boolean} message Should overlays (e.g., start button) be removed
+     * 
+     */
+    showError(message, disableControls, clearOverlays) {
+        this._player.showErrorLayer(message);
+        if (disableControls) this._player.disableControls();
+        if (clearOverlays) this._player.clearStartButton();
+    }
+
     _setAspectRatio(story: Object) {
         let aspectRatio = 16 / 9;
         if (story.meta
