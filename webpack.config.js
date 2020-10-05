@@ -15,10 +15,6 @@ module.exports = env => {
     const entry = {
         romper: './src/romper.js'
     }
-    // Plugin only used for demo code. Distributed plugin is built in SPH
-    if(!productionBuild) {
-        entry.plugin = './smp-example/plugin/plugin.js'
-    }
 
     const config = {
         entry,
