@@ -31,15 +31,8 @@ class BaseControls extends EventEmitter {
         this._logUserInteraction = logUserInteraction;
     }
 
-    /* setters for overlay buttons */
-    setVolumeButton(button: HTMLButtonElement) { }
-
-    setChapterButton(button: HTMLButtonElement) { }
-
-    setSwitchableButton(button: HTMLButtonElement) { }
-
     /* getters */
-    
+
     // get the whole lot organised in a DIV
     getControls(): HTMLDivElement {
         return document.createElement('div');

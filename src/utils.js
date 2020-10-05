@@ -7,11 +7,58 @@ import {
 
 // @flow
 
+export const proxyWrapper = (text, classInstance) => {
+    const handler = {
+        get (getTarget, getProp) {
+            // eslint-disable-next-line func-names
+            return function() {
+                /* eslint-disable prefer-rest-params */
+                try {
+                    logger.info( `(C) ${text} call: ${getProp} (${arguments.length})` );
+                } catch {
+                    logger.info( `(C) ${text} call: ${getProp} logger failed`)
+                }
+                try {
+                    logger.info( `(C+A) ${text} call: ${getProp}`, ...arguments );
+                } catch {
+                    logger.info( `(C+A) ${text} call: ${getProp} logger failed`)
+                }
+                // eslint-disable-next-line prefer-spread
+                const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                try {
+                    logger.info( `(C+R) ${text} call: ${getProp}`, ret );
+                } catch {
+                    logger.info( `(C+R) ${text} call: ${getProp} logger failed`)
+                }
+                try {
+                    logger.info( `(C+A+R) ${text} call: ${getProp}`, ...arguments, ret );
+                } catch {
+                    logger.info( `(C+A+R) ${text} call: ${getProp} logger failed`)
+                }
+                /* eslint-enable prefer-rest-params */
+
+                return ret
+            }
+        },
+    };
+    return new Proxy(classInstance, handler);
+}
+
+/**
+ * Are we in the SMP iframe or not
+ */
 export const inSMPWrapper = () => {
     if (window.publicApi && window.playerInterface) {
         return true;
     }
     return false
+}
+
+/**
+ * Returns the SMP interface
+ */
+export const getSMPInterface = () => {
+    return window.playerInterface;
 }
 
 export const ADD_DETAILS_FLAG = "addDetails"
@@ -28,7 +75,15 @@ export const OVERRIDE_ACTIVE_BUFFERING = "overrideActiveBuffering"
 export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBuffering"
 
 export const getSetting = (settingName) => {
-    const settingValue = new URLSearchParams(window.location.search).get(settingName);
+    let settingValue;
+    if(inSMPWrapper()) {
+        settingValue = new URLSearchParams(
+            window.playerInterface.datastore.get("queryString")
+        ).get(settingName);
+    } else {
+        settingValue = new URLSearchParams(window.location.search).get(settingName);
+    }
+
     switch(settingName) {
     case ADD_DETAILS_FLAG:
     case DEBUG_PLAYOUT_FLAG:
@@ -41,8 +96,6 @@ export const getSetting = (settingName) => {
         return settingValue
     }
 }
-
-
 
 export const getCurrentUrl = () => {
     return window.location.href
@@ -116,11 +169,16 @@ export const preventEventDefault = (event: Event) => {
     }
 };
 
+/**
+ * Adds an event handler to the event called
+ * @param {Function} callback callback to execute on the event
+ * @param {string} touchEvent Event to attach listener to
+ */
 export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
     return (event: Object) => {
         if(getSetting(DEBUG_PLAYOUT_FLAG)) {
             logger.info('Event Captured:', event);
-            console.log('Touch Event Captured:', touchEvent);
+            logger.info('Touch Event Captured:', touchEvent);
         }
         // handle multiple touch points?
         if(event.touches !== undefined && event.touches && event.touches.length > 1) {

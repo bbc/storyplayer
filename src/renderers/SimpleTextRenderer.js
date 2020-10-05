@@ -89,6 +89,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
+        this._playoutEngine.startNonAVPlayout(this._rendererId, 0)
 
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
@@ -114,6 +115,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     end() {
         const needToEnd = super.end();
         if (!needToEnd) return false;
+        this._playoutEngine.stopNonAVPlayout(this._rendererId)
 
         logger.info(`Ended: ${this._representation.id}`);
         try {
