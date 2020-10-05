@@ -1,33 +1,3 @@
-# StoryPlayer SMP Testing
-
-## Install Deps:
-```
-yarn install
-```
-
-## Setup Hosts file
-Follow https://www.howtogeek.com/howto/27350/beginner-geek-how-to-edit-your-hosts-file/ to add the following to your hosts file:
-```
-127.0.0.1       localhost.bbc.co.uk
-```
-
-## Run Code:
-```
-yarn demo
-```
-
-## Open in Browser:
-
-### Standard SP:
-Load webpage http://localhost.bbc.co.uk:3000/examples/, go to `Select Story`, select a story, go to `Render`. The stories in this website will be shown based on their name/description in the JSON not their filename.
-
-
-### SMP SP:
-Load webpage http://localhost.bbc.co.uk:3000/smp-example/#examples/[DEMO_FILENAME_HERE]
-Where: [DEMO_FILENAME_HERE] is the filename of a demo in the examples folder e.g. `demo10`. You'll need to refresh the website whenever you load another example.
-
-
-
 StoryPlayer
 ======
 
