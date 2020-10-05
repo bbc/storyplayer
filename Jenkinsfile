@@ -122,7 +122,7 @@ pipeline {
 ${commit_messages}
 "
               git pull --rebase
-              git push origin master --tags
+              git push origin main --tags
             '''
           }
 
