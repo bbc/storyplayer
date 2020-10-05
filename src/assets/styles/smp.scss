@@ -1,0 +1,82 @@
+.controlsFadedOut {
+    .chapterButton {
+        display: none;
+    }
+
+    // Hide Chapter Overlay when SMP Controls are not there
+    .romper-buttons-smp {
+        .romper-overlay {
+            display: none;
+        }
+    }
+
+    .audioMixSlider {
+        display: none;
+    }
+
+    .audioMixSliderLabel {
+        display: none;
+    }
+}
+
+.controlsFadedIn {
+    .chapterButton {
+        top: 0;
+        right: 0;
+
+        &.romper-inactive {
+            display: none;
+        }
+    }
+
+    .audioMixSlider {
+        position: absolute;
+        width: 170px;
+        height: 30px;
+        margin-top: 14px;
+        left: 200px;
+    }
+
+    .audioMixSliderLabel {
+        position: absolute;
+        width: 170px;
+        height: 44px;
+        left: 200px;
+        color: white;
+        text-align: center;
+        line-height: 1;
+    }
+}
+
+.chapterIcon {
+    left: 0;
+    top: 0;
+    margin: 10px 10px;
+}
+
+.romper-player > .romper-gui >.romper-buttons-smp {
+    width: 100%;
+    padding-bottom: 0;
+    bottom: 0;
+    display: flex;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: all 1s ease;
+    z-index: 10;
+
+    &.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .romper-icon-label {
+      display: none;
+    }
+
+    .romper-icon-overlay {
+      top: 0;
+      bottom: unset;
+    }
+  }

@@ -58,7 +58,7 @@ export default class ImageRenderer extends BaseRenderer {
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
-
+        this._playoutEngine.startNonAVPlayout(this._rendererId, this._duration)
         this._visible = true;
         this._setVisibility(true);
         return true;
@@ -66,6 +66,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     start() {
         super.start();
+
         if (this._duration === Infinity || this._duration < 0) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
@@ -86,7 +87,7 @@ export default class ImageRenderer extends BaseRenderer {
                     // eslint-disable-next-line max-len
                     logger.info(`Image representation ${this._representation.id} completed time`);
                     this.complete();
-                },  
+                },
             );
         }
     }
@@ -94,6 +95,7 @@ export default class ImageRenderer extends BaseRenderer {
     end() {
         const needToEnd = super.end();
         if (!needToEnd) return false;
+        this._playoutEngine.stopNonAVPlayout(this._rendererId)
 
         this._visible = false;
         // Hack to make image transitions smooth (preventing showing of black background with
@@ -121,7 +123,7 @@ export default class ImageRenderer extends BaseRenderer {
                     logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                     this._imageElement.src = mediaUrl;
                 }
-                catch(err) { 
+                catch(err) {
                     logger.error(err, 'Notfound');
                     throw new Error('Image media not found');
                 }

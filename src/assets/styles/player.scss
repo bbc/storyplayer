@@ -98,6 +98,19 @@ $start-button-size: 15vw;
   position: absolute;
 }
 
+#p_pluginContainer {
+  .romper-player {
+    display: unset;
+    flex-direction: unset;
+    height: 100%;
+    justify-content: unset;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+}
+
 .romper-player {
   color: $accent-colour;
   display: flex;
@@ -648,7 +661,8 @@ $start-button-size: 15vw;
     width: 80%;
     z-index: 15;
 
-    &.fullscreen-icons {
+    &.fullscreen-choice-icons,
+    .fullscreen-icons {
       background: none;
       display: grid;
       grid-auto-columns: 1fr;
@@ -846,6 +860,10 @@ $start-button-size: 15vw;
     transition: all 1s ease;
     z-index: 10;
 
+    &.romper-buttons-smp {
+      background: unset;
+    }
+
     &.icons-showing {
       background: linear-gradient($transparent 0, $black 30%, $black 100%);
     }
@@ -1016,6 +1034,7 @@ $start-button-size: 15vw;
   position: absolute;
   top: 0;
   width: 100%;
+  z-index: 1;
 }
 
 .romper-render-image {
