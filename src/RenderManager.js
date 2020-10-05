@@ -152,6 +152,10 @@ export default class RenderManager extends EventEmitter {
             this._rendererState.volumes[event.label] = event.value;
         });
 
+        this._player.on(PlayerEvents.AUDIO_MIX_CHANGED, (event) => {
+            this._rendererState.volumes[event.label] = event.value;
+        });
+
         this._player.on(PlayerEvents.VOLUME_MUTE_TOGGLE, (event) => {
             this._rendererState.muted[event.label] = event.muted;
         });
@@ -215,7 +219,11 @@ export default class RenderManager extends EventEmitter {
             }
             this._player.playoutEngine.pauseBackgrounds();
         } else {
-            if (this._isPlaying) {
+            if (
+                this._currentRenderer
+                && this._isPlaying 
+                && this._currentRenderer.phase === RENDERER_PHASES.MAIN
+            ) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                     this._currentRenderer.play();
