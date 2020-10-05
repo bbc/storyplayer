@@ -2,6 +2,7 @@
 import EventEmitter from 'events';
 import { handleButtonTouchEvent } from '../utils';
 import { PlayerEvents } from './Player';
+import { createElementWithClass } from '../documentUtils';
 
 const DEFAULT_ERROR_MESSAGE = "Sorry, there is a problem - try skipping ahead";
 
@@ -30,8 +31,11 @@ class ErrorControls extends EventEmitter {
     // generate the UI
     _buildUi() {
         // modal
-        this._container = document.createElement('div');
-        this._container.classList.add('romper-error', 'romper-error-controls', 'hide');
+        this._container = createElementWithClass(
+            'div',
+            'romper-error-layer',
+            ['romper-error', 'romper-error-controls', 'hide'],
+        );
 
         // message
         this._addMessageDiv();
@@ -49,8 +53,11 @@ class ErrorControls extends EventEmitter {
 
     _addControls(){
         // container
-        this._controlsDiv = document.createElement('div');
-        this._controlsDiv.classList.add('romper-error-buttons', 'hide');
+        this._controlsDiv = createElementWithClass(
+            'div',
+            'romper-error-controls',
+            ['romper-error-buttons', 'hide'],
+        );
         this._container.appendChild(this._controlsDiv);
         // cancel/ignore button
         this._addIgnoreButton();
@@ -59,15 +66,20 @@ class ErrorControls extends EventEmitter {
     }
 
     _addNextButton() {
-        this._nextButton = document.createElement('button');
+        this._nextButton = createElementWithClass(
+            'button',
+            'romper-error-next-button',
+            ['romper-button','romper-next-button'],
+        );
         this._nextButton.setAttribute('type', 'button');
-        this._nextButton.classList.add('romper-button');
-        this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
         this._nextButton.setAttribute('aria-label', 'Next Button');
         this._controlsDiv.appendChild(this._nextButton);
-        const nextButtonIconDiv = document.createElement('div');
-        nextButtonIconDiv.classList.add('romper-button-icon-div');
+        const nextButtonIconDiv = createElementWithClass(
+            'div',
+            'romper-error-next-button-icon',
+            ['romper-button-icon-div'],
+        );
         this._nextButton.appendChild(document.createTextNode('Skip'));
         this._nextButton.appendChild(nextButtonIconDiv);
 
@@ -79,17 +91,17 @@ class ErrorControls extends EventEmitter {
     }
 
     _addIgnoreButton() {
-        this._ignoreButton = document.createElement('button');
+        this._ignoreButton = createElementWithClass(
+            'button',
+            'romper-error-ignore-button',
+            ['romper-button','romper-ignore-button'],
+        );
         this._ignoreButton.setAttribute('type', 'button');
-        this._ignoreButton.classList.add('romper-button', 'romper-ignore-button');
         this._ignoreButton.textContent = 'Ignore';
         this._ignoreButton.setAttribute('title', 'Ignore Button');
         this._ignoreButton.setAttribute('aria-label', 'Ignore Button');
         this._controlsDiv.appendChild(this._ignoreButton);
-        const ignoreButtonIconDiv = document.createElement('div');
-        ignoreButtonIconDiv.classList.add('romper-button-icon-div');
-        this._ignoreButton.appendChild(ignoreButtonIconDiv);
-
+    
         this._ignoreButton.onclick = this._ignoreButtonClicked.bind(this);
         this._ignoreButton.addEventListener(
             'touchend',
@@ -98,9 +110,11 @@ class ErrorControls extends EventEmitter {
     }
 
     _addMessageDiv() {
-        this._messageDiv = document.createElement('div');
-        this._messageDiv.id = 'romper-error-message';
-        this._messageDiv.className = 'romper-error-message';
+        this._messageDiv = createElementWithClass(
+            'div',
+            'romper-error-message',
+            ['romper-error-message'],
+        );
         const errorMessage = document.createTextNode(DEFAULT_ERROR_MESSAGE);
         this._messageDiv.appendChild(errorMessage);
         this._container.appendChild(this._messageDiv);
