@@ -1,7 +1,7 @@
 // @flow
 import EventEmitter from 'events';
 import { handleButtonTouchEvent } from '../utils';
-import Controller from '../Controller';
+import { PlayerEvents } from './Player';
 
 const DEFAULT_ERROR_MESSAGE = "Sorry, there is a problem - try skipping ahead";
 
@@ -13,8 +13,6 @@ class ErrorControls extends EventEmitter {
 
     _container: HTMLDivElement;
 
-    _controller: Controller;
-
     _nextButton: HTMLButtonElement;
 
     _ignoreButton: HTMLButtonElement;
@@ -24,9 +22,8 @@ class ErrorControls extends EventEmitter {
     _controlsDiv: HTMLDivElement;
 
 
-    constructor(controller) {
+    constructor() {
         super();
-        this._controller = controller;
         this._buildUi();
     }
 
@@ -110,8 +107,8 @@ class ErrorControls extends EventEmitter {
     }
 
     _nextButtonClicked() {
-        this._controller._reasoner.next();
         this.hideMessageControls();
+        this.emit(PlayerEvents.ERROR_SKIP_BUTTON_CLICKED);
     }
 
     _ignoreButtonClicked() {

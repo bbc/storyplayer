@@ -46,6 +46,7 @@ const PlayerEvents = [
     'FULLSCREEN_BUTTON_CLICKED',
     'REPEAT_BUTTON_CLICKED',
     'LINK_CHOSEN',
+    'ERROR_SKIP_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -230,9 +231,10 @@ class Player extends EventEmitter {
         this._guiLayer.id = 'gui-layer';
         this._guiLayer.classList.add('romper-gui');
 
-        this._errorControls = new ErrorControls(this._controller);
-        this._errorControls.on(PlayerEvents.NEXT_BUTTON_CLICKED, () => {
-            this.emit(PlayerEvents.NEXT_BUTTON_CLICKED);
+        this._errorControls = new ErrorControls();
+        this._errorControls.on(PlayerEvents.ERROR_SKIP_BUTTON_CLICKED, () => {
+            this._controller.forceReasonerOn();
+            this.playoutEngine.play();
         });
 
         this._continueModalLayer = document.createElement('div');
