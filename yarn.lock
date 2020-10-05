@@ -731,6 +731,13 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@bbc/object-based-media-schema@^0.3.8":
+  version "0.3.8"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@bbc/object-based-media-schema/-/@bbc/object-based-media-schema-0.3.8.tgz#53e073bb23503f003ffbd1c17d51b9d66289bc09"
+  integrity sha1-U+BzuyNQPwA/+9HBfVG51mKJvAk=
+  dependencies:
+    jsonschema "^1.1.1"
+
 "@browser-bunyan/console-formatted-stream@^1.5.3":
   version "1.5.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@browser-bunyan/console-formatted-stream/-/console-formatted-stream-1.5.3.tgz#d0fc48f8d0dd982e373d8dc5485493f9b571c5fa"
@@ -5746,6 +5753,11 @@ jsonpointer@^4.0.0:
   version "4.0.1"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsonpointer/-/jsonpointer-4.0.1.tgz#4fd92cb34e0e9db3c89c8622ecf51f9b978c6cb9"
   integrity sha1-T9kss04OnbPInIYi7PUfm5eMbLk=
+
+jsonschema@^1.1.1:
+  version "1.2.6"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsonschema/-/jsonschema-1.2.6.tgz#52b0a8e9dc06bbae7295249d03e4b9faee8a0c0b"
+  integrity sha1-UrCo6dwGu65ylSSdA+S5+u6KDAs=
 
 jsprim@^1.2.2:
   version "1.4.1"

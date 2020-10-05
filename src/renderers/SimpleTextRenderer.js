@@ -5,6 +5,7 @@ import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
+import { replaceEscapedVariables } from '../utils';
 
 import logger from '../logger';
 import { REASONER_EVENTS } from '../Events';
@@ -179,39 +180,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     /**
-     * replaces the escaped variables so we can display them onscreen
-     * @param {string} textContent text to replace 
-     */
-    _replaceEscapedVariables(textContent: string): Promise<string> {
-        const varRefs = textContent.match(/\$\{(.*?)\}/g);
-        if (varRefs) {
-            return this._controller.getVariableState().then((vState) => {
-                const getVal = (vName) => {
-                    if (vState[vName]) {
-                        /* eslint-disable camelcase */
-                        const { variable_type, value } = vState[vName];
-                        switch(variable_type) {
-                        case 'number':
-                            return value.toString();
-                        case 'boolean':
-                            return value ? 'yes' : 'no';
-                        case 'list':
-                        case 'string':
-                        default:
-                            return encodeURI(value);
-                        }
-                        /* eslint-enable camelcase */
-                    }
-                    return '';
-                };
-                const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
-                return replacedText;
-            });
-        }
-        return Promise.resolve(textContent);
-    }
-
-    /**
      * check the text element is overflown
      */
     isOverflown() {
@@ -270,7 +238,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
      * @param {string} textContent 
      */
     populateTextElement(textContent: string) {
-        this._replaceEscapedVariables(textContent)
+        replaceEscapedVariables(textContent, this._controller)
             .then((newText) => {
                 this._textDiv.innerHTML = newText;
             });

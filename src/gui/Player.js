@@ -57,6 +57,8 @@ const PlayerEvents = [
     return events;
 }, {});
 
+const DEFAULT_ERROR_MESSAGE = "Sorry, there's a problem - try skipping ahead";
+
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
 
@@ -146,7 +148,7 @@ class Player extends EventEmitter {
 
     _currentRenderer: ?BaseRenderer;
 
-    _showErrorLayer: Function;
+    showErrorLayer: Function;
 
     _removeErrorLayer: Function;
 
@@ -193,7 +195,7 @@ class Player extends EventEmitter {
         // bind various functions
         this._logUserInteraction = this._logUserInteraction.bind(this);
         this._removeExperienceOverlays = this._removeExperienceOverlays.bind(this);
-        this._showErrorLayer = this._showErrorLayer.bind(this);
+        this.showErrorLayer = this.showErrorLayer.bind(this);
         this._removeErrorLayer = this._removeErrorLayer.bind(this);
         this.showBufferingLayer = this.showBufferingLayer.bind(this);
         this.removeBufferingLayer = this.removeBufferingLayer.bind(this);
@@ -201,12 +203,12 @@ class Player extends EventEmitter {
         this._startButtonHandler = this._startButtonHandler.bind(this);
         this.createBehaviourOverlay = this.createBehaviourOverlay.bind(this);
         this._addCountdownToElement = this._addCountdownToElement.bind(this);
-        
+
         // add fullscreen handling
         this._toggleFullScreen = this._toggleFullScreen.bind(this);
         this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
         this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
-                
+
 
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
@@ -227,7 +229,7 @@ class Player extends EventEmitter {
         this._volume = this._createOverlay('volume', this._logUserInteraction);
         this._icon = this._createOverlay('icon', this._logUserInteraction);
         this._representation = this._createOverlay('representation', this._logUserInteraction);
- 
+
         // create the playout engine
         this._createPlayoutEngine(debugPlayout);
 
@@ -322,7 +324,7 @@ class Player extends EventEmitter {
         this._createErrorLayer();
         // create the start button modal layer
         this._createModalLayer();
-        
+
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
@@ -677,7 +679,15 @@ class Player extends EventEmitter {
         }
     }
 
-    _showErrorLayer() {
+    /**
+     *  Show an error message over all the content and UI
+     *  @param {message} Optional message to render.  If null or
+     *  not given, will rendere the DEFAULT_ERROR_MESSAGE
+     */
+    showErrorLayer(message) {
+        const errorMessage = message || DEFAULT_ERROR_MESSAGE;
+        const errorLayer = document.getElementById('romper-error-layer');
+        errorLayer.textContent = errorMessage;
         this._errorLayer.classList.add('show');
         this._errorLayer.classList.remove('hide');
         this._controls.showControls();
@@ -852,6 +862,17 @@ class Player extends EventEmitter {
         } catch (e) {
             logger.warn(e);
             logger.warn('could not remove _startExperienceImage');
+        }
+    }
+
+    clearStartButton() {
+        try {
+            if(this._startExperienceButton) {
+                this._guiLayer.removeChild(this._startExperienceButton);
+            }
+            this._mediaLayer.classList.remove('romper-prestart');
+        } catch (e) {
+            logger.warn(e);
         }
     }
 
@@ -1177,6 +1198,7 @@ class Player extends EventEmitter {
 
         const linkChoiceControl = document.createElement('button');
         linkChoiceControl.id = `romper-link-choice-${id}`;
+        linkChoiceControl.tabIndex = this._numChoices;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
@@ -1271,6 +1293,7 @@ class Player extends EventEmitter {
                     const clickHandler = () => {
                         // set classes to show which is selected
                         behaviourOverlay.setElementActive(`${id}`);
+                        icon.blur();
                         choiceAction();
                     };
                     icon.onclick = clickHandler;
@@ -1713,7 +1736,7 @@ class Player extends EventEmitter {
     }
 
     /**
-     * Relies on the document 'fullscreenchange' event firing, 
+     * Relies on the document 'fullscreenchange' event firing,
      * then sets the style for the player accordingly
      * handles iOS fullscreen behaviour too.
      */

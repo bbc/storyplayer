@@ -11,6 +11,36 @@ import {REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS } from './Events';
 import AnalyticEvents from './AnalyticEvents';
 import type { AnalyticsLogger } from './AnalyticEvents';
 
+const ERROR_MESSAGES = {
+    'NO_BEGINNING': 'Sorry, this story is unplayable because it has no beginning',
+    'ALREADY_ENDED': 'InvalidState: this story has ended',
+    'CURRENTLY_RESOLVING': 'InvalidState: currently resolving an action',
+    'NOT_STARTED': 'InvalidState: this story has not yet started',
+    'NO_VALID_LINKS': 'This story can play no further: there are no valid links',
+    'INVALID_LINK_TARGET': 'Link is to an narrative object not in the graph',
+};
+
+export class ReasonerError extends Error {
+    constructor(errType, message) {
+        super(message);
+        this.errorType = errType;
+    }
+}
+
+export const REASONER_ERRORS = [
+    'NO_BEGINNING',
+    'ALREADY_ENDED',
+    'CURRENTLY_RESOLVING',
+    'NOT_STARTED',
+    'NO_VALID_LINKS',
+    'INVALID_LINK_TARGET',
+    'INVALID_LINK_TYPE',
+].reduce((events, eventName) => {
+    // eslint-disable-next-line no-param-reassign
+    events[eventName] = eventName;
+    return events;
+}, {});
+
 /**
  * The StoryReasoner is a class which encapsulates navigating the narrative
  * structure of a story.
@@ -181,13 +211,16 @@ export default class StoryReasoner extends EventEmitter {
      */
     next() {
         if (!this._storyStarted) {
-            throw new Error('InvalidState: this story has not yet started');
+            throw new ReasonerError(REASONER_ERRORS.NOT_STARTED, ERROR_MESSAGES.NOT_STARTED);
         }
         if (this._storyEnded) {
-            throw new Error('InvalidState: this story has ended');
+            throw new ReasonerError(REASONER_ERRORS.ALREADY_ENDED, ERROR_MESSAGES.ALREADY_ENDED);
         }
         if (this._resolving) {
-            throw new Error('InvalidState: currently resolving an action');
+            throw new ReasonerError(
+                REASONER_ERRORS.CURRENTLY_RESOLVING,
+                ERROR_MESSAGES.CURRENTLY_RESOLVING,
+            );
         }
         if (this._subStoryReasoner) {
             this._subStoryReasoner.next();
@@ -209,7 +242,11 @@ export default class StoryReasoner extends EventEmitter {
                 if (startElement) {
                     this._setCurrentNarrativeElement(startElement[0].narrative_element_id);
                 } else {
-                    this.emit(ERROR_EVENTS, new Error('Unable to choose a valid beginning'));
+                    this.emit(
+                        ERROR_EVENTS,
+                        // eslint-disable-next-line max-len
+                        new ReasonerError(REASONER_ERRORS.NO_BEGINNING, ERROR_MESSAGES.NO_BEGINNING),
+                    );
                 }
             });
     }
@@ -247,7 +284,11 @@ export default class StoryReasoner extends EventEmitter {
                         this._followLink(nextElementChoices[0]);
                     }
                 } else {
-                    this.emit(ERROR_EVENTS, new Error('There are no possible links'));
+                    this.emit(
+                        ERROR_EVENTS,
+                        // eslint-disable-next-line max-len
+                        new ReasonerError(REASONER_ERRORS.NO_VALID_LINKS, ERROR_MESSAGES.NO_VALID_LINKS),
+                    );
                 }
             });
     }
@@ -266,14 +307,21 @@ export default class StoryReasoner extends EventEmitter {
         } else {
             this.emit(
                 ERROR_EVENTS,
-                new Error(`Unable to follow a link of type ${nextElement.link_type}`),
+                new ReasonerError(
+                    REASONER_ERRORS.INVALID_LINK_TYPE,
+                    `Unable to follow a link of type ${nextElement.link_type}`,
+                ),
             );
         }
     }
 
     _setCurrentNarrativeElement(narrativeElementId: string) {
         if (!(narrativeElementId in this._narrativeElements)) {
-            this.emit(ERROR_EVENTS, new Error('Link is to an narrative object not in the graph'));
+            this.emit(
+                ERROR_EVENTS,
+                // eslint-disable-next-line max-len
+                new ReasonerError(REASONER_ERRORS.INVALID_LINK_TARGET, ERROR_MESSAGES.INVALID_LINK_TARGET),
+            );
         } else {
             this._currentNarrativeElement = this._narrativeElements[narrativeElementId];
             if (this._currentNarrativeElement.body.type === 'STORY_ELEMENT') {
@@ -295,7 +343,10 @@ export default class StoryReasoner extends EventEmitter {
                 }
             }
             else {
-                this.emit(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, this._currentNarrativeElement);
+                this.emit(
+                    REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED,
+                    this._currentNarrativeElement,
+                );
             }
         }
     }
@@ -539,8 +590,13 @@ export default class StoryReasoner extends EventEmitter {
                         this.emit(ERROR_EVENTS, err);
                     });
             } else {
-                this.emit(ERROR_EVENTS,
-                    new Error(`No Story target id for element ${narrativeElementId}`));
+                this.emit(
+                    ERROR_EVENTS,
+                    new ReasonerError(
+                        REASONER_ERRORS.INVALID_LINK_TARGET,
+                        `No Story target id for element ${narrativeElementId}`,
+                    ),
+                );
             }
             
         }
