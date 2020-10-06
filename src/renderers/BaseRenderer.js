@@ -1267,6 +1267,8 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
+        // if they are paused, then clicking a choice should restart
+        if (!this._playoutEngine.isPlaying()) this.play();
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
