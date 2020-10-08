@@ -891,12 +891,13 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
         this._controls.setControlsActive();
+        const startNow = (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.MAIN); // eslint-disable-line max-len
         this.playoutEngine.setPermissionToPlay(
             true,
-            this._currentRenderer.phase === RENDERER_PHASES.MAIN, // (don't start playing if in START)
+            startNow,
         );
 
-        if (this._currentRenderer.phase === RENDERER_PHASES.START) {
+        if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
             this._isPausedForBehaviours = true;
         }
 
