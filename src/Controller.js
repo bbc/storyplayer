@@ -443,6 +443,13 @@ export default class Controller extends EventEmitter {
     }
 
     /**
+     * Tell the reasoner to move on (maybe we have encountered an error)
+     */
+    forceReasonerOn() {
+        this._handleRendererNextButtonEvent();
+    }
+
+    /**
      * Handle RendererEvents.PREVIOUS_BUTTON_CLICKED event
      */
     _handleRendererPreviousButtonEvent() {
