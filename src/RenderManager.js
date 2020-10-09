@@ -663,7 +663,10 @@ export default class RenderManager extends EventEmitter {
                 return this._controller.getValidNextSteps()
                     .then((nextSteps) => {
                         const hasNext = nextSteps.length > 0;
-                        this._player.setNextAvailable(hasNext);
+                        const isInUntimedRepresentation = 
+                            this._currentRenderer
+                            && this._currentRenderer.getDuration() === Infinity;
+                        this._player.setNextAvailable(hasNext || isInUntimedRepresentation);
                     })
                     .catch((err) => {
                         logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
