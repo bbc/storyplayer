@@ -17,7 +17,7 @@ const setDefinedPosition = (modalElement, behaviour) => {
 const createContainer = (target) => {
     let modalOverlay = document.getElementById('modal-container');
     if (!modalOverlay) {
-        modalOverlay = createElementWithClass('div', null, ['romper-modal-container'])
+        modalOverlay = createElementWithClass('div', 'modal-container', ['romper-modal-container'])
         target.appendChild(modalOverlay);
     }
     return modalOverlay;

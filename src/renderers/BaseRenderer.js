@@ -859,7 +859,8 @@ export default class BaseRenderer extends EventEmitter {
             const startTime = behaviour.start_time;
             const endTime = getBehaviourEndTime(behaviour);
             const clearFunction = () => {
-                const behaviourElement = document.getElementById(behaviour.behaviour.id);
+                const modalId = `modal-${behaviour.behaviour.id}`;
+                const behaviourElement = document.getElementById(modalId);
                 if (behaviourElement && behaviourElement.parentNode) {
                     behaviourElement.parentNode.removeChild(behaviourElement);
                 }

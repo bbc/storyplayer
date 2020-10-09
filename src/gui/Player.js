@@ -651,7 +651,7 @@ class Player extends EventEmitter {
      */
     showErrorLayer(message) {
         const errorMessage = message || DEFAULT_ERROR_MESSAGE;
-        const errorLayer = document.getElementById('romper-error-layer');
+        const errorLayer = document.getElementById('error-layer');
         errorLayer.textContent = errorMessage;
         this._errorLayer.classList.add('show');
         this._errorLayer.classList.remove('hide');
