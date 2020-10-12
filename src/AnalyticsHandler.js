@@ -43,7 +43,7 @@ export default class AnalyticsHandler {
             current_narrative_element: neId,
             current_representation: repId,
             userid: this.userid,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
         };
 
         // if we've not yet noted it, get the duration of the element
