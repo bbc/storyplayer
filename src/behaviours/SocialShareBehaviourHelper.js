@@ -20,12 +20,13 @@ const createTwitterIcon = (shareText, shareUrl) => {
 
 const createEmailIcon = (shareText, shareUrl) => {
     const emailLi = document.createElement('li');
-    const emailLink = document.createElement('a');
     const emailDiv = document.createElement('div');
-    emailLink.href = `mailto:?Subject=${shareText}&body=${shareUrl}`;
-    emailLink.setAttribute('target', '_new');
-    emailLi.appendChild(emailLink);
-    emailLink.appendChild(emailDiv);
+    const emailAction = () => {
+        window.location = `mailto:?Subject=${shareText}&body=${shareUrl}`;
+    };
+    emailDiv.onclick = emailAction;
+    emailDiv.addEventListener('touchend', handleButtonTouchEvent(emailAction));
+    emailLi.appendChild(emailDiv);
     emailLi.className = 'email';
     return emailLi;
 };
