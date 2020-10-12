@@ -23,7 +23,7 @@ const createEmailIcon = (shareText, shareUrl) => {
     const emailLink = document.createElement('a');
     const emailDiv = document.createElement('div');
     emailLink.href = `mailto:?Subject=${shareText}&body=${shareUrl}`;
-    emailLink.setAttribute('target', '_top');
+    emailLink.setAttribute('target', '_new');
     emailLi.appendChild(emailLink);
     emailLink.appendChild(emailDiv);
     emailLi.className = 'email';
