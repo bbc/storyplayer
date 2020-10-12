@@ -170,10 +170,12 @@ $start-button-size: 15vw;
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
     background-color: $forty-percent-black;
+    border: 1px solid $white;
     height: auto;
     left: 50%;
     padding: 10px;
     position: absolute;
+    text-align: center;
     top: 25%;
     transform: translateX(-50%) translateY(-50%);
     width: auto;
@@ -502,6 +504,37 @@ $start-button-size: 15vw;
       }
     }
   }
+
+  .romper-error-message {
+    padding: 1em;
+  }
+
+  .romper-error-buttons {
+
+    &.hide {
+      display: none;
+    }
+
+    .romper-next-button {
+      display: inline-flex;
+    }
+
+    .romper-ignore-button,
+    .romper-next-button {
+      @include button;
+      border: 1px solid $white;
+      color: $white;
+      line-height: $romper-button-height;
+      margin: 1em;
+      width: 5em;
+
+      div {
+        height: $romper-button-height;
+        width: $romper-button-width;
+      }
+    }
+  }
+
 
   .romper-volume-overlay {
     @include overlay;
