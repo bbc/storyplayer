@@ -21,9 +21,9 @@ const createTwitterIcon = (shareText, shareUrl) => {
 const createEmailIcon = (shareText, shareUrl) => {
     const emailLi = document.createElement('li');
     const emailDiv = document.createElement('div');
-    const emailAction = () => {
-        window.location = `mailto:?Subject=${shareText}&body=${shareUrl}`;
-    };
+    const emailAction = () => window.open(
+        `mailto:?Subject=${shareText}&body=${shareUrl}`
+    );
     emailDiv.onclick = emailAction;
     emailDiv.addEventListener('touchend', handleButtonTouchEvent(emailAction));
     emailLi.appendChild(emailDiv);
