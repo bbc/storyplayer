@@ -115,10 +115,14 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
                 const choiceTime = rend.getChoiceTime();
-                const { currentTime } = rend.getCurrentTime();
+                const { duration, currentTime } = rend.getCurrentTime();
                 if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
                     logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
                     rend.exitStartPauseBehaviour();
+                }
+                else if (duration === Infinity){
+                    logger.info('Next button clicked during infinite representation - completing element'); // eslint-disable-line max-len
+                    this._currentRenderer.complete();
                 }
                 else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
