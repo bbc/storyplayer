@@ -549,8 +549,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return false
     }
 
+    // eslint-disable-next-line no-unused-vars
     _getMediaElement(rendererId: string): ?HTMLMediaElement {
-        throw new Error("SMP RenderEngine doesn't allow access to HTML Media Element");
+        return this._smpPlayerInterface.requestVideoElement(true);
     }
 
     setLoopAttribute(rendererId: string, loop: ?boolean) {

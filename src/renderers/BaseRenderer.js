@@ -970,7 +970,7 @@ export default class BaseRenderer extends EventEmitter {
             if (choiceIconNEObjects !== null) {
                 if (this._choicesHaveChanged(narrativeElementObjects)) {
                     logger.info('Variable state has changed valid links - need to refresh icons');
-                    this._player.clearLinkChoices();
+                    this._clearChoices();
                     behaviourOverlay.clearAll();
                 } else {
                     logger.info('Variable state has changed, but same link options valid');
@@ -1003,7 +1003,7 @@ export default class BaseRenderer extends EventEmitter {
             return this._getIconSourceUrls(narrativeElementObjects, behaviour)
                 .then((iconObjects) => {
 
-                    this._player.clearLinkChoices();
+                    this._clearChoices();
                     iconObjects.forEach((iconSpecObject) => {
                         this._buildLinkIcon(iconSpecObject, behaviourOverlay.getOverlay());
                     });
@@ -1267,6 +1267,8 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
+        // if they are paused, then clicking a choice should restart
+        if (!this._playoutEngine.isPlaying()) this.play();
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
@@ -1331,7 +1333,7 @@ export default class BaseRenderer extends EventEmitter {
         if(behaviourElement) {
             this._linkFadeTimeout = setTimeout(() => {
                 behaviourElement.classList.remove('romper-icon-fade');
-                this._player.clearLinkChoices();
+                this._clearChoices();
                 if (narrativeElementId) {
                     this._controller.followLink(narrativeElementId);
                 } else {
@@ -1340,6 +1342,12 @@ export default class BaseRenderer extends EventEmitter {
             }, 1500);
             behaviourElement.classList.add('romper-icon-fade');
         }
+    }
+
+    _clearChoices() {
+        this._player.clearLinkChoices();
+        if (this._linkFadeTimeout) clearTimeout(this._linkFadeTimeout);
+        this._linkFadeTimeout = null;
     }
 
     // //////////// end of show link choice behaviour
