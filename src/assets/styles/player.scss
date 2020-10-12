@@ -695,7 +695,7 @@ $start-button-size: 15vw;
     z-index: 15;
 
     &.fullscreen-choice-icons,
-    .fullscreen-icons {
+    &.fullscreen-icons {
       background: none;
       display: grid;
       grid-auto-columns: 1fr;
