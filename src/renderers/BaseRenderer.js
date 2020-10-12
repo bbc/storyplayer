@@ -790,16 +790,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
-        let behaviourHandler = this._behaviourRendererMap[behaviourUrn];
+        const behaviourHandler = this._behaviourRendererMap[behaviourUrn];
         if (behaviourHandler) return behaviourHandler;
-        behaviourHandler = this._behaviourClassMap[behaviourUrn];
-        if (behaviourHandler) {
+        const BehaviourHandlerClass = this._behaviourClassMap[behaviourUrn];
+        if (BehaviourHandlerClass) {
             return (behaviour, callback) => {
-                const runner = new behaviourHandler(behaviour, callback);
+                const runner = new BehaviourHandlerClass(behaviour, callback);
                 runner.start(this);
             }
         }
-        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`)
+        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
+        return null;
     }
 
     hasShowIconBehaviour(): boolean {

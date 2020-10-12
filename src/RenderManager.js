@@ -134,11 +134,11 @@ export default class RenderManager extends EventEmitter {
                     logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
-                    const duration = this._player.playoutEngine.getDuration(representationId)
-                    if (currentTime && duration) {
+                    const playoutDuration = this._player.playoutEngine.getDuration(representationId)
+                    if (currentTime && playoutDuration) {
                         const playout = this._player.playoutEngine;
                         // skip to 1/4 s before end
-                        playout.setCurrentTime(representationId, duration);
+                        playout.setCurrentTime(representationId, playoutDuration);
                     } else if (this._currentRenderer) {
                         this._currentRenderer.complete();
                     }
