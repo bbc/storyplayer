@@ -8,7 +8,7 @@ import Controller from '../Controller';
 import { replaceEscapedVariables } from '../utils';
 
 import logger from '../logger';
-import { REASONER_EVENTS } from '../Events';
+import { REASONER_EVENTS, VARIABLE_EVENTS } from '../Events';
 
 export type HTMLTrackElement = HTMLElement & {
     kind: string,
@@ -68,6 +68,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
             this._setOverflowStyling(this._target.clientHeight)
         );
 
+        this._refreshText = this._refreshText.bind(this);
+        this._controller.on(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._refreshText);
     }
 
     /**
@@ -75,6 +77,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
      */
     async init() {
         try {
+            this._textDiv = document.createElement('div');
+            this._textDiv.classList.add('romper-text-element');
             await this.renderTextElement()
             await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
@@ -128,7 +132,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
         }
         this._player.enablePlayButton();
         this._player.enableScrubBar();
+        this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._refreshText);
         return true;
+    }
+
+    _refreshText() {
+        this.renderTextElement();
     }
 
     /**
@@ -136,8 +145,6 @@ export default class SimpleTextRenderer extends BaseRenderer {
      * populate it with the inner html
      */
     renderTextElement() {
-        this._textDiv = document.createElement('div');
-        this._textDiv.classList.add('romper-text-element');
 
         // set text source
         if (this._representation.asset_collections.foreground_id) {
