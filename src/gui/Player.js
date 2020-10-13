@@ -891,12 +891,15 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
         this._controls.setControlsActive();
+        const startNow = (this._currentRenderer
+            && (this._currentRenderer.phase === RENDERER_PHASES.MAIN // don't play if waiting in start behaviours
+            || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED)); // untimed reps will be ended
         this.playoutEngine.setPermissionToPlay(
             true,
-            this._currentRenderer.phase === RENDERER_PHASES.MAIN, // (don't start playing if in START)
+            startNow,
         );
 
-        if (this._currentRenderer.phase === RENDERER_PHASES.START) {
+        if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
             this._isPausedForBehaviours = true;
         }
 
@@ -1306,6 +1309,7 @@ class Player extends EventEmitter {
                         behaviourElement.appendChild(icon);
                     }
                     this._visibleChoices[id + 1] = container;
+                    this._controls.setSubtitlesAboveElement(behaviourElement);
                 });
             });
     }
@@ -1505,6 +1509,7 @@ class Player extends EventEmitter {
             linkChoice.className =
                 'romper-overlay romper-link-choice-overlay romper-inactive';
         });
+        this._controls.resetSubtitleHeight();
     }
 
     // eslint-disable-next-line class-methods-use-this
