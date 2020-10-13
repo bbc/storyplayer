@@ -1309,6 +1309,7 @@ class Player extends EventEmitter {
                         behaviourElement.appendChild(icon);
                     }
                     this._visibleChoices[id + 1] = container;
+                    this._controls.setSubtitlesAboveElement(behaviourElement);
                 });
             });
     }
@@ -1508,6 +1509,7 @@ class Player extends EventEmitter {
             linkChoice.className =
                 'romper-overlay romper-link-choice-overlay romper-inactive';
         });
+        this._controls.resetSubtitleHeight();
     }
 
     // eslint-disable-next-line class-methods-use-this
