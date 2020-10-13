@@ -31,6 +31,7 @@ import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
 import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
+import ErrorControls from './ErrorControls';
 import { createElementWithClass } from '../documentUtils';
 
 const PlayerEvents = [
@@ -51,13 +52,12 @@ const PlayerEvents = [
     'FULLSCREEN_BUTTON_CLICKED',
     'REPEAT_BUTTON_CLICKED',
     'LINK_CHOSEN',
+    'ERROR_SKIP_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
     return events;
 }, {});
-
-const DEFAULT_ERROR_MESSAGE = "Sorry, there's a problem - try skipping ahead";
 
 class Player extends EventEmitter {
     playoutEngine: BasePlayoutEngine
@@ -72,7 +72,7 @@ class Player extends EventEmitter {
 
     _guiLayer: HTMLDivElement;
 
-    _errorLayer: HTMLDivElement;
+    _errorControls: ErrorControls;
 
     _continueModalLayer: HTMLDivElement;
 
@@ -209,7 +209,6 @@ class Player extends EventEmitter {
         this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
         this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
 
-
         const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
         if (debugPlayout) {
             logger.info("Playout debugging: ON");
@@ -328,7 +327,7 @@ class Player extends EventEmitter {
         this._player.appendChild(this._backgroundLayer);
         this._player.appendChild(this._mediaLayer);
         this._player.appendChild(this._guiLayer);
-        this._player.appendChild(this._errorLayer);
+        this._player.appendChild(this._errorControls.getLayer());
         this._guiLayer.appendChild(this._continueModalLayer);
 
         // Hide gui elements until start clicked with 'romper-inactive'
@@ -343,11 +342,11 @@ class Player extends EventEmitter {
      * Creates the error layer
      */
     _createErrorLayer() {
-        this._errorLayer = createElementWithClass('div', 'error-layer', ['romper-error', 'hide']);
-
-        // eslint-disable-next-line max-len
-        const errorMessage = document.createTextNode("Sorry, there's a problem - try skipping ahead");
-        this._errorLayer.appendChild(errorMessage);
+        this._errorControls = new ErrorControls();
+        this._errorControls.on(PlayerEvents.ERROR_SKIP_BUTTON_CLICKED, () => {
+            this._controller.forceReasonerOn();
+            this.playoutEngine.play();
+        });
     }
 
     /**
@@ -682,14 +681,16 @@ class Player extends EventEmitter {
     /**
      *  Show an error message over all the content and UI
      *  @param {message} Optional message to render.  If null or
-     *  not given, will rendere the DEFAULT_ERROR_MESSAGE
+     *    not given, will render a default message (see ErrorControls) 
+     *  @param {showControls} Optional boolean determining if
+     *    user is presented with ignore and skip buttons
      */
-    showErrorLayer(message) {
-        const errorMessage = message || DEFAULT_ERROR_MESSAGE;
-        const errorLayer = document.getElementById('romper-error-layer');
-        errorLayer.textContent = errorMessage;
-        this._errorLayer.classList.add('show');
-        this._errorLayer.classList.remove('hide');
+    showErrorLayer(message, showControls=false) {
+        if (showControls){
+            this._errorControls.showControls(message);
+        } else {
+            this._errorControls.showMessage(message);
+        }
         this._controls.showControls();
     }
 
@@ -710,8 +711,7 @@ class Player extends EventEmitter {
     }
 
     _removeErrorLayer() {
-        this._errorLayer.classList.remove('show');
-        this._errorLayer.classList.add('hide');
+        this._errorControls.hideMessageControls();
         this._controls.hideControls();
     }
 
@@ -891,12 +891,15 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
         this._controls.setControlsActive();
+        const startNow = (this._currentRenderer
+            && (this._currentRenderer.phase === RENDERER_PHASES.MAIN // don't play if waiting in start behaviours
+            || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED)); // untimed reps will be ended
         this.playoutEngine.setPermissionToPlay(
             true,
-            this._currentRenderer.phase === RENDERER_PHASES.MAIN, // (don't start playing if in START)
+            startNow,
         );
 
-        if (this._currentRenderer.phase === RENDERER_PHASES.START) {
+        if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
             this._isPausedForBehaviours = true;
         }
 
