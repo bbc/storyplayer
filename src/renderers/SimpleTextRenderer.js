@@ -58,13 +58,15 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         this._setOverflowStyling = this._setOverflowStyling.bind(this);
 
-        // we have a one time event listener as we remove the prestart classname from the media element indicating we've started playing so 
-        // we should resize if we need to otherwise the GUI is shrunk and buttons disappear 
+        // we have a one time event listener as we remove the prestart classname 
+        // from the media element indicating we've started playing so 
+        // we should resize if we need to otherwise the GUI is shrunk and buttons disappear
         this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () =>
             this._setOverflowStyling(this._target.clientHeight || 720)
         );
     
-        // Resize event listener to dynamically resize the text element and apply overflow style rules
+        // Resize event listener to dynamically resize the text element
+        // and apply overflow style rules
         window.addEventListener('resize', () =>
             this._setOverflowStyling(this._target.clientHeight)
         );
@@ -210,7 +212,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
 
     /**
-     * Sets the overflow style for the text element and sets gui layer height so only the button activate area is present
+     * Sets the overflow style for the text element and sets gui layer height
+     * so only the button activate area is present
      * @param {HTMLElement} guiLayer div element containing the buttons and clickable links etc
      */
     _addOverflowStyle(guiLayer: HTMLElement, maxHeight: number) {
@@ -224,7 +227,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
     /**
      * Gets the gui layer and checks we have added the text node to the parent, 
      * then sets the CSS style appropriately whether we should overflow and scroll or not
-     * @param {number} maxHeight the max height of the player target div, used to set the max height of the text element
+     * @param {number} maxHeight the max height of the player target div, 
+     *    used to set the max height of the text element
      */
     _setOverflowStyling(maxHeight: number) {
         const guiLayer = document.getElementById('gui-layer');
