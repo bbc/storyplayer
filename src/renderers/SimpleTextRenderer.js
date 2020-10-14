@@ -36,6 +36,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
     _setOverflowStyling: Function;
 
+    renderTextElement: Function;
 
     constructor(
         representation: Representation,
@@ -68,8 +69,8 @@ export default class SimpleTextRenderer extends BaseRenderer {
             this._setOverflowStyling(this._target.clientHeight)
         );
 
-        this._refreshText = this._refreshText.bind(this);
-        this._controller.on(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._refreshText);
+        this.renderTextElement = this.renderTextElement.bind(this);
+        this._controller.on(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this.renderTextElement);
     }
 
     /**
@@ -132,16 +133,12 @@ export default class SimpleTextRenderer extends BaseRenderer {
         }
         this._player.enablePlayButton();
         this._player.enableScrubBar();
-        this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._refreshText);
+        this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this.renderTextElement);
         return true;
     }
 
-    _refreshText() {
-        this.renderTextElement();
-    }
-
     /**
-     * Creates the text element and calls the populateTextElement function to 
+     * Determine what text to show, and call the populateTextElement function to 
      * populate it with the inner html
      */
     renderTextElement() {
