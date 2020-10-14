@@ -115,10 +115,14 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
                 const choiceTime = rend.getChoiceTime();
-                const { currentTime } = rend.getCurrentTime();
+                const { duration, currentTime } = rend.getCurrentTime();
                 if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
                     logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
                     rend.exitStartPauseBehaviour();
+                }
+                else if (duration === Infinity){
+                    logger.info('Next button clicked during infinite representation - completing element'); // eslint-disable-line max-len
+                    this._currentRenderer.complete();
                 }
                 else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
@@ -130,11 +134,11 @@ export default class RenderManager extends EventEmitter {
                     logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
-                    const duration = this._player.playoutEngine.getDuration(representationId)
-                    if (currentTime && duration) {
+                    const playoutDuration = this._player.playoutEngine.getDuration(representationId)
+                    if (currentTime && playoutDuration) {
                         const playout = this._player.playoutEngine;
                         // skip to 1/4 s before end
-                        playout.setCurrentTime(representationId, duration);
+                        playout.setCurrentTime(representationId, playoutDuration);
                     } else if (this._currentRenderer) {
                         this._currentRenderer.complete();
                     }
