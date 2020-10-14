@@ -2,8 +2,10 @@
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
-import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
+import PauseBehaviour from '../behaviours/PauseBehaviour';
+import VariableManipulateBehaviour from '../behaviours/VariableManipulateBehaviour';
+import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player, { PlayerEvents } from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
@@ -20,7 +22,6 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
-import PauseBehaviour from '../behaviours/PauseBehaviour';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -233,6 +234,13 @@ export default class BaseRenderer extends EventEmitter {
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
         };
+
+        this._behaviourClassMap = {
+            // behaviours which are handled outside the renderer
+            'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:manipulatevariable/v1.0': VariableManipulateBehaviour,
+        }
 
         this._behaviourElements = [];
         this._timer = new TimeManager(this._rendererId);
@@ -782,7 +790,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
-        return this._behaviourRendererMap[behaviourUrn];
+        const behaviourHandler = this._behaviourRendererMap[behaviourUrn];
+        if (behaviourHandler) return behaviourHandler;
+        const BehaviourHandlerClass = this._behaviourClassMap[behaviourUrn];
+        if (BehaviourHandlerClass) {
+            return (behaviour, callback) => {
+                const runner = new BehaviourHandlerClass(behaviour, callback);
+                runner.start(this);
+            }
+        }
+        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
+        return null;
     }
 
     hasShowIconBehaviour(): boolean {
