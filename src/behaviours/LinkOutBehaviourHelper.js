@@ -1,6 +1,8 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import AnalyticEvents from '../AnalyticEvents';
+import { handleButtonTouchEvent } from '../utils';
+import { createElementWithClass } from '../documentUtils';
 
 /* eslint-disable no-param-reassign */
 const setPosition = (modalElement, behaviour) => {
@@ -18,9 +20,10 @@ const setPosition = (modalElement, behaviour) => {
 const createLink = (behaviour) => {
     const linkText = behaviour.link_text;
     let linkUrl = behaviour.link_url;
-    const linkElement = document.createElement('a');
+    const linkElement = createElementWithClass('span', null, ['romper-link-out']);
 
-    // if the link isn't absolute ie http or https we are going to assume authors want https absolute links
+    // if the link isn't absolute ie http or https we are going to assume authors want 
+    // https absolute links
     if(!(linkUrl.startsWith('http://') || linkUrl.startsWith('https://'))) {
         // set to be https and let the external website handle any failing or redirects
         linkUrl = `https://${linkUrl}`;
@@ -36,8 +39,7 @@ const createLink = (behaviour) => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
-    const modalElement = document.createElement('div');
-    modalElement.id = behaviour.id;
+    const modalElement = createElementWithClass('div', behaviour.id, []);
     const modalContainer = createContainer(target);
     modalContainer.appendChild(modalElement);
 
@@ -47,16 +49,14 @@ export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     }
 
     if (behaviour.title) {
-        const titleSpan = document.createElement('div');
+        const titleSpan = createElementWithClass('div', null, ['title']);
         titleSpan.textContent = behaviour.title;
-        titleSpan.className = 'title';
         modalElement.appendChild(titleSpan);
     }
 
     setPosition(modalElement, behaviour);
 
-    const closeButton = document.createElement('div');
-    closeButton.className= 'romper-close-button';
+    const closeButton = createElementWithClass('div', null, ['romper-close-button']);
     const closeModal = () => {
         modalContainer.removeChild(modalElement);
         callback();
@@ -65,14 +65,17 @@ export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     modalElement.appendChild(closeButton);
 
     const link = createLink(behaviour);
-    link.onclick = () => {
+    const linkClickAction = () => {
         analytics({
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names.OUTWARD_LINK_CLICKED,
             from: 'not_set',
             to: behaviour.link_url,
         });
+        window.open(link.href, '_blank');
     };
+    link.addEventListener('touchend', handleButtonTouchEvent(linkClickAction));
+    link.onclick = linkClickAction;
     const sentenceDiv = document.createElement('div');
     
     if (behaviour.before_text) {
