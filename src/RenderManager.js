@@ -234,7 +234,9 @@ export default class RenderManager extends EventEmitter {
                     this._player.playoutEngine.play();
                 }
             }
-            if (this._player.playoutEngine.hasStarted()) {
+            if (this._player.playoutEngine.hasStarted()
+                && this._player.userInteractionStarted()
+            ) {
                 this._player.playoutEngine.playBackgrounds();
             }
             if (this._player._choiceCountdownTimeout && this._currentRenderer) {
@@ -921,6 +923,7 @@ export default class RenderManager extends EventEmitter {
         });
         this._initialise();
         this._player.prepareForRestart();
+        console.log('ANDY prepared for restart');
     }
 
     /**
