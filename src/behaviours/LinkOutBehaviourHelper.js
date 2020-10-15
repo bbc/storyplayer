@@ -20,7 +20,7 @@ const setPosition = (modalElement, behaviour) => {
 const createLink = (behaviour) => {
     const linkText = behaviour.link_text;
     let linkUrl = behaviour.link_url;
-    const linkElement = createElementWithClass('span', null, ['romper-link-out']);
+    const linkElement = document.createElement('a');
 
     // if the link isn't absolute ie http or https we are going to assume authors want 
     // https absolute links
@@ -65,7 +65,7 @@ export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     modalElement.appendChild(closeButton);
 
     const link = createLink(behaviour);
-    const linkClickAction = () => {
+    const linkClickAction = (e) => {
         analytics({
             type: AnalyticEvents.types.USER_ACTION,
             name: AnalyticEvents.names.OUTWARD_LINK_CLICKED,
@@ -73,6 +73,7 @@ export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
             to: behaviour.link_url,
         });
         window.open(link.href, '_blank');
+        e.preventDefault();
     };
     link.addEventListener('touchend', handleButtonTouchEvent(linkClickAction));
     link.onclick = linkClickAction;
