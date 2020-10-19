@@ -257,6 +257,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     resetPlayoutEngine() {
+        this._secondaryPlayoutEngine.pause();
         this._smpPlayerInterface.stop();
     }
 

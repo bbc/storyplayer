@@ -478,9 +478,10 @@ class Player extends EventEmitter {
         if (this._dogImage === undefined) {
             this._dogImage = document.createElement('div');
         }
-        window.addEventListener('resize', () => {
-            this._setDogPosition(position);
-        });
+        
+        const resizeObserver = new ResizeObserver(() => this._setDogPosition(position));
+        resizeObserver.observe(this.guiTarget);
+
         this._dogImage.className = 'romper-dog';
         this._dogImage.style.backgroundImage = `url(${src})`;
         this._player.appendChild(this._dogImage);
@@ -874,6 +875,10 @@ class Player extends EventEmitter {
         } catch (e) {
             logger.warn(e);
         }
+    }
+
+    userInteractionStarted() {
+        return this._userInteractionStarted;
     }
 
     _disableUserInteraction() {
