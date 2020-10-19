@@ -923,7 +923,6 @@ export default class RenderManager extends EventEmitter {
         });
         this._initialise();
         this._player.prepareForRestart();
-        console.log('ANDY prepared for restart');
     }
 
     /**
