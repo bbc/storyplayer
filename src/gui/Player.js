@@ -877,6 +877,10 @@ class Player extends EventEmitter {
         }
     }
 
+    userInteractionStarted() {
+        return this._userInteractionStarted;
+    }
+
     _disableUserInteraction() {
         this._userInteractionStarted = false;
         this._overlaysElement.classList.add('romper-inactive');
