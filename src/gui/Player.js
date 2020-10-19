@@ -896,13 +896,20 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
         this._controls.setControlsActive();
+        // can start now if we're not waiting in START behaviours
+        // that means in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
-            && (this._currentRenderer.phase === RENDERER_PHASES.MAIN // don't play if waiting in start behaviours
-            || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED)); // untimed reps will be ended
+            && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
+            || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
         this.playoutEngine.setPermissionToPlay(
             true,
             startNow,
         );
+        if (startNow && this.playoutEngine.isPlayingNonAV()) {
+            // also need to kick off the timer for timed representations that don't use the
+            // playout engines
+            this._currentRenderer._timer.resume();
+        }
 
         if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
             this._isPausedForBehaviours = true;
