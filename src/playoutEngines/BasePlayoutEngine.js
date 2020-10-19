@@ -27,12 +27,15 @@ export default class BasePlayoutEngine {
 
     _hasStarted: boolean;
 
+    _isHandlingNonAV: Boolean;
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
         this._permissionToPlay = false;
         this._hasStarted = false;
         this._debugPlayout = debugPlayout;
+        this._isHandlingNonAV = false;
 
         if(this._debugPlayout) {
             window.playoutMedia = this._media;
@@ -129,11 +132,15 @@ export default class BasePlayoutEngine {
     }
 
     startNonAVPlayout() {
-
+        this._isHandlingNonAV = true;
     }
 
     stopNonAVPlayout() {
+        this._isHandlingNonAV = false;
+    }
 
+    isPlayingNonAV() {
+        return this._isHandlingNonAV;
     }
 
     play() {

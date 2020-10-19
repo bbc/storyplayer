@@ -118,7 +118,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMix = fbMixValue
         const backgroundAudioVolume = this._volume * this._backgroundMix
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
-        this._player.emit(PlayerEvents.AUDIO_MIX_CHANGED, { id: AUDIO_MIX_EVENT_LABEL, label: AUDIO_MIX_EVENT_LABEL, value: fbMixValue });
+        this._player.emit(
+            PlayerEvents.AUDIO_MIX_CHANGED, 
+            { id: AUDIO_MIX_EVENT_LABEL, label: AUDIO_MIX_EVENT_LABEL, value: fbMixValue },
+        );
     }
 
     supports(feature: string) {
@@ -355,6 +358,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     startNonAVPlayout(rendererId, duration = 0) {
+        super.startNonAVPlayout();
         this._fakeItemRendererId = rendererId
         this._fakeItemDuration = duration
         this._fakeItemLoaded = false;
@@ -391,6 +395,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     stopNonAVPlayout(rendererId: ?string) {
+        super.stopNonAVPlayout();
         // If stop comes after another nonav renderer has started, ignore
         if(rendererId === this._fakeItemRendererId) {
             this._fakeItemRendererId = null;
