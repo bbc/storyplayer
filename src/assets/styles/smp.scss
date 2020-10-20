@@ -64,7 +64,6 @@
     pointer-events: none;
     position: absolute;
     transition: all 1s ease;
-    z-index: 10;
 
     &.show {
       opacity: 1;

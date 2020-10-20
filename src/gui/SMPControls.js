@@ -76,7 +76,8 @@ class SMPControls extends BaseControls {
 
         this._uiUpdateQueue = []
 
-        this._createFbMixSlider()
+        // TODO: get this back in when we have approved design
+        // this._createFbMixSlider()
 
         this._setDefaultSMPControlsConfig()
 
@@ -240,7 +241,7 @@ class SMPControls extends BaseControls {
 
         const fbMixSliderLabel = document.createElement('div');
         fbMixSliderLabel.classList.add("audioMixSliderLabel")
-        fbMixSliderLabel.innerHTML = "Default"
+        fbMixSliderLabel.innerHTML = "Default Mix"
         controlBar.appendChild(fbMixSliderLabel)
 
         const fbMixSlider = document.createElement('input');

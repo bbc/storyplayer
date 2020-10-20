@@ -296,6 +296,9 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             })
             rendererPlayoutObj.queuedEvents = []
         }
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            this._player.mediaTarget.classList.add('romper-audio-element');
+        }
         super.setPlayoutActive(rendererId)
         logger.info(`SMP-SP setPlayoutActive: ${rendererId}`)
     }
@@ -421,6 +424,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         // We may need this renderer again so preload
         this._smpPlayerInterface.preloadFromCollection(rendererId)
+        
+        if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
+            this._player.mediaTarget.classList.remove('romper-audio-element');
+        }
 
         return super.setPlayoutInactive(rendererId)
     }
