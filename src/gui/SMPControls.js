@@ -76,7 +76,8 @@ class SMPControls extends BaseControls {
 
         this._uiUpdateQueue = []
 
-        this._createFbMixSlider()
+        // TODO: get this back in when we have approved design
+        // this._createFbMixSlider()
 
         this._setDefaultSMPControlsConfig()
 
