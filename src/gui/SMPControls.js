@@ -315,7 +315,6 @@ class SMPControls extends BaseControls {
 
     /* exposing functionality to change how buttons look/feel */
     disableControls() {
-        console.log('ANDY disabling smp controls')
         if(this._controlsEnabled !== false) {
             this._uiUpdate({
                 enabled: false,
@@ -325,7 +324,6 @@ class SMPControls extends BaseControls {
     }
 
     enableControls() {
-        console.log('ANDY enabling smp controls')
         if(this._controlsEnabled !== true) {
             this._uiUpdate({
                 enabled: true,
