@@ -240,7 +240,7 @@ class SMPControls extends BaseControls {
 
         const fbMixSliderLabel = document.createElement('div');
         fbMixSliderLabel.classList.add("audioMixSliderLabel")
-        fbMixSliderLabel.innerHTML = "Default"
+        fbMixSliderLabel.innerHTML = "Default Mix"
         controlBar.appendChild(fbMixSliderLabel)
 
         const fbMixSlider = document.createElement('input');
