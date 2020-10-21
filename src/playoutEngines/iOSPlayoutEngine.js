@@ -102,6 +102,13 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         super.setPermissionToPlay(value);
     }
 
+    resetPlayoutEngine() {
+        this._foregroundMediaElement.autoplay = false;
+        this._backgroundMediaElement.autoplay = false;    
+        this._backgroundMediaElement.pause();
+        this._foregroundMediaElement.pause();
+    }
+
     attachEverythingToActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         const mediaObj = this._media[rendererId].media
@@ -194,7 +201,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPlayoutActive(rendererId: string) {
-        logger.info('ANDY ios setplayoutactive', rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -307,7 +313,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     setCurrentTime(rendererId: string, time: number) {
-        logger.info('ANDY ios setCurrentTime', rendererId, time)
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return false;
@@ -318,17 +323,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
 
         if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-            // Hack for iOS to get it to stop seeking to zero after setting currentTime
-            // eslint-disable-next-line
-            // https://stackoverflow.com/questions/18266437/html5-video-currenttime-not-setting-properly-on-iphone
             mediaElement.currentTime = time;
-            // const canPlayEventHandler = () => {
-            //     mediaElement.currentTime = time;
-            //     mediaElement.removeEventListener("canplay", canPlayEventHandler)
-            //     mediaElement.removeEventListener("loadeddata", canPlayEventHandler)
-            // }
-            // mediaElement.addEventListener("canplay", canPlayEventHandler)
-            // mediaElement.addEventListener("loadeddata", canPlayEventHandler)
             return true;
         }
         return false;
