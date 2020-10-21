@@ -35,10 +35,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._backgroundMediaElement.className = 'romper-audio-element';
         this._backgroundMediaElement.crossOrigin = 'anonymous';
 
-        // Permission to play not granted on iOS without the autplay tag
-        this._foregroundMediaElement.autoplay = true;
-        this._backgroundMediaElement.autoplay = true;
-
         // disable ios controls too, we use our own
         this._foregroundMediaElement.removeAttribute("controls");
         this._backgroundMediaElement.removeAttribute("controls");
@@ -94,12 +90,23 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPermissionToPlay(value: boolean) {
+        // Permission to play not granted on iOS without the autplay tag
+        this._foregroundMediaElement.autoplay = true;
+        this._backgroundMediaElement.autoplay = true;
+
         this._backgroundMediaElement.play();
         this._foregroundMediaElement.play();
         this._backgroundMediaElement.pause();
         this._foregroundMediaElement.pause();
 
         super.setPermissionToPlay(value);
+    }
+
+    resetPlayoutEngine() {
+        this._foregroundMediaElement.autoplay = false;
+        this._backgroundMediaElement.autoplay = false;    
+        this._backgroundMediaElement.pause();
+        this._foregroundMediaElement.pause();
     }
 
     attachEverythingToActive(rendererId: string) {
@@ -201,6 +208,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj.active) {
             this.attachEverythingToActive(rendererId)
         }
+        if (this.isPlaying()) this.play();
         super.setPlayoutActive(rendererId);
     }
 
@@ -315,17 +323,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
 
         if (mediaElement.readyState >= mediaElement.HAVE_CURRENT_DATA) {
-            // Hack for iOS to get it to stop seeking to zero after setting currentTime
-            // eslint-disable-next-line
-            // https://stackoverflow.com/questions/18266437/html5-video-currenttime-not-setting-properly-on-iphone
             mediaElement.currentTime = time;
-            const canPlayEventHandler = () => {
-                mediaElement.currentTime = time;
-                mediaElement.removeEventListener("canplay", canPlayEventHandler)
-                mediaElement.removeEventListener("loadeddata", canPlayEventHandler)
-            }
-            mediaElement.addEventListener("canplay", canPlayEventHandler)
-            mediaElement.addEventListener("loadeddata", canPlayEventHandler)
             return true;
         }
         return false;
@@ -342,7 +340,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     if (e !== undefined) {
                         if (!e.target.duration) {
                             logger.info(`Received ended event with no duration. ` +
-                                `Assuming event is invalid`)
+                                `Assuming event is invalid ${rendererId}`)
                             return
                         }
                     }
