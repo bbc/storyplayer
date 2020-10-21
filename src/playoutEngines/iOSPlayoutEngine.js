@@ -90,9 +90,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     setPermissionToPlay(value: boolean) {
-        // Permission to play not granted on iOS without the autplay tag
-        this._foregroundMediaElement.autoplay = true;
-        this._backgroundMediaElement.autoplay = true;
+        this._foregroundMediaElement.autoplay = value;
+        this._backgroundMediaElement.autoplay = value;
 
         this._backgroundMediaElement.play();
         this._foregroundMediaElement.play();
@@ -103,10 +102,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     resetPlayoutEngine() {
-        this._foregroundMediaElement.autoplay = false;
-        this._backgroundMediaElement.autoplay = false;    
-        this._backgroundMediaElement.pause();
-        this._foregroundMediaElement.pause();
+        this.setPermissionToPlay(false);
     }
 
     attachEverythingToActive(rendererId: string) {
