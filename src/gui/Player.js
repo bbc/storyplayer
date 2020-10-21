@@ -188,7 +188,7 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._visibleChoices = {}
         this._volumeEventTimeouts = {};
-        this._countdownTotal = 0;
+        this._countdownTotal = Infinity;
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
 
@@ -1331,25 +1331,26 @@ class Player extends EventEmitter {
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
         }
-        if (this._countdownTotal === 0) {
-            let { remainingTime } = currentRenderer.getCurrentTime();
-            if (!remainingTime) {
-                remainingTime = 3; // default if we can't find out
+        if (this._countdownTotal === Infinity) {
+            const { remainingTime } = currentRenderer.getCurrentTime();
+            if (remainingTime && remainingTime > 0.5) { // SMP returns currentTime as -0.01
+                this._countdownTotal = remainingTime;
             }
-            this._countdownTotal = remainingTime;
         }
         this._choiceCountdownTimeout = setTimeout(() => {
             this._reflectTimeout(currentRenderer);
         }, 10);
         this._countdownContainer.classList.add('show');
-        // }
     }
 
     _reflectTimeout(currentRenderer: BaseRenderer) {
         const { remainingTime } = currentRenderer.getCurrentTime();
+        if (this._countdownTotal === Infinity && remainingTime > 0.5) {
+            this._countdownTotal = remainingTime;
+        }
         const { style } = this._countdowner;
         const percentRemain = 100 * (remainingTime / this._countdownTotal);
-        if (percentRemain > 0) {
+        if (percentRemain > 0 || this._countdownTotal === Infinity) {
             style.width = `${percentRemain}%`;
             style.marginLeft = `${(100 - percentRemain)/2}%`;
             this._choiceCountdownTimeout = setTimeout(() => {
@@ -1510,7 +1511,7 @@ class Player extends EventEmitter {
         if (this._choiceCountdownTimeout) {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
-            this._countdownTotal = 0;
+            this._countdownTotal = Infinity;
             this._countdownContainer.classList.remove('show');
         }
         this._controls.getControls().classList.remove('icons-showing');
