@@ -121,7 +121,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     mediaElement = this._backgroundMediaElement
                     if (mediaObj.url) {
                         mediaElement.src = mediaObj.url;
-                        mediaElement.play()
+                        if (this._playing) mediaElement.play();
                     }
                     this._player.addVolumeControl(rendererId, 'Background');
                 }
@@ -228,6 +228,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._player.setPlaying(true);
         this._playing = true;
         this._hasStarted = true;
+        this.playBackgrounds();
         // Check there is an active media
         const activeForegroundMedia = Object.keys(this._media)
             .filter(key => this._media[key].active)
