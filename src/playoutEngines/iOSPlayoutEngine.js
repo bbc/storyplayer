@@ -111,16 +111,12 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         if (mediaObj) {
             if (mediaObj.type) {
                 let mediaElement: HTMLMediaElement;
-                if (mediaObj.type === MEDIA_TYPES.FOREGROUND_AV
-                    || mediaObj.type === MEDIA_TYPES.FOREGROUND_A) {
+                if (mediaObj.type === MEDIA_TYPES.FOREGROUND_AV) {
                     mediaElement = this._foregroundMediaElement;
                     if (mediaObj.url) {
                         mediaElement.src = mediaObj.url;
                     }
                     this._player.addVolumeControl(rendererId, 'Foreground');
-                    if (mediaObj.hasOwnProperty('loop')) {
-                        this._setLoopAttribute(true, mediaObj.loop);
-                    }
                 } else if(mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
                     mediaElement = this._backgroundMediaElement
                     if (mediaObj.url) {
@@ -128,9 +124,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                         mediaElement.play()
                     }
                     this._player.addVolumeControl(rendererId, 'Background');
-                    if (mediaObj.hasOwnProperty('loop')) {
-                        this._setLoopAttribute(false, mediaObj.loop);
-                    }
                 }
                 if (rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
                     logger.info(`Applying queued events for ${rendererId}`)
@@ -138,6 +131,9 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                         mediaElement.addEventListener(qe.event, qe.callback)
                     })
                     rendererPlayoutObj.queuedEvents = []
+                }
+                if (mediaObj.loop) {
+                    super.setLoopAttribute(rendererId, mediaObj.loop);
                 }
             }
             if (mediaObj.subs_url) {
@@ -171,13 +167,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             if (mediaObject.url && mediaObject.url === mediaElement.src) {
                 this._foregroundMediaElement.pause();
             }
-            this._setLoopAttribute(true, false);
         } else if(mediaObject.type === MEDIA_TYPES.BACKGROUND_A) {
             const mediaElement = this._backgroundMediaElement;
             if (mediaObject.url && mediaObject.url === mediaElement.src) {
                 this._backgroundMediaElement.pause();
             }
-            this._setLoopAttribute(false, false);
         }
     }
 
@@ -223,21 +217,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             this.removeEverythingFromActive(rendererId)
         }
         super.setPlayoutInactive(rendererId);
-    }
-
-    setLoopAttribute(rendererId: string, loop: ?boolean) {
-        const rendererPlayoutObj = this._media[rendererId];
-        rendererPlayoutObj.loop = loop;
-    }
-
-    _setLoopAttribute(foreground: boolean, loop: ?boolean) {
-        const mediaElement = foreground ? this._foregroundMediaElement : this._backgroundMediaElement;
-        if(loop) {
-            mediaElement.setAttribute('loop', 'true');
-        }
-        else {
-            mediaElement.removeAttribute('loop');
-        }
+        super.setLoopAttribute(rendererId, false);
     }
 
     // nothing to do here - only one media element that is always visible
