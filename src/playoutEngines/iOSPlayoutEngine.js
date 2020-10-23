@@ -240,9 +240,12 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
-    // nothing to do here - only one media element that is always visible
-    // eslint-disable-next-line no-unused-vars
-    setPlayoutVisible(rendererId: string) {}
+    setPlayoutVisible(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj.active) {
+            this.attachEverythingToActive(rendererId)
+        }
+    }
 
     play() {
         this._player.setPlaying(true);
