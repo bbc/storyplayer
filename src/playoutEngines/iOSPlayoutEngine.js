@@ -130,6 +130,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                     this._player.addVolumeControl(rendererId, 'Background');
                     if (mediaObj.hasOwnProperty('loop')) {
                         this._setLoopAttribute(false, mediaObj.loop);
+                    } else {
+                        this._setLoopAttribute(false, false);
                     }
                 }
                 if (mediaElement && mediaObj.type === MEDIA_TYPES.FOREGROUND_A) {
@@ -182,7 +184,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             if (mediaObject.url && mediaObject.url === mediaElement.src) {
                 this._backgroundMediaElement.pause();
             }
-            this._setLoopAttribute(false, false);
         }
     }
 
@@ -233,10 +234,12 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     setLoopAttribute(rendererId: string, loop: ?boolean) {
         const rendererPlayoutObj = this._media[rendererId];
         rendererPlayoutObj.loop = loop;
+        super.setLoopAttribute(rendererId, loop);
     }
 
     _setLoopAttribute(foreground: boolean, loop: ?boolean) {
-        const mediaElement = foreground ? this._foregroundMediaElement : this._backgroundMediaElement;
+        const mediaElement = foreground ?
+            this._foregroundMediaElement : this._backgroundMediaElement;
         if(loop) {
             mediaElement.setAttribute('loop', 'true');
         }
@@ -288,6 +291,16 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 && this._media[key].media.type === MEDIA_TYPES.BACKGROUND_A)
         if (activeBackgroundMedia.length > 0) {
             this._backgroundMediaElement.play()
+        }
+    }
+
+    setVolume(rendererId: string, volume: number) {
+        const mediaElement = this._getMediaElement(rendererId);
+        if (mediaElement) {
+            mediaElement.volume = volume;
+        } else {
+            // probably trying to fade no-longer existing background
+            this._backgroundMediaElement.volume = volume;
         }
     }
 
