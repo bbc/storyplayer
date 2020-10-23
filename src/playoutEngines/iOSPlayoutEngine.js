@@ -132,6 +132,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                         this._setLoopAttribute(false, mediaObj.loop);
                     }
                 }
+                if (mediaElement && mediaObj.type === MEDIA_TYPES.FOREGROUND_A) {
+                    mediaElement.classList.add('romper-audio-element');
+                } else if (mediaElement) {
+                    mediaElement.classList.remove('romper-audio-element');
+                }
                 if (rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
                     logger.info(`Applying queued events for ${rendererId}`)
                     rendererPlayoutObj.queuedEvents.forEach((qe) => {
@@ -420,7 +425,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             return undefined;
         }
         let mediaElement;
-        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
+        if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV
+            || rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_A) {
             mediaElement = this._foregroundMediaElement
         } else {
             mediaElement = this._backgroundMediaElement
