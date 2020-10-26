@@ -105,7 +105,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this.setPermissionToPlay(false);
     }
 
-    attachEverythingToActive(rendererId: string) {
+    attachEverythingToActive(rendererId: string, wait = false) {
         const rendererPlayoutObj = this._media[rendererId];
         const mediaObj = this._media[rendererId].media
         if (mediaObj) {
@@ -157,8 +157,10 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
             if (mediaObj.inTime) {
                 this._foregroundMediaElement.currentTime = mediaObj.inTime;
             }
-            if (mediaObj.url && this._playing) {
+            if (mediaObj.url && this._playing && !wait) {
                 this.play();
+            } else if (wait) {
+                this.pause();
             }
         }
     }
@@ -251,7 +253,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     setPlayoutVisible(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj.active) {
-            this.attachEverythingToActive(rendererId)
+            this.attachEverythingToActive(rendererId, true);
         }
     }
 
