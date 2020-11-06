@@ -27,12 +27,15 @@ export default class BasePlayoutEngine {
 
     _hasStarted: boolean;
 
+    _isHandlingNonAV: Boolean;
+
     constructor(player: Player, debugPlayout: boolean) {
         this._player = player;
         this._media = {};
         this._permissionToPlay = false;
         this._hasStarted = false;
         this._debugPlayout = debugPlayout;
+        this._isHandlingNonAV = false;
 
         if(this._debugPlayout) {
             window.playoutMedia = this._media;
@@ -49,8 +52,12 @@ export default class BasePlayoutEngine {
         }
     }
 
-    setPermissionToPlay(value: boolean) {
+    setPermissionToPlay(value: boolean, startNow: boolean) {
         this._permissionToPlay = value;
+    }
+
+    resetPlayoutEngine() {
+
     }
 
     queuePlayout(rendererId: string, mediaObj: Object) {
@@ -124,6 +131,18 @@ export default class BasePlayoutEngine {
         }
     }
 
+    startNonAVPlayout() {
+        this._isHandlingNonAV = true;
+    }
+
+    stopNonAVPlayout() {
+        this._isHandlingNonAV = false;
+    }
+
+    isPlayingNonAV() {
+        return this._isHandlingNonAV;
+    }
+
     play() {
 
     }
@@ -184,15 +203,15 @@ export default class BasePlayoutEngine {
 
 
     on(rendererId: string, event: string, callback: Function) {
-        return undefined;
+        throw new Error("on method should be overriden");
     }
 
     off(rendererId: string, event: string, callback: Function) {
-        return undefined;
+        throw new Error("off method should be overriden");
     }
 
     _getMediaElement(rendererId: string): ?HTMLMediaElement {
-        return undefined;
+        throw new Error("getMediaElement method should be overriden");
     }
 
     getMediaElementFor360(rendererId: string): ?HTMLMediaElement {
@@ -228,6 +247,13 @@ export default class BasePlayoutEngine {
         if (mediaElement) {
             mediaElement.style[key] = '';
         }
+    }
+
+    setAllVolume(volume: number) {
+        Object.keys(this._media)
+            .forEach((key) => {
+                this.setVolume(key, volume)
+            });
     }
 
     setVolume(rendererId: string, volume: number) {

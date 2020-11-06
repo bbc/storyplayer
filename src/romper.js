@@ -28,6 +28,7 @@ import './assets/images/black.png';
 
 // @flowignore
 import './assets/styles/player.scss';
+import './assets/styles/smp.scss';
 
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Events';
 

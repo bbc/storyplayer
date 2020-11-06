@@ -98,6 +98,19 @@ $start-button-size: 15vw;
   position: absolute;
 }
 
+#p_pluginContainer {
+  .romper-player {
+    display: unset;
+    flex-direction: unset;
+    height: 100%;
+    justify-content: unset;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+}
+
 .romper-player {
   color: $accent-colour;
   display: flex;
@@ -157,10 +170,12 @@ $start-button-size: 15vw;
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
     background-color: $forty-percent-black;
+    border: 1px solid $white;
     height: auto;
     left: 50%;
     padding: 10px;
     position: absolute;
+    text-align: center;
     top: 25%;
     transform: translateX(-50%) translateY(-50%);
     width: auto;
@@ -490,6 +505,37 @@ $start-button-size: 15vw;
     }
   }
 
+  .romper-error-message {
+    padding: 1em;
+  }
+
+  .romper-error-buttons {
+
+    &.hide {
+      display: none;
+    }
+
+    .romper-next-button {
+      display: inline-flex;
+    }
+
+    .romper-ignore-button,
+    .romper-next-button {
+      @include button;
+      border: 1px solid $white;
+      color: $white;
+      line-height: $romper-button-height;
+      margin: 1em;
+      width: 5em;
+
+      div {
+        height: $romper-button-height;
+        width: $romper-button-width;
+      }
+    }
+  }
+
+
   .romper-volume-overlay {
     @include overlay;
     background-color: $black;
@@ -648,6 +694,7 @@ $start-button-size: 15vw;
     width: 80%;
     z-index: 15;
 
+    &.fullscreen-choice-icons,
     &.fullscreen-icons {
       background: none;
       display: grid;
@@ -846,6 +893,10 @@ $start-button-size: 15vw;
     transition: all 1s ease;
     z-index: 10;
 
+    &.romper-buttons-smp {
+      background: unset;
+    }
+
     &.icons-showing {
       background: linear-gradient($transparent 0, $black 30%, $black 100%);
     }
@@ -1016,6 +1067,7 @@ $start-button-size: 15vw;
   position: absolute;
   top: 0;
   width: 100%;
+  z-index: 1;
 }
 
 .romper-render-image {

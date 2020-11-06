@@ -125,7 +125,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             document.addEventListener('keydown', this._onKeyDown);
             document.addEventListener('keyup', this._onKeyUp);
         }
-        this._createScene();
+        this._createScene(this._representation.id);
     }
 
     _addReticle() {
@@ -156,7 +156,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._sceneReticle.position.set(xpos, ypos, zpos);
     }
 
-    _createScene() {
+    _createScene(id: string) {
         // maintain view direction
         this._applyPreviousOrientation();
 
@@ -172,6 +172,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._domElement = webGlRenderer.domElement;
         this._domElement.classList.add('romper-threejs');
+        this._domElement.id = id;
 
         this._addReticle();
 

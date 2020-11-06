@@ -89,6 +89,15 @@ class Overlay extends EventEmitter {
         return button;
     }
 
+    useCustomButton(button) {
+        this._button = button
+        this._button.onclick = this._buttonClickHandler
+        this._button.addEventListener(
+            'touchend',
+            handleButtonTouchEvent(this._buttonClickHandler),
+        );
+    }
+
     // the overlay creates its own button that activates and
     // disactivates the overlay
     // it also toggles its own state between selected and deselected
@@ -111,14 +120,14 @@ class Overlay extends EventEmitter {
     // be disactivated
     activateOverlay() {
         this.emit(OVERLAY_ACTIVATED_EVENT, { name: this._name });
-        this._overlay.classList.remove('romper-inactive');       
+        this._overlay.classList.remove('romper-inactive');
         this._button.classList.add('romper-button-selected');
     }
 
     disactivateOverlay() {
         if (!this._overlay.classList.contains('romper-inactive')) {
             this._logFunction(
-                'OVERLAY_DEACTIVATED', 
+                'OVERLAY_DEACTIVATED',
                 `${this._name} visible`,
                 `${this._name} hidden`,
             );
@@ -207,7 +216,7 @@ class Overlay extends EventEmitter {
         });
     }
 
- 
+
     _clearButtonClass() {
         this._button.classList.forEach((buttonClass) => {
             if (buttonClass.indexOf(buttonClassPrefix) === 0) {
