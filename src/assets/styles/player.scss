@@ -757,9 +757,10 @@ $start-button-size: 15vw;
       font-family: inherit;
       font-size: 100%;
       height: calc(100% - #{(2 * $romper-button-border)});
-      margin-bottom: 1%;
       pointer-events: all;
       width: calc(100% - #{(2 * $romper-button-border)});
+      margin: 0;
+      padding: 0;
 
       &:focus {
         border: 2px solid $backing-colour;
@@ -804,13 +805,13 @@ $start-button-size: 15vw;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   img {
-    height: 80%;
-    margin-left: 10%;
-    margin-top: 10%;
     object-fit: contain;
-    object-position: center;
+    height: 80%;
     width: 80%;
   }
 }
