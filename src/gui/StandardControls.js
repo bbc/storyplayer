@@ -14,7 +14,7 @@ import { createElementWithClass } from '../documentUtils';
 //
 class StandardControls extends BaseControls {
 
-    _containerDiv: HTMLDivElement;
+    _buttonsContainer: HTMLDivElement;
 
     _scrubBar: BaseScrubBar;
 
@@ -76,14 +76,14 @@ class StandardControls extends BaseControls {
         );
 
         // add transport control buttons and scrub bar
-        this._containerDiv = createElementWithClass('div', 'buttons-container', ['romper-buttons']);
+        this._buttonsContainer = createElementWithClass('div', 'buttons-container', ['romper-buttons']);
 
-        this._containerDiv.appendChild(this._scrubBar.getScrubBarElement());
-        this._containerDiv.appendChild(mediaTransport);
-        this._containerDiv.onmousemove = () => {
+        this._buttonsContainer.appendChild(this._scrubBar.getScrubBarElement());
+        this._buttonsContainer.appendChild(mediaTransport);
+        this._buttonsContainer.onmousemove = () => {
             this.activateRomperButtons();
         };
-        this._containerDiv.onmouseleave = () => {
+        this._buttonsContainer.onmouseleave = () => {
             this.hideControls();
         };
     }
@@ -123,7 +123,7 @@ class StandardControls extends BaseControls {
 
     // get the whole lot organised in a DIV
     getControls(): HTMLDivElement {
-        return this._containerDiv;
+        return this._buttonsContainer;
     }
 
     getActivator(): HTMLDivElement {
@@ -142,7 +142,7 @@ class StandardControls extends BaseControls {
     }
 
     getShowing(): boolean {
-        return this._containerDiv.classList.contains('show');
+        return this._buttonsContainer.classList.contains('show');
     }
 
     // make the controls visible
@@ -153,7 +153,7 @@ class StandardControls extends BaseControls {
         } else {
             this.emit(ControlEvents.SHOWING_BUTTONS);
         }
-        this._containerDiv.classList.add('show');
+        this._buttonsContainer.classList.add('show');
         this._buttonControls.showTransportControls();
         this._buttonsActivateArea.classList.add('hide');
     }
@@ -162,7 +162,7 @@ class StandardControls extends BaseControls {
     hideControls() {
         if (!this.getShowing()) return;
         if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
-        this._containerDiv.classList.remove('show');
+        this._buttonsContainer.classList.remove('show');
         this._buttonControls.hideTransportControls();
         this._buttonsActivateArea.classList.remove('hide');
         // hiding the controls causes the mouse to trigger a new show event
@@ -181,22 +181,22 @@ class StandardControls extends BaseControls {
     // this is like disableControls, but also has the effect of getting rid
     // of the activate area, so other things can be clicked on (e.g., start button)
     setControlsInactive() {
-        this._containerDiv.classList.add('romper-inactive');
+        this._buttonsContainer.classList.add('romper-inactive');
         this._buttonsActivateArea.classList.add('romper-inactive');
     }
 
     setControlsActive() {
-        this._containerDiv.classList.remove('romper-inactive');
+        this._buttonsContainer.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('hide');
     }
 
     setFullscreenOn() {
-        this._containerDiv.classList.add('romper-buttons-fullscreen');
+        this._buttonsContainer.classList.add('romper-buttons-fullscreen');
     }
 
     setFullscreenOff() {
-        this._containerDiv.classList.remove('romper-buttons-fullscreen');
+        this._buttonsContainer.classList.remove('romper-buttons-fullscreen');
     }
 
     hideScrubBar() {
@@ -220,7 +220,7 @@ class StandardControls extends BaseControls {
     }
 
     disconnectScrubBar() {
-        this._scrubBar.disconnect(this._containerDiv);
+        this._scrubBar.disconnect(this._buttonsContainer);
     }
 
     /* exposing functionality to change how buttons look/feel */

@@ -331,7 +331,7 @@ class Player extends EventEmitter {
         this._guiLayer.appendChild(this._continueModalLayer);
 
         // Hide gui elements until start clicked with 'romper-inactive'
-        this._overlaysElement = createElementWithClass('div', 'romper-overlays', ['romper-overlays', 'buttons-hidden', 'romper-inactive']);
+        this._overlaysElement = createElementWithClass('div', 'overlays', ['romper-overlays', 'buttons-hidden', 'romper-inactive']);
 
         // append the overlays to the gui elemebt
         this._guiLayer.appendChild(this._overlaysElement);
