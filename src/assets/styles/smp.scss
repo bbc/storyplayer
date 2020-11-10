@@ -1,81 +1,151 @@
+@import './colours';
+
 .controlsFadedOut {
-    .chapterButton {
-        display: none;
-    }
+  .chapter-button {
+    display: none;
+  }
 
-    // Hide Chapter Overlay when SMP Controls are not there
-    .romper-buttons-smp {
-        .romper-overlay {
-            display: none;
-        }
-    }
+  .volume-button {
+    opacity: 0;
+  }
 
-    .audioMixSlider {
-        display: none;
+  // Hide Chapter Overlay when SMP Controls are not there
+  .romper-buttons-smp {
+    .romper-overlay {
+      display: none;
     }
+  }
 
-    .audioMixSliderLabel {
-        display: none;
-    }
+  .smp-volume {
+    display: none;
+  }
 }
 
 .controlsFadedIn {
-    .chapterButton {
-        top: 0;
-        right: 0;
-
-        &.romper-inactive {
-            display: none;
-        }
-    }
-
-    .audioMixSlider {
-        position: absolute;
-        width: 170px;
-        height: 30px;
-        margin-top: 14px;
-        left: 200px;
-    }
-
-    .audioMixSliderLabel {
-        position: absolute;
-        width: 170px;
-        height: 44px;
-        left: 200px;
-        color: white;
-        text-align: center;
-        line-height: 1;
-    }
-}
-
-.chapterIcon {
-    left: 0;
+  .chapter-button {
+    right: 0;
     top: 0;
-    margin: 10px 10px;
-}
 
-.romper-player > .romper-gui >.romper-buttons-smp {
-    width: 100%;
-    padding-bottom: 0;
+    &.romper-inactive {
+      display: none;
+    }
+  }
+
+  .volume-button {
+    bottom: 16px;
+    left: 8px;
+
+    &.romper-inactive {
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
+    }
+  }
+
+  .smp-volume {
+    background-color: $black;
     bottom: 0;
-    display: flex;
-    height: 100%;
-    opacity: 0;
-    pointer-events: none;
+    height: 147px;
+    left: 8px;
+    margin: 0 14px 60px 0;
+    padding: 8px 8px 0;
     position: absolute;
-    transition: all 1s ease;
+    width: 216px;
+    z-index: 160;
 
-    &.show {
-      opacity: 1;
-      pointer-events: all;
+    >div {
+      height: 36px;
+      padding: 7px 9px 15px 14px;
+      width: 177px;
+
+      &:first-child {
+        margin: 0 0 8px;
+      }
+
+      &:last-child {
+        margin: 0 0 8px;
+      }
     }
 
-    .romper-icon-label {
+    &.romper-inactive {
       display: none;
     }
 
-    .romper-icon-overlay {
-      top: 0;
-      bottom: unset;
+    .audio-slider {
+      -webkit-appearance: none;
+      background-color: $transparent;
+      height: 13px;
+      margin-top: 5px;
+      outline: none;
+      width: 100%;
+
+      &::-webkit-slider-runnable-track {
+        -webkit-appearance: none;
+        background-color: $white;
+        height: 1px;
+      }
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background-color: $white;
+        border-radius: 50%;
+        height: 12px;
+        margin-top: -5px;
+        width: 12px;
+      }
+
+      &::-moz-range-progress {
+        background-color: $highlight;
+      }
+
+      &::-moz-range-track {
+        background-color: $transparent;
+      }
+    }
+
+    .audio-slider-label {
+      color: $smp-text-white;
+      font-family: 'ReithSans';
+      font-size: 14px;
+      font-stretch: normal;
+      font-style: normal;
+      font-weight: normal;
+      height: 18px;
+      letter-spacing: normal;
+      line-height: 1.29;
+      margin: 0 74px 0 0;
     }
   }
+}
+
+.chapter-icon {
+  left: 0;
+  margin: 10px;
+  top: 0;
+}
+
+.romper-player > .romper-gui >.romper-buttons-smp {
+  bottom: 0;
+  display: flex;
+  height: 100%;
+  opacity: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: all 1s ease;
+  width: 100%;
+
+  &.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .romper-icon-label {
+    display: none;
+  }
+
+  .romper-icon-overlay {
+    bottom: unset;
+    top: 0;
+  }
+}
+

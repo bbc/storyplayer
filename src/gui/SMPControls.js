@@ -27,6 +27,10 @@ class SMPControls extends BaseControls {
 
     _chapterButton: HTMLButtonElement;
 
+    _volumeButton: HTMLButtonElement;
+
+    _volumeControls: HTMLDivElement;
+
     _uiUpdateQueue: Array<Object>;
 
     _uiUpdateQueueTimer: Number;
@@ -77,16 +81,11 @@ class SMPControls extends BaseControls {
         this._uiUpdateQueue = []
 
         // TODO: get this back in when we have approved design
-        // this._createFbMixSlider()
+        this._createVolumeButton();
+        this._createFbMixSlider()
 
         this._setDefaultSMPControlsConfig()
 
-        // Set SMP Audio Bar to have extra width to contain our new control
-        this._smpPlayerInterface.updateUiConfig({
-            controls:{
-                extraVolumeWidth:170
-            }
-        })
     }
 
     /**
@@ -226,6 +225,7 @@ class SMPControls extends BaseControls {
     _setDefaultSMPControlsConfig() {
         // Setup Default Controls Settings
         this._uiUpdate({
+            always: true,
             enabled: true,
             spaceControlsPlayback: true,
             availableOnMediaEnded: true,
@@ -237,15 +237,22 @@ class SMPControls extends BaseControls {
     }
 
     _createFbMixSlider() {
-        const controlBar = document.querySelector('.p_volumeControls');
+        const controlBar = document.querySelector('.mediaContainer');
+
+        const smpVolumeBox = document.createElement('div');
+        smpVolumeBox.classList.add('smp-volume');
+        smpVolumeBox.classList.add('romper-inactive');
+
+        const mixContainer = document.createElement('div');
+        const masterContainer = document.createElement('div');
 
         const fbMixSliderLabel = document.createElement('div');
-        fbMixSliderLabel.classList.add("audioMixSliderLabel")
+        fbMixSliderLabel.classList.add("audio-slider-label")
         fbMixSliderLabel.innerHTML = "Default Mix"
-        controlBar.appendChild(fbMixSliderLabel)
+        mixContainer.appendChild(fbMixSliderLabel)
 
         const fbMixSlider = document.createElement('input');
-        fbMixSlider.classList.add("audioMixSlider")
+        fbMixSlider.classList.add("audio-slider")
 
         fbMixSlider.type = 'range';
         fbMixSlider.min = 0;
@@ -260,7 +267,7 @@ class SMPControls extends BaseControls {
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
-            const label = document.querySelector('.audioMixSliderLabel')
+            const label = document.querySelector('.audio-slider-label')
             if(sliderValue <= 0.5) {
                 label.innerHTML = "Accessible Mix"
             } else if(sliderValue > 0.5 && sliderValue < 0.75) {
@@ -271,8 +278,42 @@ class SMPControls extends BaseControls {
                 logger.warn("Invalid mix slider value: ")
             }
         })
+        
+        mixContainer.appendChild(fbMixSlider);
 
-        controlBar.appendChild(fbMixSlider)
+
+        const masterSliderLabel = document.createElement('div');
+        masterSliderLabel.classList.add("audio-slider-label")
+        masterSliderLabel.innerHTML = "Master Volume"
+        masterContainer.appendChild(masterSliderLabel)
+
+        const masterSlider = document.createElement('input');
+        masterSlider.classList.add("audio-slider")
+        // masterSlider.classList.add("romper-volume-range")
+
+        masterSlider.type = 'range';
+        masterSlider.min = 0;
+        masterSlider.max = 1;
+        masterSlider.value = 1;
+        masterSlider.step = 0.1;
+
+        const changeVol = (e) => {
+            const sliderValue = parseFloat(e.target.value)
+            const currentRenderer = this._playoutEngine._player._currentRenderer; // TODO: ouch!
+            this._playoutEngine.setVolume(currentRenderer._rendererId, sliderValue); // change
+        };
+        masterSlider.addEventListener("change", changeVol);
+
+        masterSlider.addEventListener("input", changeVol);
+        
+        masterContainer.appendChild(masterSlider);
+
+        smpVolumeBox.appendChild(mixContainer);
+        smpVolumeBox.appendChild(masterContainer);
+        smpVolumeBox.onmouseleave = () => { smpVolumeBox.classList.add('romper-inactive') };
+
+        this._volumeControls = smpVolumeBox;
+        controlBar.appendChild(smpVolumeBox);
 
     }
 
@@ -281,7 +322,7 @@ class SMPControls extends BaseControls {
         const chapterButton = document.createElement('button');
         chapterButton.classList.add("p_button")
         chapterButton.classList.add("p_controlBarButton")
-        chapterButton.classList.add("chapterButton")
+        chapterButton.classList.add("chapter-button")
         chapterButton.classList.add("romper-inactive")
         chapterButton.setAttribute("role", "button")
         chapterButton.setAttribute("aria-live", "polite")
@@ -292,10 +333,43 @@ class SMPControls extends BaseControls {
         chapterButton.onmouseout = () => {
             chapterButton.classList.remove("p_buttonHover")
         }
-        chapterButton.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapterIcon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/></svg></div>'
+        chapterButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder">
+        <svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapter-icon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/>
+        </svg>
+        </div>`;
         controlBar.appendChild(chapterButton)
 
         this._chapterButton = chapterButton;
+    }
+
+    _createVolumeButton() {
+        const controlBar = document.querySelector('.mediaContainer');
+        const volumeButton = document.createElement('button');
+        volumeButton.classList.add("p_button")
+        volumeButton.classList.add("p_controlBarButton")
+        volumeButton.classList.add("volume-button")
+        volumeButton.setAttribute("role", "button")
+        volumeButton.setAttribute("aria-live", "polite")
+        volumeButton.setAttribute("aria-label", "Toggle Volume Controls")
+        volumeButton.onmouseover = () => {
+            volumeButton.classList.add("p_buttonHover")
+            this._volumeControls.classList.remove('romper-inactive');
+        }
+        volumeButton.onmouseout = () => {
+            volumeButton.classList.remove("p_buttonHover")
+        }
+        volumeButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-8 -8 36 36">
+            <g fill="none" fill-rule="evenodd">
+                <g fill="#fff" fill-rule="nonzero">
+                    <path d="M16.091.625C18.507 3.034 20 6.343 20 10s-1.493 6.967-3.909 9.375l-.877-.865c2.195-2.19 3.555-5.195 3.555-8.51 0-3.315-1.36-6.32-3.554-8.51zm-6.245 2.1v14.55l-3.385-3.637H0V6.362h6.461l3.385-3.637zm3.633.474c1.748 1.75 2.829 4.15 2.829 6.801s-1.08 5.05-2.83 6.8l-.874-.86c1.527-1.533 2.473-3.629 2.473-5.94 0-2.312-.946-4.408-2.473-5.94z" transform="translate(-869 -2481) translate(855 2467) translate(14 14)"/>
+                </g>
+            </g>
+        </svg>
+        </div>`;
+        controlBar.appendChild(volumeButton)
+
+        this._volumeButton = volumeButton;
     }
 
     /* getters */
