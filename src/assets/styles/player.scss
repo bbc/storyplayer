@@ -757,10 +757,10 @@ $start-button-size: 15vw;
       font-family: inherit;
       font-size: 100%;
       height: calc(100% - #{(2 * $romper-button-border)});
-      pointer-events: all;
-      width: calc(100% - #{(2 * $romper-button-border)});
       margin: 0;
       padding: 0;
+      pointer-events: all;
+      width: calc(100% - #{(2 * $romper-button-border)});
 
       &:focus {
         border: 2px solid $backing-colour;
@@ -799,19 +799,19 @@ $start-button-size: 15vw;
 }
 
 .romper-link-icon-container {
+  align-items: center;
   border: $romper-button-border solid $transparent;
+  display: flex;
   height: 8em;
+  justify-content: center;
   margin-bottom: 5px;
   margin-left: auto;
   margin-right: auto;
   width: 8em;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
   img {
-    object-fit: contain;
     height: 80%;
+    object-fit: contain;
     width: 80%;
   }
 }
