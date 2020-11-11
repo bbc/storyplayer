@@ -1175,7 +1175,7 @@ class Player extends EventEmitter {
         const behaviourOverlay = this._createOverlay('link-choice', this._logUserInteraction);
         const behaviourElement = behaviourOverlay.getOverlay()
         behaviourElement.id = behaviour.id;
-
+        console.log('ANDY Adding countdown');
         this._addCountdownToElement(behaviourElement);
         this._overlaysElement.appendChild(behaviourElement);
         return behaviourOverlay;
@@ -1345,7 +1345,8 @@ class Player extends EventEmitter {
 
     _reflectTimeout(currentRenderer: BaseRenderer) {
         const { remainingTime } = currentRenderer.getCurrentTime();
-        if (this._countdownTotal === Infinity && remainingTime > 0.5) {
+        if ((this._countdownTotal === Infinity || Number.isNaN(this._countdownTotal))
+            && remainingTime > 0.5) {
             this._countdownTotal = remainingTime;
         }
         const { style } = this._countdowner;
@@ -1360,7 +1361,7 @@ class Player extends EventEmitter {
         } else {
             clearTimeout(this._choiceCountdownTimeout);
             this._choiceCountdownTimeout = null;
-            this._countdownTotal = 0;
+            this._countdownTotal = Infinity;
             style.width = '0';
             style.marginLeft = '49%';
         }
