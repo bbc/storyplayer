@@ -3,15 +3,20 @@ StoryPlayer
 
 StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using the [Data Model](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
 
-You may be wondering why the term "_romper_" appears so frequently.  This is historical and is because the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
-
 How to contribute
 =================
 
-Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for more details.
+Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) if you are interested in making contributions.
 
-How to use this repo
-====================
+Licence
+=======
+
+StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](LICENCE) in the repo for further details.
+
+How to use StoryPlayer
+======================
+
+It all starts with [romper.js](src/romper.js). You'll notice the term "_romper_" appears frequently in the code.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
