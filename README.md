@@ -1,12 +1,17 @@
 StoryPlayer
-======
+===========
 
 StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using the [Data Model](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
 
 You may be wondering why the term "_romper_" appears so frequently.  This is historical and is because the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
-How to use
-----------
+How to contribute
+=================
+
+Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for more details.
+
+How to use this repo
+====================
 
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
@@ -90,8 +95,6 @@ How to develop
 * Pre-requisites.  In order to get a local version of StoryPlayer running, you will need:
     1.  To download the repo
     2.  Ensure yarn is installed
-    3.  Have a Forge certificate
-    4.  Set up [Artifactory to run locally](https://confluence.dev.bbc.co.uk/display/PRODTOOLS/Set+up+Artifactory+outside+Sandbox)
 * Run `yarn` to get all your dev dependencies included
 * `demo.html` puts a simple player onto a page
 * `yarn build` will do a single build of the library
