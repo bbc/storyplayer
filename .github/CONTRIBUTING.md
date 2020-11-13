@@ -7,7 +7,7 @@ Documentation
 =============
 
 * [Readme](../README.md)
-* [Code of conduct](CODE_OF_CONDUCT.md)
+* [Code of conduct](../CODE_OF_CONDUCT.md)
 * [BBC Contributor Licence Agreement](BBC_Contributor_Licence_Agreement_StoryPlayer.pdf)
 
 Getting Started
@@ -40,3 +40,6 @@ As StoryPlayer consumes JSON representations of the OBM Schema, if you are propo
 Pull Requests
 =============
 If you've never created a Pull Request, [here's a great tutorial that will get you up to speed](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
+
+Licence
+=======
