@@ -38,7 +38,6 @@
     "@babel/plugin-transform-runtime": "^7.7.6",
     "@babel/preset-env": "^7.7.7",
     "@babel/runtime": "^7.7.7",
-    "@bbc/object-based-media-schema": "^0.3.8",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
