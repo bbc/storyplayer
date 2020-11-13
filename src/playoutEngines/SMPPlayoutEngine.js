@@ -151,11 +151,14 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return
         }
 
+        const isTrimmed = mediaObj.inTime > 0 || mediaObj.outTime > 0;
+
         // TODO: Get MediaFetcher to not resolve pids
         super.queuePlayout(rendererId, mediaObj);
 
         const options = {
             loop: false,
+            ondemandWebcastData: isTrimmed,
         };
         if("loop" in this._media[rendererId].media && this._media[rendererId].media.loop) {
             this.setLoopAttribute(rendererId, true);
@@ -196,16 +199,28 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             };
         }
 
+        if (isTrimmed) {
+            playlistItem = {
+                ...playlistItem,
+                in: mediaObj.inTime > 0 ? mediaObj.inTime : 0.01, // hack for SMP bug; being fixed
+            }
+        }
+        if (isTrimmed && mediaObj.outTime > 0) {
+            playlistItem = {
+                ...playlistItem,
+                out: mediaObj.outTime,
+            }
+        }
+
         const playlist = {
             summary: rendererId,
             options,
             config: {
                 // XXX ondemandwebcast data probably needed later, for now
                 // switching it off
-                ondemandWebcastData:false,
-                webcastData: {},
+                ondemandWebcastData: isTrimmed,
                 autoplay: true,
-                startTime : this._inTime,
+                // startTime : mediaOb.inTime,
             },
             playlist: {
                 id: rendererId,

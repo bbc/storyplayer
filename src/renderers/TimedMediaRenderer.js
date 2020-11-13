@@ -72,6 +72,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
                     loop: fg.loop,
                     id: fg.id,
                     inTime: this._inTime,
+                    outTime: this._outTime,
                     ...mediaObjOverride
                 }
                 let mediaType;
@@ -160,15 +161,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
             if (playheadTime >= this._outTime) {
                 this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
                 this._playoutEngine.playRenderer(this._rendererId);
-            }
-        }
-        if (this._inTime && this._inTime !== -1) {
-            if (playheadTime < this._inTime && !this._fixedInTime) {
-                // setCurrentTime will take time to have effect
-                // we don't want want to spam it, so call once and wait
-                this._fixedInTime = true;
-                setTimeout(() => { this._fixedInTime = false; }, 100);
-                this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
             }
         }
         // have we reached the end?
