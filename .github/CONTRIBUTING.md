@@ -43,3 +43,4 @@ If you've never created a Pull Request, [here's a great tutorial that will get y
 
 Licence
 =======
+StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3. Take a look at the [LICENSE](../LICENCE) and [COPYING](../COPYING) files for more details.
