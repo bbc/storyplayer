@@ -343,7 +343,7 @@ class SMPControls extends BaseControls {
     }
 
     setControlsActive() {
-        // Handled by SMP
+        this.enableControls();
     }
 
     setControlsInactive() {
