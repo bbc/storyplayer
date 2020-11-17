@@ -81,7 +81,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     async init() {
         try {
             this._textDiv = document.createElement('div');
-            this._textDiv.classList.add('romper-text-element');
+            this._textDiv.classList.add('romper-text-element', 'notInteractiveContent');
             await this.renderTextElement()
             await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
