@@ -3,6 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "A multiple representation story",
             "description": "A simple linear story with multiple representations - image or video.  The last image representation has a share behaviour.",
             "beginnings": [
@@ -26,10 +27,10 @@
                 "3c2a2442-b9b8-4cca-b934-d067c8967a20"
             ],
             "variables": {
-                "  bandwidth": {
-                    "default_value": 1,
+                "bandwidth": {
+                    "default_value": 3,
                     "description": "How much bandwidth does the user have? (2 or more gives video, less gives images)",
-                    "variable_type": "integer"
+                    "variable_type": "number"
                 }
             }
         }
@@ -40,6 +41,7 @@
             "name": "Narrative Element 1",
             "description": "The first part of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -55,6 +57,7 @@
             },
             "links": [
                 {
+                    "id": "ced13f5e-5228-4264-a111-6de3b65f5609",
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
@@ -66,6 +69,7 @@
             "name": "Narrative Element 2",
             "description": "The middle of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -81,6 +85,7 @@
             },
             "links": [
                 {
+                    "id": "d66007a8-ccec-43f7-a535-68edcc931c98",
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
@@ -92,6 +97,7 @@
             "name": "Narrative Element 3",
             "description": "The End of the Story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -107,9 +113,9 @@
             },
             "links": [
                 {
+                    "id": "1a3486d5-fc15-4623-9aaf-8abba1ee02ab",
                     "condition": {"==": [1,1]},
-                    "link_type": "END_STORY",
-                    "target_narrative_element_id": ""
+                    "link_type": "END_STORY"
                 }
             ]
         }
@@ -121,15 +127,16 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
                     "representation_id": "3ab4c455-5165-4ffc-9152-05755282dad0",
-                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
+                    "condition": {">=": [{"var": "bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "4bb4c455-5165-4ffc-9152-05755282dad0",
-                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
+                    "condition": {"<": [{"var": "bandwidth"}, 2]}
                 }
             ]
         },
@@ -139,15 +146,16 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
                     "representation_id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
-                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
+                    "condition": {">=": [{"var": "bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "802d66ce-d6fd-444f-9268-6d8474632da6",
-                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
+                    "condition": {"<": [{"var": "bandwidth"}, 2]}
                 }
             ]
         },
@@ -157,15 +165,16 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
                     "representation_id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
-                    "condition": {">=": [{"var": "  bandwidth"}, 2]}
+                    "condition": {">=": [{"var": "bandwidth"}, 2]}
                 },
                 {
                     "representation_id": "ea36c7ac-7453-4a52-8495-6ca58e944fe8",
-                    "condition": {"<": [{"var": "  bandwidth"}, 2]}
+                    "condition": {"<": [{"var": "bandwidth"}, 2]}
                 }
             ]
         }
@@ -175,6 +184,7 @@
             "id": "3ab4c455-5165-4ffc-9152-05755282dad0",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Step 1 video",
             "meta": {},
             "tags": {},
@@ -184,15 +194,13 @@
                 "background_ids": [],
                 "behaviours": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 2",
             "meta": {},
             "tags": {},
@@ -201,15 +209,13 @@
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 3",
             "meta": {},
             "tags": {},
@@ -218,15 +224,13 @@
                 "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "4bb4c455-5165-4ffc-9152-05755282dad0",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Step 1 image",
             "meta": {},
             "tags": {},
@@ -235,15 +239,14 @@
                 "foreground_id": "0c78100b-9cfe-4c21-9eac-7763a5f8188c",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "duration": -1,
+            "behaviours": {}
         },
         {
             "id": "802d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Image 2",
             "meta": {},
             "tags": {},
@@ -252,15 +255,14 @@
                 "foreground_id": "43184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "duration": -1,
+            "behaviours": {}
         },
         {
             "id": "ea36c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Image 3",
             "meta": {},
             "tags": {},
@@ -269,9 +271,8 @@
                 "foreground_id": "084568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
+            "duration": -1,
             "behaviours": {
-                "started": [],
-                "completed": [],
                 "during": [
                     {
                         "behaviour": {
@@ -283,6 +284,7 @@
                                 "width": 13,
                                 "height": 10
                             },
+                            "id": "270cd809-9628-49be-b0c3-b144a68e8e09",
                             "css_class": "share_modal",
                             "share_text": "Look at this great experience!",
                             "share_url": "http://www.bbc.co.uk/rd",
@@ -294,6 +296,7 @@
                         "behaviour": {
                             "type": "urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0",
                             "title": "Learn more:",
+                            "id": "030081dd-beca-4b50-838a-fd30b4554250",
                             "position": {
                                 "top": 25,
                                 "left": 72,
@@ -317,10 +320,11 @@
             "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
             "object_class": "ASSET_COLLECTION",
             "description": "Start image",
-            "version": "",
+            "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "",
             "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
                 "image_src": "https://rdux.files.bbci.co.uk/romper/startimage.jpg"
             }
@@ -331,6 +335,7 @@
             "name": "Demo video 1",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -343,6 +348,7 @@
             "name": "Video 2",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -355,6 +361,7 @@
             "name": "Step 3 video",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -367,6 +374,7 @@
             "name": "Demo image 1",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
@@ -379,6 +387,7 @@
             "name": "image 2",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
@@ -391,6 +400,7 @@
             "name": "Step 3 image",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {

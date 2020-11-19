@@ -5,6 +5,7 @@ body {
 
 .romper-container {
   height: 500px;
+  width: 889px;
   overflow: auto;
   resize: both;
 }
