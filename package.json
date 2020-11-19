@@ -14,7 +14,6 @@
     "test:eslint": "eslint src/ spec/",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
-    "demo": "concurrently \"yarn dev\" \"rm -f ./tmp/*.json && node demos.js\"",
     "watch": "concurrently \"webpack --watch --watch-poll 500 --progress --profile --bail\" \"jest --watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\"",
     "dev": "webpack --watch --watch-poll 500 --progress --profile --bail"
   },
