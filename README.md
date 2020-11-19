@@ -106,6 +106,12 @@ How to develop
 * `yarn test` will do a single run of the tests (Mocha with Chai, ESLint and Flow type checking)
 * `yarn dev` will do continuously build and test the library on change
 
+
+Running the examples
+--------------------
+To check everything is installed correctly, run `python3 http.server` in the root of the project, and visit `http://localhost:8000/`.
+You should be able to select a demo, inspect the demo's JSON representation, and hit the render button to experience it.
+
 Running a local StoryPlayer with local stories/media
 --------------
 
