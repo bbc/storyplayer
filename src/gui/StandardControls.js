@@ -34,8 +34,7 @@ class StandardControls extends BaseControls {
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
     ) {
-        super(logUserInteraction);
-        this._logUserInteraction = logUserInteraction;
+        super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
 
         // create button manager and scrub bar
         this._buttonControls = new Buttons(this._logUserInteraction);
@@ -89,20 +88,17 @@ class StandardControls extends BaseControls {
 
     // pass on any events
     _forwardButtonEvents() {
-        this._buttonControls.on(ButtonEvents.SUBTITLES_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.SUBTITLES_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.FULLSCREEN_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.FULLSCREEN_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.BACK_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.BACK_BUTTON_CLICKED));
-        this._buttonControls.on(ButtonEvents.NEXT_BUTTON_CLICKED,
-            () => this.emit(ButtonEvents.NEXT_BUTTON_CLICKED));
+        [
+            ButtonEvents.SUBTITLES_BUTTON_CLICKED,
+            ButtonEvents.FULLSCREEN_BUTTON_CLICKED,
+            ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,
+            ButtonEvents.SEEK_FORWARD_BUTTON_CLICKED,
+            ButtonEvents.SEEK_BACKWARD_BUTTON_CLICKED,
+            ButtonEvents.BACK_BUTTON_CLICKED,
+            ButtonEvents.NEXT_BUTTON_CLICKED,
+        ].forEach((eventType) => {
+            this._buttonControls.on(eventType, (e) => this.emit(eventType, e));
+        })
     }
 
     activateRomperButtons(event: ?Object, override: ?boolean) {

@@ -115,10 +115,14 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer) {
                 const rend = this._currentRenderer;
                 const choiceTime = rend.getChoiceTime();
-                const { currentTime } = rend.getCurrentTime();
+                const { duration, currentTime } = rend.getCurrentTime();
                 if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
                     logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
                     rend.exitStartPauseBehaviour();
+                }
+                else if (duration === Infinity){
+                    logger.info('Next button clicked during infinite representation - completing element'); // eslint-disable-line max-len
+                    this._currentRenderer.complete();
                 }
                 else if (choiceTime > 0 && currentTime < choiceTime) {
                     logger.info('Next button clicked on element with choices, skip to them');
@@ -130,11 +134,11 @@ export default class RenderManager extends EventEmitter {
                     logger.info('Next button ignored due to variable panel/choices, skip to end');
                     // skip to end if we have time-based media
                     // (if not, will continue to play then trigger another ended event)
-                    const duration = this._player.playoutEngine.getDuration(representationId)
-                    if (currentTime && duration) {
+                    const playoutDuration = this._player.playoutEngine.getDuration(representationId)
+                    if (currentTime && playoutDuration) {
                         const playout = this._player.playoutEngine;
                         // skip to 1/4 s before end
-                        playout.setCurrentTime(representationId, duration);
+                        playout.setCurrentTime(representationId, playoutDuration);
                     } else if (this._currentRenderer) {
                         this._currentRenderer.complete();
                     }
@@ -149,6 +153,10 @@ export default class RenderManager extends EventEmitter {
             }
         });
         this._player.on(PlayerEvents.VOLUME_CHANGED, (event) => {
+            this._rendererState.volumes[event.label] = event.value;
+        });
+
+        this._player.on(PlayerEvents.AUDIO_MIX_CHANGED, (event) => {
             this._rendererState.volumes[event.label] = event.value;
         });
 
@@ -215,14 +223,20 @@ export default class RenderManager extends EventEmitter {
             }
             this._player.playoutEngine.pauseBackgrounds();
         } else {
-            if (this._isPlaying) {
+            if (
+                this._currentRenderer
+                && this._isPlaying 
+                && this._currentRenderer.phase === RENDERER_PHASES.MAIN
+            ) {
                 // unless it has already ended, set it going again
                 if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
                     this._currentRenderer.play();
                     this._player.playoutEngine.play();
                 }
             }
-            if (this._player.playoutEngine.hasStarted()) {
+            if (this._player.playoutEngine.hasStarted()
+                && this._player.userInteractionStarted()
+            ) {
                 this._player.playoutEngine.playBackgrounds();
             }
             if (this._player._choiceCountdownTimeout && this._currentRenderer) {
@@ -327,6 +341,20 @@ export default class RenderManager extends EventEmitter {
             logger.error(err, `Could not get fetch story ${err}`);
             return null;
         }
+    }
+
+    /**
+     * Show an error message over everything
+     * Optionally disable controls and remove start button
+     * @param {string} message The message to show
+     * @param {boolean} message Should controls be disabled
+     * @param {boolean} message Should overlays (e.g., start button) be removed
+     * 
+     */
+    showError(message, disableControls, clearOverlays) {
+        this._player.showErrorLayer(message);
+        if (disableControls) this._player.disableControls();
+        if (clearOverlays) this._player.clearStartButton();
     }
 
     _setAspectRatio(story: Object) {
