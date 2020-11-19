@@ -202,7 +202,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if (isTrimmed) {
             playlistItem = {
                 ...playlistItem,
-                in: mediaObj.inTime > 0 ? mediaObj.inTime : 0.01, // hack for SMP bug; being fixed
+                in: mediaObj.inTime > 0 ? mediaObj.inTime : 0.01, // workaround for SMP bug
             }
         }
         if (isTrimmed && mediaObj.outTime > 0) {
@@ -216,11 +216,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             summary: rendererId,
             options,
             config: {
-                // XXX ondemandwebcast data probably needed later, for now
-                // switching it off
                 ondemandWebcastData: isTrimmed,
                 autoplay: true,
-                // startTime : mediaOb.inTime,
             },
             playlist: {
                 id: rendererId,
