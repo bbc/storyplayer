@@ -1,3 +1,0 @@
-[submodule ".jenkins"]
-	path = .jenkins
-	url = git@github.com:bbc/rd-ux-storyplayer-ci.git
