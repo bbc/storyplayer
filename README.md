@@ -97,20 +97,20 @@ How to develop
   TDD is preferred here. We have an ESLint file which follows our house file, and we prefer to have Facebook Flow
   annotations in place for type checking.
 
-* Pre-requisites.  In order to get a local version of StoryPlayer running, you will need:
-    1.  To download the repo
-    2.  Ensure yarn is installed
-* Run `yarn` to get all your dev dependencies included
-* `demo.html` puts a simple player onto a page
+* Pre-requisites.  In order to get a local version of StoryPlayer running, you will need to:
+    1.  Download the repo
+    2.  Ensure Yarn is installed
+
+* Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
 * `yarn test` will do a single run of the tests (Mocha with Chai, ESLint and Flow type checking)
-* `yarn dev` will do continuously build and test the library on change
+* `yarn dev` will continuously build and test the library on changes
 
 
 Running the examples
 --------------------
-To check everything is installed correctly, run `python3 http.server` in the root of the project, and visit `http://localhost:8000/`.
-You should be able to select a demo, inspect the demo's JSON representation, and hit the render button to experience it.
+To check everything is installed correctly, run `python3 http.server` in the root of the project, and visit `http://localhost:8000/examples`.
+Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running a local StoryPlayer with local stories/media
 --------------
