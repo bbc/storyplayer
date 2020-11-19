@@ -3,6 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "A Simple Linear Story",
             "description": "A story with a beginning, a middle and an end",
             "beginnings": [
@@ -20,28 +21,7 @@
                 }
             },
             "object_class": "STORY",
-            "variables": {
-                "counter": {
-                    "default_value": 1,
-                    "description": "does the user get an in-depth version",
-                    "variable_type": "number"
-                },
-                "bool": {
-                    "default_value": true,
-                    "description": "does the user get an in-depth version",
-                    "variable_type": "boolean"
-                },
-                "mylist": {
-                    "default_value": "red",
-                    "description": "does the user get an in-depth version",
-                    "variable_type": "list"
-                },
-                "score": {
-                    "default_value": 21,
-                    "description": "does the user get an in-depth version",
-                    "variable_type": "number"
-                }
-            },
+            "variables": {},
             "narrative_element_ids": [
                 "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
                 "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
@@ -53,8 +33,9 @@
         {
             "id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
             "name": "Narrative Element 1",
-            "description": "Part ${counter} of the story.  Your score is ${score}, colour is ${mylist}, and choice is  ${bool}",
+            "description": "Part 1 of the story.",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -70,6 +51,7 @@
             },
             "links": [
                 {
+                    "id": "cc22fc14-50e9-4182-857e-b09bcb158172",
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
@@ -81,6 +63,7 @@
             "name": "Narrative Element 2",
             "description": "The middle of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -96,6 +79,7 @@
             },
             "links": [
                 {
+                    "id": "f3bb55e5-e88a-4eb4-a0cc-025d2e040869",
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
@@ -107,6 +91,7 @@
             "name": "Narrative Element 3",
             "description": "The End of the Story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -122,9 +107,9 @@
             },
             "links": [
                 {
+                    "id": "0453d3df-3de9-40fe-be0c-0364c2b61051",
                     "condition": {"==": [1,1]},
-                    "link_type": "END_STORY",
-                    "target_narrative_element_id": ""
+                    "link_type": "END_STORY"
                 }
             ]
         }
@@ -136,8 +121,14 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
-            "representations": []
+            "representations": [
+                {
+                    "representation_id": "3ab4c455-5165-4ffc-9152-05755282dad0",
+                    "condition": {"==": [1,1]}
+                }
+            ]
         },
         {
             "id": "d9d8b449-da99-4936-a803-7a1bdf91bbe8",
@@ -145,6 +136,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -159,6 +151,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -173,6 +166,7 @@
             "id": "3ab4c455-5165-4ffc-9152-05755282dad0",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Step 1 video",
             "meta": {},
             "tags": {},
@@ -182,15 +176,13 @@
                 "background_ids": [],
                 "behaviours": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 2",
             "meta": {},
             "tags": {},
@@ -199,15 +191,13 @@
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 3",
             "meta": {},
             "tags": {},
@@ -216,10 +206,7 @@
                 "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         }
     ],
     "asset_collections": [
@@ -227,10 +214,11 @@
             "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
             "object_class": "ASSET_COLLECTION",
             "description": "Start image",
-            "version": "",
+            "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "",
             "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
                 "image_src": "https://rdux.files.bbci.co.uk/romper/startimage.jpg"
             }
@@ -241,17 +229,11 @@
             "name": "Demo video 1",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
-            "meta": {
-                "romper": {
-                    "in": "2.0",
-                    "out": "3.0"
-                }
-            },
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
-                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step1.m4v"
             }
         },
         {
@@ -260,11 +242,11 @@
             "name": "Video 2",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
-                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step2.m4v"
             }
         },
         {
@@ -273,11 +255,11 @@
             "name": "Step 3 video",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
-                "av_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.mp4",
-                "sub_src": "http://cloud7.sandbox.bbc.co.uk:3000/examples/jellies.vtt"
+                "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
             }
         }
     ]
