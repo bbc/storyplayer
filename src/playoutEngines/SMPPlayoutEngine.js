@@ -202,7 +202,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if (isTrimmed) {
             playlistItem = {
                 ...playlistItem,
-                in: mediaObj.inTime > 0 ? mediaObj.inTime : 0.01, // workaround for SMP bug
+                in: mediaObj.inTime > 0 ? mediaObj.inTime : 0,
             }
         }
         if (isTrimmed && mediaObj.outTime > 0) {
