@@ -109,7 +109,7 @@ How to develop
 
 Running the examples
 --------------------
-To check everything is installed correctly, run `python3 http.server` in the root of the project, and visit `http://localhost:8000/examples`.
+To check everything is installed correctly, run `python http.server` (python 3 only) in the root of the project, and visit `http://localhost:8000/examples`.
 Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running a local StoryPlayer with local stories/media
