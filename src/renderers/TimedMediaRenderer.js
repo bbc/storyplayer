@@ -22,8 +22,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
 
     _outTimeEventListener: Function;
 
-    _fixedInTime: Boolean; // flag to say we've set the in-time, so we don't spam setCurrentTime
-
     _seekEventHandler: Function;
 
     _testEndStallTimeout: TimeoutID;
@@ -51,7 +49,6 @@ export default class TimedMediaRenderer extends BaseRenderer {
         this._seekEventHandler = this._seekEventHandler.bind(this);
 
         this._shouldShowScrubBar = true;
-        this._fixedInTime = false;
     }
 
     async _queueMedia(mediaObjOverride, assetKey, subtitleKey = "sub_src") {
