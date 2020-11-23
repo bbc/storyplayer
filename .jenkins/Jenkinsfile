@@ -1,0 +1,3 @@
+@Library("rd-ux-storyplayer-ci-library@v1.x") _
+
+storyplayerPipeline()
