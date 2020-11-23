@@ -6,7 +6,7 @@ import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngi
 import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';
 
-import { allHlsEvents, allShakaEvents} from './playoutEngineConsts'
+import { allHlsEvents, allShakaEvents, getMediaType, MediaTypes} from './playoutEngineConsts'
 import { SHAKA_EVENTS } from '../Events';
 import {
     getSetting,
@@ -15,23 +15,7 @@ import {
     OVERRIDE_INACTIVE_BUFFERING,
 } from '../utils';
 
-const MediaTypesArray = [
-    'HLS',
-    'DASH',
-    'OTHER',
-];
 
-const MediaTypes = {};
-MediaTypesArray.forEach((name) => { MediaTypes[name] = name; });
-
-const getMediaType = (src: string) => {
-    if (src.indexOf('.m3u8') !== -1) {
-        return MediaTypes.HLS;
-    } if (src.indexOf('.mpd') !== -1) {
-        return MediaTypes.DASH;
-    }
-    return MediaTypes.OTHER;
-};
 
 const DEBUG_BUFFER_CHECK_TIME = 1000
 const HLS_BUFFER_CHECK_TIME = 2000
