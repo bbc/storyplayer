@@ -7,4 +7,4 @@ RUN useradd -u 997 -md $HOME jenkins
 USER jenkins
 
 RUN mkdir $HOME/.ssh
-ADD .known_hosts $HOME/.ssh/known_hosts
+ADD .jenkins/.known_hosts $HOME/.ssh/known_hosts
