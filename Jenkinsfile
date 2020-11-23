@@ -58,7 +58,7 @@ pipeline {
     }
 
     stage('Discover package versions') {
-      when { branch 'master' }
+      when { branch 'main' }
       steps {
         script {
           env.package_name = sh(returnStdout: true, script: '''node -p "require('./package.json').name"''')
@@ -95,7 +95,7 @@ pipeline {
     stage('Publish to Artifactory Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'main';
           not { equals expected: env.git_version, actual: env.artifactory_version }
         }
       }
@@ -122,7 +122,7 @@ pipeline {
 ${commit_messages}
 "
               git pull --rebase
-              git push origin master --tags
+              git push origin main --tags
             '''
           }
 
@@ -136,7 +136,7 @@ ${commit_messages}
 ${commit_messages}
 "
               git pull --rebase
-              git push origin master --tags
+              git push origin main --tags
             '''
           }
         }
@@ -146,7 +146,7 @@ ${commit_messages}
     stage('Publish to NPMjs Private') {
       when {
         allOf {
-          branch 'master';
+          branch 'main';
           not { equals expected: env.git_version, actual: env.npm_version }
         }
       }

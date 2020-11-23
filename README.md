@@ -71,13 +71,14 @@ Two URL parameters can be used to set the state of one variable for playback.  T
 Below are the URL parameters that can be used to toggle features in StoryPlayer.  These are primarily related to debugging.
 - overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
 - debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines, and renders scrub bar.
-- inactiveBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer inactive media.
-- activeBufferingOverride - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
-- shakaDebugLevel - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
+- overrideInactiveBuffering - Takes number in seconds. Changes the number of seconds to buffer inactive media.
+- overrideActiveBuffering - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
+- debugShaka - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
 - disableLookahead - 'true' Stops preloading of next/previous elements
 - addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
-- overridePlayoutFormat - Takes either 'hls' or 'dash' Other values are ignored.
+- overrideFormat- Takes either 'hls' or 'dash' Other values are ignored.
 - cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
+- debugUA - Takes 'true' - Creates a div element with the User agent and browser support for formats, and playout engines used.
 
 How to develop
 --------------
@@ -168,7 +169,7 @@ StoryPlayer uses local storage to record how far a user has got through an exper
 
 The `Controller` creates a `SessionManager` to handle this, which lasts for the duration of the page. When the page is reloaded the `SessionManager` is created again; the controller will check the existing state of the session and give the user options to resume current session or restart and create a new session.
 
-The session state is one of the following enums 
+The session state is one of the following enums
 - ```'NEW'```: There is a new session created.
 - ```'EXISTING'```: There is an existing session that can be resumed.
 - ```'RESUME'```: A Session has been resumed
@@ -289,7 +290,7 @@ These are events that reflect changes in the renderer.  None of these return any
 | `SOCIAL_SHARE_CLICKED` | The user has clicked a social media share icon | "not_set" | Platform id, e.g., "twitter", "facebook" | - | `socialmodal/v1.0` behaviour |
 | `OUTWARD_LINK_CLICKED` | The user has clicked an outward link | "not_set" | URL of link |  | `linkout/v1.0` behaviour |
 
-### `SEGMENT_COMPLETION` 
+### `SEGMENT_COMPLETION`
 
 Segment completion events are events that are fired each time a Narrative Element completes.  They return summary data about user activity during the NE.  This is compiled client-side, so should contain all events.
 

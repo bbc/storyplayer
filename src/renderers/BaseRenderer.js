@@ -2,8 +2,10 @@
 /* eslint-disable class-methods-use-this */
 import EventEmitter from 'events';
 import BehaviourRunner from '../behaviours/BehaviourRunner';
-import RendererEvents from './RendererEvents';
 import BehaviourTimings from '../behaviours/BehaviourTimings';
+import PauseBehaviour from '../behaviours/PauseBehaviour';
+import VariableManipulateBehaviour from '../behaviours/VariableManipulateBehaviour';
+import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player, { PlayerEvents } from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
@@ -20,7 +22,6 @@ import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import TimeManager from '../TimeManager';
-import PauseBehaviour from '../behaviours/PauseBehaviour';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -234,8 +235,15 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
         };
 
+        this._behaviourClassMap = {
+            // behaviours which are handled outside the renderer
+            'urn:x-object-based-media:representation-behaviour:pause/v1.0': PauseBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:manipulatevariable/v1.0': VariableManipulateBehaviour,
+        }
+
         this._behaviourElements = [];
-        this._timer = new TimeManager();
+        this._timer = new TimeManager(this._rendererId);
 
         this._setInTime = this._setInTime.bind(this);
         this._setOutTime = this._setOutTime.bind(this);
@@ -252,6 +260,9 @@ export default class BaseRenderer extends EventEmitter {
         this._loopCounter = 0;
         this._setPhase(RENDERER_PHASES.CONSTRUCTING);
         this._inPauseBehaviourState = false;
+
+        this._pauseHandlerForTimer = this._pauseHandlerForTimer.bind(this)
+        this._playHandlerForTimer = this._playHandlerForTimer.bind(this)
     }
 
     // run any code that may be asynchronous
@@ -269,6 +280,7 @@ export default class BaseRenderer extends EventEmitter {
         this._setPhase(RENDERER_PHASES.START);
         this.inVariablePanel = false;
 
+        this.emit(RendererEvents.CONSTRUCTED);
         this._runStartBehaviours();
 
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
@@ -284,15 +296,19 @@ export default class BaseRenderer extends EventEmitter {
         this._behaviourRunner = this._representation.behaviours ?
             new BehaviourRunner(this._representation.behaviours, this) :
             null;
-        this._player.enterStartBehaviourPhase(this);
-        this._playoutEngine.setPlayoutVisible(this._rendererId);
         if (!this._behaviourRunner ||
             !this._behaviourRunner.runBehaviours(
                 BehaviourTimings.started,
                 RendererEvents.COMPLETE_START_BEHAVIOURS,
             )
         ) {
+            this._player.enterStartBehaviourPhase(this);
+            // move on now
             this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
+        } else {
+            this._player.enterStartBehaviourPhase(this);
+            // make sure we can see media under any start behaviours
+            this._playoutEngine.setPlayoutVisible(this._rendererId);
         }
     }
 
@@ -570,26 +586,38 @@ export default class BaseRenderer extends EventEmitter {
         }
     }
 
+    _pauseHandlerForTimer() {
+        this._timer.pause()
+    }
+
+    _playHandlerForTimer() {
+        this._timer.resume()
+    }
+
+    // Both _addPauseHandlersForTimer AND _handlePlayPauseButtonClicked are
+    // handling timer changes because _handlePlayPauseButtonClicked is
+    // required in non SMP version to catch play/pause on images
     _addPauseHandlersForTimer() {
         if (this._timer) {
-            this._playoutEngine.on(this._rendererId, 'pause', () => { this._timer.pause() });
-            this._playoutEngine.on(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.on(this._rendererId, 'pause', this._pauseHandlerForTimer);
+            this._playoutEngine.on(this._rendererId, 'play', this._playHandlerForTimer);
         }
     }
 
     _removePauseHandlersForTimer() {
         if (this._timer) {
-            this._playoutEngine.off(this._rendererId, 'pause', () => { this._timer.pause() });
-            this._playoutEngine.off(this._rendererId, 'play', () => { this._timer.resume() });
+            this._playoutEngine.off(this._rendererId, 'pause', this._pauseHandlerForTimer);
+            this._playoutEngine.off(this._rendererId, 'play', this._playHandlerForTimer);
         }
     }
 
-    _handlePlayPauseButtonClicked(): void {
-        if (this._timer._paused) {
+    _handlePlayPauseButtonClicked(eventData): void {
+        if ((eventData && eventData.playButtonClicked)){
             this._timer.resume();
-        } else {
+        } else if((eventData && eventData.pauseButtonClicked)){
             this._timer.pause();
         }
+
         if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
             if (this._playoutEngine.isPlaying()) {
                 this.logRendererAction(AnalyticEvents.names.VIDEO_UNPAUSE);
@@ -763,7 +791,17 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getBehaviourRenderer(behaviourUrn: string): (behaviour: Object, callback: () => mixed) => void {
-        return this._behaviourRendererMap[behaviourUrn];
+        const behaviourHandler = this._behaviourRendererMap[behaviourUrn];
+        if (behaviourHandler) return behaviourHandler;
+        const BehaviourHandlerClass = this._behaviourClassMap[behaviourUrn];
+        if (BehaviourHandlerClass) {
+            return (behaviour, callback) => {
+                const runner = new BehaviourHandlerClass(behaviour, callback);
+                runner.start(this);
+            }
+        }
+        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
+        return null;
     }
 
     hasShowIconBehaviour(): boolean {
@@ -951,7 +989,7 @@ export default class BaseRenderer extends EventEmitter {
             if (choiceIconNEObjects !== null) {
                 if (this._choicesHaveChanged(narrativeElementObjects)) {
                     logger.info('Variable state has changed valid links - need to refresh icons');
-                    this._player.clearLinkChoices();
+                    this._clearChoices();
                     behaviourOverlay.clearAll();
                 } else {
                     logger.info('Variable state has changed, but same link options valid');
@@ -984,7 +1022,7 @@ export default class BaseRenderer extends EventEmitter {
             return this._getIconSourceUrls(narrativeElementObjects, behaviour)
                 .then((iconObjects) => {
 
-                    this._player.clearLinkChoices();
+                    this._clearChoices();
                     iconObjects.forEach((iconSpecObject) => {
                         this._buildLinkIcon(iconSpecObject, behaviourOverlay.getOverlay());
                     });
@@ -1248,6 +1286,8 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
+        // if they are paused, then clicking a choice should restart
+        if (!this._playoutEngine.isPlaying()) this.play();
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
@@ -1312,7 +1352,7 @@ export default class BaseRenderer extends EventEmitter {
         if(behaviourElement) {
             this._linkFadeTimeout = setTimeout(() => {
                 behaviourElement.classList.remove('romper-icon-fade');
-                this._player.clearLinkChoices();
+                this._clearChoices();
                 if (narrativeElementId) {
                     this._controller.followLink(narrativeElementId);
                 } else {
@@ -1321,6 +1361,12 @@ export default class BaseRenderer extends EventEmitter {
             }, 1500);
             behaviourElement.classList.add('romper-icon-fade');
         }
+    }
+
+    _clearChoices() {
+        this._player.clearLinkChoices();
+        if (this._linkFadeTimeout) clearTimeout(this._linkFadeTimeout);
+        this._linkFadeTimeout = null;
     }
 
     // //////////// end of show link choice behaviour

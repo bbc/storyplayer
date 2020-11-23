@@ -722,6 +722,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                         clearInterval(timeoutId);
                     })
                     .catch((error) => {
+                        // eslint-disable-next-line max-len
                         logger.warn(error, ' DOMSwitchPlayoutEngine set Timer Not got permission to play');
                         // Auto-play was prevented
                         clearInterval(timeoutId);
