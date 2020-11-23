@@ -3,6 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "A Simple Branching Story",
             "description": "A story with one start and a variable-determined choice of either a one node or a two node finish",
             "beginnings": [
@@ -41,6 +42,7 @@
             "name": "Narrative Element 1",
             "description": "The first part of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -62,6 +64,7 @@
                             true
                         ]
                     },
+                    "id": "2ba7ebc7-f443-433a-8230-38d16d175f16",
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
                 },
@@ -72,6 +75,7 @@
                             false
                         ]
                     },
+                    "id": "0fea43a8-b1bf-401f-9a03-257c86a22c21",
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "CBA256D0-2370-4A69-9352-EAFD9E988F4A"
                 }
@@ -82,6 +86,7 @@
             "name": "Narrative Element 2",
             "description": "The middle of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -97,6 +102,7 @@
             },
             "links": [
                 {
+                    "id": "14d870a2-1272-4ab5-a07b-da189bae9414",
                     "condition": {"==": [1,1]},
                     "link_type": "NARRATIVE_ELEMENT",
                     "target_narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
@@ -108,6 +114,7 @@
             "name": "Narrative Element 2a",
             "description": "The shorter middle and end of the story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -123,9 +130,9 @@
             },
             "links": [
                 {
+                    "id": "bedce7e0-cbe3-4820-840c-300bdc2cb964",
                     "condition": {"==": [1,1]},
-                    "link_type": "END_STORY",
-                    "target_narrative_element_id": ""
+                    "link_type": "END_STORY"
                 }
             ]
         },
@@ -134,6 +141,7 @@
             "name": "Narrative Element 3",
             "description": "The End of the Story",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -149,9 +157,9 @@
             },
             "links": [
                 {
+                    "id": "0ebd3e6e-55ff-43cd-ad31-6bb24a0eedb4",
                     "condition": {"==": [1,1]},
-                    "link_type": "END_STORY",
-                    "target_narrative_element_id": ""
+                    "link_type": "END_STORY"
                 }
             ]
         }
@@ -163,6 +171,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -177,6 +186,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -191,6 +201,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -205,6 +216,7 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -219,6 +231,7 @@
             "id": "3ab4c455-5165-4ffc-9152-05755282dad0",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Step 1 video",
             "meta": {},
             "tags": {},
@@ -228,55 +241,43 @@
                 "background_ids": [],
                 "behaviours": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 2",
             "meta": {},
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
             "asset_collections": {
                 "foreground_id": "32184381-85ce-4d71-8a42-895cf5d485c9",
-                "background_ids": [],
-                "icon": {
-                    "default_id": "97106527-4204-42B2-91F7-FD0EED9D2032"
-                }
+                "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "C92E36D7-5BB6-4442-9CC1-DDEA56A230CD",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 2 alt",
             "meta": {},
             "tags": {},
             "representation_type": "urn:x-object-based-media:representation-types:simple-av/v1.0",
             "asset_collections": {
                 "foreground_id": "4DBF46DE-F2F3-492C-9620-9D8D42377675",
-                "background_ids": [],
-                "icon": {
-                    "default_id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725"
-                }
+                "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         },
         {
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "Video 3",
             "meta": {},
             "tags": {},
@@ -285,45 +286,19 @@
                 "foreground_id": "974568d1-7dce-48f1-8c18-396553a9afbd",
                 "background_ids": []
             },
-            "behaviours": {
-                "started": [],
-                "completed": []
-            }
+            "behaviours": {}
         }
     ],
     "asset_collections": [
         {
-            "id": "97106527-4204-42B2-91F7-FD0EED9D2032",
-            "object_class": "ASSET_COLLECTION",
-            "description": "In-depth icon",
-            "version": "",
-            "name": "",
-            "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
-            "assets": {
-                "image_src": "timer-long.svg"
-            }
-        },
-        {
-            "id": "24979FEA-A3AF-4973-827E-A2A1A9BA2725",
-            "object_class": "ASSET_COLLECTION",
-            "description": "Brief icon",
-            "version": "",
-            "name": "",
-            "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
-            "assets": {
-                "image_src": "timer-short.svg"
-            }
-        },
-        {
             "id": "b165c26a-48b2-455d-85b8-4920c070d51b",
             "object_class": "ASSET_COLLECTION",
             "description": "Start image",
-            "version": "",
+            "version": "0:0",
+            "schema_version": "0.3.8",
             "name": "",
             "tags": {},
-            "type": "urn:x-object-based-media:asset-collection-asset_collection_types:image/v1.0",
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
             "assets": {
                 "image_src": "https://rdux.files.bbci.co.uk/romper/startimage.jpg"
             }
@@ -334,6 +309,7 @@
             "name": "Demo video 1",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -346,6 +322,7 @@
             "name": "Video 2",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -358,6 +335,7 @@
             "name": "Video 2 alt",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -370,6 +348,7 @@
             "name": "Step 3 video",
             "description": "",
             "version": "0:0",
+            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
