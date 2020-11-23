@@ -64,7 +64,7 @@ class SMPControls extends BaseControls {
         this._controlsEnabled = true
 
         this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons-smp');
+        this._containerDiv.classList.add('romper-buttons-smp', 'notInteractiveContent');
         this._containerDiv.classList.add('show');
 
         if(SHOW_CHAPTER_BUTTON) {

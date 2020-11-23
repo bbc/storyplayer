@@ -69,6 +69,7 @@ export default class TimedMediaRenderer extends BaseRenderer {
                     loop: fg.loop,
                     id: fg.id,
                     inTime: this._inTime,
+                    outTime: this._outTime,
                     ...mediaObjOverride
                 }
                 let mediaType;
