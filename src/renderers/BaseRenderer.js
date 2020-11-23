@@ -280,6 +280,7 @@ export default class BaseRenderer extends EventEmitter {
         this._setPhase(RENDERER_PHASES.START);
         this.inVariablePanel = false;
 
+        this.emit(RendererEvents.CONSTRUCTED);
         this._runStartBehaviours();
 
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);

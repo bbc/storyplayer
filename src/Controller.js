@@ -60,6 +60,7 @@ export default class Controller extends EventEmitter {
         this._handleStoryEnd = this._handleStoryEnd.bind(this);
         this._emitFullScreenEvent = this._emitFullScreenEvent.bind(this);
         this._handleError = this._handleError.bind(this);
+        this._handleFirstRendererEvent = this._handleFirstRendererEvent.bind(this);
 
         this._analyticsHandler = new AnalyticsHandler(analytics, this);
         this._handleAnalytics = this._handleAnalytics.bind(this);
@@ -114,9 +115,10 @@ export default class Controller extends EventEmitter {
 
     /**
      * Reset the story and keep the reasoner for it.
+     * @param  {boolean} newState state for session manager to enter
      * @param  {string} storyId story to reset
      */
-    resetStory(storyId?: ?string = null){
+    resetStory(newState: string, storyId?: ?string = null){
         let restartStoryId;
         if (storyId) {
             restartStoryId = storyId;
@@ -127,7 +129,7 @@ export default class Controller extends EventEmitter {
             return;
         }
         // set this to restart just in case
-        this.setSessionState(SESSION_STATE.RESTART);
+        this.setSessionState(newState);
         // we're just resetting
         this._prepareRenderManagerForRestart();
         this.start(restartStoryId);
@@ -456,6 +458,9 @@ export default class Controller extends EventEmitter {
         this._goBackOneStepInStory();
     }
 
+    _handleFirstRendererEvent() {
+        this.emit(RendererEvents.FIRST_RENDERER_CREATED);
+    }
 
     /**
      * Emits the event when we toggle fullscreen or not
@@ -477,6 +482,7 @@ export default class Controller extends EventEmitter {
         this._renderManager.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
 
         this._renderManager.on(DOM_EVENTS.TOGGLE_FULLSCREEN, this._emitFullScreenEvent);
+        this._renderManager.once(RendererEvents.FIRST_RENDERER_CREATED, this._handleFirstRendererEvent);
     }
 
     /**
@@ -487,6 +493,7 @@ export default class Controller extends EventEmitter {
         this._renderManager.off(RendererEvents.NEXT_BUTTON_CLICKED, this._handleRendererNextButtonEvent);
         this._renderManager.off(RendererEvents.PREVIOUS_BUTTON_CLICKED, this._handleRendererPreviousButtonEvent);
         this._renderManager.off(DOM_EVENTS.TOGGLE_FULLSCREEN, this._emitFullScreenEvent);
+        this._renderManager.off(RendererEvents.FIRST_RENDERER_CREATED, this._handleFirstRendererEvent);
     }
 
 
@@ -1282,7 +1289,7 @@ export default class Controller extends EventEmitter {
         this._handleAnalytics(logData);
         if(this._storyId) {
             logger.warn(`Story id ${this._storyId} ended, resetting`);
-            this.resetStory(this._storyId);
+            this.resetStory(SESSION_STATE.NEW, this._storyId);
         }
         this.emit(REASONER_EVENTS.STORY_END);
     }

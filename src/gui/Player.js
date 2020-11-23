@@ -12,6 +12,7 @@ import logger from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
 import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
+import RendererEvents from '../renderers/RendererEvents';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
@@ -570,9 +571,11 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
             this._controller.deleteExistingSession();
-            this._controller.resetStory();
+            this._controller.resetStory(SESSION_STATE.RESTART);
             this._hideModalLayer();
-            this._startButtonHandler();
+            this._controller.once(RendererEvents.FIRST_RENDERER_CREATED, () => {
+                this._startButtonHandler();
+            });
         };
 
         restartButton.onclick = restartButtonHandler;
@@ -588,7 +591,9 @@ class Player extends EventEmitter {
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart();
             this._hideModalLayer();
-            this._enableUserInteraction();
+            this._controller.once(RendererEvents.FIRST_RENDERER_CREATED, () => {
+                this._enableUserInteraction();
+            });
         };
 
         resumeButton.onclick = resumeExperienceButtonHandler;
@@ -889,15 +894,17 @@ class Player extends EventEmitter {
         if (this._userInteractionStarted) {
             return;
         }
-
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
-        this._controls.setControlsActive();
+
         // can start now if we're not waiting in START behaviours
         // that means in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
             && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
+
+        if (startNow) this._controls.setControlsActive();
+
         this.playoutEngine.setPermissionToPlay(
             true,
             startNow,
@@ -1463,7 +1470,7 @@ class Player extends EventEmitter {
     exitStartBehaviourPhase() {
         this._unpauseAfterBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
-        this.enableControls();
+        if (this._userInteractionStarted) this.enableControls();
         this.showSeekButtons();
         this.enablePlayButton();
         this.enableScrubBar();
@@ -1525,6 +1532,7 @@ class Player extends EventEmitter {
     }
 
     enableControls() {
+        this._controls.setControlsActive();
         this._controls.enableControls();
     }
 
