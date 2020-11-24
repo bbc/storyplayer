@@ -51,6 +51,8 @@ class SMPControls extends BaseControls {
 
     _volumeControls: HTMLDivElement;
 
+    _masterValueLabel: HTMLSpanElement;
+
     _uiUpdateQueue: Array<Object>;
 
     _uiUpdateQueueTimer: Number;
@@ -313,23 +315,30 @@ class SMPControls extends BaseControls {
 
         const masterSlider = document.createElement('input');
         masterSlider.classList.add("audio-slider")
-        // masterSlider.classList.add("romper-volume-range")
 
         masterSlider.type = 'range';
         masterSlider.min = 0;
         masterSlider.max = 1;
-        masterSlider.value = 1;
+        masterSlider.value = this._smpPlayerInterface.volume || 0.7;
         masterSlider.step = 0.1;
 
         const changeVol = (e) => {
             const sliderValue = parseFloat(e.target.value);
             this._smpPlayerInterface.volume = sliderValue;
+            this._masterValueLabel.textContent = `${10 * sliderValue}`;
         };
         masterSlider.addEventListener("change", changeVol);
 
         masterSlider.addEventListener("input", changeVol);
         
         masterContainer.appendChild(masterSlider);
+
+        const volLabel = document.createElement('div');
+        this._masterValueLabel = document.createElement('span');
+        this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 10}` || '7';
+        volLabel.classList.add('volume-label');
+        volLabel.appendChild(this._masterValueLabel);
+        masterContainer.appendChild(volLabel);
 
         smpVolumeBox.appendChild(mixContainer);
         smpVolumeBox.appendChild(masterContainer);
@@ -406,11 +415,13 @@ class SMPControls extends BaseControls {
             if (this._muted) {
                 this._volumeControls.classList.remove('muted');
                 this._smpPlayerInterface.muted = false;
+                this._masterValueLabel.textContent = `${10 * this._smpPlayerInterface.volume}`;
                 this._volumeButton.innerHTML = volumeIcon;
             } else {
                 this._volumeButton.innerHTML = muteIcon;
                 this._volumeControls.classList.add('muted');
                 this._smpPlayerInterface.muted = true;
+                this._masterValueLabel.textContent = '0';
             }
         }
 
