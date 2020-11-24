@@ -11,6 +11,26 @@ import AnalyticEvents from '../AnalyticEvents';
 
 const SHOW_CHAPTER_BUTTON = false
 
+const muteIcon = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="6 6 36 36">
+        <g fill="none" fill-rule="evenodd">
+            <g fill="#fff" fill-rule="nonzero">
+                <path d="M10.042 2.5v15l-3.766-3.75H0v-7.5h6.276l3.766-3.75zm9.025 3.751L20 7.18 17.166 10 20 12.822l-.933.93-2.833-2.822-2.833 2.821-.933-.929 2.833-2.821-2.833-2.821.933-.929 2.833 2.821 2.833-2.82z" transform="translate(-2446 -1053) translate(2446 1053) translate(14 14)"/>
+            </g>
+        </g>
+    </svg>
+    </div>`;
+
+const volumeIcon = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-8 -8 36 36">
+        <g fill="none" fill-rule="evenodd">
+            <g fill="#fff" fill-rule="nonzero">
+                <path d="M16.091.625C18.507 3.034 20 6.343 20 10s-1.493 6.967-3.909 9.375l-.877-.865c2.195-2.19 3.555-5.195 3.555-8.51 0-3.315-1.36-6.32-3.554-8.51zm-6.245 2.1v14.55l-3.385-3.637H0V6.362h6.461l3.385-3.637zm3.633.474c1.748 1.75 2.829 4.15 2.829 6.801s-1.08 5.05-2.83 6.8l-.874-.86c1.527-1.533 2.473-3.629 2.473-5.94 0-2.312-.946-4.408-2.473-5.94z" transform="translate(-869 -2481) translate(855 2467) translate(14 14)"/>
+            </g>
+        </g>
+    </svg>
+    </div>`
+
 class SMPControls extends BaseControls {
 
     _logUserInteraction: Function;
@@ -302,9 +322,8 @@ class SMPControls extends BaseControls {
         masterSlider.step = 0.1;
 
         const changeVol = (e) => {
-            const sliderValue = parseFloat(e.target.value)
-            const currentRenderer = this._playoutEngine._player._currentRenderer; // TODO: ouch!
-            this._playoutEngine.setVolume(currentRenderer._rendererId, sliderValue); // change
+            const sliderValue = parseFloat(e.target.value);
+            this._smpPlayerInterface.volume = sliderValue;
         };
         masterSlider.addEventListener("change", changeVol);
 
@@ -319,7 +338,7 @@ class SMPControls extends BaseControls {
         const triangle = document.createElement('div');
         triangle.classList.add('triangle');
         smpVolumeBox.appendChild(triangle);
-        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout() };
+        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout(5000) };
         smpVolumeBox.onmouseover = () => { this._clearVolumeTimeout() };
 
         this._volumeControls = smpVolumeBox;
@@ -327,11 +346,11 @@ class SMPControls extends BaseControls {
 
     }
 
-    _startVolumeTimeout() {
+    _startVolumeTimeout(time) {
         this._volHideTimeout = setTimeout(() => {
             this._volumeControls.classList.add('romper-inactive');
             this._volumeButton.classList.remove("p_buttonHover")
-        }, 5000);
+        }, time);
     }
 
     _clearVolumeTimeout() {
@@ -379,19 +398,23 @@ class SMPControls extends BaseControls {
         }
         volumeButton.onmouseleave = (e) => {
             if (e.toElement && e.toElement !== this._volumeControls) {
-                this._volumeControls.classList.add('romper-inactive');
-                volumeButton.classList.remove("p_buttonHover")
+                this._startVolumeTimeout(500);
             }
         }
-        volumeButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-8 -8 36 36">
-            <g fill="none" fill-rule="evenodd">
-                <g fill="#fff" fill-rule="nonzero">
-                    <path d="M16.091.625C18.507 3.034 20 6.343 20 10s-1.493 6.967-3.909 9.375l-.877-.865c2.195-2.19 3.555-5.195 3.555-8.51 0-3.315-1.36-6.32-3.554-8.51zm-6.245 2.1v14.55l-3.385-3.637H0V6.362h6.461l3.385-3.637zm3.633.474c1.748 1.75 2.829 4.15 2.829 6.801s-1.08 5.05-2.83 6.8l-.874-.86c1.527-1.533 2.473-3.629 2.473-5.94 0-2.312-.946-4.408-2.473-5.94z" transform="translate(-869 -2481) translate(855 2467) translate(14 14)"/>
-                </g>
-            </g>
-        </svg>
-        </div>`;
+        volumeButton.onclick = () => {
+            this._muted = this._smpPlayerInterface.muted;
+            if (this._muted) {
+                this._volumeControls.classList.remove('muted');
+                this._smpPlayerInterface.muted = false;
+                this._volumeButton.innerHTML = volumeIcon;
+            } else {
+                this._volumeButton.innerHTML = muteIcon;
+                this._volumeControls.classList.add('muted');
+                this._smpPlayerInterface.muted = true;
+            }
+        }
+
+        volumeButton.innerHTML = volumeIcon;
         controlBar.appendChild(volumeButton)
 
         this._volumeButton = volumeButton;

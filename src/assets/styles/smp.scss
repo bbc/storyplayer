@@ -142,6 +142,20 @@
       line-height: 1.29;
       margin: 0 74px 0 0;
     }
+
+    &.muted {
+      .audio-slider {
+        pointer-events: none;
+
+        &::-webkit-slider-thumb {
+          opacity: 0.3;
+        }
+
+        &::-moz-range-thumb {
+          opacity: 0;
+        }
+      }
+    }
   }
 }
 
