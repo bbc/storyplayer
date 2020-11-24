@@ -244,7 +244,9 @@ class SMPControls extends BaseControls {
         smpVolumeBox.classList.add('romper-inactive');
 
         const mixContainer = document.createElement('div');
+        mixContainer.classList.add('audio-volume-box');
         const masterContainer = document.createElement('div');
+        masterContainer.classList.add('audio-volume-box');
 
         const fbMixSliderLabel = document.createElement('div');
         fbMixSliderLabel.classList.add("audio-slider-label")
@@ -310,6 +312,11 @@ class SMPControls extends BaseControls {
 
         smpVolumeBox.appendChild(mixContainer);
         smpVolumeBox.appendChild(masterContainer);
+
+
+        const triangle = document.createElement('div');
+        triangle.classList.add('triangle');
+        smpVolumeBox.appendChild(triangle);
         smpVolumeBox.onmouseleave = () => { smpVolumeBox.classList.add('romper-inactive') };
 
         this._volumeControls = smpVolumeBox;

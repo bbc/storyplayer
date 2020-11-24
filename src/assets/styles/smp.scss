@@ -61,9 +61,20 @@
     padding: 8px 8px 0;
     position: absolute;
     width: 216px;
-    z-index: 160;
+    z-index: 172;
 
-    >div {
+    >.triangle {
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid $black;
+      height: 0;
+      margin-left: 8px;
+      margin-top: 23px;
+      pointer-events: none;
+      width: 0;
+    }
+
+    >.audio-volume-box {
       height: 36px;
       padding: 7px 9px 15px 14px;
       width: 177px;
@@ -176,6 +187,10 @@
       height: 135px;
       margin: 0 14px 44px 0;
       padding: 5px 8px 0;
+
+      .triangle {
+        margin-top: 11px;
+      }
     }
   }
 }
