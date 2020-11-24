@@ -39,6 +39,8 @@ class SMPControls extends BaseControls {
 
     _playoutEngine: BasePlayoutEngine;
 
+    _volHideTimeout: ?TimeoutID;
+
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
@@ -317,11 +319,23 @@ class SMPControls extends BaseControls {
         const triangle = document.createElement('div');
         triangle.classList.add('triangle');
         smpVolumeBox.appendChild(triangle);
-        smpVolumeBox.onmouseleave = () => { smpVolumeBox.classList.add('romper-inactive') };
+        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout() };
+        smpVolumeBox.onmouseover = () => { this._clearVolumeTimeout() };
 
         this._volumeControls = smpVolumeBox;
         controlBar.appendChild(smpVolumeBox);
 
+    }
+
+    _startVolumeTimeout() {
+        this._volHideTimeout = setTimeout(() => {
+            this._volumeControls.classList.add('romper-inactive');
+            this._volumeButton.classList.remove("p_buttonHover")
+        }, 5000);
+    }
+
+    _clearVolumeTimeout() {
+        if (this._volHideTimeout) clearTimeout(this._volHideTimeout);
     }
 
     _createChapterButton() {
@@ -359,14 +373,15 @@ class SMPControls extends BaseControls {
         volumeButton.setAttribute("aria-live", "polite")
         volumeButton.setAttribute("aria-label", "Toggle Volume Controls")
         volumeButton.onmouseover = () => {
-            volumeButton.classList.add("p_buttonHover")
+            volumeButton.classList.add("p_buttonHover");
             this._volumeControls.classList.remove('romper-inactive');
+            this._clearVolumeTimeout();
         }
         volumeButton.onmouseleave = (e) => {
             if (e.toElement && e.toElement !== this._volumeControls) {
                 this._volumeControls.classList.add('romper-inactive');
+                volumeButton.classList.remove("p_buttonHover")
             }
-            volumeButton.classList.remove("p_buttonHover")
         }
         volumeButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-8 -8 36 36">

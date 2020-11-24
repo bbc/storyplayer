@@ -28,7 +28,8 @@
   }
 
   .smp-volume {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
@@ -38,7 +39,8 @@
     top: 0;
 
     &.romper-inactive {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
     }
   }
 
@@ -58,8 +60,11 @@
     height: 147px;
     left: 8px;
     margin: 0 14px 60px 0;
+    opacity: 1;
     padding: 8px 8px 0;
+    pointer-events: all;
     position: absolute;
+    transition: opacity 0.4s ease-out;
     width: 216px;
     z-index: 172;
 
@@ -89,7 +94,8 @@
     }
 
     &.romper-inactive {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .audio-slider {
