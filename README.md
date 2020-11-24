@@ -1,12 +1,22 @@
 StoryPlayer
-======
+===========
 
 StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using the [Data Model](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
 
-You may be wondering why the term "_romper_" appears so frequently.  This is historical and is because the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
+How to contribute
+=================
 
-How to use
-----------
+Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) if you are interested in making contributions.
+
+Licence
+=======
+
+StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](LICENCE) in the repo for further details.
+
+How to use StoryPlayer
+======================
+
+It all starts with [romper.js](src/romper.js). You'll notice the term "_romper_" appears frequently in the code.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
@@ -87,16 +97,20 @@ How to develop
   TDD is preferred here. We have an ESLint file which follows our house file, and we prefer to have Facebook Flow
   annotations in place for type checking.
 
-* Pre-requisites.  In order to get a local version of StoryPlayer running, you will need:
-    1.  To download the repo
-    2.  Ensure yarn is installed
-    3.  Have a Forge certificate
-    4.  Set up [Artifactory to run locally](https://confluence.dev.bbc.co.uk/display/PRODTOOLS/Set+up+Artifactory+outside+Sandbox)
-* Run `yarn` to get all your dev dependencies included
-* `demo.html` puts a simple player onto a page
+* Pre-requisites.  In order to get a local version of StoryPlayer running, you will need to:
+    1.  Download the repo
+    2.  Ensure Yarn is installed
+
+* Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
 * `yarn test` will do a single run of the tests (Mocha with Chai, ESLint and Flow type checking)
-* `yarn dev` will do continuously build and test the library on change
+* `yarn dev` will continuously build and test the library on changes
+
+
+Running the examples
+--------------------
+To check everything is installed correctly, run `python http.server` (python 3 only) in the root of the project, and visit `http://localhost:8000/examples`.
+Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running a local StoryPlayer with local stories/media
 --------------

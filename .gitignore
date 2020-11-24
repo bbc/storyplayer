@@ -7,6 +7,7 @@ yarn-error.log
 package-lock.json
 .DS_Store
 *.env
+.yarnrc
 storyplayer_electron/node_modules
 storyplayer_electron/dist/
 storyplayer_electron/src/dist/

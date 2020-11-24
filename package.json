@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -14,7 +14,6 @@
     "test:eslint": "eslint src/ spec/",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
-    "demo": "concurrently \"yarn dev\" \"rm -f ./tmp/*.json && node demos.js\"",
     "watch": "concurrently \"webpack --watch --watch-poll 500 --progress --profile --bail\" \"jest --watch\" \"nodemon --watch src --watch spec --exec node_modules/.bin/eslint src/ spec/\" \"nodemon --watch src --watch spec --exec 'node_modules/.bin/flow check --all || exit 1'\"",
     "dev": "webpack --watch --watch-poll 500 --progress --profile --bail"
   },
@@ -23,7 +22,7 @@
     "url": "git+https://github.com/bbc/rd-ux-storyplayer.git"
   },
   "author": "BBC R&D",
-  "license": "UNLICENSED",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/bbc/rd-ux-storyplayer/issues"
   },
@@ -38,7 +37,7 @@
     "@babel/plugin-transform-runtime": "^7.7.6",
     "@babel/preset-env": "^7.7.7",
     "@babel/runtime": "^7.7.7",
-    "@bbc/object-based-media-schema": "^0.3.8",
+    "@bbc/object-based-media-schema": "^0.3.8",    
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
