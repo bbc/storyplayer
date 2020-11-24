@@ -757,7 +757,8 @@ $start-button-size: 15vw;
       font-family: inherit;
       font-size: 100%;
       height: calc(100% - #{(2 * $romper-button-border)});
-      margin-bottom: 1%;
+      margin: 0;
+      padding: 0;
       pointer-events: all;
       width: calc(100% - #{(2 * $romper-button-border)});
 
@@ -798,8 +799,11 @@ $start-button-size: 15vw;
 }
 
 .romper-link-icon-container {
+  align-items: center;
   border: $romper-button-border solid $transparent;
+  display: flex;
   height: 8em;
+  justify-content: center;
   margin-bottom: 5px;
   margin-left: auto;
   margin-right: auto;
@@ -807,10 +811,7 @@ $start-button-size: 15vw;
 
   img {
     height: 80%;
-    margin-left: 10%;
-    margin-top: 10%;
     object-fit: contain;
-    object-position: center;
     width: 80%;
   }
 }
@@ -854,8 +855,10 @@ $start-button-size: 15vw;
       border: 1px solid $white;
       border-radius: 50%;
       height: 0.75 * $start-button-size;
+      margin-bottom: auto;
       margin-left: auto;
       margin-right: auto;
+      margin-top: auto;
       max-height: 170px;
       max-width: 170px;
       width: 0.75 * $start-button-size;
@@ -1410,8 +1413,8 @@ $start-button-size: 15vw;
 .romper-ux-countdown {
   background: $highlight;
   height: 2px;
-  margin-left: 49%;
-  width: 2%;
+  margin-left: 0%;
+  width: 100%;
 }
 
 .noselect {

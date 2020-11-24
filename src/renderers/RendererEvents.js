@@ -1,6 +1,8 @@
 // @flow
 
 const RendererEventNames = [
+    'FIRST_RENDERER_CREATED',
+    'CONSTRUCTED',
     'STARTED',
     'RENDERER_READY',
     'COMPLETED',

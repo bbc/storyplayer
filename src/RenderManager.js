@@ -630,6 +630,15 @@ export default class RenderManager extends EventEmitter {
             }
         }
 
+        if (!oldRenderer) {
+            // this will be the first element in a story - notify controller
+            // that it has been constructed
+            this._player.setCurrentRenderer(newRenderer);
+            newRenderer.on(RendererEvents.CONSTRUCTED, () => {
+                this.emit(RendererEvents.FIRST_RENDERER_CREATED);
+            });
+        }
+
         // Update availability of back and next buttons.
         this._showBackIcon();
         this.refreshOnwardIcons();

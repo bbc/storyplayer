@@ -111,7 +111,7 @@ export default class ImageRenderer extends BaseRenderer {
 
     async renderImageElement() {
         this._imageElement = document.createElement('img');
-        this._imageElement.className = 'romper-render-image';
+        this._imageElement.className = 'romper-render-image notInteractiveContent';
         this._setVisibility(false);
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(

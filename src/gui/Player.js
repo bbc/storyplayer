@@ -12,6 +12,7 @@ import logger from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
 import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
+import RendererEvents from '../renderers/RendererEvents';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
@@ -128,13 +129,11 @@ class Player extends EventEmitter {
 
     _visibleChoices: { [key: number]: HTMLElement };
 
-    _choiceCountdownTimeout: ?TimeoutID;
+    _choiceCountdownInterval: ?TimeoutID;
 
     _countdowner: HTMLDivElement;
 
     _countdownContainer: HTMLDivElement;
-
-    _countdownTotal: number;
 
     _aspectRatio: number;
 
@@ -188,7 +187,6 @@ class Player extends EventEmitter {
         this._choiceIconSet = {};
         this._visibleChoices = {}
         this._volumeEventTimeouts = {};
-        this._countdownTotal = Infinity;
         this._userInteractionStarted = false;
         this._aspectRatio = 16 / 9;
 
@@ -478,7 +476,7 @@ class Player extends EventEmitter {
         if (this._dogImage === undefined) {
             this._dogImage = document.createElement('div');
         }
-        
+
         const resizeObserver = new ResizeObserver(() => this._setDogPosition(position));
         resizeObserver.observe(this.guiTarget);
 
@@ -573,9 +571,11 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CANCEL_BUTTON_CLICKED);
             this._controller.setSessionState(SESSION_STATE.RESTART);
             this._controller.deleteExistingSession();
-            this._controller.resetStory();
+            this._controller.resetStory(SESSION_STATE.RESTART);
             this._hideModalLayer();
-            this._startButtonHandler();
+            this._controller.once(RendererEvents.FIRST_RENDERER_CREATED, () => {
+                this._startButtonHandler();
+            });
         };
 
         restartButton.onclick = restartButtonHandler;
@@ -591,7 +591,9 @@ class Player extends EventEmitter {
             this._controller.setSessionState(SESSION_STATE.RESUME);
             this._controller.restart();
             this._hideModalLayer();
-            this._enableUserInteraction();
+            this._controller.once(RendererEvents.FIRST_RENDERER_CREATED, () => {
+                this._enableUserInteraction();
+            });
         };
 
         resumeButton.onclick = resumeExperienceButtonHandler;
@@ -682,7 +684,7 @@ class Player extends EventEmitter {
     /**
      *  Show an error message over all the content and UI
      *  @param {message} Optional message to render.  If null or
-     *    not given, will render a default message (see ErrorControls) 
+     *    not given, will render a default message (see ErrorControls)
      *  @param {showControls} Optional boolean determining if
      *    user is presented with ignore and skip buttons
      */
@@ -892,15 +894,17 @@ class Player extends EventEmitter {
         if (this._userInteractionStarted) {
             return;
         }
-
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
-        this._controls.setControlsActive();
+
         // can start now if we're not waiting in START behaviours
         // that means in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
             && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
+
+        if (startNow) this._controls.setControlsActive();
+
         this.playoutEngine.setPermissionToPlay(
             true,
             startNow,
@@ -1175,7 +1179,6 @@ class Player extends EventEmitter {
         const behaviourOverlay = this._createOverlay('link-choice', this._logUserInteraction);
         const behaviourElement = behaviourOverlay.getOverlay()
         behaviourElement.id = behaviour.id;
-
         this._addCountdownToElement(behaviourElement);
         this._overlaysElement.appendChild(behaviourElement);
         return behaviourOverlay;
@@ -1328,42 +1331,28 @@ class Player extends EventEmitter {
 
     // start animation to reflect choice remaining
     startChoiceCountdown(currentRenderer: BaseRenderer) {
-        if (this._choiceCountdownTimeout) {
-            clearTimeout(this._choiceCountdownTimeout);
-        }
-        if (this._countdownTotal === Infinity) {
-            const { remainingTime } = currentRenderer.getCurrentTime();
-            if (remainingTime && remainingTime > 0.5) { // SMP returns currentTime as -0.01
-                this._countdownTotal = remainingTime;
-            }
-        }
-        this._choiceCountdownTimeout = setTimeout(() => {
-            this._reflectTimeout(currentRenderer);
-        }, 10);
+        // Reset the counter visuals.
+        this._countdowner.style.width = '100%';
+        this._countdowner.style.marginLeft = '0%';
         this._countdownContainer.classList.add('show');
-    }
 
-    _reflectTimeout(currentRenderer: BaseRenderer) {
-        const { remainingTime } = currentRenderer.getCurrentTime();
-        if (this._countdownTotal === Infinity && remainingTime > 0.5) {
-            this._countdownTotal = remainingTime;
-        }
-        const { style } = this._countdowner;
-        const percentRemain = 100 * (remainingTime / this._countdownTotal);
-        if (percentRemain > 0 || this._countdownTotal === Infinity) {
-            style.width = `${percentRemain}%`;
-            style.marginLeft = `${(100 - percentRemain)/2}%`;
-            this._choiceCountdownTimeout = setTimeout(() => {
-                this._reflectTimeout(currentRenderer);
+        // Interval function has closure over totalTime.
+        let totalTime = 0;
+        clearInterval(this._choiceCountdownInterval);
+        this._choiceCountdownInterval = setInterval(() => {
+            const { remainingTime } = currentRenderer.getCurrentTime();
+            totalTime = totalTime <= 0.5 ? remainingTime : totalTime;
 
-            }, 10);
-        } else {
-            clearTimeout(this._choiceCountdownTimeout);
-            this._choiceCountdownTimeout = null;
-            this._countdownTotal = 0;
-            style.width = '0';
-            style.marginLeft = '49%';
-        }
+            const propRemain = remainingTime / totalTime;
+            const percentRemain = Math.max(0,Math.min(100, 100 * propRemain))
+
+            this._countdowner.style.width = `${percentRemain}%`;
+            this._countdowner.style.marginLeft = `${(100 - percentRemain)/2}%`;
+
+            if(percentRemain === 0) {
+                clearInterval(this._choiceCountdownInterval);
+            }
+        }, 10);
     }
 
     addIconControl(
@@ -1481,7 +1470,7 @@ class Player extends EventEmitter {
     exitStartBehaviourPhase() {
         this._unpauseAfterBehaviours();
         this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
-        this.enableControls();
+        if (this._userInteractionStarted) this.enableControls();
         this.showSeekButtons();
         this.enablePlayButton();
         this.enableScrubBar();
@@ -1508,13 +1497,11 @@ class Player extends EventEmitter {
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._visibleChoices = {};
-        if (this._choiceCountdownTimeout) {
-            clearTimeout(this._choiceCountdownTimeout);
-            this._choiceCountdownTimeout = null;
-            this._countdownTotal = Infinity;
-            this._countdownContainer.classList.remove('show');
-        }
+
+        clearInterval(this._choiceCountdownInterval);
+        this._countdownContainer.classList.remove('show');
         this._controls.getControls().classList.remove('icons-showing');
+
         const linkChoices = this.getLinkChoiceElement(true);
         linkChoices.forEach((linkChoice) => {
             linkChoice.style.setProperty('animation', 'none');
@@ -1545,6 +1532,7 @@ class Player extends EventEmitter {
     }
 
     enableControls() {
+        this._controls.setControlsActive();
         this._controls.enableControls();
     }
 
