@@ -1,5 +1,16 @@
 @import './colours';
 
+// hide standard volume controls
+.p_volumeButton {
+  display: none;
+}
+
+.p_volumeControls {
+  .p_sliderControls {
+    display: none;
+  }
+}
+
 .controlsFadedOut {
   .chapter-button {
     display: none;
@@ -149,3 +160,51 @@
   }
 }
 
+// BP 1 - not used
+// @media (max-width: 319px) { }
+
+// BP 2
+// @media (min-width: 320px) and (max-width: 599px) {
+@media (max-width: 599px) {
+  .controlsFadedIn {
+    .volume-button {
+      bottom: 0;
+      left: 8px;
+    }
+
+    .smp-volume {
+      height: 135px;
+      margin: 0 14px 44px 0;
+      padding: 5px 8px 0;
+    }
+  }
+}
+
+// BP 3
+@media (min-width: 600px) and (max-width: 959px) {
+  .controlsFadedIn {
+    .volume-button {
+      bottom: 8px;
+      left: 8px;
+    }
+
+    .smp-volume {
+      margin: 0 14px 52px 0;
+    }
+  }
+}
+
+// BP 4 is default, above
+// @media (min-width: 960px) { }
+
+// BP 5 is default, above
+@media (min-width: 1140ps) {
+  .volume-button {
+    bottom: 40px;
+    left: 82px;
+  }
+
+  .smp-volume {
+    margin: 0 14px 44px 0;
+  }
+}
