@@ -355,7 +355,10 @@ class SMPControls extends BaseControls {
             volumeButton.classList.add("p_buttonHover")
             this._volumeControls.classList.remove('romper-inactive');
         }
-        volumeButton.onmouseout = () => {
+        volumeButton.onmouseleave = (e) => {
+            if (e.toElement && e.toElement !== this._volumeControls) {
+                this._volumeControls.classList.add('romper-inactive');
+            }
             volumeButton.classList.remove("p_buttonHover")
         }
         volumeButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
