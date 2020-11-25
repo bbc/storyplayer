@@ -1,16 +1,5 @@
 @import './colours';
 
-// hide standard volume controls
-.p_volumeButton {
-  display: none;
-}
-
-.p_volumeControls {
-  .p_sliderControls {
-    display: none;
-  }
-}
-
 .controlsFadedOut {
   .chapter-button {
     display: none;
@@ -59,7 +48,7 @@
     bottom: 0;
     height: 147px;
     left: 8px;
-    margin: 0 14px 60px 0;
+    margin: 0 14px 44px 0;
     opacity: 1;
     padding: 8px 8px 0;
     pointer-events: all;
@@ -215,7 +204,6 @@
 
     .smp-volume {
       height: 135px;
-      margin: 0 14px 44px 0;
       padding: 5px 8px 0;
 
       .triangle {
@@ -232,10 +220,6 @@
       bottom: 8px;
       left: 8px;
     }
-
-    .smp-volume {
-      margin: 0 14px 52px 0;
-    }
   }
 }
 
@@ -247,9 +231,5 @@
   .volume-button {
     bottom: 40px;
     left: 82px;
-  }
-
-  .smp-volume {
-    margin: 0 14px 44px 0;
   }
 }

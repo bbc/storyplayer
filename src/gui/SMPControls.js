@@ -3,6 +3,7 @@ import BaseControls from './BaseControls';
 import Overlay from './Overlay';
 import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
+import { createElementWithClass } from '../documentUtils';
 import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 import AnalyticEvents from '../AnalyticEvents';
@@ -10,26 +11,6 @@ import AnalyticEvents from '../AnalyticEvents';
 /* eslint-disable class-methods-use-this */
 
 const SHOW_CHAPTER_BUTTON = false
-
-const muteIcon = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="6 6 36 36">
-        <g fill="none" fill-rule="evenodd">
-            <g fill="#fff" fill-rule="nonzero">
-                <path d="M10.042 2.5v15l-3.766-3.75H0v-7.5h6.276l3.766-3.75zm9.025 3.751L20 7.18 17.166 10 20 12.822l-.933.93-2.833-2.822-2.833 2.821-.933-.929 2.833-2.821-2.833-2.821.933-.929 2.833 2.821 2.833-2.82z" transform="translate(-2446 -1053) translate(2446 1053) translate(14 14)"/>
-            </g>
-        </g>
-    </svg>
-    </div>`;
-
-const volumeIcon = `<span class="p_hiddenElement" aria-hidden="true">Toggle Volume Menu</span><div class="p_iconHolder">
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-8 -8 36 36">
-        <g fill="none" fill-rule="evenodd">
-            <g fill="#fff" fill-rule="nonzero">
-                <path d="M16.091.625C18.507 3.034 20 6.343 20 10s-1.493 6.967-3.909 9.375l-.877-.865c2.195-2.19 3.555-5.195 3.555-8.51 0-3.315-1.36-6.32-3.554-8.51zm-6.245 2.1v14.55l-3.385-3.637H0V6.362h6.461l3.385-3.637zm3.633.474c1.748 1.75 2.829 4.15 2.829 6.801s-1.08 5.05-2.83 6.8l-.874-.86c1.527-1.533 2.473-3.629 2.473-5.94 0-2.312-.946-4.408-2.473-5.94z" transform="translate(-869 -2481) translate(855 2467) translate(14 14)"/>
-            </g>
-        </g>
-    </svg>
-    </div>`
 
 class SMPControls extends BaseControls {
 
@@ -91,9 +72,11 @@ class SMPControls extends BaseControls {
         // Controls enabled by default
         this._controlsEnabled = true
 
-        this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons-smp', 'notInteractiveContent');
-        this._containerDiv.classList.add('show');
+        this._containerDiv = createElementWithClass(
+            'div',
+            'romper-smp-buttons',
+            ['romper-buttons-smp', 'notInteractiveContent', 'show'],
+        );        
 
         if(SHOW_CHAPTER_BUTTON) {
             // Setup Chapter Overlay and attach Custom SMP button to it
@@ -104,9 +87,8 @@ class SMPControls extends BaseControls {
 
         this._uiUpdateQueue = []
 
-        // TODO: get this back in when we have approved design
-        this._createVolumeButton();
-        this._createFbMixSlider()
+        this._overrideVolumeButton();
+        this._createVolumeOverlay()
 
         this._setDefaultSMPControlsConfig()
 
@@ -179,9 +161,11 @@ class SMPControls extends BaseControls {
                 break;
             case('mute'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: true');
+                this._handleMuteClick(true);
                 break;
             case('unmute'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: false');
+                this._handleMuteClick(false);
                 break;
             case('volume_slider'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, '', `default: ${e.labels.volume}`);
@@ -260,30 +244,41 @@ class SMPControls extends BaseControls {
         })
     }
 
-    _createFbMixSlider() {
-        const controlBar = document.querySelector('.mediaContainer');
+    _createVolumeOverlay() {
+        const smpVolumeBox = createElementWithClass('div', 'smp-volume-overlay', ['smp-volume', 'romper-inactive']);
+        this._volumeControls = smpVolumeBox;
 
-        const smpVolumeBox = document.createElement('div');
-        smpVolumeBox.classList.add('smp-volume');
-        smpVolumeBox.classList.add('romper-inactive');
+        const mixContainer = this._createMixControl();
+        smpVolumeBox.appendChild(mixContainer);
 
-        const mixContainer = document.createElement('div');
-        mixContainer.classList.add('audio-volume-box');
-        const masterContainer = document.createElement('div');
-        masterContainer.classList.add('audio-volume-box');
+        const masterContainer = this._createMasterVolumeControl();
+        smpVolumeBox.appendChild(masterContainer);
 
-        const fbMixSliderLabel = document.createElement('div');
-        fbMixSliderLabel.classList.add("audio-slider-label")
-        fbMixSliderLabel.innerHTML = "Default Mix"
-        mixContainer.appendChild(fbMixSliderLabel)
+        // this currently isn't really visible
+        const triangle = createElementWithClass('div', null, ['triangle']);
+        smpVolumeBox.appendChild(triangle);
 
-        const fbMixSlider = document.createElement('input');
-        fbMixSlider.classList.add("audio-slider")
+        // hide the overlay 5s after user leaves it
+        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout(5000) };
+        smpVolumeBox.onmouseover = () => { this._clearVolumeTimeout() };
 
+        publicApi.ui.controls.appendChild(smpVolumeBox); // eslint-disable-line no-undef
+
+    }
+
+    // create slider for controlling mix
+    _createMixControl(): HTMLDivElement {
+        const mixContainer = createElementWithClass('div', 'audio-mix-box', ['audio-volume-box']);
+
+        const fbMixSliderLabel = createElementWithClass('div', 'audio-mix-label', ['audio-slider-label']);
+        fbMixSliderLabel.innerHTML = "Default Mix";
+        mixContainer.appendChild(fbMixSliderLabel);
+
+        const fbMixSlider = createElementWithClass('input', 'audio-mix-slider', ['audio-slider']);
         fbMixSlider.type = 'range';
         fbMixSlider.min = 0;
         fbMixSlider.max = 1;
-        fbMixSlider.value = 1;
+        fbMixSlider.value = '1';
         fbMixSlider.step = 0.1;
         fbMixSlider.addEventListener("change", (e) => {
             const sliderValue = parseFloat(e.target.value)
@@ -306,59 +301,51 @@ class SMPControls extends BaseControls {
         })
         
         mixContainer.appendChild(fbMixSlider);
+        return mixContainer;
+    }
 
+    // create slider for main volume control
+    _createMasterVolumeControl(): HTMLDivElement {
+        const masterContainer = createElementWithClass('div',
+            'audio-master-box', ['audio-volume-box']);
 
-        const masterSliderLabel = document.createElement('div');
-        masterSliderLabel.classList.add("audio-slider-label")
+        const masterSliderLabel = createElementWithClass('div',
+            'audio-master-label', ['audio-slider-label']);
         masterSliderLabel.innerHTML = "Master Volume"
         masterContainer.appendChild(masterSliderLabel)
 
-        const masterSlider = document.createElement('input');
-        masterSlider.classList.add("audio-slider")
-
+        const masterSlider = createElementWithClass('input',
+            'audio-master-slider', ['audio-slider'])
         masterSlider.type = 'range';
         masterSlider.min = 0;
-        masterSlider.max = 1;
-        masterSlider.value = this._smpPlayerInterface.volume || 0.7;
-        masterSlider.step = 0.1;
+        masterSlider.max = 10;
+        masterSlider.value = this._smpPlayerInterface.volume ?
+            `${this._smpPlayerInterface.volume * 10}` : '5';
+        masterSlider.step = 1;
 
         const changeVol = (e) => {
             const sliderValue = parseFloat(e.target.value);
-            this._smpPlayerInterface.volume = sliderValue;
-            this._masterValueLabel.textContent = `${10 * sliderValue}`;
+            this._smpPlayerInterface.volume = sliderValue / 10;
+            this._masterValueLabel.textContent = `${sliderValue}`;
         };
         masterSlider.addEventListener("change", changeVol);
-
         masterSlider.addEventListener("input", changeVol);
         
         masterContainer.appendChild(masterSlider);
 
-        const volLabel = document.createElement('div');
+        const volLabel = createElementWithClass('div',
+            'master-volume-value', ['volume-label']);
         this._masterValueLabel = document.createElement('span');
-        this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 10}` || '7';
-        volLabel.classList.add('volume-label');
+        this._masterValueLabel.textContent = this._smpPlayerInterface.volume ?
+            `${this._smpPlayerInterface.volume * 10}` : '7';
         volLabel.appendChild(this._masterValueLabel);
         masterContainer.appendChild(volLabel);
-
-        smpVolumeBox.appendChild(mixContainer);
-        smpVolumeBox.appendChild(masterContainer);
-
-
-        const triangle = document.createElement('div');
-        triangle.classList.add('triangle');
-        smpVolumeBox.appendChild(triangle);
-        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout(5000) };
-        smpVolumeBox.onmouseover = () => { this._clearVolumeTimeout() };
-
-        this._volumeControls = smpVolumeBox;
-        controlBar.appendChild(smpVolumeBox);
-
+        return masterContainer;
     }
 
     _startVolumeTimeout(time) {
         this._volHideTimeout = setTimeout(() => {
             this._volumeControls.classList.add('romper-inactive');
-            this._volumeButton.classList.remove("p_buttonHover")
         }, time);
     }
 
@@ -366,13 +353,35 @@ class SMPControls extends BaseControls {
         if (this._volHideTimeout) clearTimeout(this._volHideTimeout);
     }
 
+    _handleMuteClick(muted) {
+        if(muted) {
+            this._volumeControls.classList.add('muted');
+            this._masterValueLabel.textContent = '0';
+        } else {
+            this._volumeControls.classList.remove('muted');
+            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 10}`;
+        }
+    }
+
+    _overrideVolumeButton() {
+        /* eslint-disable no-undef */
+        publicApi.ui.volumeControl.openVolumeControls = () => {
+            this._clearVolumeTimeout();
+            this._volumeControls.classList.remove('romper-inactive');
+        }
+        publicApi.ui.volumeControl.closeVolumeControls = () => this._closeVolumeControls();
+        /* eslint-enable no-undef */
+    }
+
+    _closeVolumeControls() {
+        logger.info('closing SMP volume controls');
+        this._startVolumeTimeout(5000);
+    }
+
     _createChapterButton() {
         const controlBar = document.querySelector('.mediaContainer');
-        const chapterButton = document.createElement('button');
-        chapterButton.classList.add("p_button")
-        chapterButton.classList.add("p_controlBarButton")
-        chapterButton.classList.add("chapter-button")
-        chapterButton.classList.add("romper-inactive")
+        const chapterButton = createElementWithClass('button', 'smp-chapter-button',
+            ['p_button', 'p_controlBarButton', 'chapter-button', 'romper-inactive']);
         chapterButton.setAttribute("role", "button")
         chapterButton.setAttribute("aria-live", "polite")
         chapterButton.setAttribute("aria-label", "Toggle Chapter Menu")
@@ -391,45 +400,6 @@ class SMPControls extends BaseControls {
         this._chapterButton = chapterButton;
     }
 
-    _createVolumeButton() {
-        const controlBar = document.querySelector('.mediaContainer');
-        const volumeButton = document.createElement('button');
-        volumeButton.classList.add("p_button")
-        volumeButton.classList.add("p_controlBarButton")
-        volumeButton.classList.add("volume-button")
-        volumeButton.setAttribute("role", "button")
-        volumeButton.setAttribute("aria-live", "polite")
-        volumeButton.setAttribute("aria-label", "Toggle Volume Controls")
-        volumeButton.onmouseover = () => {
-            volumeButton.classList.add("p_buttonHover");
-            this._volumeControls.classList.remove('romper-inactive');
-            this._clearVolumeTimeout();
-        }
-        volumeButton.onmouseleave = (e) => {
-            if (e.toElement && e.toElement !== this._volumeControls) {
-                this._startVolumeTimeout(500);
-            }
-        }
-        volumeButton.onclick = () => {
-            this._muted = this._smpPlayerInterface.muted;
-            if (this._muted) {
-                this._volumeControls.classList.remove('muted');
-                this._smpPlayerInterface.muted = false;
-                this._masterValueLabel.textContent = `${10 * this._smpPlayerInterface.volume}`;
-                this._volumeButton.innerHTML = volumeIcon;
-            } else {
-                this._volumeButton.innerHTML = muteIcon;
-                this._volumeControls.classList.add('muted');
-                this._smpPlayerInterface.muted = true;
-                this._masterValueLabel.textContent = '0';
-            }
-        }
-
-        volumeButton.innerHTML = volumeIcon;
-        controlBar.appendChild(volumeButton)
-
-        this._volumeButton = volumeButton;
-    }
 
     /* getters */
 
