@@ -25,6 +25,7 @@ import {
     leftGreaterThanRight,
     inSMPWrapper,
     proxyWrapper,
+    getControlHideList,
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
@@ -905,6 +906,13 @@ class Player extends EventEmitter {
 
         if (startNow) this._controls.setControlsActive();
 
+        const currentNe = this._controller.getCurrentNarrativeElement();
+        const currentStory = this._controller.getCurrentStory();
+        // work out what we need to hide
+        const hideList = getControlHideList(currentNe, currentStory);
+        // hide them
+        this.applyControlHideList(hideList);
+
         this.playoutEngine.setPermissionToPlay(
             true,
             startNow,
@@ -1594,6 +1602,25 @@ class Player extends EventEmitter {
 
     setBackAvailable(isBackAvailable: boolean) {
         this._controls.setBackAvailable(isBackAvailable);
+    }
+
+    applyControlHideList(controlsToHide: Array<string>) {
+        if (controlsToHide.includes('scrub')) {
+            this.disableScrubBar();
+        }
+        if (controlsToHide.includes('back')) {
+            this.setBackAvailable(false);
+        }
+        if (controlsToHide.includes('seek')) {
+            this.hideSeekButtons();
+        }
+        if (controlsToHide.includes('play')) {
+            // requires thought - what if user is paused?
+            this.disablePlayButton();
+        }
+        if (controlsToHide.includes('next')) {
+            this.setNextAvailable(false);
+        }
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {

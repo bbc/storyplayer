@@ -18,6 +18,9 @@
                     "onLaunch": {
                         "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
                     }
+                },
+                "storyplayer": {
+                    "hide_controls": ["scrub", "seek", "chapters"]
                 }
             },
             "object_class": "STORY",
@@ -70,6 +73,9 @@
                     "colour": "#DB3E00",
                     "xPos": 517.8712064019327,
                     "yPos": 178.28219839951683
+                },
+                "storyplayer": {
+                    "hide_controls": ["scrub", "back", "seek", "next"]
                 }
             },
             "object_class": "NARRATIVE_ELEMENT",

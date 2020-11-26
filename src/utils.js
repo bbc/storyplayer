@@ -253,3 +253,20 @@ export const replaceEscapedVariables = (textContent, controller) => {
     });
 };
 
+/**
+ * Gets a list of which controls need to be hidden on this element, in this story
+ * @param {Object} ne object
+ * @param {Object} story object
+ */
+export const getControlHideList = (ne, story) => {
+    let hideList = [];
+    if (ne && ne.meta.storyplayer
+        && ne.meta.storyplayer.hide_controls) {
+        hideList = hideList.concat([...ne.meta.storyplayer.hide_controls]);
+    }
+    if (story && story.meta.storyplayer
+        && story.meta.storyplayer.hide_controls) {
+        hideList = hideList.concat([...story.meta.storyplayer.hide_controls]);
+    }
+    return hideList
+};

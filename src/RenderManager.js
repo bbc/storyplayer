@@ -21,7 +21,7 @@ import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './gui/Player';
 import { REASONER_EVENTS, DOM_EVENTS } from './Events';
-import { getSetting, DISABLE_LOOKAHEAD_FLAG } from './utils';
+import { getSetting, DISABLE_LOOKAHEAD_FLAG, getControlHideList } from './utils';
 
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
@@ -55,6 +55,8 @@ export default class RenderManager extends EventEmitter {
     _linearStoryPath: Array<StoryPathItem>;
 
     _currentNarrativeElement: NarrativeElement;
+
+    _story: Object;
 
     _rendererState: {
         lastSwitchableLabel: string,
@@ -334,6 +336,7 @@ export default class RenderManager extends EventEmitter {
     async handleStoryStart(storyId: string) {
         try {
             const story = await this._fetchers.storyFetcher(storyId);
+            this._story = story;
             this._setAspectRatio(story);
             await this.fetchDog(story)
             return await this.fetchStartImage(story);
@@ -431,6 +434,8 @@ export default class RenderManager extends EventEmitter {
      * @param {Array<StoryPathItem>} storyItemPath Array of path items for the icons and target narrative elements
      */
     _createStoryIconRenderer(storyItemPath: Array<StoryPathItem>) {
+        const hideList = getControlHideList(null, this._story);
+        if (hideList.includes('chapters')) return;
         this._renderStory = new StoryIconRenderer(
             storyItemPath,
             this._fetchers.assetCollectionFetcher,
@@ -668,17 +673,27 @@ export default class RenderManager extends EventEmitter {
      * ... but if there is only one choice, show next!
      */
     refreshOnwardIcons() {
+        // work out what we need to hide
+        const hideList = getControlHideList(this._currentNarrativeElement, this._story);
+        // hide them
+        this._player.applyControlHideList(hideList);
+
+        // calculating next availability - keep in mind if force hidden
+        let nextForceHide = false;
+        if  (hideList.includes('next')) {
+            nextForceHide = true;
+        }
         if (this._currentRenderer) {
             const rend = this._currentRenderer;
             if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
-                this._player.setNextAvailable(true);
+                this._player.setNextAvailable(!nextForceHide);
                 return Promise.resolve();
             }
             if (!rend.inVariablePanel) {
                 return this._controller.getValidNextSteps()
                     .then((nextSteps) => {
                         const hasNext = nextSteps.length > 0;
-                        this._player.setNextAvailable(hasNext);
+                        this._player.setNextAvailable(!nextForceHide && hasNext);
                     })
                     .catch((err) => {
                         logger.error('Could not get valid next steps to set next button availability', err); // eslint-disable-line max-len
