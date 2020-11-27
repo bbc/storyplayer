@@ -288,7 +288,7 @@ class SMPControls extends BaseControls {
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
-            const label = document.querySelector('.audio-slider-label')
+            const label = document.selectElementById('audio-mix-label')
             if(sliderValue <= 0.5) {
                 label.innerHTML = "Accessible Mix"
             } else if(sliderValue > 0.5 && sliderValue < 0.75) {
