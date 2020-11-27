@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls,
+    RepresentationChoice, AssetUrls, Story,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -55,6 +55,8 @@ export default class RenderManager extends EventEmitter {
     _linearStoryPath: Array<StoryPathItem>;
 
     _currentNarrativeElement: NarrativeElement;
+
+    _story: Story;
 
     _rendererState: {
         lastSwitchableLabel: string,
@@ -214,6 +216,9 @@ export default class RenderManager extends EventEmitter {
      * @param {boolean} isVisible
      */
     _handleVisibilityChange(isVisible: boolean) {
+        const { meta } = this._story;
+        if (meta.storyplayer && meta.storyplayer.disable_tab_defocus) return;
+        return;
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
@@ -334,6 +339,7 @@ export default class RenderManager extends EventEmitter {
     async handleStoryStart(storyId: string) {
         try {
             const story = await this._fetchers.storyFetcher(storyId);
+            this._story = story;
             this._setAspectRatio(story);
             await this.fetchDog(story)
             return await this.fetchStartImage(story);

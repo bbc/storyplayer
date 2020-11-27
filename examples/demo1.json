@@ -18,6 +18,9 @@
                     "onLaunch": {
                         "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
                     }
+                },
+                "storyplayer": {
+                    "disable_tab_defocus": true
                 }
             },
             "object_class": "STORY",
