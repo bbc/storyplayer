@@ -218,7 +218,6 @@ export default class RenderManager extends EventEmitter {
     _handleVisibilityChange(isVisible: boolean) {
         const { meta } = this._story;
         if (meta.storyplayer && meta.storyplayer.disable_tab_defocus) return;
-        return;
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
