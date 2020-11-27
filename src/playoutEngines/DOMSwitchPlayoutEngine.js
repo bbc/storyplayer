@@ -642,6 +642,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     }
 
     pause() {
+        console.log('ANDY playoutengine pause');
         this._playing = false;
         this._player.setPlaying(false);
         Object.keys(this._media)
