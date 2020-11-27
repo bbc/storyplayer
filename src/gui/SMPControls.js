@@ -245,7 +245,8 @@ class SMPControls extends BaseControls {
     }
 
     _createVolumeOverlay() {
-        const smpVolumeBox = createElementWithClass('div', 'smp-volume-overlay', ['smp-volume', 'romper-inactive']);
+        const smpVolumeBox = createElementWithClass('div', 'smp-volume-overlay',
+            ['smp-volume', 'romper-inactive']);
         this._volumeControls = smpVolumeBox;
 
         const mixContainer = this._createMixControl();
@@ -268,13 +269,16 @@ class SMPControls extends BaseControls {
 
     // create slider for controlling mix
     _createMixControl(): HTMLDivElement {
-        const mixContainer = createElementWithClass('div', 'audio-mix-box', ['audio-volume-box']);
+        const mixContainer = createElementWithClass('div', 'audio-mix-box',
+            ['audio-volume-box', 'romper-disabled']);
 
-        const fbMixSliderLabel = createElementWithClass('div', 'audio-mix-label', ['audio-slider-label']);
-        fbMixSliderLabel.innerHTML = "Default Mix";
+        const fbMixSliderLabel = createElementWithClass('div', 'audio-mix-label',
+            ['audio-slider-label']);
+        fbMixSliderLabel.innerHTML = "Disabled";
         mixContainer.appendChild(fbMixSliderLabel);
 
-        const fbMixSlider = createElementWithClass('input', 'audio-mix-slider', ['audio-slider']);
+        const fbMixSlider = createElementWithClass('input', 'audio-mix-slider',
+            ['audio-slider']);
         fbMixSlider.type = 'range';
         fbMixSlider.min = 0;
         fbMixSlider.max = 1;
@@ -283,25 +287,31 @@ class SMPControls extends BaseControls {
         fbMixSlider.addEventListener("change", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
+            this._setMixerLabel()
         })
 
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
-            const label = document.selectElementById('audio-mix-label')
-            if(sliderValue <= 0.5) {
-                label.innerHTML = "Accessible Mix"
-            } else if(sliderValue > 0.5 && sliderValue < 0.75) {
-                label.innerHTML = "Enhanced Mix"
-            } else if(sliderValue >= 0.75) {
-                label.innerHTML = "Default Mix"
-            } else {
-                logger.warn("Invalid mix slider value: ")
-            }
         })
         
         mixContainer.appendChild(fbMixSlider);
         return mixContainer;
+    }
+
+    _setMixerLabel() {
+        const slider = document.getElementById('audio-mix-slider');
+        const sliderValue = slider.value;
+        const label = document.getElementById('audio-mix-label')
+        if(sliderValue <= 0.5) {
+            label.innerHTML = "Accessible Mix"
+        } else if(sliderValue > 0.5 && sliderValue < 0.75) {
+            label.innerHTML = "Enhanced Mix"
+        } else if(sliderValue >= 0.75) {
+            label.innerHTML = "Default Mix"
+        } else {
+            logger.warn("Invalid mix slider value: ")
+        }
     }
 
     // create slider for main volume control
@@ -391,9 +401,17 @@ class SMPControls extends BaseControls {
         chapterButton.onmouseout = () => {
             chapterButton.classList.remove("p_buttonHover")
         }
-        chapterButton.innerHTML = `<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder">
-        <svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapter-icon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/>
-        </svg>
+        chapterButton.innerHTML = `
+            <span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span>
+            <div class="p_iconHolder">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    class="p_svg chapter-icon" focusable="false" viewBox="0 0 60 60">
+                <title>chapters</title>
+                <rect x="8" width="24" height="8"/>
+                <rect x="16" y="12" width="16" height="8"/>
+                <rect x="8" y="24" width="24" height="8"/>
+                <polygon points="0 23 12 16 0 9 0 23"/>
+            </svg>
         </div>`;
         controlBar.appendChild(chapterButton)
 
@@ -433,6 +451,19 @@ class SMPControls extends BaseControls {
             })
             this._controlsEnabled = true
         }
+    }
+
+    enableBackgroundAudio() {
+        const mixer = document.getElementById('audio-mix-box');
+        mixer.classList.remove('romper-disabled');
+        this._setMixerLabel();
+    }
+
+    disableBackgroundAudio() {
+        const mixer = document.getElementById('audio-mix-box');
+        mixer.classList.add('romper-disabled');
+        const label = document.getElementById('audio-mix-label');
+        label.textContent = 'Disabled';
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -506,7 +537,8 @@ class SMPControls extends BaseControls {
             // seek is due to scrub or +/- 20s buttons
             if(seekTo === this._playoutEngine.getCurrentTime(renderer._rendererId) + 20) {
                 seekTo = Math.min(currentTime + 20, duration);
-            } else if(seekTo === 0 && this._playoutEngine.getCurrentTime(renderer._rendererId) <= 20) {
+            } else if(seekTo === 0 
+                && this._playoutEngine.getCurrentTime(renderer._rendererId) <= 20) {
                 seekTo = Math.max(currentTime - 20, 0);
             }
             renderer.setCurrentTime(seekTo);

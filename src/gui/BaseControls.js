@@ -102,6 +102,11 @@ class BaseControls extends EventEmitter {
     setSubtitlesAboveElement() { }
 
     resetSubtitleHeight() { }
+
+    enableBackgroundAudio() { }
+
+    disableBackgroundAudio() { }
+
 }
 
 export { ControlEvents };

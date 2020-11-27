@@ -90,6 +90,11 @@
         font-weight: normal;
         padding-left: 12px;
       }
+
+      &.romper-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
     }
 
     &.romper-inactive {
