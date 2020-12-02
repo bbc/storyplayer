@@ -42,8 +42,6 @@ class SMPControls extends BaseControls {
 
     _playoutEngine: BasePlayoutEngine;
 
-    _volHideTimeout: ?TimeoutID;
-
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
@@ -233,6 +231,7 @@ class SMPControls extends BaseControls {
     _setDefaultSMPControlsConfig() {
         // Setup Default Controls Settings
         this._uiUpdate({
+            volumeDismissTime: 5000,
             always: true,
             enabled: true,
             spaceControlsPlayback: true,
@@ -259,11 +258,8 @@ class SMPControls extends BaseControls {
         const triangle = createElementWithClass('div', null, ['triangle']);
         smpVolumeBox.appendChild(triangle);
 
-        // hide the overlay 5s after user leaves it
-        smpVolumeBox.onmouseleave = () => { this._startVolumeTimeout(5000) };
-        smpVolumeBox.onmouseover = () => { this._clearVolumeTimeout() };
-
-        publicApi.ui.controls.appendChild(smpVolumeBox); // eslint-disable-line no-undef
+        // eslint-disable-next-line no-undef
+        publicApi.ui.volumeControl.volumeControls.appendChild(smpVolumeBox);
 
     }
 
@@ -353,16 +349,6 @@ class SMPControls extends BaseControls {
         return masterContainer;
     }
 
-    _startVolumeTimeout(time) {
-        this._volHideTimeout = setTimeout(() => {
-            this._volumeControls.classList.add('romper-inactive');
-        }, time);
-    }
-
-    _clearVolumeTimeout() {
-        if (this._volHideTimeout) clearTimeout(this._volHideTimeout);
-    }
-
     _handleMuteClick(muted) {
         if(muted) {
             this._volumeControls.classList.add('muted');
@@ -376,16 +362,13 @@ class SMPControls extends BaseControls {
     _overrideVolumeButton() {
         /* eslint-disable no-undef */
         publicApi.ui.volumeControl.openVolumeControls = () => {
-            this._clearVolumeTimeout();
             this._volumeControls.classList.remove('romper-inactive');
         }
-        publicApi.ui.volumeControl.closeVolumeControls = () => this._closeVolumeControls();
+        publicApi.ui.volumeControl.closeVolumeControls = () => {
+            this._volumeControls.classList.add('romper-inactive');
+        };
+        publicApi.ui.volumeControl.volumeControls.style.overflow = 'visible'
         /* eslint-enable no-undef */
-    }
-
-    _closeVolumeControls() {
-        logger.info('closing SMP volume controls');
-        this._startVolumeTimeout(5000);
     }
 
     _createChapterButton() {
