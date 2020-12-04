@@ -1,4 +1,4 @@
-const { SCHEMA_VERSION } = require('@bbc/object-based-media-schema');
+const { SCHEMA_VERSION } = require('object-based-media-schema');
 
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
