@@ -552,7 +552,7 @@ export default class RenderManager extends EventEmitter {
             // now it has been constructed, start fetching all the media and building the components
             newRenderer.init();
             newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
-                this.refreshOnwardIcons();
+                this.updateControlAvailability();
                 newRenderer.start();
             });
             newRenderer.on(RendererEvents.COMPLETED, () => {
@@ -601,7 +601,7 @@ export default class RenderManager extends EventEmitter {
             const currentRenderer = this._currentRenderer;
             currentRenderer.end();
             currentRenderer.willStart();
-            this.refreshOnwardIcons();
+            this.updateControlAvailability();
             // ensure volume persistence
             this._setVolumePersistence();
         } else {
@@ -646,7 +646,7 @@ export default class RenderManager extends EventEmitter {
 
         // Update availability of back and next buttons.
         this._showBackIcon();
-        this.refreshOnwardIcons();
+        this.updateControlAvailability();
         newRenderer.willStart(newNarrativeElement.name, newNarrativeElement.id);
         // ensure volume persistence
         this._setVolumePersistence();
@@ -672,7 +672,7 @@ export default class RenderManager extends EventEmitter {
      *  show next button, or icons if choice
      * ... but if there is only one choice, show next!
      */
-    refreshOnwardIcons() {
+    updateControlAvailability() {
         // work out what we need to hide
         const hideList = getControlHideList(this._currentNarrativeElement, this._story);
         // hide them
@@ -800,7 +800,7 @@ export default class RenderManager extends EventEmitter {
                     return Promise.resolve();
                 });
 
-            this.refreshOnwardIcons();
+            this.updateControlAvailability();
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {

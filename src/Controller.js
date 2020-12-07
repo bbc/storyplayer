@@ -1148,7 +1148,7 @@ export default class Controller extends EventEmitter {
     }
 
     refreshPlayerNextAndBack() {
-        this._renderManager.refreshOnwardIcons();
+        this._renderManager.updateControlAvailability();
     }
 
     /**
