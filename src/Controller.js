@@ -1147,7 +1147,7 @@ export default class Controller extends EventEmitter {
         return Promise.resolve([]);
     }
 
-    refreshPlayerNextAndBack() {
+    refreshPlayerControls() {
         this._renderManager.updateControlAvailability();
     }
 

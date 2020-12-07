@@ -25,7 +25,6 @@ import {
     leftGreaterThanRight,
     inSMPWrapper,
     proxyWrapper,
-    getControlHideList,
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
@@ -906,12 +905,7 @@ class Player extends EventEmitter {
 
         if (startNow) this._controls.setControlsActive();
 
-        const currentNe = this._controller.getCurrentNarrativeElement();
-        const currentStory = this._controller.getCurrentStory();
-        // work out what we need to hide
-        const hideList = getControlHideList(currentNe, currentStory);
-        // hide them
-        this.applyControlHideList(hideList);
+        this._controller.refreshPlayerControls();
 
         this.playoutEngine.setPermissionToPlay(
             true,
