@@ -324,14 +324,14 @@ class SMPControls extends BaseControls {
             'audio-master-slider', ['audio-slider'])
         masterSlider.type = 'range';
         masterSlider.min = 0;
-        masterSlider.max = 10;
+        masterSlider.max = 11;
         masterSlider.value = this._smpPlayerInterface.volume ?
-            `${this._smpPlayerInterface.volume * 10}` : '5';
+            `${this._smpPlayerInterface.volume * 11}` : '5';
         masterSlider.step = 1;
 
         const changeVol = (e) => {
             const sliderValue = parseFloat(e.target.value);
-            this._smpPlayerInterface.volume = sliderValue / 10;
+            this._smpPlayerInterface.volume = sliderValue / 11;
             this._masterValueLabel.textContent = `${sliderValue}`;
         };
         masterSlider.addEventListener("change", changeVol);
@@ -355,7 +355,7 @@ class SMPControls extends BaseControls {
             this._masterValueLabel.textContent = '0';
         } else {
             this._volumeControls.classList.remove('muted');
-            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 10}`;
+            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 11}`;
         }
     }
 
