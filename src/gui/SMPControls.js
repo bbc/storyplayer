@@ -3,6 +3,7 @@ import BaseControls from './BaseControls';
 import Overlay from './Overlay';
 import { ButtonEvents } from './Buttons';
 import { getSMPInterface } from '../utils'
+import { createElementWithClass } from '../documentUtils';
 import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 import AnalyticEvents from '../AnalyticEvents';
@@ -26,6 +27,12 @@ class SMPControls extends BaseControls {
     _containerDiv: HTMLDivElement;
 
     _chapterButton: HTMLButtonElement;
+
+    _volumeButton: HTMLButtonElement;
+
+    _volumeControls: HTMLDivElement;
+
+    _masterValueLabel: HTMLSpanElement;
 
     _uiUpdateQueue: Array<Object>;
 
@@ -63,9 +70,11 @@ class SMPControls extends BaseControls {
         // Controls enabled by default
         this._controlsEnabled = true
 
-        this._containerDiv = document.createElement('div');
-        this._containerDiv.classList.add('romper-buttons-smp', 'notInteractiveContent');
-        this._containerDiv.classList.add('show');
+        this._containerDiv = createElementWithClass(
+            'div',
+            'romper-smp-buttons',
+            ['romper-buttons-smp', 'notInteractiveContent', 'show'],
+        );        
 
         if(SHOW_CHAPTER_BUTTON) {
             // Setup Chapter Overlay and attach Custom SMP button to it
@@ -76,17 +85,11 @@ class SMPControls extends BaseControls {
 
         this._uiUpdateQueue = []
 
-        // TODO: get this back in when we have approved design
-        // this._createFbMixSlider()
+        this._overrideVolumeButton();
+        this._createVolumeOverlay()
 
         this._setDefaultSMPControlsConfig()
 
-        // Set SMP Audio Bar to have extra width to contain our new control
-        this._smpPlayerInterface.updateUiConfig({
-            controls:{
-                extraVolumeWidth:170
-            }
-        })
     }
 
     /**
@@ -156,9 +159,11 @@ class SMPControls extends BaseControls {
                 break;
             case('mute'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: true');
+                this._handleMuteClick(true);
                 break;
             case('unmute'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_MUTE_TOGGLED, 'not_set', 'default: false');
+                this._handleMuteClick(false);
                 break;
             case('volume_slider'):
                 this._logUserInteraction(AnalyticEvents.names.VOLUME_CHANGED, '', `default: ${e.labels.volume}`);
@@ -226,6 +231,8 @@ class SMPControls extends BaseControls {
     _setDefaultSMPControlsConfig() {
         // Setup Default Controls Settings
         this._uiUpdate({
+            volumeDismissTime: 5000,
+            always: true,
             enabled: true,
             spaceControlsPlayback: true,
             availableOnMediaEnded: true,
@@ -236,53 +243,138 @@ class SMPControls extends BaseControls {
         })
     }
 
-    _createFbMixSlider() {
-        const controlBar = document.querySelector('.p_volumeControls');
+    _createVolumeOverlay() {
+        const smpVolumeBox = createElementWithClass('div', 'smp-volume-overlay',
+            ['smp-volume', 'romper-inactive']);
+        this._volumeControls = smpVolumeBox;
 
-        const fbMixSliderLabel = document.createElement('div');
-        fbMixSliderLabel.classList.add("audioMixSliderLabel")
-        fbMixSliderLabel.innerHTML = "Default Mix"
-        controlBar.appendChild(fbMixSliderLabel)
+        const mixContainer = this._createMixControl();
+        smpVolumeBox.appendChild(mixContainer);
 
-        const fbMixSlider = document.createElement('input');
-        fbMixSlider.classList.add("audioMixSlider")
+        const masterContainer = this._createMasterVolumeControl();
+        smpVolumeBox.appendChild(masterContainer);
 
+        // this currently isn't really visible
+        const triangle = createElementWithClass('div', null, ['triangle']);
+        smpVolumeBox.appendChild(triangle);
+
+        // eslint-disable-next-line no-undef
+        publicApi.ui.volumeControl.volumeControls.appendChild(smpVolumeBox);
+
+    }
+
+    // create slider for controlling mix
+    _createMixControl(): HTMLDivElement {
+        const mixContainer = createElementWithClass('div', 'audio-mix-box',
+            ['audio-volume-box', 'romper-disabled']);
+
+        const fbMixSliderLabel = createElementWithClass('div', 'audio-mix-label',
+            ['audio-slider-label']);
+        fbMixSliderLabel.innerHTML = "Disabled";
+        mixContainer.appendChild(fbMixSliderLabel);
+
+        const fbMixSlider = createElementWithClass('input', 'audio-mix-slider',
+            ['audio-slider']);
         fbMixSlider.type = 'range';
         fbMixSlider.min = 0;
         fbMixSlider.max = 1;
-        fbMixSlider.value = 1;
+        fbMixSlider.value = '1';
         fbMixSlider.step = 0.1;
         fbMixSlider.addEventListener("change", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
+            this._setMixerLabel()
         })
 
         fbMixSlider.addEventListener("input", (e) => {
             const sliderValue = parseFloat(e.target.value)
             this._playoutEngine.setFbMix(sliderValue)
-            const label = document.querySelector('.audioMixSliderLabel')
-            if(sliderValue <= 0.5) {
-                label.innerHTML = "Accessible Mix"
-            } else if(sliderValue > 0.5 && sliderValue < 0.75) {
-                label.innerHTML = "Enhanced Mix"
-            } else if(sliderValue >= 0.75) {
-                label.innerHTML = "Default Mix"
-            } else {
-                logger.warn("Invalid mix slider value: ")
-            }
         })
+        
+        mixContainer.appendChild(fbMixSlider);
+        return mixContainer;
+    }
 
-        controlBar.appendChild(fbMixSlider)
+    _setMixerLabel() {
+        const slider = document.getElementById('audio-mix-slider');
+        const sliderValue = slider.value;
+        const label = document.getElementById('audio-mix-label')
+        if(sliderValue <= 0.5) {
+            label.innerHTML = "Accessible Mix"
+        } else if(sliderValue > 0.5 && sliderValue < 0.75) {
+            label.innerHTML = "Enhanced Mix"
+        } else if(sliderValue >= 0.75) {
+            label.innerHTML = "Default Mix"
+        } else {
+            logger.warn("Invalid mix slider value: ")
+        }
+    }
 
+    // create slider for main volume control
+    _createMasterVolumeControl(): HTMLDivElement {
+        const masterContainer = createElementWithClass('div',
+            'audio-master-box', ['audio-volume-box']);
+
+        const masterSliderLabel = createElementWithClass('div',
+            'audio-master-label', ['audio-slider-label']);
+        masterSliderLabel.innerHTML = "Master Volume"
+        masterContainer.appendChild(masterSliderLabel)
+
+        const masterSlider = createElementWithClass('input',
+            'audio-master-slider', ['audio-slider'])
+        masterSlider.type = 'range';
+        masterSlider.min = 0;
+        masterSlider.max = 10;
+        masterSlider.value = this._smpPlayerInterface.volume ?
+            `${this._smpPlayerInterface.volume * 10}` : '5';
+        masterSlider.step = 1;
+
+        const changeVol = (e) => {
+            const sliderValue = parseFloat(e.target.value);
+            this._smpPlayerInterface.volume = sliderValue / 10;
+            this._masterValueLabel.textContent = `${sliderValue}`;
+        };
+        masterSlider.addEventListener("change", changeVol);
+        masterSlider.addEventListener("input", changeVol);
+        
+        masterContainer.appendChild(masterSlider);
+
+        const volLabel = createElementWithClass('div',
+            'master-volume-value', ['volume-label']);
+        this._masterValueLabel = document.createElement('span');
+        this._masterValueLabel.textContent = this._smpPlayerInterface.volume ?
+            `${this._smpPlayerInterface.volume * 10}` : '7';
+        volLabel.appendChild(this._masterValueLabel);
+        masterContainer.appendChild(volLabel);
+        return masterContainer;
+    }
+
+    _handleMuteClick(muted) {
+        if(muted) {
+            this._volumeControls.classList.add('muted');
+            this._masterValueLabel.textContent = '0';
+        } else {
+            this._volumeControls.classList.remove('muted');
+            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 10}`;
+        }
+    }
+
+    _overrideVolumeButton() {
+        /* eslint-disable no-undef */
+        publicApi.ui.volumeControl.openVolumeControls = () => {
+            this._volumeControls.classList.remove('romper-inactive');
+        }
+        publicApi.ui.volumeControl.closeVolumeControls = () => {
+            this._volumeControls.classList.add('romper-inactive');
+        };
+        publicApi.ui.volumeControl.volumeControls.style.overflow = 'visible'
+        /* eslint-enable no-undef */
     }
 
     _createChapterButton() {
         const controlBar = document.querySelector('.mediaContainer');
-        const chapterButton = document.createElement('button');
-        chapterButton.classList.add("p_button")
-        chapterButton.classList.add("p_controlBarButton")
-        chapterButton.classList.add("chapterButton")
-        chapterButton.classList.add("romper-inactive")
+        const chapterButton = createElementWithClass('button', 'smp-chapter-button',
+            ['p_button', 'p_controlBarButton', 'chapter-button', 'romper-inactive']);
         chapterButton.setAttribute("role", "button")
         chapterButton.setAttribute("aria-live", "polite")
         chapterButton.setAttribute("aria-label", "Toggle Chapter Menu")
@@ -292,11 +384,23 @@ class SMPControls extends BaseControls {
         chapterButton.onmouseout = () => {
             chapterButton.classList.remove("p_buttonHover")
         }
-        chapterButton.innerHTML = '<span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span><div class="p_iconHolder"><svg xmlns="http://www.w3.org/2000/svg" class="p_svg chapterIcon" focusable="false" viewBox="0 0 60 60"><title>chapters</title><rect x="8" width="24" height="8"/><rect x="16" y="12" width="16" height="8"/><rect x="8" y="24" width="24" height="8"/><polygon points="0 23 12 16 0 9 0 23"/></svg></div>'
+        chapterButton.innerHTML = `
+            <span class="p_hiddenElement" aria-hidden="true">Toggle Chapter Menu</span>
+            <div class="p_iconHolder">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    class="p_svg chapter-icon" focusable="false" viewBox="0 0 60 60">
+                <title>chapters</title>
+                <rect x="8" width="24" height="8"/>
+                <rect x="16" y="12" width="16" height="8"/>
+                <rect x="8" y="24" width="24" height="8"/>
+                <polygon points="0 23 12 16 0 9 0 23"/>
+            </svg>
+        </div>`;
         controlBar.appendChild(chapterButton)
 
         this._chapterButton = chapterButton;
     }
+
 
     /* getters */
 
@@ -330,6 +434,19 @@ class SMPControls extends BaseControls {
             })
             this._controlsEnabled = true
         }
+    }
+
+    enableBackgroundAudio() {
+        const mixer = document.getElementById('audio-mix-box');
+        mixer.classList.remove('romper-disabled');
+        this._setMixerLabel();
+    }
+
+    disableBackgroundAudio() {
+        const mixer = document.getElementById('audio-mix-box');
+        mixer.classList.add('romper-disabled');
+        const label = document.getElementById('audio-mix-label');
+        label.textContent = 'Disabled';
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -403,7 +520,8 @@ class SMPControls extends BaseControls {
             // seek is due to scrub or +/- 20s buttons
             if(seekTo === this._playoutEngine.getCurrentTime(renderer._rendererId) + 20) {
                 seekTo = Math.min(currentTime + 20, duration);
-            } else if(seekTo === 0 && this._playoutEngine.getCurrentTime(renderer._rendererId) <= 20) {
+            } else if(seekTo === 0 
+                && this._playoutEngine.getCurrentTime(renderer._rendererId) <= 20) {
                 seekTo = Math.max(currentTime - 20, 0);
             }
             renderer.setCurrentTime(seekTo);

@@ -1,81 +1,240 @@
+@import './colours';
+
 .controlsFadedOut {
-    .chapterButton {
-        display: none;
-    }
+  .chapter-button {
+    display: none;
+  }
 
-    // Hide Chapter Overlay when SMP Controls are not there
-    .romper-buttons-smp {
-        .romper-overlay {
-            display: none;
-        }
-    }
+  .volume-button {
+    opacity: 0;
+  }
 
-    .audioMixSlider {
-        display: none;
+  // Hide Chapter Overlay when SMP Controls are not there
+  .romper-buttons-smp {
+    .romper-overlay {
+      display: none;
     }
+  }
 
-    .audioMixSliderLabel {
-        display: none;
-    }
+  .smp-volume {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .controlsFadedIn {
-    .chapterButton {
-        top: 0;
-        right: 0;
+  .chapter-button {
+    right: 0;
+    top: 0;
 
-        &.romper-inactive {
-            display: none;
+    &.romper-inactive {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  .volume-button {
+    bottom: 16px;
+    left: 8px;
+
+    &.romper-inactive {
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
+    }
+  }
+
+  .smp-volume {
+    background-color: $black;
+    bottom: 0;
+    height: 147px;
+    left: 0;
+    margin: 0 14px 44px 0;
+    opacity: 1;
+    padding: 8px 8px 0;
+    pointer-events: all;
+    position: absolute;
+    transition: opacity 0.4s ease-out;
+    width: 216px;
+    z-index: 172;
+
+    >.triangle {
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid $black;
+      height: 0;
+      margin-left: 8px;
+      margin-top: 23px;
+      pointer-events: none;
+      width: 0;
+    }
+
+    >.audio-volume-box {
+      height: 36px;
+      padding: 7px 9px 15px 14px;
+
+      &:first-child {
+        margin: 0 0 8px;
+      }
+
+      &:last-child {
+        margin: 0 0 8px;
+      }
+
+      .volume-label {
+        color: $smp-text-white;
+        display: inline-flex;
+        font-family: 'ReithSans';
+        font-size: 14px;
+        font-stretch: normal;
+        font-style: normal;
+        font-weight: normal;
+        padding-left: 12px;
+      }
+
+      &.romper-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+    }
+
+    &.romper-inactive {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .audio-slider {
+      -webkit-appearance: none;
+      background-color: $transparent;
+      height: 13px;
+      margin-top: 5px;
+      outline: none;
+      width: 160px;
+
+      &::-webkit-slider-runnable-track {
+        -webkit-appearance: none;
+        background-color: $white;
+        height: 1px;
+      }
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background-color: $white;
+        border-radius: 50%;
+        height: 12px;
+        margin-top: -5px;
+        width: 12px;
+      }
+
+      &::-moz-range-progress {
+        background-color: $highlight;
+      }
+
+      &::-moz-range-track {
+        background-color: $transparent;
+      }
+    }
+
+    .audio-slider-label {
+      color: $smp-text-white;
+      font-family: 'ReithSans';
+      font-size: 14px;
+      font-stretch: normal;
+      font-style: normal;
+      font-weight: normal;
+      height: 18px;
+      letter-spacing: normal;
+      line-height: 1.29;
+      margin: 0 74px 0 0;
+    }
+
+    &.muted {
+      .audio-slider {
+        pointer-events: none;
+
+        &::-webkit-slider-thumb {
+          opacity: 0.3;
         }
-    }
 
-    .audioMixSlider {
-        position: absolute;
-        width: 170px;
-        height: 30px;
-        margin-top: 14px;
-        left: 200px;
+        &::-moz-range-thumb {
+          opacity: 0;
+        }
+      }
     }
-
-    .audioMixSliderLabel {
-        position: absolute;
-        width: 170px;
-        height: 44px;
-        left: 200px;
-        color: white;
-        text-align: center;
-        line-height: 1;
-    }
+  }
 }
 
-.chapterIcon {
-    left: 0;
-    top: 0;
-    margin: 10px 10px;
+.chapter-icon {
+  left: 0;
+  margin: 10px;
+  top: 0;
 }
 
 .romper-player > .romper-gui >.romper-buttons-smp {
-    width: 100%;
-    padding-bottom: 0;
-    bottom: 0;
-    display: flex;
-    height: 100%;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    transition: all 1s ease;
+  bottom: 0;
+  display: flex;
+  height: 100%;
+  opacity: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: all 1s ease;
+  width: 100%;
 
-    &.show {
-      opacity: 1;
-      pointer-events: all;
+  &.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .romper-icon-label {
+    display: none;
+  }
+
+  .romper-icon-overlay {
+    bottom: unset;
+    top: 0;
+  }
+}
+
+// BP 1 - not used
+// @media (max-width: 319px) { }
+
+// BP 2
+// @media (min-width: 320px) and (max-width: 599px) {
+@media (max-width: 599px) {
+  .controlsFadedIn {
+    .volume-button {
+      bottom: 0;
+      left: 8px;
     }
 
-    .romper-icon-label {
-      display: none;
-    }
+    .smp-volume {
+      height: 135px;
+      padding: 5px 8px 0;
 
-    .romper-icon-overlay {
-      top: 0;
-      bottom: unset;
+      .triangle {
+        margin-top: 11px;
+      }
     }
   }
+}
+
+// BP 3
+@media (min-width: 600px) and (max-width: 959px) {
+  .controlsFadedIn {
+    .volume-button {
+      bottom: 8px;
+      left: 8px;
+    }
+  }
+}
+
+// BP 4 is default, above
+// @media (min-width: 960px) { }
+
+// BP 5 is default, above
+@media (min-width: 1140ps) {
+  .volume-button {
+    bottom: 40px;
+    left: 82px;
+  }
+}
