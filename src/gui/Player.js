@@ -1110,10 +1110,13 @@ class Player extends EventEmitter {
         volumeControl.appendChild(controlDiv);
 
         this._volume.add(id, volumeControl, label);
+
+        if (label === 'Background') this._controls.enableBackgroundAudio();
     }
 
     removeVolumeControl(id: string) {
         this._volume.remove(id);
+        if (this._volume.getCount() === 0) this._controls.disableBackgroundAudio();
     }
     /* End of volume handling */
 

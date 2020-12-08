@@ -673,7 +673,8 @@ export default class Controller extends EventEmitter {
             [neObj] = this._allNarrativeElements.filter(ne => ne.id === narrativeElementId);
         } else if (this._reasoner) {
             // get the actual NarrativeElement object
-            const subReasoner = this._reasoner.getSubReasonerContainingNarrativeElement(narrativeElementId);
+            const subReasoner = this._reasoner
+                .getSubReasonerContainingNarrativeElement(narrativeElementId);
             if (subReasoner) {
                 neObj = subReasoner._narrativeElements[narrativeElementId];
             }
@@ -1201,7 +1202,10 @@ export default class Controller extends EventEmitter {
         return this.getValidNextSteps(narrativeElement.id)
             .then((nextNarrativeElements) => {
                 if(nextNarrativeElements && nextNarrativeElements.length > 0) {
-                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { names: nextNarrativeElements.map(neObj => neObj.ne.name) }); // eslint-disable-line max-len
+                    this.emit(REASONER_EVENTS.NEXT_ELEMENTS, { 
+                        names: nextNarrativeElements.map(neObj => neObj.ne.name),
+                        ids: nextNarrativeElements.map(neObj => neObj.ne.id),
+                    });
                 }
                 return nextNarrativeElements.map(neObj => neObj.ne.id);;
             });
