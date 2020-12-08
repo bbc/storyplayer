@@ -280,9 +280,7 @@
                             "title": "Share your fun:",
                             "position": {
                                 "top": 5,
-                                "left": 82,
-                                "width": 13,
-                                "height": 10
+                                "right": 8
                             },
                             "id": "270cd809-9628-49be-b0c3-b144a68e8e09",
                             "css_class": "share_modal",
@@ -298,10 +296,8 @@
                             "title": "Learn more:",
                             "id": "030081dd-beca-4b50-838a-fd30b4554250",
                             "position": {
-                                "top": 25,
-                                "left": 72,
-                                "width": 23,
-                                "height": 10
+                                "top": 35,
+                                "right": 18
                             },
                             "open_in_new_tab": false,
                             "before_text": "Come and ",
