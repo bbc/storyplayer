@@ -232,7 +232,6 @@ class SMPControls extends BaseControls {
         // Setup Default Controls Settings
         this._uiUpdate({
             volumeDismissTime: 5000,
-            always: true,
             enabled: true,
             spaceControlsPlayback: true,
             availableOnMediaEnded: true,
