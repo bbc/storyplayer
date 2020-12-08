@@ -422,6 +422,10 @@ export default class Controller extends EventEmitter {
         return this._currentNarrativeElement;
     }
 
+    getCurrentStory(): ?Story {
+        return this._reasoner ? this._reasoner._story : null;
+    }
+
     /**
      * handle RendererEvents.COMPLETED event
      */
@@ -1144,8 +1148,8 @@ export default class Controller extends EventEmitter {
         return Promise.resolve([]);
     }
 
-    refreshPlayerNextAndBack() {
-        this._renderManager.refreshOnwardIcons();
+    refreshPlayerControls() {
+        this._renderManager.updateControlAvailability();
     }
 
     /**

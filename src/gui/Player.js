@@ -905,6 +905,8 @@ class Player extends EventEmitter {
 
         if (startNow) this._controls.setControlsActive();
 
+        this._controller.refreshPlayerControls();
+
         this.playoutEngine.setPermissionToPlay(
             true,
             startNow,
@@ -1597,6 +1599,25 @@ class Player extends EventEmitter {
 
     setBackAvailable(isBackAvailable: boolean) {
         this._controls.setBackAvailable(isBackAvailable);
+    }
+
+    applyControlHideList(controlsToHide: Array<string>) {
+        if (controlsToHide.includes('scrub')) {
+            this.disableScrubBar();
+        }
+        if (controlsToHide.includes('back')) {
+            this.setBackAvailable(false);
+        }
+        if (controlsToHide.includes('seek')) {
+            this.hideSeekButtons();
+        }
+        if (controlsToHide.includes('play')) {
+            // requires thought - what if user is paused?
+            this.disablePlayButton();
+        }
+        if (controlsToHide.includes('next')) {
+            this.setNextAvailable(false);
+        }
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {
