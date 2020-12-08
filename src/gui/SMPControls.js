@@ -224,7 +224,8 @@ class SMPControls extends BaseControls {
         this._uiUpdateQueue = []
 
         this._smpPlayerInterface.updateUiConfig({
-            controls: controlsConfig
+            controls: controlsConfig,
+            pictureInPicture : { enabled: false }
         })
     }
 
