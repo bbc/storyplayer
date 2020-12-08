@@ -35,6 +35,7 @@ export default class SimpleAudioRenderer extends TimedMediaRenderer {
                 if (image.assets.image_src) {
                     const imageUrl = await this._fetchMedia(image.assets.image_src);
                     this._backgroundImage = document.createElement('img');
+                    this._backgroundImage.setAttribute('draggable', 'false');
                     this._backgroundImage.className = 'romper-render-image';
                     this._backgroundImage.src = imageUrl;
                     if (this.phase !== RENDERER_PHASES.MAIN) {

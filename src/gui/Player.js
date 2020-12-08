@@ -742,7 +742,8 @@ class Player extends EventEmitter {
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
             this._startExperienceImage = document.createElement('img');
-            this._startExperienceImage.className = 'romper-start-image';
+            this._startExperienceImage.setAttribute('draggable', 'false');
+            this._startExperienceImage.className = 'romper-start-image noselect';
             this._startExperienceImage.src = options.background_art;
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
@@ -1246,6 +1247,7 @@ class Player extends EventEmitter {
                 linkChoiceControl.classList.add('text');
                 const iconParent = document.createElement('div');
                 const iconElement = document.createElement('img');
+                iconElement.setAttribute('draggable', 'false');
                 iconElement.src = linkChoiceIconSrc;
                 iconParent.appendChild(iconElement);
                 iconParent.className = 'romper-link-icon-container'
@@ -1266,6 +1268,7 @@ class Player extends EventEmitter {
                 linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const iconElement = document.createElement('img');
+                iconElement.setAttribute('draggable', 'false');
                 iconElement.src = linkChoiceIconSrc;
                 iconContainer.appendChild(iconElement);
             }
