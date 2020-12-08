@@ -1412,6 +1412,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _overlayImage(imageSrc: string, id: string) {
         const overlayImageElement = document.createElement('img');
+        overlayImageElement.setAttribute('draggable', 'false');
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.src = imageSrc;

@@ -224,7 +224,8 @@ class SMPControls extends BaseControls {
         this._uiUpdateQueue = []
 
         this._smpPlayerInterface.updateUiConfig({
-            controls: controlsConfig
+            controls: controlsConfig,
+            pictureInPicture : { enabled: false }
         })
     }
 
@@ -232,7 +233,6 @@ class SMPControls extends BaseControls {
         // Setup Default Controls Settings
         this._uiUpdate({
             volumeDismissTime: 5000,
-            always: true,
             enabled: true,
             spaceControlsPlayback: true,
             availableOnMediaEnded: true,
