@@ -742,7 +742,8 @@ class Player extends EventEmitter {
     _createStartImage(options: Object) {
         if(!this._startExperienceImage) {
             this._startExperienceImage = document.createElement('img');
-            this._startExperienceImage.className = 'romper-start-image';
+            this._startExperienceImage.setAttribute('draggable', 'false');
+            this._startExperienceImage.className = 'romper-start-image noselect';
             this._startExperienceImage.src = options.background_art;
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
@@ -904,6 +905,8 @@ class Player extends EventEmitter {
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
 
         if (startNow) this._controls.setControlsActive();
+
+        this._controller.refreshPlayerControls();
 
         this.playoutEngine.setPermissionToPlay(
             true,
@@ -1108,10 +1111,13 @@ class Player extends EventEmitter {
         volumeControl.appendChild(controlDiv);
 
         this._volume.add(id, volumeControl, label);
+
+        if (label === 'Background') this._controls.enableBackgroundAudio();
     }
 
     removeVolumeControl(id: string) {
         this._volume.remove(id);
+        if (this._volume.getCount() === 0) this._controls.disableBackgroundAudio();
     }
     /* End of volume handling */
 
@@ -1243,6 +1249,7 @@ class Player extends EventEmitter {
                 linkChoiceControl.classList.add('text');
                 const iconParent = document.createElement('div');
                 const iconElement = document.createElement('img');
+                iconElement.setAttribute('draggable', 'false');
                 iconElement.src = linkChoiceIconSrc;
                 iconParent.appendChild(iconElement);
                 iconParent.className = 'romper-link-icon-container'
@@ -1263,6 +1270,7 @@ class Player extends EventEmitter {
                 linkChoiceControl.classList.add('icon');
                 const linkChoiceIconSrc = (src !== '' ? src : this._assetUrls.noAssetIconUrl);
                 const iconElement = document.createElement('img');
+                iconElement.setAttribute('draggable', 'false');
                 iconElement.src = linkChoiceIconSrc;
                 iconContainer.appendChild(iconElement);
             }
@@ -1594,6 +1602,25 @@ class Player extends EventEmitter {
 
     setBackAvailable(isBackAvailable: boolean) {
         this._controls.setBackAvailable(isBackAvailable);
+    }
+
+    applyControlHideList(controlsToHide: Array<string>) {
+        if (controlsToHide.includes('scrub')) {
+            this.disableScrubBar();
+        }
+        if (controlsToHide.includes('back')) {
+            this.setBackAvailable(false);
+        }
+        if (controlsToHide.includes('seek')) {
+            this.hideSeekButtons();
+        }
+        if (controlsToHide.includes('play')) {
+            // requires thought - what if user is paused?
+            this.disablePlayButton();
+        }
+        if (controlsToHide.includes('next')) {
+            this.setNextAvailable(false);
+        }
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {

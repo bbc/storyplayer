@@ -1312,7 +1312,7 @@ export default class BaseRenderer extends EventEmitter {
                 // hide icons
                 this._hideChoiceIcons(null, behaviourId);
                 // refresh next/prev so user can skip now if necessary
-                this._controller.refreshPlayerNextAndBack();
+                this._controller.refreshPlayerControls();
                 this._player.enableControls();
                 this._player.showSeekButtons();
             }
@@ -1412,6 +1412,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _overlayImage(imageSrc: string, id: string) {
         const overlayImageElement = document.createElement('img');
+        overlayImageElement.setAttribute('draggable', 'false');
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.src = imageSrc;

@@ -20,7 +20,8 @@
                     }
                 },
                 "storyplayer": {
-                    "disable_tab_defocus": true
+                    "disable_tab_defocus": true,
+                    "hide_controls": ["scrub", "seek", "chapters"]
                 }
             },
             "object_class": "STORY",
@@ -73,6 +74,9 @@
                     "colour": "#DB3E00",
                     "xPos": 517.8712064019327,
                     "yPos": 178.28219839951683
+                },
+                "storyplayer": {
+                    "hide_controls": ["scrub", "back", "seek", "next"]
                 }
             },
             "object_class": "NARRATIVE_ELEMENT",
