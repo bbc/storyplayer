@@ -25,6 +25,7 @@ import {
     leftGreaterThanRight,
     inSMPWrapper,
     proxyWrapper,
+    getSMPInterface,
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
@@ -1240,6 +1241,9 @@ class Player extends EventEmitter {
                     id,
                     { label, text, },
                 );
+                if(inSMPWrapper()) {
+                    getSMPInterface().captureIntent('audio');
+                }
             };
 
             linkChoiceControl.appendChild(iconContainer);
