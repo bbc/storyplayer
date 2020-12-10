@@ -88,7 +88,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             volume = 0
         }
         this._volume = volume
-        const backgroundAudioVolume = this._volume * this._backgroundMix
+        const backgroundAudioVolume = this._volume * this._backgroundMix;
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
     }
 
@@ -444,6 +444,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return super.setPlayoutInactive(rendererId)
     }
 
+    removeBackgrounds(rendererId: string) {
+        this._secondaryPlayoutEngine.removeBackgrounds(rendererId);
+    }
+
     play(changeSMP = true) {
         this._playing = true;
         this._hasStarted = true;
@@ -634,7 +638,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             return this._secondaryPlayoutEngine.getVolume(rendererId)
         }
         if(rendererPlayoutObj.active) {
-            return this._volume
+            return this._volume;
         }
         return 1
     }
