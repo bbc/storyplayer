@@ -453,7 +453,6 @@ export default class RenderManager extends EventEmitter {
     }
 
 
-
     getBackgroundIds(representation: Representation) {
         if(representation.asset_collections.background_ids) {
             return representation.asset_collections.background_ids
@@ -462,19 +461,39 @@ export default class RenderManager extends EventEmitter {
     }
 
 
+    /**
+     * Tries to stop all the current background renderers
+     * calls stopBackgroundRenderer with the renderer src
+     */
     stopCurrentBackgroundRenderers() {
         Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
-            if (Object.values(this._upcomingBackgroundRenderers).includes(this._backgroundRenderers[rendererSrc])) {
-                const rendererToEnd = this._backgroundRenderers[rendererSrc];
-                rendererToEnd.end();
-            } else {
-                const rendererToDestroy = this._backgroundRenderers[rendererSrc];
-                rendererToDestroy.destroy();
-            }
-            delete this._backgroundRenderers[rendererSrc];
+            this.stopBackgroundRenderer(rendererSrc);
         });
     }
 
+
+    /**
+     * If the renderer is needed in up coming representations stop it
+     * otherwise destroy it and remove it from the pool of background renderers
+     * @param {string} rendererSrc Background renderer source
+     */
+    stopBackgroundRenderer(rendererSrc: string) {
+        const backgroundRenderer = this._backgroundRenderers[rendererSrc];
+        if (this.hasUpComingRenderersForBackground(rendererSrc)) {
+            // end the renderer we want to keep it around for the next representation
+            backgroundRenderer.end();
+        } else {
+            backgroundRenderer.destroy();
+            delete this._backgroundRenderers[rendererSrc];
+        }
+    }
+
+    /**
+     * Cleans up all the active foreground renderers for a 
+     * list of element ids where we are not using them
+     * @param {NarrativeElement} narrativeElement 
+     * @param {*} allIds 
+     */
     cleanupActiveRenderers(narrativeElement: NarrativeElement, allIds: string[]) {
         Object.keys(this._activeRenderers)
             .filter(neid => allIds.indexOf(neid) === -1)
@@ -486,29 +505,55 @@ export default class RenderManager extends EventEmitter {
             });
     }
 
-    srcHasBackgroundRenderer(src: string) {
-        this._backgroundRenderers.hasOwnProperty(src)
+    /**
+     * Checks this._backgroundRenderers contains a renderer for a given src
+     * @param {string} src 
+     */
+    hasRendererForBackground(src: string) {
+        if(!src) return false;
+        return Object.keys(this._backgroundRenderers).includes(src);
+    }
+
+    /**
+     * Checks this._upcomingBackgroundRenderers contains a renderer for a given src
+     * @param {string} src 
+     */
+    hasUpComingRenderersForBackground(src: string) {
+        if(!src) return false;
+        return Object.keys(this._upcomingBackgroundRenderers).includes(src);
     }
 
 
-    createNewBackgroundRenderer(assetCollection: AssetCollection) {
+    /**
+     * Creates a new background renderer for a given asset collection
+     * or picks it from the up comming background renderers we currently have
+     * And starts the renderer
+     * @param {AssetCollection} assetCollection 
+     * @param {*} src 
+     */
+    createNewBackgroundRenderer(assetCollection: AssetCollection, src: string): ?BackgroundRenderer {
         let backgroundRenderer = null;
-        if (src in this._upcomingBackgroundRenderers) {
-            backgroundRenderer = this._upcomingBackgroundRenderers[src];
+        if (this.hasUpComingRenderersForBackground(src)) {
+            return this._upcomingBackgroundRenderers[src];
         } else {
-            backgroundRenderer = BackgroundRendererFactory(
+            return BackgroundRendererFactory(
                 assetCollection.asset_collection_type,
                 assetCollection,
                 this._fetchers.mediaFetcher,
                 this._player,
             );
         }
-        if (backgroundRenderer) {
-            backgroundRenderer.start();
-            this._backgroundRenderers[src]
-                = backgroundRenderer;
-        }
-        return backgroundRenderer;
+    }
+
+
+
+    /**
+     * Gets all the background asset collections
+     * @param {*} backgroundIds 
+     */
+    async getBackgroundAudioAssets(backgroundIds: string[]) {
+        const assetCollectionPromises = [];
+        return Promise.all(backgroundIds.map(assetId => this._fetchers.assetCollectionFetcher(assetId)));
     }
 
     /**
@@ -519,72 +564,37 @@ export default class RenderManager extends EventEmitter {
      *      or start a new background renderer
      * @param {*} representation
      */
-    async _handleBackgroundRendering(representation: Representation): Promise < any > {
-
+    async _handleBackgroundRendering(representation: Representation) {
         if (!representation) {
-            return Promise.resolve();
+            return;
         }
-
         const newBackgrounds = this.getBackgroundIds(representation);
 
-        // if there are no new backgrounds to render we stop[ the current ones and exit
+        // if there are no new backgrounds to render we stop all the current ones and exit
         if (newBackgrounds.length === 0) {
             this.stopCurrentBackgroundRenderers();
-            return Promise.resolve();
+            return;
         }
 
+        // gets all the background asset collections and picks the audio srcs
+        const assetCollections = await this.getBackgroundAudioAssets(newBackgrounds);
 
-        // get asset collections and find srcs
-        const assetCollectionPromises = [];
-        newBackgrounds.forEach(assetId => assetCollectionPromises.push(this._fetchers.assetCollectionFetcher(assetId)));
-
-        const assetCollections = await Promise.all(assetCollectionPromises);
-
-        const newBackgroundSrcs = assetCollections.map(ac => {
-            if (ac.assets.audio_src) {
-                return {
-                    src: ac.assets.audio_src,
-                    acId: ac.id,
+        // if we have a renderer for the background then stop it and create a new one for it
+        assetCollections.forEach(ac => {
+            if(ac.assets.audio_src) {
+                const src = ac.assets.audio_src;
+                if(this.hasRendererForBackground(src)) {
+                    this.stopBackgroundRenderer(src);
+                } else {
+                    // create a new background renderer and start it
+                    const newBackgroundRenderer = this.createNewBackgroundRenderer(ac, src);
+                    if (newBackgroundRenderer) {
+                        newBackgroundRenderer.start();
+                        this._backgroundRenderers[src] = newBackgroundRenderer;
+                    }
                 }
             }
-            return null;
-        }).filter(a => a !== null);
-
-        // remove dead backgrounds
-        console.log('_backgroundRenderers before', this._backgroundRenderers);
-        if (newBackgroundSrcs.filter(blg => Object.keys(this._backgroundRenderers).includes(blg.src)).length === 0) {
-            this.stopCurrentBackgroundRenderers();
-        }
-
-        // check the new background asset collections include the same src
-
-
-        newBackgroundSrcs.forEach((srcObj) => {
-            const {src, acId } = srcObj;
-            // maintain ones in both, add new ones, remove old ones
-            if (!this._backgroundRenderers.hasOwnProperty(src)) {
-                this._fetchers.assetCollectionFetcher(acId)
-                    .then((bgAssetCollection) => {
-                        let backgroundRenderer = null;
-                        if (src in this._upcomingBackgroundRenderers) {
-                            backgroundRenderer = this._upcomingBackgroundRenderers[src];
-                        } else {
-                            backgroundRenderer = BackgroundRendererFactory(
-                                bgAssetCollection.asset_collection_type,
-                                bgAssetCollection,
-                                this._fetchers.mediaFetcher,
-                                this._player,
-                            );
-                        }
-                        if (backgroundRenderer) {
-                            backgroundRenderer.start();
-                            this._backgroundRenderers[src] = backgroundRenderer;
-                        }
-                        return Promise.resolve(backgroundRenderer);
-                    });
-            }
         });
-        // });
     }
 
     /**
