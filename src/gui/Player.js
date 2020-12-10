@@ -1243,6 +1243,8 @@ class Player extends EventEmitter {
                 );
                 if(inSMPWrapper()) {
                     getSMPInterface().captureIntent('audio');
+                } else {
+                    this.playoutEngine.setPermissionToPlay(true, false);
                 }
             };
 
