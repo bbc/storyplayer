@@ -243,10 +243,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         const mediaObject = rendererPlayoutObj.media;
         if(mediaObject.type === MEDIA_TYPES.BACKGROUND_A) {
             const mediaElement = this._backgroundMediaElement;
-            if (mediaObject.url && mediaObject.url === mediaElement.src) {
-                mediaElement.pause();
-                mediaElement.removeAttribute('src');
-            }
+            mediaElement.pause();
+            mediaElement.removeAttribute('src');
         }
     }
 

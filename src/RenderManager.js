@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls,
+RepresentationChoice, AssetUrls, AssetCollection,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -453,6 +453,64 @@ export default class RenderManager extends EventEmitter {
     }
 
 
+
+    getBackgroundIds(representation: Representation) {
+        if(representation.asset_collections.background_ids) {
+            return representation.asset_collections.background_ids
+        }
+        return [];
+    }
+
+
+    stopCurrentBackgroundRenderers() {
+        Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
+            if (Object.values(this._upcomingBackgroundRenderers).includes(this._backgroundRenderers[rendererSrc])) {
+                const rendererToEnd = this._backgroundRenderers[rendererSrc];
+                rendererToEnd.end();
+            } else {
+                const rendererToDestroy = this._backgroundRenderers[rendererSrc];
+                rendererToDestroy.destroy();
+            }
+            delete this._backgroundRenderers[rendererSrc];
+        });
+    }
+
+    cleanupActiveRenderers(narrativeElement: NarrativeElement, allIds: string[]) {
+        Object.keys(this._activeRenderers)
+            .filter(neid => allIds.indexOf(neid) === -1)
+            .forEach((neid) => {
+                if (narrativeElement.id !== neid) {
+                    this._activeRenderers[neid].destroy();
+                }
+                delete this._activeRenderers[neid];
+            });
+    }
+
+    srcHasBackgroundRenderer(src: string) {
+        this._backgroundRenderers.hasOwnProperty(src)
+    }
+
+
+    createNewBackgroundRenderer(assetCollection: AssetCollection) {
+        let backgroundRenderer = null;
+        if (src in this._upcomingBackgroundRenderers) {
+            backgroundRenderer = this._upcomingBackgroundRenderers[src];
+        } else {
+            backgroundRenderer = BackgroundRendererFactory(
+                assetCollection.asset_collection_type,
+                assetCollection,
+                this._fetchers.mediaFetcher,
+                this._player,
+            );
+        }
+        if (backgroundRenderer) {
+            backgroundRenderer.start();
+            this._backgroundRenderers[src]
+                = backgroundRenderer;
+        }
+        return backgroundRenderer;
+    }
+
     /**
      * given a new representation, handle the background rendering
      * either:
@@ -461,71 +519,72 @@ export default class RenderManager extends EventEmitter {
      *      or start a new background renderer
      * @param {*} representation
      */
-    _handleBackgroundRendering(representation: Representation): Promise<any> {
-        let newBackgrounds = [];
-        if (representation
-            && representation.asset_collections.background_ids) {
-            newBackgrounds = representation.asset_collections.background_ids;
+    async _handleBackgroundRendering(representation: Representation): Promise < any > {
+
+        if (!representation) {
+            return Promise.resolve();
         }
+
+        const newBackgrounds = this.getBackgroundIds(representation);
+
+        // if there are no new backgrounds to render we stop[ the current ones and exit
+        if (newBackgrounds.length === 0) {
+            this.stopCurrentBackgroundRenderers();
+            return Promise.resolve();
+        }
+
 
         // get asset collections and find srcs
         const assetCollectionPromises = [];
-        newBackgrounds.forEach(backgroundAssetCollectionId =>
-            assetCollectionPromises
-                .push(this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)));
+        newBackgrounds.forEach(assetId => assetCollectionPromises.push(this._fetchers.assetCollectionFetcher(assetId)));
 
-        return Promise.all(assetCollectionPromises).then((assetCollections) => {
-            const srcs = [];
-            assetCollections.forEach((ac) => {
-                if (ac.assets.audio_src) {
-                    srcs.push({
-                        src: ac.assets.audio_src,
-                        acId: ac.id,
+        const assetCollections = await Promise.all(assetCollectionPromises);
+
+        const newBackgroundSrcs = assetCollections.map(ac => {
+            if (ac.assets.audio_src) {
+                return {
+                    src: ac.assets.audio_src,
+                    acId: ac.id,
+                }
+            }
+            return null;
+        }).filter(a => a !== null);
+
+        // remove dead backgrounds
+        console.log('_backgroundRenderers before', this._backgroundRenderers);
+        if (newBackgroundSrcs.filter(blg => Object.keys(this._backgroundRenderers).includes(blg.src)).length === 0) {
+            this.stopCurrentBackgroundRenderers();
+        }
+
+        // check the new background asset collections include the same src
+
+
+        newBackgroundSrcs.forEach((srcObj) => {
+            const {src, acId } = srcObj;
+            // maintain ones in both, add new ones, remove old ones
+            if (!this._backgroundRenderers.hasOwnProperty(src)) {
+                this._fetchers.assetCollectionFetcher(acId)
+                    .then((bgAssetCollection) => {
+                        let backgroundRenderer = null;
+                        if (src in this._upcomingBackgroundRenderers) {
+                            backgroundRenderer = this._upcomingBackgroundRenderers[src];
+                        } else {
+                            backgroundRenderer = BackgroundRendererFactory(
+                                bgAssetCollection.asset_collection_type,
+                                bgAssetCollection,
+                                this._fetchers.mediaFetcher,
+                                this._player,
+                            );
+                        }
+                        if (backgroundRenderer) {
+                            backgroundRenderer.start();
+                            this._backgroundRenderers[src] = backgroundRenderer;
+                        }
+                        return Promise.resolve(backgroundRenderer);
                     });
-                }
-            });
-            return Promise.resolve(srcs);
-        }).then((newBackgroundSrcs) => {
-            // remove dead backgrounds
-            Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
-                if (newBackgroundSrcs.filter(srcObj => srcObj.src === rendererSrc).length === 0) {
-                    if (Object.values(this._upcomingBackgroundRenderers)
-                        .includes(this._backgroundRenderers[rendererSrc])) {
-                        this._backgroundRenderers[rendererSrc].end();
-                    } else {
-                        this._backgroundRenderers[rendererSrc].destroy();
-                    }
-                    delete this._backgroundRenderers[rendererSrc];
-                }
-            });
-
-            newBackgroundSrcs.forEach((srcObj) => {
-                const { src, acId } = srcObj;
-                // maintain ones in both, add new ones, remove old ones
-                if (!this._backgroundRenderers.hasOwnProperty(src)) {
-                    this._fetchers.assetCollectionFetcher(acId)
-                        .then((bgAssetCollection) => {
-                            let backgroundRenderer = null;
-                            if (src in this._upcomingBackgroundRenderers) {
-                                backgroundRenderer = this._upcomingBackgroundRenderers[src];
-                            } else {
-                                backgroundRenderer = BackgroundRendererFactory(
-                                    bgAssetCollection.asset_collection_type,
-                                    bgAssetCollection,
-                                    this._fetchers.mediaFetcher,
-                                    this._player,
-                                );
-                            }
-                            if (backgroundRenderer) {
-                                backgroundRenderer.start();
-                                this._backgroundRenderers[src]
-                                    = backgroundRenderer;
-                            }
-                            return Promise.resolve(backgroundRenderer);
-                        });
-                }
-            });
+            }
         });
+        // });
     }
 
     /**
@@ -762,10 +821,7 @@ export default class RenderManager extends EventEmitter {
             } else {
                 allIds = nextIds;
             }
-            if (
-                this._currentRenderer &&
-                this._currentNarrativeElement
-            ) {
+            if (this._currentRenderer && this._currentNarrativeElement) {
                 // add current neid
                 allIds.push(this._currentNarrativeElement.id);
             }
@@ -804,14 +860,7 @@ export default class RenderManager extends EventEmitter {
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
-                    Object.keys(this._activeRenderers)
-                        .filter(neid => allIds.indexOf(neid) === -1)
-                        .forEach((neid) => {
-                            if (narrativeElement.id !== neid) {
-                                this._activeRenderers[neid].destroy();
-                            }
-                            delete this._activeRenderers[neid];
-                        });
+                    this.cleanupActiveRenderers(narrativeElement, allIds);
                     this._runBackgroundLookahead();
                 });
         });
@@ -906,6 +955,7 @@ export default class RenderManager extends EventEmitter {
                 if (this._currentRenderer) {
                     const renderer = this._currentRenderer;
                     const timeObj = renderer.getCurrentTime();
+                    console.log('timeObj', timeObj)
                     if (timeObj.remainingTime) {
                         if (timeObj.remainingTime < FADE_OUT_TIME) {
                             this._backgroundRenderers[id].fadeOut(timeObj.remainingTime);

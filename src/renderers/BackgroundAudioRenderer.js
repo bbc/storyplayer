@@ -116,6 +116,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     needsHardFade() {
+        console.log('this._playoutEngine instanceof SMPPlayoutEngine', this._playoutEngine instanceof SMPPlayoutEngine)
         return this._playoutEngine instanceof SMPPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine instanceof iOSPlayoutEngine;
     }
 

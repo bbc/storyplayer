@@ -38,7 +38,7 @@ export default class TimeManager extends EventEmitter {
                 this._testForEvents();
             }
             if (this._debug && this._timeElapsed > 0 && this._timeElapsed % 2 <= TIMER_INTERVAL/1000) {
-                logger.info(`TimeManager: ${this._rendererId} timer`, this._timeElapsed);
+                logger.trace(`TimeManager: ${this._rendererId} timer`, this._timeElapsed);
             }
             window.TimeManagerTime = this._timeElapsed
         }, TIMER_INTERVAL);
