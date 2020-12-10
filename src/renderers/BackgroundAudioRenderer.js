@@ -10,6 +10,8 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 import { AUDIO, LOOPING_AUDIO_AC_TYPE } from '../utils';
+import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
+import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
@@ -109,9 +111,22 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         this._fadePaused = false;
     }
 
+    iosHardFade() {
+        this._playoutEngine.removeBackgrounds(this._rendererId);
+    }
+
+    needsHardFade() {
+        return this._playoutEngine instanceof SMPPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine instanceof iOSPlayoutEngine;
+    }
+
     // start fading out the volume, over given duration (seconds)
     fadeOut(duration: number) {
         logger.info(`Fading out background audio ${this._getDescriptionString()}`);
+        // if we're on ios and using SMP then we have to clear the background
+        if(this.needsHardFade()) {
+            this.iosHardFade();
+            return;
+        }
         // clear fade in
         if (this._volFadeInterval) {
             clearInterval(this._volFadeInterval);

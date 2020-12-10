@@ -30,10 +30,12 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._foregroundMediaElement = document.createElement('video');
         this._foregroundMediaElement.className = 'romper-video-element';
         this._foregroundMediaElement.crossOrigin = 'anonymous';
+        this._foregroundMediaElement.id = 'storyplayer-foreground-media-element';
 
         this._backgroundMediaElement = document.createElement('audio');
         this._backgroundMediaElement.className = 'romper-audio-element';
         this._backgroundMediaElement.crossOrigin = 'anonymous';
+        this._backgroundMediaElement.id = 'storyplayer-background-media-element';
 
         // disable ios controls too, we use our own
         this._foregroundMediaElement.removeAttribute("controls");
@@ -233,6 +235,21 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         super.setPlayoutInactive(rendererId);
     }
 
+    removeBackgrounds(rendererId: string) {
+        const rendererPlayoutObj = this._media[rendererId];
+        if (!rendererPlayoutObj) {
+            return;
+        }
+        const mediaObject = rendererPlayoutObj.media;
+        if(mediaObject.type === MEDIA_TYPES.BACKGROUND_A) {
+            const mediaElement = this._backgroundMediaElement;
+            if (mediaObject.url && mediaObject.url === mediaElement.src) {
+                mediaElement.pause();
+                mediaElement.removeAttribute('src');
+            }
+        }
+    }
+
     setLoopAttribute(rendererId: string, loop: ?boolean) {
         const rendererPlayoutObj = this._media[rendererId];
         rendererPlayoutObj.loop = loop;
@@ -296,6 +313,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         }
     }
 
+    /**
+     * Attempts to set the volume on iOS will not do anything here
+     * @param {string} rendererId 
+     * @param {*} volume 
+     */
     setVolume(rendererId: string, volume: number) {
         const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {
