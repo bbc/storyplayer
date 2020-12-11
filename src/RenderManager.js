@@ -486,7 +486,6 @@ export default class RenderManager extends EventEmitter {
         });
     }
 
-
     /**
      * If the renderer is needed in up coming representations stop it
      * otherwise destroy it and remove it from the pool of background renderers
@@ -595,9 +594,8 @@ export default class RenderManager extends EventEmitter {
 
         // gets all the background asset collections and picks the audio srcs
         const assetCollections = await this.getBackgroundAudioAssets(newBackgrounds);
-
         // stop the renderers we don't want to keep
-        this.stopCurrentBackgroundRenderers();
+        this.stopCurrentBackgroundRenderers(assetCollections);
 
         // if we have don't have a renderer for this background then add it to list of renderers to start
         assetCollections.forEach(ac => {
@@ -983,7 +981,6 @@ export default class RenderManager extends EventEmitter {
                 if (this._currentRenderer) {
                     const renderer = this._currentRenderer;
                     const timeObj = renderer.getCurrentTime();
-                    console.log('timeObj', timeObj)
                     if (timeObj.remainingTime) {
                         if (timeObj.remainingTime < FADE_OUT_TIME) {
                             this._backgroundRenderers[id].fadeOut(timeObj.remainingTime);

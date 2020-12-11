@@ -9,7 +9,7 @@ import { MediaFormats } from '../browserCapabilities';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
-import { AUDIO, LOOPING_AUDIO_AC_TYPE } from '../utils';
+import { AUDIO, inSMPWrapper, LOOPING_AUDIO_AC_TYPE } from '../utils';
 import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
@@ -116,14 +116,12 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     }
 
     needsHardFade() {
-        console.log('this._playoutEngine instanceof SMPPlayoutEngine', this._playoutEngine instanceof SMPPlayoutEngine)
         return this._playoutEngine instanceof SMPPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine && this._playoutEngine._secondaryPlayoutEngine instanceof iOSPlayoutEngine;
     }
 
     // start fading out the volume, over given duration (seconds)
     fadeOut(duration: number) {
         logger.info(`Fading out background audio ${this._getDescriptionString()}`);
-        console.log(this)
         // if we're on ios and using SMP then we have to clear the background
         if(this.needsHardFade()) {
             this.iosHardFade();
@@ -137,16 +135,13 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (!this._fadeIntervalId) {
             const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
-                console.log('interval')
                 const volume = this._playoutEngine.getVolume(this._rendererId);
-                console.log('volume', volume);
                 if (volume >= (1 / interval)
                     && this._fadeIntervalId
                     && this.phase === RENDERER_PHASES.BG_FADE_OUT) {
                     if (!this._fadePaused) {
                         const newVolume = volume - (1 / interval);
                         this._playoutEngine.setVolume(this._rendererId, newVolume)
-                        console.log('new volume', newVolume);
                     }
                 } else if (this._fadeIntervalId) {
                     this._playoutEngine.setVolume(this._rendererId, 0)
