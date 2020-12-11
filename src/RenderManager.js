@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-RepresentationChoice, AssetUrls, AssetCollection,
+    RepresentationChoice, AssetUrls, AssetCollection,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -200,7 +200,6 @@ export default class RenderManager extends EventEmitter {
         // send fullscreen events
         this._player.on(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
     }
-
 
     _handleOrientationChange() {
         this._analytics({
@@ -452,7 +451,7 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-
+    // eslint-disable-next-line class-methods-use-this
     getBackgroundIds(representation: Representation) {
         if(representation.asset_collections.background_ids) {
             return representation.asset_collections.background_ids
@@ -547,20 +546,19 @@ export default class RenderManager extends EventEmitter {
      * or picks it from the up comming background renderers we currently have
      * And starts the renderer
      * @param {AssetCollection} assetCollection 
-     * @param {*} src 
+     * @param {string} src 
      */
-    createNewBackgroundRenderer(assetCollection: AssetCollection, src: string): ?BackgroundRenderer {
-        let backgroundRenderer = null;
+    createNewBackgroundRenderer(assetCollection: AssetCollection, src: string): ? BackgroundRenderer {
         if (this.hasUpComingRenderersForBackground(src)) {
             return this._upcomingBackgroundRenderers[src];
-        } else {
-            return BackgroundRendererFactory(
-                assetCollection.asset_collection_type,
-                assetCollection,
-                this._fetchers.mediaFetcher,
-                this._player,
-            );
         }
+        return BackgroundRendererFactory(
+            assetCollection.asset_collection_type,
+            assetCollection,
+            this._fetchers.mediaFetcher,
+            this._player,
+        );
+
     }
 
     /**
@@ -568,7 +566,6 @@ export default class RenderManager extends EventEmitter {
      * @param {*} backgroundIds 
      */
     async getBackgroundAudioAssets(backgroundIds: string[]) {
-        const assetCollectionPromises = [];
         return Promise.all(backgroundIds.map(assetId => this._fetchers.assetCollectionFetcher(assetId)));
     }
 

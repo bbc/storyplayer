@@ -9,7 +9,7 @@ import { MediaFormats } from '../browserCapabilities';
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
-import { AUDIO, inSMPWrapper, LOOPING_AUDIO_AC_TYPE } from '../utils';
+import { AUDIO, LOOPING_AUDIO_AC_TYPE } from '../utils';
 import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
