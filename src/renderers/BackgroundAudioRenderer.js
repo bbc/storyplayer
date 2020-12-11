@@ -15,7 +15,7 @@ import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
-const FADE_STEP_LENGTH = 10; // time between steps for fades
+const FADE_STEP_LENGTH = 50; // time between steps for fades
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
@@ -123,6 +123,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
     // start fading out the volume, over given duration (seconds)
     fadeOut(duration: number) {
         logger.info(`Fading out background audio ${this._getDescriptionString()}`);
+        console.log(this)
         // if we're on ios and using SMP then we have to clear the background
         if(this.needsHardFade()) {
             this.iosHardFade();
@@ -136,13 +137,16 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (!this._fadeIntervalId) {
             const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
-                const volume = this._playoutEngine.getVolume(this._rendererId)
+                console.log('interval')
+                const volume = this._playoutEngine.getVolume(this._rendererId);
+                console.log('volume', volume);
                 if (volume >= (1 / interval)
                     && this._fadeIntervalId
                     && this.phase === RENDERER_PHASES.BG_FADE_OUT) {
                     if (!this._fadePaused) {
                         const newVolume = volume - (1 / interval);
                         this._playoutEngine.setVolume(this._rendererId, newVolume)
+                        console.log('new volume', newVolume);
                     }
                 } else if (this._fadeIntervalId) {
                     this._playoutEngine.setVolume(this._rendererId, 0)

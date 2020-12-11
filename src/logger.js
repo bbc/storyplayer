@@ -17,7 +17,7 @@ module.exports = createLogger({
     name: 'romper',
     streams: [
         {
-            level: 'debug',
+            level: 'fatal',
             stream: new ConsoleFormattedStream({ logByLevel: true }),
         },
     ],

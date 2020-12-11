@@ -462,12 +462,27 @@ export default class RenderManager extends EventEmitter {
 
 
     /**
-     * Tries to stop all the current background renderers
-     * calls stopBackgroundRenderer with the renderer src
+     * accepts an array of asset collections for this representation backgrounds
+     * checks whether we have a renderer for these so to maintain background music continuity
+     * otherwise stops all the other background renderers
+     * @param {AssetCollection[]} assetCollections 
      */
-    stopCurrentBackgroundRenderers() {
+    stopCurrentBackgroundRenderers(assetCollections: ?AssetCollection[]) {
+        const renderersToKeep = [];
+        if (assetCollections && assetCollections.length > 0) {
+            assetCollections.forEach(ac => {
+                if (ac.assets.audio_src) {
+                    const src = ac.assets.audio_src;
+                    // if we already have a background renderer for this then we want to keep it
+                    if (this.hasRendererForBackground(src)) {
+                        renderersToKeep.push(src);
+                    }
+                }
+            });
+        }
+
         Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
-            this.stopBackgroundRenderer(rendererSrc);
+            this.stopBackgroundRenderer(rendererSrc, renderersToKeep);
         });
     }
 
@@ -475,17 +490,21 @@ export default class RenderManager extends EventEmitter {
     /**
      * If the renderer is needed in up coming representations stop it
      * otherwise destroy it and remove it from the pool of background renderers
+     * unless it is explicitly told to be kept around as the current representation has it
      * @param {string} rendererSrc Background renderer source
      */
-    stopBackgroundRenderer(rendererSrc: string) {
+    stopBackgroundRenderer(rendererSrc: string, renderersToKeep: ?string[]) {
+        if(renderersToKeep && renderersToKeep.includes(rendererSrc)){
+            return;
+        }
         const backgroundRenderer = this._backgroundRenderers[rendererSrc];
         if (this.hasUpComingRenderersForBackground(rendererSrc)) {
             // end the renderer we want to keep it around for the next representation
             backgroundRenderer.end();
         } else {
             backgroundRenderer.destroy();
-            delete this._backgroundRenderers[rendererSrc];
         }
+        delete this._backgroundRenderers[rendererSrc];
     }
 
     /**
@@ -545,8 +564,6 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
-
-
     /**
      * Gets all the background asset collections
      * @param {*} backgroundIds 
@@ -579,24 +596,23 @@ export default class RenderManager extends EventEmitter {
         // gets all the background asset collections and picks the audio srcs
         const assetCollections = await this.getBackgroundAudioAssets(newBackgrounds);
 
-        // if we have a renderer for the background then stop it and create a new one for it
+        // stop the renderers we don't want to keep
+        this.stopCurrentBackgroundRenderers();
+
+        // if we have don't have a renderer for this background then add it to list of renderers to start
         assetCollections.forEach(ac => {
             if(ac.assets.audio_src) {
                 const src = ac.assets.audio_src;
-                if(this.hasRendererForBackground(src)) {
-                    this.stopBackgroundRenderer(src);
-                } else {
+                if(!this.hasRendererForBackground(src)) {
                     // create a new background renderer and start it
                     const newBackgroundRenderer = this.createNewBackgroundRenderer(ac, src);
                     if (newBackgroundRenderer) {
                         newBackgroundRenderer.start();
                         this._backgroundRenderers[src] = newBackgroundRenderer;
                     }
-                }
+                } 
             }
         });
-        console.log('representation', this._currentRenderer._representation);
-        console.log('background renderers', this._backgroundRenderers);
     }
 
     /**
@@ -873,7 +889,7 @@ export default class RenderManager extends EventEmitter {
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
                     this.cleanupActiveRenderers(narrativeElement, allIds);
-                    // this._runBackgroundLookahead();
+                    this._runBackgroundLookahead();
                 });
         });
     }
