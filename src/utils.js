@@ -14,26 +14,26 @@ export const proxyWrapper = (text, classInstance) => {
             return function() {
                 /* eslint-disable prefer-rest-params */
                 try {
-                    logger.trace( `(C) ${text} call: ${getProp} (${arguments.length})` );
+                    logger.debug( `(C) ${text} call: ${getProp} (${arguments.length})` );
                 } catch {
-                    logger.trace( `(C) ${text} call: ${getProp} logger failed`)
+                    logger.debug( `(C) ${text} call: ${getProp} logger failed`)
                 }
                 try {
-                    logger.trace( `(C+A) ${text} call: ${getProp}`, ...arguments );
+                    logger.debug( `(C+A) ${text} call: ${getProp}`, ...arguments );
                 } catch {
-                    logger.trace( `(C+A) ${text} call: ${getProp} logger failed`)
+                    logger.debug( `(C+A) ${text} call: ${getProp} logger failed`)
                 }
                 // eslint-disable-next-line prefer-spread
                 const ret = getTarget[ getProp ].apply( getTarget, arguments );
                 try {
-                    logger.trace( `(C+R) ${text} call: ${getProp}`, ret );
+                    logger.debug( `(C+R) ${text} call: ${getProp}`, ret );
                 } catch {
-                    logger.trace( `(C+R) ${text} call: ${getProp} logger failed`)
+                    logger.debug( `(C+R) ${text} call: ${getProp} logger failed`)
                 }
                 try {
-                    logger.trace( `(C+A+R) ${text} call: ${getProp}`, ...arguments, ret );
+                    logger.debug( `(C+A+R) ${text} call: ${getProp}`, ...arguments, ret );
                 } catch {
-                    logger.trace( `(C+A+R) ${text} call: ${getProp} logger failed`)
+                    logger.debug( `(C+A+R) ${text} call: ${getProp} logger failed`)
                 }
                 /* eslint-enable prefer-rest-params */
 

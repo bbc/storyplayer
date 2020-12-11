@@ -595,6 +595,8 @@ export default class RenderManager extends EventEmitter {
                 }
             }
         });
+        console.log('representation', this._currentRenderer._representation);
+        console.log('background renderers', this._backgroundRenderers);
     }
 
     /**
@@ -871,7 +873,7 @@ export default class RenderManager extends EventEmitter {
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
                     this.cleanupActiveRenderers(narrativeElement, allIds);
-                    this._runBackgroundLookahead();
+                    // this._runBackgroundLookahead();
                 });
         });
     }
