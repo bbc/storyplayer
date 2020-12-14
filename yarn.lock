@@ -5926,10 +5926,10 @@ json-buffer@3.0.0:
   resolved "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.0.tgz#5b1f397afc75d677bde8bcfc0e47e1f9a3d9a898"
   integrity sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=
 
-json-logic-js@^1.0.11:
-  version "1.2.3"
-  resolved "https://registry.npmjs.org/json-logic-js/-/json-logic-js-1.2.3.tgz#7cbea4cbd5342916fbe63dc7f84833c6143a24a5"
-  integrity sha512-QD/5xD9X5ZYD3pYpWxdAQD2/ph83dnybo8zwkKmrvCirnDXB0pjv4d+CnAZ3iq5lGiNfl97uWz8WuAn+wD/QBw==
+json-logic-js@^2.0.0:
+  version "2.0.0"
+  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/json-logic-js/-/json-logic-js-2.0.0.tgz#bd83ade3f1e46e4544062e61f9f7c035052b101d"
+  integrity sha1-vYOt4/HkbkVEBi5h+ffANQUrEB0=
 
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
