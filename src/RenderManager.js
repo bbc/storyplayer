@@ -481,7 +481,10 @@ export default class RenderManager extends EventEmitter {
         }
 
         Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
-            this.stopBackgroundRenderer(rendererSrc, renderersToKeep);
+            if(renderersToKeep.includes(rendererSrc)) {
+                return;
+            }
+            this.stopBackgroundRenderer(rendererSrc);
         });
     }
 
@@ -491,10 +494,7 @@ export default class RenderManager extends EventEmitter {
      * unless it is explicitly told to be kept around as the current representation has it
      * @param {string} rendererSrc Background renderer source
      */
-    stopBackgroundRenderer(rendererSrc: string, renderersToKeep: ?string[]) {
-        if(renderersToKeep && renderersToKeep.includes(rendererSrc)){
-            return;
-        }
+    stopBackgroundRenderer(rendererSrc: string) {
         const backgroundRenderer = this._backgroundRenderers[rendererSrc];
         if (this.hasUpComingRenderersForBackground(rendererSrc)) {
             // end the renderer we want to keep it around for the next representation
