@@ -3,7 +3,7 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls,
+    RepresentationChoice, AssetUrls, Story,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -56,7 +56,7 @@ export default class RenderManager extends EventEmitter {
 
     _currentNarrativeElement: NarrativeElement;
 
-    _story: Object;
+    _story: Story;
 
     _rendererState: {
         lastSwitchableLabel: string,
@@ -216,6 +216,8 @@ export default class RenderManager extends EventEmitter {
      * @param {boolean} isVisible
      */
     _handleVisibilityChange(isVisible: boolean) {
+        const { meta } = this._story;
+        if (meta.storyplayer && meta.storyplayer.disable_tab_defocus) return;
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
