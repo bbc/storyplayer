@@ -1242,7 +1242,7 @@ class Player extends EventEmitter {
                     { label, text, },
                 );
                 if(inSMPWrapper()) {
-                    getSMPInterface().captureIntent('audio');
+                    getSMPInterface().captureIntent({type: 'audio'});
                 }
             };
 
