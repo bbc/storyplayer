@@ -1626,6 +1626,7 @@ class Player extends EventEmitter {
             this.setNextAvailable(false);
         }
         if (controlsToHide.includes('accessibility')) {
+            // note this can't get un-done!
             this.setAccessilitySliderAvailable(false);
         }
     }
