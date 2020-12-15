@@ -336,7 +336,7 @@ class SMPControls extends BaseControls {
         const changeVol = (e) => {
             const sliderValue = parseFloat(e.target.value);
             this._smpPlayerInterface.volume = sliderValue / 11;
-            this._masterValueLabel.textContent = `${sliderValue}`;
+            this._masterValueLabel.textContent = `${Math.round(sliderValue)}`;
         };
         masterSlider.addEventListener("change", changeVol);
         masterSlider.addEventListener("input", changeVol);
@@ -347,7 +347,7 @@ class SMPControls extends BaseControls {
             'master-volume-value', ['volume-label']);
         this._masterValueLabel = document.createElement('span');
         this._masterValueLabel.textContent = this._smpPlayerInterface.volume ?
-            `${this._smpPlayerInterface.volume * 10}` : '7';
+            `${Math.round(this._smpPlayerInterface.volume * 10)}` : '7';
         volLabel.appendChild(this._masterValueLabel);
         masterContainer.appendChild(volLabel);
         return masterContainer;
@@ -359,7 +359,7 @@ class SMPControls extends BaseControls {
             this._masterValueLabel.textContent = '0';
         } else {
             this._volumeControls.classList.remove('muted');
-            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 11}`;
+            this._masterValueLabel.textContent = `${Math.round(this._smpPlayerInterface.volume * 11)}`;
         }
     }
 
