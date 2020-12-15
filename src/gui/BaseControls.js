@@ -107,6 +107,8 @@ class BaseControls extends EventEmitter {
 
     disableBackgroundAudio() { }
 
+    setAccessilitySliderAvailable() { }
+
 }
 
 export { ControlEvents };

@@ -42,6 +42,10 @@ class SMPControls extends BaseControls {
 
     _playoutEngine: BasePlayoutEngine;
 
+    oldCloseVol: Function;
+
+    oldOpenVol: Function;
+
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
@@ -361,6 +365,8 @@ class SMPControls extends BaseControls {
 
     _overrideVolumeButton() {
         /* eslint-disable no-undef */
+        this.oldOpenVol = publicApi.ui.volumeControl.openVolumeControls;
+        this.oldCloseVol = publicApi.ui.volumeControl.closeVolumeControls;
         publicApi.ui.volumeControl.openVolumeControls = () => {
             this._volumeControls.classList.remove('romper-inactive');
         }
@@ -368,6 +374,13 @@ class SMPControls extends BaseControls {
             this._volumeControls.classList.add('romper-inactive');
         };
         publicApi.ui.volumeControl.volumeControls.style.overflow = 'visible'
+        /* eslint-enable no-undef */
+    }
+
+    _clearVolumeButtonOverride() {
+        /* eslint-disable no-undef */
+        publicApi.ui.volumeControl.openVolumeControls = this.oldOpenVol;
+        publicApi.ui.volumeControl.closeVolumeControls = this.oldCloseVol;
         /* eslint-enable no-undef */
     }
 
@@ -602,6 +615,15 @@ class SMPControls extends BaseControls {
                 yOffset: maxSubsY,
             }
         });
+    }
+
+
+    setAccessilitySliderAvailable(show) {
+        if (show) {
+            this._overrideVolumeButton()
+        } else {
+            this._clearVolumeButtonOverride();
+        }
     }
 
     // choices have been cleared - return the subtitles to normal

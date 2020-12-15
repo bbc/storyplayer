@@ -1625,6 +1625,13 @@ class Player extends EventEmitter {
         if (controlsToHide.includes('next')) {
             this.setNextAvailable(false);
         }
+        if (controlsToHide.includes('accessibility')) {
+            this.setAccessilitySliderAvailable(false);
+        }
+    }
+
+    setAccessilitySliderAvailable(show) {
+        this._controls.setAccessilitySliderAvailable(show);
     }
 
     _applyExitFullscreenBehaviour(behaviour: Object, callback: () => mixed) {
