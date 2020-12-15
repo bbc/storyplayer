@@ -339,6 +339,7 @@ export default class RenderManager extends EventEmitter {
         try {
             const story = await this._fetchers.storyFetcher(storyId);
             this._story = story;
+            this._player.disableControls();
             this._setAspectRatio(story);
             await this.fetchDog(story)
             return await this.fetchStartImage(story);
