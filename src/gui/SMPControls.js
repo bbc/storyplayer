@@ -229,23 +229,26 @@ class SMPControls extends BaseControls {
 
         this._smpPlayerInterface.updateUiConfig({
             controls: controlsConfig,
-            pictureInPicture : { enabled: false },
-            allowAudioControlsToHide: true,
-        })
+        });
     }
 
     _setDefaultSMPControlsConfig() {
         // Setup Default Controls Settings
-        this._uiUpdate({
-            volumeDismissTime: 5000,
-            enabled: true,
-            spaceControlsPlayback: true,
-            availableOnMediaEnded: true,
-            includeNextButton: true,
-            includePreviousButton: true,
-            alwaysEnablePreviousButton: false,
-            alwaysEnableNextButton: false,
-        })
+        this._smpPlayerInterface.updateUiConfig({
+            pictureInPicture : { enabled: false },
+            allowAudioControlsToHide: true,
+            chromecast: { enabled: false },
+            controls: {
+                volumeDismissTime: 5000,
+                enabled: true,
+                spaceControlsPlayback: true,
+                availableOnMediaEnded: true,
+                includeNextButton: true,
+                includePreviousButton: true,
+                alwaysEnablePreviousButton: false,
+                alwaysEnableNextButton: false,
+            },
+        });
     }
 
     _createVolumeOverlay() {
