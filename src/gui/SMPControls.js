@@ -229,7 +229,8 @@ class SMPControls extends BaseControls {
 
         this._smpPlayerInterface.updateUiConfig({
             controls: controlsConfig,
-            pictureInPicture : { enabled: false }
+            pictureInPicture : { enabled: false },
+            allowAudioControlsToHide: true,
         })
     }
 
