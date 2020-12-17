@@ -7,7 +7,7 @@ const DEFAULT_CSS = {
         trace: 'color: DeepPink',
         debug: 'color: GoldenRod',
         info: 'color: DarkTurquoise',
-        warn: 'color: Green',
+        warn: 'color: Purple',
         error: 'color: Crimson',
         fatal: 'color: Black',
     },
@@ -48,16 +48,11 @@ export default class ConsoleFormattedStream {
         const loggerName = rec.childName ? `${rec.name}/${rec.childName}` : rec.name;
 
         // get level name and pad start with spacs
-        let levelName = nameFromLevel[rec.level];
+        const levelName = nameFromLevel[rec.level];
         const formattedLevelName = (Array(6 - levelName.length).join(' ') + levelName)
             .toUpperCase();
 
         if (this.logByLevel) {
-            if (rec.level === TRACE) {
-                levelName = 'debug';
-            } else if (rec.level === FATAL) {
-                levelName = 'error';
-            }
             // eslint-disable-next-line max-len, no-console
             consoleMethod = typeof console[levelName] === 'function' ? console[levelName] : console.log;
         } else {
@@ -85,10 +80,10 @@ export default class ConsoleFormattedStream {
         const logArgs = [];
         // [time] level: loggerName: msg src?
         logArgs.push(`[%s:%s:%s:%s] %c%s%c: %s: %c%s ${rec.src ? '%c%s' : ''}`);
-        logArgs.push(padZeros(rec.time.getHours(), 2));
-        logArgs.push(padZeros(rec.time.getMinutes(), 2));
-        logArgs.push(padZeros(rec.time.getSeconds(), 2));
-        logArgs.push(padZeros(rec.time.getMilliseconds(), 4));
+        // logArgs.push(padZeros(rec.time.getHours(), 2));
+        // logArgs.push(padZeros(rec.time.getMinutes(), 2));
+        // logArgs.push(padZeros(rec.time.getSeconds(), 2));
+        // logArgs.push(padZeros(rec.time.getMilliseconds(), 4));
         logArgs.push(levelCss);
         logArgs.push(formattedLevelName);
         logArgs.push(defaultCss);

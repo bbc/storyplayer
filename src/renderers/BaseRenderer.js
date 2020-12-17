@@ -352,17 +352,17 @@ export default class BaseRenderer extends EventEmitter {
         case (RENDERER_PHASES.ENDED):
         case (RENDERER_PHASES.DESTROYED):
             // eslint-disable-next-line max-len
-            if (debugPhase) logger.info('PHASE base ended already', this._representation.id, this.phase);
+            logger.debug('PHASE base ended already', this._representation.id, this.phase);
             return false;
         default:
             break;
         };
-        if (debugPhase) logger.info('PHASE base ending', this._representation.id, this.phase);
+        logger.debug('PHASE base ending', this._representation.id, this.phase);
         this._player.disconnectScrubBar(this);
         try{
             this._clearBehaviourElements()
         } catch (e) {
-            logger.info(e);
+            logger.error(e, 'error clearing behaviour elements');
         }
         this._reapplyLinkConditions();
         this._player.exitCompleteBehaviourPhase();
@@ -1579,14 +1579,14 @@ export default class BaseRenderer extends EventEmitter {
      * @return {void}
      */
     destroy() {
-        if (debugPhase) logger.info('PHASE destroying', this._representation.id, this.phase);
+        logger.debug('PHASE destroying', this._representation.id, this.phase);
         if (this.phase === RENDERER_PHASES.DESTROYED) {
             // eslint-disable-next-line max-len
-            if (debugPhase) logger.info('PHASE destroying - already destroyed', this._representation.id, this.phase);
+            logger.debug('PHASE destroying - already destroyed', this._representation.id, this.phase);
             return false;
         }
         if (this.phase !== RENDERER_PHASES.ENDED) {
-            if (debugPhase) logger.info('PHASE destroying need to end first');
+            logger.debug('PHASE destroying need to end first');
             this.end();
         }
         this._clearBehaviourElements();

@@ -19,7 +19,6 @@ import { InternalVariableNames } from './InternalVariables';
 
 import { REASONER_EVENTS, VARIABLE_EVENTS, ERROR_EVENTS, DOM_EVENTS } from './Events';
 import SessionManager, { SESSION_STATE } from './SessionManager';
-import { getSetting, DEBUG_PLAYOUT_FLAG } from './utils';
 import AnalyticsHandler from './AnalyticsHandler';
 
 export const PLACEHOLDER_REPRESENTATION = {
@@ -341,10 +340,8 @@ export default class Controller extends EventEmitter {
             },
         };
 
-        if(getSetting(DEBUG_PLAYOUT_FLAG)) {
-            // we want to check which devices can olay what
-            logger.info('playing capabilities', data);
-        }
+        // we want to check which devices can olay what
+        logger.debug('playing capabilities', data);
 
         const anyRequirementsFailed = requirements.some((req) => {
             if (JsonLogic.apply(req.logic, data) === false) {

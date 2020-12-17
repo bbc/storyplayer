@@ -29,11 +29,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
     _fakeEventEmitter: Object
 
-    constructor(player: Player, debugPlayout: boolean) {
-        super(player, debugPlayout);
+    constructor(player: Player) {
+        super(player);
 
         // Get Playout Engine to use for BackgroundAudio
-        this._createSecondaryPlayoutEngine(player, debugPlayout);
+        this._createSecondaryPlayoutEngine(player);
 
         this._smpPlayerInterface.addEventListener("pause", (event) => {
             // Hack to update playing status from SMP
@@ -87,12 +87,12 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if(e.muted) {
             volume = 0
         }
-        this._volume = volume
+        this._volume = volume;
         const backgroundAudioVolume = this._volume * this._backgroundMix;
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume);
     }
 
-    _createSecondaryPlayoutEngine(player: Player, debugPlayout: boolean) {
+    _createSecondaryPlayoutEngine(player: Player) {
         const playoutToUse = MediaFormats.getPlayoutEngine(true);
 
         logger.info('SMP: Using backup playout engine: ', playoutToUse);
@@ -102,11 +102,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         switch (playoutToUse) {
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
-            this._secondaryPlayoutEngine = new DOMSwitchPlayoutEngine(player, debugPlayout);
+            this._secondaryPlayoutEngine = new DOMSwitchPlayoutEngine(player);
             break;
         case PLAYOUT_ENGINES.IOS_PLAYOUT:
             // Refactored iOS playout engine
-            this._secondaryPlayoutEngine = new IOSPlayoutEngine(player, debugPlayout);
+            this._secondaryPlayoutEngine = new IOSPlayoutEngine(player);
             break;
         default:
             logger.fatal('Invalid Playout Engine');
