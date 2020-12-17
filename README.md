@@ -80,7 +80,7 @@ Two URL parameters can be used to set the state of one variable for playback.  T
 ### URL Parameters for Debugging
 Below are the URL parameters that can be used to toggle features in StoryPlayer.  These are primarily related to debugging.
 - overridePlayout - Takes 'ios' or 'dom'. Sets the playout engine.
-- debugPlayout - Takes 'true' or 'false'. Increases debugging in playout engines, and renders scrub bar.
+- debugPlayout - Takes 'trace' 'debug' info' 'warn' 'error' 'fatal'. Increases debugging in playout engines, if level is 'debug' or 'trace' will render scrub bar.
 - overrideInactiveBuffering - Takes number in seconds. Changes the number of seconds to buffer inactive media.
 - overrideActiveBuffering - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
 - debugShaka - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
