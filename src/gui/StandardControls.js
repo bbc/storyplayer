@@ -184,6 +184,7 @@ class StandardControls extends BaseControls {
     }
 
     setControlsActive() {
+        this.enableControls();
         this._containerDiv.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('romper-inactive');
         this._buttonsActivateArea.classList.remove('hide');
