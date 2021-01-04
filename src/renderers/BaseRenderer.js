@@ -26,7 +26,6 @@ import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
 
-const debugPhase = true;
 
 const getBehaviourEndTime = (behaviour: Object) => {
     if(behaviour.duration !== undefined) {
@@ -1609,7 +1608,7 @@ export default class BaseRenderer extends EventEmitter {
 
     _setPhase(phase: string) {
         // eslint-disable-next-line max-len
-        if (debugPhase) logger.info(`Renderer ${this._rendererId} for representation ${this._representation.id} entering ${phase} phase`);
+        logger.debug(`Renderer ${this._rendererId} for representation ${this._representation.id} entering ${phase} phase`);
         this.phase = phase;
     }
 }
