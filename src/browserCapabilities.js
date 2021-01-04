@@ -3,7 +3,6 @@
 import Hls from 'hls.js';
 import {
     getSetting,
-    DEBUG_PLAYOUT_FLAG,
     OVERRIDE_PLAYOUT,
     OVERRIDE_PLAYOUT_FORMAT,
     inSMPWrapper
