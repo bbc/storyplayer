@@ -8,7 +8,7 @@ import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
-import logger from '../logger';
+import logger, { isDebug } from '../logger';
 import { BrowserUserAgent, MediaFormats } from '../browserCapabilities'; // eslint-disable-line max-len
 import { PLAYOUT_ENGINES } from '../playoutEngines/playoutEngineConsts'
 import BaseRenderer, { RENDERER_PHASES } from '../renderers/BaseRenderer';
@@ -16,7 +16,6 @@ import RendererEvents from '../renderers/RendererEvents';
 import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
-    DEBUG_PLAYOUT_FLAG,
     FACEBOOK_BLOCK_FLAG,
     addDetail,
     scrollToTop,
@@ -208,10 +207,7 @@ class Player extends EventEmitter {
         this._addFullscreenListeners = this._addFullscreenListeners.bind(this);
         this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
 
-        const debugPlayout = getSetting(DEBUG_PLAYOUT_FLAG);
-        if (debugPlayout) {
-            logger.info("Playout debugging: ON");
-        }
+        logger.debug("Playout debugging: ON");
         this._isPausedForBehaviours = false;
 
 
@@ -229,7 +225,7 @@ class Player extends EventEmitter {
         this._representation = this._createOverlay('representation', this._logUserInteraction);
 
         // create the playout engine
-        this._createPlayoutEngine(debugPlayout);
+        this._createPlayoutEngine();
 
         this._addFullscreenListeners();
 
@@ -267,26 +263,25 @@ class Player extends EventEmitter {
 
     /**
      * Creates an instance of the playout engine to use based on the media formats
-     * @param {boolean} debugPlayout debug playout or not
      */
-    _createPlayoutEngine(debugPlayout: boolean) {
+    _createPlayoutEngine() {
         const playoutToUse = MediaFormats.getPlayoutEngine();
         logger.info('Using playout engine: ', playoutToUse);
 
         switch (playoutToUse) {
         case PLAYOUT_ENGINES.DOM_SWITCH_PLAYOUT:
             // Use shiny source switching engine.... smooth.
-            this.playoutEngine = new DOMSwitchPlayoutEngine(this, debugPlayout);
+            this.playoutEngine = new DOMSwitchPlayoutEngine(this);
             this._buildStandardControls();
             break;
         case PLAYOUT_ENGINES.IOS_PLAYOUT:
             // Refactored iOS playout engine
-            this.playoutEngine = new IOSPlayoutEngine(this, debugPlayout);
+            this.playoutEngine = new IOSPlayoutEngine(this);
             this._buildStandardControls();
             break;
         case PLAYOUT_ENGINES.SMP_PLAYOUT:
             // SMP playout engine
-            this.playoutEngine = new SMPPlayoutEngine(this, debugPlayout);
+            this.playoutEngine = new SMPPlayoutEngine(this);
             this._buildSMPControls();
             break;
         default:
@@ -294,7 +289,7 @@ class Player extends EventEmitter {
             throw new Error('Invalid Playout Engine');
         }
 
-        if(debugPlayout) {
+        if(isDebug()) {
             // Print all calls to PlayoutEngine along with their arguments
             this.playoutEngine = proxyWrapper("PlayoutEngine", this.playoutEngine);
         }

@@ -1,26 +1,69 @@
 // @flow
+import {
+    createLogger,
+    stdSerializers,
+    INFO,
+    TRACE,
+    DEBUG,
+    WARN,
+    ERROR,
+    FATAL,
+    ConsoleFormattedStream
+} from 'browser-bunyan';
+import {
+    DEBUG_PLAYOUT_FLAG,
+    getSetting
+} from './utils';
 
-import { createLogger, stdSerializers } from 'browser-bunyan';
-import ConsoleFormattedStream from './logger/logger_formatter';
+const DEFAULT_CSS = {
+    levels: {
+        trace: 'color: DeepPink',
+        debug: 'color: GoldenRod',
+        info: 'color: DarkTurquoise',
+        warn: 'color: Blue',
+        error: 'color: Crimson',
+        fatal: 'color: White',
+    },
+    def: 'color: DimGray',
+    msg: 'color: SteelBlue',
+    src: 'color: DimGray; font-style: italic; font-size: 0.9em',
+};
 
-// Example Logging Usage
-// import logger from './logger'
-// logger.warn('Logging a generic string');
-// logger.warn(
-//    { obj: {myObject: 1243} },
-//    'Logging a generic string and also an object to go with it. Note the object must be under' +
-//    ' the obj key in an object passed to the logger. Follows the bunyan logging API: ' +
-//    'https://github.com/philmander/browser-bunyan#log-method-api'
-// );
+const DEFAULT_SETTINGS = {
+    css: DEFAULT_CSS,
+    logByLevel: true,
+};
 
-module.exports = createLogger({
-    name: 'romper',
-    streams: [
-        {
-            level: 'info',
-            stream: new ConsoleFormattedStream({ logByLevel: true }),
-        },
-    ],
+const getLogLevel = () => {
+    const logLevel = getSetting(DEBUG_PLAYOUT_FLAG)
+    switch (logLevel) {
+    case 'trace':
+        return TRACE;
+    case 'debug':
+        return DEBUG;
+    case 'info':
+        return INFO;
+    case 'warn':
+        return WARN;
+    case 'error':
+        return ERROR;
+    case 'fatal':
+        return FATAL;
+    default:
+        return INFO;
+    }
+}
+
+const logger = createLogger({
+    name: 'storyplayer',
+    streams: [{
+        level: getLogLevel(),
+        stream: new ConsoleFormattedStream(DEFAULT_SETTINGS),
+    }, ],
     serializers: stdSerializers,
-    src: true,
+    src: getLogLevel() < INFO,
 });
+
+export const isDebug = () => logger.level() < INFO;
+
+export default logger;

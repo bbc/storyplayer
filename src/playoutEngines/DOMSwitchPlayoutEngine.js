@@ -4,7 +4,7 @@ import Hls from 'hls.js';
 import shaka from 'shaka-player';
 import BasePlayoutEngine, { MEDIA_TYPES, SUPPORT_FLAGS } from './BasePlayoutEngine';
 import Player, { PlayerEvents } from '../gui/Player';
-import logger from '../logger';
+import logger, { isDebug } from '../logger';
 
 import { allHlsEvents, allShakaEvents, getMediaType, MediaTypes} from './playoutEngineConsts'
 import { SHAKA_EVENTS } from '../Events';
@@ -49,10 +49,10 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     _estimatedBandwidth: number;
 
-    constructor(player: Player, debugPlayout: boolean) {
-        super(player, debugPlayout);
+    constructor(player: Player) {
+        super(player);
 
-        if(this._debugPlayout) {
+        if(isDebug()) {
             this._printActiveMSEBuffers()
         }
 
@@ -69,7 +69,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 600,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: this._debugPlayout,
+                debug: isDebug(),
             },
             dash: {
                 bufferingGoal: 10,
@@ -88,7 +88,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 maxMaxBufferLength: 4,
                 startFragPrefetch: true,
                 startLevel: 3,
-                debug: this._debugPlayout,
+                debug: isDebug(),
             },
             dash: {
                 bufferingGoal: 2,
@@ -106,7 +106,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
         // Shaka Logs only in shaka debug. Minified Shaka doesn't do logging
         const shakaDebugLevel = getSetting(SHAKA_DEBUG_LEVEL);
-        if (shaka.log && this._debugPlayout && shakaDebugLevel) {
+        if (shaka.log && isDebug() && shakaDebugLevel) {
             if (shakaDebugLevel === 'vv') {
                 shaka.log.setLevel(shaka.log.Level.V2);
             } else if (shakaDebugLevel === 'v') {
@@ -167,15 +167,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             const newBandwidth = rendererPlayoutObj._shaka.getStats().estimatedBandwidth;
             if(newBandwidth) {
                 this._estimatedBandwidth = newBandwidth
-                if(this._debugPlayout) {
-                    // eslint-disable-next-line no-console
-                    console.log(
-                        "DASH Shaka Bandwidth Update: ",
-                        this._estimatedBandwidth.toFixed(2),
-                        " ",
-                        (this._estimatedBandwidth/1000000).toFixed(2)
-                    )
-                }
+                // eslint-disable-next-line no-console
+                logger.debug(
+                    "DASH Shaka Bandwidth Update: ",
+                    this._estimatedBandwidth.toFixed(2),
+                    " ",
+                    (this._estimatedBandwidth/1000000).toFixed(2)
+                )
             }
         }
     }
@@ -250,7 +248,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 const start = videoElement.buffered.start(i)
                 const end = videoElement.buffered.end(i)
                 // eslint-disable-next-line no-console
-                console.log(`BUFFER: Buffer Range ${i}: `
+                logger.debug(`BUFFER: Buffer Range ${i}: `
                   + `${start} - `
                   + `${end}`)
                 if(currentTime > start && currentTime < end) {
@@ -264,7 +262,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 if(this._activePlayer._shakaRep !== `${activeRep.width}x${activeRep.height}`) {
                     this._activePlayer._shakaRep = `${activeRep.width}x${activeRep.height}`
                     // eslint-disable-next-line no-console
-                    console.log(
+                    logger.debug(
                         `Active DASH shaka is using representation: `
                         + `${activeRep.width}x${activeRep.height}`
                     )
@@ -278,13 +276,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
 
             // eslint-disable-next-line no-console
-            console.log(`BUFFER: Current Time: ${currentTime}`)
+            logger.debug(`BUFFER: Current Time: ${currentTime}`)
             if(validPlayback !== true) {
                 // eslint-disable-next-line no-console
-                console.log("BUFFER WARNING: current playback time outside of buffered range")
+                logger.debug("BUFFER WARNING: current playback time outside of buffered range")
             }
             // eslint-disable-next-line no-console
-            console.log("BUFFER ---------")
+            logger.debug("BUFFER ---------")
         }
         setTimeout(() => {this._printActiveMSEBuffers()}, DEBUG_BUFFER_CHECK_TIME)
     }
@@ -451,17 +449,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                             ...rendererPlayoutObj._hls.config,
                             ...this._activeConfig.hls,
                         };
-                        if(this._debugPlayout) {
-                            allHlsEvents.forEach((e) => {
-                                rendererPlayoutObj._hls.on(
-                                    Hls.Events[e], (ev) => {
-                                        // eslint-disable-next-line no-console
-                                        console.log("HLS EVENT: ", ev)
-                                    }
-                                );
+                        allHlsEvents.forEach((e) => {
+                            rendererPlayoutObj._hls.on(
+                                Hls.Events[e], (ev) => {
+                                    // eslint-disable-next-line no-console
+                                    logger.debug("HLS EVENT: ", ev)
+                                }
+                            );
 
-                            })
-                        }
+                        })
 
 
                     }
@@ -523,17 +519,16 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     );
 
 
-                    if(this._debugPlayout) {
-                        allShakaEvents.forEach((e) => {
-                            rendererPlayoutObj._shaka.addEventListener(
-                                e,
-                                (ev) => {
-                                    // eslint-disable-next-line no-console
-                                    console.log("DASH SHAKA EVENT: ", ev)
-                                }
-                            )
-                        })
-                    }
+                    allShakaEvents.forEach((e) => {
+                        rendererPlayoutObj._shaka.addEventListener(
+                            e,
+                            (ev) => {
+                                // eslint-disable-next-line no-console
+                                logger.debug("DASH SHAKA EVENT: ", ev)
+                            }
+                        )
+                    });
+
                     break;
                 }
                 case MediaTypes.OTHER:
@@ -546,7 +541,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             super.setPlayoutActive(rendererId);
             rendererPlayoutObj.mediaElement.classList.remove('romper-media-element-queued');
 
-            if(this._debugPlayout) {
+            if(isDebug()) {
                 this._activePlayer = rendererPlayoutObj;
                 window.activePlayer = rendererPlayoutObj;
             }

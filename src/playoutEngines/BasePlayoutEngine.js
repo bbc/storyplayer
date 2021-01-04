@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 import Player from '../gui/Player';
+import { isDebug } from '../logger';
 import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 
 
@@ -19,8 +20,6 @@ export const SUPPORT_FLAGS = {
 export default class BasePlayoutEngine {
     _player: Player
 
-    _debugPlayout: boolean;
-
     _media: Object
 
     _permissionToPlay: boolean;
@@ -29,15 +28,14 @@ export default class BasePlayoutEngine {
 
     _isHandlingNonAV: Boolean;
 
-    constructor(player: Player, debugPlayout: boolean) {
+    constructor(player: Player) {
         this._player = player;
         this._media = {};
         this._permissionToPlay = false;
         this._hasStarted = false;
-        this._debugPlayout = debugPlayout;
         this._isHandlingNonAV = false;
 
-        if(this._debugPlayout) {
+        if(isDebug()) {
             window.playoutMedia = this._media;
             window.playout = this;
         }
