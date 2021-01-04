@@ -1416,7 +1416,7 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'image-overlay');
         overlayImageElement.src = imageSrc;
-        overlayImageElement.className = 'romper-image-overlay';
+        overlayImageElement.className = 'romper-image-overlay notInteractiveContent';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
     }

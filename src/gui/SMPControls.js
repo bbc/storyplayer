@@ -42,6 +42,10 @@ class SMPControls extends BaseControls {
 
     _playoutEngine: BasePlayoutEngine;
 
+    oldCloseVol: Function;
+
+    oldOpenVol: Function;
+
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
@@ -225,22 +229,26 @@ class SMPControls extends BaseControls {
 
         this._smpPlayerInterface.updateUiConfig({
             controls: controlsConfig,
-            pictureInPicture : { enabled: false }
-        })
+        });
     }
 
     _setDefaultSMPControlsConfig() {
         // Setup Default Controls Settings
-        this._uiUpdate({
-            volumeDismissTime: 5000,
-            enabled: true,
-            spaceControlsPlayback: true,
-            availableOnMediaEnded: true,
-            includeNextButton: true,
-            includePreviousButton: true,
-            alwaysEnablePreviousButton: false,
-            alwaysEnableNextButton: false,
-        })
+        this._smpPlayerInterface.updateUiConfig({
+            pictureInPicture : { enabled: false },
+            allowAudioControlsToHide: true,
+            chromecast: { enabled: false },
+            controls: {
+                volumeDismissTime: 5000,
+                enabled: true,
+                spaceControlsPlayback: true,
+                availableOnMediaEnded: true,
+                includeNextButton: true,
+                includePreviousButton: true,
+                alwaysEnablePreviousButton: false,
+                alwaysEnableNextButton: false,
+            },
+        });
     }
 
     _createVolumeOverlay() {
@@ -332,7 +340,7 @@ class SMPControls extends BaseControls {
         const changeVol = (e) => {
             const sliderValue = parseFloat(e.target.value);
             this._smpPlayerInterface.volume = sliderValue / 11;
-            this._masterValueLabel.textContent = `${sliderValue}`;
+            this._masterValueLabel.textContent = `${Math.round(sliderValue)}`;
         };
         masterSlider.addEventListener("change", changeVol);
         masterSlider.addEventListener("input", changeVol);
@@ -343,7 +351,7 @@ class SMPControls extends BaseControls {
             'master-volume-value', ['volume-label']);
         this._masterValueLabel = document.createElement('span');
         this._masterValueLabel.textContent = this._smpPlayerInterface.volume ?
-            `${this._smpPlayerInterface.volume * 10}` : '7';
+            `${Math.round(this._smpPlayerInterface.volume * 10)}` : '7';
         volLabel.appendChild(this._masterValueLabel);
         masterContainer.appendChild(volLabel);
         return masterContainer;
@@ -355,12 +363,14 @@ class SMPControls extends BaseControls {
             this._masterValueLabel.textContent = '0';
         } else {
             this._volumeControls.classList.remove('muted');
-            this._masterValueLabel.textContent = `${this._smpPlayerInterface.volume * 11}`;
+            this._masterValueLabel.textContent = `${Math.round(this._smpPlayerInterface.volume * 11)}`;
         }
     }
 
     _overrideVolumeButton() {
         /* eslint-disable no-undef */
+        this.oldOpenVol = publicApi.ui.volumeControl.openVolumeControls;
+        this.oldCloseVol = publicApi.ui.volumeControl.closeVolumeControls;
         publicApi.ui.volumeControl.openVolumeControls = () => {
             this._volumeControls.classList.remove('romper-inactive');
         }
@@ -368,6 +378,13 @@ class SMPControls extends BaseControls {
             this._volumeControls.classList.add('romper-inactive');
         };
         publicApi.ui.volumeControl.volumeControls.style.overflow = 'visible'
+        /* eslint-enable no-undef */
+    }
+
+    _clearVolumeButtonOverride() {
+        /* eslint-disable no-undef */
+        publicApi.ui.volumeControl.openVolumeControls = this.oldOpenVol;
+        publicApi.ui.volumeControl.closeVolumeControls = this.oldCloseVol;
         /* eslint-enable no-undef */
     }
 
@@ -602,6 +619,15 @@ class SMPControls extends BaseControls {
                 yOffset: maxSubsY,
             }
         });
+    }
+
+
+    setAccessilitySliderAvailable(show) {
+        if (show) {
+            this._overrideVolumeButton()
+        } else {
+            this._clearVolumeButtonOverride();
+        }
     }
 
     // choices have been cleared - return the subtitles to normal

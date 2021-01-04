@@ -216,8 +216,16 @@ export default class RenderManager extends EventEmitter {
      * @param {boolean} isVisible
      */
     _handleVisibilityChange(isVisible: boolean) {
+        this._analytics({
+            type: AnalyticEvents.types.RENDERER_ACTION,
+            name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,
+            from: isVisible ? 'hidden' : 'visible',
+            to: isVisible ? 'visible' : 'hidden',
+        });
+
         const { meta } = this._story;
         if (meta.storyplayer && meta.storyplayer.disable_tab_defocus) return;
+
         if (!isVisible) {
             this._isPlaying = this._player.playoutEngine.isPlaying();
             if (this._currentRenderer && !this._currentRenderer.hasMediaEnded()) {
@@ -248,13 +256,6 @@ export default class RenderManager extends EventEmitter {
                 this._player.startChoiceCountdown(this._currentRenderer);
             }
         }
-
-        this._analytics({
-            type: AnalyticEvents.types.RENDERER_ACTION,
-            name: AnalyticEvents.names.BROWSER_VISIBILITY_CHANGE,
-            from: isVisible ? 'hidden' : 'visible',
-            to: isVisible ? 'visible' : 'hidden',
-        });
     }
 
     /**
@@ -339,6 +340,7 @@ export default class RenderManager extends EventEmitter {
         try {
             const story = await this._fetchers.storyFetcher(storyId);
             this._story = story;
+            this._player.disableControls();
             this._setAspectRatio(story);
             await this.fetchDog(story)
             return await this.fetchStartImage(story);
