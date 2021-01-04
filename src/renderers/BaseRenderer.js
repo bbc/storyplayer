@@ -362,7 +362,7 @@ export default class BaseRenderer extends EventEmitter {
         try{
             this._clearBehaviourElements()
         } catch (e) {
-            logger.error(e, 'error clearing behaviour elements');
+            logger.warn(e, 'error clearing behaviour elements');
         }
         this._reapplyLinkConditions();
         this._player.exitCompleteBehaviourPhase();
