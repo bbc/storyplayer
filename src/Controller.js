@@ -340,7 +340,8 @@ export default class Controller extends EventEmitter {
             },
         };
 
-        // we want to check which devices can olay what
+        // logs the capabilities and which format we support
+        // also rudimentary check of the browser UA/platform/vendor/features
         logger.debug('playing capabilities', data);
 
         const anyRequirementsFailed = requirements.some((req) => {
