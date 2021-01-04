@@ -3,7 +3,8 @@
 import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
-    RepresentationChoice, AssetUrls, Story,
+    RepresentationChoice, AssetUrls, AssetCollection,
+    Story,
 } from './romper';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -200,7 +201,6 @@ export default class RenderManager extends EventEmitter {
         // send fullscreen events
         this._player.on(DOM_EVENTS.TOGGLE_FULLSCREEN, (event) => this.emit(DOM_EVENTS.TOGGLE_FULLSCREEN, event));
     }
-
 
     _handleOrientationChange() {
         this._analytics({
@@ -456,6 +456,123 @@ export default class RenderManager extends EventEmitter {
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    getBackgroundIds(representation: Representation) {
+        if(representation.asset_collections.background_ids) {
+            return representation.asset_collections.background_ids
+        }
+        return [];
+    }
+
+
+    /**
+     * accepts an array of asset collections for this representation backgrounds
+     * checks whether we have a renderer for these so to maintain background music continuity
+     * otherwise stops all the other background renderers
+     * @param {AssetCollection[]} assetCollections 
+     */
+    stopCurrentBackgroundRenderers(assetCollections: ?AssetCollection[]) {
+        const renderersToKeep = [];
+        if (assetCollections && assetCollections.length > 0) {
+            assetCollections.forEach(ac => {
+                if (ac.assets.audio_src) {
+                    const src = ac.assets.audio_src;
+                    // if we already have a background renderer for this then we want to keep it
+                    if (this.hasRendererForBackground(src)) {
+                        renderersToKeep.push(src);
+                    }
+                }
+            });
+        }
+
+        Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
+            if(renderersToKeep.includes(rendererSrc)) {
+                return;
+            }
+            this.stopBackgroundRenderer(rendererSrc);
+        });
+    }
+
+    /**
+     * If the renderer is needed in up coming representations stop it
+     * otherwise destroy it and remove it from the pool of background renderers
+     * unless it is explicitly told to be kept around as the current representation has it
+     * @param {string} rendererSrc Background renderer source
+     */
+    stopBackgroundRenderer(rendererSrc: string) {
+        const backgroundRenderer = this._backgroundRenderers[rendererSrc];
+        if (this.hasUpComingRenderersForBackground(rendererSrc)) {
+            // end the renderer we want to keep it around for the next representation
+            backgroundRenderer.end();
+        } else {
+            backgroundRenderer.destroy();
+        }
+        delete this._backgroundRenderers[rendererSrc];
+    }
+
+    /**
+     * Cleans up all the active foreground renderers for a 
+     * list of element ids where we are not using them
+     * @param {NarrativeElement} narrativeElement 
+     * @param {*} allIds 
+     */
+    cleanupActiveRenderers(narrativeElement: NarrativeElement, allIds: string[]) {
+        Object.keys(this._activeRenderers)
+            .filter(neid => allIds.indexOf(neid) === -1)
+            .forEach((neid) => {
+                if (narrativeElement.id !== neid) {
+                    this._activeRenderers[neid].destroy();
+                }
+                delete this._activeRenderers[neid];
+            });
+    }
+
+    /**
+     * Checks this._backgroundRenderers contains a renderer for a given src
+     * @param {string} src 
+     */
+    hasRendererForBackground(src: string) {
+        if(!src) return false;
+        return Object.keys(this._backgroundRenderers).includes(src);
+    }
+
+    /**
+     * Checks this._upcomingBackgroundRenderers contains a renderer for a given src
+     * @param {string} src 
+     */
+    hasUpComingRenderersForBackground(src: string) {
+        if(!src) return false;
+        return Object.keys(this._upcomingBackgroundRenderers).includes(src);
+    }
+
+
+    /**
+     * Creates a new background renderer for a given asset collection
+     * or picks it from the up comming background renderers we currently have
+     * And starts the renderer
+     * @param {AssetCollection} assetCollection 
+     * @param {string} src 
+     */
+    createNewBackgroundRenderer(assetCollection: AssetCollection, src: string): ? BackgroundRenderer {
+        if (this.hasUpComingRenderersForBackground(src)) {
+            return this._upcomingBackgroundRenderers[src];
+        }
+        return BackgroundRendererFactory(
+            assetCollection.asset_collection_type,
+            assetCollection,
+            this._fetchers.mediaFetcher,
+            this._player,
+        );
+
+    }
+
+    /**
+     * Gets all the background asset collections
+     * @param {*} backgroundIds 
+     */
+    async getBackgroundAudioAssets(backgroundIds: string[]) {
+        return Promise.all(backgroundIds.map(assetId => this._fetchers.assetCollectionFetcher(assetId)));
+    }
 
     /**
      * given a new representation, handle the background rendering
@@ -465,70 +582,36 @@ export default class RenderManager extends EventEmitter {
      *      or start a new background renderer
      * @param {*} representation
      */
-    _handleBackgroundRendering(representation: Representation): Promise<any> {
-        let newBackgrounds = [];
-        if (representation
-            && representation.asset_collections.background_ids) {
-            newBackgrounds = representation.asset_collections.background_ids;
+    async _handleBackgroundRendering(representation: Representation) {
+        if (!representation) {
+            return;
+        }
+        const newBackgrounds = this.getBackgroundIds(representation);
+
+        // if there are no new backgrounds to render we stop all the current ones and exit
+        if (newBackgrounds.length === 0) {
+            this.stopCurrentBackgroundRenderers();
+            return;
         }
 
-        // get asset collections and find srcs
-        const assetCollectionPromises = [];
-        newBackgrounds.forEach(backgroundAssetCollectionId =>
-            assetCollectionPromises
-                .push(this._fetchers.assetCollectionFetcher(backgroundAssetCollectionId)));
+        // gets all the background asset collections and picks the audio srcs
+        const assetCollections = await this.getBackgroundAudioAssets(newBackgrounds);
+        // stop the renderers we don't want to keep
+        this.stopCurrentBackgroundRenderers(assetCollections);
 
-        return Promise.all(assetCollectionPromises).then((assetCollections) => {
-            const srcs = [];
-            assetCollections.forEach((ac) => {
-                if (ac.assets.audio_src) {
-                    srcs.push({
-                        src: ac.assets.audio_src,
-                        acId: ac.id,
-                    });
-                }
-            });
-            return Promise.resolve(srcs);
-        }).then((newBackgroundSrcs) => {
-            // remove dead backgrounds
-            Object.keys(this._backgroundRenderers).forEach((rendererSrc) => {
-                if (newBackgroundSrcs.filter(srcObj => srcObj.src === rendererSrc).length === 0) {
-                    if (Object.values(this._upcomingBackgroundRenderers)
-                        .includes(this._backgroundRenderers[rendererSrc])) {
-                        this._backgroundRenderers[rendererSrc].end();
-                    } else {
-                        this._backgroundRenderers[rendererSrc].destroy();
+        // if we have don't have a renderer for this background then add it to list of renderers to start
+        assetCollections.forEach(ac => {
+            if(ac.assets.audio_src) {
+                const src = ac.assets.audio_src;
+                if(!this.hasRendererForBackground(src)) {
+                    // create a new background renderer and start it
+                    const newBackgroundRenderer = this.createNewBackgroundRenderer(ac, src);
+                    if (newBackgroundRenderer) {
+                        newBackgroundRenderer.start();
+                        this._backgroundRenderers[src] = newBackgroundRenderer;
                     }
-                    delete this._backgroundRenderers[rendererSrc];
-                }
-            });
-
-            newBackgroundSrcs.forEach((srcObj) => {
-                const { src, acId } = srcObj;
-                // maintain ones in both, add new ones, remove old ones
-                if (!this._backgroundRenderers.hasOwnProperty(src)) {
-                    this._fetchers.assetCollectionFetcher(acId)
-                        .then((bgAssetCollection) => {
-                            let backgroundRenderer = null;
-                            if (src in this._upcomingBackgroundRenderers) {
-                                backgroundRenderer = this._upcomingBackgroundRenderers[src];
-                            } else {
-                                backgroundRenderer = BackgroundRendererFactory(
-                                    bgAssetCollection.asset_collection_type,
-                                    bgAssetCollection,
-                                    this._fetchers.mediaFetcher,
-                                    this._player,
-                                );
-                            }
-                            if (backgroundRenderer) {
-                                backgroundRenderer.start();
-                                this._backgroundRenderers[src]
-                                    = backgroundRenderer;
-                            }
-                            return Promise.resolve(backgroundRenderer);
-                        });
-                }
-            });
+                } 
+            }
         });
     }
 
@@ -766,10 +849,7 @@ export default class RenderManager extends EventEmitter {
             } else {
                 allIds = nextIds;
             }
-            if (
-                this._currentRenderer &&
-                this._currentNarrativeElement
-            ) {
+            if (this._currentRenderer && this._currentNarrativeElement) {
                 // add current neid
                 allIds.push(this._currentNarrativeElement.id);
             }
@@ -808,14 +888,7 @@ export default class RenderManager extends EventEmitter {
             return Promise.all(renderPromises)
                 // Clean up any renderers that are not needed any longer
                 .then(() => {
-                    Object.keys(this._activeRenderers)
-                        .filter(neid => allIds.indexOf(neid) === -1)
-                        .forEach((neid) => {
-                            if (narrativeElement.id !== neid) {
-                                this._activeRenderers[neid].destroy();
-                            }
-                            delete this._activeRenderers[neid];
-                        });
+                    this.cleanupActiveRenderers(narrativeElement, allIds);
                     this._runBackgroundLookahead();
                 });
         });

@@ -15,7 +15,7 @@ import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
 const FADE_IN_TIME = 2000; // fade in time for audio in ms
 const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
-const FADE_STEP_LENGTH = 10; // time between steps for fades
+const FADE_STEP_LENGTH = 20; // time between steps for fades
 
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
@@ -135,7 +135,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
         if (!this._fadeIntervalId) {
             const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
             this._fadeIntervalId = setInterval(() => {
-                const volume = this._playoutEngine.getVolume(this._rendererId)
+                const volume = this._playoutEngine.getVolume(this._rendererId);
                 if (volume >= (1 / interval)
                     && this._fadeIntervalId
                     && this.phase === RENDERER_PHASES.BG_FADE_OUT) {

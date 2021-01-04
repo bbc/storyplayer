@@ -63,6 +63,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this._toggleMute = this._toggleMute.bind(this);
         this._showHideSubtitles = this._showHideSubtitles.bind(this);
         this._queueSubtitleAttach = this._queueSubtitleAttach.bind(this);
+        this.removeBackgrounds = this.removeBackgrounds.bind(this);
 
         this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
@@ -236,6 +237,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     }
 
     removeBackgrounds(rendererId: string) {
+        this.setPlayoutInactive(rendererId);
         const rendererPlayoutObj = this._media[rendererId];
         if (!rendererPlayoutObj) {
             return;
@@ -243,9 +245,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         const mediaObject = rendererPlayoutObj.media;
         if(mediaObject.type === MEDIA_TYPES.BACKGROUND_A) {
             const mediaElement = this._backgroundMediaElement;
-            if (mediaObject.url && mediaObject.url === mediaElement.src) {
+            if(mediaElement.src === mediaObject.url) {
                 mediaElement.pause();
                 mediaElement.removeAttribute('src');
+                mediaElement.removeAttribute('currentSrc');
+                mediaElement.removeAttribute('loop');
             }
         }
     }
