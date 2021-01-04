@@ -1,7 +1,7 @@
 import logger from './logger';
-import { 
+import {
     InternalVariableNames,
-    getTodaysDay, 
+    getTodaysDay,
     getSegmentOfDay,
 } from './InternalVariables';
 
@@ -9,34 +9,18 @@ import {
 
 export const proxyWrapper = (text, classInstance) => {
     const handler = {
-        get (getTarget, getProp) {
+        get(getTarget, getProp) {
             // eslint-disable-next-line func-names
-            return function() {
+            return function () {
                 /* eslint-disable prefer-rest-params */
-                try {
-                    logger.debug( `(C) ${text} call: ${getProp} (${arguments.length})` );
-                } catch {
-                    logger.debug( `(C) ${text} call: ${getProp} logger failed`)
-                }
-                try {
-                    logger.debug( `(C+A) ${text} call: ${getProp}`, ...arguments );
-                } catch {
-                    logger.debug( `(C+A) ${text} call: ${getProp} logger failed`)
-                }
                 // eslint-disable-next-line prefer-spread
-                const ret = getTarget[ getProp ].apply( getTarget, arguments );
+                const ret = getTarget[getProp].apply(getTarget, arguments);
                 try {
-                    logger.debug( `(C+R) ${text} call: ${getProp}`, ret );
+                    logger.trace(`${text} call: ${getProp} with:`,  ...arguments, ret);
                 } catch {
-                    logger.debug( `(C+R) ${text} call: ${getProp} logger failed`)
-                }
-                try {
-                    logger.debug( `(C+A+R) ${text} call: ${getProp}`, ...arguments, ret );
-                } catch {
-                    logger.debug( `(C+A+R) ${text} call: ${getProp} logger failed`)
+                    logger.error(`${text} call: ${getProp} logger failed`)
                 }
                 /* eslint-enable prefer-rest-params */
-
                 return ret
             }
         },
@@ -76,7 +60,7 @@ export const OVERRIDE_INACTIVE_BUFFERING = "overrideInactiveBuffering"
 
 export const getSetting = (settingName) => {
     let settingValue;
-    if(inSMPWrapper()) {
+    if (inSMPWrapper()) {
         settingValue = new URLSearchParams(
             window.playerInterface.datastore.get("queryString")
         ).get(settingName);
@@ -84,14 +68,14 @@ export const getSetting = (settingName) => {
         settingValue = new URLSearchParams(window.location.search).get(settingName);
     }
 
-    switch(settingName) {
+    switch (settingName) {
     case ADD_DETAILS_FLAG:
-    case DEBUG_PLAYOUT_FLAG:
     case FACEBOOK_BLOCK_FLAG:
     case WEBVIEW_DEBUG_FLAG:
     case UA_DEBUG_FLAG:
     case DISABLE_LOOKAHEAD_FLAG:
         return (settingValue === 'true');
+    case DEBUG_PLAYOUT_FLAG:
     default:
         return settingValue
     }
@@ -104,11 +88,11 @@ export const getCurrentUrl = () => {
 export const getVariableOverrides = () => {
     const varNames = new URLSearchParams(window.location.search).getAll('varName');
     const varVals = new URLSearchParams(window.location.search).getAll('varVal');
-    if(varNames.length !== varVals.length) {
+    if (varNames.length !== varVals.length) {
         logger.info(`Query Parameter variable failed - number of name and value does not match`);
         return []
     }
-    if(varNames.length === 0) {
+    if (varNames.length === 0) {
         return []
     }
     const varArray = varNames.map((name, index) => [name, varVals[index]])
@@ -124,7 +108,7 @@ export const copySelection = (e: Object) => {
 // eslint-disable-next-line class-methods-use-this
 export const addDetail = (key: string, name: ? string, id : ? string) => {
     const detail = document.createElement('div');
-    detail.className= 'detail'
+    detail.className = 'detail'
     detail.innerText = `${key}: ${name || ''}`;
     const detailId = document.createElement('input');
     detailId.value = `${id || ''}`;
@@ -162,8 +146,8 @@ export const LOOPING_AUDIO_AC_TYPE = 'urn:x-object-based-media:asset-collection-
 
 export const preventEventDefault = (event: Event) => {
     // if the event doesn't come from the scrub bar we suppress the touch moves
-    if(event && event.target && event.target.classList) {
-        if(!event.target.classList.includes(SLIDER_CLASS)) {
+    if (event && event.target && event.target.classList) {
+        if (!event.target.classList.includes(SLIDER_CLASS)) {
             event.preventDefault();
         }
     }
@@ -174,14 +158,14 @@ export const preventEventDefault = (event: Event) => {
  * @param {Function} callback callback to execute on the event
  * @param {string} touchEvent Event to attach listener to
  */
-export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent )) => {
+export const handleButtonTouchEvent = (callback: Function, touchEvent: (Event | TouchEvent)) => {
     return (event: Object) => {
-        if(getSetting(DEBUG_PLAYOUT_FLAG)) {
+        if (getSetting(DEBUG_PLAYOUT_FLAG)) {
             logger.info('Event Captured:', event);
             logger.info('Touch Event Captured:', touchEvent);
         }
         // handle multiple touch points?
-        if(event.touches !== undefined && event.touches && event.touches.length > 1) {
+        if (event.touches !== undefined && event.touches && event.touches.length > 1) {
             return;
         }
         // Stop propagation of touch event.
@@ -233,8 +217,11 @@ export const replaceEscapedVariables = (textContent, controller) => {
             }
             if (vState[vName]) {
                 /* eslint-disable camelcase */
-                const { variable_type, value } = vState[vName];
-                switch(variable_type) {
+                const {
+                    variable_type,
+                    value
+                } = vState[vName];
+                switch (variable_type) {
                 case 'number':
                     return value.toString();
                 case 'boolean':
@@ -248,7 +235,7 @@ export const replaceEscapedVariables = (textContent, controller) => {
             }
             return '';
         };
-        const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m ,c) => getVal(c));
+        const replacedText = textContent.replace(/\$\{(.*?)\}/g, (m, c) => getVal(c));
         return replacedText;
     });
 };
@@ -260,12 +247,12 @@ export const replaceEscapedVariables = (textContent, controller) => {
  */
 export const getControlHideList = (ne, story) => {
     let hideList = [];
-    if (ne && ne.meta.storyplayer
-        && ne.meta.storyplayer.hide_controls) {
+    if (ne && ne.meta.storyplayer &&
+        ne.meta.storyplayer.hide_controls) {
         hideList = hideList.concat([...ne.meta.storyplayer.hide_controls]);
     }
-    if (story && story.meta.storyplayer
-        && story.meta.storyplayer.hide_controls) {
+    if (story && story.meta.storyplayer &&
+        story.meta.storyplayer.hide_controls) {
         hideList = hideList.concat([...story.meta.storyplayer.hide_controls]);
     }
     return hideList

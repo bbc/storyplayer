@@ -25,8 +25,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
     _queueSubtitleAttach: Function;
 
-    constructor(player: Player, debugPlayout: boolean) {
-        super(player, debugPlayout);
+    constructor(player: Player) {
+        super(player);
         this._foregroundMediaElement = document.createElement('video');
         this._foregroundMediaElement.className = 'romper-video-element';
         this._foregroundMediaElement.crossOrigin = 'anonymous';
