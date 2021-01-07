@@ -109,19 +109,19 @@ How to develop
 
 Running the examples
 --------------------
-To check everything is installed correctly, run `python http.server` (python 3 only) in the root of the project, and visit `http://localhost:8000/examples`.
+To check everything is installed correctly, run `python3 -m http.server` in the root of the project, and visit `http://localhost:8000/examples`.
 Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running a local StoryPlayer with local stories/media
 --------------
 
-* The StoryPlayer code should be placed behind a Web Server, e.g., by running `python -m http.server` (python3 only) in the root directory of the code.
+* Run `python3 -m http.server` in the root of the projectedx.
 
 * The media can be placed in the `/examples/` folder.  It can be put directly in, or organised into subfolders.
 
 * The story json can be placed in the `/examples/` folder.  The json must conform with the [schema](https://github.com/bbc/object-based-media-schema); there are stories in the examples folder there can provide some guidance or be edited manually for testing and exploration.   The Asset Collection source values can use a relative path to the local folder containing the media.  For example, if you are editing `my_story.json` in the `/examples/` folder, and wish to use the video `/examples/my_project/my_nice_vid.mp4`, then the asset collection should have:
 
-```
+```                                                                                       
     "assets": {
         "av_src": "./my_project/my_nice_vid.mp4"
     }
