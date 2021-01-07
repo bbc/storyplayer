@@ -103,7 +103,7 @@ How to develop
 
 * Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
-* `yarn test` will do a single run of the tests (Mocha with Chai, ESLint and Flow type checking)
+* `yarn test` will do a single run of the tests (ESLint, jest and sass-lint)
 * `yarn dev` will continuously build and test the library on changes
 
 
