@@ -16,7 +16,7 @@ StoryPlayer is available to everyone under the terms of the GNU General Public L
 How to use StoryPlayer
 ======================
 
-It all starts with [romper.js](src/romper.js). You'll notice the term "_romper_" appears frequently in the code.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to StoryPlayer, to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
+You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
@@ -93,10 +93,10 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer.
 How to develop
 --------------
 
-* We use [Yarn](https://yarnpkg.com/en/) for dependency management, Mocha as a test runner with Chai for assertions.
-  TDD is preferred here. We have an ESLint file which follows our house file, and we prefer to have Facebook Flow
-  annotations in place for type checking.
-
+* We use [Yarn](https://yarnpkg.com/en/) for dependency management.
+  We have an ESLint file based on airbnb-base, with our own tweaks.
+  We have used Flow for type checking, but this is not consistent throughout the code base.
+  
 * Pre-requisites.  In order to get a local version of StoryPlayer running, you will need to:
     1.  Download the repo
     2.  Ensure Yarn is installed
