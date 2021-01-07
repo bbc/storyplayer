@@ -64,10 +64,10 @@
   },
   "dependencies": {
     "browser-bunyan": "^1.5.3",
-    "hls.js": "^0.13.0",
+    "hls.js": "0.14.17",
     "json-logic-js": "^2.0.0",
-    "shaka-player": "^2.5.7",
+    "shaka-player": "3.0.7",
     "three": "^0.112.1",
-    "uuid": "^3.3.3"
+    "uuid": "8.3.2"
   }
 }
