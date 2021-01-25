@@ -1,7 +1,7 @@
 // @flow
-
 import Player from '../gui/Player';
-import ThreeJsBaseRenderer from './ThreeJsBaseRenderer';
+import ThreeJSDriver from './ThreeJSDriver';
+import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -10,18 +10,10 @@ import { RENDERER_PHASES } from './BaseRenderer';
 
 const THREE = require('three');
 
-const TIMER_INTERVAL = 100;
-
-export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
+export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
     _fetchMedia: MediaFetcher;
 
-    _imageTimer: ?IntervalID;
-
-    _timeElapsed: number;
-
     _duration: number;
-
-    _timedEvents: { [key: string]: Object };
 
     _disablePlayButton: Function;
 
@@ -54,116 +46,79 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this._timeElapsed = 0;
-        this._duration = Infinity;
-        this._timedEvents = {};
+        this._duration = this._representation.duration ? this._representation.duration : Infinity;
+
+        this._threeJSDriver = new ThreeJSDriver(
+            this._controller,
+            this._player.mediaTarget,
+            this._player.getOverlayElement(),
+        );
     }
 
     async init() {
         try {
-            await this.renderImageElement();
+            await this._preloadImage();
+            await this._preloadBehaviourAssets();
             this._setPhase(RENDERER_PHASES.CONSTRUCTED);
+        } catch(e) {
+            logger.error(e, 'Could not construct 360 image renderer');
         }
-        catch(e) {
-            logger.error(e, 'could not initiate 360 image renderer');
-        }
+    }
+
+    willStart() {
+        const ready = super.willStart();
+        if (!ready) return false;
+        this._playoutEngine.startNonAVPlayout(this._rendererId, this._duration);
+        return true;
     }
 
     start() {
         super.start();
-        logger.info('Starting ThreeJs image');
-        this._setPhase(RENDERER_PHASES.MAIN);
-        this._showImage();
-        if (this._representation.duration && this._representation.duration > 0){
-            this._duration = this._representation.duration;
-            this._timeElapsed = 0;
-            // eslint-disable-next-line max-len
-            logger.info(`360 Image representation ${this._representation.id} timed for ${this._representation.duration}s, starting now`);
-            this._player.showSeekButtons();
-        }
-        if (this._representation.duration && this._representation.duration === 0) {
+        this._threeJSDriver.init();
+        this._threeJSDriver.addToScene(this._imageMesh);
+
+        if (this._duration === Infinity || this._duration < 0) {
+            logger.info(`360 image representation ${this._representation.id} persistent`);
+            this._disablePlayButton();
+            this._disableScrubBar();
+            this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+        } else if (this._duration === 0) {
+            logger.warn(`360 image representation ${this._representation.id} has zero duration`);
             this.complete();
         } else {
-            this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
-            this._startTimer();
-        }
-        this._disableScrubBar();
-        this._disablePlayButton();
-    }
-
-    pause() {
-        clearInterval(this._imageTimer);
-    }
-
-    _startTimer() {
-        this._imageTimer = setInterval(() => {
-            this._timeElapsed += TIMER_INTERVAL/1000;
-            if (this._timeElapsed >= this._duration) {
-                // eslint-disable-next-line max-len
-                logger.info(`Image representation ${this._representation.id} completed timeout`);
-                this.complete();
-            }
-            Object.keys(this._timedEvents).forEach((timeEventId) => {
-                const { time, callback } = this._timedEvents[timeEventId];
-                if (this._timeElapsed >= time){
-                    delete this._timedEvents[timeEventId];
-                    callback();
-                }
-            });
-        }, TIMER_INTERVAL);
-    }
-
-    getCurrentTime(): Object {
-        if (this._representation.duration && this._representation.duration > 0) {
-            const timeObject = {
-                timeBased: true,
-                currentTime: this._timeElapsed,
-                remainingTime: this._duration - this._timeElapsed,
-            };
-            return timeObject;
-        }
-        return super.getCurrentTime();
-    }
-
-    play(){
-        this._startTimer();
-    }
-
-    addTimeEventListener(listenerId: string, time: number, callback: Function) {
-        this._timedEvents[listenerId] = { time, callback };
-    }
-
-    deleteTimeEventListener(listenerId: string) {
-        if (listenerId in this._timedEvents) {
-            delete this._timedEvents[listenerId];
+            // eslint-disable-next-line max-len
+            logger.info(`360 image representation ${this._representation.id} timed for ${this._duration}s, starting now`);
+            this._player.showSeekButtons();
+            this._enableScrubBar();
+            this.addTimeEventListener(
+                `${this._rendererId}-complete`,
+                this._duration,
+                () => {
+                    // eslint-disable-next-line max-len
+                    logger.info(`360 image representation ${this._representation.id} completed time`);
+                    this.complete();
+                },
+            );
         }
     }
 
     end() {
         const needToEnd = super.end();
-        if (!needToEnd) return false;
-
-        this._setPhase(RENDERER_PHASES.ENDED);
-        if (this._imageTimer){
-            clearInterval(this._imageTimer);
+        if (needToEnd) {
+            this._threeJSDriver.destroy();
+            this._setPhase(RENDERER_PHASES.ENDED);
         }
-        this._timedEvents = {};
-        return true;
+        return needToEnd;
     }
 
-    _showImage() {
-        this._scene.add(this._imageMesh);
-        this._animate();
-    }
-
-    async renderImageElement() {
+    async _preloadImage() {
         // set image source
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
             if (fg.assets.image_src) {
                 try {
                     const mediaUrl = await this._fetchMedia(fg.assets.image_src);
-                    this.populateImageElement(mediaUrl)
+                    this._imageMesh = ThreeJSDriver.loadImage(mediaUrl)
                 } catch(err) {
                     throw new Error('Could not resolve media source for 360 image');
                 }
@@ -171,18 +126,5 @@ export default class ThreeJsVideoRenderer extends ThreeJsBaseRenderer {
                 throw new Error('No image source for 360 image asset collectoin');
             }
         }
-    }
-
-    populateImageElement(mediaUrl: string) {
-        const loader = new THREE.TextureLoader();
-        loader.setCrossOrigin('');
-        const texture = loader.load(mediaUrl);
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-
-        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
-        // invert the geometry on the x-axis so that all of the faces point inward
-        geometry.scale(-1, 1, 1);
-
-        this._imageMesh = new THREE.Mesh(geometry, material);
     }
 }

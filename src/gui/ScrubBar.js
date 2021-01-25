@@ -69,74 +69,38 @@ class ScrubBar extends BaseScrubBar {
     connect(renderer: BaseRenderer) {
         const scrubBar = this._scrubBar;
 
-        let isSyncing = false; // do we need to wait for everything to sync?
+        // Update scrubbar position as media plays and when manipulated by user.
+        // TODO: Using scrubBar.oninput stop/pause the player whilst scrubbing.
+        scrubBar.addEventListener('change', () => {
+            const { currentTime, duration } = renderer.getCurrentTime();
+            const seekTime = duration * (parseInt(scrubBar.value, 10) / 100);
+            renderer.setCurrentTime(seekTime);
 
-        const scrubBarSeek = (time) => {
-            const { currentTime } = renderer.getCurrentTime();
-            const currentTimeString = currentTime.toString()
-            isSyncing = true;
-            renderer.setCurrentTime(time);
-
-            // Don't spam analtics with lots of changes
-            // Wait 1 second after scrub bar stops changing before sending analytics
             if (this._scrubbedEventTimeout) {
                 clearTimeout(this._scrubbedEventTimeout);
             }
             this._scrubbedEventTimeout = setTimeout(() => {
                 this._logUserInteraction(
                     AnalyticEvents.names.VIDEO_SCRUBBED,
-                    currentTimeString,
-                    time.toString(),
+                    currentTime.toString(),
+                    seekTime.toString(),
                 );
             }, 1000);
-        }
-
-        const scrubBarChangeFunc = () => {
-            // Calculate the new time
-            const { duration } = renderer.getCurrentTime();
-            const time = duration * (parseInt(scrubBar.value, 10) / 100);
-            scrubBarSeek(time)
-        };
-
-        // update scrub bar position as media plays
-        // TODO: Using scrubBar.oninput we should stop player whilst scrub is
-        // held
-        scrubBar.onchange = scrubBarChangeFunc;
-
-        // allow clicking the scrub bar to seek to a media position
-        scrubBar.addEventListener('click', (e: MouseEvent) => {
-            const percent = e.offsetX / scrubBar.offsetWidth;
-            const { duration } = renderer.getCurrentTime();
-            // Update the media time
-            const newTime = percent * duration;
-            scrubBarSeek(newTime)
         });
 
         let isDragging = false;
-        // Pause the media when the slider handle is being dragged
-        scrubBar.addEventListener('mousedown', () => {
-            isDragging = true;
-        });
+        scrubBar.addEventListener('mousedown', () => { isDragging = true; });
+        scrubBar.addEventListener('mouseup', () => { isDragging = false; });
 
-        // Play the media when the slider handle is dropped (if it was previously playing)
-        scrubBar.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        // clear any existing polling
-        if (this._scrubTimePoller) clearInterval(this._scrubTimePoller);
-
-        // Update the seek bar as the media plays
+        // Update the seek bar as the media plays.
+        clearInterval(this._scrubTimePoller);
         this._scrubTimePoller = setInterval(
             () => {
-                const { currentTime, duration, timersSyncing } = renderer.getCurrentTime();
-                const value = ((100 / duration) * currentTime);
-                // Update the slider value
-                if (!(isDragging || isSyncing)) {
+                // Only update the slider value if not manipulated by user.
+                if (!isDragging) {
+                    const { currentTime, duration } = renderer.getCurrentTime();
+                    const value = ((100 / duration) * currentTime);
                     scrubBar.value = value.toString();
-                }
-                if (isSyncing && !timersSyncing) {
-                    isSyncing = false;
                 }
             },
             200,

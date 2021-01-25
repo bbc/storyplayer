@@ -1,7 +1,6 @@
 // @flow
-
 import Player from '../gui/Player';
-import TimedMediaRenderer from './TimedMediaRenderer';
+import BaseTimedMediaRenderer from './BaseTimedMediaRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import type { AnalyticsLogger } from '../AnalyticEvents';
@@ -11,9 +10,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 
-export default class SimpleAVRenderer extends TimedMediaRenderer {
-    _fetchMedia: MediaFetcher;
-
+export default class SimpleAVRenderer extends BaseTimedMediaRenderer {
     _applyBlurBehaviour: Function;
 
 
@@ -57,14 +54,6 @@ export default class SimpleAVRenderer extends TimedMediaRenderer {
         const { blur } = behaviour;
         this._playoutEngine.applyStyle(this._rendererId, "filter", `blur(${blur}px)`)
         callback();
-    }
-
-    switchFrom() {
-        this.end();
-    }
-
-    switchTo() {
-        this.start();
     }
 
     _clearBehaviourElements() {

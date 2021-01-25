@@ -1,13 +1,14 @@
 // @flow
 
-import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
+import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
 import Player from '../gui/Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
-export default class ImageRenderer extends BaseRenderer {
+export default class ImageRenderer extends BaseTimedIntervalRenderer {
     _imageElement: HTMLImgElement;
 
     _disablePlayButton: Function;
@@ -80,7 +81,7 @@ export default class ImageRenderer extends BaseRenderer {
             logger.info(`Image representation ${this._representation.id} timed for ${this._duration}s, starting now`);
             this._player.showSeekButtons();
             this._enableScrubBar();
-            this._timer.addTimeEventListener(
+            this.addTimeEventListener(
                 `${this._rendererId}-complete`,
                 this._duration,
                 () => {

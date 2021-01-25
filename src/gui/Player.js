@@ -909,9 +909,8 @@ class Player extends EventEmitter {
             startNow,
         );
         if (startNow && this.playoutEngine.isPlayingNonAV()) {
-            // also need to kick off the timer for timed representations that don't use the
-            // playout engines
-            this._currentRenderer._timer.resume();
+            // Kick off non-AV that doesn't use a playout engine.
+            this._currentRenderer.play();
         }
 
         if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
