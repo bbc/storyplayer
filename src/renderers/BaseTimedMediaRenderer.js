@@ -25,7 +25,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         // During loading (intial load or chunk load after a seek) the player
         // reports underfined as it's current time. We latch the previous
         // returned currentTime and return that rather than undefined.
-        this._latchedCurrentTime = 0;
+        this._latchedCurrentTime = undefined;
         this._accumulatedTime = 0;
         this._shouldShowScrubBar = true;
 
@@ -39,7 +39,8 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         const oldTime = this._latchedCurrentTime;
         this._latchedCurrentTime =
             this._playoutEngine.getCurrentTime(this._rendererId) ||
-            this._latchedCurrentTime;
+            this._latchedCurrentTime ||
+            this._inTime;
 
         let currentTime;
         // If we are looping use the total amount of time player has been
@@ -64,7 +65,13 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     setCurrentTime(time) {
         // Calculate bounded time w.r.t. what was requested.
         const { duration } = this.getCurrentTime();
+
+        // Duration of an HTMLMediaElement is not always reported accurately;
+        // and if we seek past the actual duration, behaviour is undefined, so
+        // instead seek to the duration minus guard time.
         let targetTime = time;
+        targetTime = Math.min(targetTime, duration - 0.01)
+        targetTime = Math.max(0, targetTime)
 
         const choiceTime = this.getChoiceTime();
         if (choiceTime >= 0 && choiceTime < targetTime) {
@@ -73,12 +80,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
         // Account for trimmed video.
         targetTime += this._inTime;
-
-        // Duration of an HTMLMediaElement is not always reported accurately;
-        // and if we seek past the actual duration, behaviour is undefined, so
-        // instead seek to the duration minus guard time.
-        targetTime = Math.min(targetTime, duration - 0.01)
-        targetTime = Math.max(0, targetTime)
 
         // Ensure that targetTime is valid.
         if (targetTime === Infinity || Number.isNaN(targetTime)) {
@@ -186,7 +187,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             (this._outTime > 0 && currentTime >= this._outTime)
         ) {
             if (this.checkIsLooping()) {
-                // this._playoutEngine.setCurrentTime(this._rendererId, this._inTime);
                 this.setCurrentTime(0);
                 this._loopCount += currentTime;
                 this._playoutEngine.playRenderer(this._rendererId);
@@ -246,7 +246,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         const needToEnd = super.end();
         if (!needToEnd) return false;
 
-        this._latchedCurrentTime = 0;
+        this._latchedCurrentTime = undefined;
         this._accumulatedTime = 0;
         this.setCurrentTime(0);
 
