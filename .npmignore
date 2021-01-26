@@ -1,9 +1,0 @@
-/.babelrc
-/.eslintrc
-/.flowconfig
-*.iml
-/demo.html
-/flow-typed
-/spec
-/src
-/yarn.lock

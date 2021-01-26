@@ -22,6 +22,11 @@
   "bugs": {
     "url": "https://github.com/bbc/rd-ux-storyplayer/issues"
   },
+  "files": [
+    "/dist",
+    "/docs",
+    "/examples"
+  ],
   "homepage": "https://github.com/bbc/rd-ux-storyplayer#readme",
   "devDependencies": {
     "@babel/cli": "^7.12.10",

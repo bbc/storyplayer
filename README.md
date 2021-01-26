@@ -1,7 +1,7 @@
 StoryPlayer
 ===========
 
-StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using the [Data Model](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
+StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories that are expressed using our [object-based media schema](https://github.com/bbc/object-based-media-schema) and render the experience within an HTML `<div>` element, responding to audience interactions as and when.
 
 Installing the library
 ======================
