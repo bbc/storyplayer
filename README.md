@@ -104,7 +104,7 @@ The [demo index page](examples/index.html) shows how this might work in a static
 
 Implementation
 ==============
-Information regarding the implementation of StoryPlayer is detailed in [docs/implementation.md](docs/implementation.md), and includdes:
+Information regarding the implementation of StoryPlayer is detailed in [docs/implementation.md](docs/implementation.md), and includes:
 * [URL Parameters for Playback](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#url-parameters-for-playback)
 * [URL Parameters for Debugging](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#url-parameters-for-debugging)
 * [Internal Variables](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#internal-variables)
@@ -123,5 +123,5 @@ Please read our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and our [CODE_OF_COND
 Licence
 =======
 
-StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](LICENCE) and [COPYING](COPYING)in the repo for further details.
+StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](LICENCE) and [COPYING](COPYING) in the repo for further details.
 
