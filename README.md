@@ -47,20 +47,20 @@ Running StoryPlayer with local stories and media
 Instantiating StoryPlayer
 =========================
 
-You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
+> First, an implementation note. You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
 [romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
-  - `storyFetcher` - returns a [`story`](https://github.com/bbc/object-based-media-schema#story)
-  - `narrativeElementFetcher` - returns a [`Narrative Element`](https://github.com/bbc/object-based-media-schema#narrative-element)
-  - `representationCollectionFetcher` - returns a [`Representation Collection`](https://github.com/bbc/object-based-media-schema#representation-collection)
-  - `representationFetcher` - returns a [`Representation`](https://github.com/bbc/object-based-media-schema#representation)
-  - `assetCollectionFetcher` - returns an [`Asset Collection`](https://github.com/bbc/object-based-media-schema#asset-collection)
+  - `storyFetcher` - returns a [`story`](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md#story)
+  - `narrativeElementFetcher` - returns a [`Narrative Element`](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md#narrative-element)
+  - `representationCollectionFetcher` - returns a [`Representation Collection`](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md#representation-collection)
+  - `representationFetcher` - returns a [`Representation`](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md#representation)
+  - `assetCollectionFetcher` - returns an [`Asset Collection`](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md#asset-collection)
 * `mediaFetcher`  - A function that takes a URI for some media and returns a URL that can be given, for example, as a `src` attribute for a `<video>` element
 * `staticImageBaseUrl` - The location of some static assets used by the player (specifically image assets to used if not defined in the story)
-* `analyticsLogger` (optional, defaults to logging on the browser console) - A function that processes analytics data Objects; see [below](#analytics).  For example, the function might save the information into a database
+* `analyticsLogger` (optional, defaults to logging on the browser console) - A function that processes analytics data Objects; see [docs/analytics.md](docs/analytics.md).  For example, the function might save the information into a database
 * `dataResolver` (optional, defaults to creating one) - contains `get` and `set` functions to get and set the values of the variables that determine the flow of logic of the story (see the [built-in DataResolver](src/resolvers/ObjectDataResolver.js)).  This can be used to hook the player into an external data store
 * `privacyNotice` (optional, defaults to null) - A string rendered alongside the start button and start image designed to present a privacy warning to users
 * `saveSession` (optional, defaults to false) - A boolean to say whether or not the player should save state and offer to resume when restarted
@@ -104,13 +104,12 @@ The [demo index page](examples/index.html) shows how this might work in a static
 
 Implementation
 ==============
-Details on XYZ can be found here
+Information regarding the implementation of StoryPlayer is detailed in [docs/implementation.md](docs/implementation.md).
+
 
 Analytics
 =========
-Details on analytics can be
-
-
+StoryPlayer features a highly granular analytics solution that can be used to record user behaviour, and is detailed in [docs/analytics.md](docs/analytics.md).
 
 How to contribute
 =================
