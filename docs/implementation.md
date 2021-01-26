@@ -46,12 +46,15 @@ Document Object Model
 =====================
 The following diagram shows how the HTML elements that make up StoryPlayer are organised.  The elements are labelled with their primary CSS class name.  The blue `target` node at the root of the tree is the `<div>` that is passed into StoryPlayer when it is initiated.
 
-![StoryPlayer DOM](docs/img/storyplayer-dom.png)
+![StoryPlayer DOM](img/storyplayer-dom.png)
 
 Code Components and Data Flow
 =============================
 
-The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this diagram](https://github.com/bbc/object-based-media-schema#story-logic-flow).  This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
+
+
+
+The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this flow diagram](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md/#story-logic-flow). This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
 
 ### Story Control
 
@@ -84,29 +87,29 @@ The `Player` builds the DOM tree for rendering the content and the UI.  It handl
 ### Renderer Lifecycle
 The basic lifecycle of a renderer is shown below:
 
-![Overview of Renderer Lifecycle](docs/img/renderer_lifecycle.png)
+![Overview of Renderer Lifecycle](img/renderer_lifecycle.png)
 
 The `BaseRenderer` is the base class for all the Renderers and handles concerns that are common to all.  The rough lifecycle is that constructing a Renderer builds the necessary components for it to play (e.g., a `SimpleAVRenderer` fetches the media assets and gets the `PlayoutEngine` to queue them up).  When the Controller tells the RenderManager to change to the NarrativeElement that the Renderer is handling, the `willStart()` function is called.  This tells the `BehaviourRunner` to run any start behaviours for the Representation and the `PlayoutEngine` to move on to this media.  Once the behaviours have all completed, the `start()` function is called, which clears any behaviour DOM elements and starts rendering (e.g., video playback commences).  It also tests for during behaviours and queues these to run at the appropriate time.  The Renderer is responsible for ending itself, which is done by running the `complete()` function, e.g., when the video has completed.  The `complete()` function asks the `BehaviourRunner` to run any completed behaviours; once these have completed, the Renderer emits a COMPLETED event, which is heard by the RenderManager and passed on to the Controller.  The Controller then tells its StoryReasoner to move on to the next element; this fires events which the Controller listens for and handles, e.g., to tell the RenderManager handle a change in NarrativeElement.  The renderer's `destroy()` function is called when it is no longer either playing or held in the RenderManager's 'buffer' of next and previous NarrativeElements.  The Renderer uses a `TimeManager` to monitor time passing during the main part of the renderer lifecycle.  This monitors absolute time elapsed (compensating for time spent paused or with the window invisible) and allows DURING behaviours to occur at a set time into the element both for representations that have a natural timeline (e.g., video) and those that don't (e.g., image).
 
 The diagram below extends the simple overview (above) to show the functions that are called to start each phase of the lifecycle and the events that are sent to the RenderManager that allow it to call them at the appropriate times.  For example, when a renderer has completed all its COMPLETED behaviours, it will fire the `COMPLETED` event to the RenderManager, which will call the `end()` function on the renderer and move to the next Narrative Element.
 
-![Details of Renderer Lifecycle](docs/img/renderer_lifecycle_ext.png)
+![Details of Renderer Lifecycle](img/renderer_lifecycle_ext.png)
 
 
 #### Behaviours
-[Behaviours](https://github.com/bbc/object-based-media-schema#behaviours) are associated with Representations in the Data Model, and can be run at the start, middle, or end of an Element.  They are handled by the Renderer for the given Representation; this uses a `BehaviourRunner` to run the behaviours.  The BehaviourRunner passes each behaviour to the `BehaviourFactory`; which returns a `Behaviour` that is capable of handling it.  Some (e.g., pause) are generic enough to be handled by their own class for all Renderer types; other behaviours can only be handled by certain Representation types, or need to be handled differently for different Representation types; these are handled by the `BaseBehaviour`, which basically passes responsibility on to the Renderer for the Representation.  Each Renderer has a map that associates functions with the URNs of the behaviours it can handle; the function is called when the behaviour needs to be run and runs a callback when it is completed.  The behaviours are considered complete when all of those which are capable of being run have run their callbacks.
+[Behaviours](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md/#behaviours) are associated with Representations in the Data Model, and can be run at the start, middle, or end of an Element.  They are handled by the Renderer for the given Representation; this uses a `BehaviourRunner` to run the behaviours.  The BehaviourRunner passes each behaviour to the `BehaviourFactory`; which returns a `Behaviour` that is capable of handling it.  Some (e.g., pause) are generic enough to be handled by their own class for all Renderer types; other behaviours can only be handled by certain Representation types, or need to be handled differently for different Representation types; these are handled by the `BaseBehaviour`, which basically passes responsibility on to the Renderer for the Representation.  Each Renderer has a map that associates functions with the URNs of the behaviours it can handle; the function is called when the behaviour needs to be run and runs a callback when it is completed.  The behaviours are considered complete when all of those which are capable of being run have run their callbacks.
 
 ### Interpretation of User Interactions
 There is considerable complexity in how user interactions influence the lifecycle.  For example, if a link choice behaviour has been applied to a Representation, what should the Next button on the transport bar do?  The following diagrams are intended to capture how StoryPlayer works.
 
 #### Transport controls
 
-![Next button](docs/img/next_button.png)
-![Previous button](docs/img/back_button.png)
-![Seek forward](docs/img/seek_fwd_button.png)
-![Seek backward](docs/img/seek_back_button.png)
+![Next button](img/next_button.png)
+![Previous button](img/back_button.png)
+![Seek forward](img/seek_fwd_button.png)
+![Seek backward](img/seek_back_button.png)
 
 #### Interaction with behaviours
 The variables panel and link choice behaviours both allow for user interaction.  The following diagram shows how this affects the renderer lifecycle in StoryPlayer.
 
-![Interaction with behaviours](docs/img/behaviour_interaction.png)
+![Interaction with behaviours](img/behaviour_interaction.png)
