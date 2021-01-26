@@ -51,9 +51,6 @@ The following diagram shows how the HTML elements that make up StoryPlayer are o
 Code Components and Data Flow
 =============================
 
-
-
-
 The logic of processing the [data model](https://github.com/bbc/object-based-media-schema) is shown in [this flow diagram](https://github.com/bbc/object-based-media-schema/blob/main/docs/SCHEMA.md/#story-logic-flow). This section briefly describes how the responsibilities for performing that are allocated amongst the different code components of StoryPlayer.
 
 ### Story Control

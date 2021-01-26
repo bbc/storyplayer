@@ -104,13 +104,12 @@ The [demo index page](examples/index.html) shows how this might work in a static
 
 Implementation
 ==============
-Information regarding the implementation of StoryPlayer is detailed in [docs/implementation.md](docs/implementation.md).
-* URL Parameters for Playback
-* URL Parameters for Debugging
-* Internal Variables
-* Document Object Model
-* Code Components and Data Flow
-* 
+Information regarding the implementation of StoryPlayer is detailed in [docs/implementation.md](docs/implementation.md), and includdes:
+* [URL Parameters for Playback](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#url-parameters-for-playback)
+* [URL Parameters for Debugging](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#url-parameters-for-debugging)
+* [Internal Variables](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#internal-variables)
+* [Document Object Model](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#document-object-model)
+* [Code Components and Data Flow](https://github.com/bbc/rd-ux-storyplayer/blob/open-source-cleanup/docs/implementation.md#code-components-and-data-flow)
 
 Analytics
 =========
