@@ -169,8 +169,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         let playlistItem = {}
         // Check if we have subtitles and that they are EBU-TT-D and not WebVTT
         if(
-            "subs_url" in this._media[rendererId].media &&
-            this._media[rendererId].media.subs_url.substr(-4) === ".xml"
+            "subs_url" in this._media[rendererId].media 
+            // && this._media[rendererId].media.subs_url.substr(-4) === ".xml"
         ) {
 
             playlistItem.captionsUrl = this._media[rendererId].media.subs_url;
