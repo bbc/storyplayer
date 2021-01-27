@@ -270,7 +270,7 @@ export default class BaseRenderer extends EventEmitter {
                 try {
                     if (clearCallback) clearCallback();
                 } catch (err) {
-                    logger.info(`TimeManager: ${this._rendererId} couldn't clear up behaviour ${timeEventId}`);
+                    logger.warn(`TimeManager: ${this._rendererId} couldn't clear up behaviour ${timeEventId}`);
                 }
                 this._timedEvents[timeEventId].isRunning = false;
             }
