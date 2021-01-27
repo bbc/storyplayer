@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
-import uuid from 'uuid/v4'
+import { v4 as uuid } from 'uuid';
 import EventEmitter from 'events';
 import Player, { PlayerEvents } from '../gui/Player';
 import logger from '../logger';

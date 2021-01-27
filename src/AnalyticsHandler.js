@@ -1,6 +1,6 @@
 import AnalyticEvents from './AnalyticEvents';
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 export default class AnalyticsHandler {
     constructor(analytics, controller) {
