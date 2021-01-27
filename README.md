@@ -64,7 +64,7 @@ The returned instance will fire events that can be listened for and handled.  Fo
     this.storyplayer.on(REASONER_EVENTS.STORY_END, this.handleStoryEnd)
 ```
 
-The demo index page in [the storyplayer repo](https://github.com/bbc/rd-ux-storyplayer/blob/main/examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
+The demo index page in [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
 Building the library from the repo
 ==================================
@@ -73,7 +73,7 @@ Building the library from the repo
 > We have an ESLint file based on [airbnb-base](https://www.npmjs.com/package/eslint-config-airbnb-base), with our own tweaks.\
 > We have used [Flow](https://flow.org) for type checking, but this is not consistent throughout the code base.
 
-* First, clone [the storyplayer repo](https://github.com/bbc/rd-ux-storyplayer) and ```cd``` into the new directory.
+* First, clone [the storyplayer repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
 * Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
 * `yarn test` will do a single run of the tests (ESLint, jest and sass-lint)
@@ -106,24 +106,24 @@ Running StoryPlayer against local stories and media
 
 StoryPlayer Implementation details
 ----------------------------------
-Information regarding the implementation of StoryPlayer is detailed in [the storyplayer repo](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md), and includes:
-* [URL Parameters for Playback](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md#url-parameters-for-playback)
-* [URL Parameters for Debugging](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md#url-parameters-for-debugging)
-* [Internal Variables](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md#internal-variables)
-* [Document Object Model](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md#document-object-model)
-* [Code Components and Data Flow](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/implementation.md#code-components-and-data-flow)
+Information regarding the implementation of StoryPlayer is detailed in [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md), and includes:
+* [URL Parameters for Playback](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#url-parameters-for-playback)
+* [URL Parameters for Debugging](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#url-parameters-for-debugging)
+* [Internal Variables](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#internal-variables)
+* [Document Object Model](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#document-object-model)
+* [Code Components and Data Flow](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#code-components-and-data-flow)
 
 StoryPlayer Analytics
 ---------------------
-StoryPlayer features a highly granular analytics solution that can be used to record user behaviour. For full details, head to [the storyplayer repo](https://github.com/bbc/rd-ux-storyplayer/blob/main/docs/analytics.md).
+StoryPlayer features a highly granular analytics solution that can be used to record user behaviour. For full details, head to [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/docs/analytics.md).
 
 How to contribute
 =================
 
-Please read our [CONTRIBUTING.md](https://github.com/bbc/rd-ux-storyplayer/blob/main/.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](https://github.com/bbc/rd-ux-storyplayer/blob/main/.github/CODE_OF_CONDUCT.md) if you are interested in making contributions.
+Please read our [CONTRIBUTING.md](https://github.com/bbc/storyplayer/blob/main/.github/CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](https://github.com/bbc/storyplayer/blob/main/.github/CODE_OF_CONDUCT.md) if you are interested in making contributions.
 
 Licence
 =======
 
-StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](https://github.com/bbc/rd-ux-storyplayer/blob/main/LICENCE) and [COPYING](https://github.com/bbc/rd-ux-storyplayer/blob/main/COPYING) in the repo for further details.
+StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](https://github.com/bbc/storyplayer/blob/main/LICENCE) and [COPYING](https://github.com/bbc/storyplayer/blob/main/COPYING) in the repo for further details.
 

@@ -1,6 +1,6 @@
 {
-  "name": "@bbc/storyplayer",
-  "version": "0.21.0",
+  "name": "storyplayer",
+  "version": "0.21.1",
   "description": "Object Based Media player",
   "main": "dist/romper.js",
   "scripts": {
@@ -16,17 +16,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bbc/rd-ux-storyplayer.git"
+    "url": "git+https://github.com/bbc/storyplayer.git"
   },
   "author": "BBC R&D",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/bbc/rd-ux-storyplayer/issues"
+    "url": "https://github.com/bbc/storyplayer/issues"
   },
   "files": [
     "/dist"
   ],
-  "homepage": "https://github.com/bbc/rd-ux-storyplayer#readme",
+  "homepage": "https://github.com/bbc/storyplayer#readme",
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",

@@ -12,7 +12,7 @@ Documentation
 
 Getting Started
 ===============
-Before starting a pull request, please search through [existing issues](https://github.com/bbc/rd-ux-storyplayer/issues). If the work you want to carry out isn't captured in an issue, please open one - we want to make sure that you don't spend a lot of time working on something that we may not be able to merge into the project. 
+Before starting a pull request, please search through [existing issues](https://github.com/bbc/storyplayer/issues). If the work you want to carry out isn't captured in an issue, please open one - we want to make sure that you don't spend a lot of time working on something that we may not be able to merge into the project. 
 
 There are issue templates available for bug fix and feature requests, so you know what information to include.
 
@@ -31,7 +31,7 @@ Issues should include:
 Making a contribution - what to expect
 ======================================
 
-The [StoryPlayer](https://github.com/bbc/rd-ux-storyplayer/) and [Object-based media schema](https://github.com/bbc/object-based-media-schema) repos are closely related, and contributions to one repo may require contributions to the other.
+The [StoryPlayer](https://github.com/bbc/storyplayer/) and [Object-based media schema](https://github.com/bbc/object-based-media-schema) repos are closely related, and contributions to one repo may require contributions to the other.
 
 We're keen that StoryPlayer works as well as possible across a range of browsers and devices, so we encourage fixes for any problems you might find. However - it is a significant amount of work for us to ensure that these fixes don't impact the devices you don't have, so we will have to be circumspect regarding these kinds of contributions.
 
