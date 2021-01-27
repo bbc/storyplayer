@@ -11,6 +11,7 @@
     "test:eslint": "eslint src/ spec/",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
+    "prepublishOnly": "yarn run test && yarn run build",
     "dev": "webpack --watch --watch-poll 500 --progress --profile --bail"
   },
   "repository": {
