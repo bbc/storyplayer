@@ -24,9 +24,7 @@
     "url": "https://github.com/bbc/rd-ux-storyplayer/issues"
   },
   "files": [
-    "/dist",
-    "/docs",
-    "/examples"
+    "/dist"
   ],
   "homepage": "https://github.com/bbc/rd-ux-storyplayer#readme",
   "devDependencies": {
