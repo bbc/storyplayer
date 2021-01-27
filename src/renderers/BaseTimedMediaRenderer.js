@@ -2,6 +2,7 @@ import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import logger from '../logger';
 
 import { MediaFormats } from '../browserCapabilities';
+import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine'
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import { VIDEO, AUDIO } from '../utils';
 
@@ -143,6 +144,8 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     }
 
     _endedEventListener() {
+        clearTimeout(this._testEndStallTimeout);
+
         // Race Condition: ended and timeupdate events firing at same time from
         // a playoutEngine cause this function to be run twice, resulting in two
         // NE skips. Only allow function to run if in MAIN phase.
@@ -193,6 +196,36 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             } else {
                 this._playoutEngine.pauseRenderer(this._rendererId);
                 this._endedEventListener();
+            }
+        }
+
+        // Stall Detection
+        // Only needed for non SMPPlayoutEngine
+        if (
+            !(this._playoutEngine instanceof SMPPlayoutEngine) &&
+            currentTime > (duration - 1)
+        ) {
+            if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
+                const startTime = currentTime;
+                this._testEndStallTimeout = setTimeout(() => {
+                    // eslint-disable-next-line no-shadow
+                    const { currentTime } = this.getCurrentTime();
+                    // eslint-disable-next-line max-len
+                    logger.info(`Checked video end for stall, run for 2s at ${startTime}, reached ${currentTime}`);
+                    if (currentTime >= startTime && currentTime <= startTime + 1.9) {
+                        logger.warn('Video end checker failed stall test');
+                        clearTimeout(this._testEndStallTimeout);
+                        // one more loop check
+                        if(this.checkIsLooping()) {
+                            this.setCurrentTime(0);
+                            this._loopCount += currentTime;
+                            this._playoutEngine.playRenderer(this._rendererId);
+                        } else {
+                            this._playoutEngine.pauseRenderer(this._rendererId);
+                            this._endedEventListener();
+                        }
+                    }
+                }, 2000);
             }
         }
     }
@@ -249,6 +282,8 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         this._latchedCurrentTime = undefined;
         this._accumulatedTime = 0;
         this.setCurrentTime(0);
+
+        clearTimeout(this._testEndStallTimeout);
 
         logger.info(`Ended: ${this._representation.id}`);
         this._playoutEngine.setPlayoutInactive(this._rendererId);
