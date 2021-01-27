@@ -191,7 +191,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         ) {
             if (this.checkIsLooping()) {
                 this.setCurrentTime(0);
-                this._loopCount += currentTime;
                 this._playoutEngine.playRenderer(this._rendererId);
             } else {
                 this._playoutEngine.pauseRenderer(this._rendererId);
@@ -218,7 +217,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                         // one more loop check
                         if(this.checkIsLooping()) {
                             this.setCurrentTime(0);
-                            this._loopCount += currentTime;
                             this._playoutEngine.playRenderer(this._rendererId);
                         } else {
                             this._playoutEngine.pauseRenderer(this._rendererId);
