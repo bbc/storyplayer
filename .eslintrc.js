@@ -28,7 +28,8 @@ module.exports = {
     "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
     "no-underscore-dangle": 0,
     "import/no-cycle": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "arrow-body-style": "off"
 
   }
 };

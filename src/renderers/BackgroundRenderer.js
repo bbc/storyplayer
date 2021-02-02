@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 
 import EventEmitter from 'events';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import type { AssetCollection, MediaFetcher } from '../romper';
 import Player from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
