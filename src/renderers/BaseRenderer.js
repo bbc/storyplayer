@@ -284,7 +284,7 @@ export default class BaseRenderer extends EventEmitter {
         endTime: ?number = Infinity,
         clearCallback: ?Function,
     ) {
-        if (this._debug) logger.info(`timer: Added event for ${listenerId} at ${startTime}`);
+        logger.info(`timer: Added event for ${listenerId} at ${startTime}`);
         this._timedEvents[listenerId] = {
             startTime,
             endTime,
