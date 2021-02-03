@@ -222,7 +222,7 @@
             document.getElementById('restart-button').removeAttribute('disabled');
             document.getElementById('story-title').textContent = config.stories[0].name;
             jsonEditor.set(config);
-            romperInstance = window.Romper.init({
+            romperInstance = window.Storyplayer.init({
                 target: document.getElementById('romper-target'),
                 staticImageBaseUrl: '/src/assets/images/',
                 analyticsLogger: dataObj => {
