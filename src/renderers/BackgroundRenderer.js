@@ -4,7 +4,7 @@
 
 import EventEmitter from 'events';
 import { v4 as uuid } from 'uuid';
-import type { AssetCollection, MediaFetcher } from '../romper';
+import type { AssetCollection, MediaFetcher } from '../storyplayer';
 import Player from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import { RENDERER_PHASES } from './BaseRenderer';

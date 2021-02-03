@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import JsonLogic from 'json-logic-js';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import StoryReasoner, { ReasonerError, REASONER_ERRORS } from './StoryReasoner';
-import type { ExperienceFetchers, NarrativeElement, AssetUrls, Representation } from './romper';
+import type { ExperienceFetchers, NarrativeElement, AssetUrls, Representation } from './storyplayer';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import StoryPathWalker from './StoryPathWalker';
 import type { StoryPathItem } from './StoryPathWalker';

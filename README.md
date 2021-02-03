@@ -33,7 +33,7 @@ Using the library
 For example, in a React application import the player:
 
 ```
-import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
+import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from 'storyplayer';
 ```
 
 Initiate it using an Object with the attributes described above:
@@ -41,7 +41,7 @@ Initiate it using an Object with the attributes described above:
     const playerSettingsObject = {
         // an Object including the above attributes
     }
-    this.storyplayer = Romper.init(playerSettingsObject);
+    this.storyplayer = Storyplayer.init(playerSettingsObject);
 ```
 
 The returned instance will fire events that can be listened for and handled.  For example:

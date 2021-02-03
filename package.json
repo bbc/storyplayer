@@ -2,7 +2,7 @@
   "name": "storyplayer",
   "version": "1.0.0",
   "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/object-based-media-schema)",
-  "main": "dist/romper.js",
+  "main": "dist/storyplayer.js",
   "keywords": ["BBC", "BBC Research & Development", "player", "interactive", "media", "object", "personalised"],
   "scripts": {
     "build": "webpack",

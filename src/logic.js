@@ -1,7 +1,7 @@
 // @flow
 
 import JsonLogic from 'json-logic-js';
-import type { DataResolver } from './romper';
+import type { DataResolver } from './storyplayer';
 import logger from './logger';
 
 /**

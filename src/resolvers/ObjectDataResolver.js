@@ -1,6 +1,6 @@
 // @flow
 
-import type { DataResolver } from '../romper';
+import type { DataResolver } from '../storyplayer';
 import { InternalVariableNames } from '../InternalVariables';
 
 /**

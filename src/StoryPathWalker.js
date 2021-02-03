@@ -6,7 +6,7 @@ import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import type {
     Representation, RepresentationCollectionFetcher, StoryFetcher, NarrativeElement,
     RepresentationCollection,
-} from './romper';
+} from './storyplayer';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import logger from './logger';
 import { REASONER_EVENTS, ERROR_EVENTS } from './Events';
