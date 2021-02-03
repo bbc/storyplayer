@@ -1,8 +1,9 @@
 {
   "name": "storyplayer",
-  "version": "0.21.2",
-  "description": "Object Based Media player",
+  "version": "1.0.1",
+  "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/object-based-media-schema)",
   "main": "dist/romper.js",
+  "keywords": ["BBC", "BBC Research & Development", "player", "interactive", "media", "object", "personalised"],
   "scripts": {
     "build": "webpack",
     "build:electron": "webpack --env.platform=electron",
