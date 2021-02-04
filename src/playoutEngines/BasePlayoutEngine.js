@@ -99,6 +99,10 @@ export default class BasePlayoutEngine {
         if (this._media[rendererId]) {
             this._media[rendererId].active = true;
         }
+
+        const isLooping = this._media[rendererId].media.loop === true;
+        this.setLoopAttribute(rendererId, isLooping);
+
         if(this._media[rendererId].media.type !== MEDIA_TYPES.BACKGROUND_A) {
             // eslint-disable-next-line max-len
             const foregroundId = this._player._currentRenderer._representation.asset_collections.foreground_id;
@@ -108,6 +112,7 @@ export default class BasePlayoutEngine {
                 });
             }
         }
+
         if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
             const mediaElement = this._getMediaElement(rendererId);
             if (mediaElement) {
@@ -120,6 +125,8 @@ export default class BasePlayoutEngine {
         if (this._media[rendererId]) {
             this._media[rendererId].active = false;
         }
+
+        this.setLoopAttribute(rendererId, false);
 
         if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
             const mediaElement = this._getMediaElement(rendererId);

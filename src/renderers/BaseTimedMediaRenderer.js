@@ -35,6 +35,26 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         this._seekEventHandler = this._seekEventHandler.bind(this);
     }
 
+    getDuration() {
+        let duration = super.getDuration();
+
+        if (duration === Infinity) {
+            if (this._outTime >= 0) {
+                duration = this._outTime;
+            } else if (!this.checkIsLooping()) {
+                duration =
+                    this._playoutEngine.getDuration(this._rendererId) ??
+                    duration;
+            }
+
+            if (this._inTime) {
+                duration -= this._inTime;
+            }
+        }
+
+        return duration;
+    }
+
     getCurrentTime() {
         const duration = this.getDuration();
         const oldTime = this._latchedCurrentTime;
@@ -215,7 +235,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                         logger.warn('Video end checker failed stall test');
                         clearTimeout(this._testEndStallTimeout);
                         // one more loop check
-                        if(this.checkIsLooping()) {
+                        if (this.checkIsLooping()) {
                             this.setCurrentTime(0);
                             this._playoutEngine.playRenderer(this._rendererId);
                         } else {

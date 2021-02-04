@@ -499,37 +499,16 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     getDuration(): number {
-        let  { duration } = this._representation; // specified in rep
-        if (duration !== undefined && duration !== null) {
-            if (duration < 0) duration = Infinity;
-            this._duration = duration;
-            return this._duration;
-        }
-
-        // otherwise need to work out
-        if (this._duration && this._duration !== Infinity) {
-            return this._duration; // if value stored, return
-        }
-
-        if (duration === undefined || duration === null) {
-            // if not, check playout engine
+        let  { duration } = this._representation;
+        if (
+            duration === undefined ||
+            duration === null ||
+            duration < 0
+        ) {
             duration = Infinity;
-            if (!this.checkIsLooping()){
-                // if we have playout engine duration, use
-                duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined || duration === null) {
-                    duration = Infinity;
-                }
-            }
         }
-        if (this._outTime >= 0) {
-            duration = this._outTime - this._inTime;
-        } else if (this._inTime) {
-            duration -= this._inTime;
-        }
-        this._duration = duration;
 
-        return this._duration;
+        return duration;
     }
 
     getCurrentTime(): Object {
