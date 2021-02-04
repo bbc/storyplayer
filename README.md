@@ -33,7 +33,7 @@ Using the library
 For example, in a React application import the player:
 
 ```
-import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from 'storyplayer';
+import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
 ```
 
 Initiate it using an Object with the attributes described above:
