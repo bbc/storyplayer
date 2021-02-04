@@ -9,7 +9,7 @@ import StoryReasonerFactory from '../src/StoryReasonerFactory';
 import RepresentationReasonerFactory from '../src/RepresentationReasoner';
 import ObjectDataResolverFactory from '../src/resolvers/ObjectDataResolver';
 
-import type { Experience } from '../src/romper';
+import type { Experience } from '../src/storyplayer';
 import { REASONER_EVENTS } from '../src/Events';
 
 

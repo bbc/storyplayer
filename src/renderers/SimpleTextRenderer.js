@@ -2,7 +2,7 @@
 
 import Player from '../gui/Player';
 import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 import { replaceEscapedVariables } from '../utils';

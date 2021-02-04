@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>StoryPlayer Demo Stories</title>
-    <link href="../dist/romper.css" rel="stylesheet" type="text/css">
+    <link href="../dist/storyplayer.css" rel="stylesheet" type="text/css">
     <link href="demos.css" rel="stylesheet" type="text/css">
     <link href="../node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="../node_modules/jsoneditor/dist/jsoneditor.min.js"></script>
@@ -54,7 +54,7 @@
     <!-- information for users -->
     <div id='feedback' class='feedback'></div>
 
-    <script src="../dist/romper.js"></script>
+    <script src="../dist/storyplayer.js"></script>
     <script>
         window.addEventListener('resize', resizeWindow);
 
@@ -222,7 +222,7 @@
             document.getElementById('restart-button').removeAttribute('disabled');
             document.getElementById('story-title').textContent = config.stories[0].name;
             jsonEditor.set(config);
-            romperInstance = window.Romper.init({
+            romperInstance = window.Storyplayer.init({
                 target: document.getElementById('romper-target'),
                 staticImageBaseUrl: '/src/assets/images/',
                 analyticsLogger: dataObj => {

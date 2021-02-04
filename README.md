@@ -13,7 +13,7 @@ Using the library
 
 > You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
-[romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
+[storyplayer.js](src/storyplayer.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
@@ -33,7 +33,7 @@ Using the library
 For example, in a React application import the player:
 
 ```
-import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
+import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from 'storyplayer';
 ```
 
 Initiate it using an Object with the attributes described above:
@@ -41,7 +41,7 @@ Initiate it using an Object with the attributes described above:
     const playerSettingsObject = {
         // an Object including the above attributes
     }
-    this.storyplayer = Romper.init(playerSettingsObject);
+    this.storyplayer = Storyplayer.init(playerSettingsObject);
 ```
 
 The returned instance will fire events that can be listened for and handled.  For example:

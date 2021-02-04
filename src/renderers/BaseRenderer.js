@@ -6,7 +6,7 @@ import BehaviourTimings from '../behaviours/BehaviourTimings';
 import PauseBehaviour from '../behaviours/PauseBehaviour';
 import VariableManipulateBehaviour from '../behaviours/VariableManipulateBehaviour';
 import RendererEvents from './RendererEvents';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import Player, { PlayerEvents } from '../gui/Player';
 import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';

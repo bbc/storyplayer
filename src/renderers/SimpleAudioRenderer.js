@@ -3,7 +3,7 @@
 // import Player from '../gui/Player';
 import TimedMediaRenderer from './TimedMediaRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
-import type { MediaFetcher } from '../romper';
+import type { MediaFetcher } from '../storyplayer';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 

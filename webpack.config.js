@@ -1,4 +1,4 @@
-const { SCHEMA_VERSION } = require('object-based-media-schema');
+const { SCHEMA_VERSION } = require('@bbc/object-based-media-schema');
 
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -13,7 +13,7 @@ const cacheLoaderSourceMapArray = [];
 
 module.exports = env => {
     const entry = {
-        romper: './src/romper.js'
+        storyplayer: './src/storyplayer.js'
     }
 
     const config = {
@@ -22,7 +22,7 @@ module.exports = env => {
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: '[name].js',
-            library: 'Romper',
+            library: 'Storyplayer',
             libraryTarget: 'umd'
         },
         mode: productionBuild ? 'production' : 'development',
@@ -108,8 +108,8 @@ module.exports = env => {
         }
         config.output = {
             path: path.resolve(__dirname, 'storyplayer-electron', 'src', 'dist'),
-            filename: 'romper.js',
-            library: 'Romper',
+            filename: 'storyplayer.js',
+            library: 'Storyplayer',
             libraryTarget: 'umd'
         }
         config.devtool = undefined;

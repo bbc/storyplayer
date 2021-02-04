@@ -3,7 +3,7 @@
 import Player from '../gui/Player';
 import BackgroundRenderer from './BackgroundRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
-import type { MediaFetcher, AssetCollection } from '../romper';
+import type { MediaFetcher, AssetCollection } from '../storyplayer';
 import { MediaFormats } from '../browserCapabilities';
 
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';

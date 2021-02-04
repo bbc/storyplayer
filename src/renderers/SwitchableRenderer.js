@@ -1,7 +1,7 @@
 // @flow
 import Player, { PlayerEvents } from '../gui/Player';
 import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import RendererFactory from './RendererFactory';
 import RendererEvents from './RendererEvents';
 import logger from '../logger';
