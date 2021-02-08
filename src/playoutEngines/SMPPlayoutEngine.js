@@ -119,7 +119,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         const backgroundAudioVolume = this._volume * this._backgroundMix
         this._secondaryPlayoutEngine.setAllVolume(backgroundAudioVolume)
         this._player.emit(
-            PlayerEvents.AUDIO_MIX_CHANGED, 
+            PlayerEvents.AUDIO_MIX_CHANGED,
             { id: AUDIO_MIX_EVENT_LABEL, label: AUDIO_MIX_EVENT_LABEL, value: fbMixValue },
         );
     }
@@ -303,9 +303,11 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         }
         if (!rendererPlayoutObj.active) {
             logger.info(`Applying queued events for ${rendererId}`)
-            rendererPlayoutObj.queuedEvents.forEach((qe) => {
-                this._smpPlayerInterface.addEventListener(qe.event, qe.callback)
-            })
+            if (rendererPlayoutObj.queuedEvents) {
+                rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                    this._smpPlayerInterface.addEventListener(qe.event, qe.callback)
+                })
+            }
             rendererPlayoutObj.queuedEvents = []
         }
         if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
@@ -436,7 +438,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         // We may need this renderer again so preload
         this._smpPlayerInterface.preloadFromCollection(rendererId)
-        
+
         if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
             this._player.mediaTarget.classList.remove('romper-audio-element');
         }

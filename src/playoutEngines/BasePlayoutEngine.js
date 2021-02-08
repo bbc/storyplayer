@@ -240,6 +240,11 @@ export default class BasePlayoutEngine {
         return mediaElement && mediaElement.hasAttribute('loop');
     }
 
+    checkIsEnded(rendererId: string) {
+        const mediaElement = this._getMediaElement(rendererId);
+        return mediaElement && mediaElement.ended;
+    }
+
     applyStyle(rendererId: string, key: string, value: string) {
         const mediaElement = this._getMediaElement(rendererId);
         if (mediaElement) {

@@ -20,7 +20,6 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
-import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -108,17 +107,11 @@ export default class BaseRenderer extends EventEmitter {
 
     _linkFadeTimeout: TimeoutID;
 
-    seekEventHandler: Function;
-
-    checkIsLooping: Function;
-
     _willHideControls: Function;
 
     _hideControls: Function;
 
     _showControls: Function;
-
-    isIosPlayoutEngine: Function;
 
     _setBehaviourElementAttribute: Function;
 
@@ -135,14 +128,6 @@ export default class BaseRenderer extends EventEmitter {
     _handlePlayPauseButtonClicked: Function;
 
     _duration: ?number;
-
-    _inTime: number;
-
-    _outTime: number;
-
-    _setOutTime: Function;
-
-    _setInTime: Function;
 
     _inPauseBehaviourState: boolean;
 
@@ -188,9 +173,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
-        this.seekEventHandler = this.seekEventHandler.bind(this);
-        this.checkIsLooping = this.checkIsLooping.bind(this);
-        this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._setBehaviourElementAttribute = this._setBehaviourElementAttribute.bind(this);
 
@@ -227,12 +209,6 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         this._behaviourElements = [];
-
-        this._setInTime = this._setInTime.bind(this);
-        this._setOutTime = this._setOutTime.bind(this);
-        this._inTime = 0;
-        this._outTime = -1;
-
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
@@ -487,15 +463,6 @@ export default class BaseRenderer extends EventEmitter {
      */
     getRepresentation(): Representation {
         return this._representation;
-    }
-
-    _setInTime(time: number) {
-        this._inTime = time;
-        this.setCurrentTime(0);
-    }
-
-    _setOutTime(time: number) {
-        this._outTime = time;
     }
 
     getDuration(): number {
@@ -966,9 +933,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
-        if(this.checkIsLooping()) {
-            this._playoutEngine.setLoopAttribute(this._rendererId, false);
-        }
         this._followLink(eventObject.id, eventObject.behaviourId);
     }
 
@@ -1442,28 +1406,6 @@ export default class BaseRenderer extends EventEmitter {
         return this._inPauseBehaviourState;
     }
 
-    seekEventHandler(inTime: number) {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if(this.checkIsLooping()) {
-            if (currentTime !== undefined && currentTime <= 0.002) {
-                if(inTime !== 0) {
-                    this.setCurrentTime(inTime);
-                }
-                // this.resetPlayer();
-                if(this.isIosPlayoutEngine()) {
-                    if(this._playoutEngine._playing
-                        && this._playoutEngine._foregroundMediaElement.paused) {
-                        this._playoutEngine.play();
-                    }
-                }
-            }
-        }
-    }
-
-    checkIsLooping() {
-        return this._playoutEngine.checkIsLooping(this._rendererId);
-    }
-
     /**
      * Destroy is called as this representation is unloaded from being visible.
      * You should leave the DOM as you left it.
@@ -1489,10 +1431,6 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
         return true;
-    }
-
-    isIosPlayoutEngine() {
-        return (this._playoutEngine instanceof iOSPlayoutEngine)
     }
 
     getController(): Controller {

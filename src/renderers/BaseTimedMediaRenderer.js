@@ -2,7 +2,6 @@ import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
 import logger from '../logger';
 
 import { MediaFormats } from '../browserCapabilities';
-import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine'
 import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import { VIDEO, AUDIO } from '../utils';
 
@@ -23,16 +22,25 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             analytics,
             controller,
         );
+
+        this._inTime = 0;
+        this._outTime = undefined;
+
         // During loading (intial load or chunk load after a seek) the player
         // reports underfined as it's current time. We latch the previous
         // returned currentTime and return that rather than undefined.
-        this._latchedCurrentTime = undefined;
-        this._accumulatedTime = 0;
-        this._shouldShowScrubBar = true;
+        this._latchedMediaTime = undefined;
+        this._accumulatedMediaTime = 0;
+        this._stalledMediaTime = 0;
 
-        this._endedEventListener = this._endedEventListener.bind(this);
-        this._outTimeEventListener = this._outTimeEventListener.bind(this);
-        this._seekEventHandler = this._seekEventHandler.bind(this);
+        this._inspectMediaPlaybackTime = 10;
+        this._inspectMediaPlayback = this._inspectMediaPlayback.bind(this);
+
+        this._shouldShowScrubBar = true;
+    }
+
+    getIsLooping() {
+        return this._playoutEngine.checkIsLooping(this._rendererId);
     }
 
     getDuration() {
@@ -41,15 +49,13 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         if (duration === Infinity) {
             if (this._outTime >= 0) {
                 duration = this._outTime;
-            } else if (!this.checkIsLooping()) {
+            } else if (!this.getIsLooping()) {
                 duration =
                     this._playoutEngine.getDuration(this._rendererId) ??
                     duration;
             }
 
-            if (this._inTime) {
-                duration -= this._inTime;
-            }
+            duration -= this._inTime;
         }
 
         return duration;
@@ -57,29 +63,15 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
     getCurrentTime() {
         const duration = this.getDuration();
-        const oldTime = this._latchedCurrentTime;
-        this._latchedCurrentTime =
-            this._playoutEngine.getCurrentTime(this._rendererId) ||
-            this._latchedCurrentTime ||
-            this._inTime;
-
-        let currentTime;
-        // If we are looping use the total amount of time player has been
-        // running, rather than current play head position. Otherwise; use the
-        // latched play head time and account for in-time.
-        if (this.checkIsLooping()) {
-            const diffTime = this._latchedCurrentTime - oldTime
-            if (diffTime > 0) this._accumulatedTime += diffTime;
-            currentTime = this._accumulatedTime;
-        } else {
-            currentTime = this._latchedCurrentTime - this._inTime;
-        }
+        const currentTime = this.getIsLooping() ?
+            this._accumulatedMediaTime :
+            this._latchedMediaTime - this._inTime;
 
         return {
             duration,
             currentTime,
             timeBased: duration !== Infinity,
-            remainingTime: duration - this._latchedCurrentTime,
+            remainingTime: duration - currentTime,
         };
     }
 
@@ -111,6 +103,63 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
     }
 
+    _inspectMediaPlayback() {
+        const duration = this.getDuration();
+        const isLooping = this.getIsLooping();
+        const isPlaying = this._playoutEngine.isPlaying();
+
+        const oldTime = this._latchedMediaTime;
+        this._latchedMediaTime =
+            this._playoutEngine.getCurrentTime(this._rendererId) ||
+            this._latchedMediaTime;
+
+        const diffTime = this._latchedMediaTime - oldTime;
+        if (diffTime > 0) this._accumulatedMediaTime += diffTime;
+
+        // Transcoded media _may_ cause stalls close to the reported end of the
+        // media. No ended value is set on the media element. The only way to
+        // detect this is to check if the media element play head is not moving
+        // while the playout engine believes it is.
+        if (
+            this._latchedMediaTime > duration - 1 &&
+            diffTime === 0 &&
+            isPlaying
+        ) {
+            this._stalledMediaTime += this._inspectMediaPlaybackTime / 1000;
+        } else {
+            this._stalledMediaTime = 0;
+        }
+
+        const isEnded =
+            this._playoutEngine.checkIsEnded(this._rendererId) ||
+            this._latchedMediaTime > this._outTime ||
+            this._stalledMediaTime > 2;
+
+        if (isLooping && isEnded) {
+            this.setCurrentTime(0);
+            this.play();
+        }
+
+        if (
+            (!isLooping && isEnded) ||
+            (isLooping && this._accumulatedMediaTime >= duration)
+        ) {
+            // Some players fallback to first frame--force showing ending frame.
+            this._playoutEngine.setCurrentTime(this._rendererId, duration-0.1);
+
+            // Seeking past end on some players will cause end to trigger even
+            // when paused. Cycle Play-Pause for consistent player state.
+            if(!isPlaying) {
+                this._playoutEngine.play();
+                this._playoutEngine.pause();
+            } else {
+                clearInterval(this._inspectMediaPlaybackInterval);
+                this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+                super.complete();
+            }
+        }
+    }
+
     async _queueMedia(mediaObjOverride, assetKey, subtitleKey = "sub_src") {
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(
@@ -118,10 +167,10 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             );
             this._testShowScrubBar(fg);
             if (fg.meta && fg.meta.romper && fg.meta.romper.in) {
-                this._setInTime(parseFloat(fg.meta.romper.in));
+                this._inTime = parseFloat(fg.meta.romper.in);
             }
             if (fg.meta && fg.meta.romper && fg.meta.romper.out) {
-                this._setOutTime(parseFloat(fg.meta.romper.out));
+                this._outTime = parseFloat(fg.meta.romper.out);
             }
             if (fg.assets[assetKey]) {
                 const mediaObj = {
@@ -163,96 +212,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         }
     }
 
-    _endedEventListener() {
-        clearTimeout(this._testEndStallTimeout);
-
-        // Race Condition: ended and timeupdate events firing at same time from
-        // a playoutEngine cause this function to be run twice, resulting in two
-        // NE skips. Only allow function to run if in MAIN phase.
-        if(this.phase !== RENDERER_PHASES.MAIN) {
-            return
-        }
-
-        const { duration, currentTime } = this.getCurrentTime()
-
-        // We must not end if paused. Firefox specific issue: Seeking to end
-        // on Firefox will cause end event to trigger. So if this happens
-        // we back MediaPlayer off a bit from end.
-        // Reset SMP back to the ending frame.
-        this._playoutEngine.setCurrentTime(this._rendererId, duration - 0.1)
-        if(!this._playoutEngine.isPlaying()) {
-            // Play/Pause cycle to reset SMP to not be in a unstarted state
-            this._playoutEngine.play()
-            this._playoutEngine.pause()
-            return
-        }
-
-        if (this.checkIsLooping() && currentTime < duration) {
-            this.setCurrentTime(0);
-            this.play();
-            return;
-        }
-
-        this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
-        super.complete();
-    }
-
-    _seekEventHandler() {
-        super.seekEventHandler(this._inTime);
-    }
-
-    _outTimeEventListener() {
-        const { duration, currentTime } = this.getCurrentTime();
-
-        if (
-            this.checkIsLooping() &&
-            this._outTime > 0 &&
-            currentTime >= this._outTime
-        ) {
-            this.setCurrentTime(0);
-            this._playoutEngine.playRenderer(this._rendererId);
-        }
-
-        if (
-          currentTime >= duration ||
-          (!this.checkIsLooping() &&
-            this._outTime > 0 &&
-            currentTime >= this._outTime)
-        ) {
-          this._playoutEngine.pauseRenderer(this._rendererId);
-          this._endedEventListener();
-        }
-
-        // Stall Detection
-        // Only needed for non SMPPlayoutEngine
-        if (
-            !(this._playoutEngine instanceof SMPPlayoutEngine) &&
-            currentTime > (duration - 1)
-        ) {
-            if (this._playoutEngine.isPlaying() && !this._testEndStallTimeout) {
-                const startTime = currentTime;
-                this._testEndStallTimeout = setTimeout(() => {
-                    // eslint-disable-next-line no-shadow
-                    const { currentTime } = this.getCurrentTime();
-                    // eslint-disable-next-line max-len
-                    logger.info(`Checked video end for stall, run for 2s at ${startTime}, reached ${currentTime}`);
-                    if (currentTime >= startTime && currentTime <= startTime + 1.9) {
-                        logger.warn('Video end checker failed stall test');
-                        clearTimeout(this._testEndStallTimeout);
-                        // one more loop check
-                        if (this.checkIsLooping()) {
-                            this.setCurrentTime(0);
-                            this._playoutEngine.playRenderer(this._rendererId);
-                        } else {
-                            this._playoutEngine.pauseRenderer(this._rendererId);
-                            this._endedEventListener();
-                        }
-                    }
-                }, 2000);
-            }
-        }
-    }
-
     // given the forground asset collection, determine whether or not
     // scrub bar should be shown
     _testShowScrubBar(foregroundAssetCollection) {
@@ -271,11 +230,14 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
     start() {
         super.start();
-
-        this._playoutEngine.on(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.on(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._playoutEngine.on(this._rendererId, 'seeked', this._seekEventHandler);
         this._playoutEngine.setPlayoutActive(this._rendererId);
+
+        clearInterval(this._inspectMediaPlaybackInterval);
+        this._inspectMediaPlaybackInterval = setInterval(
+            this._inspectMediaPlayback,
+            this._inspectMediaPlaybackTime,
+        );
+
         logger.info(`Started: ${this._representation.id}`);
 
         // // set time to last set time (relative to click start)
@@ -302,17 +264,14 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         const needToEnd = super.end();
         if (!needToEnd) return false;
 
-        this._latchedCurrentTime = undefined;
-        this._accumulatedTime = 0;
+        clearInterval(this._inspectMediaPlaybackInterval);
+        this._latchedMediaTime = undefined;
+        this._accumulatedMediaTime = 0;
+        this._stalledMediaTime = 0;
         this.setCurrentTime(0);
-
-        clearTimeout(this._testEndStallTimeout);
 
         logger.info(`Ended: ${this._representation.id}`);
         this._playoutEngine.setPlayoutInactive(this._rendererId);
-        this._playoutEngine.off(this._rendererId, 'ended', this._endedEventListener);
-        this._playoutEngine.off(this._rendererId, 'timeupdate', this._outTimeEventListener);
-        this._playoutEngine.off(this._rendererId, 'seeked', this._seekEventHandler);
 
         return true;
     }
