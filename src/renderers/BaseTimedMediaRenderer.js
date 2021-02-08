@@ -173,7 +173,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             return
         }
 
-        const { duration } = this.getCurrentTime()
+        const { duration, currentTime } = this.getCurrentTime()
 
         // We must not end if paused. Firefox specific issue: Seeking to end
         // on Firefox will cause end event to trigger. So if this happens
@@ -187,9 +187,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             return
         }
 
-        if (this.checkIsLooping()) {
-            // eslint-disable-next-line max-len
-            logger.warn(`received ended event for looping media on rep ${ this._rendererId} - need to loop manually`);
+        if (this.checkIsLooping() && currentTime < duration) {
             this.setCurrentTime(0);
             this.play();
             return;
@@ -205,17 +203,24 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
     _outTimeEventListener() {
         const { duration, currentTime } = this.getCurrentTime();
+
         if (
-            currentTime >= duration ||
-            (this._outTime > 0 && currentTime >= this._outTime)
+            this.checkIsLooping() &&
+            this._outTime > 0 &&
+            currentTime >= this._outTime
         ) {
-            if (this.checkIsLooping()) {
-                this.setCurrentTime(0);
-                this._playoutEngine.playRenderer(this._rendererId);
-            } else {
-                this._playoutEngine.pauseRenderer(this._rendererId);
-                this._endedEventListener();
-            }
+            this.setCurrentTime(0);
+            this._playoutEngine.playRenderer(this._rendererId);
+        }
+
+        if (
+          currentTime >= duration ||
+          (!this.checkIsLooping() &&
+            this._outTime > 0 &&
+            currentTime >= this._outTime)
+        ) {
+          this._playoutEngine.pauseRenderer(this._rendererId);
+          this._endedEventListener();
         }
 
         // Stall Detection
