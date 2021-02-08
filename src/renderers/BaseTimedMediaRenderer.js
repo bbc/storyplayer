@@ -120,8 +120,9 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         // media. No ended value is set on the media element. The only way to
         // detect this is to check if the media element play head is not moving
         // while the playout engine believes it is.
+        const mediaDuration = this._playoutEngine.getDuration(this._rendererId);
         if (
-            this._latchedMediaTime > duration - 1 &&
+            this._latchedMediaTime > mediaDuration - 1 &&
             diffTime === 0 &&
             isPlaying
         ) {
