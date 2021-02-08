@@ -1,6 +1,6 @@
 // @flow
 // eslint-disable-next-line max-len
-import type { DataResolver, RepresentationFetcher, Representation, RepresentationCollection } from './romper';
+import type { DataResolver, RepresentationFetcher, Representation, RepresentationCollection } from './storyplayer';
 import evaluateConditions from './logic';
 
 export type RepresentationReasoner = (representationCollection: RepresentationCollection)

@@ -1,7 +1,7 @@
 // @flow
 
 import type BackgroundRenderer from './BackgroundRenderer';
-import type { MediaFetcher, AssetCollection } from '../romper';
+import type { MediaFetcher, AssetCollection } from '../storyplayer';
 import BackgroundAudioRenderer from './BackgroundAudioRenderer';
 import Player from '../gui/Player';
 import logger from '../logger';

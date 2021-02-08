@@ -6,14 +6,14 @@ StoryPlayer is R&D's Object-based Media Player.  It is designed to read stories 
 Installing the library
 ======================
 To install the library
-```npm install storyplayer --save```
+```npm install @bbc/storyplayer --save```
 
 Using the library
 -----------------
 
 > You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
-[romper.js](src/romper.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
+[storyplayer.js](src/storyplayer.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
@@ -41,7 +41,7 @@ Initiate it using an Object with the attributes described above:
     const playerSettingsObject = {
         // an Object including the above attributes
     }
-    this.storyplayer = Romper.init(playerSettingsObject);
+    this.storyplayer = Storyplayer.init(playerSettingsObject);
 ```
 
 The returned instance will fire events that can be listened for and handled.  For example:
@@ -64,7 +64,7 @@ The returned instance will fire events that can be listened for and handled.  Fo
     this.storyplayer.on(REASONER_EVENTS.STORY_END, this.handleStoryEnd)
 ```
 
-The demo index page in [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
+The demo index page [here](https://github.com/bbc/storyplayer/blob/main/examples/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
 
 Building the library from the repo
 ==================================
@@ -73,7 +73,7 @@ Building the library from the repo
 > We have an ESLint file based on [airbnb-base](https://www.npmjs.com/package/eslint-config-airbnb-base), with our own tweaks.\
 > We have used [Flow](https://flow.org) for type checking, but this is not consistent throughout the code base.
 
-* First, clone [the storyplayer repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
+* First, clone [the repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
 * Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
 * `yarn test` will do a single run of the tests (ESLint, jest and sass-lint)
@@ -106,7 +106,7 @@ Running StoryPlayer against local stories and media
 
 StoryPlayer Implementation details
 ----------------------------------
-Information regarding the implementation of StoryPlayer is detailed in [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md), and includes:
+Information regarding the implementation of StoryPlayer is detailed [here](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md), and includes:
 * [URL Parameters for Playback](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#url-parameters-for-playback)
 * [URL Parameters for Debugging](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#url-parameters-for-debugging)
 * [Internal Variables](https://github.com/bbc/storyplayer/blob/main/docs/implementation.md#internal-variables)
@@ -115,7 +115,7 @@ Information regarding the implementation of StoryPlayer is detailed in [the stor
 
 StoryPlayer Analytics
 ---------------------
-StoryPlayer features a highly granular analytics solution that can be used to record user behaviour. For full details, head to [the storyplayer repo](https://github.com/bbc/storyplayer/blob/main/docs/analytics.md).
+StoryPlayer features a highly granular analytics solution that can be used to record user behaviour. For full details, head [here](https://github.com/bbc/storyplayer/blob/main/docs/analytics.md).
 
 How to contribute
 =================

@@ -1,7 +1,7 @@
 // @flow
 
 import type BaseRenderer from './BaseRenderer';
-import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, Representation, MediaFetcher } from '../storyplayer';
 import ImageRenderer from './ImageRenderer';
 import SimpleAVRenderer from './SimpleAVRenderer';
 import SimpleAudioRenderer from './SimpleAudioRenderer';

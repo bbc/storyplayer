@@ -2,7 +2,7 @@
 
 import EventEmitter from 'events';
 import Player, { PlayerEvents } from '../gui/Player';
-import type { AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import { REASONER_EVENTS } from '../Events';
 import type { StoryPathItem } from '../StoryPathWalker';
 

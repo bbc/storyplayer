@@ -1,6 +1,6 @@
 // @flow
 // eslint-disable-next-line max-len
-import type { DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement } from './romper';
+import type { DataResolver, StoryFetcher, NarrativeElementFetcher, NarrativeElement } from './storyplayer';
 import type { AnalyticsLogger } from './AnalyticEvents';
 import StoryReasoner from './StoryReasoner';
 

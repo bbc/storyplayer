@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
-import type { AssetUrls } from '../romper';
+import type { AssetUrls } from '../storyplayer';
 import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';

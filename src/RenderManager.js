@@ -5,7 +5,7 @@ import type {
     NarrativeElement, ExperienceFetchers, Representation,
     RepresentationChoice, AssetUrls, AssetCollection,
     Story,
-} from './romper';
+} from './storyplayer';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
 import RendererFactory from './renderers/RendererFactory';

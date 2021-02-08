@@ -2,7 +2,7 @@
 
 import { RENDERER_PHASES } from './BaseRenderer';
 import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../romper';
+import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import Player from '../gui/Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';

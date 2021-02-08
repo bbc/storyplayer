@@ -2,7 +2,7 @@
 
 import EventEmitter from 'events';
 
-import type { Story, NarrativeElement, Link, DataResolver } from './romper';
+import type { Story, NarrativeElement, Link, DataResolver } from './storyplayer';
 import evaluateConditions from './logic';
 import type { StoryReasonerFactory } from './StoryReasonerFactory';
 import logger from './logger';
