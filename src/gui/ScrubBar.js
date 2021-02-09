@@ -103,7 +103,7 @@ class ScrubBar extends BaseScrubBar {
                     scrubBar.value = value.toString();
                 }
             },
-            200,
+            50,
         );
     }
 }

@@ -110,7 +110,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
         const oldTime = this._latchedMediaTime;
         this._latchedMediaTime =
-            this._playoutEngine.getCurrentTime(this._rendererId) ||
+            this._playoutEngine.getCurrentTime(this._rendererId) ??
             this._latchedMediaTime;
 
         const diffTime = this._latchedMediaTime - oldTime;
