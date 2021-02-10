@@ -620,7 +620,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             rendererPlayoutObj.mediaElement.pause();
             rendererPlayoutObj.mediaElement.classList.add('romper-media-element-queued');
             super.setPlayoutInactive(rendererId);
-            super.setLoopAttribute(rendererId, false);
             this._player.removeVolumeControl(rendererId);
         }
     }

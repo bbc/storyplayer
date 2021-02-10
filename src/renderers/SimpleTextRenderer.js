@@ -1,7 +1,8 @@
 // @flow
 
 import Player from '../gui/Player';
-import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
+import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -20,10 +21,10 @@ export type HTMLTrackElement = HTMLElement & {
 }
 
 /**
- * Simple text renderer displays a HTML element populated with the description 
+ * Simple text renderer displays a HTML element populated with the description
  * or asset collection text_src
  */
-export default class SimpleTextRenderer extends BaseRenderer {
+export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
     _fetchMedia: MediaFetcher;
 
     _canvas: HTMLCanvasElement;
@@ -58,13 +59,13 @@ export default class SimpleTextRenderer extends BaseRenderer {
 
         this._setOverflowStyling = this._setOverflowStyling.bind(this);
 
-        // we have a one time event listener as we remove the prestart classname 
-        // from the media element indicating we've started playing so 
+        // we have a one time event listener as we remove the prestart classname
+        // from the media element indicating we've started playing so
         // we should resize if we need to otherwise the GUI is shrunk and buttons disappear
         this._player.once(REASONER_EVENTS.ROMPER_STORY_STARTED, () =>
             this._setOverflowStyling(this._target.clientHeight || 720)
         );
-    
+
         // Resize event listener to dynamically resize the text element
         // and apply overflow style rules
         window.addEventListener('resize', () =>
@@ -140,7 +141,7 @@ export default class SimpleTextRenderer extends BaseRenderer {
     }
 
     /**
-     * Determine what text to show, and call the populateTextElement function to 
+     * Determine what text to show, and call the populateTextElement function to
      * populate it with the inner html
      */
     renderTextElement() {
@@ -223,11 +224,11 @@ export default class SimpleTextRenderer extends BaseRenderer {
             this._textDiv.style['max-height'] = `calc(${maxHeight}px - 4em)`;
         }
     }
-    
+
     /**
-     * Gets the gui layer and checks we have added the text node to the parent, 
+     * Gets the gui layer and checks we have added the text node to the parent,
      * then sets the CSS style appropriately whether we should overflow and scroll or not
-     * @param {number} maxHeight the max height of the player target div, 
+     * @param {number} maxHeight the max height of the player target div,
      *    used to set the max height of the text element
      */
     _setOverflowStyling(maxHeight: number) {
@@ -237,13 +238,13 @@ export default class SimpleTextRenderer extends BaseRenderer {
                 this._addOverflowStyle(guiLayer, maxHeight);
             } else {
                 this._removeOverflowStyle(guiLayer);
-            }     
+            }
         }
     }
 
     /**
      * Populates the text element with the string provided
-     * @param {string} textContent 
+     * @param {string} textContent
      */
     populateTextElement(textContent: string) {
         replaceEscapedVariables(textContent, this._controller)

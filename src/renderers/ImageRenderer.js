@@ -1,13 +1,14 @@
 // @flow
 
-import BaseRenderer, { RENDERER_PHASES } from './BaseRenderer';
+import { RENDERER_PHASES } from './BaseRenderer';
+import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import Player from '../gui/Player';
 import logger from '../logger';
 import type { AnalyticsLogger } from '../AnalyticEvents';
 import Controller from '../Controller';
 
-export default class ImageRenderer extends BaseRenderer {
+export default class ImageRenderer extends BaseTimedIntervalRenderer {
     _imageElement: HTMLImgElement;
 
     _disablePlayButton: Function;
@@ -42,7 +43,6 @@ export default class ImageRenderer extends BaseRenderer {
         this._enablePlayButton = () => { this._player.enablePlayButton(); };
         this._disableScrubBar = () => { this._player.disableScrubBar(); };
         this._enableScrubBar = () => { this._player.enableScrubBar(); };
-        this._duration = this._representation.duration ? this._representation.duration : Infinity;
     }
 
     async init() {
@@ -58,7 +58,9 @@ export default class ImageRenderer extends BaseRenderer {
     willStart() {
         const ready = super.willStart();
         if (!ready) return false;
-        this._playoutEngine.startNonAVPlayout(this._rendererId, this._duration)
+
+        const duration = this.getDuration();
+        this._playoutEngine.startNonAVPlayout(this._rendererId, duration)
         this._visible = true;
         this._setVisibility(true);
         return true;
@@ -67,22 +69,23 @@ export default class ImageRenderer extends BaseRenderer {
     start() {
         super.start();
 
-        if (this._duration === Infinity || this._duration < 0) {
+        const duration = this.getDuration();
+        if (duration === Infinity) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
             this._disableScrubBar();
             this._setPhase(RENDERER_PHASES.MEDIA_FINISHED); // so link choices still work
-        } else if (this._duration === 0) {
+        } else if (duration === 0) {
             logger.warn(`Image representation ${this._representation.id} has zero duration`);
             this.complete();
         } else {
             // eslint-disable-next-line max-len
-            logger.info(`Image representation ${this._representation.id} timed for ${this._duration}s, starting now`);
+            logger.info(`Image representation ${this._representation.id} timed for ${duration}s, starting now`);
             this._player.showSeekButtons();
             this._enableScrubBar();
-            this._timer.addTimeEventListener(
+            this.addTimeEventListener(
                 `${this._rendererId}-complete`,
-                this._duration,
+                duration,
                 () => {
                     // eslint-disable-next-line max-len
                     logger.info(`Image representation ${this._representation.id} completed time`);

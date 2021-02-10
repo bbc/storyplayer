@@ -20,11 +20,11 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
-import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
-import TimeManager from '../TimeManager';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
+// TODO: Consider making this longer now it runs higher than 4Hz.
+const TIMER_INTERVAL = 10;
 
 
 const getBehaviourEndTime = (behaviour: Object) => {
@@ -85,8 +85,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _seekBack: Function;
 
-    _togglePause: Function;
-
     _behaviourElements: Array<HTMLElement>;
 
     _target: HTMLDivElement;
@@ -109,21 +107,11 @@ export default class BaseRenderer extends EventEmitter {
 
     _linkFadeTimeout: TimeoutID;
 
-    seekEventHandler: Function;
-
-    checkIsLooping: Function;
-
-    _loopCounter: number;
-
     _willHideControls: Function;
 
     _hideControls: Function;
 
     _showControls: Function;
-
-    _timer: TimeManager;
-
-    isIosPlayoutEngine: Function;
 
     _setBehaviourElementAttribute: Function;
 
@@ -137,23 +125,9 @@ export default class BaseRenderer extends EventEmitter {
 
     addTimeEventListener: Function;
 
-    _addPauseHandlersForTimer: Function;
-
-    _removePauseHandlersForTimer: Function;
-
     _handlePlayPauseButtonClicked: Function;
 
     _duration: ?number;
-
-    _lastSetTime: number;
-
-    _inTime: number;
-
-    _outTime: number;
-
-    _setOutTime: Function;
-
-    _setInTime: Function;
 
     _inPauseBehaviourState: boolean;
 
@@ -199,10 +173,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
-        this._togglePause = this._togglePause.bind(this);
-        this.seekEventHandler = this.seekEventHandler.bind(this);
-        this.checkIsLooping = this.checkIsLooping.bind(this);
-        this.isIosPlayoutEngine = this.isIosPlayoutEngine.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
         this._setBehaviourElementAttribute = this._setBehaviourElementAttribute.bind(this);
 
@@ -213,9 +183,6 @@ export default class BaseRenderer extends EventEmitter {
         this._runStartBehaviours = this._runStartBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
-        this._addPauseHandlersForTimer = this._addPauseHandlersForTimer.bind(this);
-        this._removePauseHandlersForTimer = this._removePauseHandlersForTimer.bind(this);
-
 
         this._behaviourRendererMap = {
             // eslint-disable-next-line max-len
@@ -242,26 +209,71 @@ export default class BaseRenderer extends EventEmitter {
         }
 
         this._behaviourElements = [];
-        this._timer = new TimeManager(this._rendererId);
-
-        this._setInTime = this._setInTime.bind(this);
-        this._setOutTime = this._setOutTime.bind(this);
-        this._lastSetTime = 0;
-        this._inTime = 0;
-        this._outTime = -1;
-
         this._destroyed = false;
         this._analytics = analytics;
         this.inVariablePanel = false;
         this._preloadedBehaviourAssets = [];
         this._preloadIconAssets().catch(e =>
             logger.warn(e, 'Could not preload icon assets'));
-        this._loopCounter = 0;
         this._setPhase(RENDERER_PHASES.CONSTRUCTING);
         this._inPauseBehaviourState = false;
 
-        this._pauseHandlerForTimer = this._pauseHandlerForTimer.bind(this)
-        this._playHandlerForTimer = this._playHandlerForTimer.bind(this)
+        this._serviceTimedEvents = this._serviceTimedEvents.bind(this);
+        this._timedEvents = {};
+    }
+
+    _serviceTimedEvents() {
+        Object.keys(this._timedEvents).forEach((timeEventId) => {
+            const {
+                startTime,
+                startCallback,
+                isRunning,
+                endTime,
+                clearCallback,
+            } = this._timedEvents[timeEventId];
+
+            const { currentTime }  = this.getCurrentTime();
+
+            // handle starting event
+            if (currentTime >= startTime && currentTime <= endTime && !isRunning){
+                logger.info(`TimeManager: ${this._rendererId} timer running timed event ${timeEventId}`);
+                this._timedEvents[timeEventId].isRunning = true;
+                startCallback();
+            }
+
+            // handle clearing event
+            if ((currentTime < startTime || currentTime > endTime) && isRunning) {
+                try {
+                    if (clearCallback) clearCallback();
+                } catch (err) {
+                    logger.warn(`TimeManager: ${this._rendererId} couldn't clear up behaviour ${timeEventId}`);
+                }
+                this._timedEvents[timeEventId].isRunning = false;
+            }
+        });
+    }
+
+    addTimeEventListener(
+        listenerId: string,
+        startTime: number,
+        startCallback: Function,
+        endTime: ?number = Infinity,
+        clearCallback: ?Function,
+    ) {
+        logger.debug(`timer: Added event for ${listenerId} at ${startTime}`);
+        this._timedEvents[listenerId] = {
+            startTime,
+            endTime,
+            startCallback,
+            isRunning: false,
+            clearCallback,
+        };
+    }
+
+    deleteTimeEventListener(listenerId: string) {
+        if (listenerId in this._timedEvents) {
+            delete this._timedEvents[listenerId];
+        }
     }
 
     // run any code that may be asynchronous
@@ -328,17 +340,12 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this._setPhase(RENDERER_PHASES.MAIN);
         this._player.exitStartBehaviourPhase();
+        clearInterval(this._timedEventsInterval);
+        this._timedEventsInterval = setInterval(this._serviceTimedEvents, TIMER_INTERVAL);
         this.emit(RendererEvents.STARTED);
-        this._timer.start();
-        if (!this._playoutEngine.isPlaying()) {
-            this._timer.pause();
-        }
-        this._addPauseHandlersForTimer();
         this._clearBehaviourElements();
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
-        // set time to last set time (relative to click start)
-        this.setCurrentTime(this._lastSetTime);
         this._runDuringBehaviours();
         this._player.hideSeekButtons();
     }
@@ -363,19 +370,17 @@ export default class BaseRenderer extends EventEmitter {
         } catch (e) {
             logger.warn(e, 'error clearing behaviour elements');
         }
+        clearInterval(this._timedEventsInterval);
         this._reapplyLinkConditions();
         this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
         this._player.removeListener(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.removeListener(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
-        this._timer.clear();
-        this._loopCounter = 0;
         this._player.removeListener(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
-        this._lastSetTime = 0;
         this._setPhase(RENDERER_PHASES.ENDED);
         return true;
     }
@@ -460,161 +465,33 @@ export default class BaseRenderer extends EventEmitter {
         return this._representation;
     }
 
-    _setInTime(time: number) {
-        this._inTime = time;
-        this.setCurrentTime(0);
-    }
-
-    _setOutTime(time: number) {
-        this._outTime = time;
-    }
-
     getDuration(): number {
-        let  { duration } = this._representation; // specified in rep
-        if (duration !== undefined && duration !== null) {
-            if (duration < 0) duration = Infinity;
-            this._duration = duration;
-            return this._duration;
-        }
-
-        // otherwise need to work out
-        if (this._duration && this._duration !== Infinity) {
-            return this._duration; // if value stored, return
-        }
-
-        if (duration === undefined || duration === null) {
-            // if not, check playout engine
+        let  { duration } = this._representation;
+        if (
+            duration === undefined ||
+            duration === null ||
+            duration < 0
+        ) {
             duration = Infinity;
-            if (!this.checkIsLooping()){
-                // if we have playout engine duration, use
-                duration = this._playoutEngine.getDuration(this._rendererId);
-                if (duration === undefined || duration === null) {
-                    duration = Infinity;
-                }
-            }
         }
-        if (this._outTime >= 0) {
-            duration = this._outTime - this._inTime;
-        } else if (this._inTime) {
-            duration -= this._inTime;
-        }
-        this._duration = duration;
 
-        return this._duration;
+        return duration;
     }
 
     getCurrentTime(): Object {
-        const duration = this.getDuration();
-        const currentTime = this._timer.getTime();
-        let timeBased = false;
-        let remainingTime = Infinity;
-        if (duration !== Infinity) {
-            timeBased = true;
-            remainingTime = duration - currentTime;
-        }
-        const timeObject = {
-            timeBased,
-            currentTime,
-            remainingTime,
-            duration,
-            timersSyncing: this._timer.isSyncing(),
-        };
-        return timeObject;
+        throw new Error('getCurrentTime not implemented.');
     }
 
+    // eslint-disable-next-line no-unused-vars
     setCurrentTime(time: number) {
-        const { duration } = this.getCurrentTime();
-        const timeIsInvalid = (value) => {
-            return (value === Infinity || Number.isNaN(value))
-        };
-
-        // work out what time we actually need to go to, given what was asked for
-        let targetTime = time;
-        targetTime = Math.max(0, targetTime)
-        // duration is not always reported 100% accurately
-        // if we seek past actual duration, video will go to 1s beyond end
-        // hack to seek to JUST before end to avoid this
-        targetTime = Math.min(targetTime, duration - 0.01)
-
-        // ensure that we are setting a valid time
-        if (timeIsInvalid(targetTime)) {
-            logger.warn(`Setting time for renderer out of range (${targetTime}).  Ignoring`);
-            return;
-        }
-
-        const choiceTime = this.getChoiceTime();
-        if (choiceTime >= 0 && choiceTime < targetTime) {
-            targetTime = choiceTime;
-        }
-        // convert to absolute time into video
-        this._lastSetTime = targetTime; // time into segment
-        targetTime += this._inTime;
-
-        // test again to make sure calculations haven't resulted in invalid time
-        if (timeIsInvalid(targetTime)) {
-            logger.warn(`Setting time for renderer out of range (${time}).  Ignoring`);
-            return;
-        }
-
-        // if we have a media element, set that time and pause the timer until playhead has synced
-        const isPaused = this._timer._paused;
-        const sync = () => {
-            const playheadTime = this._playoutEngine.getCurrentTime(this._rendererId);
-            if (playheadTime >= (targetTime + 0.1)) { // leeway to allow it to start going
-                this._timer.setTime(playheadTime - this._inTime);
-                this._timer.setSyncing(false);
-                if (isPaused) this._timer.pause();  // don't restart if we were paused
-                this._playoutEngine.off(this._rendererId,'timeupdate', sync);
-            }
-        };
-        // only try to sync if playout engine has time and we're not looping
-        if (!this.checkIsLooping() && this._playoutEngine.getCurrentTime(this._rendererId) !== undefined) {
-            this._timer.setSyncing(true);
-            this._playoutEngine.on(this._rendererId,'timeupdate', sync);
-            this._playoutEngine.setCurrentTime(this._rendererId, targetTime);
-        } else {
-            this._timer.setTime(targetTime);
-        }
-    }
-
-    _togglePause() {
-        if (this._playoutEngine.isPlaying()) {
-            this._timer.resume();
-        } else {
-            this._timer.pause();
-        }
-    }
-
-    _pauseHandlerForTimer() {
-        this._timer.pause()
-    }
-
-    _playHandlerForTimer() {
-        this._timer.resume()
-    }
-
-    // Both _addPauseHandlersForTimer AND _handlePlayPauseButtonClicked are
-    // handling timer changes because _handlePlayPauseButtonClicked is
-    // required in non SMP version to catch play/pause on images
-    _addPauseHandlersForTimer() {
-        if (this._timer) {
-            this._playoutEngine.on(this._rendererId, 'pause', this._pauseHandlerForTimer);
-            this._playoutEngine.on(this._rendererId, 'play', this._playHandlerForTimer);
-        }
-    }
-
-    _removePauseHandlersForTimer() {
-        if (this._timer) {
-            this._playoutEngine.off(this._rendererId, 'pause', this._pauseHandlerForTimer);
-            this._playoutEngine.off(this._rendererId, 'play', this._playHandlerForTimer);
-        }
+        throw new Error('setCurrentTime not implemented.');
     }
 
     _handlePlayPauseButtonClicked(eventData): void {
         if ((eventData && eventData.playButtonClicked)){
-            this._timer.resume();
+            this.play();
         } else if((eventData && eventData.pauseButtonClicked)){
-            this._timer.pause();
+            this.pause();
         }
 
         if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
@@ -627,12 +504,10 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     pause() {
-        this._timer.pause();
         this._playoutEngine.pause();
     }
 
     play() {
-        this._timer.resume();
         this._playoutEngine.play();
     }
 
@@ -706,7 +581,6 @@ export default class BaseRenderer extends EventEmitter {
             return;
         }
         this._setPhase(RENDERER_PHASES.COMPLETING);
-        this._timer.pause();
         if (!this._linkBehaviour ||
             (this._linkBehaviour && !this._linkBehaviour.forceChoice)) {
             this._player.enterCompleteBehavourPhase();
@@ -1059,9 +933,6 @@ export default class BaseRenderer extends EventEmitter {
 
     // handler for user clicking on link choice
     _handleLinkChoiceEvent(eventObject: Object) {
-        if(this.checkIsLooping()) {
-            this._playoutEngine.setLoopAttribute(this._rendererId, false);
-        }
         this._followLink(eventObject.id, eventObject.behaviourId);
     }
 
@@ -1526,20 +1397,6 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    addTimeEventListener(
-        listenerId: string,
-        startTime: number,
-        startCallback: Function,
-        endTime: ?number,
-        clearCallback: ?Function,
-    ) {
-        this._timer.addTimeEventListener(listenerId, startTime, startCallback, endTime, clearCallback); // eslint-disable-line max-len
-    }
-
-    deleteTimeEventListener(listenerId: string) {
-        this._timer.deleteTimeEventListener(listenerId);
-    }
-
     // the renderer is waiting in an infinite pause behaviour
     setInPause(paused: boolean) {
         this._inPauseBehaviourState = paused;
@@ -1547,28 +1404,6 @@ export default class BaseRenderer extends EventEmitter {
 
     getInPause(): boolean {
         return this._inPauseBehaviourState;
-    }
-
-    seekEventHandler(inTime: number) {
-        const currentTime = this._playoutEngine.getCurrentTime(this._rendererId);
-        if(this.checkIsLooping()) {
-            if (currentTime !== undefined && currentTime <= 0.002) {
-                if(inTime !== 0) {
-                    this.setCurrentTime(inTime);
-                }
-                // this.resetPlayer();
-                if(this.isIosPlayoutEngine()) {
-                    if(this._playoutEngine._playing
-                        && this._playoutEngine._foregroundMediaElement.paused) {
-                        this._playoutEngine.play();
-                    }
-                }
-            }
-        }
-    }
-
-    checkIsLooping() {
-        return this._playoutEngine.checkIsLooping(this._rendererId);
     }
 
     /**
@@ -1596,10 +1431,6 @@ export default class BaseRenderer extends EventEmitter {
         this.emit(RendererEvents.DESTROYED);
         this._destroyed = true;
         return true;
-    }
-
-    isIosPlayoutEngine() {
-        return (this._playoutEngine instanceof iOSPlayoutEngine)
     }
 
     getController(): Controller {

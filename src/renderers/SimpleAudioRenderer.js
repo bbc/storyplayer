@@ -1,7 +1,7 @@
 // @flow
 
 // import Player from '../gui/Player';
-import TimedMediaRenderer from './TimedMediaRenderer';
+import BaseTimedMediaRenderer from './BaseTimedMediaRenderer';
 import { RENDERER_PHASES } from './BaseRenderer';
 import type { MediaFetcher } from '../storyplayer';
 
@@ -9,7 +9,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 
 import logger from '../logger';
 
-export default class SimpleAudioRenderer extends TimedMediaRenderer {
+export default class SimpleAudioRenderer extends BaseTimedMediaRenderer {
     _fetchMedia: MediaFetcher;
 
     _backgroundImage: ?HTMLElement;

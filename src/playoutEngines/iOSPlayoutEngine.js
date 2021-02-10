@@ -144,9 +144,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
                 }
                 if (rendererPlayoutObj.queuedEvents && rendererPlayoutObj.queuedEvents.length > 0) {
                     logger.info(`Applying queued events for ${rendererId}`)
-                    rendererPlayoutObj.queuedEvents.forEach((qe) => {
-                        mediaElement.addEventListener(qe.event, qe.callback)
-                    })
+                    if (rendererPlayoutObj.queuedEvents) {
+                        rendererPlayoutObj.queuedEvents.forEach((qe) => {
+                            mediaElement.addEventListener(qe.event, qe.callback)
+                        })
+                    }
                     rendererPlayoutObj.queuedEvents = []
                 }
             }
@@ -319,8 +321,8 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
     /**
      * Attempts to set the volume on iOS will not do anything here
-     * @param {string} rendererId 
-     * @param {*} volume 
+     * @param {string} rendererId
+     * @param {*} volume
      */
     setVolume(rendererId: string, volume: number) {
         const mediaElement = this._getMediaElement(rendererId);

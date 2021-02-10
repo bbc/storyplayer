@@ -1,11 +1,4 @@
 // @flow
-
-import Player from '../gui/Player';
-import BaseRenderer from './BaseRenderer';
-import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
-import AnalyticEvents from '../AnalyticEvents';
-import type { AnalyticsLogger } from '../AnalyticEvents';
-import Controller from '../Controller';
 import logger from '../logger';
 import { InternalVariableNames } from '../InternalVariables';
 
@@ -20,7 +13,7 @@ export type ThreeIcon = {
     behaviourId: string,
 };
 
-export default class ThreeJsBaseRenderer extends BaseRenderer {
+export default class ThreeJSDriver {
     _setOrientationVariable: Function;
 
     _onMouseDown: Function;
@@ -68,21 +61,14 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     _camera: THREE.PerspectiveCamera;
 
     constructor(
-        representation: Representation,
-        assetCollectionFetcher: AssetCollectionFetcher,
-        fetchMedia: MediaFetcher,
-        player: Player,
-        analytics: AnalyticsLogger,
         controller: Controller,
+        mediaElement: HTMLElement,
+        uiElement: HTMLElement,
     ) {
-        super(
-            representation,
-            assetCollectionFetcher,
-            fetchMedia,
-            player,
-            analytics,
-            controller,
-        );
+        this._controller = controller;
+        this._mediaElement = mediaElement;
+        this._uiElement = uiElement;
+
         this._setOrientationVariable = this._setOrientationVariable.bind(this);
         this._onMouseDown = this._onMouseDown.bind(this);
         this._onMouseMove = this._onMouseMove.bind(this);
@@ -117,9 +103,8 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._raycaster = new THREE.Raycaster();
     }
 
-    start() {
-        super.start();
-        logger.info(`Started: ${this._representation.id}`);
+
+    init() {
         this._started = true;
         if (this._controller.handleKeys) {
             document.addEventListener('keydown', this._onKeyDown);
@@ -160,7 +145,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         // maintain view direction
         this._applyPreviousOrientation();
 
-        const target = this._player.mediaTarget;
+        const target = this._mediaElement;
         logger.info('Starting 3js video scene');
         this._scene = new THREE.Scene();
         this._camera = new THREE.PerspectiveCamera(75, 16/9, 1, 1000);
@@ -175,7 +160,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._addReticle();
 
-        const uiLayer = this._player.getOverlayElement();
+        const uiLayer = this._uiElement;
         uiLayer.addEventListener('mousedown', this._onMouseDown, false);
         uiLayer.addEventListener('mouseup', this._onMouseUp, false);
         uiLayer.addEventListener('mousemove', this._onMouseMove, false);
@@ -206,11 +191,11 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             .then((lon) => {
                 if (lon !== null) {
                     logger.info(`Maintaining 360 orientation at ${lon} longitude`);
-                    this._view.lon = lon; 
+                    this._view.lon = lon;
                 }
             });
         this._controller.getVariableValue(InternalVariableNames.LATITUDE)
-            .then((lat) => { 
+            .then((lat) => {
                 if (lat !== null) {
                     logger.info(`Maintaining 360 orientation at ${lat} latitude`);
                     this._view.lat = lat;
@@ -242,14 +227,14 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
     }
 
     _onKeyDown(event: KeyboardEvent) {
-        if (this._userDragging && ThreeJsBaseRenderer._isArrowKey(event)) {
-            event.preventDefault(); 
+        if (this._userDragging && ThreeJSDriver._isArrowKey(event)) {
+            event.preventDefault();
             return;
         }
-        if (ThreeJsBaseRenderer._isArrowKey(event)) {
+        if (ThreeJSDriver._isArrowKey(event)) {
             this._userInteracting = true;
             this._userDragging = true;
-            event.preventDefault(); 
+            event.preventDefault();
         }
         if (event.code === 'ArrowLeft') {
             this._moveInterval = setInterval(() => {
@@ -260,15 +245,15 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             this._moveInterval = setInterval(() => {
                 this._view.lon += 1;
                 this._view.lon = (360 + this._view.lon) % 360;
-            }, 50);   
+            }, 50);
         } else if (event.code === 'ArrowUp') {
             this._moveInterval = setInterval(() => {
                 this._view.lat += 0.5;
-            }, 50);   
+            }, 50);
         } else if (event.code === 'ArrowDown') {
             this._moveInterval = setInterval(() => {
                 this._view.lat -= 0.5;
-            }, 50);   
+            }, 50);
         }
     }
 
@@ -368,11 +353,12 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         const phi = parseInt(lon, 10);
         const theta = parseInt(lat, 10);
 
-        if (phi === this._oldOrientation.phi && theta === this._oldOrientation.theta) {
+        if (
+            phi === this._oldOrientation.phi &&
+            theta === this._oldOrientation.theta
+        ) {
             return;
         }
-
-        const oldOrientationString = `${this._oldOrientation.phi}, ${this._oldOrientation.theta}`;
         this._oldOrientation = {
             phi,
             theta,
@@ -382,15 +368,6 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
             [InternalVariableNames.LONGITUDE]: phi,
             [InternalVariableNames.LATITUDE]: theta,
         });
-
-        // and log analytics
-        const logData = {
-            type: AnalyticEvents.types.USER_ACTION,
-            name: AnalyticEvents.names.VR_ORIENTATION_CHANGED,
-            from: oldOrientationString,
-            to: `${phi} ${theta}`,
-        };
-        this._analytics(logData);
     }
 
     // add a link choice icon to within the 360 scene that can be stared at
@@ -432,10 +409,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         });
     }
 
-    end() {
-        const needToEnd = super.end();
-        if (!needToEnd) return false;
-
+    destroy() {
         if (this._domElement && this._domElement.parentNode) {
             this._domElement.parentNode.removeChild(this._domElement);
         }
@@ -444,7 +418,7 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
         this._readyToShowIcons = false;
 
         // remove drag view handler
-        const uiLayer = this._player.getOverlayElement();
+        const uiLayer = this._uiElement;
         uiLayer.removeEventListener('mousedown', this._onMouseDown);
         uiLayer.removeEventListener('mouseup', this._onMouseUp);
         uiLayer.removeEventListener('mousemove', this._onMouseMove);
@@ -459,6 +433,44 @@ export default class ThreeJsBaseRenderer extends BaseRenderer {
 
         this._started = false;
         this._rendered = false;
-        return true;
+    }
+
+    static loadImage(mediaUrl: string) {
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('');
+        const texture = loader.load(mediaUrl);
+
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+
+        return new THREE.Mesh(geometry, material);
+    }
+
+    static loadVideo(videoElement: HTMLElement) {
+        const texture = new THREE.VideoTexture(videoElement);
+
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+
+        return new THREE.Mesh(geometry, material);
+    }
+
+    showImage(image: THREE.Mesh) {
+        this._scene.add(image);
+        this._animate();
+    }
+
+    showVideo(video: THREE.Mesh) {
+        this._scene.add(video);
+        this._animate();
+    }
+
+    addToScene(mesh: THREE.Mesh) {
+        this._scene.add(mesh);
+        this._animate();
     }
 }

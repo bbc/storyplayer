@@ -94,7 +94,7 @@ Running StoryPlayer against local stories and media
 
 * The story json can be placed in the `/examples/` folder.  The json must conform with the [schema](https://github.com/bbc/object-based-media-schema); there are stories in the examples folder there can provide some guidance or be edited manually for testing and exploration.   The Asset Collection source values can use a relative path to the local folder containing the media.  For example, if you are editing `my_story.json` in the `/examples/` folder, and wish to use the video `/examples/my_project/my_nice_vid.mp4`, then the asset collection should have:
 
-```                                                                                       
+```
     "assets": {
         "av_src": "./my_project/my_nice_vid.mp4"
     }
