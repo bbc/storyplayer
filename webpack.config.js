@@ -9,6 +9,8 @@ const Package = require('./package.json');
 
 const productionBuild = process.env.NODE_ENV === 'production';
 
+console.log((productionBuild ? "Webpack: Production build" : "Webpack: Development build"));
+
 const cacheLoaderSourceMapArray = [];
 
 module.exports = env => {
@@ -67,7 +69,7 @@ module.exports = env => {
     };
 
     if (!productionBuild) {
-        console.log('generating source maps');
+        console.log('Webpack: Generating source maps');
         config.module.rules.push({
             test: /\.js$/,
             use: cacheLoaderSourceMapArray.concat([
