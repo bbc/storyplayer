@@ -13,15 +13,15 @@
     "personalised"
   ],
   "scripts": {
-    "build": "cross-env NODE_ENV=development webpack",
-    "build:electron": "cross-env NODE_ENV=development webpack --env.platform=electron",
-    "build:electron -m": "cross-env NODE_ENV=production webpack --env.platform=electron --env.mangle=true",
+    "build": "webpack --env.node_env=development",
+    "build:electron": "webpack --env.node_env=development --env.platform=electron",
+    "build:electron -m": "webpack --env.platform=electron --env.mangle=true --env.node_env=production",
     "test": "concurrently --names \"eslint,jest,sass-lint\" -c \"blue.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:jest\" \"yarn test:sass-lint\"",
     "test:eslint": "eslint src/ spec/",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
-    "prepublishOnly": "yarn run test && cross-env NODE_ENV=production webpack",
-    "dev": "cross-env NODE_ENV=development webpack --watch --watch-poll 500 --progress --profile --bail"
+    "prepublishOnly": "yarn run test && webpack --env.node_env=production",
+    "dev": "webpack --env.node_env=development --watch --watch-poll 500 --progress --profile --bail"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,6 @@
     "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
     "concurrently": "^5.3.0",
-    "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "eslint": "^7.17.0",
     "eslint-config-airbnb-base": "^14.2.1",
