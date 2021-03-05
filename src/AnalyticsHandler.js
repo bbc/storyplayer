@@ -8,7 +8,10 @@ export default class AnalyticsHandler {
         this._controller = controller;
         this.userid = uuidv4();
 
-        this._segmentSummaryData = {};
+        this._segmentSummaryData = {
+            timing: {},
+            eventcounts: [],
+        };
         this._lastpausedTime = Date.now();
         this._lastHideTime = Date.now();
         this._paused = false;
@@ -47,8 +50,8 @@ export default class AnalyticsHandler {
         };
 
         // if we've not yet noted it, get the duration of the element
-        if (renderer && this._segmentSummaryData.defaultDuration === null) {
-            this._segmentSummaryData.defaultDuration = renderer.getDuration();
+        if (renderer && this._segmentSummaryData.timing.defaultDuration === null) {
+            this._segmentSummaryData.timing.defaultDuration = renderer.getDuration();
         }
         return appendedData;
     }
@@ -60,14 +63,14 @@ export default class AnalyticsHandler {
      
     _sumpausedTime() {
         const pausedTime = Date.now() - this._lastpausedTime;
-        const totalPausedTime = this._segmentSummaryData.pausedTime + pausedTime;
-        this._segmentSummaryData.pausedTime = totalPausedTime;
+        const totalPausedTime = this._segmentSummaryData.timing.pausedTime + pausedTime;
+        this._segmentSummaryData.timing.pausedTime = totalPausedTime;
     }
 
     _sumHiddenTime() {
         const hiddenTime = Date.now() - this._lastHideTime;
-        const totalHiddenTime = this._segmentSummaryData.hiddenTime + hiddenTime;
-        this._segmentSummaryData.hiddenTime = totalHiddenTime;
+        const totalHiddenTime = this._segmentSummaryData.timing.hiddenTime + hiddenTime;
+        this._segmentSummaryData.timing.hiddenTime = totalHiddenTime;
     }
 
     // log events that happen within the lifetime of a NarrativeElement so we can 
@@ -75,10 +78,15 @@ export default class AnalyticsHandler {
     _handleSegmentSummaries(appendedData) {
         // count number of each user event type
         if (appendedData.type === AnalyticEvents.types.USER_ACTION) {
-            if (this._segmentSummaryData.hasOwnProperty(appendedData.name)) {
-                this._segmentSummaryData[appendedData.name] += 1;
+            const { eventcounts } = this._segmentSummaryData;
+            const match = eventcounts.find(e => e.event === appendedData.name);
+            if (match) {
+                match.count += 1;
             } else {
-                this._segmentSummaryData[appendedData.name] = 1;
+                eventcounts.push({
+                    event: appendedData.name,
+                    count: 1,
+                });
             }
         }
 
@@ -125,10 +133,13 @@ export default class AnalyticsHandler {
 
     _resetSegmentData() {
         this._segmentSummaryData = {
-            startTime: Date.now(),
-            pausedTime: 0,
-            hiddenTime: 0,
-            defaultDuration: null,
+            timing: {
+                startTime: Date.now(),
+                pausedTime: 0,
+                hiddenTime: 0,
+                defaultDuration: null,
+            },
+            eventcounts: [],
         };
         this._lastpausedTime = Date.now();
         this._lastHideTime = Date.now();
@@ -136,11 +147,11 @@ export default class AnalyticsHandler {
     }
 
     _saveSummaryData(appendedData) {
-        const { startTime, pausedTime, hiddenTime } = this._segmentSummaryData;
+        const { startTime, pausedTime, hiddenTime } = this._segmentSummaryData.timing;
         const duration = Date.now() - startTime;
-        this._segmentSummaryData.duration = duration;
-        this._segmentSummaryData.playingTime = duration - pausedTime - hiddenTime;
-        this._segmentSummaryData.visibleTime = duration - hiddenTime;
+        this._segmentSummaryData.timing.duration = duration;
+        this._segmentSummaryData.timing.playingTime = duration - pausedTime - hiddenTime;
+        this._segmentSummaryData.timing.visibleTime = duration - hiddenTime;
 
         if (!this._segmentSummaryData.chapter) {
             this._segmentSummaryData.chapter = appendedData.from;
