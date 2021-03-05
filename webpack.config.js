@@ -7,11 +7,12 @@ const JavaScriptObfuscator = require('webpack-obfuscator');
 const webpack = require('webpack');
 const Package = require('./package.json');
 
-const productionBuild = process.env.NODE_ENV === 'production';
-
 const cacheLoaderSourceMapArray = [];
 
 module.exports = env => {
+    const productionBuild = env.node_env === 'production';
+    console.log((productionBuild ? "Webpack: Production build" : "Webpack: Development build"));
+
     const entry = {
         storyplayer: './src/storyplayer.js'
     }
@@ -25,7 +26,7 @@ module.exports = env => {
             library: 'Storyplayer',
             libraryTarget: 'umd'
         },
-        mode: productionBuild ? 'production' : 'development',
+        mode: env.node_env === 'production' ? 'production' : 'development',
         module: {
             rules: [{
                 test: /\.jsx?$/,
@@ -65,9 +66,8 @@ module.exports = env => {
             }),
         ],
     };
-
-    if (!productionBuild) {
-        console.log('generating source maps');
+    if (env.node_env !== 'production') {
+        console.log('Webpack: Generating source maps');
         config.module.rules.push({
             test: /\.js$/,
             use: cacheLoaderSourceMapArray.concat([
