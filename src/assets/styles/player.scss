@@ -1110,6 +1110,11 @@ $start-button-size: 15vw;
 
   &.map-overlay {
     background-color: transparent;
+    height: 100%;
+    left: 0;
+    padding: 0;
+    top: 0;
+    width: 100%;
   }
 }
 
