@@ -8,7 +8,7 @@
             "description": "A simple linear story with multiple representations - image or video.  The last image representation has a share behaviour.",
             "beginnings": [
                 {
-                    "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
+                    "narrative_element_id": "126ea8ea-abe8-4738-87a2-d482f03f5bd8",
                     "condition": {"==": [1,1]}
                 }
             ],
@@ -22,13 +22,14 @@
             },
             "object_class": "STORY",
             "narrative_element_ids": [
+                "126ea8ea-abe8-4738-87a2-d482f03f5bd8",
                 "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
                 "8c448fdf-a4f8-4470-a8d4-80c93b976c2f",
                 "3c2a2442-b9b8-4cca-b934-d067c8967a20"
             ],
             "variables": {
                 "bandwidth": {
-                    "default_value": 3,
+                    "default_value": 1,
                     "description": "How much bandwidth does the user have? (2 or more gives video, less gives images)",
                     "variable_type": "number"
                 }
@@ -36,6 +37,34 @@
         }
     ],
     "narrative_elements": [
+        {
+            "id": "126ea8ea-abe8-4738-87a2-d482f03f5bd8",
+            "name": "Narrative Element 0",
+            "description": "The map of the story",
+            "version": "0:0",
+            "schema_version": "0.3.8",
+            "tags": {},
+            "meta": {
+                "storygraph": {
+                    "colour": "rgb(252, 203, 0)",
+                    "xPos": 222,
+                    "yPos": 180
+                }
+            },
+            "object_class": "NARRATIVE_ELEMENT",
+            "body": {
+                "type": "REPRESENTATION_COLLECTION_ELEMENT",
+                "representation_collection_target_id": "70760bb7-aae5-4f21-9298-e35f6a4f6248"
+            },
+            "links": [
+                {
+                    "id": "ded13f5e-5228-4264-a111-6de3b65f5609",
+                    "condition": {"==": [1,1]},
+                    "link_type": "NARRATIVE_ELEMENT",
+                    "target_narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8"
+                }
+            ]
+        },
         {
             "id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8",
             "name": "Narrative Element 1",
@@ -121,6 +150,21 @@
         }
     ],
     "representation_collections": [
+        {
+            "id": "70760bb7-aae5-4f21-9298-e35f6a4f6248",
+            "object_class": "REPRESENTATION_COLLECTION",
+            "tags": {},
+            "meta": {},
+            "version": "0:0",
+            "schema_version": "0.3.8",
+            "name": "Narrative Element Map",
+            "representations": [
+                {
+                    "representation_id": "5bb4c455-5165-4ffc-9152-05755282dad0",
+                    "condition": {"==": [2, 2]}
+                }
+            ]
+        },
         {
             "id": "60760bb7-aae5-4f21-9298-e35f6a4f6248",
             "object_class": "REPRESENTATION_COLLECTION",
@@ -225,6 +269,60 @@
                 "background_ids": []
             },
             "behaviours": {}
+        },
+        {
+            "id": "5bb4c455-5165-4ffc-9152-05755282dad0",
+            "object_class": "REPRESENTATION",
+            "version": "0:0",
+            "schema_version": "0.3.8",
+            "name": "Map image",
+            "meta": {},
+            "tags": {},
+            "representation_type": "urn:x-object-based-media:representation-types:image/v1.0",
+            "asset_collections": {
+                "foreground_id": "1c78100b-9cfe-4c21-9eac-7763a5f8188c",
+                "background_ids": []
+            },
+            "duration": -1,
+"behaviours": {
+    "during": [
+        {
+            "behaviour": {
+                "type": "urn:x-object-based-media:representation-behaviour:mapoverlay/v1.0",
+                "links": [
+                    {
+                        "position": {
+                            "top": 43,
+                            "left": 17,
+                            "width": 13,
+                            "height": 24
+                        },
+                        "narrative_element_id": "026ea8ea-abe8-4738-87a2-d482f03f5bd8"
+                    },
+                    {
+                        "position": {
+                            "top": 30.7,
+                            "left": 43.5,
+                            "width": 13,
+                            "height": 24
+                        },
+                        "narrative_element_id": "8c448fdf-a4f8-4470-a8d4-80c93b976c2f"
+                    },
+                    {
+                        "position": {
+                            "top": 45.3,
+                            "left": 68.5,
+                            "width": 13,
+                            "height": 24
+                        },
+                        "narrative_element_id": "3c2a2442-b9b8-4cca-b934-d067c8967a20"
+                    }
+                ]
+            },
+            "start_time": 0
+        }
+    ]
+}
         },
         {
             "id": "4bb4c455-5165-4ffc-9152-05755282dad0",
@@ -362,6 +460,19 @@
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
                 "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
+            }
+        },
+        {
+            "id": "1c78100b-9cfe-4c21-9eac-7763a5f8188c",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Map image 1",
+            "description": "",
+            "version": "0:0",
+            "schema_version": "0.3.8",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "assets": {
+                "image_src": "/examples/map.png"
             }
         },
         {

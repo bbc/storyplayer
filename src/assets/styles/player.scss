@@ -1107,6 +1107,10 @@ $start-button-size: 15vw;
       width: 100%;
     }
   }
+
+  &.map-overlay {
+    background-color: transparent;
+  }
 }
 
 .romper-close-button {
