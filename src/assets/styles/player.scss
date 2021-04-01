@@ -639,6 +639,7 @@ $start-button-size: 15vw;
 
   .romper-icon-overlay {
     @include overlay;
+    display: none;
     background-color: $black;
     bottom: 104px;
     flex-wrap: wrap;
@@ -1735,4 +1736,30 @@ $start-button-size: 15vw;
   top: 50%;
   transform: translateY(-50%);
   width: 100%;
+}
+
+.nav-panel {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  &.hidden {
+    display: none;
+  }
+
+  >img {
+    height: 100%;
+    width: 100%;
+  }
+
+  >canvas {
+    background-color: transparent;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
 }

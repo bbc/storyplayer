@@ -28,7 +28,7 @@ import {
 } from '../utils'; // eslint-disable-line max-len
 import { REASONER_EVENTS, DOM_EVENTS } from '../Events';
 import { ButtonEvents } from './BaseButtons';
-import Overlay, { OVERLAY_ACTIVATED_EVENT } from './Overlay';
+import Overlay, { OVERLAY_ACTIVATED_EVENT, OVERLAY_DEACTIVATED_EVENT } from './Overlay';
 import StandardControls from './StandardControls';
 import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
@@ -395,8 +395,6 @@ class Player extends EventEmitter {
 
         // one overlay has been activated, disactivate all other overlays
         overlay.on(OVERLAY_ACTIVATED_EVENT, (clickedName) => {
-            this._overlays.filter(o => o.getName() !== clickedName)
-                .forEach(o => o.disactivateOverlay());
         });
         return overlay;
     }

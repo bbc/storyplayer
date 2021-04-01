@@ -5,6 +5,7 @@ import { handleButtonTouchEvent } from '../utils';
 const buttonClassPrefix = 'romper-overlay-button-choice-';
 
 const OVERLAY_ACTIVATED_EVENT = 'overlay-click-event';
+const OVERLAY_DEACTIVATED_EVENT = 'OVERLAY_DEACTIVATED_EVENT';
 
 class Overlay extends EventEmitter {
 
@@ -131,6 +132,7 @@ class Overlay extends EventEmitter {
     }
 
     disactivateOverlay() {
+        this.emit(OVERLAY_DEACTIVATED_EVENT, { name: this._name });
         if (!this._overlay.classList.contains('romper-inactive')) {
             this._logFunction(
                 'OVERLAY_DEACTIVATED',
@@ -260,4 +262,4 @@ class Overlay extends EventEmitter {
 }
 
 export default Overlay;
-export { OVERLAY_ACTIVATED_EVENT };
+export { OVERLAY_ACTIVATED_EVENT, OVERLAY_DEACTIVATED_EVENT };

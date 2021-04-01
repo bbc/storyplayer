@@ -19,6 +19,7 @@ import RendererEvents from './renderers/RendererEvents';
 import logger from './logger';
 import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
+import NavPanel from './gui/NavPanel';
 
 import Player, { PlayerEvents } from './gui/Player';
 import { REASONER_EVENTS, DOM_EVENTS } from './Events';
@@ -454,6 +455,31 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             this._renderStory.start(this._currentRenderer.getRepresentation().id);
         }
+    }
+
+    createNavPanel(storyElement, narrativeElements) {
+        if (!(
+            storyElement &&
+            storyElement.meta &&
+            storyElement.meta.romper &&
+            storyElement.meta.romper.navpanel &&
+            storyElement.meta.romper.navpanel.background_art_asset_collection_id)) {
+            return;
+        }
+        const navPanel = new NavPanel(
+            storyElement.meta.romper.navpanel.background_art_asset_collection_id,
+            narrativeElements,
+            this._player,
+            this._fetchers.assetCollectionFetcher,
+            this._fetchers.mediaFetcher,
+        );
+        this._controller.on(REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, (ne) => {
+            navPanel.handleNarrativeElementChange(ne.id);
+        })
+        this._player.guiTarget.appendChild(navPanel.getOverlay());
+        navPanel.on(REASONER_EVENTS.JUMP_TO_NARRATIVE_ELEMENT, (neid) => {
+            this._controller._jumpToNarrativeElement(neid);
+        });
     }
 
     // eslint-disable-next-line class-methods-use-this

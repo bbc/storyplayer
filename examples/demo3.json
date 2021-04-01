@@ -17,6 +17,9 @@
                 "romper": {
                     "onLaunch": {
                         "background_art_asset_collection_id": "b165c26a-48b2-455d-85b8-4920c070d51b"
+                    },
+                    "navpanel": {
+                        "background_art_asset_collection_id": "1d78100b-9cfe-4c21-9eac-7763a5f8188c"
                     }
                 }
             },
@@ -48,6 +51,20 @@
                     "colour": "rgb(252, 203, 0)",
                     "xPos": 222,
                     "yPos": 180
+                },
+                "storyplayer": {
+                    "navpanel": {
+                        "scrubPosition": {
+                            "x": 23.5,
+                            "y": 70
+                        },
+                        "clickArea": {
+                            "left": 17,
+                            "top": 43,
+                            "width": 13,
+                            "height": 24
+                        }
+                    }
                 }
             },
             "object_class": "NARRATIVE_ELEMENT",
@@ -76,6 +93,20 @@
                     "colour": "#DB3E00",
                     "xPos": 517.8712064019327,
                     "yPos": 178.28219839951683
+                },
+                "storyplayer": {
+                    "navpanel": {
+                        "scrubPosition": {
+                            "x": 50,
+                            "y": 58
+                        },
+                        "clickArea": {
+                            "left": 43.5,
+                            "top": 30.7,
+                            "width": 13,
+                            "height": 24
+                        }
+                    }
                 }
             },
             "object_class": "NARRATIVE_ELEMENT",
@@ -104,6 +135,20 @@
                     "colour": "#DB3E00",
                     "xPos": 825.2036117900344,
                     "yPos": 178.0519976175977
+                },
+                "storyplayer": {
+                    "navpanel": {
+                        "scrubPosition": {
+                            "x": 75,
+                            "y": 70
+                        },
+                        "clickArea": {
+                            "left": 68.5,
+                            "top": 45.3,
+                            "width": 13,
+                            "height": 24
+                        }
+                    }
                 }
             },
             "object_class": "NARRATIVE_ELEMENT",
@@ -362,6 +407,19 @@
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
                 "av_src": "https://rdux.files.bbci.co.uk/romper/step3.mp4"
+            }
+        },
+        {
+            "id": "1d78100b-9cfe-4c21-9eac-7763a5f8188c",
+            "object_class": "ASSET_COLLECTION",
+            "name": "Map",
+            "description": "",
+            "version": "0:0",
+            "schema_version": "0.3.8",
+            "tags": {},
+            "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
+            "assets": {
+                "image_src": "/examples/map.png"
             }
         },
         {

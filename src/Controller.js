@@ -218,6 +218,13 @@ export default class Controller extends EventEmitter {
         });
         window._sessionManager = this._sessionManager;
 
+        Promise.all([
+            this._getAllNarrativeElements(), 
+            this._fetchers.storyFetcher(storyId),
+        ]).then(([nes, story]) => {
+            this._renderManager.createNavPanel(story, nes);
+        });
+
         // see if we have a linear story
         this._testForLinearityAndBuildStoryRenderer(storyId)
             .then(() => this._storyReasonerFactory(storyId, this._analytics))
