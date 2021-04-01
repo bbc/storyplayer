@@ -22,7 +22,6 @@ const getLinkId = (e, behaviour) => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderMapOverlay = (behaviour, target, callback, controller) => {
-    console.log('ANDY rendering map overlay');
     const modalElement = document.createElement('div');
     modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
