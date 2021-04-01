@@ -99,21 +99,17 @@ class NavPanel extends EventEmitter {
     _plotLine(x1, y1, x2, y2) {
         const { offsetHeight, offsetWidth } = this._player.mediaTarget;
         const ctx = this._canvas.getContext('2d');
-        ctx.fillStyle = "#FFf"; 
+        ctx.fillStyle = "#3cffd5"; 
         ctx.lineWidth = "5"; 
-        ctx.strokeStyle = "#FFf"; 
+        ctx.strokeStyle = "#3cffd5"; 
 
-        // draw end only
         const xp2 = x2 * offsetWidth / 100;
         const yp2 = y2 * offsetHeight / 100;
         ctx.fillRect(xp2-5, yp2-5, 10, 10); 
-        if (!x1) {
-            return;
-        }
+        if (!x1) return; 
 
         const yp1 = y1 * offsetHeight / 100;
         const xp1 = x1 * offsetWidth / 100;
-        console.log('ANDY media size', offsetHeight, offsetWidth);
         ctx.moveTo(xp1, yp1);
         ctx.lineTo(xp2, yp2);
         ctx.stroke();        
@@ -130,7 +126,6 @@ class NavPanel extends EventEmitter {
         ) {
             const { x, y } = match.meta.storyplayer.navpanel.scrubPosition
             const { lastX, lastY } = this._currentPosition;
-            console.log(`ANDY plot (${lastX}, ${lastY}) to (${x}, ${y})`);
             this._currentPosition = {
                 lastY: y,
                 lastX: x,
