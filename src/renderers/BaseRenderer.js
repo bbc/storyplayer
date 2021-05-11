@@ -1166,9 +1166,9 @@ export default class BaseRenderer extends EventEmitter {
             if (!this._playoutEngine.isPlaying()) {
                 setTimeout(() => this.play(), LINK_FADE_TIME);
             }
-        } else {
+        } else if (!this._playoutEngine.isPlaying()) {
             // if they are paused, then clicking a choice should restart immediately
-            if (!this._playoutEngine.isPlaying()) this.play();
+            this.play();
         }
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
