@@ -154,8 +154,14 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                 this._playoutEngine.play();
                 this._playoutEngine.pause();
             } else {
+                if (this.phase === RENDERER_PHASES.WAITING) {
+                    // if we have non-looping trimmed media, and are waiting
+                    // for user to select link, we need to pause
+                    this._playoutEngine.pause();
+                } else {
+                    this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+                }
                 clearInterval(this._inspectMediaPlaybackInterval);
-                this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
                 super.complete();
             }
         }

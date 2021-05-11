@@ -26,6 +26,7 @@ const SEEK_TIME = 10;
 // TODO: Consider making this longer now it runs higher than 4Hz.
 const TIMER_INTERVAL = 10;
 
+const LINK_FADE_TIME = 1500;
 
 const getBehaviourEndTime = (behaviour: Object) => {
     if(behaviour.duration !== undefined) {
@@ -46,6 +47,7 @@ export const RENDERER_PHASES = {
     BG_FADE_IN: 'BG_FADE_IN',
     BG_FADE_OUT: 'BG_FADE_OUT',
     MEDIA_FINISHED: 'MEDIA_FINISHED', // done all its rendering and ready to move on, but not ended
+    WAITING: 'WAITING', // waiting for user link choice...
 };
 
 export default class BaseRenderer extends EventEmitter {
@@ -574,7 +576,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     complete() {
-        if (this._linkFadeTimeout) {
+        if (this._linkFadeTimeout || this.phase === RENDERER_PHASES.WAITING) {
             // a link has been chosen and is fading out
             // controller will move to next element as soon as done
             // so don't finish this one
@@ -915,6 +917,8 @@ export default class BaseRenderer extends EventEmitter {
                         // change their mind
                         if (!forceChoice) {
                             callback();
+                        } else {
+                            this._setPhase(RENDERER_PHASES.WAITING);
                         }
                     } else {
                         logger.info('Link Choice behaviour ignored - only one link');
@@ -1156,8 +1160,16 @@ export default class BaseRenderer extends EventEmitter {
 
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
-        // if they are paused, then clicking a choice should restart
-        if (!this._playoutEngine.isPlaying()) this.play();
+        if (this.phase === RENDERER_PHASES.WAITING) {
+            this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+            // paused for user choice, restart once icons gone
+            if (!this._playoutEngine.isPlaying()) {
+                setTimeout(() => this.play(), LINK_FADE_TIME);
+            }
+        } else if (!this._playoutEngine.isPlaying()) {
+            // if they are paused, then clicking a choice should restart immediately
+            this.play();
+        }
         this._controller.off(VARIABLE_EVENTS.CONTROLLER_CHANGED_VARIABLE, this._renderLinkChoices);
         if (this._linkBehaviour) {
             this._linkBehaviour.forceChoice = false; // they have made their choice
@@ -1228,7 +1240,7 @@ export default class BaseRenderer extends EventEmitter {
                 } else {
                     this._linkBehaviour.callback();
                 }
-            }, 1500);
+            }, LINK_FADE_TIME);
             behaviourElement.classList.add('romper-icon-fade');
         }
     }
