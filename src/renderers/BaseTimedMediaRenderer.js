@@ -146,7 +146,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             (isLooping && this._accumulatedMediaTime >= duration)
         ) {
             // Some players fallback to first frame--force showing ending frame.
-            this._playoutEngine.setCurrentTime(this._rendererId, this._inTime + duration - 0.1);
+            this._playoutEngine.setCurrentTime(this._rendererId, duration-0.1);
 
             // Seeking past end on some players will cause end to trigger even
             // when paused. Cycle Play-Pause for consistent player state.
@@ -157,16 +157,8 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                 if (this.phase === RENDERER_PHASES.WAITING) {
                     // if we have non-looping trimmed media, and are waiting
                     // for user to select link, we need to pause
-                    this.forcedPauseForTrimmedMedia = true;
                     this._playoutEngine.pause();
                 } else {
-                    if (this.hasEndPauseBehaviour() && this._outTime > 0) {
-                        // we have reached the out point, but there is a pause behaviour
-                        // so we must tell the player to pause, and set a flag so we can
-                        // restart when pause done
-                        this.forcedPauseForTrimmedMedia = true;
-                        this._playoutEngine.pause();
-                    }
                     this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
                 }
                 clearInterval(this._inspectMediaPlaybackInterval);

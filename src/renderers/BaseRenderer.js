@@ -135,8 +135,6 @@ export default class BaseRenderer extends EventEmitter {
 
     phase: string;
 
-    forcedPauseForTrimmedMedia: Boolean;
-
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.
@@ -224,8 +222,6 @@ export default class BaseRenderer extends EventEmitter {
 
         this._serviceTimedEvents = this._serviceTimedEvents.bind(this);
         this._timedEvents = {};
-
-        this.forcedPauseForTrimmedMedia = false;
     }
 
     _serviceTimedEvents() {
@@ -681,15 +677,6 @@ export default class BaseRenderer extends EventEmitter {
         }
         logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
         return null;
-    }
-
-    hasEndPauseBehaviour(): boolean {
-        if (this._representation.behaviours?.completed) {
-            const endMatches = this._representation.behaviours.completed.filter(behave =>
-                behave.type === 'urn:x-object-based-media:representation-behaviour:pause/v1.0'); // eslint-disable-line max-len
-            return (endMatches.length > 0);
-        }
-        return false;
     }
 
     hasShowIconBehaviour(): boolean {
@@ -1174,8 +1161,11 @@ export default class BaseRenderer extends EventEmitter {
     // user has made a choice of link to follow - do it
     _followLink(narrativeElementId: string, behaviourId: string) {
         if (this.phase === RENDERER_PHASES.WAITING) {
-            // was paused for user choice: done WAITING, now FINISHED 
             this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+            // paused for user choice, restart once icons gone
+            if (!this._playoutEngine.isPlaying()) {
+                setTimeout(() => this.play(), LINK_FADE_TIME);
+            }
         } else if (!this._playoutEngine.isPlaying()) {
             // if they are paused, then clicking a choice should restart immediately
             this.play();
