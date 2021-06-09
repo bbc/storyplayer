@@ -1463,13 +1463,6 @@ class Player extends EventEmitter {
     }
 
     exitCompleteBehaviourPhase() {
-        // with trimmed media we sometimes need to force the
-        // playout engine to pause at the end
-        // if this has happened, get it going again
-        if (this._currentRenderer.forcedPauseForTrimmedMedia) {
-            this.playoutEngine.play();
-            this._currentRenderer.forcedPauseForTrimmedMedia = false;
-        }
         this._controls.enableSeekBack();
     }
 
