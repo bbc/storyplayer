@@ -951,10 +951,10 @@
     "@babel/helper-validator-identifier" "^7.14.0"
     to-fast-properties "^2.0.0"
 
-"@bbc/object-based-media-schema@^1.0.0":
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/@bbc/object-based-media-schema/-/object-based-media-schema-1.0.3.tgz#bff829943469fcf751a8d03a2c2bd5e3cc351d37"
-  integrity sha512-9LhqpTOih5Gmm3dbADG5RJESO6teIR9uspt1e4LmHMDy0IQMhKeuRzTy+Zv/9WdDg7ek+IMM125sON8+fZ0FZw==
+"@bbc/object-based-media-schema@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@bbc/object-based-media-schema/-/object-based-media-schema-1.0.4.tgz#cbc6ae431f51f12c8cb81e94c8a38eef60dcbf73"
+  integrity sha512-SUAXcpIjUw6jGJcuTGxTNoJiIfFWWecKTQCG8K4mfk+wgMcGCUt9g+777dJozLg+4+c58lMJzDKVNlJOkzghEg==
   dependencies:
     jsonschema "^1.4.0"
 
@@ -9501,9 +9501,9 @@ write@^0.2.1:
     mkdirp "^0.5.1"
 
 ws@^7.4.5:
-  version "7.4.5"
-  resolved "https://registry.npmjs.org/ws/-/ws-7.4.5.tgz#a484dd851e9beb6fdb420027e3885e8ce48986c1"
-  integrity sha512-xzyu3hFvomRfXKH8vOFMU3OguG6oOvhXMo3xsGy3xWExqaM2dxBbVxuD99O7m3ZUFMvvscsZDqxfgMaRr/Nr1g==
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.1.tgz#44fc000d87edb1d9c53e51fbc69a0ac1f6871d66"
+  integrity sha512-2c6faOUH/nhoQN6abwMloF7Iyl0ZS2E9HGtsiLrWn0zOOMWlhtDmdf/uihDt6jnuCxgtwGBNy6Onsoy2s2O2Ow==
 
 xml-name-validator@^3.0.0:
   version "3.0.0"
