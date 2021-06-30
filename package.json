@@ -43,7 +43,7 @@
     "@babel/plugin-transform-flow-strip-types": "^7.12.10",
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/preset-env": "^7.12.11",
-    "@bbc/object-based-media-schema": "^1.0.0",
+    "@bbc/object-based-media-schema": "^1.0.4",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
