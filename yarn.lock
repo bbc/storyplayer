@@ -951,10 +951,10 @@
     "@babel/helper-validator-identifier" "^7.14.0"
     to-fast-properties "^2.0.0"
 
-"@bbc/object-based-media-schema@^1.0.0":
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/@bbc/object-based-media-schema/-/object-based-media-schema-1.0.3.tgz#bff829943469fcf751a8d03a2c2bd5e3cc351d37"
-  integrity sha512-9LhqpTOih5Gmm3dbADG5RJESO6teIR9uspt1e4LmHMDy0IQMhKeuRzTy+Zv/9WdDg7ek+IMM125sON8+fZ0FZw==
+"@bbc/object-based-media-schema@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/@bbc/object-based-media-schema/-/object-based-media-schema-1.0.4.tgz#cbc6ae431f51f12c8cb81e94c8a38eef60dcbf73"
+  integrity sha512-SUAXcpIjUw6jGJcuTGxTNoJiIfFWWecKTQCG8K4mfk+wgMcGCUt9g+777dJozLg+4+c58lMJzDKVNlJOkzghEg==
   dependencies:
     jsonschema "^1.4.0"
 
