@@ -1,4 +1,4 @@
-FROM node:10.20
+FROM node:12.18
 
 RUN apt-get -y update && apt-get -y install netcat-openbsd
 
