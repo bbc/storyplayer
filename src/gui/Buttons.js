@@ -33,7 +33,7 @@ class Buttons extends BaseButtons {
         subsButton.setAttribute('type', 'button');
         subsButton.classList.add('romper-button');
         subsButton.setAttribute('title', 'Subtitles Button');
-        subsButton.setAttribute('aria-label', 'Subtitles Button');
+        subsButton.setAttribute('aria-label', 'Subtitles');
         subsButton.classList.add('romper-subtitles-button');
         // this.disableSubtitlesControl();
         const subtitlesButtonIconDiv = document.createElement('div');
@@ -55,7 +55,7 @@ class Buttons extends BaseButtons {
         fsButton.classList.add('romper-button');
         fsButton.classList.add('romper-fullscreen-button');
         fsButton.setAttribute('title', 'Fullscreen Button');
-        fsButton.setAttribute('aria-label', 'Fullscreen Button');
+        fsButton.setAttribute('aria-label', 'Fullscreen');
         const fullscreenButtonIconDiv = document.createElement('div');
         fullscreenButtonIconDiv.classList.add('romper-button-icon-div');
         fullscreenButtonIconDiv.classList.add('romper-fullscreen-button-icon-div');

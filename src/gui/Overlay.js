@@ -77,7 +77,7 @@ class Overlay extends EventEmitter {
         // eslint-disable-next-line max-len
         button.setAttribute('title', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
         // eslint-disable-next-line max-len
-        button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
+        button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)}`);
         button.classList.add('romper-button');
         button.classList.add(`romper-${this._name}-button`);
         button.classList.add('romper-inactive');
