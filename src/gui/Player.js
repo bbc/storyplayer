@@ -544,7 +544,7 @@ class Player extends EventEmitter {
         resumeButton.setAttribute('type', 'button');
         resumeButton.classList.add('romper-resume-button');
         resumeButton.setAttribute('title', 'Resume and accept terms');
-        resumeButton.setAttribute('aria-label', 'Resume Button');
+        resumeButton.setAttribute('aria-label', 'Resume');
 
         const resumeButtonDiv = document.createElement('div');
         resumeButtonDiv.classList.add('romper-continue-control');
@@ -555,7 +555,7 @@ class Player extends EventEmitter {
         restartButton.setAttribute('type', 'button');
         restartButton.classList.add('romper-restart-button');
         restartButton.setAttribute('title', 'Restart and accept terms');
-        restartButton.setAttribute('aria-label', 'Restart Button');
+        restartButton.setAttribute('aria-label', 'Restart');
 
         const restartButtonDiv = document.createElement('div');
         restartButtonDiv.classList.add('romper-continue-control');
@@ -719,7 +719,7 @@ class Player extends EventEmitter {
         this._startExperienceButton.setAttribute('type', 'button');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
-        this._startExperienceButton.setAttribute('aria-label', 'Start Button');
+        this._startExperienceButton.setAttribute('aria-label', 'Start');
 
         const startButtonIconHolder = document.createElement('div');
         this._startExperienceButton.appendChild(startButtonIconHolder);
@@ -809,6 +809,7 @@ class Player extends EventEmitter {
         this._createSharedOverlays(options);
         this._createStartExperienceButton(options);
         this._guiLayer.appendChild(this._startExperienceButton);
+        this._startExperienceButton.focus();
         this._startExperienceButton.onclick = this._startButtonHandler;
         this._startExperienceButton.addEventListener(
             'touchend',
@@ -1126,11 +1127,12 @@ class Player extends EventEmitter {
         representationControl.classList.add('romper-representation-control');
         representationControl.classList.add(`romper-representation-choice-${id}`);
         representationControl.setAttribute('title', label);
-        representationControl.setAttribute('aria-label', label);
 
         const iconContainer = document.createElement('div');
         iconContainer.classList.add('romper-representation-icon-container');
 
+        const representationButton = document.createElement('button');
+        representationButton.setAttribute('aria-label', `switch to ${label}`);
         const representationIcon = document.createElement('img');
         if (src !== '') {
             representationIcon.src = src;
@@ -1147,13 +1149,14 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.SWITCH_VIEW_BUTTON_CLICKED, null, id);
         };
 
-        representationIcon.onclick = representationIconClick;
+        representationButton.onclick = representationIconClick;
         representationIcon.addEventListener(
             'touchend',
             handleButtonTouchEvent(representationIconClick),
         );
 
-        iconContainer.appendChild(representationIcon);
+        representationButton.appendChild(representationIcon)
+        iconContainer.appendChild(representationButton);
         representationControl.appendChild(iconContainer);
 
         this._representation.add(id, representationControl);
@@ -1217,7 +1220,7 @@ class Player extends EventEmitter {
 
         const linkChoiceControl = document.createElement('button');
         linkChoiceControl.id = `romper-link-choice-${id}`;
-        linkChoiceControl.tabIndex = this._numChoices;
+        linkChoiceControl.tabIndex = 0;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
@@ -1299,6 +1302,9 @@ class Player extends EventEmitter {
         behaviourElement.classList.remove('romper-inactive');
         behaviourElement.classList.add(`choices-${choiceCount}`);
         behaviourElement.classList.add(`count-${choiceCount}`);
+        behaviourElement.setAttribute('role', 'alert'); // alertdialog better, but not working in JAWS...?
+        behaviourElement.setAttribute('aria-modal', 'true');
+        behaviourElement.setAttribute('aria-label', 'You need to choose');
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
             promisesArray.push(this._choiceIconSet[id]);
@@ -1328,6 +1334,7 @@ class Player extends EventEmitter {
                     behaviourOverlay.add(id, icon);
                     if(behaviourElement){
                         behaviourElement.appendChild(icon);
+                        if (id === 0) icon.focus();
                     }
                     this._visibleChoices[id + 1] = container;
                     this._controls.setSubtitlesAboveElement(behaviourElement);
@@ -1368,7 +1375,7 @@ class Player extends EventEmitter {
         representationName: string,
         labelString: ?string,
     ) {
-        const iconControl = document.createElement('div');
+        const iconControl = document.createElement('button');
         iconControl.classList.add('romper-icon-control');
 
         const icon = document.createElement('img');
@@ -1383,7 +1390,7 @@ class Player extends EventEmitter {
             icon.classList.add(`romper-icon-choice-${labelString}`);
         }
         icon.setAttribute('title', representationName);
-        icon.setAttribute('aria-label', representationName);
+        icon.setAttribute('aria-label', `skip to ${representationName}`);
         icon.setAttribute('draggable', 'false');
         if (selected) {
             icon.classList.add('romper-selected');
@@ -1395,7 +1402,7 @@ class Player extends EventEmitter {
             this._logUserInteraction(AnalyticEvents.names.CHANGE_CHAPTER_BUTTON_CLICKED, null, id);
         };
 
-        icon.onclick = iconClick;
+        iconControl.onclick = iconClick;
         icon.addEventListener(
             'touchend',
             handleButtonTouchEvent(iconClick),

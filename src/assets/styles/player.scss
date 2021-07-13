@@ -315,6 +315,12 @@ $start-button-size: 15vw;
     background-color: $highlight;
   }
 
+  .romper-icon-control,
+  .romper-representation-control {
+    background-color: $transparent;
+    border: 0;
+  }
+
   .romper-no-icon {
     background-color: $transparent;
     background-image: url('../images/no-asset.svg');
@@ -1550,6 +1556,12 @@ $start-button-size: 15vw;
     }
   }
 
+  .romper-behaviour-modal {
+    >div {
+      font-size: 80%;
+    }
+  }
+
   .romper-link-text-icon {
     font-size: 120%;
   }
@@ -1561,6 +1573,12 @@ $start-button-size: 15vw;
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
+    }
+  }
+
+  .romper-behaviour-modal {
+    >div {
+      font-size: 80%;
     }
   }
 }
@@ -1611,6 +1629,12 @@ $start-button-size: 15vw;
 
 @media (min-width: 320px) and (max-width: 500px),
   (max-height: 450px) {
+    .romper-behaviour-modal {
+      >div {
+        font-size: 80%;
+      }
+    }
+
     .romper-player > .romper-media {
       &.romper-prestart > .romper-privacy-notice {
         font-size: 70%;
@@ -1641,6 +1665,12 @@ $start-button-size: 15vw;
 
   .romper-text-link-container {
     height: 6em;
+  }
+
+  .romper-behaviour-modal {
+    >div {
+      font-size: 65%;
+    }
   }
 
   .romper-variable-panel {
