@@ -20,6 +20,7 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
+import { renderMapOverlay } from '../behaviours/MapLinkBehaviourHelper';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -171,6 +172,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
+        this._applyMapOverlayBehaviour = this._applyMapOverlayBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -199,6 +201,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:mapoverlay/v1.0' : this._applyMapOverlayBehaviour,
         };
 
         this._behaviourClassMap = {
@@ -1321,6 +1325,17 @@ export default class BaseRenderer extends EventEmitter {
             this._controller,
         );
         this._setBehaviourElementAttribute(modalElement, 'text-overlay');
+        this._behaviourElements.push(modalElement);
+    }
+
+    _applyMapOverlayBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderMapOverlay(
+            behaviour,
+            this._player.getOverlayElement(),
+            callback,
+            this._controller,
+        );
+        this._setBehaviourElementAttribute(modalElement, 'map-overlay');
         this._behaviourElements.push(modalElement);
     }
 
