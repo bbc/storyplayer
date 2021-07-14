@@ -62,7 +62,9 @@ class StandardControls extends BaseControls {
         this._narrativeElementTransport = this._buttonControls.getTransportControls();
 
         // pass the overlay buttons to the button manager
-        this._buttonControls.setVolumeButton(volumeOverlay.getButton());
+        const volBtn = volumeOverlay.getButton();
+        volBtn.setAttribute('tabindex', '2');
+        this._buttonControls.setVolumeButton(volBtn);
         this._buttonControls.setChapterButton(chapterOverlay.getButton());
         this._buttonControls.setSwitchableButton(switchableOverlay.getButton());
 

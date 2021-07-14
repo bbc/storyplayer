@@ -38,6 +38,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._container.classList.add('romper-narrative-element-transport');
 
         this._backButton = document.createElement('button');
+        this._backButton.setAttribute('tabindex', '2');
         this._backButton.setAttribute('type', 'button');
         this._backButton.classList.add('romper-button');
         this._backButton.classList.add('romper-back-button');
@@ -50,6 +51,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._container.appendChild(this._backButton);
 
         this._seekBackButton = document.createElement('button');
+        this._seekBackButton.setAttribute('tabindex', '2');
         this._seekBackButton.setAttribute('type', 'button');
         this._seekBackButton.classList.add('romper-button');
         this._seekBackButton.classList.add('romper-seek-back-button');
@@ -61,6 +63,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._container.appendChild(this._seekBackButton);
 
         this._playPauseButton = document.createElement('button');
+        this._playPauseButton.setAttribute('tabindex', '2');
         this._playPauseButton.setAttribute('type', 'button');
         this._playPauseButton.classList.add('romper-button');
         this._playPauseButton.classList.add('romper-play-button');
@@ -73,6 +76,7 @@ class NarrativeElementTransport extends EventEmitter {
 
         this._seekForwardButton = document.createElement('button');
         this._seekForwardButton.setAttribute('type', 'button');
+        this._seekForwardButton.setAttribute('tabindex', '2');
         this._seekForwardButton.classList.add('romper-button');
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
@@ -84,6 +88,7 @@ class NarrativeElementTransport extends EventEmitter {
 
         this._nextButton = document.createElement('button');
         this._nextButton.setAttribute('type', 'button');
+        this._nextButton.setAttribute('tabindex', '2');
         this._nextButton.classList.add('romper-button');
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');

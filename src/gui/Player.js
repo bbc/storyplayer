@@ -718,6 +718,7 @@ class Player extends EventEmitter {
     _createStartExperienceButton(options: Object) {
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.setAttribute('type', 'button');
+        this._startExperienceButton.setAttribute('tabindex', '1');
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Start');
