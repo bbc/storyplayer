@@ -76,6 +76,8 @@ class StandardControls extends BaseControls {
         // add transport control buttons and scrub bar
         this._containerDiv = document.createElement('div');
         this._containerDiv.classList.add('romper-buttons');
+        this._containerDiv.setAttribute('role', 'navigation');
+        this._containerDiv.setAttribute('aria-disabled', 'true');
         this._containerDiv.appendChild(this._scrubBar.getScrubBarElement());
         this._containerDiv.appendChild(mediaTransport);
         this._containerDiv.onmousemove = () => {
@@ -132,11 +134,13 @@ class StandardControls extends BaseControls {
     // and hides controls immediately
     disableControls() {
         this._controlsDisabled = true;
+        this._containerDiv.setAttribute('aria-disabled', 'true');
         this.hideControls();
     }
 
     enableControls() {
         this._controlsDisabled = false;
+        this._containerDiv.setAttribute('aria-disabled', 'false');
     }
 
     getShowing(): boolean {

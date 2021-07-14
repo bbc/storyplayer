@@ -326,6 +326,7 @@ class Player extends EventEmitter {
 
         // Hide gui elements until start clicked with 'romper-inactive'
         this._overlaysElement = createElementWithClass('div', 'romper-overlays', ['romper-overlays', 'buttons-hidden', 'romper-inactive']);
+        this._overlaysElement.setAttribute('aria-live', 'polite');
 
         // append the overlays to the gui elemebt
         this._guiLayer.appendChild(this._overlaysElement);
@@ -741,6 +742,7 @@ class Player extends EventEmitter {
             this._startExperienceImage.setAttribute('draggable', 'false');
             this._startExperienceImage.className = 'romper-start-image noselect';
             this._startExperienceImage.src = options.background_art;
+            this._startExperienceImage.setAttribute('alt', 'start screen background image');
         }
         this._mediaLayer.appendChild(this._startExperienceImage);
 
@@ -1225,7 +1227,7 @@ class Player extends EventEmitter {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');
             linkChoiceControl.classList.add(`romper-link-choice-${id}`);
-            linkChoiceControl.setAttribute('aria-label', label);
+            linkChoiceControl.setAttribute('aria-label', `${this._numChoices}: ${label}`);
 
             linkChoiceControl.setAttribute('data-link-choice', 'inactive');
 
@@ -1304,7 +1306,7 @@ class Player extends EventEmitter {
         behaviourElement.classList.add(`count-${choiceCount}`);
         behaviourElement.setAttribute('role', 'alert'); // alertdialog better, but not working in JAWS...?
         behaviourElement.setAttribute('aria-modal', 'true');
-        behaviourElement.setAttribute('aria-label', 'You need to choose');
+        behaviourElement.setAttribute('aria-label', 'choice: enter number to choose');
         const promisesArray = [];
         Object.keys(this._choiceIconSet).forEach((id) => {
             promisesArray.push(this._choiceIconSet[id]);

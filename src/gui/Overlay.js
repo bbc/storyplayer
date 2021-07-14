@@ -83,7 +83,10 @@ class Overlay extends EventEmitter {
         } else if (this._name === 'representation') {
             button.setAttribute('aria-label', 'open choice of views');
         } else {
-            button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)}`);
+            button.setAttribute(
+                'aria-label',
+                `${this._name.charAt(0).toUpperCase() + this._name.slice(1)}`,
+            );
         }
         button.classList.add('romper-button');
         button.classList.add(`romper-${this._name}-button`);
