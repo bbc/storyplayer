@@ -1766,3 +1766,10 @@ $start-button-size: 15vw;
   transform: translateY(-50%);
   width: 100%;
 }
+
+// place things (e.g., text overlays) off screen and transparent
+// so not visible, except to screen reader
+.screenreader-only {
+  opacity: 0;
+  transform: translate(-10000px, -10000px);
+}
