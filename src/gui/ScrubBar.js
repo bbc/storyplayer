@@ -20,6 +20,7 @@ class ScrubBar extends BaseScrubBar {
     _createScrubBar(): HTMLInputElement {
         const scrubBar = document.createElement('input');
         scrubBar.setAttribute('title', 'Seek bar');
+        scrubBar.setAttribute('tabindex', '2');
         scrubBar.setAttribute('aria-label', 'Seek bar');
         scrubBar.setAttribute('data-required-controls', 'false');
         scrubBar.type = 'range';

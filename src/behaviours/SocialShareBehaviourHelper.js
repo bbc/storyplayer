@@ -5,12 +5,15 @@ import { handleButtonTouchEvent, getCurrentUrl } from '../utils';
 
 const createTwitterIcon = (shareText, shareUrl) => {
     const twitterLi = document.createElement('li');
-    const twitterDiv = document.createElement('div');
+    const twitterDiv = document.createElement('button');
     const twitterAction = () => window.open(
         `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`,
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
+    twitterDiv.setAttribute('role', 'button');
+    twitterDiv.setAttribute('tabindex', '0');
+    twitterDiv.setAttribute('aria-label', 'share via Twitter')
     twitterDiv.onclick = twitterAction;
     twitterDiv.addEventListener('touchend', handleButtonTouchEvent(twitterAction));
     twitterLi.className = 'twitter';
@@ -20,10 +23,13 @@ const createTwitterIcon = (shareText, shareUrl) => {
 
 const createEmailIcon = (shareText, shareUrl) => {
     const emailLi = document.createElement('li');
-    const emailDiv = document.createElement('div');
+    const emailDiv = document.createElement('button');
     const emailAction = () => window.open(
         `mailto:?Subject=${shareText}&body=${shareUrl}`
     );
+    emailDiv.setAttribute('role', 'button');
+    emailDiv.setAttribute('tabindex', '0');
+    emailDiv.setAttribute('aria-label', 'share via email')
     emailDiv.onclick = emailAction;
     emailDiv.addEventListener('touchend', handleButtonTouchEvent(emailAction));
     emailLi.appendChild(emailDiv);
@@ -33,7 +39,7 @@ const createEmailIcon = (shareText, shareUrl) => {
 
 const createFacebookIcon = (shareText, shareUrl) => {
     const facebookLi = document.createElement('li');
-    const facebookDiv = document.createElement('div');
+    const facebookDiv = document.createElement('button');
     // TODO: uses app id scraped from BBC news website
     const facebookAction = () => window.open(
         // eslint-disable-next-line max-len
@@ -41,6 +47,9 @@ const createFacebookIcon = (shareText, shareUrl) => {
         '_blank',
         'toolbar=no,scrollbars=yes,resizable=no,fullscreen=no,top=50,left=50,width=550,height=250',
     );
+    facebookDiv.setAttribute('role', 'button');
+    facebookDiv.setAttribute('tabindex', '0');
+    facebookDiv.setAttribute('aria-label', 'share via Facebook')
     facebookDiv.onclick = facebookAction;
     facebookDiv.addEventListener('touchend', handleButtonTouchEvent(facebookAction));
     facebookLi.className = 'facebook';
@@ -125,6 +134,7 @@ export const renderSocialPopup = (behaviour, target, callback, analytics = () =>
         }
     });
     modalElement.appendChild(platformList);
+    // platformList.firstChild.firstChild.focus();
 
     return modalElement;
 };

@@ -73,7 +73,7 @@ class ErrorControls extends EventEmitter {
         );
         this._nextButton.setAttribute('type', 'button');
         this._nextButton.setAttribute('title', 'Next Button');
-        this._nextButton.setAttribute('aria-label', 'Next Button');
+        this._nextButton.setAttribute('aria-label', 'Next');
         this._controlsDiv.appendChild(this._nextButton);
         const nextButtonIconDiv = createElementWithClass(
             'div',
@@ -99,7 +99,7 @@ class ErrorControls extends EventEmitter {
         this._ignoreButton.setAttribute('type', 'button');
         this._ignoreButton.textContent = 'Ignore';
         this._ignoreButton.setAttribute('title', 'Ignore Button');
-        this._ignoreButton.setAttribute('aria-label', 'Ignore Button');
+        this._ignoreButton.setAttribute('aria-label', 'Ignore');
         this._controlsDiv.appendChild(this._ignoreButton);
     
         this._ignoreButton.onclick = this._ignoreButtonClicked.bind(this);

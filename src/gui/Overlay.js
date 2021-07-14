@@ -58,6 +58,7 @@ class Overlay extends EventEmitter {
     _createOverlay(): HTMLDivElement {
         const overlayDiv = document.createElement('div');
         overlayDiv.classList.add('romper-overlay');
+        overlayDiv.setAttribute('role', 'alert');
         overlayDiv.classList.add(`romper-${this._name}-overlay`);
         overlayDiv.classList.add('romper-inactive');
         overlayDiv.onclick = (e) => {
@@ -77,7 +78,16 @@ class Overlay extends EventEmitter {
         // eslint-disable-next-line max-len
         button.setAttribute('title', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
         // eslint-disable-next-line max-len
-        button.setAttribute('aria-label', `${this._name.charAt(0).toUpperCase() + this._name.slice(1)} button`);
+        if (this._name === 'icon') {
+            button.setAttribute('aria-label', 'open list of chapters');
+        } else if (this._name === 'representation') {
+            button.setAttribute('aria-label', 'open choice of views');
+        } else {
+            button.setAttribute(
+                'aria-label',
+                `${this._name.charAt(0).toUpperCase() + this._name.slice(1)}`,
+            );
+        }
         button.classList.add('romper-button');
         button.classList.add(`romper-${this._name}-button`);
         button.classList.add('romper-inactive');

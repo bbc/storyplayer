@@ -298,6 +298,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         if (!rendererPlayoutObj.mediaElement) {
             if (rendererPlayoutObj.media.type === MEDIA_TYPES.FOREGROUND_AV) {
                 const videoElement = document.createElement('video');
+                videoElement.setAttribute('tabindex', '-1');
                 videoElement.className = 'romper-video-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = videoElement;
@@ -306,11 +307,13 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 const videoElement = document.createElement('video');
                 videoElement.className = 'romper-audio-element romper-media-element-queued';
                 videoElement.crossOrigin = 'anonymous';
+                videoElement.setAttribute('tabindex', '-1');
                 rendererPlayoutObj.mediaElement = videoElement;
                 this._player.mediaTarget.appendChild(rendererPlayoutObj.mediaElement);
             } else {
                 const audioElement = document.createElement('audio');
                 audioElement.className = 'romper-audio-element romper-media-element-queued';
+                audioElement.setAttribute('tabindex', '-1');
                 audioElement.crossOrigin = 'anonymous';
                 rendererPlayoutObj.mediaElement = audioElement;
                 this._player.backgroundTarget.appendChild(rendererPlayoutObj.mediaElement);

@@ -18,6 +18,8 @@ const createContainer = (target) => {
         modalOverlay = document.createElement('div');
         modalOverlay.id = 'modal-container'
         modalOverlay.className = 'romper-modal-container';
+        modalOverlay.setAttribute('role', 'alert');
+        modalOverlay.setAttribute('aria-atomic', 'true');
         target.appendChild(modalOverlay);
     }
     return modalOverlay;

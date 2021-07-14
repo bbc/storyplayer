@@ -28,6 +28,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
     constructor(player: Player) {
         super(player);
         this._foregroundMediaElement = document.createElement('video');
+        this._foregroundMediaElement.setAttribute('tabindex', '-1');
         this._foregroundMediaElement.className = 'romper-video-element';
         this._foregroundMediaElement.crossOrigin = 'anonymous';
         this._foregroundMediaElement.id = 'storyplayer-foreground-media-element';
