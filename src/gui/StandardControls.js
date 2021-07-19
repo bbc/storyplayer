@@ -51,6 +51,10 @@ class StandardControls extends BaseControls {
         this._buttonsActivateArea.onmousemove = () => {
             this.activateRomperButtons();
         };
+        document.addEventListener(
+            'keydown',
+            (e) => { if (e.key === 'Tab') this.activateRomperButtons() },
+        );
         this._buttonsActivateArea.addEventListener(
             'touchend',
             handleButtonTouchEvent(this.activateRomperButtons.bind(this)),

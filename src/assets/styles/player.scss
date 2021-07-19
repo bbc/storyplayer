@@ -24,7 +24,8 @@ $start-button-size: 15vw;
   vertical-align: top;
   width: $romper-button-width;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: $highlight-invert;
     filter: invert(100%);
   }
@@ -495,7 +496,8 @@ $start-button-size: 15vw;
     margin-top: 0;
     padding: 3px;
 
-    &:hover {
+    &:hover,
+    &:focus {
       background-color: initial;
       filter: none;
     }
@@ -504,7 +506,8 @@ $start-button-size: 15vw;
       @include button-icon('../images/volume-off.svg');
       background-size: 80%;
 
-      &:hover {
+      &:hover,
+      &:focus {
         background-color: initial;
         filter: none;
       }
@@ -848,7 +851,8 @@ $start-button-size: 15vw;
     width: $start-button-size;
     z-index: 101;
 
-    &:hover {
+    &:hover,
+    &:focus {
       background-color: $transparent;
 
       >div {
@@ -1128,7 +1132,8 @@ $start-button-size: 15vw;
   top: 0.5em;
   width: 1em;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: $white;
     border: 1px solid $white;
     border-radius: 0.5em;
@@ -1503,7 +1508,8 @@ $start-button-size: 15vw;
           padding: 100% 0 0;
           width: 100%;
 
-          &:hover {
+          &:hover,
+          &:focus {
             background-color: $highlight-invert;
           }
         }
