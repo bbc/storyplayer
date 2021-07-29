@@ -51,6 +51,10 @@ class StandardControls extends BaseControls {
         this._buttonsActivateArea.onmousemove = () => {
             this.activateRomperButtons();
         };
+        document.addEventListener(
+            'keydown',
+            (e) => { if (e.key === 'Tab') this.activateRomperButtons() },
+        );
         this._buttonsActivateArea.addEventListener(
             'touchend',
             handleButtonTouchEvent(this.activateRomperButtons.bind(this)),
@@ -62,7 +66,9 @@ class StandardControls extends BaseControls {
         this._narrativeElementTransport = this._buttonControls.getTransportControls();
 
         // pass the overlay buttons to the button manager
-        this._buttonControls.setVolumeButton(volumeOverlay.getButton());
+        const volBtn = volumeOverlay.getButton();
+        volBtn.setAttribute('tabindex', '2');
+        this._buttonControls.setVolumeButton(volBtn);
         this._buttonControls.setChapterButton(chapterOverlay.getButton());
         this._buttonControls.setSwitchableButton(switchableOverlay.getButton());
 
@@ -76,6 +82,8 @@ class StandardControls extends BaseControls {
         // add transport control buttons and scrub bar
         this._containerDiv = document.createElement('div');
         this._containerDiv.classList.add('romper-buttons');
+        this._containerDiv.setAttribute('role', 'navigation');
+        this._containerDiv.setAttribute('aria-disabled', 'true');
         this._containerDiv.appendChild(this._scrubBar.getScrubBarElement());
         this._containerDiv.appendChild(mediaTransport);
         this._containerDiv.onmousemove = () => {
@@ -132,11 +140,13 @@ class StandardControls extends BaseControls {
     // and hides controls immediately
     disableControls() {
         this._controlsDisabled = true;
+        this._containerDiv.setAttribute('aria-disabled', 'true');
         this.hideControls();
     }
 
     enableControls() {
         this._controlsDisabled = false;
+        this._containerDiv.setAttribute('aria-disabled', 'false');
     }
 
     getShowing(): boolean {

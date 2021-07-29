@@ -1078,21 +1078,21 @@ export default class BaseRenderer extends EventEmitter {
                 targetId,
                 iconObject.iconText,
                 iconObject.resolvedUrl,
-                `Option ${(iconObject.choiceId + 1)}`,
+                iconObject.iconText,
             );
         } else if (iconObject.iconText) {
             icon = this._player.addTextLinkChoice(
                 behaviourElement,
                 targetId,
                 iconObject.iconText,
-                `Option ${(iconObject.choiceId + 1)}`,
+                iconObject.iconText,
             );
         } else if (iconObject.resolvedUrl) {
             icon = this._player.addLinkChoiceControl(
                 behaviourElement,
                 targetId,
                 iconObject.resolvedUrl,
-                `Option ${(iconObject.choiceId + 1)}`,
+                `Option ${(iconObject.choiceId + 1)}`, // TODO - need sensible label
             );
         } else {
             logger.warn(`No icon specified for link to ${targetId} - not rendering`);
