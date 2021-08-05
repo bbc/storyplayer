@@ -519,10 +519,16 @@ export default class RenderManager extends EventEmitter {
     cleanupActiveRenderers(narrativeElement: NarrativeElement, allIds: string[]) {
         Object.keys(this._activeRenderers)
             .filter(neid => allIds.indexOf(neid) === -1)
+            .filter(neid => {
+                // make sure we aren't deleting current renderer
+                return (this._currentNarrativeElement === undefined) || 
+                    (neid !== this._currentNarrativeElement.id);
+            })
             .forEach((neid) => {
                 if (narrativeElement.id !== neid) {
                     this._activeRenderers[neid].destroy();
                 }
+                logger.info(`Deleting renderer for NE ${neid}`);
                 delete this._activeRenderers[neid];
             });
     }
@@ -852,6 +858,7 @@ export default class RenderManager extends EventEmitter {
             if (this._currentRenderer && this._currentNarrativeElement) {
                 // add current neid
                 allIds.push(this._currentNarrativeElement.id);
+                allIds.push(narrativeElement.id);
             }
 
             // get renderers for all nes in the list
