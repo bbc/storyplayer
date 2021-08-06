@@ -1,4 +1,4 @@
 @Library("rd-apmm-groovy-ci-library@v1.x") _
-@Library("rd-ux-groovy-ci-library@main") __
+@Library("rd-ux-groovy-ci-library@hardcode-jenkins-machine") __
 
 storyplayerPipeline()
