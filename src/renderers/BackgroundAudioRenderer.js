@@ -13,7 +13,7 @@ import { AUDIO, LOOPING_AUDIO_AC_TYPE } from '../utils';
 import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
-const FADE_IN_TIME = 2000; // fade in time for audio in ms
+const FADE_IN_TIME = 2001; // fade in time for audio in ms
 const HARD_FADE_OUT_TIME = 500; // fade out in ms - will overrun into next NE
 const FADE_STEP_LENGTH = 20; // time between steps for fades
 
