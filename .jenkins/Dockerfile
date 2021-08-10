@@ -3,6 +3,8 @@ FROM node:12.18
 RUN apt-get -y update && apt-get -y install netcat-openbsd
 
 ENV HOME /var/tmp/jenkins
+RUN chmod -R a+rw /var/tmp/jenkins
+
 RUN useradd -u 997 -md $HOME jenkins
 USER jenkins
 
