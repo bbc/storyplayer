@@ -15,6 +15,10 @@ const setPosition = (modalElement, behaviour) => {
 };
 /* eslint-enable no-param-reassign */
 
+// remove any script elements from a Text overlay
+const stripScripts = (htmlText) => {
+    return htmlText.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+}
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderTextOverlay = (behaviour, target, callback, controller) => {
@@ -40,7 +44,7 @@ export const renderTextOverlay = (behaviour, target, callback, controller) => {
     const sentenceDiv = document.createElement('div');
     replaceEscapedVariables(behaviour.text, controller)
         .then((newText) => {
-            sentenceDiv.textContent = newText;    
+            sentenceDiv.innerHTML = stripScripts(newText);    
         });
     modalElement.appendChild(sentenceDiv);
     callback();
