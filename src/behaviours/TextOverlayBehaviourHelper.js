@@ -1,6 +1,7 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import { replaceEscapedVariables } from '../utils';
+import logger from '../logger';
 
 /* eslint-disable no-param-reassign */
 const setPosition = (modalElement, behaviour) => {
@@ -14,11 +15,6 @@ const setPosition = (modalElement, behaviour) => {
     }
 };
 /* eslint-enable no-param-reassign */
-
-// remove any script elements from a Text overlay
-const stripScripts = (htmlText) => {
-    return htmlText.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-}
 
 // eslint-disable-next-line import/prefer-default-export
 export const renderTextOverlay = (behaviour, target, callback, controller) => {
@@ -44,7 +40,14 @@ export const renderTextOverlay = (behaviour, target, callback, controller) => {
     const sentenceDiv = document.createElement('div');
     replaceEscapedVariables(behaviour.text, controller)
         .then((newText) => {
-            sentenceDiv.innerHTML = stripScripts(newText);    
+            const contentEl = document.createElement('div');
+            contentEl.innerHTML = newText.trim();
+            const scripts = contentEl.getElementsByTagName('script');
+            scripts.forEach(s => {
+                logger.warn(`removing script element from text overlay behaviour ${behaviour.id}`);
+                s.remove();
+            });
+            sentenceDiv.appendChild(contentEl);
         });
     modalElement.appendChild(sentenceDiv);
     callback();
