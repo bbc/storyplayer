@@ -1116,6 +1116,21 @@ $start-button-size: 15vw;
     top: 0;
     width: 100%;
   }
+
+  &.behaviour-icon {
+    background-color: $transparent;
+    border: 2px solid $transparent;
+    z-index: 100;
+
+    &.selected {
+      border: 2px solid $highlight;
+    }
+
+    >img{
+      height: 100%;
+      width: 100%;
+    }
+  }
 }
 
 .romper-close-button {

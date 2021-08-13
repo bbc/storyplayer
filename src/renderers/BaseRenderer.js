@@ -21,6 +21,7 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
 import { renderMapOverlay } from '../behaviours/MapLinkBehaviourHelper';
+import { renderBehaviourIcon } from '../behaviours/IconBehaviourHelper';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -173,6 +174,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
         this._applyMapOverlayBehaviour = this._applyMapOverlayBehaviour.bind(this);
+        this._showIconForBehaviour = this._showIconForBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -203,6 +205,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:mapoverlay/v1.0' : this._applyMapOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:iconbehaviour/v1.0': this._showIconForBehaviour,
         };
 
         this._behaviourClassMap = {
@@ -1336,6 +1340,54 @@ export default class BaseRenderer extends EventEmitter {
             this._controller,
         );
         this._setBehaviourElementAttribute(modalElement, 'map-overlay');
+        this._behaviourElements.push(modalElement);
+    }
+
+    _showIconForBehaviour(behaviour: Object, callback: () => mixed) {
+        // get icon AC
+        const { icon, behaviours } = behaviour;
+        const iconACId = this.resolveBehaviourAssetCollectionMappingId(icon.asset_id);
+        let behaviourRunning = false;
+
+        const runBehaviour = (b) => {
+            const behavourRunner = this.getBehaviourRenderer(b.type);
+            if (!behavourRunner) return;
+            behavourRunner(b, () =>
+                logger.info(`running during behaviour ${b.type}`));
+        };
+
+        const clearBehaviour = (b) => {
+            const behaviourElement = document.getElementById(b.id);
+            if (behaviourElement && behaviourElement.parentNode) {
+                behaviourElement.parentNode.removeChild(behaviourElement);
+            }
+        };
+        
+        const clickHandler = () => {
+            if (!behaviourRunning) {
+                behaviourRunning = true;
+                modalElement.classList.add('selected');
+                behaviours.forEach(b => runBehaviour(b));
+            } else {
+                behaviourRunning = false;
+                modalElement.classList.remove('selected');
+                behaviours.forEach(b => clearBehaviour(b));
+            }
+        }
+
+        if (!iconACId) return;
+        // render icon
+        const modalElement = renderBehaviourIcon(
+            iconACId,
+            icon.position,
+            behaviour.id,
+            this._player.getOverlayElement(),
+            callback,
+            this._fetchAssetCollection,
+            this._fetchMedia,
+            clickHandler,
+        );
+        this._setBehaviourElementAttribute(modalElement, 'icon-overlay');
         this._behaviourElements.push(modalElement);
     }
 
