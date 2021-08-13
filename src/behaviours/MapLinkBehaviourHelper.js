@@ -36,7 +36,8 @@ export const renderMapOverlay = (behaviour, target, callback, controller) => {
 
     modalElement.onclick = (e) => {
         const matchid = getLinkId(e, behaviour);
-        if (matchid) controller._jumpToNarrativeElement(matchid);
+        const ne = controller._getNarrativeElement(matchid)
+        if (ne && matchid) controller._jumpToNarrativeElement(matchid);
     }
 
     callback();
