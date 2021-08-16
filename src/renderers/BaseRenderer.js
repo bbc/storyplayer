@@ -1346,7 +1346,7 @@ export default class BaseRenderer extends EventEmitter {
     _showIconForBehaviour(behaviour: Object, callback: () => mixed) {
         // get icon AC
         const { icon, behaviours } = behaviour;
-        const iconACId = this.resolveBehaviourAssetCollectionMappingId(icon.asset_id);
+        const iconACId = this.resolveBehaviourAssetCollectionMappingId(icon.image);
         let behaviourRunning = false;
 
         const runBehaviour = (b) => {
