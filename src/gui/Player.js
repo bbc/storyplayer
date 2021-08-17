@@ -169,6 +169,8 @@ class Player extends EventEmitter {
 
     _controller: Controller;
 
+    userSetForegroundVolume: Number;
+
     constructor(
         target: HTMLElement,
         analytics: AnalyticsLogger,
@@ -240,6 +242,8 @@ class Player extends EventEmitter {
 
         // add the event listeners to the layers
         this._addEventListeners();
+
+        this.userSetForegroundVolume = 1;
     }
 
     /**
@@ -1047,6 +1051,11 @@ class Player extends EventEmitter {
             }
 
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
+            console.log('user set vol to ', id, value, label);
+            if (label === 'Foreground') {
+                console.log('user set vol to ', value);
+                this.userSetForegroundVolume = value;
+            }
 
             // Don't spam analtics with lots of volume changes
             // Wait 1 second after volume stops changing before sending analytics
