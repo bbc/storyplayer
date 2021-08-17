@@ -171,6 +171,8 @@ export default class BaseRenderer extends EventEmitter {
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
+        this._applyFadeInBehaviour = this._applyFadeInBehaviour.bind(this);
+        this._applyFadeOutBehaviour = this._applyFadeOutBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -199,6 +201,10 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadein/v1.0' : this._applyFadeInBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadeout/v1.0' : this._applyFadeOutBehaviour,
         };
 
         this._behaviourClassMap = {
@@ -1249,6 +1255,36 @@ export default class BaseRenderer extends EventEmitter {
         overlayImageElement.className = 'romper-image-overlay';
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+        callback();
+    }
+
+    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour, duration } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.style.opacity = 0;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+        overlayImageElement.className = 'romper-image-overlay';
+        const startFade = () => { overlayImageElement.style.opacity = 1 };
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+        setTimeout(startFade, 500);
+        callback();
+    }
+
+    _applyFadeInBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour, duration } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.style.opacity = 1;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+        overlayImageElement.className = 'romper-image-overlay';
+        const startFade = () => { overlayImageElement.style.opacity = 0 };
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+        setTimeout(startFade, 500);
         callback();
     }
 
