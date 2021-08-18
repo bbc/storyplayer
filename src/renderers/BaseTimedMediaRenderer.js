@@ -363,6 +363,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         this._accumulatedMediaTime = 0;
         this._stalledMediaTime = 0;
         this.setCurrentTime(0);
+        this._playoutEngine.setVolume(this._rendererId, this._player.userSetForegroundVolume);
 
         logger.info(`Ended: ${this._representation.id}`);
         this._playoutEngine.setPlayoutInactive(this._rendererId);
