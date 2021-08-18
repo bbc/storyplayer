@@ -1250,8 +1250,9 @@ export default class BaseRenderer extends EventEmitter {
     // //////////// end of show link choice behaviour
 
     _applyColourOverlayBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour } = behaviour;
+        const { colour, id } = behaviour;
         const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
         overlayImageElement.className = 'romper-image-overlay';
