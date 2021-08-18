@@ -1265,8 +1265,9 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration } = behaviour;
+        const { colour, duration, id } = behaviour;
         const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
         overlayImageElement.style.opacity = 0;
@@ -1280,8 +1281,9 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _applyFadeInBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration } = behaviour;
+        const { colour, duration, id } = behaviour;
         const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
         overlayImageElement.style.opacity = 1;
