@@ -24,7 +24,8 @@ $start-button-size: 15vw;
   vertical-align: top;
   width: $romper-button-width;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: $highlight-invert;
     filter: invert(100%);
   }
@@ -315,6 +316,12 @@ $start-button-size: 15vw;
     background-color: $highlight;
   }
 
+  .romper-icon-control,
+  .romper-representation-control {
+    background-color: $transparent;
+    border: 0;
+  }
+
   .romper-no-icon {
     background-color: $transparent;
     background-image: url('../images/no-asset.svg');
@@ -489,7 +496,8 @@ $start-button-size: 15vw;
     margin-top: 0;
     padding: 3px;
 
-    &:hover {
+    &:hover,
+    &:focus {
       background-color: initial;
       filter: none;
     }
@@ -498,7 +506,8 @@ $start-button-size: 15vw;
       @include button-icon('../images/volume-off.svg');
       background-size: 80%;
 
-      &:hover {
+      &:hover,
+      &:focus {
         background-color: initial;
         filter: none;
       }
@@ -763,7 +772,7 @@ $start-button-size: 15vw;
       width: calc(100% - #{(2 * $romper-button-border)});
 
       &:focus {
-        border: 2px solid $backing-colour;
+        border: 0;
         outline: none;
       }
     }
@@ -842,7 +851,8 @@ $start-button-size: 15vw;
     width: $start-button-size;
     z-index: 101;
 
-    &:hover {
+    &:hover,
+    &:focus {
       background-color: $transparent;
 
       >div {
@@ -974,6 +984,14 @@ $start-button-size: 15vw;
       .romper-link-choice-overlay {
         bottom: 8em;
         transition: all 0.5s ease;
+      }
+    }
+
+    &.keyboard-active {
+      .romper-link-control {
+        &:focus {
+          border: 2px solid $backing-colour;
+        }
       }
     }
   }
@@ -1131,7 +1149,8 @@ $start-button-size: 15vw;
   top: 0.5em;
   width: 1em;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: $white;
     border: 1px solid $white;
     border-radius: 0.5em;
@@ -1506,7 +1525,8 @@ $start-button-size: 15vw;
           padding: 100% 0 0;
           width: 100%;
 
-          &:hover {
+          &:hover,
+          &:focus {
             background-color: $highlight-invert;
           }
         }
@@ -1559,6 +1579,12 @@ $start-button-size: 15vw;
     }
   }
 
+  .romper-behaviour-modal {
+    >div {
+      font-size: 80%;
+    }
+  }
+
   .romper-link-text-icon {
     font-size: 120%;
   }
@@ -1570,6 +1596,12 @@ $start-button-size: 15vw;
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
+    }
+  }
+
+  .romper-behaviour-modal {
+    >div {
+      font-size: 80%;
     }
   }
 }
@@ -1620,6 +1652,12 @@ $start-button-size: 15vw;
 
 @media (min-width: 320px) and (max-width: 500px),
   (max-height: 450px) {
+    .romper-behaviour-modal {
+      >div {
+        font-size: 80%;
+      }
+    }
+
     .romper-player > .romper-media {
       &.romper-prestart > .romper-privacy-notice {
         font-size: 70%;
@@ -1650,6 +1688,12 @@ $start-button-size: 15vw;
 
   .romper-text-link-container {
     height: 6em;
+  }
+
+  .romper-behaviour-modal {
+    >div {
+      font-size: 65%;
+    }
   }
 
   .romper-variable-panel {
@@ -1744,4 +1788,11 @@ $start-button-size: 15vw;
   top: 50%;
   transform: translateY(-50%);
   width: 100%;
+}
+
+// place things (e.g., text overlays) off screen and transparent
+// so not visible, except to screen reader
+.screenreader-only {
+  opacity: 0;
+  transform: translate(-10000px, -10000px);
 }
