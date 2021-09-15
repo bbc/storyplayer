@@ -1,4 +1,4 @@
-// not a behaviour in itself, just helps, to keep BaseRenderer Clean
+// not a behaviour in itself, just helps to keep BaseRenderer Clean
 import { setDefinedPosition, createContainer } from './ModalHelper';
 import { replaceEscapedVariables } from '../utils';
 import logger from '../logger';
