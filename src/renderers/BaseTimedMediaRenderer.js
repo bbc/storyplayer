@@ -6,7 +6,7 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import { VIDEO, AUDIO } from '../utils';
 import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
-const FADE_IN_TIME = 2000; // fade in time for audio in ms
+const FADE_IN_TIME = 2000; // default fade in time for audio in ms (if not specced in behaviour)
 const FADE_STEP_LENGTH = 20; // time between steps for fades
 export default class BaseTimedMediaRenderer extends BaseRenderer {
     constructor(
