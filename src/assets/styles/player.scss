@@ -772,7 +772,7 @@ $start-button-size: 15vw;
       width: calc(100% - #{(2 * $romper-button-border)});
 
       &:focus {
-        border: 2px solid $backing-colour;
+        border: 0;
         outline: none;
       }
     }
@@ -984,6 +984,14 @@ $start-button-size: 15vw;
       .romper-link-choice-overlay {
         bottom: 8em;
         transition: all 0.5s ease;
+      }
+    }
+
+    &.keyboard-active {
+      .romper-link-control {
+        &:focus {
+          border: 2px solid $backing-colour;
+        }
       }
     }
   }

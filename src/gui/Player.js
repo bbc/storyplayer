@@ -429,6 +429,16 @@ class Player extends EventEmitter {
                 this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
             }
         }
+
+        if(!this._keyboardActiveTimeout) {
+            this._overlaysElement.classList.add('keyboard-active');
+        } else {
+            clearTimeout(this._keyboardActiveTimeout);
+        }
+        this._keyboardActiveTimeout = setTimeout(() => {
+            this._overlaysElement.classList.remove('keyboard-active');
+            this._keyboardActiveTimeout = undefined;
+        }, 2000);
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
