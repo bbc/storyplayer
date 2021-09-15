@@ -1061,11 +1061,7 @@ class Player extends EventEmitter {
             }
 
             this.emit(PlayerEvents.VOLUME_CHANGED, { id, value, label });
-            console.log('user set vol to ', id, value, label);
-            if (label === 'Foreground') {
-                console.log('user set vol to ', value);
-                this.userSetForegroundVolume = value;
-            }
+            if (label === 'Foreground') this.userSetForegroundVolume = value;
 
             // Don't spam analtics with lots of volume changes
             // Wait 1 second after volume stops changing before sending analytics

@@ -1298,12 +1298,12 @@ export default class BaseRenderer extends EventEmitter {
 
     // eslint-disable-next-line no-unused-vars
     _applyFadeAudioOutBehaviour(behaviour: Object, callback: () => mixed) {
-        logger.warn('cannot fade out audio!');
+        logger.warn(`${this._representation.type} representations do not support audio fade out`);
     }
 
     // eslint-disable-next-line no-unused-vars
     _applyFadeAudioInBehaviour(behaviour: Object, callback: () => mixed) {
-        logger.warn('cannot fade in audio!');
+        logger.warn(`${this._representation.type} representations do not support audio fade in`);
     }
 
     // REFACTOR note: these are called by the behaviour, without knowing what will happen
