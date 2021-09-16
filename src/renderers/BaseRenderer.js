@@ -171,6 +171,10 @@ export default class BaseRenderer extends EventEmitter {
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
+        this._applyFadeInBehaviour = this._applyFadeInBehaviour.bind(this);
+        this._applyFadeOutBehaviour = this._applyFadeOutBehaviour.bind(this);
+        this._applyFadeAudioOutBehaviour = this._applyFadeAudioOutBehaviour.bind(this);
+        this._applyFadeAudioInBehaviour = this._applyFadeAudioInBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -199,6 +203,14 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadein/v1.0' : this._applyFadeInBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadeout/v1.0' : this._applyFadeOutBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadeaudioout/v1.0' : this._applyFadeAudioOutBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:fadeaudioin/v1.0' : this._applyFadeAudioInBehaviour,
         };
 
         this._behaviourClassMap = {
@@ -1250,6 +1262,48 @@ export default class BaseRenderer extends EventEmitter {
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
         callback();
+    }
+
+    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour, duration, id } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.style.opacity = 0;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+        overlayImageElement.className = 'romper-image-overlay';
+        const startFade = () => { overlayImageElement.style.opacity = 1 };
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+        setTimeout(startFade, 500);
+        callback();
+    }
+
+    _applyFadeInBehaviour(behaviour: Object, callback: () => mixed) {
+        const { colour, duration, id } = behaviour;
+        const overlayImageElement = document.createElement('div');
+        overlayImageElement.id = id;
+        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
+        overlayImageElement.style.background = colour;
+        overlayImageElement.style.opacity = 1;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+        overlayImageElement.className = 'romper-image-overlay';
+        const startFade = () => { overlayImageElement.style.opacity = 0 };
+        this._target.appendChild(overlayImageElement);
+        this._behaviourElements.push(overlayImageElement);
+        setTimeout(startFade, 500);
+        callback();
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    _applyFadeAudioOutBehaviour(behaviour: Object, callback: () => mixed) {
+        logger.warn(`${this._representation.type} representations do not support audio fade out`);
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    _applyFadeAudioInBehaviour(behaviour: Object, callback: () => mixed) {
+        logger.warn(`${this._representation.type} representations do not support audio fade in`);
     }
 
     // REFACTOR note: these are called by the behaviour, without knowing what will happen
