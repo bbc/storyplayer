@@ -323,16 +323,16 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     }
 
     _applyFadeInBehaviour(behaviour, callback) {
+        if (this._visualFadeIntervals[behaviour.id]) clearInterval(this._visualFadeIntervals[behaviour.id]);  
         const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 1;
         const { duration } = behaviour;
         const startTime = this.getCurrentTime().currentTime || 0;
 
-        this._visualFadeInInterval = setInterval(() => {
+        this._visualFadeIntervals[behaviour.id] = setInterval(() => {
             const { currentTime } = this.getCurrentTime();
             const fadeVal = 1 - ((currentTime - startTime) / duration) ;
             if (currentTime > (startTime + duration)) {
-                clearInterval(this._visualFadeInInterval);  
                 overlayImageElement.style.opacity = 0;
             } 
             if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
@@ -343,16 +343,16 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     }
 
     _applyFadeOutBehaviour(behaviour, callback) {
+        if (this._visualFadeIntervals[behaviour.id]) clearInterval(this._visualFadeIntervals[behaviour.id]);  
         const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 0;
         const { duration } = behaviour;
         const startTime = this.getCurrentTime().currentTime || 0;
 
-        this._visualFadeOutInterval = setInterval(() => {
+        this._visualFadeIntervals[behaviour.id] = setInterval(() => {
             const { currentTime } = this.getCurrentTime();
             const fadeVal = ((currentTime - startTime) / duration) ;
             if (currentTime > (startTime + duration)) {
-                clearInterval(this._visualFadeOutInterval);  
                 overlayImageElement.style.opacity = 1;
             } 
             if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
