@@ -1334,6 +1334,7 @@ export default class BaseRenderer extends EventEmitter {
             this._player.getOverlayElement(),
             callback,
             this._controller,
+            this._analytics,
         );
         this._setBehaviourElementAttribute(modalElement, 'map-overlay');
         this._behaviourElements.push(modalElement);

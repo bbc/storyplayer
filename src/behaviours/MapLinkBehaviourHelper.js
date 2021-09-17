@@ -1,5 +1,6 @@
 // not a behaviour in itself, just helps, to keep BaseRenderer Clean
 import {  createContainer } from './ModalHelper';
+import AnalyticEvents from '../AnalyticEvents';
 
 const getLinkId = (e, behaviour) => {
     const { offsetX, offsetY } = e;
@@ -21,7 +22,7 @@ const getLinkId = (e, behaviour) => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const renderMapOverlay = (behaviour, target, callback, controller) => {
+export const renderMapOverlay = (behaviour, target, callback, controller, analytics) => {
     const modalElement = document.createElement('div');
     modalElement.id = behaviour.id;
     const modalContainer = createContainer(target);
@@ -37,7 +38,15 @@ export const renderMapOverlay = (behaviour, target, callback, controller) => {
     modalElement.onclick = (e) => {
         const matchid = getLinkId(e, behaviour);
         const ne = controller._getNarrativeElement(matchid)
-        if (ne && matchid) controller._jumpToNarrativeElement(matchid);
+        if (ne && matchid) {
+            analytics({
+                type: AnalyticEvents.types.USER_ACTION,
+                name: AnalyticEvents.names.MAP_OVERLAY_LINK_CLICKED,
+                from: 'not_set',
+                to: matchid,
+            });
+            controller._jumpToNarrativeElement(matchid);
+        }
     }
 
     callback();
