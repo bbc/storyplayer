@@ -3,6 +3,7 @@ import logger from '../logger';
 
 
 const TIMER_INTERVAL = 10;
+const FADE_STEP_LENGTH = 20; // time between steps for fades
 
 export default class TimedMediaRenderer extends BaseRenderer {
     constructor(
@@ -59,6 +60,46 @@ export default class TimedMediaRenderer extends BaseRenderer {
         }
 
         this._current = targetTime;
+    }
+
+    _applyFadeInBehaviour(behaviour, callback) {
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 1;
+        const { duration } = behaviour;
+        const startTime = this.getCurrentTime().currentTime || 0;
+
+        this._visualFadeInInterval = setInterval(() => {
+            const { currentTime } = this.getCurrentTime();
+            const fadeVal = 1 - ((currentTime - startTime) / duration) ;
+            if (currentTime > (startTime + duration)) {
+                clearInterval(this._visualFadeInInterval);  
+                overlayImageElement.style.opacity = 0;
+            } 
+            if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
+
+        }, FADE_STEP_LENGTH);
+
+        callback();
+    }
+
+    _applyFadeOutBehaviour(behaviour, callback) {
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 0;
+        const { duration } = behaviour;
+        const startTime = this.getCurrentTime().currentTime || 0;
+
+        this._visualFadeOutInterval = setInterval(() => {
+            const { currentTime } = this.getCurrentTime();
+            const fadeVal = ((currentTime - startTime) / duration) ;
+            if (currentTime > (startTime + duration)) {
+                clearInterval(this._visualFadeOutInterval);  
+                overlayImageElement.style.opacity = 1;
+            } 
+            if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
+
+        }, FADE_STEP_LENGTH);
+
+        callback();
     }
 
     start() {
