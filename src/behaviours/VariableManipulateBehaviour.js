@@ -23,7 +23,7 @@ export default class VariableManipulateBehaviour extends BaseBehaviour {
             controller.getVariableValue(interestingVar)
                 .catch(() => null)
                 .then(value => ({ key: interestingVar, value })))
-            )
+        )
             .then(convertDotNotationToNestedObjects)
             .then((resolvedVars) => {
                 const output = JsonLogic.apply(operation, resolvedVars);
