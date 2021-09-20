@@ -4,6 +4,7 @@ import BehaviourFactory from "./BehaviourFactory";
 import BaseRenderer from '../renderers/BaseRenderer';
 import type { RendererEvent } from '../renderers/RendererEvents';
 import type { BehaviourTiming } from './BehaviourTimings';
+import SMPPlayoutEngine from "../playoutEngines/SMPPlayoutEngine";
 
 export default class BehaviourRunner {
     behaviourDefinitions: Object;
@@ -81,7 +82,14 @@ export default class BehaviourRunner {
         }
 
         if (this.eventCounters[event] === 0) {
-            this.baseRenderer.emit(completionEvent);
+            if (event === 'started' && this.baseRenderer._player.playoutEngine instanceof SMPPlayoutEngine) {
+                // add an extra bit of delay in case events complete in 0 time
+                // (in that case, SMP gets spammed by show and wait message then play message
+                // almost at once, and falls over)
+                setTimeout(() => this.baseRenderer.emit(completionEvent), 100);
+            } else {
+                this.baseRenderer.emit(completionEvent);
+            }
         }
     }
 }
