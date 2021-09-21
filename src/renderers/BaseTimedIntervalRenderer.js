@@ -5,6 +5,10 @@ import logger from '../logger';
 const TIMER_INTERVAL = 10;
 const FADE_STEP_LENGTH = 20; // time between steps for fades
 
+const FADE_IN_TIME = 2000; // default fade in time for audio in ms (if not specced in behaviour)
+const FADE_IN = "urn:x-object-based-media:representation-behaviour:fadein/v1.0";
+const FADE_OUT = "urn:x-object-based-media:representation-behaviour:fadeout/v1.0";
+
 export default class TimedMediaRenderer extends BaseRenderer {
     constructor(
         representation,
@@ -63,43 +67,73 @@ export default class TimedMediaRenderer extends BaseRenderer {
     }
 
     _applyFadeInBehaviour(behaviour, callback) {
-        if (this._visualFadeIntervals[behaviour.id]) clearInterval(this._visualFadeIntervals[behaviour.id]);  
         const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 1;
-        const { duration } = behaviour;
-        const startTime = this.getCurrentTime().currentTime || 0;
-
-        this._visualFadeIntervals[behaviour.id] = setInterval(() => {
-            const { currentTime } = this.getCurrentTime();
-            const fadeVal = 1 - ((currentTime - startTime) / duration) ;
-            if (currentTime > (startTime + duration)) {
-                overlayImageElement.style.opacity = 0;
-            } 
-            if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
-
-        }, FADE_STEP_LENGTH);
-
+        this._setupVisualFade();
         callback();
     }
 
     _applyFadeOutBehaviour(behaviour, callback) {
-        if (this._visualFadeIntervals[behaviour.id]) clearInterval(this._visualFadeIntervals[behaviour.id]);  
         const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 0;
-        const { duration } = behaviour;
-        const startTime = this.getCurrentTime().currentTime || 0;
-
-        this._visualFadeIntervals[behaviour.id] = setInterval(() => {
-            const { currentTime } = this.getCurrentTime();
-            const fadeVal = ((currentTime - startTime) / duration) ;
-            if (currentTime > (startTime + duration)) {
-                overlayImageElement.style.opacity = 1;
-            } 
-            if (!Number.isNaN(currentTime)) overlayImageElement.style.opacity = fadeVal;
-
-        }, FADE_STEP_LENGTH);
-
+        this._setupVisualFade();
         callback();
+    }
+
+    // setup a fade monitor, if there isn't one already
+    _setupVisualFade() {
+        logger.info(`Fading colour for renderer ${this._rendererId}`);
+        if (this._visualFadeInterval) return;
+
+        logger.info('Initiating colour fade listener');
+        this._visualFadeInterval = setInterval(
+            () => this._calculateVisualFadeStatus(),
+            FADE_STEP_LENGTH,
+        );
+    }
+
+    _calculateVisualFadeStatus() {
+        const { currentTime } = this.getCurrentTime();
+        const currentFadeBehaviours = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_OUT
+                || b.behaviour.type === FADE_IN;
+            }).filter(b => {
+                const duration = b.behaviour.duration || FADE_IN_TIME;
+                return currentTime > b.start_time && currentTime < (b.start_time + duration);
+            });
+
+        currentFadeBehaviours.forEach(b => {
+            const { id, duration, type } = b.behaviour;
+            const proportion = (currentTime - b.start_time) / duration;
+            const element = document.getElementById(id);
+            if (type === FADE_IN) {
+                element.style.opacity = 1 - proportion;
+            }
+            if (type === FADE_OUT) {
+                element.style.opacity = proportion;
+            }    
+        });
+
+        const previousFadeBehaviours = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_OUT
+                || b.behaviour.type === FADE_IN;
+            }).filter(b => {
+                const duration = b.behaviour.duration || FADE_IN_TIME;
+                return currentTime > (b.start_time + duration);
+            });
+
+        previousFadeBehaviours.forEach(b => {
+            const { id, type } = b.behaviour;
+            const element = document.getElementById(id);
+            if (type === FADE_IN) {
+                element.style.opacity = 0;
+            }
+            if (type === FADE_OUT) {
+                element.style.opacity = 1;
+            }    
+        });
     }
 
     start() {
@@ -124,6 +158,10 @@ export default class TimedMediaRenderer extends BaseRenderer {
     end() {
         const shouldEnd = super.end();
         if (shouldEnd) {
+            if (this._visualFadeInterval) {
+                clearInterval(this._visualFadeInterval);
+                this._visualFadeInterval = undefined;
+            }
             this.pause();
         }
         return shouldEnd;

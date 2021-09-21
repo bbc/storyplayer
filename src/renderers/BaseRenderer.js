@@ -232,7 +232,6 @@ export default class BaseRenderer extends EventEmitter {
 
         this._serviceTimedEvents = this._serviceTimedEvents.bind(this);
         this._timedEvents = {};
-        this._visualFadeIntervals = {};
     }
 
     _serviceTimedEvents() {
@@ -384,9 +383,6 @@ export default class BaseRenderer extends EventEmitter {
             logger.warn(e, 'error clearing behaviour elements');
         }
         clearInterval(this._timedEventsInterval);
-        Object.keys(this._visualFadeIntervals).forEach(bid => {
-            clearInterval(this._visualFadeIntervals[bid]);
-        })
         this._reapplyLinkConditions();
         this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
