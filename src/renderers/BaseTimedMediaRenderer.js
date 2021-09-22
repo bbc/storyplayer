@@ -447,7 +447,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
     destroy() {
         const needToDestroy = super.destroy();
-        this.cancelFade();
         if(needToDestroy) {
             this._playoutEngine.unqueuePlayout(this._rendererId);
         }
