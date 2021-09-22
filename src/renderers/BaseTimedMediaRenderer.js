@@ -377,7 +377,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
             });
 
         previousFadeBehaviours.forEach(b => {
-            const { id, type, colour } = b.behaviour;
+            const { id, type } = b.behaviour;
             const element = document.getElementById(id);
             if (type === FADE_IN) {
                 element.style.opacity = 0;
