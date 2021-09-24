@@ -27,7 +27,7 @@ export default class VariableManipulateBehaviour extends BaseBehaviour {
             .then(convertDotNotationToNestedObjects)
             .then((resolvedVars) => {
                 const output = JsonLogic.apply(operation, resolvedVars);
-                logger.info(`variable manipluated: ${targetVariable} set to ${output}`);
+                logger.info(`variable manipulated: ${targetVariable} set to ${output}`);
                 controller.setVariableValue(targetVariable, output);
                 this._handleDone();
             }).catch(() => {
