@@ -1,4 +1,4 @@
-// not a behaviour in itself, just helps, to keep BaseRenderer Clean
+// not a behaviour in itself, just helps to keep BaseRenderer Clean
 import {  createContainer } from './ModalHelper';
 import AnalyticEvents from '../AnalyticEvents';
 
