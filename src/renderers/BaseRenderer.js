@@ -1268,34 +1268,36 @@ export default class BaseRenderer extends EventEmitter {
         callback();
     }
 
-    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration, id } = behaviour;
+    _createFadeOverlay(behaviour: Object) {
+        const { colour, id } = behaviour;
         const overlayImageElement = document.createElement('div');
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
-        overlayImageElement.style.opacity = 0;
-        overlayImageElement.style.transition = `opacity ${duration}s`;
         overlayImageElement.className = 'romper-image-overlay';
-        const startFade = () => { overlayImageElement.style.opacity = 1 };
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+        return overlayImageElement;
+    }
+
+    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
+        const { duration } = behaviour;
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 0;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+ 
+        const startFade = () => { overlayImageElement.style.opacity = 1 };
         setTimeout(startFade, 500);
         callback();
     }
 
     _applyFadeInBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration, id } = behaviour;
-        const overlayImageElement = document.createElement('div');
-        overlayImageElement.id = id;
-        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
-        overlayImageElement.style.background = colour;
+        const { duration } = behaviour;
+        const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 1;
         overlayImageElement.style.transition = `opacity ${duration}s`;
-        overlayImageElement.className = 'romper-image-overlay';
+
         const startFade = () => { overlayImageElement.style.opacity = 0 };
-        this._target.appendChild(overlayImageElement);
-        this._behaviourElements.push(overlayImageElement);
         setTimeout(startFade, 500);
         callback();
     }

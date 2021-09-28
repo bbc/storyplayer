@@ -8,6 +8,13 @@ import iOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 
 const FADE_IN_TIME = 2000; // default fade in time for audio in ms (if not specced in behaviour)
 const FADE_STEP_LENGTH = 20; // time between steps for fades
+
+const FADE_AUDIO_IN = "urn:x-object-based-media:representation-behaviour:fadeaudioin/v1.0";
+const FADE_AUDIO_OUT = "urn:x-object-based-media:representation-behaviour:fadeaudioout/v1.0"
+
+const FADE_IN = "urn:x-object-based-media:representation-behaviour:fadein/v1.0";
+const FADE_OUT = "urn:x-object-based-media:representation-behaviour:fadeout/v1.0";
+
 export default class BaseTimedMediaRenderer extends BaseRenderer {
     constructor(
         representation,
@@ -235,91 +242,150 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     _applyFadeAudioOutBehaviour(behaviour, callback) {
         const { duration } = behaviour;
         logger.info(`fading out audio for ${this._rendererId} over ${duration}s`);
-        this.fadeOut(duration, behaviour.targetVolume ?? 0);
+        this._setupAudioFade();
         callback();
     }
 
     _applyFadeAudioInBehaviour(behaviour, callback) {
         const { duration } = behaviour;
         logger.info(`fading in audio for ${this._rendererId} over ${duration}s`);
-        this.fadeIn(duration, behaviour.startVolume ?? 0);
+        this._setupAudioFade();
         callback();
     }
 
-    cancelFade() {
-        if (this._fadeIntervalId) {
-            clearInterval(this._fadeIntervalId);
-            this._fadeIntervalId = null;
-        }
-    }
-
-    pauseFade() {
-        this._fadePaused = true;
-    }
-
-    resumeFade() {
-        this._fadePaused = false;
-    }
-
-    cannotFade() {
-        // TODO: need to check this for foreground fading
-        return this._playoutEngine instanceof iOSPlayoutEngine;
-    }
-
-    // start fading out the volume, over given duration (seconds)
-    fadeOut(duration, targetVolume) {
+    // setup a fade monitor, if there isn't one already
+    _setupAudioFade() {
         // if we're on ios and using SMP then we have to clear the background
-        if(this.cannotFade()) {
+        if(this._playoutEngine instanceof iOSPlayoutEngine) {
             logger.warn(`cannot fade`);
             return;
         }
-        logger.info(`Fading out foreground audio for renderer ${this._rendererId}`);
-        // clear fade in
-        if (this._volFadeInterval) {
-            clearInterval(this._volFadeInterval);
-            this._volFadeInterval = null;
+        logger.info(`Fading foreground audio for renderer ${this._rendererId}`);
+        if (this._audioFadeInterval) return;
+
+        logger.info('Initiating audio fade listener');
+        this._audioFadeInterval = setInterval(
+            () => this._calculateAudioFadeStatus(),
+            FADE_STEP_LENGTH,
+        );
+    }
+
+    _calculateAudioFadeStatus() {
+        const { currentTime } = this.getCurrentTime();
+        const currentVolume = this._playoutEngine.getVolume(this._rendererId);
+        const currentFadeBehaviour = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_AUDIO_OUT
+                || b.behaviour.type === FADE_AUDIO_IN;
+            }).find(b => {
+                const duration = b.behaviour.duration || FADE_IN_TIME;
+                return currentTime > b.start_time && currentTime < (b.start_time + duration);
+            });
+        const previousFadeBehaviours = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_AUDIO_OUT
+                || b.behaviour.type === FADE_AUDIO_IN;
+            })
+            .filter(b => currentTime > b.start_time)
+            .sort((a, b) => b.start_time - a.start_time);
+        const lastFadeBehaviour = previousFadeBehaviours[0];
+        if (!currentFadeBehaviour) {
+            let desiredVolume;
+            if (lastFadeBehaviour?.behaviour.type === FADE_AUDIO_OUT) {
+                desiredVolume = lastFadeBehaviour.behaviour.targetVolume;
+            } else {
+                desiredVolume = this._player.userSetForegroundVolume
+            }
+            if (currentVolume !== desiredVolume) {
+                this._playoutEngine.setVolume(this._rendererId, desiredVolume);
+            }
+            return;
+        };
+        const { type, duration } = currentFadeBehaviour.behaviour;
+        const proportion = (currentTime - currentFadeBehaviour.start_time) / duration;
+        if (type === FADE_AUDIO_IN) {
+            const { startVolume } = currentFadeBehaviour.behaviour;
+            const volume = startVolume + 
+                (proportion * (this._player.userSetForegroundVolume - startVolume));
+            this._playoutEngine.setVolume(this._rendererId, volume);
+
         }
-        if (!this._fadeIntervalId) {
-            const interval = (duration * 1000) / FADE_STEP_LENGTH; // number of steps
-            this._fadeIntervalId = setInterval(() => {
-                const volume = this._playoutEngine.getVolume(this._rendererId);
-                if (volume >= (1 / interval)
-                    && volume >= targetVolume
-                    && this._fadeIntervalId) {
-                    if (!this._fadePaused) {
-                        const newVolume = volume - (1 / interval);
-                        this._playoutEngine.setVolume(this._rendererId, newVolume)
-                    }
-                } else if (this._fadeIntervalId) {
-                    this._playoutEngine.setVolume(this._rendererId, targetVolume)
-                    clearInterval(this._fadeIntervalId);
-                    this._fadeIntervalId = null;
-                }
-            }, FADE_STEP_LENGTH);
+        if (type === FADE_AUDIO_OUT) {
+            const { targetVolume } = currentFadeBehaviour.behaviour;
+            const volume = this._player.userSetForegroundVolume - 
+                (proportion * (this._player.userSetForegroundVolume - targetVolume))
+            this._playoutEngine.setVolume(this._rendererId, volume);
         }
     }
 
-    fadeIn(duration, initialVolume) {
-        if(this.cannotFade()) {
-            logger.warn(`cannot fade`);
-            return;
-        }
-        logger.info(`Fading in foreground audio for renderer ${this._rendererId}`);
-        this._playoutEngine.setVolume(this._rendererId, initialVolume)
-        this._volFadeInterval = setInterval(() => {
-            const volume = this._playoutEngine.getVolume(this._rendererId)
-            if ((volume >= (1 - (FADE_STEP_LENGTH / FADE_IN_TIME))
-                || volume > this._player.userSetForegroundVolume)
-                && this._volFadeInterval) {
-                clearInterval(this._volFadeInterval);
-                this._volFadeInterval = null;
-                this._setPhase(RENDERER_PHASES.MAIN);
-            } else if (!this._fadePaused) {
-                const newVolume = volume + (FADE_STEP_LENGTH / FADE_IN_TIME);
-                this._playoutEngine.setVolume(this._rendererId, newVolume)
-            }
-        }, FADE_STEP_LENGTH);
+    _applyFadeInBehaviour(behaviour, callback) {
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 1;
+        this._setupVisualFade();
+        callback();
+    }
 
+    _applyFadeOutBehaviour(behaviour, callback) {
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 0;
+        this._setupVisualFade();
+        callback();
+    }
+
+    // setup a fade monitor, if there isn't one already
+    _setupVisualFade() {
+        logger.info(`Fading colour for renderer ${this._rendererId}`);
+        if (this._visualFadeInterval) return;
+
+        logger.info('Initiating colour fade listener');
+        this._visualFadeInterval = setInterval(
+            () => this._calculateVisualFadeStatus(),
+            FADE_STEP_LENGTH,
+        );
+    }
+
+    _calculateVisualFadeStatus() {
+        const { currentTime } = this.getCurrentTime();
+        const currentFadeBehaviours = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_OUT
+                || b.behaviour.type === FADE_IN;
+            }).filter(b => {
+                const duration = b.behaviour.duration || FADE_IN_TIME;
+                return currentTime > b.start_time && currentTime < (b.start_time + duration);
+            });
+
+        currentFadeBehaviours.forEach(b => {
+            const { id, duration, type } = b.behaviour;
+            const proportion = (currentTime - b.start_time) / duration;
+            const element = document.getElementById(id);
+            if (type === FADE_IN) {
+                element.style.opacity = 1 - proportion;
+            }
+            if (type === FADE_OUT) {
+                element.style.opacity = proportion;
+            }    
+        });
+
+        const previousFadeBehaviours = this._representation.behaviours?.during
+            .filter(b => {
+                return b.behaviour.type === FADE_OUT
+                || b.behaviour.type === FADE_IN;
+            }).filter(b => {
+                const duration = b.behaviour.duration || FADE_IN_TIME;
+                return currentTime > (b.start_time + duration);
+            });
+
+        previousFadeBehaviours.forEach(b => {
+            const { id, type } = b.behaviour;
+            const element = document.getElementById(id);
+            if (type === FADE_IN) {
+                element.style.opacity = 0;
+            }
+            if (type === FADE_OUT) {
+                element.style.opacity = 1;
+            }    
+        });
     }
 
     start() {
@@ -357,6 +423,14 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     end() {
         const needToEnd = super.end();
         if (!needToEnd) return false;
+        if (this._audioFadeInterval) {
+            clearInterval(this._audioFadeInterval);
+            this._audioFadeInterval = undefined;
+        }
+        if (this._visualFadeInterval) {
+            clearInterval(this._visualFadeInterval);
+            this._visualFadeInterval = undefined;
+        }
 
         clearInterval(this._inspectMediaPlaybackInterval);
         this._latchedMediaTime = undefined;
@@ -373,7 +447,6 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
 
     destroy() {
         const needToDestroy = super.destroy();
-        this.cancelFade();
         if(needToDestroy) {
             this._playoutEngine.unqueuePlayout(this._rendererId);
         }
