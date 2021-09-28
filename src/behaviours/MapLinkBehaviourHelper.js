@@ -37,15 +37,17 @@ export const renderMapOverlay = (behaviour, target, callback, controller, analyt
 
     modalElement.onclick = (e) => {
         const matchid = getLinkId(e, behaviour);
-        const ne = controller._getNarrativeElement(matchid)
-        if (ne && matchid) {
-            analytics({
-                type: AnalyticEvents.types.USER_ACTION,
-                name: AnalyticEvents.names.MAP_OVERLAY_LINK_CLICKED,
-                from: 'not_set',
-                to: matchid,
-            });
-            controller._jumpToNarrativeElement(matchid);
+        if (matchid) {
+            const ne = controller._getNarrativeElement(matchid)
+            if (ne) {
+                analytics({
+                    type: AnalyticEvents.types.USER_ACTION,
+                    name: AnalyticEvents.names.MAP_OVERLAY_LINK_CLICKED,
+                    from: 'not_set',
+                    to: matchid,
+                });
+                controller._jumpToNarrativeElement(matchid);
+            }
         }
     }
 
