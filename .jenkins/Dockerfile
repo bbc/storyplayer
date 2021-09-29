@@ -7,9 +7,9 @@ ARG USERID
 
 RUN echo "UID is $USERID"
 # UID 997 is the norm for Jenkins
-RUN useradd -u $USERID -md $HOME jenkins
-RUN chmod -R a+rw $HOME
+RUN useradd -u "$USERID" -md "$HOME" jenkins
+RUN chmod -R a+rw "$HOME"
 USER jenkins
 
-RUN mkdir $HOME/.ssh
-ADD known_hosts $HOME/.ssh/known_hosts
+RUN mkdir "${HOME}/.ssh"
+ADD known_hosts "${HOME}/.ssh/known_hosts"
