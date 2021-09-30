@@ -81,6 +81,11 @@ body {
   background-color: rgb(190, 46, 2);
 }
 
+.selection button:hover, .selection button:focus {
+  background-color: rgb(120, 0, 0);
+  cursor: pointer;
+}
+
  /* Style the tab */
  .tab {
   border-bottom: 1px solid #ccc;
