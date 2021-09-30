@@ -1093,9 +1093,10 @@ class Player extends EventEmitter {
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
         controlDiv.id = `volume-control-${id}`;
-        const muteDiv = document.createElement('div');
+        const muteDiv = document.createElement('button'); // why is this a div?
         muteDiv.id = `mute-button-${id}`;
         muteDiv.classList.add('romper-mute-button');
+        muteDiv.setAttribute('tabindex', '2');
         muteDiv.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
         levelSpan.classList.add('romper-volume-level');
@@ -1108,6 +1109,7 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
+        volumeRange.setAttribute('tabindex', '2');
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
 

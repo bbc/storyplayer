@@ -498,8 +498,8 @@ $start-button-size: 15vw;
 
     &:hover,
     &:focus {
-      background-color: initial;
-      filter: none;
+      background-color: $highlight-invert;
+      filter: invert(100%);
     }
 
     div {
@@ -508,8 +508,8 @@ $start-button-size: 15vw;
 
       &:hover,
       &:focus {
-        background-color: initial;
-        filter: none;
+        background-color: $highlight-invert;
+        filter: invert(100%);
       }
     }
   }
@@ -561,7 +561,6 @@ $start-button-size: 15vw;
       flex-direction: row;
       font-size: smaller;
       justify-content: center;
-      width: 100%;
 
       &.romper-muted {
         .romper-volume-level,
@@ -577,7 +576,7 @@ $start-button-size: 15vw;
       .romper-volume-level {
         align-self: center;
         padding-left: 15px;
-        width: 1.2em;
+        width: 1.5em;
       }
 
       .romper-volume-label {
@@ -593,6 +592,7 @@ $start-button-size: 15vw;
       .romper-volume-range {
         -webkit-appearance: none;
         background-color: $transparent;
+        border: 2px solid transparent;
         margin-left: 5px;
         margin-top: 5px;
         outline: none;
@@ -619,6 +619,10 @@ $start-button-size: 15vw;
 
         &::-moz-range-track {
           background-color: $transparent;
+        }
+
+        &:focus-visible {
+          border: solid 2px $highlight;
         }
       }
     }
@@ -1028,6 +1032,7 @@ $start-button-size: 15vw;
 }
 
 .romper-scrub-bar {
+  border: solid 2px transparent;
   bottom: 83px;
   display: block;
   height: 10px;
@@ -1042,6 +1047,10 @@ $start-button-size: 15vw;
   &.romper-control-disabled {
     pointer-events: none;
     visibility: hidden;
+  }
+
+  &:focus-visible {
+    border: solid 2px $highlight;
   }
 
   &[type='range'] {
