@@ -689,7 +689,7 @@ export default class BaseRenderer extends EventEmitter {
                 runner.start(this);
             }
         }
-        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
+        logger.warn(`Unable to handle behaviour of type ${behaviourUrn}`);
         return null;
     }
 
