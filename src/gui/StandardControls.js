@@ -53,7 +53,11 @@ class StandardControls extends BaseControls {
         };
         document.addEventListener(
             'keydown',
-            (e) => { if (e.key === 'Tab') this.activateRomperButtons() },
+            (e) => { 
+                if (e.key === 'Tab' || this.getShowing()) {
+                    this.activateRomperButtons()
+                }
+            },
         );
         this._buttonsActivateArea.addEventListener(
             'touchend',
@@ -124,7 +128,7 @@ class StandardControls extends BaseControls {
             return;
         }
         if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
-        this._showRomperButtonsTimeout = setTimeout(() => this.hideControls(), 5000);
+        this._showRomperButtonsTimeout = setTimeout(() => this.hideControls(), 2000);
     }
 
     // get the whole lot organised in a DIV
