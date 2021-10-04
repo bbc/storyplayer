@@ -20,6 +20,7 @@ import { buildPanel } from '../behaviours/VariablePanelHelper';
 import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
+import { renderMapOverlay } from '../behaviours/MapLinkBehaviourHelper';
 import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
@@ -171,6 +172,7 @@ export default class BaseRenderer extends EventEmitter {
         this._applySocialSharePanelBehaviour = this._applySocialSharePanelBehaviour.bind(this);
         this._applyLinkOutBehaviour = this._applyLinkOutBehaviour.bind(this);
         this._applyTextOverlayBehaviour = this._applyTextOverlayBehaviour.bind(this);
+        this._applyMapOverlayBehaviour = this._applyMapOverlayBehaviour.bind(this);
         this._applyFadeInBehaviour = this._applyFadeInBehaviour.bind(this);
         this._applyFadeOutBehaviour = this._applyFadeOutBehaviour.bind(this);
         this._applyFadeAudioOutBehaviour = this._applyFadeAudioOutBehaviour.bind(this);
@@ -203,6 +205,8 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:linkoutmodal/v1.0' : this._applyLinkOutBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:textoverlay/v1.0' : this._applyTextOverlayBehaviour,
+            // eslint-disable-next-line max-len
+            'urn:x-object-based-media:representation-behaviour:mapoverlay/v1.0' : this._applyMapOverlayBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:fadein/v1.0' : this._applyFadeInBehaviour,
             // eslint-disable-next-line max-len
@@ -685,7 +689,7 @@ export default class BaseRenderer extends EventEmitter {
                 runner.start(this);
             }
         }
-        logger.warn(`Unable to handle behaviour of type &{behaviourUrn}`);
+        logger.warn(`Unable to handle behaviour of type ${behaviourUrn}`);
         return null;
     }
 
@@ -1264,34 +1268,36 @@ export default class BaseRenderer extends EventEmitter {
         callback();
     }
 
-    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration, id } = behaviour;
+    _createFadeOverlay(behaviour: Object) {
+        const { colour, id } = behaviour;
         const overlayImageElement = document.createElement('div');
         overlayImageElement.id = id;
         this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
         overlayImageElement.style.background = colour;
-        overlayImageElement.style.opacity = 0;
-        overlayImageElement.style.transition = `opacity ${duration}s`;
         overlayImageElement.className = 'romper-image-overlay';
-        const startFade = () => { overlayImageElement.style.opacity = 1 };
         this._target.appendChild(overlayImageElement);
         this._behaviourElements.push(overlayImageElement);
+        return overlayImageElement;
+    }
+
+    _applyFadeOutBehaviour(behaviour: Object, callback: () => mixed) {
+        const { duration } = behaviour;
+        const overlayImageElement = this._createFadeOverlay(behaviour);
+        overlayImageElement.style.opacity = 0;
+        overlayImageElement.style.transition = `opacity ${duration}s`;
+ 
+        const startFade = () => { overlayImageElement.style.opacity = 1 };
         setTimeout(startFade, 500);
         callback();
     }
 
     _applyFadeInBehaviour(behaviour: Object, callback: () => mixed) {
-        const { colour, duration, id } = behaviour;
-        const overlayImageElement = document.createElement('div');
-        overlayImageElement.id = id;
-        this._setBehaviourElementAttribute(overlayImageElement, 'colour-overlay');
-        overlayImageElement.style.background = colour;
+        const { duration } = behaviour;
+        const overlayImageElement = this._createFadeOverlay(behaviour);
         overlayImageElement.style.opacity = 1;
         overlayImageElement.style.transition = `opacity ${duration}s`;
-        overlayImageElement.className = 'romper-image-overlay';
+
         const startFade = () => { overlayImageElement.style.opacity = 0 };
-        this._target.appendChild(overlayImageElement);
-        this._behaviourElements.push(overlayImageElement);
         setTimeout(startFade, 500);
         callback();
     }
@@ -1375,6 +1381,18 @@ export default class BaseRenderer extends EventEmitter {
             this._controller,
         );
         this._setBehaviourElementAttribute(modalElement, 'text-overlay');
+        this._behaviourElements.push(modalElement);
+    }
+
+    _applyMapOverlayBehaviour(behaviour: Object, callback: () => mixed) {
+        const modalElement = renderMapOverlay(
+            behaviour,
+            this._player.getOverlayElement(),
+            callback,
+            this._controller,
+            this._analytics,
+        );
+        this._setBehaviourElementAttribute(modalElement, 'map-overlay');
         this._behaviourElements.push(modalElement);
     }
 
