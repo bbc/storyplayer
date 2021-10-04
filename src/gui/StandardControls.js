@@ -145,12 +145,14 @@ class StandardControls extends BaseControls {
     disableControls() {
         this._controlsDisabled = true;
         this._containerDiv.setAttribute('aria-disabled', 'true');
+        this._containerDiv.classList.add('disabled');
         this.hideControls();
     }
 
     enableControls() {
         this._controlsDisabled = false;
         this._containerDiv.setAttribute('aria-disabled', 'false');
+        this._containerDiv.classList.remove('disabled');
     }
 
     getShowing(): boolean {

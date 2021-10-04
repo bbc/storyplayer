@@ -914,6 +914,10 @@ $start-button-size: 15vw;
       background: unset;
     }
 
+    &.disabled {
+      display: none;
+    }
+
     &.icons-showing {
       background: linear-gradient($transparent 0, $black 30%, $black 100%);
     }
