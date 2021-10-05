@@ -128,7 +128,7 @@ class StandardControls extends BaseControls {
             return;
         }
         if (this._showRomperButtonsTimeout) clearTimeout(this._showRomperButtonsTimeout);
-        this._showRomperButtonsTimeout = setTimeout(() => this.hideControls(), 2000);
+        this._showRomperButtonsTimeout = setTimeout(() => this.hideControls(), 5000);
     }
 
     // get the whole lot organised in a DIV
