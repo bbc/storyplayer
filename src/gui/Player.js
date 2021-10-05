@@ -1093,7 +1093,7 @@ class Player extends EventEmitter {
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
         controlDiv.id = `volume-control-${id}`;
-        const muteDiv = document.createElement('button'); // why is this a div?
+        const muteDiv = document.createElement('button');
         muteDiv.id = `mute-button-${id}`;
         muteDiv.classList.add('romper-mute-button');
         muteDiv.setAttribute('tabindex', '2');
