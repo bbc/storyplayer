@@ -1093,11 +1093,11 @@ class Player extends EventEmitter {
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
         controlDiv.id = `volume-control-${id}`;
-        const muteDiv = document.createElement('button');
-        muteDiv.id = `mute-button-${id}`;
-        muteDiv.classList.add('romper-mute-button');
-        muteDiv.setAttribute('tabindex', '2');
-        muteDiv.appendChild(document.createElement('div'));
+        const muteButton = document.createElement('button');
+        muteButton.id = `mute-button-${id}`;
+        muteButton.classList.add('romper-mute-button');
+        muteButton.setAttribute('tabindex', '2');
+        muteButton.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
         levelSpan.classList.add('romper-volume-level');
         levelSpan.textContent = '10';
@@ -1110,16 +1110,16 @@ class Player extends EventEmitter {
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
         volumeRange.setAttribute('tabindex', '2');
-        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
-        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
+        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
 
-        muteDiv.addEventListener(
+        muteButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteDiv).bind(this)),
+            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteButton).bind(this)),
         );
-        muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
+        muteButton.onclick = this._setMuteCallBack(id, label, muteButton).bind(this);
 
-        controlDiv.appendChild(muteDiv);
+        controlDiv.appendChild(muteButton);
         controlDiv.appendChild(volumeRange);
         controlDiv.appendChild(levelSpan);
 
