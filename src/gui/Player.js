@@ -842,6 +842,7 @@ class Player extends EventEmitter {
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._enableUserInteraction();
         this._controls.setTransportControlsActive();
+        this._controls.focusScrubBar();
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
     }
@@ -1240,7 +1241,7 @@ class Player extends EventEmitter {
 
         const linkChoiceControl = document.createElement('button');
         linkChoiceControl.id = `romper-link-choice-${id}`;
-        linkChoiceControl.tabIndex = 0;
+        linkChoiceControl.tabIndex = 2;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');

@@ -135,9 +135,13 @@ class StandardControls extends BaseControls {
     getControls(): HTMLDivElement {
         return this._containerDiv;
     }
-
+    
     getActivator(): HTMLDivElement {
         return this._buttonsActivateArea;
+    }
+    
+    focusScrubBar() {
+        this._scrubBar.getScrubBarElement().focus();
     }
 
     // this stops activation from proceeding
