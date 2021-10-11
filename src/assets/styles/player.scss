@@ -705,7 +705,7 @@ $start-button-size: 15vw;
     pointer-events: none;
     position: absolute;
     width: 80%;
-    z-index: 15;
+    z-index: 16;
 
     &.fullscreen-choice-icons,
     &.fullscreen-icons {
@@ -1444,7 +1444,7 @@ $start-button-size: 15vw;
   position: absolute;
   top: 20px;
   width: 80%;
-  z-index: 16;
+  z-index: 17;
 
   &.show {
     display: initial;
