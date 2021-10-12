@@ -250,6 +250,8 @@ export default class BaseRenderer extends EventEmitter {
 
             const { currentTime }  = this.getCurrentTime();
 
+            if (!this._player.userInteractionStarted()) return;
+
             // handle starting event
             if (currentTime >= startTime && currentTime <= endTime && !isRunning){
                 logger.info(`TimeManager: ${this._rendererId} timer running timed event ${timeEventId}`);
@@ -792,18 +794,13 @@ export default class BaseRenderer extends EventEmitter {
                 this._showControls();
             };
             const listenerId = behaviour.behaviour.id;
-            if (startTime === 0) {
-                startCallback();
-                this.addTimeEventListener(listenerId, endTime, clearFunction);
-            } else {
-                this.addTimeEventListener(
-                    listenerId,
-                    startTime,
-                    startCallback,
-                    endTime,
-                    clearFunction,
-                );
-            }
+            this.addTimeEventListener(
+                listenerId,
+                startTime,
+                startCallback,
+                endTime,
+                clearFunction,
+            );
         } else {
             logger.warn(`${this.constructor.name} does not support ` +
                 `${behaviour.behaviour.type} - ignoring`)
