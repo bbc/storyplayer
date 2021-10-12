@@ -1086,6 +1086,7 @@ class Player extends EventEmitter {
         const volumeControl = document.createElement('div');
         volumeControl.classList.add('romper-volume-control');
         volumeControl.classList.add(`romper-volume-label-${label.toLowerCase()}`);
+        volumeControl.setAttribute('aria-label', `Volume controls for ${label} audio`);
 
         const volumeLabel = document.createElement('div');
         volumeLabel.classList.add('romper-volume-label');
@@ -1098,9 +1099,11 @@ class Player extends EventEmitter {
         muteButton.id = `mute-button-${id}`;
         muteButton.classList.add('romper-mute-button');
         muteButton.setAttribute('tabindex', '2');
+        muteButton.setAttribute('aria-label', 'Mute');
         muteButton.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
         levelSpan.classList.add('romper-volume-level');
+        levelSpan.setAttribute('aria-label', 'Current volume');
         levelSpan.textContent = '10';
 
         const volumeRange = document.createElement('input');
@@ -1111,6 +1114,7 @@ class Player extends EventEmitter {
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
         volumeRange.setAttribute('tabindex', '2');
+        volumeRange.setAttribute('aria-label', 'volume range');
         volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
         volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
 
