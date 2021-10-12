@@ -53,7 +53,11 @@ class StandardControls extends BaseControls {
         };
         document.addEventListener(
             'keydown',
-            (e) => { if (e.key === 'Tab') this.activateRomperButtons() },
+            (e) => { 
+                if (e.key === 'Tab' || this.getShowing()) {
+                    this.activateRomperButtons()
+                }
+            },
         );
         this._buttonsActivateArea.addEventListener(
             'touchend',
@@ -131,9 +135,13 @@ class StandardControls extends BaseControls {
     getControls(): HTMLDivElement {
         return this._containerDiv;
     }
-
+    
     getActivator(): HTMLDivElement {
         return this._buttonsActivateArea;
+    }
+    
+    focusScrubBar() {
+        this._scrubBar.getScrubBarElement().focus();
     }
 
     // this stops activation from proceeding
@@ -141,12 +149,14 @@ class StandardControls extends BaseControls {
     disableControls() {
         this._controlsDisabled = true;
         this._containerDiv.setAttribute('aria-disabled', 'true');
+        this._containerDiv.classList.add('disabled');
         this.hideControls();
     }
 
     enableControls() {
         this._controlsDisabled = false;
         this._containerDiv.setAttribute('aria-disabled', 'false');
+        this._containerDiv.classList.remove('disabled');
     }
 
     getShowing(): boolean {

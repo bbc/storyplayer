@@ -81,6 +81,11 @@ body {
   background-color: rgb(190, 46, 2);
 }
 
+.selection button:hover, .selection button:focus {
+  background-color: rgb(120, 0, 0);
+  cursor: pointer;
+}
+
  /* Style the tab */
  .tab {
   border-bottom: 1px solid #ccc;
@@ -99,10 +104,8 @@ body {
   cursor: pointer;
   float: left;
   font-size: 100%;
-  outline: none;
   padding: 14px 16px;
   transition: 0.3s;
-
 }
 
 button:first-child {
@@ -118,6 +121,10 @@ button:first-child {
 .tab button.active {
   background-color: #ccc;
   font-weight: bold;
+}
+
+.tab button.focus-visible {
+  outline: 2px auto -webkit-focus-ring-color; 
 }
 
 .variable-setter {

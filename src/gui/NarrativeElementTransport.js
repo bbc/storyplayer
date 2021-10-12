@@ -184,16 +184,20 @@ class NarrativeElementTransport extends EventEmitter {
     setNextAvailable(isNextAvailable: boolean) {
         if (isNextAvailable) {
             this._nextButton.classList.remove('romper-unavailable');
+            this._nextButton.disabled = false;
         } else {
             this._nextButton.classList.add('romper-unavailable');
+            this._nextButton.disabled = true;
         }
     }
 
     setBackAvailable(isBackAvailable: boolean) {
         if (isBackAvailable) {
             this._backButton.classList.remove('romper-unavailable');
+            this._backButton.disabled = false;
         } else {
             this._backButton.classList.add('romper-unavailable');
+            this._backButton.disabled = true;
         }
     }
 

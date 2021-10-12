@@ -842,6 +842,7 @@ class Player extends EventEmitter {
         this.emit(REASONER_EVENTS.ROMPER_STORY_STARTED);
         this._enableUserInteraction();
         this._controls.setTransportControlsActive();
+        this._controls.focusScrubBar();
         this._logUserInteraction(AnalyticEvents.names.BEHAVIOUR_CONTINUE_BUTTON_CLICKED);
         this._controller.setExistingSession();
     }
@@ -1085,6 +1086,7 @@ class Player extends EventEmitter {
         const volumeControl = document.createElement('div');
         volumeControl.classList.add('romper-volume-control');
         volumeControl.classList.add(`romper-volume-label-${label.toLowerCase()}`);
+        volumeControl.setAttribute('aria-label', `Volume controls for ${label} audio`);
 
         const volumeLabel = document.createElement('div');
         volumeLabel.classList.add('romper-volume-label');
@@ -1093,12 +1095,15 @@ class Player extends EventEmitter {
         const controlDiv = document.createElement('div');
         controlDiv.classList.add('romper-control-line');
         controlDiv.id = `volume-control-${id}`;
-        const muteDiv = document.createElement('div');
-        muteDiv.id = `mute-button-${id}`;
-        muteDiv.classList.add('romper-mute-button');
-        muteDiv.appendChild(document.createElement('div'));
+        const muteButton = document.createElement('button');
+        muteButton.id = `mute-button-${id}`;
+        muteButton.classList.add('romper-mute-button');
+        muteButton.setAttribute('tabindex', '2');
+        muteButton.setAttribute('aria-label', 'Mute');
+        muteButton.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
         levelSpan.classList.add('romper-volume-level');
+        levelSpan.setAttribute('aria-label', 'Current volume');
         levelSpan.textContent = '10';
 
         const volumeRange = document.createElement('input');
@@ -1108,16 +1113,18 @@ class Player extends EventEmitter {
         volumeRange.max = '1';
         volumeRange.defaultValue = '1';
         volumeRange.classList.add('romper-volume-range');
-        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
-        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteDiv).bind(this);
+        volumeRange.setAttribute('tabindex', '2');
+        volumeRange.setAttribute('aria-label', 'volume range');
+        volumeRange.oninput = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
+        volumeRange.onchange = this._setVolumeCallback(id, label, levelSpan, muteButton).bind(this);
 
-        muteDiv.addEventListener(
+        muteButton.addEventListener(
             'touchend',
-            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteDiv).bind(this)),
+            handleButtonTouchEvent(this._setMuteCallBack(id, label, muteButton).bind(this)),
         );
-        muteDiv.onclick = this._setMuteCallBack(id, label, muteDiv).bind(this);
+        muteButton.onclick = this._setMuteCallBack(id, label, muteButton).bind(this);
 
-        controlDiv.appendChild(muteDiv);
+        controlDiv.appendChild(muteButton);
         controlDiv.appendChild(volumeRange);
         controlDiv.appendChild(levelSpan);
 
@@ -1238,7 +1245,7 @@ class Player extends EventEmitter {
 
         const linkChoiceControl = document.createElement('button');
         linkChoiceControl.id = `romper-link-choice-${id}`;
-        linkChoiceControl.tabIndex = 0;
+        linkChoiceControl.tabIndex = 2;
         const containerPromise = new Promise((resolve) => {
             linkChoiceControl.classList.add('romper-link-control');
             linkChoiceControl.classList.add('noselect');

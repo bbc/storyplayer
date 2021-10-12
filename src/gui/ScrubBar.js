@@ -91,7 +91,11 @@ class ScrubBar extends BaseScrubBar {
 
         let isDragging = false;
         scrubBar.addEventListener('mousedown', () => { isDragging = true; });
+        scrubBar.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') isDragging = true; 
+        });
         scrubBar.addEventListener('mouseup', () => { isDragging = false; });
+        scrubBar.addEventListener('keyup', () => { isDragging = false; });
 
         // Update the seek bar as the media plays.
         clearInterval(this._scrubTimePoller);
