@@ -11,7 +11,8 @@ StoryPlayer generates analytics events so that we can record what users are doin
 * `current_representation` - UUID of current Representation
 * `userid` - automatically generated UUID.  If the `saveSession` attribute for StoryPlayer is `true` this uuid is stored in local storage and used across multiple sessions.  Otherwise it lasts for the session.  `userid` is unique per experience (the same browser will use different userids for different stories).
 * `timestamp` - String ISO timestamp giving time at which the event was sent
-* `data` - Object with other information about the event (see below for details).  A consistent field within this object is `playheadTime` which records the `currentTime` according to the current renderer (e.g., playhead time of the video element)
+* `data` - Object with other information about the event (see below for details).
+* `playheadTime` - Float which records the `currentTime` according to the current renderer (e.g., playhead time of the video element)
 
 ### Event Types
 
