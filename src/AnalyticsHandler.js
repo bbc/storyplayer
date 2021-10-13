@@ -29,10 +29,28 @@ export default class AnalyticsHandler {
         this._analytics(appendedPayload);
     }
 
+    // takes the log data and returns an object
+    // which is the log data supplemented with the playhead time
+    static _addPlayheadTime(renderer, logData) {
+        if (renderer === undefined) return logData;
+        const data = { ...logData.data }
+        let playheadTime;
+        if (renderer) {
+            const timeData = renderer.getCurrentTime();
+            if (timeData) playheadTime = timeData.currentTime;
+        }
+        data.playheadTime = playheadTime;
+        return {
+            ...logData,
+            data,
+        };
+    }
+
     // add user id, current NE and Representation ids
     _enhanceAnalytics(logData) {
         let repId = logData.current_representation;
         const renderer = this._controller.getCurrentRenderer();
+        const timedData = AnalyticsHandler._addPlayheadTime(renderer, logData);
         if (repId === undefined && renderer && renderer.getRepresentation()){
             repId = renderer.getRepresentation().id;
         }
@@ -42,7 +60,7 @@ export default class AnalyticsHandler {
                 this._controller.getCurrentNarrativeElement().id : 'null';
         }
         const appendedData = {
-            ...logData,
+            ...timedData,
             current_narrative_element: neId,
             current_representation: repId,
             userid: this.userid,
