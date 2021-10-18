@@ -33,6 +33,11 @@ export default class AnalyticsHandler {
     _enhanceAnalytics(logData) {
         let repId = logData.current_representation;
         const renderer = this._controller.getCurrentRenderer();
+        let playheadTime;
+        if (renderer) {
+            const timeData = renderer.getCurrentTime();
+            if (timeData) playheadTime = timeData.currentTime;
+        }
         if (repId === undefined && renderer && renderer.getRepresentation()){
             repId = renderer.getRepresentation().id;
         }
@@ -47,6 +52,7 @@ export default class AnalyticsHandler {
             current_representation: repId,
             userid: this.userid,
             timestamp: new Date(),
+            playheadTime,
         };
 
         // if we've not yet noted it, get the duration of the element
