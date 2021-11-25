@@ -1,0 +1,166 @@
+body {
+  font-family: system-ui;
+  min-width: 35rem;
+}
+
+.romper-container {
+  height: 500px;
+  width: 889px;
+  overflow: auto;
+  resize: both;
+}
+
+.romper-player {
+  height: 100%;
+  width: 100%;
+}
+
+.story-title {
+  margin: 0 0 10px 0;
+  padding: 10px;
+  text-align: center;
+}
+
+.variable-description {
+  color: darkgrey;
+  padding-left: 10px;
+}
+
+.feedback {
+  color: darkgrey;
+  font-size: 80%;
+  height: 500px;
+  padding: 10px;
+  width: 780px;
+}
+
+.warning {
+  color: darkred;
+  font-weight: bold;
+}
+
+.selection {
+  padding: 0 10px 10px 10px;
+}
+
+.selection div {
+  border-bottom: 1px solid #777 ;
+}
+
+.render-placeholder {
+  background: lightblue;
+  color: black;
+  height: 50px;
+  padding: 200px 5%;
+  text-align: center;
+  vertical-align: middle;
+  width: 90%;
+}
+
+.jsoncontent button, .selection button, .restart-button {
+  background-color: lightgray;
+  border: none;
+  color: white;
+  display: inline-block;
+  font-size: 16px;
+  padding: 10px 34px;
+  text-align: center;
+  text-decoration: none;
+  margin: 1em 0;
+}
+
+.selection button {
+  margin-top: 0;
+}
+
+.jsoneditor {
+  min-height: 500px;
+}
+
+.selection button, .jsoncontent button.active, .restart-button.active {
+  background-color: rgb(190, 46, 2);
+}
+
+.selection button:hover, .selection button:focus {
+  background-color: rgb(120, 0, 0);
+  cursor: pointer;
+}
+
+ /* Style the tab */
+ .tab {
+  border-bottom: 1px solid #ccc;
+  /* background-color: #f1f1f1; */
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  border-left: none;
+  border-bottom: none;
+  border-right: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+  cursor: pointer;
+  float: left;
+  font-size: 100%;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+button:first-child {
+  border-left: 1px solid #ccc;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+  font-weight: bold;
+}
+
+.tab button.focus-visible {
+  outline: 2px auto -webkit-focus-ring-color; 
+}
+
+.variable-setter {
+  display: none;
+}
+
+.variable-setter.active{
+  display: block;
+}
+
+/* Style the tab content */
+.tabcontent {
+  border: 1px solid #ccc;
+  border-top: none;
+  display: none;
+  padding: 6px;
+}
+
+.tabcontent.active {
+  display: block;
+}
+
+.switch {
+  padding-right: 10px;
+}
+
+.slider-choice {
+  color: gray;
+  font-style: oblique;
+}
+
+.romper-loading-inner {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 28%;
+  max-width: 50px;
+  transform-origin: 50% 0;
+  width: 20%;
+}
