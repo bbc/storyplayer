@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>StoryPlayer Demo Stories</title>
     <link href="../dist/storyplayer.css" rel="stylesheet" type="text/css">
-    <link href="demos.css" rel="stylesheet" type="text/css">
+    <link href="demos.css?foo=1232" rel="stylesheet" type="text/css">
     <link href="../node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="../node_modules/jsoneditor/dist/jsoneditor.min.js"></script>
 </head>
@@ -44,6 +44,12 @@
             <p>The first Narrative Element is already loaded, so the story will need to be restarted to apply changes.</p>
             <div id='variables-generic'>Load a story to see its variables.</div>
         </div> -->
+    </div>
+
+    <!-- Explore story -->
+    <div id="explorer">
+        <ul id="narrative-route" class="nav-list">
+        </ul>
     </div>
 
     <!-- View/edit json -->
@@ -93,6 +99,9 @@
         }).catch((rejection) => {
             console.warn('Could not load built-in demo file');
         });
+
+        // @ME
+        // romperInstance.on(window.REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, event => console.log("pika", event));
 
         // return promise to fetch
         function fetchFile(filename) {
@@ -255,6 +264,75 @@
             // romperInstance.on(window.Romper.REASONER_EVENTS.ROMPER_STORY_STARTED, () => {
             //     addVariableControls(config.stories[0].id);
             // });
+
+            // @ME build waypoint navigator
+            romperInstance.on(window.Storyplayer.REASONER_EVENTS.NARRATIVE_ELEMENT_CHANGED, (newNarrativeElement) => {
+                const oldNarrativeElement = romperInstance.getCurrentNarrativeElement();
+                console.warn("pika", newNarrativeElement)
+                console.warn("chu", oldNarrativeElement)
+
+                const neNavigator = document.getElementById("narrative-route");
+
+                // get all elements with class="navlinks" and remove the class "active"
+                const navlinks = neNavigator.getElementsByClassName("ne-navlinks");
+                for (let i = 0; i < navlinks.length; i++) {
+                    navlinks[i].classList.remove("active")
+                }
+
+                // look for other options
+                let optionalNarrativeElements = null;
+                if (oldNarrativeElement && oldNarrativeElement.links.length > 1) {
+                    optionalNarrativeElements = oldNarrativeElement.links.filter(function (link) {
+                        return link.target_narrative_element_id != newNarrativeElement.id;
+                    }).map(function (link) {
+                        return romperInstance._getNarrativeElement(link.target_narrative_element_id);
+                    })
+                }
+
+                // create a navlist element for the new narrative element
+                const newNE_li = document.createElement('li');
+                const newNE_link = document.createElement("span");
+                const newNE_text = document.createElement("span");
+                newNE_li.id = newNarrativeElement.name.replace(/ /g, '_');
+                newNE_link.textContent = newNarrativeElement.name;
+                newNE_link.classList.add("ne-navlinks", "visited");
+                newNE_text.textContent = optionalNarrativeElements ? "You chose " : "";
+
+                // add an "active" class to the current narrative element
+                newNE_link.classList.add("active");
+                newNE_link.addEventListener("click", function () {
+                    const neId = newNarrativeElement.id;
+                    romperInstance._jumpToNarrativeElement(neId);
+                });
+
+                newNE_li.appendChild(newNE_text);
+                newNE_li.appendChild(newNE_link);
+
+                // add a sublist of the option set
+                let optNEs_ol = null;
+                if (optionalNarrativeElements) {
+                    optNEs_ol = document.createElement("ol");
+
+                    for (let i = 0; i < optionalNarrativeElements.length; i++) {
+                        const optNE_li = document.createElement("li");
+                        const optNE_link = document.createElement("span");
+                        optNE_link.textContent = optionalNarrativeElements[i].name;
+                        optNE_link.classList.add("ne-navlinks");
+
+                        optNE_link.addEventListener("click", function () {
+                            romperInstance._jumpToNarrativeElement(optionalNarrativeElements[i].id);
+                        });
+
+                        optNE_li.appendChild(optNE_link);
+                        optNEs_ol.appendChild(optNE_li);
+                    }
+
+
+                    newNE_li.appendChild(optNEs_ol);
+                }
+
+                neNavigator.appendChild(newNE_li);
+            });
         }
 
         function restart() {

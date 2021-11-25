@@ -164,3 +164,20 @@ button:first-child {
   transform-origin: 50% 0;
   width: 20%;
 }
+
+.ne-navlinks {
+  color: #06c;
+  text-decoration: underline;
+}
+
+.ne-navlinks:hover {
+  cursor: pointer;
+}
+
+.ne-navlinks.visited {
+  color: purple;
+}
+
+.ne-navlinks.active {
+  color: red;
+}
