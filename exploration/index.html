@@ -33,7 +33,8 @@
                 <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
             </div>
         </div>
-        <div><!-- restart button -->
+        <div>
+            <!-- restart button -->
             <button id="restart-button" class="restart-button" onclick="restart()" disabled>Restart story</button>
         </div>
 
@@ -84,9 +85,9 @@
                 const description = storyjson.stories[0].description;
                 divs.push(addStoryOption(stories[i], name, description));
             });
-            divs.sort( function ( a, b ) {
+            divs.sort(function (a, b) {
                 return (a.id < b.id) ? -1 : (a.id > b.id) ? 1 : 0;
-            }).forEach( function ( elem ) {
+            }).forEach(function (elem) {
                 document.getElementById('choices').appendChild(elem);
             });
         }).catch((rejection) => {
@@ -96,16 +97,16 @@
         // return promise to fetch
         function fetchFile(filename) {
             return fetch(filename)
-            .then((response) => {
-                if (response.ok) {
-                    return Promise.resolve(response.text());
-                }
-                return Promise.reject(response);
-            })
-            .catch((rejection) => {
-                console.warn(`could not fetch story content for ${filename}: ${rejection.status} ${rejection.statusText}`);
-                return Promise.reject(rejection);
-            });
+                .then((response) => {
+                    if (response.ok) {
+                        return Promise.resolve(response.text());
+                    }
+                    return Promise.reject(response);
+                })
+                .catch((rejection) => {
+                    console.warn(`could not fetch story content for ${filename}: ${rejection.status} ${rejection.statusText}`);
+                    return Promise.reject(rejection);
+                });
         }
 
         // render a story for user selection
@@ -147,9 +148,9 @@
                 const description = storyjson.stories[0].description;
                 document.getElementById('choices').appendChild(addStoryOption(getFilename, name, description));
             })
-            .catch((rejection) => {
-                console.warn(`could not load GET story content`);
-            });
+                .catch((rejection) => {
+                    console.warn(`could not load GET story content`);
+                });
             loadStory(getFilename);
             document.getElementById('renderer').classList.add('active');
             document.getElementById('rendertab').classList.add('active');
@@ -160,7 +161,7 @@
         }
 
         // display a message to the user
-        function showMessage(messageText, error=false) {
+        function showMessage(messageText, error = false) {
             const messageDiv = document.getElementById('feedback');
             messageDiv.textContent = messageText;
             if (error) {
@@ -264,7 +265,7 @@
 
         function addMeta(storyId) {
             const experienceIdMeta = document.querySelector('meta[name="experienceId"]');
-            if(!experienceIdMeta ) {
+            if (!experienceIdMeta) {
                 const meta = document.createElement('meta');
                 meta.name = 'experienceId';
                 meta.content = storyId;
@@ -290,7 +291,7 @@
                     const storyJson = JSON.parse(text);
                     addMeta(storyJson.stories[0].id);
                     run(storyJson);
-                    if(document.getElementById('rendertab').classList.contains('active')) {
+                    if (document.getElementById('rendertab').classList.contains('active')) {
                         resizeWindow();
                     }
                 })
@@ -303,21 +304,21 @@
         function addVariableControls() {
             const varPanel = document.getElementById('variables-generic');
             romperInstance.getVariableState()
-            .then((variableDeclaration) => {
-                if (variableDeclaration === undefined || variableDeclaration === {}) {
-                    varPanel.innerHTML = 'There are no variables in this story';
-                    return;
-                }
+                .then((variableDeclaration) => {
+                    if (variableDeclaration === undefined || variableDeclaration === {}) {
+                        varPanel.innerHTML = 'There are no variables in this story';
+                        return;
+                    }
 
-                varPanel.innerHTML = '';
-                Object.keys(variableDeclaration).forEach((varName) => {
-                    addVariableSetter(varName, variableDeclaration[varName]);
+                    varPanel.innerHTML = '';
+                    Object.keys(variableDeclaration).forEach((varName) => {
+                        addVariableSetter(varName, variableDeclaration[varName]);
+                    });
                 });
-            });
         }
 
         // render a panel enabling the user to modify the value of a variable
-        function addVariableSetter(varName, variableDecl){
+        function addVariableSetter(varName, variableDecl) {
             const varType = variableDecl.variable_type;
             const varDesc = variableDecl.description;
             const parEl = document.createElement('p');
@@ -362,7 +363,7 @@
         }
 
         // an input for changing integer variables
-        function getIntegerVariableSetter(varName, variableDecl){
+        function getIntegerVariableSetter(varName, variableDecl) {
             const varInput = document.createElement('input');
             varInput.type = 'number';
 
@@ -373,7 +374,7 @@
         }
 
         // an input for changing string variables
-        function getStringVariableSetter(varName, variableDecl){
+        function getStringVariableSetter(varName, variableDecl) {
             const varInput = document.createElement('input');
             varInput.type = 'text';
 
@@ -384,7 +385,7 @@
         }
 
         // an input for changing enumerated string variables
-        function getListVariableSetter(varName, variableDecl){
+        function getListVariableSetter(varName, variableDecl) {
             const options = variableDecl.values;
             const varInput = document.createElement('select');
             options.forEach((optionValue) => {
@@ -401,7 +402,7 @@
         }
 
         // an input for changing boolean variables
-        function getBooleanVariableSwitch(varName, variableDecl){
+        function getBooleanVariableSwitch(varName, variableDecl) {
             const varInput = document.createElement('input');
             varInput.type = 'checkbox';
 
@@ -415,7 +416,7 @@
         function getVariablesState() {
             const varInputs = document.getElementsByClassName('variable-input');
             const variableState = {};
-            for(var i = 0; i < varInputs.length; i++){
+            for (var i = 0; i < varInputs.length; i++) {
                 const varInputEl = varInputs[i];
                 if (varInputEl.getAttribute('type') === 'checkbox') {
                     variableState[varInputEl.id] = varInputEl.checked;
