@@ -21,6 +21,7 @@ import type { AnalyticsLogger } from './AnalyticEvents';
 import AnalyticEvents from './AnalyticEvents';
 
 import Player, { PlayerEvents } from './gui/Player';
+import Api from './gui/api';
 import { REASONER_EVENTS, DOM_EVENTS } from './Events';
 import { getSetting, DISABLE_LOOKAHEAD_FLAG, getControlHideList } from './utils';
 
@@ -109,6 +110,9 @@ export default class RenderManager extends EventEmitter {
         this._privacyNotice = privacyNotice;
 
         this._player = new Player(this._target, this._analytics, this._assetUrls, this._controller);
+
+        this.api = new Api(this._player, this._controller);
+
         this._player.on(PlayerEvents.BACK_BUTTON_CLICKED, () => {
             if (this._currentRenderer) {
                 this._currentRenderer.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED);

@@ -54,6 +54,7 @@ const PlayerEvents = [
     'REPEAT_BUTTON_CLICKED',
     'LINK_CHOSEN',
     'ERROR_SKIP_BUTTON_CLICKED',
+    'START_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -317,6 +318,13 @@ class Player extends EventEmitter {
 
         // create gui layer we use for buttons and user interactions
         this._guiLayer = createElementWithClass('div', 'gui-layer', ['romper-gui']);
+        const guiHide = new URLSearchParams(window.top.location.search).getAll('noUi').length > 0;
+        if (guiHide) { 
+            logger.info('hiding UI layer'); 
+            // better to not append to this._player (below), but style approach allows debugging
+            this._guiLayer.style.display = 'none';
+        }
+
         // create error layer
         this._createErrorLayer();
         // create the start button modal layer
@@ -730,6 +738,13 @@ class Player extends EventEmitter {
     }
 
     _createStartExperienceButton(options: Object) {
+        this.emit('UI_RENDER', 
+            { 
+                type: 'start button',
+                event_name: PlayerEvents.START_BUTTON_CLICKED,
+                comment: 'no arguments required',
+            } 
+        );
         this._startExperienceButton = document.createElement('button');
         this._startExperienceButton.setAttribute('type', 'button');
         this._startExperienceButton.setAttribute('tabindex', '1');
@@ -1566,6 +1581,12 @@ class Player extends EventEmitter {
     }
 
     disableControls() {
+        this.emit('UI_RENDER', 
+            { 
+                type: 'hide_controls',
+                comment: 'please hide transport controls',
+            }
+        );
         this._controls.disableControls();
     }
 

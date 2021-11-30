@@ -909,6 +909,18 @@ export default class BaseRenderer extends EventEmitter {
                 .then((iconObjects) => {
 
                     this._clearChoices();
+                    this._player.emit('UI_RENDER', 
+                        { 
+                            type: 'link_choice',
+                            event_name: PlayerEvents.LINK_CHOSEN,
+                            comment: 'fire LINK_CHOSEN event with object { id: narrativeELementId, behaviourId: behaviourId }',
+                            links: { 
+                                ...iconObjects,
+                                behaviourId: behaviour.id,
+                            }
+                        } 
+                    );
+
                     iconObjects.forEach((iconSpecObject) => {
                         this._buildLinkIcon(iconSpecObject, behaviourOverlay.getOverlay());
                     });

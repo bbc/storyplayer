@@ -445,7 +445,8 @@ class SMPControls extends BaseControls {
     }
 
     enableControls() {
-        if(this._controlsEnabled !== true) {
+        const guiHide = new URLSearchParams(window.top.location.search).getAll('noUi').length > 0;
+        if(this._controlsEnabled !== true && !guiHide) {
             this._uiUpdate({
                 enabled: true,
             })
