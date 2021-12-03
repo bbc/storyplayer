@@ -225,15 +225,15 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             }
         }
 
-        const dataStore = this._smpPlayerInterface.datastore;
-        const baseUrl = dataStore.get("baseUrl");
-        const includeCredentials = dataStore.get("includeCredentials") === true
+        // const dataStore = this._smpPlayerInterface.datastore;
+        // const baseUrl = dataStore.get("baseUrl");
+        // const includeCredentials = dataStore.get("includeCredentials") === true
 
-        if(url.indexOf(baseUrl) === 0 && includeCredentials) {
-            playlist.options.useCredentials = "MPD,InitializationSegment,MediaSegment"
-        } else {
-            playlist.options.useCredentials = "none"
-        }
+        // if(url.indexOf(baseUrl) === 0 && includeCredentials) {
+        playlist.options.useCredentials = "MPD,InitializationSegment,MediaSegment"
+        // } else {
+        //     playlist.options.useCredentials = "none"
+        // }
 
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
         this._smpPlayerInterface.readyPlaylist(playlist)
