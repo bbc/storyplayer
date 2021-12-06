@@ -635,7 +635,7 @@ export default class BaseRenderer extends EventEmitter {
             try {
                 const assetCollection = await this._fetchAssetCollection(behaviour.asset_collection_id);
                 if (assetCollection.assets.image_src) {
-                    const imageUrl = await this._fetchMedia(assetCollection.assets.image_src);
+                    const imageUrl = await this._fetchMedia(assetCollection.assets.image_src, { includeCredentials: true });
                     if (imageUrl) {
                         const image = new Image();
                         image.src = imageUrl;
@@ -664,7 +664,7 @@ export default class BaseRenderer extends EventEmitter {
             return this._fetchAssetCollection(iconAssetCollection)
                 .then((assetCollection) => {
                     if (assetCollection.assets.image_src) {
-                        return this._fetchMedia(assetCollection.assets.image_src);
+                        return this._fetchMedia(assetCollection.assets.image_src, { includeCredentials: true });
                     }
                     return Promise.resolve();
                 })
@@ -1062,7 +1062,7 @@ export default class BaseRenderer extends EventEmitter {
             const fetcherPromises = [];
             iconObjects.forEach((iconObject) => {
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
-                    fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src));
+                    fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src, { includeCredentials: true }));
                 } else {
                     fetcherPromises.push(Promise.resolve(''));
                 }
@@ -1319,7 +1319,7 @@ export default class BaseRenderer extends EventEmitter {
             this._fetchAssetCollection(assetCollectionId)
                 .then((assetCollection) => {
                     if (assetCollection.assets.image_src) {
-                        return this._fetchMedia(assetCollection.assets.image_src);
+                        return this._fetchMedia(assetCollection.assets.image_src, { includeCredentials: true });
                     }
                     return Promise.resolve();
                 })
