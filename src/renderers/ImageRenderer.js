@@ -123,7 +123,7 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
             );
             if (fg.assets.image_src) {
                 try {
-                    const mediaUrl = await this._fetchMedia(fg.assets.image_src);
+                    const mediaUrl = await this._fetchMedia(fg.assets.image_src, { includeCredentials: true });
                     logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`);
                     this._imageElement.src = mediaUrl;
                 }
