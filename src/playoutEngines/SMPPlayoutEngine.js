@@ -225,7 +225,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             }
         }
 
-        playlist.options.useCredentials = ["MPD", "InitializationSegment", "MediaSegment"];
+        playlist.options.useCredentials = ["MPD", "InitializationSegment", "MediaSegment", "Player"];
 
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
         this._smpPlayerInterface.readyPlaylist(playlist)
