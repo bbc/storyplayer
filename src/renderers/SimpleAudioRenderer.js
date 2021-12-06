@@ -33,7 +33,7 @@ export default class SimpleAudioRenderer extends BaseTimedMediaRenderer {
                 const assetCollectionId = this._representation.asset_collections.background_image;
                 const image = await this._fetchAssetCollection(assetCollectionId);
                 if (image.assets.image_src) {
-                    const imageUrl = await this._fetchMedia(image.assets.image_src);
+                    const imageUrl = await this._fetchMedia(image.assets.image_src, { includeCredentials: true });
                     this._backgroundImage = document.createElement('img');
                     this._backgroundImage.setAttribute('draggable', 'false');
                     this._backgroundImage.className = 'romper-render-image notInteractiveContent noselect';
