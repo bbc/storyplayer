@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "1.1.10",
+  "version": "1.1.20",
   "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/@bbc/object-based-media-schema)",
   "main": "dist/storyplayer.js",
   "keywords": [
