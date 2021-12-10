@@ -203,10 +203,10 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                 default:
                     throw new Error("Invalid MDIA_TYPE")
                 }
-                const options = { mediaFormat: MediaFormats.getFormat(), mediaType };
+                const options = { mediaFormat: MediaFormats.getFormat(), mediaType, includeCredentials: true };
                 const mediaUrl = await this._fetchMedia(fg.assets[assetKey], options);
                 if (fg.assets[subtitleKey]) {
-                    const subsUrl = await this._fetchMedia(fg.assets[subtitleKey]);
+                    const subsUrl = await this._fetchMedia(fg.assets[subtitleKey], { includeCredentials: true });
                     mediaObj.subs_url = subsUrl
                 }
                 if (this._destroyed) {

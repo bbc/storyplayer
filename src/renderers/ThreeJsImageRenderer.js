@@ -118,7 +118,7 @@ export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
             const fg = await this._fetchAssetCollection(this._representation.asset_collections.foreground_id);
             if (fg.assets.image_src) {
                 try {
-                    const mediaUrl = await this._fetchMedia(fg.assets.image_src);
+                    const mediaUrl = await this._fetchMedia(fg.assets.image_src, { includeCredentials: true });
                     this._imageMesh = ThreeJSDriver.loadImage(mediaUrl)
                 } catch(err) {
                     throw new Error('Could not resolve media source for 360 image');

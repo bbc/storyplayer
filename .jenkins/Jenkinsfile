@@ -1,4 +1,0 @@
-@Library("rd-apmm-groovy-ci-library@v1.x") _
-@Library("rd-ux-groovy-ci-library") __
-
-storyplayerPipeline()

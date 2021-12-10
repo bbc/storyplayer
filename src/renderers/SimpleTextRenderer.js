@@ -151,7 +151,7 @@ export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
             return this._fetchAssetCollection(this._representation.asset_collections.foreground_id)
                 .then((fg) => {
                     if (fg.assets.text_src) {
-                        return this._fetchMedia(fg.assets.text_src)
+                        return this._fetchMedia(fg.assets.text_src, { includeCredentials: true })
                             .then((textFileUrl) => {
                                 this._fetchTextContent(textFileUrl);
                             });

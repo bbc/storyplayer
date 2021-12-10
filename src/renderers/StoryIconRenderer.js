@@ -147,7 +147,7 @@ export default class StoryIconRenderer extends EventEmitter {
             const resolvePromises = [];
             iconAssets.forEach((assetUrl) => {
                 if (assetUrl && assetUrl.assets.image_src) {
-                    resolvePromises.push(this._fetchMedia(assetUrl.assets.image_src));
+                    resolvePromises.push(this._fetchMedia(assetUrl.assets.image_src, { includeCredentials: true }));
                 } else {
                     resolvePromises.push(Promise.resolve(null));
                 }

@@ -160,6 +160,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
                 mediaFormat: MediaFormats.getFormat(),
                 mediaType: AUDIO,
                 returnPid: false,
+                includeCredentials: true,
             })
             if (this.phase !== RENDERER_PHASES.CONSTRUCTING) {
                 logger.warn('trying to populate audio element that has been destroyed');

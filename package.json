@@ -1,6 +1,6 @@
 {
   "name": "@bbc/storyplayer",
-  "version": "1.1.3",
+  "version": "1.1.23",
   "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/@bbc/object-based-media-schema)",
   "main": "dist/storyplayer.js",
   "keywords": [
@@ -13,14 +13,14 @@
     "personalised"
   ],
   "scripts": {
-    "build": "webpack --env.node_env=development",
+    "build": "webpack --env.node_env=production",
     "build:electron": "webpack --env.node_env=development --env.platform=electron",
     "build:electron -m": "webpack --env.platform=electron --env.mangle=true --env.node_env=production",
     "test": "concurrently --names \"eslint,jest,sass-lint\" -c \"blue.bgWhite,magenta.bgWhite,black.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:jest\" \"yarn test:sass-lint\"",
     "test:eslint": "eslint src/ spec/",
     "test:jest": "jest",
     "test:sass-lint": "sass-lint -v",
-    "prepublishOnly": "yarn run test && webpack --env.node_env=production",
+    "prepublishOnly": "yarn run test && yarn run build",
     "dev": "webpack --env.node_env=development --watch --watch-poll 500 --progress --profile --bail"
   },
   "repository": {

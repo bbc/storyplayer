@@ -132,7 +132,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                     this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
                         .then((icon) => {
                             if (icon.assets.image_src) {
-                                return this._fetchMedia(icon.assets.image_src);
+                                return this._fetchMedia(icon.assets.image_src, { includeCredentials: true });
                             }
                             return Promise.resolve();
                         })
@@ -175,7 +175,7 @@ export default class SwitchableRenderer extends BaseRenderer {
                         this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
                             .then((icon) => {
                                 if (icon.assets.image_src) {
-                                    this._fetchMedia(icon.assets.image_src)
+                                    this._fetchMedia(icon.assets.image_src, { includeCredentials: true })
                                         .then(setRepresentationControl)
                                         .catch((err) => { logger.error(err, 'Notfound'); });
                                 }
