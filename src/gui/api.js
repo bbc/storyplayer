@@ -61,10 +61,7 @@ export default class Api extends EventEmitter {
         this._controller.on(PlayerEvents.START_BUTTON_CLICKED, this._player._startButtonHandler);
 
         // outgoing events, to render ui
-        this._player.on('UI_RENDER', (e) => {
-            console.log('ANDY need to render something:', e);
-            this._controller.emit('UI_RENDER', e);
-        });
+        this._player.on('UI_RENDER', (e) => this._controller.emit('UI_RENDER', e));
     }
 
 }
