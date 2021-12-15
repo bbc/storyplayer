@@ -214,6 +214,10 @@ class Player extends EventEmitter {
         this._isPausedForBehaviours = false;
 
 
+        // should we be hiding the UI completely?
+        this.guiHide = new URLSearchParams(window.top.location.search).getAll('noUi').length > 0 
+            || this._controller.options?.noUi;
+
         // create the layer elements
         this._createLayerElements();
 
@@ -318,8 +322,7 @@ class Player extends EventEmitter {
 
         // create gui layer we use for buttons and user interactions
         this._guiLayer = createElementWithClass('div', 'gui-layer', ['romper-gui']);
-        const guiHide = new URLSearchParams(window.top.location.search).getAll('noUi').length > 0;
-        if (guiHide) { 
+        if (this.guiHide) { 
             logger.info('hiding UI layer'); 
             // better to not append to this._player (below), but style approach allows debugging
             this._guiLayer.style.display = 'none';
@@ -375,6 +378,7 @@ class Player extends EventEmitter {
             this._icon,
             this._representation,
             this.playoutEngine,
+            this.guiHide,
         );
         this._guiLayer.appendChild(this._controls.getControls());
     }

@@ -50,6 +50,7 @@ const DEFAULT_SETTINGS = {
     privacyNotice: null,
     saveSession: false,
     handleKeys: true,
+    options: {},
 };
 
 // Limited Debugging for iOS webviews
@@ -163,6 +164,7 @@ module.exports = {
             mergedSettings.privacyNotice,
             mergedSettings.saveSession,
             mergedSettings.handleKeys,
+            mergedSettings.options,
         );
     },
 };

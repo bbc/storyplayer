@@ -4,7 +4,7 @@ import { PlayerEvents } from './Player';
 
 export default class Api extends EventEmitter {
 
-/*
+    /*
     'SCRUB_BAR_MOUSE_DOWN', // ignore
     'SCRUB_BAR_CHANGED', // ignore
     'SCRUB_BAR_MOUSE_UP', // ignore
@@ -36,7 +36,7 @@ export default class Api extends EventEmitter {
         social share?
         linkout ?
 
-*/
+    */
     constructor (player, controller) {
         super();
         this._player = player;
@@ -44,7 +44,7 @@ export default class Api extends EventEmitter {
         
         // TODO: also need to log to analytics
 
-        // incoming events from ui
+        // handle incoming events from ui here:
 
         // complex events where need event name and some data
         this._controller.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, (e) => this._player.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, e));

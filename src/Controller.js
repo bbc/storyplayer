@@ -41,6 +41,7 @@ export default class Controller extends EventEmitter {
         privacyNotice: ?string,
         saveSession: ?boolean,
         handleKeys: ?boolean,
+        options: ?Object,
     ) {
         super();
         this._storyId = null;
@@ -70,6 +71,7 @@ export default class Controller extends EventEmitter {
         this._linearStoryPath = [];
         this._createRenderManager();
         this._storyIconRendererCreated = false;
+        this.options = options;
     }
 
     _handleAnalytics(logData: AnalyticsPayload): mixed {

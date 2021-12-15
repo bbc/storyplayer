@@ -52,10 +52,13 @@ class SMPControls extends BaseControls {
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
         playoutEngine: BasePlayoutEngine,
+        guiHide: Boolean,
     ) {
         super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
 
         this._playoutEngine = playoutEngine;
+        
+        this._guiHide = guiHide;
 
         this._smpPlayerInterface = getSMPInterface();
 
@@ -72,7 +75,7 @@ class SMPControls extends BaseControls {
         this._setupAnalytics();
 
         // Controls enabled by default
-        this._controlsEnabled = true
+        this._controlsEnabled = (true && !guiHide);
 
         this._containerDiv = createElementWithClass(
             'div',
@@ -445,8 +448,7 @@ class SMPControls extends BaseControls {
     }
 
     enableControls() {
-        const guiHide = new URLSearchParams(window.top.location.search).getAll('noUi').length > 0;
-        if(this._controlsEnabled !== true && !guiHide) {
+        if(this._controlsEnabled !== true && !this._guiHide) {
             this._uiUpdate({
                 enabled: true,
             })
