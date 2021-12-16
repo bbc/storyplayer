@@ -19,6 +19,7 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer.
 - overrideFormat- Takes either 'hls' or 'dash' Other values are ignored.
 - cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
 - debugUA - Takes 'true' - Creates a div element with the User agent and browser support for formats, and playout engines used.
+- noUi - Takes 'true'; all UI will be hidden (to allow rendering by a third party)
 
 Internal Variables
 ==================

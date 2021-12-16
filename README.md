@@ -29,6 +29,7 @@ Using the library
 * `privacyNotice` (optional, defaults to null) - A string rendered alongside the start button and start image designed to present a privacy warning to users
 * `saveSession` (optional, defaults to false) - A boolean to say whether or not the player should save state and offer to resume when restarted
 * `handleKeys` (optional, defaults to true) - A boolean to say whether keyboard events should be handled by the player
+* `options` (optional) - An object for other options.  Currently allows `noUi: true` to specify that no user interface be shown.
 
 For example, in a React application import the player:
 
