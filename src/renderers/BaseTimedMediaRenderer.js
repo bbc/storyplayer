@@ -213,7 +213,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                     logger.warn('trying to populate video element that has been destroyed');
                 } else {
                     mediaObj.url = mediaUrl
-                    this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
+                    await this._playoutEngine.queuePlayout(this._rendererId, mediaObj);
                 }
             } else {
                 throw new Error('No av source for video');
