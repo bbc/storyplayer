@@ -43,7 +43,8 @@ export const renderTextOverlay = (behaviour, target, callback, controller) => {
             const contentEl = document.createElement('div');
             contentEl.innerHTML = newText.trim();
             const scripts = contentEl.getElementsByTagName('script');
-            scripts.forEach(s => {
+            const scriptEls = Array.from(scripts);
+            scriptEls.forEach(s => {
                 logger.warn(`removing script element from text overlay behaviour ${behaviour.id}`);
                 s.remove();
             });

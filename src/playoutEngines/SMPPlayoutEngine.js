@@ -144,7 +144,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         if (!startNow) this.pause()
     }
 
-    queuePlayout(rendererId: string, mediaObj: Object) {
+    async queuePlayout(rendererId: string, mediaObj: Object) {
         if(mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
             // Handle with Secondary Playout
             this._secondaryPlayoutEngine.queuePlayout(rendererId, mediaObj)
@@ -169,12 +169,14 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         let playlistItem = {}
         // Check if we have subtitles and that they are EBU-TT-D and not WebVTT
         if(
-            "subs_url" in this._media[rendererId].media &&
-            this._media[rendererId].media.subs_url.substr(-4) === ".xml"
-        ) {
-
-            playlistItem.captionsUrl = this._media[rendererId].media.subs_url;
+            "subs_url" in this._media[rendererId].media
+        ) { 
+            const subsAreEbuttFormat = await fetch(this._media[rendererId].media.subs_url)
+                .then(res => res.text())
+                .then(text => text.includes('xmlns="http://www.w3.org/ns/ttml"')); // is this too much?  too little?
+            if (subsAreEbuttFormat) playlistItem.captionsUrl = this._media[rendererId].media.subs_url;
         }
+
         let kind = "programme"
         if(mediaObj.type === MEDIA_TYPES.FOREGROUND_A) {
             kind = "audio"
@@ -225,7 +227,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             }
         }
 
-        playlist.options.useCredentials = ["MPD", "InitializationSegment", "MediaSegment", "Player"];
+        const isPid = /^[a-z0-9]{8}$/.test(url);
+        playlist.options.useCredentials = isPid ? false : ["MPD", "InitializationSegment", "MediaSegment", "Player"];
 
         logger.info(`SMP-SP readyPlaylist: ${rendererId}`)
         this._smpPlayerInterface.readyPlaylist(playlist)
