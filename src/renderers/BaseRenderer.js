@@ -914,10 +914,8 @@ export default class BaseRenderer extends EventEmitter {
                             type: 'link_choice',
                             event_name: PlayerEvents.LINK_CHOSEN,
                             comment: 'fire LINK_CHOSEN event with object { id: narrativeELementId, behaviourId: behaviourId }',
-                            links: { 
-                                ...iconObjects,
-                                behaviourId: behaviour.id,
-                            }
+                            links: iconObjects,
+                            behaviour,
                         } 
                     );
 
