@@ -1551,6 +1551,12 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
+        this.emit('UI_RENDER', 
+            { 
+                type: 'clear_link_choices',
+                comment: 'hide any link choice icons',
+            } 
+        );
         this._numChoices = 0;
         this._choiceIconSet = {};
         this._visibleChoices = {};
