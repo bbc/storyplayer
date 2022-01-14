@@ -1401,7 +1401,8 @@ class Player extends EventEmitter {
             totalTime = totalTime <= 0.5 ? remainingTime : totalTime;
 
             const propRemain = remainingTime / totalTime;
-            const percentRemain = Math.max(0,Math.min(100, 100 * propRemain))
+            const percentRemain = Math.max(0,Math.min(100, 100 * propRemain));
+            this.emit('UI_RENDER', { type: 'choice_countdown_update', percentRemain });
 
             this._countdowner.style.width = `${percentRemain}%`;
             this._countdowner.style.marginLeft = `${(100 - percentRemain)/2}%`;
