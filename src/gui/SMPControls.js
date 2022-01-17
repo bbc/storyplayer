@@ -502,6 +502,10 @@ class SMPControls extends BaseControls {
         // Called from showSeekButtons in player
     }
 
+    focusScrubBar() {
+        // this is for keyboard control on starting; not sure how to actually effect this
+    }
+
     enableScrubBar() {
         if(this._scrubEnabled !== true) {
             this._uiUpdate({
