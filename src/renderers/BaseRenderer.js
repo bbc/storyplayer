@@ -909,7 +909,7 @@ export default class BaseRenderer extends EventEmitter {
                 .then((iconObjects) => {
 
                     this._clearChoices();
-                    this._player.emit('UI_RENDER', 
+                    this._player.emit(RendererEvents.UI_RENDER, 
                         { 
                             type: 'link_choice',
                             event_name: PlayerEvents.LINK_CHOSEN,

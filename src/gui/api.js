@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 
 import { PlayerEvents } from './Player';
+import RendererEvents from '../renderers/RendererEvents';
 
 export default class Api extends EventEmitter {
 
@@ -61,7 +62,7 @@ export default class Api extends EventEmitter {
         this._controller.on(PlayerEvents.START_BUTTON_CLICKED, this._player._startButtonHandler);
 
         // outgoing events, to render ui
-        this._player.on('UI_RENDER', (e) => this._controller.emit('UI_RENDER', e));
+        this._player.on(RendererEvents.UI_RENDER, (e) => this._controller.emit(RendererEvents.UI_RENDER, e));
     }
 
 }

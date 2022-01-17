@@ -14,6 +14,7 @@ const RendererEventNames = [
     'REMOVE_FROM_DOM',
     'SWITCHED_REPRESENTATION',
     'STARTED_COMPLETE_BEHAVIOURS',
+    'UI_RENDER',
 ];
 
 const RendererEvents = {};

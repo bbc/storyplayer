@@ -742,7 +742,7 @@ class Player extends EventEmitter {
     }
 
     _createStartExperienceButton(options: Object) {
-        this.emit('UI_RENDER', 
+        this.emit(RendererEvents.UI_RENDER, 
             { 
                 type: 'start button',
                 event_name: PlayerEvents.START_BUTTON_CLICKED,
@@ -1402,7 +1402,7 @@ class Player extends EventEmitter {
 
             const propRemain = remainingTime / totalTime;
             const percentRemain = Math.max(0,Math.min(100, 100 * propRemain));
-            this.emit('UI_RENDER', { type: 'choice_countdown_update', percentRemain });
+            this.emit(RendererEvents.UI_RENDER, { type: 'choice_countdown_update', percentRemain });
 
             this._countdowner.style.width = `${percentRemain}%`;
             this._countdowner.style.marginLeft = `${(100 - percentRemain)/2}%`;
@@ -1552,7 +1552,7 @@ class Player extends EventEmitter {
     }
 
     clearLinkChoices() {
-        this.emit('UI_RENDER', 
+        this.emit(RendererEvents.UI_RENDER, 
             { 
                 type: 'clear_link_choices',
                 comment: 'hide any link choice icons',
