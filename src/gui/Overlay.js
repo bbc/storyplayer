@@ -88,6 +88,7 @@ class Overlay extends EventEmitter {
                 `${this._name.charAt(0).toUpperCase() + this._name.slice(1)}`,
             );
         }
+        button.setAttribute('spatial-navigation-object', 'transport');
         button.classList.add('romper-button');
         button.classList.add(`romper-${this._name}-button`);
         button.classList.add('romper-inactive');

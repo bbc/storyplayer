@@ -44,6 +44,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._backButton.classList.add('romper-back-button');
         this._backButton.setAttribute('title', 'Back Button');
         this._backButton.setAttribute('aria-label', 'Back');
+        this._backButton.setAttribute('spatial-navigation-object', 'transport');
         const backButtonIconDiv = document.createElement('div');
         backButtonIconDiv.classList.add('romper-button-icon-div');
         backButtonIconDiv.classList.add('romper-back-button-icon-div');
@@ -57,6 +58,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._seekBackButton.classList.add('romper-seek-back-button');
         this._seekBackButton.setAttribute('title', 'Seek Back Button');
         this._seekBackButton.setAttribute('aria-label', 'Seek Back');
+        this._seekBackButton.setAttribute('spatial-navigation-object', 'transport');
         const seekBackButtonIconDiv = document.createElement('div');
         seekBackButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekBackButton.appendChild(seekBackButtonIconDiv);
@@ -69,6 +71,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._playPauseButton.classList.add('romper-play-button');
         this._playPauseButton.setAttribute('title', 'Play Pause Button');
         this._playPauseButton.setAttribute('aria-label', 'Play Pause');
+        this._playPauseButton.setAttribute('spatial-navigation-object', 'transport');
         const playPauseButtonIconDiv = document.createElement('div');
         playPauseButtonIconDiv.classList.add('romper-button-icon-div');
         this._playPauseButton.appendChild(playPauseButtonIconDiv);
@@ -81,6 +84,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._seekForwardButton.classList.add('romper-seek-fwd-button');
         this._seekForwardButton.setAttribute('title', 'Seek Forward Button');
         this._seekForwardButton.setAttribute('aria-label', 'Seek Forward');
+        this._seekForwardButton.setAttribute('spatial-navigation-object', 'transport');
         const seekForwardButtonIconDiv = document.createElement('div');
         seekForwardButtonIconDiv.classList.add('romper-button-icon-div');
         this._seekForwardButton.appendChild(seekForwardButtonIconDiv);
@@ -93,6 +97,7 @@ class NarrativeElementTransport extends EventEmitter {
         this._nextButton.classList.add('romper-next-button');
         this._nextButton.setAttribute('title', 'Next Button');
         this._nextButton.setAttribute('aria-label', 'Next');
+        this._nextButton.setAttribute('spatial-navigation-object', 'transport');
         this._container.appendChild(this._nextButton);
         const nextButtonIconDiv = document.createElement('div');
         nextButtonIconDiv.classList.add('romper-button-icon-div');
