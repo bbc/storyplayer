@@ -34,6 +34,7 @@ import SMPControls from './SMPControls'
 import { ControlEvents } from './BaseControls';
 import ErrorControls from './ErrorControls';
 import { createElementWithClass } from '../documentUtils';
+import SpatialNavigationHandler from './SpatialNavigation';
 
 const PlayerEvents = [
     'VOLUME_CHANGED',
@@ -171,6 +172,8 @@ class Player extends EventEmitter {
 
     userSetForegroundVolume: Number;
 
+    _spatialNavigationHandler;
+
     constructor(
         target: HTMLElement,
         analytics: AnalyticsLogger,
@@ -212,6 +215,9 @@ class Player extends EventEmitter {
         logger.debug("Playout debugging: ON");
         this._isPausedForBehaviours = false;
 
+        // initiate spatial navigation
+        // do we want to include UI?
+        this._spatialNavigationHandler = new SpatialNavigationHandler(true, true);
 
         // create the layer elements
         this._createLayerElements();
@@ -430,6 +436,11 @@ class Player extends EventEmitter {
             }
         }
 
+        if (event.code === 'ArrowUp') this._spatialNavigationHandler.goUp();
+        if (event.code === 'ArrowRight') this._spatialNavigationHandler.goRight();
+        if (event.code === 'ArrowLeft') this._spatialNavigationHandler.goLeft();
+        if (event.code === 'ArrowDown' ) this._spatialNavigationHandler.goDown();
+
         if(!this._keyboardActiveTimeout) {
             this._overlaysElement.classList.add('keyboard-active');
         } else {
@@ -560,6 +571,7 @@ class Player extends EventEmitter {
         resumeButton.classList.add('romper-resume-button');
         resumeButton.setAttribute('title', 'Resume and accept terms');
         resumeButton.setAttribute('aria-label', 'Resume');
+        resumeButton.setAttribute('spatial-navigation-object', 'content');
 
         const resumeButtonDiv = document.createElement('div');
         resumeButtonDiv.classList.add('romper-continue-control');
@@ -571,6 +583,7 @@ class Player extends EventEmitter {
         restartButton.classList.add('romper-restart-button');
         restartButton.setAttribute('title', 'Restart and accept terms');
         restartButton.setAttribute('aria-label', 'Restart');
+        restartButton.setAttribute('spatial-navigation-object', 'content');
 
         const restartButtonDiv = document.createElement('div');
         restartButtonDiv.classList.add('romper-continue-control');
@@ -736,6 +749,7 @@ class Player extends EventEmitter {
         this._startExperienceButton.classList.add(options.button_class);
         this._startExperienceButton.setAttribute('title', 'Play and accept terms');
         this._startExperienceButton.setAttribute('aria-label', 'Start');
+        this._startExperienceButton.setAttribute('spatial-navigation-object', 'content');
 
         const startButtonIconHolder = document.createElement('div');
         this._startExperienceButton.appendChild(startButtonIconHolder);
@@ -1100,6 +1114,7 @@ class Player extends EventEmitter {
         muteButton.classList.add('romper-mute-button');
         muteButton.setAttribute('tabindex', '2');
         muteButton.setAttribute('aria-label', 'Mute');
+        muteButton.setAttribute('spatial-navigation-object', 'transport');
         muteButton.appendChild(document.createElement('div'));
         const levelSpan = document.createElement('span');
         levelSpan.classList.add('romper-volume-level');
@@ -1158,6 +1173,7 @@ class Player extends EventEmitter {
 
         const representationButton = document.createElement('button');
         representationButton.setAttribute('aria-label', `switch to ${label}`);
+        representationButton.setAttribute('spatial-navigation-object', 'transport');
         const representationIcon = document.createElement('img');
         if (src !== '') {
             representationIcon.src = src;
@@ -1402,6 +1418,7 @@ class Player extends EventEmitter {
     ) {
         const iconControl = document.createElement('button');
         iconControl.classList.add('romper-icon-control');
+        iconControl.setAttribute('spatial-navigation-object', 'transport');
 
         const icon = document.createElement('img');
         if (src !== '') {
