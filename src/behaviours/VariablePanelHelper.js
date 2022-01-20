@@ -16,6 +16,7 @@ const _getLongListVariableSetter = (
 
     const options = variableDecl.values;
     const varInputSelect = document.createElement('select');
+    varInputSelect.setAttribute('spatial-navigation-object', 'content');
 
     options.forEach((optionValue) => {
         const optionElement = document.createElement('option');
@@ -50,8 +51,10 @@ const _getBooleanVariableSetter = (
 
     const yesElement = document.createElement('button');
     yesElement.setAttribute('type', 'button');
+    yesElement.setAttribute('spatial-navigation-object', 'content');
     const noElement = document.createElement('button');
     noElement.setAttribute('type', 'button');
+    noElement.setAttribute('spatial-navigation-object', 'content');
 
     const setSelected = (varVal) => {
         if (varVal) {
@@ -95,6 +98,7 @@ const _getIntegerVariableSetter = (
 
     const varIntInput = document.createElement('input');
     varIntInput.type = 'number';
+    varIntInput.setAttribute('spatial-navigation-object', 'content');
 
     getVariableValue(varName)
         .then((varValue) => {
@@ -141,6 +145,7 @@ const _getNumberRangeVariableSetter = (
     slider.type = 'range';
     slider.classList.add('romper-var-form-slider');
     slider.id = `variable-input-${varName}`;
+    slider.setAttribute('spatial-navigation-object', 'content');
 
     sliderDiv.appendChild(minSpan);
     sliderDiv.appendChild(slider);
@@ -301,14 +306,17 @@ const createVarPanelElements = (formTitle, backgroundColour): Object => {
     okButton.type = 'button';
     okButton.classList.add('var-next');
     okButton.value = 'Next';
+    okButton.setAttribute('spatial-navigation-object', 'content');
     variablePanelElement.appendChild(okButtonContainer);
 
     // back button
     const backButton = document.createElement('input');
     backButton.type = 'button';
     backButton.value = 'Back';
+    backButton.disabled = true;
     backButton.classList.add('var-back');
     backButton.classList.add('romper-var-form-button');
+    backButton.setAttribute('spatial-navigation-object', 'content');
 
     const statusSpan = document.createElement('span');
     statusSpan.classList.add('var-count');
@@ -434,8 +442,10 @@ export const buildPanel = (
                 currentQuestion = targetId;
                 if (currentQuestion > 0) {
                     backButton.classList.add('active');
+                    backButton.disabled = false;
                 } else {
                     backButton.classList.remove('active');
+                    backButton.disabled = true;
                 }
                 statusText = `${currentQuestion + 1} of ${behaviourVariables.length}`;
                 statusSpan.textContent = statusText;
