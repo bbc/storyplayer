@@ -13,17 +13,28 @@ const getOverlap = (minA, maxA, minB, maxB) => {
     return Math.min(...[maxB - minA, maxA - minA]);
 }
 
+const getEuclidianDistance = (cxa, cya, cxb, cyb) => {
+    const xDist = cxa - cxb;
+    const yDist = cya - cyb;
+    return Math.sqrt((xDist * xDist) + (yDist * yDist))
+}
+
 const changeFocusHorizontal = (focusedElement, otherElements, goRight) => {
     // current: focusedElement
-    const { minY, maxY, centreX } = getElementScope(focusedElement);
+    const { minY, maxY, centreX, centreY } = getElementScope(focusedElement);
 
     // find all elements that have some vertical overlap with current
     // overlap at least 50% of height of one of the elements
-    const verticalOverlaps = otherElements.filter(otherElement => {
+    let verticalOverlaps = otherElements.filter(otherElement => {
         const { minY: minYOther, maxY: maxYOther } = getElementScope(otherElement);
         const overlap = getOverlap(minY, maxY, minYOther, maxYOther);
         return (overlap / (maxY - minY)) > 0.5|| (overlap / (maxYOther - minYOther)) > 0.5; 
     });
+
+    if (verticalOverlaps.length === 0) {
+        // none found overlapping, take whatever!
+        verticalOverlaps = otherElements;
+    }
 
     const overlapToSide = verticalOverlaps
         .filter(e => {
@@ -32,27 +43,29 @@ const changeFocusHorizontal = (focusedElement, otherElements, goRight) => {
             return goRight ? (cxOther > centreX) : (cxOther < centreX);
         })
         .sort((a, b) => {
-            const { centreX: cxa } = getElementScope(a);
-            const { centreX: cxb } = getElementScope(b);
-            const directionFactor = goRight ? 1 : -1
-            const distanceA = (cxa - centreX) * directionFactor;
-            const distanceB = (cxb - centreX) * directionFactor;
-            // sort by closeness
-            // should probably select according to vertical overlap too, if competition
-            return distanceA - distanceB
+            const { centreY: cya, centreX: cxa } = getElementScope(a);
+            const { centreY: cyb, centreX: cxb } = getElementScope(b);
+            const distanceA = getEuclidianDistance(centreX, centreY, cxa, cya);
+            const distanceB = getEuclidianDistance(centreX, centreY, cxb, cyb);
+            return distanceA - distanceB;
         });
     if (overlapToSide.length > 0) overlapToSide[0].focus();
 }
 
 const changeFocusVertical = (focusedElement, otherElements, goUp) => {
-    const { minX, maxX, centreY } = getElementScope(focusedElement);
+    const { minX, maxX, centreY, centreX } = getElementScope(focusedElement);
 
     // find all elements that have some vertical overlap with current
-    const horizontalOverlaps = otherElements.filter(otherElement => {
+    let horizontalOverlaps = otherElements.filter(otherElement => {
         const { minX: minXOther, maxX: maxXOther } = getElementScope(otherElement);
         const overlap = getOverlap(minX, maxX, minXOther, maxXOther);
         return (overlap / (maxX - minX)) > 0.5 || (overlap / (maxXOther - minXOther)) > 0.5; 
     });
+
+    if (horizontalOverlaps.length === 0) {
+        // none found overlapping, take whatever!
+        horizontalOverlaps = otherElements;
+    }
 
     const overlaps = horizontalOverlaps
         .filter(e => {
@@ -61,14 +74,11 @@ const changeFocusVertical = (focusedElement, otherElements, goUp) => {
             return goUp ? (cyOther > centreY) : (cyOther < centreY);
         })
         .sort((a, b) => {
-            const { centreY: cya } = getElementScope(a);
-            const { centreY: cyb } = getElementScope(b);
-            // sort by closeness
-            const directionFactor = goUp ? 1 : -1
-            const distanceA = (cya - centreY) * directionFactor;
-            const distanceB = (cyb - centreY) * directionFactor;
-            // should probably select according to vertical overlap too, if competition
-            return distanceB - distanceA;
+            const { centreY: cya, centreX: cxa } = getElementScope(a);
+            const { centreY: cyb, centreX: cxb } = getElementScope(b);
+            const distanceA = getEuclidianDistance(centreX, centreY, cxa, cya);
+            const distanceB = getEuclidianDistance(centreX, centreY, cxb, cyb);
+            return distanceA - distanceB;
         });
     if (overlaps.length > 0) overlaps[0].focus();
 }
@@ -112,24 +122,33 @@ class SpatialNavigationHandler {
     goLeft() {
         const { focusedElement, otherElements } = this._getElements();
         if (!focusedElement) return;
+        if (focusedElement.nodeName === 'INPUT' && focusedElement.type === 'range') return;
         changeFocusHorizontal(focusedElement, otherElements, false);
     }
 
     goRight() {
         const { focusedElement, otherElements } = this._getElements();
         if (!focusedElement) return;
+        // if focussed is scrub bar, var form slider or volume
+        // need to move slider, not move focus
+        // what is UX?  maybe enter, then move, then enter???
+        if (focusedElement.nodeName === 'INPUT' && focusedElement.type === 'range') return;
         changeFocusHorizontal(focusedElement, otherElements, true);
     }
 
     goUp() {
         const { focusedElement, otherElements } = this._getElements();
         if (!focusedElement) return;
+        // if focussed is a dropdown...
+        if (focusedElement.nodeName === 'SELECT') return;
         changeFocusVertical(focusedElement, otherElements, false);
     }
 
     goDown() {
         const { focusedElement, otherElements } = this._getElements();
         if (!focusedElement) return;
+        // if focussed is a dropdown up/down should change selection, not move focus
+        if (focusedElement.nodeName === 'SELECT') return;
         changeFocusVertical(focusedElement, otherElements, true);
     }
 
@@ -138,43 +157,5 @@ class SpatialNavigationHandler {
         if (focusedElement) focusedElement.click();
     }
 }
-
-// const handleSpatialNavigation = (eventCode) => {
-//     console.log('ANDY spatial nav')
-//     // add data id to each 'entity' to be interacted with
-    
-//     // get all elements with given data
-//     const taggedTransportEls = document.querySelectorAll('[spatial-navigation-object="transport"]');
-//     const taggedContentEls = document.querySelectorAll('[spatial-navigation-object="content"]');
-
-//     // console.log('ANDY spatial UIs', taggedEls);
-//     // if (taggedEls.length <= 1) return;
-
-//     const basicUiComponents = Array.from(taggedTransportEls);
-//     const contentUiComponents = Array.from(taggedContentEls);
-//     const uiComponents = [...basicUiComponents, ...contentUiComponents];
-//     let focusedElement = uiComponents.find(e => e === document.activeElement);
-//     if (!focusedElement) {
-//         // set focus to btlr?
-//         focusedElement = uiComponents[0] || undefined;
-//         console.log('ANDY no element focused', focusedElement);
-//     }
-
-//     const otherElements = uiComponents
-//         .filter(e => e !== focusedElement)
-//         .filter(e => !e.disabled);
-
-//     // which is focused?
-//     // where is LRUD?
-//     if (eventCode === 'ArrowRight') {
-//         changeFocusHorizontal(focusedElement, otherElements, true);
-//     } else if (eventCode === 'ArrowLeft') {
-//         changeFocusHorizontal(focusedElement, otherElements, false);
-//     } else if (eventCode === 'ArrowUp' ) {
-//         changeFocusVertical(focusedElement, otherElements, false);
-//     } else if (eventCode === 'ArrowDown') {
-//         changeFocusVertical(focusedElement, otherElements, true);
-//     }
-// }
 
 export default SpatialNavigationHandler;
