@@ -46,18 +46,23 @@ class SMPControls extends BaseControls {
 
     oldOpenVol: Function;
 
+    _useExternalTransport: boolean;
+
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
         playoutEngine: BasePlayoutEngine,
+        useExternalTransport: boolean,
     ) {
         super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
 
         this._playoutEngine = playoutEngine;
 
         this._smpPlayerInterface = getSMPInterface();
+
+        this._useExternalTransport = useExternalTransport;
 
         // Previous Button
         this._smpPlayerInterface.addEventListener("previousRequested", () => {
@@ -72,7 +77,7 @@ class SMPControls extends BaseControls {
         this._setupAnalytics();
 
         // Controls enabled by default
-        this._controlsEnabled = true
+        this._controlsEnabled = (true && !this._useExternalTransport)
 
         this._containerDiv = createElementWithClass(
             'div',
@@ -445,7 +450,7 @@ class SMPControls extends BaseControls {
     }
 
     enableControls() {
-        if(this._controlsEnabled !== true) {
+        if(this._controlsEnabled !== true && !this._useExternalTransport) {
             this._uiUpdate({
                 enabled: true,
             })

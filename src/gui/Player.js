@@ -215,6 +215,10 @@ class Player extends EventEmitter {
         logger.debug("Playout debugging: ON");
         this._isPausedForBehaviours = false;
 
+        this.useExternalTransport = 
+            new URLSearchParams(window.top.location.search).getAll('noUi').length > 0 
+            || this._controller.options?.noUi;
+
         // initiate spatial navigation
         // do we want to include UI?
         this._spatialNavigationHandler = new SpatialNavigationHandler(true, true);
@@ -373,6 +377,7 @@ class Player extends EventEmitter {
             this._icon,
             this._representation,
             this.playoutEngine,
+            this.useExternalTransport,
         );
         this._guiLayer.appendChild(this._controls.getControls());
     }
@@ -385,9 +390,10 @@ class Player extends EventEmitter {
             this._icon,
             this._representation,
         );
-        this._guiLayer.appendChild(this._controls.getControls());
-        this._guiLayer.appendChild(this._controls.getActivator());
-
+        if (!this.useExternalTransport) {
+            this._guiLayer.appendChild(this._controls.getControls());
+            this._guiLayer.appendChild(this._controls.getActivator());
+        }
         this._player.addEventListener('touchend', this._handleTouchEndEvent.bind(this));
     }
 
@@ -436,6 +442,7 @@ class Player extends EventEmitter {
             }
         }
 
+        // TODO: will also need to listen for these events separately, e.g., from PX
         if (event.code === 'ArrowUp') this._spatialNavigationHandler.goUp();
         if (event.code === 'ArrowRight') this._spatialNavigationHandler.goRight();
         if (event.code === 'ArrowLeft') this._spatialNavigationHandler.goLeft();
@@ -1583,6 +1590,7 @@ class Player extends EventEmitter {
     }
 
     disableControls() {
+        this._controller.emit('HIDE_TRANSPORT_CONTROLS');
         this._controls.disableControls();
     }
 
