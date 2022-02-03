@@ -696,7 +696,7 @@ $start-button-size: 15vw;
 
   .romper-link-choice-overlay {
     background: linear-gradient($transparent 0%, $forty-percent-black 20%, $ninety-percent-black 100%);
-    bottom: 100px;
+    bottom: 0;
     display: flex;
     left: 0;
     min-height: 10%;
@@ -1232,7 +1232,6 @@ $start-button-size: 15vw;
   width: 80%;
 
   &.left {
-    display: none;
     margin-left: -100%;
     opacity: 0;
     pointer-events: none;
@@ -1240,7 +1239,6 @@ $start-button-size: 15vw;
   }
 
   &.right {
-    display: none;
     margin-left: 100%;
     opacity: 0;
     pointer-events: none;
