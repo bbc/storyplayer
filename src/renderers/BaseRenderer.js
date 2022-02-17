@@ -358,13 +358,16 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         this._setPhase(RENDERER_PHASES.MAIN);
         this._player.exitStartBehaviourPhase();
+        this._clearBehaviourElements();
+        
+        this._runDuringBehaviours(); // queue up all during events
+        this._serviceTimedEvents(); // run any that should start at 0
+
         clearInterval(this._timedEventsInterval);
         this._timedEventsInterval = setInterval(this._serviceTimedEvents, TIMER_INTERVAL);
         this.emit(RendererEvents.STARTED);
-        this._clearBehaviourElements();
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
-        this._runDuringBehaviours();
         this._player.hideSeekButtons();
     }
 
@@ -755,7 +758,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _runDuringBehaviours() {
-        // run during behaviours
+        // run during behaviours (add them to the queue to be run at appropriate time)
         if (this._representation.behaviours && this._representation.behaviours.during) {
             const duringBehaviours = this._representation.behaviours.during;
             duringBehaviours.forEach((behaviour) => {

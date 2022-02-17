@@ -19,8 +19,6 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
 
     _enableScrubBar: Function;
 
-    _visible: boolean;
-
     _duration: number;
 
     constructor(
@@ -61,7 +59,6 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
 
         const duration = this.getDuration();
         this._playoutEngine.startNonAVPlayout(this._rendererId, duration)
-        this._visible = true;
         this._setVisibility(true);
         return true;
     }
@@ -100,15 +97,7 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
         if (!needToEnd) return false;
         this._playoutEngine.stopNonAVPlayout(this._rendererId)
 
-        this._visible = false;
-        // Hack to make image transitions smooth (preventing showing of black background with
-        // loading wheel). For some reason the DOM transition on images is slow, not sure why this
-        // is only the case for images and not video but this fixes it.
-        setTimeout(() => {
-            if (!this._visible) {
-                this._setVisibility(false);
-            }
-        }, 100);
+        this._setVisibility(false);
         return true;
     }
 
