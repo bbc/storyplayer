@@ -442,7 +442,7 @@ class Player extends EventEmitter {
             }
         }
 
-        // TODO: will also need to listen for these events separately, e.g., from PX
+        // PX will emit standard html key events
         if (event.code === 'ArrowUp') this._spatialNavigationHandler.goUp();
         if (event.code === 'ArrowRight') this._spatialNavigationHandler.goRight();
         if (event.code === 'ArrowLeft') this._spatialNavigationHandler.goLeft();
