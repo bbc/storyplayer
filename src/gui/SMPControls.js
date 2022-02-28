@@ -441,6 +441,7 @@ class SMPControls extends BaseControls {
 
     /* exposing functionality to change how buttons look/feel */
     disableControls() {
+        this._smpPlayerInterface.dispatchEvent({ type: 'PLUGIN_UI', myData: "DISABLE_CONTROLS"});
         if(this._controlsEnabled !== false) {
             this._uiUpdate({
                 enabled: false,
@@ -450,6 +451,7 @@ class SMPControls extends BaseControls {
     }
 
     enableControls() {
+        this._smpPlayerInterface.dispatchEvent({ type: 'PLUGIN_UI', myData: "ENABLE_CONTROLS"});
         if(this._controlsEnabled !== true && !this._useExternalTransport) {
             this._uiUpdate({
                 enabled: true,

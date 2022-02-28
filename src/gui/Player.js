@@ -1590,7 +1590,6 @@ class Player extends EventEmitter {
     }
 
     disableControls() {
-        this._controller.emit('HIDE_TRANSPORT_CONTROLS');
         this._controls.disableControls();
     }
 
