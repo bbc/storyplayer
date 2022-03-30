@@ -152,8 +152,9 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         }
 
         if (
-            (!isLooping && isEnded) ||
-            (isLooping && this._accumulatedMediaTime >= duration)
+            ((!isLooping && isEnded) ||
+            (isLooping && this._accumulatedMediaTime >= duration)) &&
+            !this.inVariablePanel // wait until variable panel completed
         ) {
             // Some players fallback to first frame--force showing ending frame.
             this._playoutEngine.setCurrentTime(this._rendererId, duration-0.1);

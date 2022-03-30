@@ -342,6 +342,10 @@ export const buildPanel = (
     player.setNextAvailable(false);
     renderer.inVariablePanel = true; // eslint-disable-line no-param-reassign
 
+    // does behaviour definition want us to pause?
+    const pauseWhileShowing = (behaviour.pause_content !== undefined) ? behaviour.pause_content : true;
+    if (pauseWhileShowing) renderer.pause();
+
     const {
         overlayImageElement,
         carouselDiv,
@@ -413,6 +417,7 @@ export const buildPanel = (
                     setTimeout(() => {
                         player.enableControls();
                         player.setNextAvailable(true);
+                        if (pauseWhileShowing) renderer.play();
                         return callback();
                     }, 700);
                     return false;
