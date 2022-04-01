@@ -21,6 +21,7 @@ const createLink = (behaviour) => {
     const linkText = behaviour.link_text;
     let linkUrl = behaviour.link_url;
     const linkElement = document.createElement('a');
+    linkElement.setAttribute('spatial-navigation-object', 'content');
 
     // if the link isn't absolute ie http or https we are going to assume authors want 
     // https absolute links

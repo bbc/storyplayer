@@ -1113,6 +1113,7 @@ export default class BaseRenderer extends EventEmitter {
         } else {
             logger.warn(`No icon specified for link to ${targetId} - not rendering`);
         }
+        icon.setAttribute('spatial-navigation-object', 'content');
         if (icon && iconObject.position && iconObject.position.two_d) {
             const {
                 left,
