@@ -23,6 +23,7 @@ class ScrubBar extends BaseScrubBar {
         scrubBar.setAttribute('tabindex', '2');
         scrubBar.setAttribute('aria-label', 'Seek bar');
         scrubBar.setAttribute('data-required-controls', 'false');
+        scrubBar.setAttribute('spatial-navigation-object', 'transport');
         scrubBar.type = 'range';
         scrubBar.id = 'scrub-bar';
         scrubBar.value = '0';
