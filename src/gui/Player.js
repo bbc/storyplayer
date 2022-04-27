@@ -429,7 +429,7 @@ class Player extends EventEmitter {
             this._toggleFullScreen();
             event.preventDefault();
         }
-        if (!this._userInteractionStarted) return;
+        if (!this._userInteractionStarted) return true;
         // numbers activate link choices
         const keyNumber = parseInt(event.key, 10);
         if (!isNaN(keyNumber)) { // eslint-disable-line no-restricted-globals
@@ -457,6 +457,17 @@ class Player extends EventEmitter {
             this._overlaysElement.classList.remove('keyboard-active');
             this._keyboardActiveTimeout = undefined;
         }, 2000);
+
+        // stop vertical scrolling unless ctrl/cmd modifier
+        if(
+            (event.code === 'ArrowUp' ||
+            event.code === 'ArrowDown') &&
+            !(event.ctrlKey || event.metaKey)
+        ) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
     }
 
     setCurrentRenderer(renderer: BaseRenderer) {
