@@ -937,13 +937,13 @@ export default class BaseRenderer extends EventEmitter {
                         this._linkBehaviour.forceChoice = false;
                         callback();
                     }
-                }).catch((err) => {
-                    logger.error(err, 'could not get assets for rendering link icons');
-                    callback();
+                // }).catch((err) => {
+                //     logger.error(err, 'could not get assets for rendering link icons');
+                //     callback();
                 });
-        }).catch((err) => {
-            logger.error(err, 'Could not get next steps for rendering links');
-            callback();
+        // }).catch((err) => {
+        //     logger.error(err, 'Could not get next steps for rendering links');
+        //     callback();
         });
     }
 
@@ -1113,7 +1113,7 @@ export default class BaseRenderer extends EventEmitter {
         } else {
             logger.warn(`No icon specified for link to ${targetId} - not rendering`);
         }
-        icon.setAttribute('spatial-navigation-object', 'content');
+        if (icon) icon.setAttribute('spatial-navigation-object', 'content');
         if (icon && iconObject.position && iconObject.position.two_d) {
             const {
                 left,
