@@ -937,13 +937,13 @@ export default class BaseRenderer extends EventEmitter {
                         this._linkBehaviour.forceChoice = false;
                         callback();
                     }
-                // }).catch((err) => {
-                //     logger.error(err, 'could not get assets for rendering link icons');
-                //     callback();
+                }).catch((err) => {
+                    logger.error(err, 'could not get assets for rendering link icons');
+                    callback();
                 });
-        // }).catch((err) => {
-        //     logger.error(err, 'Could not get next steps for rendering links');
-        //     callback();
+        }).catch((err) => {
+            logger.error(err, 'Could not get next steps for rendering links');
+            callback();
         });
     }
 
