@@ -216,7 +216,8 @@ class Player extends EventEmitter {
         this._isPausedForBehaviours = false;
 
         this.useExternalTransport = 
-            new URLSearchParams(window.top.location.search).getAll('noUi').length > 0 
+            // eslint-disable-next-line no-restricted-globals
+            new URLSearchParams(parent.location.search).getAll('noUi').length > 0 
             || this._controller.options?.noUi;
 
         // initiate spatial navigation
