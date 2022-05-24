@@ -1,6 +1,7 @@
 @import './colours';
 @import './social';
 @import './functions';
+@import './px';
 
 $romper-button-height: 25px;
 $romper-button-width: 25px;
@@ -804,10 +805,6 @@ $start-button-size: 15vw;
         }
       }
     }
-  }
-
-  .romper-link-choice-grid-cell {
-    opacity: 1;
   }
 }
 
