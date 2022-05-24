@@ -86,9 +86,19 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
                 () => {
                     // eslint-disable-next-line max-len
                     logger.info(`Image representation ${this._representation.id} completed time`);
-                    this.complete();
+                    this._testIfInVarPanel();
                 },
             );
+        }
+    }
+
+    // tests if we're in a variable panel, and waits until we've finished before moving on
+    _testIfInVarPanel() {
+        if (!this.inVariablePanel) {
+            this.complete();
+        }
+        else {
+            setTimeout(() => this._testIfInVarPanel(), 100);
         }
     }
 
