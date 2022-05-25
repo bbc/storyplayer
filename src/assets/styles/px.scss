@@ -94,8 +94,8 @@ $px-border-width: 50px;
       }
     }
 
-    .romper-control-unselected {
-
+    .romper-control-unselected,
+    .romper-control-selected {
       &.default {
         &.text {
           border: 5px solid $px-highlight;
@@ -108,11 +108,13 @@ $px-border-width: 50px;
     }
   }
 
-  .romper-player > .romper-gui > .romper-overlays {
-    &.keyboard-active {
-      .romper-link-control {
-        &:focus {
-          border: 5px solid $px-border;
+  .romper-gui > .romper-overlays.keyboard-active { // sass-lint:disable-line force-element-nesting
+    .romper-link-control {
+      &:focus {
+        border: 5px solid $px-border;
+
+        &.default {
+          border: 5px solid $px-highlight;
         }
       }
     }
