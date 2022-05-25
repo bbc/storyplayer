@@ -1,0 +1,128 @@
+$px-button-width: 470px;
+$px-screen-width: 1920px;
+$px-border-width: 50px;
+
+// skin to style choices as a carousel for PX
+.px .romper-player { // sass-lint:disable-line force-element-nesting
+  .romper-link-choice-overlay {
+    display: inline-flex;
+    padding: 85px (2 * $px-border-width) $px-border-width;
+    width: $px-screen-width - (4 * $px-border-width);
+
+    &.focused-3 {
+      .romper-link-control {
+        transform: translate(-$px-button-width, 0);
+      }
+    }
+
+    &.focused-4 {
+      .romper-link-control {
+        transform: translate(-2 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-5 {
+      .romper-link-control {
+        transform: translate(-3 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-6 {
+      .romper-link-control {
+        transform: translate(-4 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-7 {
+      .romper-link-control {
+        transform: translate(-5 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-8 {
+      .romper-link-control {
+        transform: translate(-6 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-9 {
+      .romper-link-control {
+        transform: translate(-7 * $px-button-width, 0);
+      }
+    }
+
+    &.focused-10 {
+      .romper-link-control {
+        transform: translate(-8 * $px-button-width, 0);
+      }
+    }
+
+    .romper-link-control {
+      border: 5px solid $px-border;
+      margin: 0 $px-border-width;
+      max-width: $px-button-width;
+      min-width: $px-button-width;
+
+      &:nth-child(2) {
+        margin-left: auto;
+      }
+
+      &:last-child {
+        margin-right: auto;
+      }
+
+      &:focus {
+        background: $px-border;
+        border: 5px solid $px-border;
+      }
+    }
+
+    .romper-ux-divider {
+      border-bottom: 2px solid $white;
+      left: 0;
+      width: $px-screen-width;
+    }
+
+    .romper-control-selected {
+
+      &.text {
+        border: 5px solid $px-highlight;
+      }
+
+      .romper-link-icon-container {
+        border: 5px solid $px-highlight;
+      }
+    }
+
+    .romper-control-unselected,
+    .romper-control-selected {
+      &.default {
+        &.text {
+          border: 5px solid $px-highlight;
+        }
+
+        .romper-link-icon-container {
+          border: 5px solid $px-highlight;
+        }
+      }
+    }
+  }
+
+  .romper-gui > .romper-overlays.keyboard-active { // sass-lint:disable-line force-element-nesting
+    .romper-link-control {
+      &:focus {
+        border: 5px solid $px-border;
+
+        &.default {
+          border: 5px solid $px-highlight;
+        }
+      }
+    }
+  }
+
+  .romper-ux-countdown {
+    background: $px-highlight;
+    height: 6px;
+    transform: translate(0 -3px);
+  }
+}

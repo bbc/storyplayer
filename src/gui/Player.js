@@ -1278,7 +1278,15 @@ class Player extends EventEmitter {
             behaviourElement.classList.remove('threerow');
         }
 
+        const linkIndex = this._numChoices;
         const linkChoiceControl = document.createElement('button');
+        linkChoiceControl.onfocus = () => { 
+            const linkChoices = this.getLinkChoiceElement()[0];
+            for (let i = 0; i < 10; i += 1) {
+                linkChoices.classList.remove(`focused-${i}`);
+            }
+            linkChoices.classList.add(`focused-${linkIndex}`);
+        }
         linkChoiceControl.id = `romper-link-choice-${id}`;
         linkChoiceControl.tabIndex = 2;
         const containerPromise = new Promise((resolve) => {
