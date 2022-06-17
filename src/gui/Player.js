@@ -215,10 +215,13 @@ class Player extends EventEmitter {
         logger.debug("Playout debugging: ON");
         this._isPausedForBehaviours = false;
 
-        this.useExternalTransport = 
+        this.useExternalTransport = () => {
             // eslint-disable-next-line no-restricted-globals
-            new URLSearchParams(parent.location.search).getAll('noUi').length > 0 
-            || this._controller.options?.noUi;
+            const useExternal = new URLSearchParams(parent.location.search).getAll('noUi').length > 0 
+                || this._controller.options?.noUi;
+            if (useExternal === undefined) return false;
+            return useExternal;
+        }
 
         // initiate spatial navigation
         // do we want to include UI?

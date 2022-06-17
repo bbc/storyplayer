@@ -41,6 +41,7 @@ export default class Controller extends EventEmitter {
         privacyNotice: ?string,
         saveSession: ?boolean,
         handleKeys: ?boolean,
+        options: ?Object,
     ) {
         super();
         this._storyId = null;
@@ -63,6 +64,8 @@ export default class Controller extends EventEmitter {
 
         this._analyticsHandler = new AnalyticsHandler(analytics, this);
         this._handleAnalytics = this._handleAnalytics.bind(this);
+
+        this.options = options;
 
         this._assetUrls = assetUrls;
         this._privacyNotice = privacyNotice;
@@ -102,6 +105,10 @@ export default class Controller extends EventEmitter {
         } else {
             this.start(restartStoryId, initialState);
         }
+    }
+
+    updateOptions(newOptions: Object) {
+        this.options = newOptions;
     }
 
     /**

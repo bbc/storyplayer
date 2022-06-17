@@ -54,7 +54,7 @@ class SMPControls extends BaseControls {
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
         playoutEngine: BasePlayoutEngine,
-        useExternalTransport: boolean,
+        useExternalTransport: function,
     ) {
         super(logUserInteraction, volumeOverlay, chapterOverlay, switchableOverlay);
 
@@ -77,7 +77,7 @@ class SMPControls extends BaseControls {
         this._setupAnalytics();
 
         // Controls enabled by default
-        this._controlsEnabled = (true && !this._useExternalTransport)
+        this._controlsEnabled = (true && !this._useExternalTransport())
 
         this._containerDiv = createElementWithClass(
             'div',
@@ -245,7 +245,7 @@ class SMPControls extends BaseControls {
             chromecast: { enabled: false },
             controls: {
                 volumeDismissTime: 5000,
-                enabled: true,
+                enabled: !this._useExternalTransport(),
                 spaceControlsPlayback: true,
                 availableOnMediaEnded: true,
                 includeNextButton: true,
@@ -452,7 +452,7 @@ class SMPControls extends BaseControls {
 
     enableControls() {
         this._smpPlayerInterface.dispatchEvent({ type: 'PLUGIN_UI', myData: "ENABLE_CONTROLS"});
-        if(this._controlsEnabled !== true && !this._useExternalTransport) {
+        if(this._controlsEnabled !== true && !this._useExternalTransport()) {
             this._uiUpdate({
                 enabled: true,
             })
@@ -504,6 +504,10 @@ class SMPControls extends BaseControls {
 
     showScrubBar() {
         // Called from showSeekButtons in player
+    }
+
+    focusScrubBar() {
+        // can't do this
     }
 
     enableScrubBar() {
