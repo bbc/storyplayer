@@ -433,6 +433,14 @@ class Player extends EventEmitter {
             this._toggleFullScreen();
             event.preventDefault();
         }
+
+        // PX will emit standard html key events
+        // need these here to allow PX users to choose restart/resume
+        if (event.code === 'ArrowUp') this._spatialNavigationHandler.goUp();
+        if (event.code === 'ArrowRight') this._spatialNavigationHandler.goRight();
+        if (event.code === 'ArrowLeft') this._spatialNavigationHandler.goLeft();
+        if (event.code === 'ArrowDown' ) this._spatialNavigationHandler.goDown();
+
         if (!this._userInteractionStarted) return true;
         // numbers activate link choices
         const keyNumber = parseInt(event.key, 10);
@@ -445,12 +453,6 @@ class Player extends EventEmitter {
                 this._visibleChoices[keyNumber].dispatchEvent(newMouseEvent, true);
             }
         }
-
-        // PX will emit standard html key events
-        if (event.code === 'ArrowUp') this._spatialNavigationHandler.goUp();
-        if (event.code === 'ArrowRight') this._spatialNavigationHandler.goRight();
-        if (event.code === 'ArrowLeft') this._spatialNavigationHandler.goLeft();
-        if (event.code === 'ArrowDown' ) this._spatialNavigationHandler.goDown();
 
         if(!this._keyboardActiveTimeout) {
             this._overlaysElement.classList.add('keyboard-active');
@@ -664,6 +666,7 @@ class Player extends EventEmitter {
             this._continueModalLayer.classList.add('show');
             this._continueModalContent.classList.add('show');
         }
+        resumeButton.focus();
     }
 
     // TODO: this needs proper testing!
