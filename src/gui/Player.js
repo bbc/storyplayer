@@ -217,7 +217,7 @@ class Player extends EventEmitter {
 
         this.useExternalTransport = () => {
             // eslint-disable-next-line no-restricted-globals
-            const useExternal = new URLSearchParams(parent.location.search).getAll('noUi').length > 0 
+            const useExternal = new URLSearchParams(parent.location.search).getAll('noUi').length > 0
                 || this._controller.options?.noUi;
             if (useExternal === undefined) return false;
             return useExternal;
@@ -394,7 +394,7 @@ class Player extends EventEmitter {
             this._icon,
             this._representation,
         );
-        if (!this.useExternalTransport) {
+        if (!this.useExternalTransport()) {
             this._guiLayer.appendChild(this._controls.getControls());
             this._guiLayer.appendChild(this._controls.getActivator());
         }
@@ -1286,7 +1286,7 @@ class Player extends EventEmitter {
 
         const linkIndex = this._numChoices;
         const linkChoiceControl = document.createElement('button');
-        linkChoiceControl.onfocus = () => { 
+        linkChoiceControl.onfocus = () => {
             const linkChoices = this.getLinkChoiceElement()[0];
             for (let i = 0; i < 10; i += 1) {
                 linkChoices.classList.remove(`focused-${i}`);
