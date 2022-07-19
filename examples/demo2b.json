@@ -3,7 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "schema_version": "0.3.8",
+            "schema_version": "1.0.12",
             "name": "A Branching Story with user choice",
             "description": "A story with one start and a user-selected choice of either a one node or a two node finish",
             "beginnings": [
@@ -36,7 +36,6 @@
             "name": "Narrative Element 1",
             "description": "The first part of the story",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -70,7 +69,6 @@
             "name": "Narrative Element 2",
             "description": "The middle of the story",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -98,7 +96,6 @@
             "name": "Narrative Element 2a",
             "description": "The shorter middle and end of the story",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -125,7 +122,6 @@
             "name": "Narrative Element 3",
             "description": "The End of the Story",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "meta": {
                 "storygraph": {
@@ -155,7 +151,6 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -170,7 +165,6 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -185,7 +179,6 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -200,7 +193,6 @@
             "tags": {},
             "meta": {},
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Narrative Element ",
             "representations": [
                 {
@@ -215,7 +207,6 @@
             "id": "3ab4c455-5165-4ffc-9152-05755282dad0",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Step 1 video",
             "meta": {},
             "tags": {},
@@ -251,7 +242,6 @@
             "id": "7f2d66ce-d6fd-444f-9268-6d8474632da6",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Video 2",
             "meta": {},
             "tags": {},
@@ -266,7 +256,6 @@
             "id": "C92E36D7-5BB6-4442-9CC1-DDEA56A230CD",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Video 2 alt",
             "meta": {},
             "tags": {},
@@ -281,7 +270,6 @@
             "id": "d936c7ac-7453-4a52-8495-6ca58e944fe8",
             "object_class": "REPRESENTATION",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "Video 3",
             "meta": {},
             "tags": {},
@@ -299,7 +287,6 @@
             "object_class": "ASSET_COLLECTION",
             "description": "Start image",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "name": "",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:image/v1.0",
@@ -313,7 +300,6 @@
             "name": "Demo video 1",
             "description": "",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -326,7 +312,6 @@
             "name": "Video 2",
             "description": "",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -339,7 +324,6 @@
             "name": "Video 2 alt",
             "description": "",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
@@ -352,7 +336,6 @@
             "name": "Step 3 video",
             "description": "",
             "version": "0:0",
-            "schema_version": "0.3.8",
             "tags": {},
             "asset_collection_type": "urn:x-object-based-media:asset-collection-types:simple-av/v1.0",
             "assets": {
