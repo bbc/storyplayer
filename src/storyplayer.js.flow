@@ -96,20 +96,6 @@ export type Representation = {
     meta?: Object,
     choices?: Array<RepresentationChoice>,
     behaviours?: {
-        started?: Array<{
-            id: string,
-            type: string,
-            pauseTime?: number,
-            colour?: string,
-            image?: string,
-            blur?: string,
-            show_ne_to_end?: boolean,
-            one_shot?: boolean,
-            disable_controls?: boolean,
-            show_time_remaining?: boolean,
-            force_choice?: boolean,
-            overlay_class?: string,
-        }>,
         completed?: Array<{
             id: String,
             type: string,

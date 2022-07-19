@@ -1,7 +1,6 @@
 // @flow
 
 const BehaviourTimingsNames = [
-    'started',
     'completed',
 ];
 
