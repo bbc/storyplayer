@@ -644,10 +644,6 @@ export default class RenderManager extends EventEmitter {
         if (newRenderer) {
             // now it has been constructed, start fetching all the media and building the components
             newRenderer.init();
-            newRenderer.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
-                this.updateControlAvailability();
-                newRenderer.start();
-            });
             newRenderer.on(RendererEvents.COMPLETED, () => {
                 this.emit(RendererEvents.COMPLETED);
             });
@@ -693,7 +689,7 @@ export default class RenderManager extends EventEmitter {
         if (this._currentRenderer) {
             const currentRenderer = this._currentRenderer;
             currentRenderer.end();
-            currentRenderer.willStart();
+            currentRenderer.start();
             this.updateControlAvailability();
             // ensure volume persistence
             this._setVolumePersistence();
@@ -740,7 +736,7 @@ export default class RenderManager extends EventEmitter {
         // Update availability of back and next buttons.
         this._showBackIcon();
         this.updateControlAvailability();
-        newRenderer.willStart(newNarrativeElement.name, newNarrativeElement.id);
+        newRenderer.start(newNarrativeElement.name, newNarrativeElement.id);
         // ensure volume persistence
         this._setVolumePersistence();
 

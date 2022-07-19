@@ -7,7 +7,6 @@ const RendererEventNames = [
     'RENDERER_READY',
     'COMPLETED',
     'DESTROYED',
-    'COMPLETE_START_BEHAVIOURS',
     'NEXT_BUTTON_CLICKED',
     'PREVIOUS_BUTTON_CLICKED',
     'ADD_TO_DOM',

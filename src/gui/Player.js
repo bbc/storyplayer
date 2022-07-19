@@ -1548,23 +1548,6 @@ class Player extends EventEmitter {
         this._controls.enableSeekBack();
     }
 
-    enterStartBehaviourPhase(renderer: BaseRenderer) {
-        this.setCurrentRenderer(renderer);
-        this._controls.disableSeekBack();
-        this._pauseForBehaviours();
-        this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_STARTED);
-    }
-
-    exitStartBehaviourPhase() {
-        this._unpauseAfterBehaviours();
-        this._logRendererAction(AnalyticEvents.names.START_BEHAVIOUR_PHASE_ENDED);
-        if (this._userInteractionStarted) this.enableControls();
-        this.showSeekButtons();
-        this.enablePlayButton();
-        this.enableScrubBar();
-        this._enableRepresentationControl();
-    }
-
     enableLinkChoiceControl() {
         const linkChoice = this.getLinkChoiceElement()[0];
         linkChoice.classList.remove('romper-inactive');

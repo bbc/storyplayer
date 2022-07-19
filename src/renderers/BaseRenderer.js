@@ -13,7 +13,6 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import logger from '../logger';
-import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 import { VARIABLE_EVENTS } from '../Events';
 import { buildPanel } from '../behaviours/VariablePanelHelper';
 
@@ -186,7 +185,6 @@ export default class BaseRenderer extends EventEmitter {
         this._hideControls = this._hideControls.bind(this);
         this._showControls = this._showControls.bind(this);
         this._runDuringBehaviours = this._runDuringBehaviours.bind(this);
-        this._runStartBehaviours = this._runStartBehaviours.bind(this);
         this._runSingleDuringBehaviour = this._runSingleDuringBehaviour.bind(this);
         this.addTimeEventListener = this.addTimeEventListener.bind(this);
 
@@ -300,53 +298,6 @@ export default class BaseRenderer extends EventEmitter {
         throw new Error('Need to override this class to run async code and set renderer phase to CONSTRUCTED');
     }
 
-    willStart(elementName: ?string, elementId: ?string): boolean {
-        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
-            setTimeout(() => this.willStart(elementName, elementId), 100);
-            return false;
-        }
-        // eslint-disable-next-line max-len
-        this._setPhase(RENDERER_PHASES.START);
-        this.inVariablePanel = false;
-
-        this.emit(RendererEvents.CONSTRUCTED);
-        this._runStartBehaviours();
-
-        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
-        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
-        if(getSetting(ADD_DETAILS_FLAG)) {
-            const { name, id } = this._representation;
-            this._player.addDetails(elementName, elementId, name, id)
-        }
-        return true;
-    }
-
-    _runStartBehaviours() {
-        this._behaviourRunner = this._representation.behaviours ?
-            new BehaviourRunner(this._representation.behaviours, this) :
-            null;
-        if (!this._behaviourRunner ||
-            !this._behaviourRunner.runBehaviours(
-                BehaviourTimings.started,
-                RendererEvents.COMPLETE_START_BEHAVIOURS,
-            )
-        ) {
-            this._player.enterStartBehaviourPhase(this);
-            // move on now
-            this.emit(RendererEvents.COMPLETE_START_BEHAVIOURS);
-        } else {
-            this._player.enterStartBehaviourPhase(this);
-            // make sure we can see media under any start behaviours
-            this._playoutEngine.setPlayoutVisible(this._rendererId);
-        }
-    }
-
-    /**
-     * An event which fires when this renderer has completed it's part of the experience
-     * (e.g., video finished, or the user has clicked 'skip', etc)
-     *
-     * @event BaseRenderer#complete
-     */
 
     /**
      * When start() is called you are expected to take control of the DOM node in question.
@@ -356,10 +307,18 @@ export default class BaseRenderer extends EventEmitter {
      */
 
     start() {
+        if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
+            setTimeout(() => this.start(), 100);
+            return;
+        }
+
+        this.emit(RendererEvents.CONSTRUCTED);
+
+        this._player.setCurrentRenderer(this);
+        this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
+        this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._setPhase(RENDERER_PHASES.MAIN);
-        this._player.exitStartBehaviourPhase();
-        this._clearBehaviourElements();
-        
+
         this._runDuringBehaviours(); // queue up all during events
         this._serviceTimedEvents(); // run any that should start at 0
 

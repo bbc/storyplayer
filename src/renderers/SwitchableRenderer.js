@@ -82,7 +82,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
-                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
+                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => { // TODO
                         cr.start();
                     });
                     cr.on(RendererEvents.COMPLETED, () => {
@@ -298,7 +298,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
         if (firstChoice) {
-            firstChoice.willStart();
+            firstChoice.start();
         }
     }
 

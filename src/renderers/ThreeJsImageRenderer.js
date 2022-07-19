@@ -64,20 +64,13 @@ export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
         }
     }
 
-    willStart() {
-        const ready = super.willStart();
-        if (!ready) return false;
-        const duration = this.getDuration();
-        this._playoutEngine.startNonAVPlayout(this._rendererId, duration);
-        return true;
-    }
-
     start() {
         super.start();
+        const duration = this.getDuration();
+        this._playoutEngine.startNonAVPlayout(this._rendererId, duration);
         this._threeJSDriver.init();
         this._threeJSDriver.addToScene(this._imageMesh);
 
-        const duration = this.getDuration();
         if (duration === Infinity) {
             logger.info(`360 image representation ${this._representation.id} persistent`);
             this._disablePlayButton();
