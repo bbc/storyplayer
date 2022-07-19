@@ -46,6 +46,9 @@ export const renderMapOverlay = (behaviour, target, callback, controller, analyt
                     from: 'not_set',
                     to: matchid,
                 });
+                const renderer = controller.getCurrentRenderer();
+                // un-pause if clicked during variables panel
+                if (renderer && renderer.inVariablePanel) renderer.play();
                 controller._jumpToNarrativeElement(matchid);
             }
         }
