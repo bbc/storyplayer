@@ -17,7 +17,6 @@ import { SESSION_STATE } from '../SessionManager';
 import {
     getSetting,
     FACEBOOK_BLOCK_FLAG,
-    addDetail,
     scrollToTop,
     preventEventDefault,
     handleButtonTouchEvent,
@@ -139,8 +138,6 @@ class Player extends EventEmitter {
     _aspectRatio: number;
 
     _dogImage: HTMLDivElement;
-
-    _details: ?HTMLDivElement
 
     _loadingLayer: HTMLElement
 
@@ -551,34 +548,6 @@ class Player extends EventEmitter {
             this._dogImage.style.width = `${width}%`;
             this._dogImage.style.height = `${(height/100) * mediaHeight}px`;
         }
-    }
-
-    addDetails(elementName: ?string, elementId: ?string, name: ?string, id: ?string) {
-        if (!this._details) {
-            this._details = document.createElement('div');
-        }
-        // clean up then redo
-        while (this._details.firstChild) {
-            this._details.removeChild(this._details.firstChild);
-        }
-        this._details.className = 'details-overlay';
-        const narrativeElement = addDetail('NE', elementName, elementId);
-        this._details.appendChild(narrativeElement);
-
-        const representation = addDetail('REP', name, id);
-        this._details.appendChild(representation);
-        this._player.appendChild(this._details);
-    }
-
-    addAssetCollectionDetails(assetCollection: Object) {
-        if(!assetCollection) return;
-        if (!this._details) {
-            this._details = document.createElement('div');
-            this._player.appendChild(this._details);
-        }
-        this._details.className = 'details-overlay';
-        const assetCollectionDetail = addDetail('Asset', assetCollection.name, assetCollection.id)
-        this._details.appendChild(assetCollectionDetail);
     }
 
     // eslint-disable-next-line class-methods-use-this

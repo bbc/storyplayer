@@ -15,7 +15,6 @@ Below are the URL parameters that can be used to toggle features in StoryPlayer.
 - overrideActiveBuffering - Takes number in seconds. Changes the number of seconds to buffer media currently playing.
 - debugShaka - Takes 'vv', 'v', 'debug' or 'info'. Sets debug level of Shaka when debugPlayout is on.
 - disableLookahead - 'true' Stops preloading of next/previous elements
-- addDetails - Takes 'true' this inserts the Narrative element name and Id onto the GUI layer in the top right of the player.
 - overrideFormat- Takes either 'hls' or 'dash' Other values are ignored.
 - cache - 'true'/'false' Only on sandbox and test. Toggles whether to fetch the story from the cache or S3 buckets
 - debugUA - Takes 'true' - Creates a div element with the User agent and browser support for formats, and playout engines used.

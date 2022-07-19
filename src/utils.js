@@ -45,7 +45,6 @@ export const getSMPInterface = () => {
     return window.playerInterface;
 }
 
-export const ADD_DETAILS_FLAG = "addDetails"
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
 export const FACEBOOK_BLOCK_FLAG = "overrideWebView"
 export const WEBVIEW_DEBUG_FLAG = "debugWebview"
@@ -69,7 +68,6 @@ export const getSetting = (settingName) => {
     }
 
     switch (settingName) {
-    case ADD_DETAILS_FLAG:
     case FACEBOOK_BLOCK_FLAG:
     case WEBVIEW_DEBUG_FLAG:
     case UA_DEBUG_FLAG:
@@ -104,20 +102,6 @@ export const copySelection = (e: Object) => {
     document.execCommand('copy');
     e.target.focus();
 }
-
-// eslint-disable-next-line class-methods-use-this
-export const addDetail = (key: string, name: ? string, id : ? string) => {
-    const detail = document.createElement('div');
-    detail.className = 'detail'
-    detail.innerText = `${key}: ${name || ''}`;
-    const detailId = document.createElement('input');
-    detailId.value = `${id || ''}`;
-    detailId.readOnly = true;
-    detailId.className = 'detail-input';
-    detailId.onclick = copySelection;
-    detail.appendChild(detailId);
-    return detail;
-};
 
 export const scrollToTop = () => {
     window.setTimeout(() => {

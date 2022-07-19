@@ -736,7 +736,7 @@ export default class RenderManager extends EventEmitter {
         // Update availability of back and next buttons.
         this._showBackIcon();
         this.updateControlAvailability();
-        newRenderer.start(newNarrativeElement.name, newNarrativeElement.id);
+        newRenderer.start();
         // ensure volume persistence
         this._setVolumePersistence();
 
