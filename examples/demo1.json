@@ -3,7 +3,7 @@
         {
             "id": "ea5ac93e-1bc9-4f04-b5b5-f1ba0da9afe5",
             "version": "0:0",
-            "schema_version": "1.0.12",
+            "schema_version": "1.1.0",
             "name": "A Simple Linear Story",
             "description": "A story with a beginning, a middle and an end",
             "beginnings": [
