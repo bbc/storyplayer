@@ -22,7 +22,7 @@ module.exports = {
   // override Airbnb defaults with our own rules
   "rules": {
     "indent": [2, 4],
-    "max-len": [1, 100], // downgrade this to a warning
+    "max-len": [1, 120], // downgrade this to a warning
     "no-confusing-arrow": [1, {"allowParens": true}],
     "no-prototype-builtins": [0],
     "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
