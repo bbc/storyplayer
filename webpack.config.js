@@ -48,11 +48,25 @@ module.exports = env => {
             },
             {
                 test: /\.(jpe?g|png|gif|svg)$/,
-                loader: 'file-loader?name=images/[name].[ext]'
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: 'images/[name].[ext]'
+                        }
+                    }
+                ]
             },
             {
                 test: /\.(eot|ttf|woff|woff2)$/,
-                loader: 'file-loader?name=fonts/[name].[ext]'
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: 'fonts/[name].[ext]'
+                        }
+                    }
+                ]
             }
             ]
         },
@@ -87,7 +101,6 @@ module.exports = env => {
             minimize: true,
             minimizer: [
                 new TerserPlugin({
-                    sourceMap: false,
                     extractComments: false, // To avoid separate file with licenses.
                     terserOptions: {
                         // mangle: {
