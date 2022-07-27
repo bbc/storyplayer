@@ -110,7 +110,6 @@ export default class SwitchableRenderer extends BaseRenderer {
     _initRemainingRenderers() {
         this._choiceRenderers.forEach((choiceRenderer, index) => {
             if (choiceRenderer && index !== this._currentRendererIndex) {
-                console.log(`ANDY init renderer ${index}`, choiceRenderer);
                 choiceRenderer.init();
             }
         });
