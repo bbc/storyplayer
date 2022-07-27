@@ -92,26 +92,18 @@ export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
     }
 
     /**
-     * Called to actually start the renderer
+     * Starts the renderer sets the phase to be RENDERER_PHASES.MEDIA_FINISHED
+     * @extends BaseRenderer#start()
      */
-    willStart() {
-        const ready = super.willStart();
-        if (!ready) return false;
+    start() {
+        super.start();
         this._playoutEngine.startNonAVPlayout(this._rendererId, 0)
 
         this._target.appendChild(this._textDiv);
         this._player.disablePlayButton();
         this._player.disableScrubBar();
         this._setOverflowStyling(this._target.clientHeight);
-        return true;
-    }
-
-    /**
-     * Starts the renderer sets the phase to be RENDERER_PHASES.MEDIA_FINISHED
-     * @extends BaseRenderer#start()
-     */
-    start() {
-        super.start();
+        
         // no duration, so ends immediately
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
     }

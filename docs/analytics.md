@@ -37,8 +37,6 @@ These are events that reflect changes in the renderer.  None of these return any
 
 | name | meaning | from | to |
 | -- | -- | -- | -- |
-| `START_BEHAVIOUR_PHASE_STARTED` | The renderer has started running start behaviours | "not_set" | "not_set" |
-| `START_BEHAVIOUR_PHASE_ENDED` | The renderer has finished running start behaviours | "not_set" | "not_set" |
 | `COMPLETE_BEHAVIOUR_PHASE_STARTED` | The renderer has started running end behaviours | "not_set" | "not_set" |
 | `DURING_BEHAVIOUR_STARTED` | The renderer has started running a during behaviour | behaviour URI | - |
 | `SWITCHABLE_REPRESENTATION_SWITCH` | The renderer has changed representation in a Switchable | previous Representation name | new Representation name |

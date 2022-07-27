@@ -82,9 +82,6 @@ export default class SwitchableRenderer extends BaseRenderer {
             choices.forEach((choiceRenderer) => {
                 if (choiceRenderer) {
                     const cr = choiceRenderer;
-                    cr.on(RendererEvents.COMPLETE_START_BEHAVIOURS, () => {
-                        cr.start();
-                    });
                     cr.on(RendererEvents.COMPLETED, () => {
                         if (!this._nodeCompleted) {
                             this.complete();
@@ -149,43 +146,45 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     // display the buttons as IMG elements in a list in a div
-    _renderSwitchButtons() {
-        this._player.clearAllRepresentationControls();
-        if (this._representation.choices) {
-            this._representation.choices.forEach((choice, idx) => {
-                if (choice.choice_representation &&
-                    choice.choice_representation.asset_collections
-                ) {
-                    const choiceName = choice.choice_representation.name;
-                    const setRepresentationControl = (mediaUrl) => {
-                        this._player.addRepresentationControl(
-                            `${idx}`,
-                            mediaUrl,
-                            choiceName,
-                        );
-                        const currentSelection = this._currentRendererIndex.toString();
-                        this._player.setActiveRepresentationControl(currentSelection);
-                    };
+    async _renderSwitchButtons() {
+        if (!this._representation.choices) return;
 
-                    if (
-                        choice.choice_representation.asset_collections.icon &&
-                        choice.choice_representation.asset_collections.icon.default_id
-                    ) {
-                        // eslint-disable-next-line max-len
-                        this._fetchAssetCollection(choice.choice_representation.asset_collections.icon.default_id)
-                            .then((icon) => {
-                                if (icon.assets.image_src) {
-                                    this._fetchMedia(icon.assets.image_src, { includeCredentials: true })
-                                        .then(setRepresentationControl)
-                                        .catch((err) => { logger.error(err, 'Notfound'); });
-                                }
-                            });
-                    } else {
-                        setRepresentationControl('');
-                    }
+        const urlPromises = this._representation.choices
+            .filter(choice => (choice.choice_representation &&
+                choice.choice_representation.asset_collections
+            ))            
+            .map(async (choice, idx) => {
+                const choiceName = choice.choice_representation.name;
+                let iconUrl = '';
+                if (
+                    choice.choice_representation.asset_collections.icon &&
+                    choice.choice_representation.asset_collections.icon.default_id
+                ) {
+                    const iconAc = await this._fetchAssetCollection(
+                        choice.choice_representation.asset_collections.icon.default_id)
+                    if (iconAc.assets.image_src) iconUrl = await this._fetchMedia(
+                        iconAc.assets.image_src,
+                        { includeCredentials: true },
+                    );
                 }
+                return {
+                    idx,
+                    choiceName,
+                    iconUrl,
+                };
             });
-        }
+        const repIconObjects = await Promise.all(urlPromises);
+        repIconObjects.forEach(repObj => {
+            const { idx, choiceName, iconUrl } = repObj;
+            this._player.addRepresentationControl(
+                `${idx}`,
+                iconUrl,
+                choiceName,
+            );
+        });
+        const currentSelection = this._currentRendererIndex.toString();
+        this._player._enableRepresentationControl();  
+        this._player.setActiveRepresentationControl(currentSelection);
     }
 
     setCurrentTime(time: number) {
@@ -289,6 +288,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
+        super.start();
         this._setPhase(RENDERER_PHASES.MAIN);
         this._initRemainingRenderers();
         this._previousRendererPlayheadTime = 0;
@@ -298,7 +298,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         // start subrenderer for first choice
         const firstChoice = this._choiceRenderers[this._currentRendererIndex];
         if (firstChoice) {
-            firstChoice.willStart();
+            firstChoice.start();
         }
     }
 

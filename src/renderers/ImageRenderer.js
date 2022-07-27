@@ -53,20 +53,13 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
         }
     }
 
-    willStart() {
-        const ready = super.willStart();
-        if (!ready) return false;
-
-        const duration = this.getDuration();
-        this._playoutEngine.startNonAVPlayout(this._rendererId, duration)
-        this._setVisibility(true);
-        return true;
-    }
-
     start() {
         super.start();
 
         const duration = this.getDuration();
+        this._playoutEngine.startNonAVPlayout(this._rendererId, duration)
+        this._setVisibility(true);
+
         if (duration === Infinity) {
             logger.info(`Image representation ${this._representation.id} persistent`);
             this._disablePlayButton();

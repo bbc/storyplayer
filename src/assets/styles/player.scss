@@ -1763,29 +1763,6 @@ $start-button-size: 15vw;
   }
 }
 
-.details-overlay {
-  background-color: $black;
-  color: $white;
-  display: flex;
-  flex-direction: row;
-  font-size: 1em;
-  left: 0;
-  overflow: scroll;
-  position: absolute;
-  top: 2%;
-  z-index: 2000;
-
-  .detail {
-    padding-left: 0.5em;
-  }
-
-  .detail-input {
-    background: $black;
-    border: 0;
-    color: $white;
-  }
-}
-
 .ua-debug {
   height: 200px;
   overflow: scroll;

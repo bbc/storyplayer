@@ -3,7 +3,6 @@
 /* eslint-disable no-unused-vars */
 import Player from '../gui/Player';
 import { isDebug } from '../logger';
-import { getSetting, ADD_DETAILS_FLAG } from '../utils';
 
 
 
@@ -102,16 +101,6 @@ export default class BasePlayoutEngine {
 
         const isLooping = this._media[rendererId].media.loop === true;
         this.setLoopAttribute(rendererId, isLooping);
-
-        if(this._media[rendererId].media.type !== MEDIA_TYPES.BACKGROUND_A) {
-            // eslint-disable-next-line max-len
-            const foregroundId = this._player._currentRenderer._representation.asset_collections.foreground_id;
-            if(getSetting(ADD_DETAILS_FLAG) && foregroundId) {
-                this._player._currentRenderer._fetchAssetCollection(foregroundId).then(fg => {
-                    this._player.addAssetCollectionDetails(fg);
-                });
-            }
-        }
 
         if(this._media[rendererId].media.type === MEDIA_TYPES.FOREGROUND_A) {
             const mediaElement = this._getMediaElement(rendererId);
