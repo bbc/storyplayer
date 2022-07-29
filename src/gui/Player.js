@@ -163,8 +163,6 @@ class Player extends EventEmitter {
 
     _addCountdownToElement: Function;
 
-    _isPausedForBehaviours: boolean;
-
     _controller: Controller;
 
     userSetForegroundVolume: Number;
@@ -210,7 +208,6 @@ class Player extends EventEmitter {
         this._handleFullScreenEvent = this._handleFullScreenEvent.bind(this);
 
         logger.debug("Playout debugging: ON");
-        this._isPausedForBehaviours = false;
 
         this.useExternalTransport = () => {
             // eslint-disable-next-line no-restricted-globals
@@ -921,8 +918,8 @@ class Player extends EventEmitter {
         this._userInteractionStarted = true;
         this._overlaysElement.classList.remove('romper-inactive');
 
-        // can start now if we're not waiting in START behaviours
-        // that means in MAIN, or (for untimed representations) in MEDIA_FINISHED
+        // can start now if we're
+        // in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
             && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
@@ -938,10 +935,6 @@ class Player extends EventEmitter {
         if (startNow && this.playoutEngine.isPlayingNonAV()) {
             // Kick off non-AV that doesn't use a playout engine.
             this._currentRenderer.play();
-        }
-
-        if (this._currentRenderer && this._currentRenderer.phase === RENDERER_PHASES.START) {
-            this._isPausedForBehaviours = true;
         }
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
@@ -1495,22 +1488,6 @@ class Player extends EventEmitter {
         this._controls.disableSeekBack();
         this.disablePlayButton();
         this._disableRepresentationControl();
-    }
-
-    _pauseForBehaviours() {
-        if (this.playoutEngine.isPlaying()) {
-            this._isPausedForBehaviours = true;
-            this.playoutEngine.pause();
-        }
-        this._controls.disablePlayButton();
-    }
-
-    _unpauseAfterBehaviours() {
-        if (this._isPausedForBehaviours) {
-            this._isPausedForBehaviours = false;
-            this.playoutEngine.play();
-        }
-        this._controls.enablePlayButton();
     }
 
     exitCompleteBehaviourPhase() {
