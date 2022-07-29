@@ -435,7 +435,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
     setPlayoutActive(rendererId: string) {
         const rendererPlayoutObj = this._media[rendererId];
-        if (this._media[rendererId].error === true) {
+        if (this._media[rendererId] && this._media[rendererId].error === true) {
             this._player._showErrorLayer()
         }
         if (!rendererPlayoutObj) {
