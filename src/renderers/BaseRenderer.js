@@ -38,7 +38,6 @@ const getBehaviourEndTime = (behaviour: Object) => {
 export const RENDERER_PHASES = {
     CONSTRUCTING: 'CONSTRUCTING',
     CONSTRUCTED: 'CONSTRUCTED',
-    START: 'START',
     MAIN: 'MAIN',
     COMPLETING: 'COMPLETING',
     ENDED: 'ENDED',
@@ -318,6 +317,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.on(PlayerEvents.SEEK_BACKWARD_BUTTON_CLICKED, this._seekBack);
         this._player.on(PlayerEvents.SEEK_FORWARD_BUTTON_CLICKED, this._seekForward);
         this._setPhase(RENDERER_PHASES.MAIN);
+        this._showControls();
 
         this._runDuringBehaviours(); // queue up all during events
         this._serviceTimedEvents(); // run any that should start at 0
@@ -373,18 +373,6 @@ export default class BaseRenderer extends EventEmitter {
             || this.phase === RENDERER_PHASES.ENDED
             || this.phase === RENDERER_PHASES.DESTROYED
         );
-    }
-
-    // if we have any start pauses, complete those behaviours early
-    exitStartPauseBehaviour() {
-        if (!this._behaviourRunner || this._behaviourRunner.eventCounters.started === 0 ) return;
-        const startBehaviours = this._behaviourRunner.behaviours;
-        startBehaviours.forEach((behaviour => {
-            if (behaviour instanceof PauseBehaviour) {
-                behaviour.handleTimeout();
-            }
-        }));
-        this.setInPause(false);
     }
 
     exitCompletePauseBehaviour() {
@@ -492,8 +480,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekBack() {
-        if (this.phase === RENDERER_PHASES.START ||
-            this.phase === RENDERER_PHASES.COMPLETING) {
+        if (this.phase === RENDERER_PHASES.COMPLETING) {
             logger.info('Seek backward button clicked during behaviours - ignoring'); // eslint-disable-line max-len
             return;
         }
@@ -512,11 +499,6 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _seekForward() {
-        if (this.phase === RENDERER_PHASES.START) {
-            logger.info('Seek forward button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
-            this.exitStartPauseBehaviour();
-            return;
-        }
         if (this.phase === RENDERER_PHASES.COMPLETING) {
             logger.info('Seek forward button clicked during infinite end pause - ending element'); // eslint-disable-line max-len
             this.exitCompletePauseBehaviour();
@@ -713,7 +695,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     _showControls() {
-        this._player.enableControls();
+        if (this._player.userInteractionStarted()) this._player.enableControls();
     }
 
     _runDuringBehaviours() {
