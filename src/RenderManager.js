@@ -119,7 +119,11 @@ export default class RenderManager extends EventEmitter {
                 const rend = this._currentRenderer;
                 const choiceTime = rend.getChoiceTime();
                 const { duration, currentTime } = rend.getCurrentTime();
-                if (duration === Infinity){
+                if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
+                    logger.info('Next button clicked during infinite start pause - starting element'); // eslint-disable-line max-len
+                    rend.exitStartPauseBehaviour();
+                }
+                else if (duration === Infinity){
                     logger.info('Next button clicked during infinite representation - completing element'); // eslint-disable-line max-len
                     this._currentRenderer.complete();
                 }
@@ -770,6 +774,10 @@ export default class RenderManager extends EventEmitter {
         }
         if (this._currentRenderer) {
             const rend = this._currentRenderer;
+            if (rend.getInPause() && rend.phase === RENDERER_PHASES.START) {
+                this._player.setNextAvailable(!nextForceHide);
+                return Promise.resolve();
+            }
             if (!rend.inVariablePanel) {
                 return this._controller.getValidNextSteps()
                     .then((nextSteps) => {
