@@ -311,6 +311,11 @@ export default class BaseRenderer extends EventEmitter {
             return false;
         }
 
+        // init the behaviour runner, which will run completed behaviours
+        this._behaviourRunner = this._representation.behaviours ?
+            new BehaviourRunner(this._representation.behaviours, this) :
+            null;
+        
         this.emit(RendererEvents.CONSTRUCTED);
 
         this._player.setCurrentRenderer(this);
@@ -461,6 +466,11 @@ export default class BaseRenderer extends EventEmitter {
             this.play();
         } else if((eventData && eventData.pauseButtonClicked)){
             this.pause();
+        }
+
+        // if we're in a pause behaviour, kill it
+        if (this.getInPause()) {
+            this.setInPause(false);
         }
 
         if (this._playoutEngine.getPlayoutActive(this._rendererId)) {
@@ -1414,8 +1424,10 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    // the renderer is waiting in an infinite pause behaviour
+    // set the renderer in/out of a pause behaviour
     setInPause(paused: boolean) {
+        if (paused) this.pause();
+        else this.play();
         this._inPauseBehaviourState = paused;
     }
 
