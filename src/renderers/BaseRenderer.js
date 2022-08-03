@@ -318,6 +318,11 @@ export default class BaseRenderer extends EventEmitter {
             return false;
         }
 
+        // init the behaviour runner, which will run completed behaviours
+        this._behaviourRunner = this._representation.behaviours ?
+            new BehaviourRunner(this._representation.behaviours, this) :
+            null;
+        
         this.emit(RendererEvents.CONSTRUCTED);
 
         this._player.setCurrentRenderer(this);
