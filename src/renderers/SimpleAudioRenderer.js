@@ -52,8 +52,10 @@ export default class SimpleAudioRenderer extends BaseTimedMediaRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._setImageVisibility(true);
+        return true;
     }
 
     end() {

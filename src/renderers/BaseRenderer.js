@@ -308,7 +308,7 @@ export default class BaseRenderer extends EventEmitter {
     start() {
         if (this.phase === RENDERER_PHASES.CONSTRUCTING) {
             setTimeout(() => this.start(), 100);
-            return;
+            return false;
         }
 
         this.emit(RendererEvents.CONSTRUCTED);
@@ -328,6 +328,7 @@ export default class BaseRenderer extends EventEmitter {
         this._player.connectScrubBar(this);
         this._player.on(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED, this._handlePlayPauseButtonClicked);
         this._player.hideSeekButtons();
+        return true;
     }
 
     end(): boolean {
@@ -579,6 +580,7 @@ export default class BaseRenderer extends EventEmitter {
             try {
                 const assetCollection = await this._fetchAssetCollection(behaviour.asset_collection_id);
                 if (assetCollection.assets.image_src) {
+                    // eslint-disable-next-line max-len
                     const imageUrl = await this._fetchMedia(assetCollection.assets.image_src, { includeCredentials: true });
                     if (imageUrl) {
                         const image = new Image();
@@ -1006,6 +1008,7 @@ export default class BaseRenderer extends EventEmitter {
             const fetcherPromises = [];
             iconObjects.forEach((iconObject) => {
                 if (iconObject && iconObject.ac && iconObject.ac.assets.image_src) {
+                    // eslint-disable-next-line max-len
                     fetcherPromises.push(this._fetchMedia(iconObject.ac.assets.image_src, { includeCredentials: true }));
                 } else {
                     fetcherPromises.push(Promise.resolve(''));

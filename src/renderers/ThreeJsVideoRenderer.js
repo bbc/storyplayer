@@ -52,7 +52,8 @@ export default class ThreeJsVideoRenderer extends BaseTimedMedialRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._setPhase(RENDERER_PHASES.MAIN);
         this._threeJSDriver.init();
         this._startThreeSixtyVideo();
@@ -60,6 +61,7 @@ export default class ThreeJsVideoRenderer extends BaseTimedMedialRenderer {
         this._player.enablePlayButton();
         this._player.enableScrubBar();
         this._player.showSeekButtons();
+        return true;
     }
 
     _startThreeSixtyVideo() {

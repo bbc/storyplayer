@@ -288,7 +288,8 @@ export default class SwitchableRenderer extends BaseRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._setPhase(RENDERER_PHASES.MAIN);
         this._initRemainingRenderers();
         this._previousRendererPlayheadTime = 0;
@@ -300,6 +301,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         if (firstChoice) {
             firstChoice.start();
         }
+        return true;
     }
 
     end() {

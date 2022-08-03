@@ -65,7 +65,8 @@ export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         const duration = this.getDuration();
         this._playoutEngine.startNonAVPlayout(this._rendererId, duration);
         this._threeJSDriver.init();
@@ -94,6 +95,7 @@ export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
                 },
             );
         }
+        return true;
     }
 
     end() {
