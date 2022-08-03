@@ -106,8 +106,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _linkFadeTimeout: TimeoutID;
 
-    _pauseTimeout: TimeoutID;
-
     _willHideControls: Function;
 
     _hideControls: Function;
@@ -359,7 +357,6 @@ export default class BaseRenderer extends EventEmitter {
             logger.warn(e, 'error clearing behaviour elements');
         }
         clearInterval(this._timedEventsInterval);
-        if (this._pauseTimeout) clearTimeout(this._pauseTimeout);
         this._reapplyLinkConditions();
         this._player.exitCompleteBehaviourPhase();
         this._player.removeListener(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent);
@@ -473,7 +470,6 @@ export default class BaseRenderer extends EventEmitter {
 
         // if we're in a pause behaviour, kill it
         if (this.getInPause()) {
-            if (this._pauseTimeout) clearTimeout(this._pauseTimeout);
             this.setInPause(false);
         }
 
