@@ -54,7 +54,8 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
 
         const duration = this.getDuration();
         this._playoutEngine.startNonAVPlayout(this._rendererId, duration)
@@ -83,6 +84,7 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
                 },
             );
         }
+        return true;
     }
 
     // tests if we're in a variable panel, and waits until we've finished before moving on

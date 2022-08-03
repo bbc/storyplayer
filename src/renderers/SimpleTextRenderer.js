@@ -96,7 +96,8 @@ export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
      * @extends BaseRenderer#start()
      */
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._playoutEngine.startNonAVPlayout(this._rendererId, 0)
 
         this._target.appendChild(this._textDiv);
@@ -106,6 +107,7 @@ export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
         
         // no duration, so ends immediately
         this._setPhase(RENDERER_PHASES.MEDIA_FINISHED);
+        return true;
     }
 
     /**

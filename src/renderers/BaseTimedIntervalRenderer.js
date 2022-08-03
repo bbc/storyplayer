@@ -137,11 +137,13 @@ export default class TimedMediaRenderer extends BaseRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._current = 0;
         if (this._playoutEngine.isPlaying()) {
             this.play();
         }
+        return true;
     }
 
     play() {

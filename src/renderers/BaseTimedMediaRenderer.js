@@ -390,7 +390,8 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
     }
 
     start() {
-        super.start();
+        const ready = super.start();
+        if (!ready) return false;
         this._playoutEngine.setPlayoutActive(this._rendererId);
 
         clearInterval(this._inspectMediaPlaybackInterval);
@@ -411,6 +412,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         } else {
             this._player.disableScrubBar();
         }
+        return true;
     }
 
     play() {
