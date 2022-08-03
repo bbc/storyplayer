@@ -78,8 +78,6 @@ export default class BaseRenderer extends EventEmitter {
 
     _applyLinkOutBehaviour: Function;
 
-    _applyPauseBehaviour: Function;
-
     _handleLinkChoiceEvent: Function;
 
     _seekForward: Function;
@@ -179,7 +177,6 @@ export default class BaseRenderer extends EventEmitter {
         this._applyFadeOutBehaviour = this._applyFadeOutBehaviour.bind(this);
         this._applyFadeAudioOutBehaviour = this._applyFadeAudioOutBehaviour.bind(this);
         this._applyFadeAudioInBehaviour = this._applyFadeAudioInBehaviour.bind(this);
-        this._applyPauseBehaviour = this._applyPauseBehaviour.bind(this);
         this._seekBack = this._seekBack.bind(this);
         this._seekForward = this._seekForward.bind(this);
         this._handlePlayPauseButtonClicked = this._handlePlayPauseButtonClicked.bind(this);
@@ -217,8 +214,6 @@ export default class BaseRenderer extends EventEmitter {
             'urn:x-object-based-media:representation-behaviour:fadeaudioout/v1.0' : this._applyFadeAudioOutBehaviour,
             // eslint-disable-next-line max-len
             'urn:x-object-based-media:representation-behaviour:fadeaudioin/v1.0' : this._applyFadeAudioInBehaviour,
-            // eslint-disable-next-line max-len
-            'urn:x-object-based-media:representation-behaviour:pause/v1.0' : this._applyPauseBehaviour,
         };
 
         this._behaviourClassMap = {
@@ -1276,17 +1271,6 @@ export default class BaseRenderer extends EventEmitter {
         logger.warn(`${this._representation.type} representations do not support audio fade in`);
     }
 
-    _applyPauseBehaviour(behaviour: Object, callback: () => mixed) {
-        const { pauseTime } = behaviour;
-        this.pause();
-        this.setInPause(true);
-        this._pauseTimeout = setTimeout(() => {
-            this.play();
-            this.setInPause(false);
-            callback();
-        }, pauseTime*1000);
-    }
-
     // REFACTOR note: these are called by the behaviour, without knowing what will happen
     // via behaviour map
     _applyShowImageBehaviour(behaviour: Object, callback: () => mixed) {
@@ -1444,8 +1428,10 @@ export default class BaseRenderer extends EventEmitter {
         return false;
     }
 
-    // the renderer is waiting in an infinite pause behaviour
+    // set the renderer in/out of a pause behaviour
     setInPause(paused: boolean) {
+        if (paused) this.pause();
+        else this.play();
         this._inPauseBehaviourState = paused;
     }
 
