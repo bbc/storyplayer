@@ -48,25 +48,17 @@ module.exports = env => {
             },
             {
                 test: /\.(jpe?g|png|gif|svg)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: 'images/[name].[ext]'
-                        }
-                    }
-                ]
+                type: 'asset/resource',
+                generator: {
+                    filename: 'images/[base]',
+                }
             },
             {
                 test: /\.(eot|ttf|woff|woff2)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: 'fonts/[name].[ext]'
-                        }
-                    }
-                ]
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[base]',
+                }
             }
             ]
         },
