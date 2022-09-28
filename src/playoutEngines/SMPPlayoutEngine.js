@@ -170,8 +170,15 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         // Check if we have subtitles and that they are EBU-TT-D and not WebVTT
         if(
             "subs_url" in this._media[rendererId].media
-        ) { 
-            const subsAreEbuttFormat = await fetch(this._media[rendererId].media.subs_url)
+        ) {
+            // eslint-disable-next-line no-restricted-globals
+            const isPublishedExperience = parent.location.href.includes('/experience/');
+            const subsAreEbuttFormat = await fetch(
+                this._media[rendererId].media.subs_url,
+                {
+                    credentials: isPublishedExperience ? "same-origin": "include"
+                }
+            )
                 .then(res => res.text())
                 .then(text => text.includes('xmlns="http://www.w3.org/ns/ttml"')); // is this too much?  too little?
             if (subsAreEbuttFormat) playlistItem.captionsUrl = this._media[rendererId].media.subs_url;
