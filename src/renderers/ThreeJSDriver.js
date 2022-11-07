@@ -171,8 +171,8 @@ export default class ThreeJSDriver {
 
         this._update = () => {
             const lat = Math.max(-85, Math.min(85, this._view.lat));
-            const phi = THREE.Math.degToRad(90 - lat);
-            const theta = THREE.Math.degToRad(this._view.lon);
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = this._view.lon * (Math.PI / 180);
             const viewTarget = new THREE.Vector3(
                 this._view.distance * Math.sin(phi) * Math.cos(theta),
                 this._view.distance * Math.cos(phi),
@@ -383,9 +383,8 @@ export default class ThreeJSDriver {
         const { lat, long, radius } = position;
         const { width, height } = size;
         logger.info(`Adding threejs icon for ${targetId}, src ${iconSrc}, at (${lat}, ${long})`);
-
-        const vphi = THREE.Math.degToRad(90 - lat);
-        const vtheta = THREE.Math.degToRad(long);
+        const vphi = (90 - lat)  * (Math.PI / 180);
+        const vtheta = long * (Math.PI / 180);
         const xpos = radius * Math.sin(vphi) * Math.cos(vtheta);
         const ypos = radius * Math.cos(vphi);
         const zpos = radius * Math.sin(vphi) * Math.sin(vtheta);
