@@ -922,6 +922,7 @@ class Player extends EventEmitter {
         // in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
             && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
+            || this._currentRenderer.phase === RENDERER_PHASES.CONSTRUCTED
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
 
         if (startNow) this._controls.setControlsActive();
