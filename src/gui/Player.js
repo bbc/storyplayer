@@ -54,6 +54,7 @@ const PlayerEvents = [
     'REPEAT_BUTTON_CLICKED',
     'LINK_CHOSEN',
     'ERROR_SKIP_BUTTON_CLICKED',
+    'START_BUTTON_CLICKED',
 ].reduce((events, eventName) => {
     // eslint-disable-next-line no-param-reassign
     events[eventName] = eventName;
@@ -922,7 +923,6 @@ class Player extends EventEmitter {
         // in MAIN, or (for untimed representations) in MEDIA_FINISHED
         const startNow = (this._currentRenderer
             && (this._currentRenderer.phase === RENDERER_PHASES.MAIN
-            || this._currentRenderer.phase === RENDERER_PHASES.CONSTRUCTED
             || this._currentRenderer.phase === RENDERER_PHASES.MEDIA_FINISHED));
 
         if (startNow) this._controls.setControlsActive();
@@ -939,7 +939,7 @@ class Player extends EventEmitter {
         }
 
         this._logUserInteraction(AnalyticEvents.names.START_BUTTON_CLICKED);
-        this.emit(PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED);
+        this.emit(PlayerEvents.START_BUTTON_CLICKED);
     }
 
     _handleOverlayClick(event: Object) {
