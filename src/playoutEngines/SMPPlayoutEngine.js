@@ -63,6 +63,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._volume = 1;
         this._backgroundMix = 1;
 
+        this._handleStartButtonClicked = this._handleStartButtonClicked.bind(this);
         this._handleVolumePersistence = this._handleVolumePersistence.bind(this);
         this._handleVolumeChange = this._handleVolumeChange.bind(this);
         this._smpPlayerInterface.addEventListener("volumechange", this._handleVolumeChange);
@@ -73,6 +74,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         this._player.on(
             PlayerEvents.VOLUME_CHANGED,
             this._handleVolumePersistence,
+        );
+        this._player.on(
+            PlayerEvents.START_BUTTON_CLICKED,
+            this._handleStartButtonClicked,
         );
     }
 
@@ -317,6 +322,10 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         }
         super.setPlayoutActive(rendererId)
         logger.info(`SMP-SP setPlayoutActive: ${rendererId}`)
+    }
+
+    _handleStartButtonClicked() {
+        this._playing = true;
     }
 
     _smpFakePlay() {

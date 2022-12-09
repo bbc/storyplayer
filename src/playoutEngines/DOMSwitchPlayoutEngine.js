@@ -132,6 +132,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
         this._printActiveMSEBuffers = this._printActiveMSEBuffers.bind(this);
 
         this._player.on(
+            PlayerEvents.START_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );

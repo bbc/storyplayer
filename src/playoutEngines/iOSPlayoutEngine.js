@@ -67,6 +67,11 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
         this.removeBackgrounds = this.removeBackgrounds.bind(this);
 
         this._player.on(
+            PlayerEvents.START_BUTTON_CLICKED,
+            this._handlePlayPauseButtonClicked,
+        );
+
+        this._player.on(
             PlayerEvents.PLAY_PAUSE_BUTTON_CLICKED,
             this._handlePlayPauseButtonClicked,
         );
