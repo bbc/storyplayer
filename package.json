@@ -37,7 +37,7 @@
   ],
   "homepage": "https://github.com/bbc/storyplayer#readme",
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
+    "@babel/cli": "^7.19.3",
     "@babel/core": "^7.12.10",
     "@babel/node": "^7.12.10",
     "@babel/plugin-transform-flow-strip-types": "^7.12.10",
