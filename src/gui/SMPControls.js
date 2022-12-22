@@ -14,8 +14,6 @@ const SHOW_CHAPTER_BUTTON = false
 
 class SMPControls extends BaseControls {
 
-    _logUserInteraction: Function;
-
     _smpPlayerInterface: Object;
 
     _backButton: boolean;

@@ -11,8 +11,6 @@ import { MEDIA_TYPES } from '../playoutEngines/BasePlayoutEngine';
 import logger from '../logger';
 
 export default class SimpleAVRenderer extends BaseTimedMediaRenderer {
-    _applyBlurBehaviour: Function;
-
 
     constructor(
         representation: Representation,

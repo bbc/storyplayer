@@ -19,8 +19,6 @@ const ControlEvents = [
 //
 class BaseControls extends EventEmitter {
 
-    _logUserInteraction: Function;
-
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,

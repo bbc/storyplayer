@@ -1427,13 +1427,7 @@ export default class Controller extends EventEmitter {
 
     _analytics: AnalyticsLogger;
 
-    _handleAnalytics: AnalyticsLogger
-
     _assetUrls: AssetUrls;
-
-    _handleError: Function;
-
-    _handleStoryEnd: Function;
 
     _handleNarrativeElementChanged: ?Function;
 
@@ -1451,15 +1445,7 @@ export default class Controller extends EventEmitter {
 
     _sessionManager: SessionManager;
 
-    _handleRendererCompletedEvent: Function;
-
-    _handleRendererNextButtonEvent: Function;
-
-    _handleRendererPreviousButtonEvent: Function;
-
     handleKeys: ?boolean;
 
     _analyticsHandler: AnalyticsHandler;
-
-    _hideTasterBadge: Function;
 }

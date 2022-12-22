@@ -16,8 +16,6 @@ export default class BehaviourRunner {
 
     behaviours: Array<Object>;
 
-    handleCompletion: Function;
-
     constructor(behaviourDefinitions: Object, baseRenderer: BaseRenderer) {
         this.behaviourDefinitions = behaviourDefinitions;
         this.eventCounters = {};

@@ -46,27 +46,6 @@ export const REASONER_ERRORS = [
  * structure of a story.
  */
 export default class StoryReasoner extends EventEmitter {
-    _story: Story;
-
-    _dataResolver: DataResolver;
-
-    _reasonerFactory: StoryReasonerFactory;
-
-    _narrativeElements: { [id: string]: NarrativeElement };
-
-    _currentNarrativeElement: NarrativeElement;
-
-    _storyStarted: boolean;
-
-    _storyEnded: boolean;
-
-    _resolving: boolean;
-
-    _subStoryReasoner: ?StoryReasoner;
-
-    _parent: ?StoryReasoner;
-
-    _analytics: AnalyticsLogger;
 
     /**
      * An error event. This will get fired if the narrative gets stuck or some other error occurs.

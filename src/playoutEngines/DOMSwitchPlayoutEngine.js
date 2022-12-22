@@ -23,31 +23,6 @@ const HLS_BUFFER_ERROR_MARGIN = 0.1
 const SHAKKA_BANDWIDTH_CHECK_TIME = 1000
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
-    _playing: boolean;
-
-    _subtitlesShowing: boolean;
-
-    _useHlsJs: boolean;
-
-    _activeConfig: Object;
-
-    _inactiveConfig: Object;
-
-    _handlePlayPauseButtonClicked: Function
-
-    _handleSubtitlesClicked: Function
-
-    _handleVolumeClicked: Function
-
-    _showHideSubtitles: Function
-
-    _queueSubtitleAttach: Function
-
-    _printActiveMSEBuffers: Function
-
-    _activePlayer: Object;
-
-    _estimatedBandwidth: number;
 
     constructor(player: Player) {
         super(player);

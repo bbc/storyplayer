@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>StoryPlayer Demo Stories</title>
+    <link href="./src/assets/styles/player.scss" rel="stylesheet" type="text/css">
+    <link href="./examples/demos.css" rel="stylesheet" type="text/css">
+    <link href="./node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script type='module' src="./examples/main.js"></script>
+</head>
+
+<body>
+    <h1>StoryKit Demo Experiences</h1>
+
+    <!-- tab switcher -->
+    <div class="tab">
+        <button id="choosetab" class="tablinks">Select story</button>
+        <button id="jsontab" class="tablinks">View Data Model JSON</button>
+        <button id="rendertab" class="tablinks">Render</button>
+    </div>
+
+    <!-- Select a story -->
+    <div id='chooser' class='tabcontent'>
+        <div id='choices' class='selection'></div>
+    </div>
+
+    <!-- View rendered content -->
+    <div id='renderer' class='tabcontent'>
+        <h2 id='story-title' class='story-title'>No story selected</h2>
+        <div class='romper-container'>
+            <div class='romper-target' id="romper-target">
+                <p class='render-placeholder'>Select a demo story and it will be rendered here.</p>
+            </div>
+        </div>
+        <div><!-- restart button -->
+            <button id="restart-button" class="restart-button" disabled>Restart story</button>
+        </div>
+
+        <!-- Allow user to modify variables -->
+        <!-- <div id='variable-pane'class='variable-setter active'>
+            <h3>Modify variable values here</h3>
+            <p>The first Narrative Element is already loaded, so the story will need to be restarted to apply changes.</p>
+            <div id='variables-generic'>Load a story to see its variables.</div>
+        </div> -->
+    </div>
+
+    <!-- View/edit json -->
+    <div id='jsoncontent' class='jsoncontent tabcontent'>
+        <div id='json-view'></div>
+        <button id='runjson' onclick="runEditedJson()" disabled>Run</button>
+    </div>
+
+    <!-- information for users -->
+    <div id='feedback' class='feedback'></div>
+
+</body>
+
+</html>

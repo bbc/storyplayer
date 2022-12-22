@@ -11,14 +11,6 @@ import Controller from '../Controller';
 export default class ImageRenderer extends BaseTimedIntervalRenderer {
     _imageElement: HTMLImgElement;
 
-    _disablePlayButton: Function;
-
-    _disableScrubBar: Function;
-
-    _enablePlayButton: Function;
-
-    _enableScrubBar: Function;
-
     _duration: number;
 
     constructor(

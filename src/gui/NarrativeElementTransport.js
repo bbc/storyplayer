@@ -25,8 +25,6 @@ class NarrativeElementTransport extends EventEmitter {
     
     _backClickedOnce: boolean; // but allow double click on back
 
-    _logUserInteraction: Function;
-
     _isPlaying: boolean;
 
     constructor(

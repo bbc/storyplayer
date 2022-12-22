@@ -26,8 +26,6 @@ class StandardControls extends BaseControls {
 
     _controlsDisabled: boolean;
 
-    _logUserInteraction: Function;
-
     constructor(
         logUserInteraction: Function,
         volumeOverlay: Overlay,

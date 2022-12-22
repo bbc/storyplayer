@@ -30,8 +30,6 @@ export default class StoryIconRenderer extends EventEmitter {
 
     _player: Player;
 
-    _handleIconClicked: Function;
-
     _preloadedIcons: Array<Image>
 
     /**

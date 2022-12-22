@@ -8,22 +8,6 @@ const OVERLAY_ACTIVATED_EVENT = 'overlay-click-event';
 
 class Overlay extends EventEmitter {
 
-    _button: HTMLButtonElement;
-
-    _name: string;
-
-    _overlay: HTMLDivElement;
-
-    _logFunction: Function;
-
-    _elements: Object;
-
-    _labels: Object;
-
-    _activeIconId: ?string;
-
-    _buttonClickHandler: Function;
-
     constructor (name: string, logFunction: Function) {
         super();
         this._logFunction = logFunction;

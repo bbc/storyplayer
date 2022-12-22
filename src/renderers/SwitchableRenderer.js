@@ -22,8 +22,6 @@ export default class SwitchableRenderer extends BaseRenderer {
 
     _inCompleteBehaviours: boolean;
 
-    _handleChoiceClicked: Function;
-
     _preloadedSwitchIcons: Array<Image>;
 
     constructor(

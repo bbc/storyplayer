@@ -4,7 +4,6 @@ import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
 import type { AssetUrls } from '../storyplayer';
-import BasePlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import DOMSwitchPlayoutEngine from '../playoutEngines/DOMSwitchPlayoutEngine';
 import IOSPlayoutEngine from '../playoutEngines/iOSPlayoutEngine';
 import SMPPlayoutEngine from '../playoutEngines/SMPPlayoutEngine';
@@ -62,113 +61,6 @@ const PlayerEvents = [
 }, {});
 
 class Player extends EventEmitter {
-    playoutEngine: BasePlayoutEngine
-
-    _player: HTMLDivElement;
-
-    _playerParent: HTMLElement;
-
-    _backgroundLayer: HTMLDivElement;
-
-    _mediaLayer: HTMLDivElement;
-
-    _guiLayer: HTMLDivElement;
-
-    _errorControls: ErrorControls;
-
-    _continueModalLayer: HTMLDivElement;
-
-    _continueModalContent: HTMLDivElement;
-
-    backgroundTarget: HTMLDivElement;
-
-    mediaTarget: HTMLDivElement;
-
-    guiTarget: HTMLDivElement;
-
-    _overlaysElement: HTMLDivElement;
-
-    _overlays: Array<Overlay>;
-
-    _controls: StandardControls;
-
-    _startExperienceButton: HTMLButtonElement;
-
-    _resumeExperienceButton: HTMLButtonElement;
-
-    _startExperienceImage: HTMLImgElement;
-
-    _fullscreenButton: HTMLButtonElement;
-
-
-    _volume: Object;
-
-    _representation: Object;
-
-    _icon: Object;
-
-    _linkChoice: Object;
-
-    _analytics: AnalyticsLogger;
-
-    _assetUrls: AssetUrls;
-
-    _logUserInteraction: Function;
-
-    _volumeEventTimeouts: Object;
-
-    _userInteractionStarted: boolean;
-
-    _numChoices: number;
-
-    _removeExperienceOverlays: Function;
-
-    setupExperienceOverlays: Function;
-
-
-    _choiceIconSet: { [key: string]: Promise<Object> };
-
-    _visibleChoices: { [key: number]: HTMLElement };
-
-    _choiceCountdownInterval: ?TimeoutID;
-
-    _countdowner: HTMLDivElement;
-
-    _countdownContainer: HTMLDivElement;
-
-    _aspectRatio: number;
-
-    _dogImage: HTMLDivElement;
-
-    _loadingLayer: HTMLElement
-
-    _privacyDiv: ?HTMLDivElement;
-
-    _currentRenderer: ?BaseRenderer;
-
-    showErrorLayer: Function;
-
-    _removeErrorLayer: Function;
-
-    showBufferingLayer: Function;
-
-    removeBufferingLayer: Function;
-
-    _addContinueModal: Function;
-
-    _hideModalLayer: Function;
-
-    _startButtonHandler: Function;
-
-    createBehaviourOverlay: Function;
-
-    _addCountdownToElement: Function;
-
-    _controller: Controller;
-
-    userSetForegroundVolume: Number;
-
-    _spatialNavigationHandler;
 
     constructor(
         target: HTMLElement,

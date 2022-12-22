@@ -29,7 +29,6 @@ module.exports = {
     "no-underscore-dangle": 0,
     "import/no-cycle": "off",
     "max-classes-per-file": "off",
-    "arrow-body-style": "off"
-
+    "arrow-body-style": "off",
   }
 };

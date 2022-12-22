@@ -10,7 +10,6 @@ import { MEDIA_TYPES, SUPPORT_FLAGS } from '../playoutEngines/BasePlayoutEngine'
 import logger from '../logger';
 
 export default class ThreeJsVideoRenderer extends BaseTimedMedialRenderer {
-    _handlePlayPauseButtonClicked: Function;
 
     constructor(
         representation: Representation,

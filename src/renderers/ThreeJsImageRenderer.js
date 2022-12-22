@@ -1,4 +1,5 @@
 // @flow
+import * as THREE from 'three';
 import Player from '../gui/Player';
 import ThreeJSDriver from './ThreeJSDriver';
 import BaseTimedIntervalRenderer from './BaseTimedIntervalRenderer';
@@ -8,20 +9,11 @@ import Controller from '../Controller';
 import logger from '../logger';
 import { RENDERER_PHASES } from './BaseRenderer';
 
-const THREE = require('three');
 
 export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
     _fetchMedia: MediaFetcher;
 
     _duration: number;
-
-    _disablePlayButton: Function;
-
-    _disableScrubBar: Function;
-
-    _enablePlayButton: Function;
-
-    _enableScrubBar: Function;
 
     _imageMesh: THREE.Mesh;
 

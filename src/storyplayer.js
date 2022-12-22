@@ -104,10 +104,10 @@ if(getSetting(UA_DEBUG_FLAG)) {
         + `${MediaFormats.getPlayoutEngine()}`
 }
 // eslint-disable-next-line no-undef
-const playerVersion = __PLAYER_VERSION__;
+// const playerVersion = __PLAYER_VERSION__;
 // eslint-disable-next-line no-undef
-const schemaVersion = __LATEST_SCHEMA_VERSION__;
-module.exports = {
+// const schemaVersion = __LATEST_SCHEMA_VERSION__;
+export default {
     RESOLVERS: {
         FROM_OBJECT: ObjectDataResolver,
     },
@@ -117,11 +117,12 @@ module.exports = {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     DOM_EVENTS,
-    playerVersion,
-    schemaVersion,
+    // playerVersion,
+    // schemaVersion,
     init: (settings: Settings): ?Controller => {
+        console.log('ANDY initing Romper', settings);
         // eslint-disable-next-line no-undef
-        logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
+        // logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
         const mergedSettings = { ...DEFAULT_SETTINGS, ...settings};
 
         if (!mergedSettings.dataResolver) {

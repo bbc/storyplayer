@@ -27,15 +27,7 @@ const ButtonEvents = [
 //
 class BaseButtons extends EventEmitter {
 
-    _logUserInteraction: Function;
-
-    _volumeButton: HTMLButtonElement;
-
-    _chapterButton: HTMLButtonElement;
-
-    _switchableButton: HTMLButtonElement;
-
-    constructor(logUserInteraction: Function) {
+    constructor(logUserInteraction) {
         super();
         this._logUserInteraction = logUserInteraction;
     }
@@ -110,11 +102,11 @@ class BaseButtons extends EventEmitter {
 
     disablePlayButton() { }
 
-    setPlaying(isPlaying: boolean){ }
+    setPlaying(isPlaying){ }
 
-    setNextAvailable(isNextAvailable: boolean) { }
+    setNextAvailable(isNextAvailable) { }
 
-    setBackAvailable(isBackAvailable: boolean) { }
+    setBackAvailable(isBackAvailable) { }
 
     enableSubtitlesButton() { }
 

@@ -1,4 +1,3 @@
-// @flow
 import { handleButtonTouchEvent } from '../utils';
 import AnalyticEvents from '../AnalyticEvents';
 import NarrativeElementTransport from './NarrativeElementTransport';
@@ -9,15 +8,7 @@ import BaseButtons, { ButtonEvents } from './BaseButtons';
 //
 class Buttons extends BaseButtons {
 
-    _subtitlesButton: HTMLButtonElement;
-
-    showingSubtitles: boolean;
-
-    _fullscreenButton: HTMLButtonElement;
-
-    _transportControls: NarrativeElementTransport;
-
-    constructor(logUserInteraction: Function) {
+    constructor(logUserInteraction) {
         super(logUserInteraction);
 
         this._subtitlesButton = this._createSubtitlesButton();
@@ -28,7 +19,7 @@ class Buttons extends BaseButtons {
     }
 
     /* creating stuff */
-    _createSubtitlesButton(): HTMLButtonElement {
+    _createSubtitlesButton() {
         const subsButton = document.createElement('button');
         subsButton.setAttribute('type', 'button');
         subsButton.setAttribute('tabindex', '2');
@@ -51,7 +42,7 @@ class Buttons extends BaseButtons {
         return subsButton;
     }
 
-    _createFullscreenButton(): HTMLButtonElement {
+    _createFullscreenButton() {
         const fsButton = document.createElement('button');
         fsButton.setAttribute('type', 'button');
         fsButton.setAttribute('tabindex', '2');
@@ -73,7 +64,7 @@ class Buttons extends BaseButtons {
         return fsButton;
     }
 
-    _initiateTransportControls(): NarrativeElementTransport {
+    _initiateTransportControls() {
         const transportControls = new NarrativeElementTransport(this._logUserInteraction);
 
         [
@@ -135,10 +126,10 @@ class Buttons extends BaseButtons {
     // and overlays, but not the scrub bar
     // nor the button activation controls
     getControlsDiv(
-        volumeOverlay: HTMLDivElement,
-        chapterOverlay: HTMLDivElement,
-        switchableOverlay: HTMLDivElement,
-    ): HTMLDivElement {
+        volumeOverlay,
+        chapterOverlay,
+        switchableOverlay,
+    ) {
         // create the container divs
         const mediaTransport = document.createElement('div');
         mediaTransport.classList.add('romper-media-transport');
@@ -220,15 +211,15 @@ class Buttons extends BaseButtons {
         this._transportControls.disablePlayButton();
     }
 
-    setPlaying(isPlaying: boolean){
+    setPlaying(isPlaying){
         this._transportControls.setPlaying(isPlaying);
     }
 
-    setNextAvailable(isNextAvailable: boolean) {
+    setNextAvailable(isNextAvailable) {
         this._transportControls.setNextAvailable(isNextAvailable);
     }
 
-    setBackAvailable(isBackAvailable: boolean) {
+    setBackAvailable(isBackAvailable) {
         this._transportControls.setBackAvailable(isBackAvailable);
     }
 

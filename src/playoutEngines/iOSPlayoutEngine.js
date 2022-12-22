@@ -13,18 +13,6 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
     _subtitlesShowing: boolean;
 
-    _handlePlayPauseButtonClicked: Function;
-
-    _handleSubtitlesClicked: Function;
-
-    _handleVolumeClicked: Function;
-
-    _toggleMute: Function;
-
-    _showHideSubtitles: Function;
-
-    _queueSubtitleAttach: Function;
-
     constructor(player: Player) {
         super(player);
         this._foregroundMediaElement = document.createElement('video');

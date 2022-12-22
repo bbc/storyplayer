@@ -35,10 +35,6 @@ export default class SimpleTextRenderer extends BaseTimedIntervalRenderer {
 
     _textDiv: HTMLDivElement;
 
-    _setOverflowStyling: Function;
-
-    renderTextElement: Function;
-
     constructor(
         representation: Representation,
         assetCollectionFetcher: AssetCollectionFetcher,

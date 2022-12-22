@@ -28,25 +28,6 @@ export default class SessionManager extends EventEmitter {
 
     sessionState: string; // current state of the session 'RESUME'/'RESTART'/'NEW'/'EXISTING'
 
-    deleteExistingSession: Function; // delete the existing session
-
-    setExistingSession: Function; // set a new session
-
-    checkExistingSession: Function; // check we have existing sessions
-
-    fetchExistingSessionState: Function; // fetch the existing session state
-
-    fetchLastVisitedElement: Function; // fetch the last visited element
-
-    fetchPathHistory: Function; // fetch the path history for the existing session
-
-    setSessionState: Function; // set the session state takes 'RESUME'/'RESTART'/'NEW'/'EXISTING',
-
-    setVariable: Function;
-
-    setPathHistory: Function;
-
-
     constructor(storyId: string) {
         super();
         this._storyId = storyId;

@@ -1,17 +1,12 @@
-// @flow
-import BaseRenderer from '../renderers/BaseRenderer';
-
 /* eslint-disable class-methods-use-this */
 
 class BaseScrubBar {
 
-    _logUserInteraction: Function;
-
-    constructor(logUserInteraction: Function) {
+    constructor(logUserInteraction) {
         this._logUserInteraction = logUserInteraction;
     }
 
-    getScrubBarElement(): HTMLInputElement {
+    getScrubBarElement() {
         return this._scrubBar;
     }
 
@@ -24,10 +19,10 @@ class BaseScrubBar {
     disable() { }
 
     // eslint-disable-next-line no-unused-vars
-    disconnect(parentDiv: ?HTMLDivElement) { }
+    disconnect(parentDiv) { }
 
     // eslint-disable-next-line no-unused-vars
-    connect(renderer: BaseRenderer) { }
+    connect(renderer) { }
 }
 
 export default BaseScrubBar;

@@ -5,8 +5,6 @@ import logger from '../logger';
 export default class BaseBehaviour {
     _behaviourDefinition: Object;
 
-    _handleDone: Function;
-
     _onComplete: () => void;
 
     constructor(behaviourDefinition: Object, onComplete: () => void) {

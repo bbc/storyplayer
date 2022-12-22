@@ -1,8 +1,9 @@
 // @flow
+import * as THREE from 'three';
 import logger from '../logger';
+
 import { InternalVariableNames } from '../InternalVariables';
 
-const THREE = require('three');
 
 const ORIENTATION_POLL_INTERVAL = 2000;
 const RETICLE_RADIUS = 15;
@@ -14,18 +15,6 @@ export type ThreeIcon = {
 };
 
 export default class ThreeJSDriver {
-    _setOrientationVariable: Function;
-
-    _onMouseDown: Function;
-
-    _onMouseMove: Function;
-
-    _onMouseUp: Function;
-
-    _onKeyUp: Function;
-
-    _onKeyDown: Function;
-
     _moveInterval: ?IntervalID;
 
     _orientationWatcher: ?IntervalID;
@@ -49,8 +38,6 @@ export default class ThreeJSDriver {
     _oldOrientation: Object;
 
     _scene: THREE.Scene;
-
-    _update: Function;
 
     _icons: {[key:string]: ThreeIcon};
 

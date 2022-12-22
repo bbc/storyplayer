@@ -8,7 +8,6 @@ import VariableManipulateBehaviour from '../behaviours/VariableManipulateBehavio
 import RendererEvents from './RendererEvents';
 import type { Representation, AssetCollectionFetcher, MediaFetcher } from '../storyplayer';
 import Player, { PlayerEvents } from '../gui/Player';
-import PlayoutEngine from '../playoutEngines/BasePlayoutEngine';
 import AnalyticEvents from '../AnalyticEvents';
 import type { AnalyticsLogger, AnalyticEventName } from '../AnalyticEvents';
 import Controller from '../Controller';
@@ -20,7 +19,6 @@ import { renderSocialPopup } from '../behaviours/SocialShareBehaviourHelper';
 import { renderLinkoutPopup } from '../behaviours/LinkOutBehaviourHelper';
 import { renderTextOverlay } from '../behaviours/TextOverlayBehaviourHelper';
 import { renderMapOverlay } from '../behaviours/MapLinkBehaviourHelper';
-import Overlay from '../gui/Overlay';
 
 const SEEK_TIME = 10;
 // TODO: Consider making this longer now it runs higher than 4Hz.
@@ -48,90 +46,6 @@ export const RENDERER_PHASES = {
 };
 
 export default class BaseRenderer extends EventEmitter {
-    _rendererId: string;
-
-    _representation: Representation;
-
-    _fetchAssetCollection: AssetCollectionFetcher;
-
-    _fetchMedia: MediaFetcher;
-
-    _player: Player;
-
-    _playoutEngine: PlayoutEngine;
-
-    _behaviourRunner: ?BehaviourRunner;
-
-    _behaviourRendererMap: { [key: string]: (behaviour: Object, callback: () => mixed) => void };
-
-    _applyColourOverlayBehaviour: Function;
-
-    _applyShowImageBehaviour: Function;
-
-    _applyShowVariablePanelBehaviour: Function;
-
-    _applyShowChoiceBehaviour: Function;
-
-    _renderLinkChoices: Function;
-
-    _applySocialSharePanelBehaviour: Function;
-
-    _applyLinkOutBehaviour: Function;
-
-    _handleLinkChoiceEvent: Function;
-
-    _seekForward: Function;
-
-    _seekBack: Function;
-
-    _behaviourElements: Array<HTMLElement>;
-
-    _target: HTMLDivElement;
-
-    _destroyed: boolean;
-
-    _analytics: AnalyticsLogger;
-
-    _controller: Controller;
-
-    _preloadedBehaviourAssets: Array<Image>;
-
-    _preloadedIconAssets: Array<Image>;
-
-    _choiceBehaviourData: Object;
-
-    _linkBehaviour: Object;
-
-    inVariablePanel: boolean;
-
-    _linkFadeTimeout: TimeoutID;
-
-    _willHideControls: Function;
-
-    _hideControls: Function;
-
-    _showControls: Function;
-
-    _setBehaviourElementAttribute: Function;
-
-    _linkChoiceBehaviourOverlay: Overlay;
-
-    _cleanupSingleDuringBehaviour: Function;
-
-    _runSingleDuringBehaviour: Function;
-
-    _runDuringBehaviours: Function;
-
-    addTimeEventListener: Function;
-
-    _handlePlayPauseButtonClicked: Function;
-
-    _duration: ?number;
-
-    _inPauseBehaviourState: boolean;
-
-    phase: string;
-
     /**
      * Load an particular representation. This should not actually render anything until start()
      * is called, as this could be constructed in advance as part of pre-loading.

@@ -4,7 +4,6 @@ import EventEmitter from 'events';
 import type {
     NarrativeElement, ExperienceFetchers, Representation,
     RepresentationChoice, AssetUrls, AssetCollection,
-    Story,
 } from './storyplayer';
 import type { RepresentationReasoner } from './RepresentationReasoner';
 import BaseRenderer, { RENDERER_PHASES } from './renderers/BaseRenderer';
@@ -27,63 +26,6 @@ import { getSetting, DISABLE_LOOKAHEAD_FLAG, getControlHideList } from './utils'
 const FADE_OUT_TIME = 2; // default fade out time for backgrounds, in s
 
 export default class RenderManager extends EventEmitter {
-    _controller: Controller;
-
-    _currentRenderer: ?BaseRenderer;
-
-    _handleOrientationChange: Function;
-
-    _backgroundRenderers: { [key: string]: BackgroundRenderer };
-
-    _target: HTMLElement;
-
-    _backgroundTarget: HTMLElement;
-
-    _representationReasoner: RepresentationReasoner;
-
-    _fetchers: ExperienceFetchers;
-
-    _analytics: AnalyticsLogger;
-
-    _privacyNotice: ?string;
-
-    _renderStory: StoryIconRenderer;
-
-    _neTarget: HTMLDivElement;
-
-    _storyTarget: HTMLDivElement;
-
-    _linearStoryPath: Array<StoryPathItem>;
-
-    _currentNarrativeElement: NarrativeElement;
-
-    _story: Story;
-
-    _rendererState: {
-        lastSwitchableLabel: string,
-        volumes: { [key: string]: number },
-        muted: { [key: string]: boolean},
-    };
-
-    _activeRenderers: { [key: string]: BaseRenderer };
-
-    _upcomingBackgroundRenderers: { [key: string]: BackgroundRenderer };
-
-    _previousNeId: ?string;
-
-    _nextButton: HTMLButtonElement;
-
-    _previousButton: HTMLButtonElement;
-
-    _player: Player;
-
-    _assetUrls: AssetUrls;
-
-    _handleVisibilityChange: Function;
-
-    _handleClose: Function;
-
-    _isPlaying: boolean;
 
     constructor(
         controller: Controller,

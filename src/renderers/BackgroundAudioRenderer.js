@@ -20,8 +20,6 @@ const FADE_STEP_LENGTH = 20; // time between steps for fades
 export default class BackgroundAudioRenderer extends BackgroundRenderer {
     _target: HTMLDivElement;
 
-    _handleVolumeClicked: Function;
-
     _volFadeInterval: ?IntervalID;
 
     // fade in interval
