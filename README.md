@@ -76,19 +76,20 @@ Building the library from the repo
 * First, clone [the repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
 * Run `yarn` to pull down and build all the dependencies, and the library.
 * `yarn build` will do a single build of the library
-* `yarn test` will do a single run of the tests (ESLint, jest and sass-lint)
-* `yarn dev` will continuously build and test the library on changes
+* `yarn test` will do a single run of the tests (eslint and sass-lint)
+* `yarn dev` will serve up the example content (see below) and continuously build and test the library on changes.
 
 Running the examples in the repo
 --------------------------------
 
-To check everything is installed correctly, run `python3 -m http.server` in the root of the project, and visit `http://localhost:8000/examples`.
-Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
+To check everything is installed correctly, run `yarn dev` in the root of the project, then visit [`http://localhost:5173`](http://localhost:5173).
+
+Select a demo using the left hand tab. Use the middle tabs to inspect (and edit, if you wish) the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running StoryPlayer against local stories and media
 ---------------------------------------------------
 
-* Run `python3 -m http.server` in the root of the project.
+* Run `yarn dev` in the root of the project.
 
 * The media can be placed in the `/examples/` folder.  It can be put directly in, or organised into subfolders.
 
@@ -100,9 +101,9 @@ Running StoryPlayer against local stories and media
     }
 ```
 
-* Stories can be played by visiting `localhost:8000/examples/` (the server prefix may vary depending on your local web server - this should work if you have used python, as above); there you will see a list of the example stories provided in the repository.  Select a story in the "Select story" tab then visit the "Render" tab to play.
+* Stories can be played by visiting [`http://localhost:5173`](http://localhost:5173); there you will see a list of the example stories provided in the repository.  Select a story in the "Select story" tab then visit the "Render" tab to play.
 
-* Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:8000/examples/index.html?storyjson=my_story.json`.
+* Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:5173?storyjson=my_story.json` (e.g., if `my_story.json` is in the `examples/` folder).
 
 StoryPlayer Implementation details
 ----------------------------------
