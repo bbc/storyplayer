@@ -4,6 +4,7 @@ import vitePluginFlow from 'vite-plugin-flow'
 
 export default defineConfig({
   plugins: [vitePluginFlow()],
+  publicDir: 'src/assets/public',
   build: {
     target: 'es2015',
     lib: {
