@@ -4,6 +4,7 @@
   "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/@bbc/object-based-media-schema)",
   "main": "./dist/storyplayer.js",
   "module": "./dist/storyplayer.js",
+  "ttttttttype": "module",
   "keywords": [
     "BBC",
     "BBC Research & Development",
@@ -18,6 +19,7 @@
     "test": "concurrently --names \"eslint,sass-lint\" -c \"blue.bgWhite,magenta.bgWhite\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:sass-lint\"",
     "test:eslint": "eslint src/",
     "test:sass-lint": "sass-lint -v",
+    "test:typescript": "tsc",
     "prepublishOnly": "yarn run test && yarn run build",
     "dev": "vite"
   },
@@ -44,17 +46,17 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-flowtype": "^4.5.3",
     "eslint-plugin-import": "^2.22.1",
-    "flow-typed": "^3.8.0",
     "jsoneditor": "^9.9.0",
     "sass": "^1.53.0",
     "sass-lint": "^1.13.1",
     "typescript": "^4.9.4",
+    "utility-types": "^3.10.0",
     "vite": "^4.0.3",
     "vite-plugin-flow": "^0.2.1"
   },
   "dependencies": {
+    "@types/node": "^18.11.18",
     "browser-bunyan": "^1.5.3",
     "events": "^3.3.0",
     "hls.js": "^1.2.9",

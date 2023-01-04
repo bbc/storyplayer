@@ -1,16 +1,14 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import vitePluginFlow from 'vite-plugin-flow'
 
 export default defineConfig({
-  plugins: [vitePluginFlow()],
   publicDir: 'src/assets/public',
   build: {
     target: 'es2015',
     lib: {
-      entry: resolve(__dirname, 'src/storyplayer.js'),
+      entry: resolve(__dirname, 'src/storyplayer.ts'),
       name: 'StoryPlayer',
-      fileName: 'storyplayer',
+      fileName: (format) => `storyplayer.js`,
       formats: ['cjs'],
     },
     rollupOptions: {
