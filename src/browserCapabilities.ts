@@ -228,7 +228,7 @@ export class MediaFormats {
      * ios will only play back hls dom should play back either
      * @returns {string} 'ios' or 'dom'
      */
-    static getPlayoutEngine(noSMP: boolean = false) {
+    static getPlayoutEngine(noSMP = false) {
         const overridePlayout = getSetting(OVERRIDE_PLAYOUT)
 
         if (

@@ -21,7 +21,6 @@ const getLinkId = (e, behaviour) => {
     return null
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const renderMapOverlay = (
     behaviour,
     target,

@@ -104,7 +104,7 @@ class Player extends EventEmitter {
     _controller: Controller
     userSetForegroundVolume: number
     _spatialNavigationHandler
-    useExternalTransport: Function
+    useExternalTransport: () => boolean
     _keyboardActiveTimeout: ReturnType<typeof setTimeout> | null | undefined
     
     constructor(
@@ -546,9 +546,6 @@ class Player extends EventEmitter {
             this.emit(PlayerEvents.NEXT_BUTTON_CLICKED)
         })
 
-        this._controls.on(ControlEvents.SHOWING_BUTTONS, () => {})
-
-        this._controls.on(ControlEvents.HIDING_BUTTONS, () => {})
     }
 
     setAspectRatio(aspectRatio: number) {
@@ -1109,8 +1106,8 @@ class Player extends EventEmitter {
 
     _logUserInteraction(
         userEventName: AnalyticEventName,
-        fromId: string = "not_set",
-        toId: string = "not_set",
+        fromId = "not_set",
+        toId = "not_set",
         information: Record<string, any> | null | undefined = {},
     ) {
         const logData = {
@@ -1720,7 +1717,7 @@ class Player extends EventEmitter {
     addIconControl(
         id: string,
         src: string,
-        selected: boolean = false,
+        selected = false,
         representationName: string,
         labelString: string | null | undefined,
     ) {
@@ -1780,7 +1777,7 @@ class Player extends EventEmitter {
         this._icon.add(id, iconControl)
     }
 
-    setIconControl(id: string, src: string, selected: boolean = false) {
+    setIconControl(id: string, src: string, selected = false) {
         const iconControl = this._icon.get(id)
 
         if (iconControl) {

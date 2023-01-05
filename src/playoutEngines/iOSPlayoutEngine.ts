@@ -135,7 +135,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
                     this._player.addVolumeControl(rendererId, "Foreground")
 
-                    if (mediaObj.hasOwnProperty("loop")) {
+                    if (Object.getOwnPropertyDescriptor(mediaObj, "loop")) {
                         this._setLoopAttribute(true, mediaObj.loop)
                     }
                 } else if (mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
@@ -148,7 +148,7 @@ export default class iOSPlayoutEngine extends BasePlayoutEngine {
 
                     this._player.addVolumeControl(rendererId, "Background")
 
-                    if (mediaObj.hasOwnProperty("loop")) {
+                    if (Object.getOwnPropertyDescriptor(mediaObj, "loop")) {
                         this._setLoopAttribute(false, mediaObj.loop)
                     } else {
                         this._setLoopAttribute(false, false)

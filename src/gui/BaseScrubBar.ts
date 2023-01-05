@@ -1,8 +1,8 @@
-import ScrubBar from "./ScrubBar"
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-/* eslint-disable class-methods-use-this */
 class BaseScrubBar {
-    _logUserInteraction: Function
+    _logUserInteraction: (evType: string, from?: string, to?: string) => void
     _scrubBar: HTMLInputElement
 
     constructor(logUserInteraction) {
@@ -21,10 +21,8 @@ class BaseScrubBar {
 
     disable() {}
 
-    // eslint-disable-next-line no-unused-vars
     disconnect(parentDiv) {}
 
-    // eslint-disable-next-line no-unused-vars
     connect(renderer) {}
 }
 

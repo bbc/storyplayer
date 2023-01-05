@@ -5,7 +5,6 @@ import {
     AssetUrls,
 } from "./types"
 import Controller from "./Controller"
-// eslint-disable-next-line import/no-named-as-default
 import StoryReasonerFactory from "./StoryReasonerFactory"
 import RepresentationReasonerFactory from "./RepresentationReasoner"
 import MediaFetcher from "./fetchers/MediaFetcher"

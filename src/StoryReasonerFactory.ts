@@ -33,7 +33,7 @@ export default function (
      */
     function Factory(
         id: string,
-        analytics: AnalyticsLogger = () => {},
+        analytics: AnalyticsLogger = () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
     ): Promise<StoryReasoner> {
         let returnedStory
         return storyFetcher(id)

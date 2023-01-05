@@ -114,7 +114,7 @@ const _getNumberRangeVariableSetter = (
     const minSpan = document.createElement("span")
     minSpan.classList.add("min")
 
-    if (behaviourVar.hasOwnProperty("min_label")) {
+    if (Object.getOwnPropertyDescriptor(behaviourVar, "min_label")) {
         minSpan.textContent =
             behaviourVar.min_label === null ? "" : behaviourVar.min_label
     } else {
@@ -124,7 +124,7 @@ const _getNumberRangeVariableSetter = (
     const maxSpan = document.createElement("span")
     maxSpan.classList.add("max")
 
-    if (behaviourVar.hasOwnProperty("max_label")) {
+    if (Object.getOwnPropertyDescriptor(behaviourVar, "max_label")) {
         maxSpan.textContent =
             behaviourVar.max_label === null ? "" : behaviourVar.max_label
     } else {
@@ -188,14 +188,14 @@ const _getNumberRangeVariableSetter = (
     varInput.appendChild(sliderDiv)
 
     if (
-        behaviourVar.hasOwnProperty("precise_entry") &&
+        Object.getOwnPropertyDescriptor(behaviourVar, "precise_entry") &&
         behaviourVar.precise_entry
     ) {
         varInput.appendChild(numberInput)
     } else if (
         !(
-            behaviourVar.hasOwnProperty("min_label") ||
-            behaviourVar.hasOwnProperty("max_label")
+            Object.getOwnPropertyDescriptor(behaviourVar, "min_label") ||
+            Object.getOwnPropertyDescriptor(behaviourVar, "max_label")
         )
     ) {
         // if precise, or user has specified labels, don't show
@@ -256,7 +256,7 @@ const getVariableSetter = (
     } else if (variableType === "number") {
         let numDiv
 
-        if (variableDecl.hasOwnProperty("range")) {
+        if (Object.getOwnPropertyDescriptor(variableDecl, "range")) {
             numDiv = _getNumberRangeVariableSetter(
                 variableName,
                 variableDecl.range,
@@ -333,7 +333,6 @@ const createVarPanelElements = (
     }
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const buildPanel = (
     behaviour: Record<string, any>,
     getVariableState: (...args: Array<any>) => any,

@@ -12,12 +12,12 @@ export interface Experience {
 
 export interface Beginning {
     narrative_element_id: string,
-    condition: any,
+    condition: object,
 }
 
 export interface Link {
     link_type: string,
-    condition: any,
+    condition: object,
     description?: string,
     target_narrative_element_id?: string,
     link_rank?: number,
@@ -26,7 +26,7 @@ export interface Link {
 
 interface Meta {
     romper?: {
-        requirements?: Array<{logic: Object, errorMsg?: string}>,
+        requirements?: Array<{logic: object, errorMsg?: string}>,
     },
     storyplayer?: {
         disable_tab_defocus?: boolean,
@@ -44,7 +44,7 @@ export interface Story {
     beginnings: Array<Beginning>,
     narrative_element_ids: Array<string>,
     meta?: Meta,
-    variables?: Object,
+    variables?: object,
 }
 
 export interface NarrativeElement {
@@ -68,7 +68,7 @@ export interface RepresentationCollection {
     tags: Tags,
     representations: Array<{
         representation_id: string,
-        condition: any,
+        condition: object,
     }>,
 }
 
@@ -76,6 +76,28 @@ export interface RepresentationChoice {
     label: string,
     choice_representation_id: string,
     choice_representation?: Representation,
+}
+
+export interface Behaviour {
+    id: string,
+    type: string,
+    pauseTime?: number,
+    colour?: string,
+    image?: string,
+    blur?: string,
+    show_ne_to_end?: boolean,
+    one_shot?: boolean,
+    disable_controls?: boolean,
+    show_time_remaining?: boolean,
+    force_choice?: boolean,
+    overlay_class?: string,
+    duration?: number,
+}
+
+export interface DuringBehaviour {
+    behaviour: Behaviour,
+    start_time: number,
+    duration?: number,
 }
 
 export interface Representation {
@@ -103,40 +125,11 @@ export interface Representation {
         }>
     },
     duration?: number,
-    meta?: Object,
+    meta?: object,
     choices?: Array<RepresentationChoice>,
     behaviours?: {
-        completed?: Array<{
-            id: String,
-            type: string,
-            pauseTime?: number,
-            colour?: string,
-            image?: string,
-            blur?: string,
-            show_ne_to_end?: boolean,
-            one_shot?: boolean,
-            disable_controls?: boolean,
-            show_time_remaining?: boolean,
-            force_choice?: boolean,
-            overlay_class?: string,
-        }>,
-        during?: Array<{
-            behaviour: {
-                id: string,
-                type: string,
-                show_ne_to_end?: boolean,
-                one_shot?: boolean,
-                disable_controls?: boolean,
-                show_time_remaining?: boolean,
-                force_choice?: boolean,
-                overlay_class?: string,
-                duration?: number,
-                startVolume: number,
-                targetVolume: number,
-            },
-            start_time: number,
-            duration?: number,
-        }>,
+        completed?: Array<Behaviour>,
+        during?: Array<DuringBehaviour>,
     },
 }
 
@@ -170,7 +163,7 @@ export interface NarrativeElementFetcher { (id: string) : Promise<NarrativeEleme
 export interface RepresentationCollectionFetcher { (id: string) : Promise<RepresentationCollection> }
 export interface RepresentationFetcher { (id: string) : Promise<Representation> }
 export interface AssetCollectionFetcher { (id: string) : Promise<AssetCollection> }
-export interface MediaFetcher { (uri: string, options?:Object) : Promise<string> }
+export interface MediaFetcher { (uri: string, options?: object) : Promise<string> }
 
 export interface ExperienceFetchers {
     storyFetcher: StoryFetcher,
@@ -226,7 +219,7 @@ export interface SMPPlayList {
     options: {
         useCredentials: boolean | Array<string>,
     },
-    config: Object,
+    config: object,
     playlist: {
         id: string,
         items: Array<SMPPlayListItem>,

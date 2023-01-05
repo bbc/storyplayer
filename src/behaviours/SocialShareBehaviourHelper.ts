@@ -92,12 +92,11 @@ const addAnalytics = (icon, platformId, analytics) => {
     })
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const renderSocialPopup = (
     behaviour,
     target,
     callback,
-    analytics: AnalyticsLogger = () => {},
+    analytics: AnalyticsLogger = () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
 ) => {
     const modalElement = document.createElement("div")
     modalElement.id = behaviour.id

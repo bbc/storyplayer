@@ -254,7 +254,7 @@ export default class Controller extends EventEmitter {
      * @param {string} storyId top level story id
      * @param {Object?} initialState initial state for the story variables
      */
-    startStory(storyId: string, initialState: Array<{logic?: Object, errorMsg?: string}> | {} = {}) {
+    startStory(storyId: string, initialState: Array<{logic?: object, errorMsg?: string}> | object = {}) {
         this._getAllNarrativeElements().then(neList => {
             this._allNarrativeElements = neList
         })
@@ -408,7 +408,7 @@ export default class Controller extends EventEmitter {
      * @returns number
      * @param {Array<Object>} requirements requirements to satisfy for story to be playable
      */
-    _checkStoryPlayable(requirements: Array<{logic: Object, errorMsg?: string}>) {
+    _checkStoryPlayable(requirements: Array<{logic: object, errorMsg?: string}>) {
         const data = {
             supports: {
                 hls: BrowserCapabilities.hlsSupport(),
@@ -838,7 +838,7 @@ export default class Controller extends EventEmitter {
         let neObj
 
         if (this._allNarrativeElements) {
-            ;[neObj] = this._allNarrativeElements.filter(
+            [neObj] = this._allNarrativeElements.filter(
                 ne => ne.id === narrativeElementId,
             )
         } else if (this._reasoner) {
@@ -1301,7 +1301,7 @@ export default class Controller extends EventEmitter {
      */
     getValidNextSteps(
         narrativeElementId: string | null | undefined = null,
-    ): Promise<Array<Record<string, any>>> {
+    ): Promise<Array<{ne: NarrativeElement, targetNeId: string}>> {
         let neId = narrativeElementId
 
         if (neId === null && this._currentNarrativeElement) {

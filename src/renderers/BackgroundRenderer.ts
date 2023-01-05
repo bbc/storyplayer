@@ -62,12 +62,16 @@ export default class BackgroundRenderer extends EventEmitter {
         return true
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     cancelFade() {}
 
-    fadeOut(duration: number) {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function 
+    fadeOut(duration: number) {} // eslint-disable-line @typescript-eslint/no-unused-vars
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     pauseFade() {}
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     resumeFade() {}
 
     destroy() {

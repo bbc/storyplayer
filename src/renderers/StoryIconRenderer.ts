@@ -225,13 +225,13 @@ export default class StoryIconRenderer extends EventEmitter {
         Object.keys(this._iconUrlMap).forEach(mapKey => {
             const iconUrls = this._iconUrlMap[mapKey]
 
-            if (mapKey === representationId && iconUrls) {
+            if (mapKey === representationId && iconUrls?.active) {
                 this._player.setIconControl(
                     mapKey,
                     iconUrls.active ? iconUrls.active : "",
                     true,
                 )
-            } else if (mapKey === representationId && iconUrls) {
+            } else if (mapKey === representationId && iconUrls?.default) {
                 this._player.setIconControl(
                     mapKey,
                     iconUrls.default ? iconUrls.default : "",

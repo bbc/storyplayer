@@ -6,7 +6,7 @@ import {ButtonEvents} from "./Buttons" //
 //
 
 class NarrativeElementTransport extends EventEmitter {
-    _logUserInteraction: Function
+    _logUserInteraction: (evType: string, from?: string, to?: string) => void
     _playPauseButton: HTMLButtonElement
     _backButton: HTMLButtonElement
     _seekBackButton: HTMLButtonElement
@@ -19,7 +19,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _isPlaying: boolean
 
-    constructor(logUserInteraction: Function) {
+    constructor(logUserInteraction: (evType: string, from?: string, to?: string) => void) {
         super()
         this._logUserInteraction = logUserInteraction
         this._container = document.createElement("div")

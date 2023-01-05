@@ -13,14 +13,14 @@ export default class ThreeJSDriver {
     _moveInterval: ReturnType<typeof setInterval> | null | undefined
     _orientationWatcher: ReturnType<typeof setInterval> | null | undefined
     _initialRotation: string
-    _view: Record<string, any>
+    _view: Record<string, number>
     _userInteracting: boolean
     _userDragging: boolean
     _started: boolean
     _rendered: boolean
     _domElement: HTMLElement
     _sceneReticle: THREE.Mesh
-    _oldOrientation: Record<string, any>
+    _oldOrientation: Record<string, number>
     _scene: THREE.Scene
     _icons: Record<string, ThreeIcon>
     _readyToShowIcons: boolean
@@ -29,8 +29,8 @@ export default class ThreeJSDriver {
     _controller: Controller
     _mediaElement: HTMLElement
     _uiElement: HTMLElement
-    _update: Function
-    _followLink: Function
+    _update: () => void
+    _followLink: (target: string, id: string) => void
 
     constructor(
         controller: Controller,
@@ -359,8 +359,8 @@ export default class ThreeJSDriver {
 
     _setOrientationVariable(): void {
         const {lat, lon} = this._view
-        const phi = parseInt(lon, 10)
-        const theta = parseInt(lat, 10)
+        const phi = parseInt(`${lon}`, 10)
+        const theta = parseInt(`${lat}`, 10)
 
         if (
             phi === this._oldOrientation.phi &&
@@ -385,8 +385,8 @@ export default class ThreeJSDriver {
     // (currently not used as no authoring for position)
     _addIcon(
         iconSrc: string,
-        position: Record<string, any>,
-        size: Record<string, any>,
+        position: Record<string, number>,
+        size: Record<string, number>,
         targetId: string,
         behaviourId: string,
     ) {

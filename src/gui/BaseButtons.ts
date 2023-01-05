@@ -1,8 +1,8 @@
 import EventEmitter from "events"
 
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-/* eslint-disable no-unused-vars */
 const ButtonEventTypes = [
     "BACK_BUTTON_CLICKED",
     "NEXT_BUTTON_CLICKED",
@@ -30,7 +30,7 @@ const ButtonEvents: Record<string, string> =
 
 class BaseButtons extends EventEmitter {
 
-    _logUserInteraction: Function
+    _logUserInteraction: (evType: string, from?: string, to?: string) => void
     _volumeButton: HTMLButtonElement
     _chapterButton: HTMLButtonElement
     _switchableButton: HTMLButtonElement

@@ -40,7 +40,6 @@ const createLink = behaviour => {
     return linkElement
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const renderLinkoutPopup = (behaviour, target, callback, analytics) => {
     const modalElement = createElementWithClass("div", behaviour.id, [])
     const modalContainer = createContainer(target)

@@ -16,7 +16,6 @@ const setPosition = (modalElement, behaviour) => {
 }
 
 /* eslint-enable no-param-reassign */
-// eslint-disable-next-line import/prefer-default-export
 export const renderTextOverlay = (behaviour, target, callback, controller) => {
     const modalElement = document.createElement("div")
     modalElement.id = behaviour.id

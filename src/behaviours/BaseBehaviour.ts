@@ -35,6 +35,7 @@ export default class BaseBehaviour {
     _handleDone() {
         this._onComplete()
     }
-
+    
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     destroy() {}
 }

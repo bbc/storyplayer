@@ -6,14 +6,15 @@ import SMPPlayoutEngine from "../playoutEngines/SMPPlayoutEngine"
 import logger from "../logger"
 import AnalyticEvents from "../AnalyticEvents"
 
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 const SHOW_CHAPTER_BUTTON = false
 
 class SMPControls extends BaseControls {
 
     _playoutEngine: SMPPlayoutEngine
     _smpPlayerInterface: Record<any, any>
-    _useExternalTransport: Function
+    _useExternalTransport: () => boolean
     _controlsEnabled: boolean
     _containerDiv: HTMLDivElement
     _uiUpdateQueue: Array<any>

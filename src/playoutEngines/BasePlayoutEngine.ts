@@ -1,6 +1,6 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-/* eslint-disable no-unused-vars */
 import Player from "../gui/Player"
 import {isDebug} from "../logger"
 export const MEDIA_TYPES = {
@@ -16,7 +16,7 @@ export default class BasePlayoutEngine {
     _media: Record<string, any>
     _permissionToPlay: boolean
     _hasStarted: boolean
-    _isHandlingNonAV: Boolean
+    _isHandlingNonAV: boolean
 
     constructor(player: Player) {
         this._player = player

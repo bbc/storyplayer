@@ -575,7 +575,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
      * Pauses the player and backgrounds
      * @param {boolean} changeSMP do we change the SMP player state or not
      */
-    pause(changeSMP: boolean = true) {
+    pause(changeSMP = true) {
         this._playing = false
         this.pauseBackgrounds()
 

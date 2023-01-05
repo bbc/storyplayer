@@ -5,6 +5,7 @@ import {
     Representation,
     AssetCollectionFetcher,
     MediaFetcher,
+    Behaviour,
 } from "../types"
 import type {AnalyticsLogger} from "../AnalyticEvents"
 import Controller from "../Controller"
@@ -53,7 +54,7 @@ export default class SimpleAVRenderer extends BaseTimedMediaRenderer {
     }
 
     _applyBlurBehaviour(
-        behaviour: Record<string, any>,
+        behaviour: Behaviour,
         callback: () => unknown,
     ) {
         const {blur} = behaviour

@@ -12,7 +12,7 @@ const RendererEventNames = [
     "SWITCHED_REPRESENTATION",
     "STARTED_COMPLETE_BEHAVIOURS",
 ] as const
-const RendererEvents: Record<string, any> = RendererEventNames.reduce(
+const RendererEvents: Record<string, string> = RendererEventNames.reduce(
     (events, eventName) => {
         // eslint-disable-next-line no-param-reassign
         events[eventName] = eventName

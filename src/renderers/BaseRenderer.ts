@@ -9,6 +9,9 @@ import {
     Representation,
     AssetCollectionFetcher,
     MediaFetcher,
+    DuringBehaviour,
+    Behaviour,
+    NarrativeElement,
 } from "../types"
 import Player, {PlayerEvents} from "../gui/Player"
 import PlayoutEngine from "../playoutEngines/BasePlayoutEngine"
@@ -30,7 +33,7 @@ const SEEK_TIME = 10
 // TODO: Consider making this longer now it runs higher than 4Hz.
 const TIMER_INTERVAL = 10
 
-const getBehaviourEndTime = (behaviour: Record<string, any>) => {
+const getBehaviourEndTime = (behaviour: DuringBehaviour) => {
     if (behaviour.duration !== undefined) {
         const endTime = behaviour.start_time + behaviour.duration
         return endTime
@@ -50,6 +53,12 @@ export const RENDERER_PHASES = {
     BG_FADE_OUT: "BG_FADE_OUT",
     MEDIA_FINISHED: "MEDIA_FINISHED", // done all its rendering and ready to move on, but not ended
 }
+
+interface NEObject {
+    targetNeId: string
+    ne: NarrativeElement
+} 
+
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string
     _representation: Representation
@@ -60,7 +69,7 @@ export default class BaseRenderer extends EventEmitter {
     _behaviourRunner: BehaviourRunner | null | undefined
     _behaviourRendererMap: Record<
         string,
-        (behaviour: Record<string, any>, callback: () => unknown) => void
+        (behaviour: Behaviour, callback: () => void) => void
     >
    _behaviourElements: Array<HTMLElement>
     _target: HTMLDivElement
@@ -69,8 +78,8 @@ export default class BaseRenderer extends EventEmitter {
     _controller: Controller
     _preloadedBehaviourAssets: Array<HTMLImageElement>
     _preloadedIconAssets: Array<HTMLImageElement>
-    _choiceBehaviourData: Record<string, any>
-    _linkBehaviour: Record<string, any>
+    _choiceBehaviourData: { choiceIconNEObjects: Array<NEObject>, behaviour: Behaviour, callback: () => void }
+    _linkBehaviour:  { showNeToEnd: boolean, oneShot: boolean, forceChoice: boolean, callback: () => void }
     inVariablePanel: boolean
     _linkFadeTimeout: ReturnType<typeof setTimeout>
     _linkChoiceBehaviourOverlay: Overlay
@@ -259,9 +268,9 @@ export default class BaseRenderer extends EventEmitter {
     addTimeEventListener(
         listenerId: string,
         startTime: number,
-        startCallback: Function,
+        startCallback: () => void,
         endTime: number | null | undefined = Infinity,
-        clearCallback?: Function | null | undefined,
+        clearCallback?: () => void | null | undefined,
     ) {
         logger.debug(`timer: Added event for ${listenerId} at ${startTime}`)
         this._timedEvents[listenerId] = {
@@ -471,8 +480,8 @@ export default class BaseRenderer extends EventEmitter {
     /* record some analytics for a user action */
     logUserInteraction(
         userEventName: AnalyticEventName,
-        fromId: string = "not_set",
-        toId: string = "not_set",
+        fromId = "not_set",
+        toId = "not_set",
     ) {
         const logData = {
             type: AnalyticEvents.types.USER_ACTION,
@@ -654,6 +663,7 @@ export default class BaseRenderer extends EventEmitter {
     }
 
     // prepare renderer so it can be switched to quickly and in sync
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     cueUp() {}
 
     switchTo() {
@@ -841,7 +851,7 @@ export default class BaseRenderer extends EventEmitter {
     /**
      * Runs the single during behaviour
      */
-    _runSingleDuringBehaviour(behaviour: Record<string, any>) {
+    _runSingleDuringBehaviour(behaviour: DuringBehaviour) {
         const behaviourRunner = this.getBehaviourRenderer(
             behaviour.behaviour.type,
         )
@@ -903,7 +913,7 @@ export default class BaseRenderer extends EventEmitter {
 
     // //////////// show link choice behaviour
     _applyShowChoiceBehaviour(
-        behaviour: Record<string, any>,
+        behaviour: Behaviour,
         callback: () => unknown,
     ) {
         this._player.on(PlayerEvents.LINK_CHOSEN, this._handleLinkChoiceEvent)
@@ -971,6 +981,7 @@ export default class BaseRenderer extends EventEmitter {
             showNeToEnd,
             oneShot,
             forceChoice,
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             callback: forceChoice ? callback : () => {},
         }
         const behaviourOverlay = this._linkChoiceBehaviourOverlay
@@ -1112,34 +1123,34 @@ export default class BaseRenderer extends EventEmitter {
         let showIfOneLink = false
 
         // and override if they are specified
-        if (behaviour.hasOwnProperty("show_ne_to_end")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "show_ne_to_end")) {
             showNeToEnd = behaviour.show_ne_to_end
         }
 
-        if (behaviour.hasOwnProperty("one_shot")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "one_shot")) {
             oneShot = behaviour.one_shot
         }
 
-        if (behaviour.hasOwnProperty("show_if_one_choice")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "show_if_one_choice")) {
             showIfOneLink = behaviour.show_if_one_choice
         }
 
         // do we show countdown?
-        if (behaviour.hasOwnProperty("show_time_remaining")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "show_time_remaining")) {
             countdown = behaviour.show_time_remaining
         }
 
         // do we disable controls while choosing
-        if (behaviour.hasOwnProperty("disable_controls")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "disable_controls")) {
             disableControls = behaviour.disable_controls
         }
 
         // do we apply any special css classes to the overlay
-        if (behaviour.hasOwnProperty("overlay_class")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "overlay_class")) {
             iconOverlayClass = behaviour.overlay_class
         }
 
-        if (behaviour.hasOwnProperty("force_choice")) {
+        if (Object.getOwnPropertyDescriptor(behaviour, "force_choice")) {
             forceChoice = behaviour.force_choice
         }
 
@@ -1385,7 +1396,7 @@ export default class BaseRenderer extends EventEmitter {
             currentNarrativeElement.links.forEach(neLink => {
                 if (neLink.target_narrative_element_id === narrativeElementId) {
                     neLink.override_as_chosen = true // eslint-disable-line no-param-reassign
-                } else if (neLink.hasOwnProperty("override_as_chosen")) {
+                } else if (Object.getOwnPropertyDescriptor(neLink, "override_as_chosen")) {
                     neLink.override_as_chosen = false // eslint-disable-line no-param-reassign
                 }
             })
@@ -1430,7 +1441,7 @@ export default class BaseRenderer extends EventEmitter {
         const currentNarrativeElement = this._controller.getCurrentNarrativeElement()
 
         currentNarrativeElement.links.forEach(neLink => {
-            if (neLink.hasOwnProperty("override_as_chosen")) {
+            if (Object.getOwnPropertyDescriptor(neLink, "override_as_chosen")) {
                 neLink.override_as_chosen = false // eslint-disable-line no-param-reassign
             }
         })

@@ -2,9 +2,9 @@ import EventEmitter from "events"
 import BaseRenderer from "../renderers/BaseRenderer"
 import type Overlay from "./Overlay"
 
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-/* eslint-disable no-unused-vars */
 const ControlEventsTypes = ["SHOWING_BUTTONS", "HIDING_BUTTONS"]
 
 const ControlEvents: Record<string, string> = ControlEventsTypes.reduce(
@@ -21,7 +21,8 @@ const ControlEvents: Record<string, string> = ControlEventsTypes.reduce(
 //
 
 class BaseControls extends EventEmitter {
-    _logUserInteraction: Function
+    _logUserInteraction: (evType: string, from?: string, to?: string) => void
+
     volumeOverlay: Overlay
     chapterOverlay: Overlay
     switchableOverlay: Overlay

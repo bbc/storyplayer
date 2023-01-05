@@ -22,7 +22,7 @@ class StandardControls extends BaseControls {
     _controlsDisabled: boolean
 
     constructor(
-        logUserInteraction: (...args: Array<any>) => any,
+        logUserInteraction: (evType: string, from?: string, to?: string) => void,
         volumeOverlay: Overlay,
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
@@ -112,7 +112,7 @@ class StandardControls extends BaseControls {
 
     // pass on any events
     _forwardButtonEvents() {
-        ;[
+        [
             ButtonEvents.SUBTITLES_BUTTON_CLICKED,
             ButtonEvents.FULLSCREEN_BUTTON_CLICKED,
             ButtonEvents.PLAY_PAUSE_BUTTON_CLICKED,

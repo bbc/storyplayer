@@ -108,7 +108,7 @@ export default class StoryReasoner extends EventEmitter {
         })
     }
 
-    getRequirements(): Array<{logic: Object, errorMsg?: string}> {
+    getRequirements(): Array<{logic: object, errorMsg?: string}> {
         if (
             this._story.meta !== undefined &&
             this._story.meta.romper !== undefined &&

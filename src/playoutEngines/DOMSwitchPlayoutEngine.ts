@@ -27,7 +27,7 @@ const HLS_BUFFER_ERROR_MARGIN = 0.1
 const SHAKKA_BANDWIDTH_CHECK_TIME = 1000
 
 interface ShakaConfig {
-    hls: {}
+    hls: object
     dash: {
         bufferingGoal: number
     }
@@ -257,8 +257,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     // Below causes the video buffer to be cleared and hlsjs then
                     // repopulates the buffer solving weird issues.
                     // eslint-disable-next-line no-self-assign
-                    rendererPlayoutObj._hls.currentLevel =
-                        rendererPlayoutObj._hls.currentLevel
+                    rendererPlayoutObj._hls.currentLevel = rendererPlayoutObj._hls.currentLevel
                 }
             }
         }
@@ -888,7 +887,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             if (promise !== undefined) {
                 promise
-                    .then(() => {})
+                    .then()
                     .catch(error => {
                         logger.warn(
                             error,

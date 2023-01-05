@@ -15,10 +15,10 @@ export default class ThreeJsImageRenderer extends BaseTimedIntervalRenderer {
     _fetchMedia: MediaFetcher
     _duration: number
     _imageMesh: THREE.Mesh
-    _disablePlayButton: Function
-    _enablePlayButton: Function
-    _disableScrubBar: Function
-    _enableScrubBar: Function
+    _disablePlayButton: () => void
+    _enablePlayButton: () => void
+    _disableScrubBar: () => void
+    _enableScrubBar: () => void
     _threeJSDriver: ThreeJSDriver
 
     constructor(

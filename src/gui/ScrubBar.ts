@@ -7,9 +7,8 @@ class ScrubBar extends BaseScrubBar {
     _scrubBar: HTMLInputElement
     _scrubbedEventTimeout: ReturnType<typeof setTimeout>
     _scrubTimePoller: ReturnType<typeof setInterval> | null | undefined
-    _logUserInteraction: Function
 
-    constructor(logUserInteraction: Function) {
+    constructor(logUserInteraction: (evType: string, from: string, to: string) => void) {
         super(logUserInteraction)
 
         this._createScrubBar()

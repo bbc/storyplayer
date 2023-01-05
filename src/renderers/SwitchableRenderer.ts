@@ -60,7 +60,7 @@ export default class SwitchableRenderer extends BaseRenderer {
     // create each renderer, but only init the chosen one
     // the rest remain just constructed to save bandwidth
     _constructChoiceRenderers() {
-        let choices: Array<any> = []
+        let choices: Array<BaseRenderer | null | undefined> = []
 
         if (this._representation.choices) {
             choices = this._representation.choices.map(choice => {
@@ -224,7 +224,7 @@ export default class SwitchableRenderer extends BaseRenderer {
         }
     }
 
-    getCurrentTime(): Record<string, any> {
+    getCurrentTime(): Record<string, string | number> {
         const currentChoice = this._choiceRenderers[this._currentRendererIndex]
 
         if (currentChoice) {

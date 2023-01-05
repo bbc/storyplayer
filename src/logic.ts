@@ -62,7 +62,7 @@ export function convertDotNotationToNestedObjects(resolvedVars) {
  */
 
 export default function evaluateConditions<T>(
-    candidates: Array<{ condition: any} & T>,
+    candidates: Array<{ condition: object} & T>,
     dataResolver: DataResolver,
 ): Promise<Array<T> | null | undefined> {
     const interestingVars = []
