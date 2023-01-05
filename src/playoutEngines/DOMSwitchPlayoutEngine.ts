@@ -680,7 +680,6 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
             if (isDebug()) {
                 this._activePlayer = rendererPlayoutObj
-                // @ts-ignore
                 window.activePlayer = rendererPlayoutObj
             }
 

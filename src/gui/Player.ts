@@ -1999,19 +1999,16 @@ class Player extends EventEmitter {
             isFullScreen = document.fullscreenElement != null
         }
 
-        // @ts-ignore
         if (document.webkitFullscreenElement) {
-            isFullScreen = // @ts-ignore
+            isFullScreen =
                 isFullScreen || document.webkitFullscreenElement != null
         }
 
-        // @ts-ignore
-        if (document.mozFullScreenElement) { // @ts-ignore
+        if (document.mozFullScreenElement) {
             isFullScreen = isFullScreen || document.mozFullScreenElement != null
         }
 
-        // @ts-ignore
-        if (document.msFullscreenElement) { // @ts-ignore
+        if (document.msFullscreenElement) {
             isFullScreen = isFullScreen || document.msFullscreenElement != null
         }
 
@@ -2099,13 +2096,9 @@ class Player extends EventEmitter {
     _enterFullScreen() {
         if (this._playerParent.requestFullscreen) {
             this._playerParent.requestFullscreen()
-            // @ts-ignore
         } else if (this._playerParent.mozRequestFullScreen) {
-            // @ts-ignore
             this._playerParent.mozRequestFullScreen() // Firefox
-            // @ts-ignore
         } else if (this._playerParent.webkitRequestFullscreen) {
-            // @ts-ignore
             this._playerParent.webkitRequestFullscreen() // Chrome and Safari
         } else {
             window.scrollTo(0, 1)
@@ -2132,18 +2125,12 @@ class Player extends EventEmitter {
     _exitFullScreen() {
         // || document.webkitIsFullScreen);
         if (document.exitFullscreen) {
-            // @ts-ignore
-            document.exitFullscreen() // @ts-ignore
+            document.exitFullscreen()
         } else if (document.mozCancelFullScreen) { 
-            // @ts-ignore
             document.mozCancelFullScreen() // Firefox
-            // @ts-ignore
         } else if (document.webkitExitFullscreen) {
-            // @ts-ignore
             document.webkitExitFullscreen() // Chrome and Safari
-            // @ts-ignore
         } else if (document.msExitFullscreen) {
-            // @ts-ignore
             document.msExitFullscreen() // Chrome and Safari
         } else {
             this._playerParent.classList.remove("ios-target-fullscreen") // iOS

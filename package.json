@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "concurrently --names \"eslint,sass-lint,tslint\" -c \"blue.bgWhite,magenta.bgWhite,green.bgBlack\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:sass-lint\" \"yarn test:typescript\"",
+    "test": "concurrently --names \"eslint,sass-lint,tsc\" -c \"blue.bgWhite,magenta.bgWhite,green.bgBlack\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:sass-lint\" \"yarn test:typescript\"",
     "test:eslint": "eslint src/",
     "test:sass-lint": "sass-lint -v",
     "test:typescript": "tsc",

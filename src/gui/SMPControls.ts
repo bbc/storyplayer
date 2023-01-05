@@ -7,6 +7,7 @@ import logger from "../logger"
 import AnalyticEvents from "../AnalyticEvents"
 
 /* eslint-disable @typescript-eslint/no-empty-function */
+declare const publicApi: any
 
 const SHOW_CHAPTER_BUTTON = false
 
@@ -373,7 +374,6 @@ class SMPControls extends BaseControls {
         // this currently isn't really visible
         const triangle = createElementWithClass("div", null, ["triangle"])
         smpVolumeBox.appendChild(triangle)
-        // @ts-ignore
         publicApi.ui.volumeControl.volumeControls.appendChild(smpVolumeBox)
     }
 
@@ -495,29 +495,22 @@ class SMPControls extends BaseControls {
     }
 
     _overrideVolumeButton() {
-        // @ts-ignore
         this.oldOpenVol = publicApi.ui.volumeControl.openVolumeControls
-        // @ts-ignore
         this.oldCloseVol = publicApi.ui.volumeControl.closeVolumeControls
 
-        // @ts-ignore
         publicApi.ui.volumeControl.openVolumeControls = () => {
             this._volumeControls.classList.remove("romper-inactive")
         }
 
-        // @ts-ignore
         publicApi.ui.volumeControl.closeVolumeControls = () => {
             this._volumeControls.classList.add("romper-inactive")
         }
 
-        // @ts-ignore
         publicApi.ui.volumeControl.volumeControls.style.overflow = "visible"
     }
 
     _clearVolumeButtonOverride() {
-        // @ts-ignore
         publicApi.ui.volumeControl.openVolumeControls = this.oldOpenVol
-        // @ts-ignore
         publicApi.ui.volumeControl.closeVolumeControls = this.oldCloseVol
     }
 

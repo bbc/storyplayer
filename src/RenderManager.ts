@@ -175,10 +175,9 @@ export default class RenderManager extends EventEmitter {
         if (typeof document.hidden !== "undefined") {
             document.addEventListener("visibilitychange", () => {
                 this._handleVisibilityChange(!document.hidden)
-            }) // @ts-ignore
+            })
         } else if (typeof document.webkitHidden !== "undefined") {
             document.addEventListener("webkitvisibilitychange", () => {
-                // @ts-ignore
                 this._handleVisibilityChange(!document.webkitHidden)
             })
         }

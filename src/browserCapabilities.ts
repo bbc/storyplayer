@@ -87,9 +87,9 @@ export class BrowserUserAgent {
     }
 
     static isSafariDesktop() {
-        const safariCheck = // @ts-ignore
-            !window.safari || // @ts-ignore
-            (typeof safari !== "undefined" && window.safari.pushNotification)
+        const safariCheck =
+            !window.safari ||
+            (typeof window.safari !== "undefined" && window.safari.pushNotification)
         // fallback to user agent sniffing if we can't detect safari using this method
         return safariCheck.toString() === "[object SafariRemoteNotification]"
     }
@@ -169,7 +169,7 @@ export class BrowserCapabilities {
 
         // Copied from https://github.com/Dash-Industry-Forum/dash.js/issues/2055
         // No official dashjs is supported function
-        if ( // @ts-ignore
+        if ( 
             typeof (window.MediaSource || window.WebKitMediaSource) ===
             "function"
         ) {

@@ -259,7 +259,6 @@ export default class Controller extends EventEmitter {
             this._allNarrativeElements = neList
         })
 
-        // @ts-ignore
         window._sessionManager = this._sessionManager
 
         // see if we have a linear story

@@ -1,3 +1,32 @@
+
+declare global {
+	interface Window {
+		publicApi: any,
+		playerInterface: any,
+        safari: any,
+        WebKitMediaSource: string,
+        _sessionManager: any,
+        playoutMedia: any,
+        playout: any,
+        activePlayer: any,
+	}
+
+    interface Document {
+        webkitFullscreenElement: any,
+        mozFullScreenElement: any,
+        msFullscreenElement: any,
+        mozCancelFullScreen: any,
+        msExitFullscreen: any,
+        webkitExitFullscreen: any,
+        webkitHidden: any,
+    }
+
+    interface HTMLElement {
+        mozRequestFullScreen: any,
+        webkitRequestFullscreen: any,
+    }
+}
+
 export interface Tags { [key: string]: Array<string> }
 
 export interface SourceLocation { [key: string]: string }
@@ -92,6 +121,8 @@ export interface Behaviour {
     force_choice?: boolean,
     overlay_class?: string,
     duration?: number,
+    targetVolume?: number,
+    startVolume?: number,
 }
 
 export interface DuringBehaviour {

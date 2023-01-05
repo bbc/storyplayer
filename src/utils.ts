@@ -35,7 +35,6 @@ export const proxyWrapper = (text, classInstance) => {
  * Are we in the SMP iframe or not
  */
 export const inSMPWrapper = () => {
-    // @ts-ignore
     if (window.publicApi && window.playerInterface) {
         return true
     }
@@ -47,7 +46,6 @@ export const inSMPWrapper = () => {
  * Returns the SMP interface
  */
 export const getSMPInterface = () => {
-    // @ts-ignore
     return window.playerInterface
 }
 export const DEBUG_PLAYOUT_FLAG = "debugPlayout"
@@ -65,7 +63,6 @@ export const getSetting = settingName => {
 
     if (inSMPWrapper()) {
         settingValue = new URLSearchParams(
-            // @ts-ignore
             window.playerInterface.datastore.get("queryString"),
         ).get(settingName)
     } else {
@@ -191,8 +188,7 @@ export const handleButtonTouchEvent = (
  */
 export const precisionRound = (number: number, decimalPlaces: number) => {
     return Number(
-        // @ts-ignore TODO - this seems odd!
-        `${Math.round(`${number}e${decimalPlaces}`)}e-${decimalPlaces}`,
+        `${Math.round(parseFloat(`${number}e${decimalPlaces}`))}e-${decimalPlaces}`,
     )
 }
 
@@ -201,7 +197,7 @@ export const precisionRound = (number: number, decimalPlaces: number) => {
  * @param {*} left left hand number to cpmpare
  * @param {*} right right hand number to compare
  */
-export const leftGreaterThanRight = (left, right) => {
+export const leftGreaterThanRight = (left: number, right: number) => {
     return precisionRound(left, 2) > precisionRound(right, 2)
 }
 

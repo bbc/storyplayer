@@ -26,9 +26,7 @@ export default class BasePlayoutEngine {
         this._isHandlingNonAV = false
 
         if (isDebug()) {
-            // @ts-ignore
             window.playoutMedia = this._media
-            // @ts-ignore
             window.playout = this
         }
     }
