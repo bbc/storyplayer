@@ -750,36 +750,6 @@ export default class RenderManager extends EventEmitter {
             newRenderer.on(RendererEvents.PREVIOUS_BUTTON_CLICKED, () => {
                 this.emit(RendererEvents.PREVIOUS_BUTTON_CLICKED)
             })
-            newRenderer.on(
-                RendererEvents.SWITCHED_REPRESENTATION,
-                (choice: RepresentationChoice) => {
-                    this._rendererState.lastSwitchableLabel = choice.label
-
-                    if (choice.choice_representation) {
-                        this._handleBackgroundRendering(
-                            choice.choice_representation,
-                        )
-                    }
-
-                    // Set index of each queued switchable
-                    Object.keys(this._activeRenderers).forEach(rendererNEId => {
-                        const renderer = this._activeRenderers[rendererNEId]
-
-                        if (
-                            renderer instanceof SwitchableRenderer &&
-                            this._rendererState.lastSwitchableLabel
-                        ) {
-                            // eslint-disable-next-line max-len
-                            renderer.setChoiceToRepresentationWithLabel(
-                                this._rendererState.lastSwitchableLabel,
-                            )
-                        }
-                    })
-
-                    // ensure volume persistence
-                    this._setVolumePersistence()
-                },
-            )
 
             if (
                 newRenderer instanceof SwitchableRenderer &&
