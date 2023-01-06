@@ -32,7 +32,6 @@ import Overlay, {OVERLAY_ACTIVATED_EVENT} from "./Overlay"
 import StandardControls from "./StandardControls"
 import SMPControls from "./SMPControls"
 import BaseControls from "./BaseControls"
-import {ControlEvents} from "./BaseControls"
 import ErrorControls from "./ErrorControls"
 import {createElementWithClass} from "../documentUtils"
 import SpatialNavigationHandler from "./SpatialNavigation"
@@ -451,13 +450,12 @@ class Player extends EventEmitter {
         const keyNumber = parseInt(event.key, 10)
 
         if (!isNaN(keyNumber)) {
-            // eslint-disable-line no-restricted-globals
             // for choices map number key presses to choices L-R
             if (this._visibleChoices[keyNumber]) {
-                const newMouseEvent = document.createEvent("MouseEvents")
-                newMouseEvent.initEvent("click", true, true)
-                // @ts-ignore
-                newMouseEvent.synthetic = true
+                const newMouseEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                })
 
                 this._visibleChoices[keyNumber].dispatchEvent(
                     newMouseEvent,

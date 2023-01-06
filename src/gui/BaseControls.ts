@@ -1,6 +1,7 @@
 import EventEmitter from "events"
 import BaseRenderer from "../renderers/BaseRenderer"
 import type Overlay from "./Overlay"
+import { UILogFunction } from '../types'
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -21,7 +22,7 @@ const ControlEvents: Record<string, string> = ControlEventsTypes.reduce(
 //
 
 class BaseControls extends EventEmitter {
-    _logUserInteraction: (evType: string, from?: string, to?: string) => void
+    _logUserInteraction: UILogFunction
 
     volumeOverlay: Overlay
     chapterOverlay: Overlay

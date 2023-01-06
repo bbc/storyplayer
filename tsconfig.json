@@ -4,7 +4,8 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "module": "CommonJS",
-        "moduleResolution":"Node16",
+        "moduleResolution":"node",
+        "skipLibCheck": true,
         "noImplicitAny": false,
         "outDir": "./build/",
         "resolveJsonModule": true,
@@ -16,12 +17,10 @@
             "types/",
         ]
     },
-    "exclude": [
-        "node_modules/**/*",
-        "examples/*",
-        "**/*.test.*",
-        "./build/"
+    "include": [
+        "src/**/*.ts"
     ],
+    "exclude": [ ],
     "lib": [
         "es6",
         "dom",

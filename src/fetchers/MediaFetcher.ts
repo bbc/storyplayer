@@ -5,8 +5,8 @@
  * @param {Object} the parameters affecting the type of media returned
  * @return {Function} A resolver which returns data from the passed in object
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function (params?: Record<string, any>) {
-    // eslint-disable-line no-unused-vars
 
     /**
      * Converts a uri to a playable piece of media.

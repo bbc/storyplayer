@@ -30,8 +30,8 @@ import {
     ERROR_EVENTS,
     DOM_EVENTS,
 } from "./Events"
-const DEFAULT_SETTINGS = { // @ts-ignore TODO: odd one this!
-    mediaFetcher: new MediaFetcher({}),
+const DEFAULT_SETTINGS = {
+    mediaFetcher: MediaFetcher({}),
     analyticsLogger: logdata => {
         if (
             logdata.to &&

@@ -1,11 +1,12 @@
 import EventEmitter from "events"
 import {handleButtonTouchEvent} from "../utils"
+import { UILogFunction } from '../types'
 const buttonClassPrefix = "romper-overlay-button-choice-"
 const OVERLAY_ACTIVATED_EVENT = "overlay-click-event"
 
 class Overlay extends EventEmitter {
 
-    _logFunction: (evType: string, from?: string, to?: string) => void
+    _logFunction: UILogFunction
     _name: string
     _elements: object
     _labels: object
@@ -13,7 +14,7 @@ class Overlay extends EventEmitter {
     _overlay: HTMLDivElement
     _button: HTMLButtonElement
 
-    constructor(name: string, logFunction: (evType: string, from?: string, to?: string) => void) {
+    constructor(name: string, logFunction: UILogFunction) {
         super()
         this._logFunction = logFunction
         this._name = name

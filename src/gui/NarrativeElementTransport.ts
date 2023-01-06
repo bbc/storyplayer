@@ -1,12 +1,15 @@
 import EventEmitter from "events"
 import AnalyticEvents from "../AnalyticEvents"
 import {handleButtonTouchEvent} from "../utils"
-import {ButtonEvents} from "./Buttons" //
+import {ButtonEvents} from "./Buttons"
+import { UILogFunction } from '../types'
+
+//
 // Component containing UI for Narrative Element controls
 //
 
 class NarrativeElementTransport extends EventEmitter {
-    _logUserInteraction: (evType: string, from?: string, to?: string) => void
+    _logUserInteraction: UILogFunction
     _playPauseButton: HTMLButtonElement
     _backButton: HTMLButtonElement
     _seekBackButton: HTMLButtonElement
@@ -19,7 +22,7 @@ class NarrativeElementTransport extends EventEmitter {
 
     _isPlaying: boolean
 
-    constructor(logUserInteraction: (evType: string, from?: string, to?: string) => void) {
+    constructor(logUserInteraction: UILogFunction) {
         super()
         this._logUserInteraction = logUserInteraction
         this._container = document.createElement("div")

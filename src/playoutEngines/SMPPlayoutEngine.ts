@@ -1,6 +1,6 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-/* eslint-disable no-unused-vars */
 import {v4 as uuid} from "uuid"
 import EventEmitter from "events"
 import Player, {PlayerEvents} from "../gui/Player"
@@ -721,7 +721,6 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
         return false
     }
 
-    // eslint-disable-next-line no-unused-vars
     _getMediaElement(rendererId: string): HTMLMediaElement | null | undefined {
         return this._smpPlayerInterface.requestVideoElement(true)
     }

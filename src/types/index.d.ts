@@ -256,3 +256,11 @@ export interface SMPPlayList {
         items: Array<SMPPlayListItem>,
     }
 }
+
+export interface UILogFunction {
+    (
+        eventName: string, 
+        from?: string,
+        to?: string,
+    ): void
+}

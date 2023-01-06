@@ -1,4 +1,6 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import EventEmitter from "events"
 import BehaviourRunner from "../behaviours/BehaviourRunner"
 import BehaviourTimings from "../behaviours/BehaviourTimings"
@@ -515,7 +517,7 @@ export default class BaseRenderer extends EventEmitter {
         throw new Error("getCurrentTime not implemented.")
     }
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setCurrentTime(time: number) {
         throw new Error("setCurrentTime not implemented.")
     }
@@ -1563,7 +1565,6 @@ export default class BaseRenderer extends EventEmitter {
         callback()
     }
 
-    // eslint-disable-next-line no-unused-vars
     _applyFadeAudioOutBehaviour(
         behaviour: Record<string, any>,
         callback: () => unknown,
@@ -1573,7 +1574,6 @@ export default class BaseRenderer extends EventEmitter {
         )
     }
 
-    // eslint-disable-next-line no-unused-vars
     _applyFadeAudioInBehaviour(
         behaviour: Record<string, any>,
         callback: () => unknown,

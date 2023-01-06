@@ -1,4 +1,5 @@
 import EventEmitter from "events"
+import { UILogFunction } from '../types'
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -30,7 +31,7 @@ const ButtonEvents: Record<string, string> =
 
 class BaseButtons extends EventEmitter {
 
-    _logUserInteraction: (evType: string, from?: string, to?: string) => void
+    _logUserInteraction: UILogFunction
     _volumeButton: HTMLButtonElement
     _chapterButton: HTMLButtonElement
     _switchableButton: HTMLButtonElement

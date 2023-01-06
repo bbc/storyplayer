@@ -6,6 +6,7 @@ import Buttons, {ButtonEvents} from "./Buttons"
 import ScrubBar from "./ScrubBar"
 import Overlay from "./Overlay"
 import {handleButtonTouchEvent} from "../utils"
+import { UILogFunction } from '../types'
 
 //
 // Component containing UI for all buttons
@@ -22,7 +23,7 @@ class StandardControls extends BaseControls {
     _controlsDisabled: boolean
 
     constructor(
-        logUserInteraction: (evType: string, from?: string, to?: string) => void,
+        logUserInteraction: UILogFunction,
         volumeOverlay: Overlay,
         chapterOverlay: Overlay,
         switchableOverlay: Overlay,
