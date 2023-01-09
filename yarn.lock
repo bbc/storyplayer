@@ -1429,20 +1429,6 @@ flatted@^3.1.0:
   resolved "https://registry.npmjs.org/flatted/-/flatted-3.1.1.tgz"
   integrity sha512-zAoAQiudy+r5SvnSw3KJy5os/oRJYHzrzja/tBDqrZtNhUw8bt6y8OBzMWcjWr+8liV8Eb6yOhw8WZ7VFZ5ZzA==
 
-flow-parser@^0.168.0:
-  version "0.168.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-parser/-/flow-parser-0.168.0.tgz#e9c385499145828b42fd754d3528f4cb7d5c6edf"
-  integrity sha1-6cOFSZFFgotC/XVNNSj0y31cbt8=
-
-flow-remove-types@2.168.0:
-  version "2.168.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-remove-types/-/flow-remove-types-2.168.0.tgz#166f8f43d81b6d01173087ef41badf760c2e3265"
-  integrity sha1-Fm+PQ9gbbQEXMIfvQbrfdgwuMmU=
-  dependencies:
-    flow-parser "^0.168.0"
-    pirates "^3.0.2"
-    vlq "^0.2.1"
-
 front-matter@2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/front-matter/-/front-matter-2.1.2.tgz"
@@ -2144,11 +2130,6 @@ next-tick@~1.0.0:
   resolved "https://registry.npmjs.org/next-tick/-/next-tick-1.0.0.tgz"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
-node-modules-regexp@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/node-modules-regexp/-/node-modules-regexp-1.0.0.tgz"
-  integrity sha1-jZ2+KJZKSsVxLpExZCEHxx6Q7EA=
-
 normalize-package-data@^2.3.2:
   version "2.5.0"
   resolved "https://registry.npmjs.org/normalize-package-data/-/normalize-package-data-2.5.0.tgz"
@@ -2369,13 +2350,6 @@ pify@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
   integrity sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=
-
-pirates@^3.0.2:
-  version "3.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/pirates/-/pirates-3.0.2.tgz#7e6f85413fd9161ab4e12b539b06010d85954bb9"
-  integrity sha1-fm+FQT/ZFhq04StTmwYBDYWVS7k=
-  dependencies:
-    node-modules-regexp "^1.0.0"
 
 pkg-dir@^2.0.0:
   version "2.0.0"
@@ -3087,13 +3061,6 @@ vanilla-picker@^2.12.1:
   dependencies:
     "@sphinxxxx/color-conversion" "^2.2.2"
 
-vite-plugin-flow@^0.2.1:
-  version "0.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vite-plugin-flow/-/vite-plugin-flow-0.2.1.tgz#fbc30e637e03a4642990038b441bf4cdf59c5cfd"
-  integrity sha1-+8MOY34DpGQpkAOLRBv0zfWcXP0=
-  dependencies:
-    flow-remove-types "2.168.0"
-
 vite@^4.0.3:
   version "4.0.3"
   resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vite/-/vite-4.0.3.tgz#de27ad3f263a03ae9419cdc8bc07721eadcba8b9"
@@ -3105,11 +3072,6 @@ vite@^4.0.3:
     rollup "^3.7.0"
   optionalDependencies:
     fsevents "~2.3.2"
-
-vlq@^0.2.1:
-  version "0.2.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
-  integrity sha1-jz5DKM9jsVQMDWfhsneDhviXWyY=
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

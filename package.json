@@ -53,8 +53,7 @@
     "sass-lint": "^1.13.1",
     "typescript": "^4.9.4",
     "utility-types": "^3.10.0",
-    "vite": "^4.0.3",
-    "vite-plugin-flow": "^0.2.1"
+    "vite": "^4.0.3"
   },
   "dependencies": {
     "browser-bunyan": "^1.5.3",
