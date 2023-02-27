@@ -11,21 +11,21 @@
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.14.5":
   version "7.14.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/code-frame/-/code-frame-7.14.5.tgz"
+  resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.14.5.tgz"
   integrity sha1-I7CNdA6D9JxeWZRfvxtD6Au/Tts=
   dependencies:
     "@babel/highlight" "^7.14.5"
 
 "@babel/code-frame@^7.16.7":
   version "7.18.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/code-frame/-/code-frame-7.18.6.tgz"
+  resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.18.6.tgz"
   integrity sha1-OyXTjIlgC6otzCGe36iKdOssQno=
   dependencies:
     "@babel/highlight" "^7.18.6"
 
 "@babel/generator@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/generator/-/generator-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/generator/-/generator-7.15.4.tgz"
   integrity sha1-hayxWaJnymMk+Xk5hpke4gIqBbA=
   dependencies:
     "@babel/types" "^7.15.4"
@@ -34,7 +34,7 @@
 
 "@babel/helper-function-name@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-function-name/-/helper-function-name-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-function-name/-/helper-function-name-7.15.4.tgz"
   integrity sha1-hFdE2vxDgaSl+2r6bD02+Yp4frw=
   dependencies:
     "@babel/helper-get-function-arity" "^7.15.4"
@@ -43,33 +43,33 @@
 
 "@babel/helper-get-function-arity@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-get-function-arity/-/helper-get-function-arity-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-get-function-arity/-/helper-get-function-arity-7.15.4.tgz"
   integrity sha1-CYgYk0oTf854tTaj4BWGS+Hih5s=
   dependencies:
     "@babel/types" "^7.15.4"
 
 "@babel/helper-hoist-variables@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-hoist-variables/-/helper-hoist-variables-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-hoist-variables/-/helper-hoist-variables-7.15.4.tgz"
   integrity sha1-CZk6MlnA6Rj5nRBCYd/fwDPxeN8=
   dependencies:
     "@babel/types" "^7.15.4"
 
 "@babel/helper-split-export-declaration@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-split-export-declaration/-/helper-split-export-declaration-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-split-export-declaration/-/helper-split-export-declaration-7.15.4.tgz"
   integrity sha1-rsq5Lc2+9qEKo7YqsgSwhfd24lc=
   dependencies:
     "@babel/types" "^7.15.4"
 
 "@babel/helper-validator-identifier@^7.14.0", "@babel/helper-validator-identifier@^7.14.5", "@babel/helper-validator-identifier@^7.14.9":
   version "7.15.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-validator-identifier/-/helper-validator-identifier-7.15.7.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.15.7.tgz"
   integrity sha1-Ig35k7/pBKSmsCq08zhaXr9uI4k=
 
 "@babel/helper-validator-identifier@^7.18.6":
   version "7.18.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/helper-validator-identifier/-/helper-validator-identifier-7.18.6.tgz"
+  resolved "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.18.6.tgz"
   integrity sha1-nJfjDTGyuMcqHQiYTyyptXTXoHY=
 
 "@babel/highlight@^7.10.4":
@@ -83,7 +83,7 @@
 
 "@babel/highlight@^7.14.5":
   version "7.14.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/highlight/-/highlight-7.14.5.tgz"
+  resolved "https://registry.npmjs.org/@babel/highlight/-/highlight-7.14.5.tgz"
   integrity sha1-aGGlLwOWZAUAH2qlNKAaJNmejNk=
   dependencies:
     "@babel/helper-validator-identifier" "^7.14.5"
@@ -92,7 +92,7 @@
 
 "@babel/highlight@^7.16.7", "@babel/highlight@^7.18.6":
   version "7.18.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/highlight/-/highlight-7.18.6.tgz"
+  resolved "https://registry.npmjs.org/@babel/highlight/-/highlight-7.18.6.tgz"
   integrity sha1-gRWGAek+JWN5Wty/vfXWS+Py7N8=
   dependencies:
     "@babel/helper-validator-identifier" "^7.18.6"
@@ -101,12 +101,12 @@
 
 "@babel/parser@^7.15.4", "@babel/parser@^7.7.0":
   version "7.15.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/parser/-/parser-7.15.7.tgz"
+  resolved "https://registry.npmjs.org/@babel/parser/-/parser-7.15.7.tgz"
   integrity sha1-DD7UousHsWXfqFs8xFxyczTE7a4=
 
 "@babel/template@^7.15.4":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/template/-/template-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/template/-/template-7.15.4.tgz"
   integrity sha1-UYmNNdzz+qZwxO5q/P1RfuE58ZQ=
   dependencies:
     "@babel/code-frame" "^7.14.5"
@@ -115,7 +115,7 @@
 
 "@babel/traverse@^7.7.0":
   version "7.15.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/traverse/-/traverse-7.15.4.tgz"
+  resolved "https://registry.npmjs.org/@babel/traverse/-/traverse-7.15.4.tgz"
   integrity sha1-/4UQNnoUS/v/VS2eGOKPPiiJwi0=
   dependencies:
     "@babel/code-frame" "^7.14.5"
@@ -130,7 +130,7 @@
 
 "@babel/types@^7.15.4", "@babel/types@^7.7.0":
   version "7.15.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@babel/types/-/types-7.15.6.tgz"
+  resolved "https://registry.npmjs.org/@babel/types/-/types-7.15.6.tgz"
   integrity sha1-mavcSCGLKIHAWN0KerBbmcm+dY8=
   dependencies:
     "@babel/helper-validator-identifier" "^7.14.9"
@@ -171,112 +171,112 @@
 
 "@esbuild/android-arm64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/android-arm64/-/android-arm64-0.16.10.tgz#d784d8f13dbef50492ea55456fb50651e4036fbf"
+  resolved "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.16.10.tgz#d784d8f13dbef50492ea55456fb50651e4036fbf"
   integrity sha1-14TY8T2+9QSS6lVFb7UGUeQDb78=
 
 "@esbuild/android-arm@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/android-arm/-/android-arm-0.16.10.tgz#becf6b5647c091b039121db8c17300a7dfd1ab4a"
+  resolved "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.16.10.tgz#becf6b5647c091b039121db8c17300a7dfd1ab4a"
   integrity sha1-vs9rVkfAkbA5Eh24wXMAp9/Rq0o=
 
 "@esbuild/android-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/android-x64/-/android-x64-0.16.10.tgz#648cacbb13a5047380a038e5d6d895015e31b525"
+  resolved "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.16.10.tgz#648cacbb13a5047380a038e5d6d895015e31b525"
   integrity sha1-ZIysuxOlBHOAoDjl1tiVAV4xtSU=
 
 "@esbuild/darwin-arm64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/darwin-arm64/-/darwin-arm64-0.16.10.tgz#3ca7fd9a456d11752df77df6c030f2d08f27bda9"
+  resolved "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.16.10.tgz#3ca7fd9a456d11752df77df6c030f2d08f27bda9"
   integrity sha1-PKf9mkVtEXUt9332wDDy0I8nvak=
 
 "@esbuild/darwin-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/darwin-x64/-/darwin-x64-0.16.10.tgz#7eb71b8da4106627f01553def517d3c5e5942592"
+  resolved "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.16.10.tgz#7eb71b8da4106627f01553def517d3c5e5942592"
   integrity sha1-frcbjaQQZifwFVPe9RfTxeWUJZI=
 
 "@esbuild/freebsd-arm64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/freebsd-arm64/-/freebsd-arm64-0.16.10.tgz#c69c78ee1d17d35ad2cf76a1bb67788000a84b43"
+  resolved "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.16.10.tgz#c69c78ee1d17d35ad2cf76a1bb67788000a84b43"
   integrity sha1-xpx47h0X01rSz3ahu2d4gACoS0M=
 
 "@esbuild/freebsd-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/freebsd-x64/-/freebsd-x64-0.16.10.tgz#a9804ab1b9366f915812af24ad5cfc1c0db01441"
+  resolved "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.16.10.tgz#a9804ab1b9366f915812af24ad5cfc1c0db01441"
   integrity sha1-qYBKsbk2b5FYEq8krVz8HA2wFEE=
 
 "@esbuild/linux-arm64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-arm64/-/linux-arm64-0.16.10.tgz#d9a9ddfcb28ed8cced688bc112ef66283d6fa77f"
+  resolved "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.16.10.tgz#d9a9ddfcb28ed8cced688bc112ef66283d6fa77f"
   integrity sha1-2and/LKO2MztaIvBEu9mKD1vp38=
 
 "@esbuild/linux-arm@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-arm/-/linux-arm-0.16.10.tgz#f32cdac1d3319c83ae7f9f31238dd1284ee6bba2"
+  resolved "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.16.10.tgz#f32cdac1d3319c83ae7f9f31238dd1284ee6bba2"
   integrity sha1-8yzawdMxnIOuf58xI43RKE7mu6I=
 
 "@esbuild/linux-ia32@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-ia32/-/linux-ia32-0.16.10.tgz#1e023478e42f3a01cad48f4af50120d4b639af03"
+  resolved "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.16.10.tgz#1e023478e42f3a01cad48f4af50120d4b639af03"
   integrity sha1-HgI0eOQvOgHK1I9K9QEg1LY5rwM=
 
 "@esbuild/linux-loong64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-loong64/-/linux-loong64-0.16.10.tgz#f9098865a69d1d6e2f8bda51c7f9d4240f20b771"
+  resolved "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.16.10.tgz#f9098865a69d1d6e2f8bda51c7f9d4240f20b771"
   integrity sha1-+QmIZaadHW4vi9pRx/nUJA8gt3E=
 
 "@esbuild/linux-mips64el@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-mips64el/-/linux-mips64el-0.16.10.tgz#574725ad2ea81b7783b7ba7d1ab3475f8fdd8d32"
+  resolved "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.16.10.tgz#574725ad2ea81b7783b7ba7d1ab3475f8fdd8d32"
   integrity sha1-V0clrS6oG3eDt7p9GrNHX4/djTI=
 
 "@esbuild/linux-ppc64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-ppc64/-/linux-ppc64-0.16.10.tgz#11da658c54514a693813af56bb28951d563a90c3"
+  resolved "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.16.10.tgz#11da658c54514a693813af56bb28951d563a90c3"
   integrity sha1-EdpljFRRSmk4E69WuyiVHVY6kMM=
 
 "@esbuild/linux-riscv64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-riscv64/-/linux-riscv64-0.16.10.tgz#3af4600adbd6c5a4a6f1da05771f4aa6774baab2"
+  resolved "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.16.10.tgz#3af4600adbd6c5a4a6f1da05771f4aa6774baab2"
   integrity sha1-OvRgCtvWxaSm8doFdx9KpndLqrI=
 
 "@esbuild/linux-s390x@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-s390x/-/linux-s390x-0.16.10.tgz#9e3377aaf0191a9d6628e806a279085ec4391f3e"
+  resolved "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.16.10.tgz#9e3377aaf0191a9d6628e806a279085ec4391f3e"
   integrity sha1-njN3qvAZGp1mKOgGonkIXsQ5Hz4=
 
 "@esbuild/linux-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/linux-x64/-/linux-x64-0.16.10.tgz#7c41d4d697ce674e0083e7baa6231468f4650d85"
+  resolved "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.16.10.tgz#7c41d4d697ce674e0083e7baa6231468f4650d85"
   integrity sha1-fEHU1pfOZ04Ag+e6piMUaPRlDYU=
 
 "@esbuild/netbsd-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/netbsd-x64/-/netbsd-x64-0.16.10.tgz#ebac59e3986834af04bbafcee7b0c1f31cd477c6"
+  resolved "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.16.10.tgz#ebac59e3986834af04bbafcee7b0c1f31cd477c6"
   integrity sha1-66xZ45hoNK8Eu6/O57DB8xzUd8Y=
 
 "@esbuild/openbsd-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/openbsd-x64/-/openbsd-x64-0.16.10.tgz#9eaa6cac3b80db45090c0946e62de5b5689c61d1"
+  resolved "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.16.10.tgz#9eaa6cac3b80db45090c0946e62de5b5689c61d1"
   integrity sha1-nqpsrDuA20UJDAlG5i3ltWicYdE=
 
 "@esbuild/sunos-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/sunos-x64/-/sunos-x64-0.16.10.tgz#31e5e4b814ef43d300e26511e486a4716a390d5f"
+  resolved "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.16.10.tgz#31e5e4b814ef43d300e26511e486a4716a390d5f"
   integrity sha1-MeXkuBTvQ9MA4mUR5IakcWo5DV8=
 
 "@esbuild/win32-arm64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/win32-arm64/-/win32-arm64-0.16.10.tgz#ca58472dc03ca79e6d03f8a31113979ff253d94f"
+  resolved "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.16.10.tgz#ca58472dc03ca79e6d03f8a31113979ff253d94f"
   integrity sha1-ylhHLcA8p55tA/ijEROXn/JT2U8=
 
 "@esbuild/win32-ia32@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/win32-ia32/-/win32-ia32-0.16.10.tgz#c572df2c65ab118feed0a5da5a4a193846d74e43"
+  resolved "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.16.10.tgz#c572df2c65ab118feed0a5da5a4a193846d74e43"
   integrity sha1-xXLfLGWrEY/u0KXaWkoZOEbXTkM=
 
 "@esbuild/win32-x64@0.16.10":
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@esbuild/win32-x64/-/win32-x64-0.16.10.tgz#0e9c6a5e69c10d96aff2386b7ee9646138c2a831"
+  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.16.10.tgz#0e9c6a5e69c10d96aff2386b7ee9646138c2a831"
   integrity sha1-DpxqXmnBDZav8jhrfulkYTjCqDE=
 
 "@eslint/eslintrc@^0.4.1":
@@ -296,14 +296,14 @@
 
 "@octokit/auth-token@^2.4.4":
   version "2.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/auth-token/-/auth-token-2.5.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/auth-token/-/auth-token-2.5.0.tgz"
   integrity sha1-J8N+omwgXyhENAJHf/0mExHyHjY=
   dependencies:
     "@octokit/types" "^6.0.3"
 
 "@octokit/core@^3.5.1":
   version "3.6.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/core/-/core-3.6.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/core/-/core-3.6.0.tgz"
   integrity sha1-M3bLnzAI2bPREDcNkOCh/NX+YIU=
   dependencies:
     "@octokit/auth-token" "^2.4.4"
@@ -316,7 +316,7 @@
 
 "@octokit/endpoint@^6.0.1":
   version "6.0.12"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/endpoint/-/endpoint-6.0.12.tgz"
+  resolved "https://registry.npmjs.org/@octokit/endpoint/-/endpoint-6.0.12.tgz"
   integrity sha1-O01HpLDnmxAn+4111CIZKLLQVlg=
   dependencies:
     "@octokit/types" "^6.0.3"
@@ -325,7 +325,7 @@
 
 "@octokit/graphql@^4.5.8":
   version "4.8.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/graphql/-/graphql-4.8.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/graphql/-/graphql-4.8.0.tgz"
   integrity sha1-Zk2bEcDhIRLL944Q9JoFlZqiLMM=
   dependencies:
     "@octokit/request" "^5.6.0"
@@ -334,24 +334,24 @@
 
 "@octokit/openapi-types@^12.10.0":
   version "12.10.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/openapi-types/-/openapi-types-12.10.1.tgz"
+  resolved "https://registry.npmjs.org/@octokit/openapi-types/-/openapi-types-12.10.1.tgz"
   integrity sha1-V7XMbHtOVdhkLJPQZAH7GvSDmJk=
 
 "@octokit/plugin-paginate-rest@^2.16.8":
   version "2.21.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.21.2.tgz"
+  resolved "https://registry.npmjs.org/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.21.2.tgz"
   integrity sha1-BwvpuxjLeOUrRx3cNVHSg1Xi1eI=
   dependencies:
     "@octokit/types" "^6.39.0"
 
 "@octokit/plugin-request-log@^1.0.4":
   version "1.0.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/plugin-request-log/-/plugin-request-log-1.0.4.tgz"
+  resolved "https://registry.npmjs.org/@octokit/plugin-request-log/-/plugin-request-log-1.0.4.tgz"
   integrity sha1-XlDtcIOmE4FrHkooruxft/FGLoU=
 
 "@octokit/plugin-rest-endpoint-methods@^5.12.0":
   version "5.16.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-5.16.2.tgz"
+  resolved "https://registry.npmjs.org/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-5.16.2.tgz"
   integrity sha1-fui/WG35fdaGjPaPZBNU6QjCU0I=
   dependencies:
     "@octokit/types" "^6.39.0"
@@ -359,7 +359,7 @@
 
 "@octokit/request-error@^2.0.5", "@octokit/request-error@^2.1.0":
   version "2.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/request-error/-/request-error-2.1.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/request-error/-/request-error-2.1.0.tgz"
   integrity sha1-nhUDV4Mb/HiNE6T9SxkT1gx01nc=
   dependencies:
     "@octokit/types" "^6.0.3"
@@ -368,7 +368,7 @@
 
 "@octokit/request@^5.6.0", "@octokit/request@^5.6.3":
   version "5.6.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/request/-/request-5.6.3.tgz"
+  resolved "https://registry.npmjs.org/@octokit/request/-/request-5.6.3.tgz"
   integrity sha1-GaAiUVpbupZawGydEzRRTrUMSLA=
   dependencies:
     "@octokit/endpoint" "^6.0.1"
@@ -380,7 +380,7 @@
 
 "@octokit/rest@^18.12.0":
   version "18.12.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/rest/-/rest-18.12.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/rest/-/rest-18.12.0.tgz"
   integrity sha1-8GvElS/IcTAwjYEMqdAOefaYiIE=
   dependencies:
     "@octokit/core" "^3.5.1"
@@ -390,14 +390,14 @@
 
 "@octokit/types@^6.0.3", "@octokit/types@^6.16.1", "@octokit/types@^6.39.0":
   version "6.40.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@octokit/types/-/types-6.40.0.tgz"
+  resolved "https://registry.npmjs.org/@octokit/types/-/types-6.40.0.tgz"
   integrity sha1-8uZlGW1Bnhm7QmVgPPkEqCBQXQ4=
   dependencies:
     "@octokit/openapi-types" "^12.10.0"
 
 "@sindresorhus/is@^4.0.0":
   version "4.6.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@sindresorhus/is/-/is-4.6.0.tgz"
+  resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-4.6.0.tgz"
   integrity sha1-PHycRuZ4/u/nouW7YJ09vWZf+z8=
 
 "@sphinxxxx/color-conversion@^2.2.2":
@@ -407,14 +407,14 @@
 
 "@szmarczak/http-timer@^4.0.5":
   version "4.0.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@szmarczak/http-timer/-/http-timer-4.0.6.tgz"
+  resolved "https://registry.npmjs.org/@szmarczak/http-timer/-/http-timer-4.0.6.tgz"
   integrity sha1-tKkUu2LnwnLU5Zif5EQPgSqx2Ac=
   dependencies:
     defer-to-connect "^2.0.0"
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@types/cacheable-request/-/cacheable-request-6.0.2.tgz"
+  resolved "https://registry.npmjs.org/@types/cacheable-request/-/cacheable-request-6.0.2.tgz"
   integrity sha1-wyTaAZfeCpiiMSFWU2riYkKf9rk=
   dependencies:
     "@types/http-cache-semantics" "*"
@@ -424,12 +424,12 @@
 
 "@types/http-cache-semantics@*":
   version "4.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@types/http-cache-semantics/-/http-cache-semantics-4.0.1.tgz"
+  resolved "https://registry.npmjs.org/@types/http-cache-semantics/-/http-cache-semantics-4.0.1.tgz"
   integrity sha1-Dqe2FJaQK5WJDcTDoRa2DLja6BI=
 
 "@types/json-buffer@~3.0.0":
   version "3.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@types/json-buffer/-/json-buffer-3.0.0.tgz"
+  resolved "https://registry.npmjs.org/@types/json-buffer/-/json-buffer-3.0.0.tgz"
   integrity sha1-hcH/DwlI/BWYENS1vjW/jCCHX2Q=
 
 "@types/json5@^0.0.29":
@@ -439,7 +439,7 @@
 
 "@types/keyv@*":
   version "3.1.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@types/keyv/-/keyv-3.1.4.tgz"
+  resolved "https://registry.npmjs.org/@types/keyv/-/keyv-3.1.4.tgz"
   integrity sha1-PM2xxnUbDH5SMAvNrNW8v4+qdbY=
   dependencies:
     "@types/node" "*"
@@ -451,14 +451,14 @@
 
 "@types/responselike@*", "@types/responselike@^1.0.0":
   version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/@types/responselike/-/responselike-1.0.0.tgz"
+  resolved "https://registry.npmjs.org/@types/responselike/-/responselike-1.0.0.tgz"
   integrity sha1-JR9P59FU0rrRJavhtCmyOv0mLik=
   dependencies:
     "@types/node" "*"
 
 ace-builds@^1.6.0:
   version "1.7.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ace-builds/-/ace-builds-1.7.1.tgz"
+  resolved "https://registry.npmjs.org/ace-builds/-/ace-builds-1.7.1.tgz"
   integrity sha1-vnlvvZhhDdpeE4rtmNMJysKrCHI=
 
 acorn-jsx@^3.0.0:
@@ -553,7 +553,7 @@ ansi-regex@^5.0.0:
 
 ansi-regex@^5.0.1:
   version "5.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ansi-regex/-/ansi-regex-5.0.1.tgz"
+  resolved "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz"
   integrity sha1-CCyyyJyf6GWaMRpTvWpNxTAdswQ=
 
 ansi-styles@^2.2.1:
@@ -563,7 +563,7 @@ ansi-styles@^2.2.1:
 
 ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   version "3.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ansi-styles/-/ansi-styles-3.2.1.tgz"
+  resolved "https://registry.npmjs.org/ansi-styles/-/ansi-styles-3.2.1.tgz"
   integrity sha1-QfuyAkPlCxK+DwS43tvwdSDOhB0=
   dependencies:
     color-convert "^1.9.0"
@@ -617,7 +617,7 @@ astral-regex@^2.0.0:
 
 babel-eslint@^10.1.0:
   version "10.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/babel-eslint/-/babel-eslint-10.1.0.tgz"
+  resolved "https://registry.npmjs.org/babel-eslint/-/babel-eslint-10.1.0.tgz"
   integrity sha1-aWjlaKkQt4+zd5zdi2rC9HmUMjI=
   dependencies:
     "@babel/code-frame" "^7.0.0"
@@ -634,7 +634,7 @@ balanced-match@^1.0.0:
 
 before-after-hook@^2.2.0:
   version "2.2.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/before-after-hook/-/before-after-hook-2.2.2.tgz"
+  resolved "https://registry.npmjs.org/before-after-hook/-/before-after-hook-2.2.2.tgz"
   integrity sha1-pujKQQKNkO4sJCIvIByQlWCRYT4=
 
 binary-extensions@^2.0.0:
@@ -674,12 +674,12 @@ buffer-from@^1.0.0:
 
 cacheable-lookup@^5.0.3:
   version "5.0.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cacheable-lookup/-/cacheable-lookup-5.0.4.tgz"
+  resolved "https://registry.npmjs.org/cacheable-lookup/-/cacheable-lookup-5.0.4.tgz"
   integrity sha1-WmuGWyxENXvj1evCpGewMnGacAU=
 
 cacheable-request@^7.0.2:
   version "7.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cacheable-request/-/cacheable-request-7.0.2.tgz"
+  resolved "https://registry.npmjs.org/cacheable-request/-/cacheable-request-7.0.2.tgz"
   integrity sha1-6g0LiJNkolhUdXMByhKy2nf5HSc=
   dependencies:
     clone-response "^1.0.2"
@@ -733,7 +733,7 @@ chalk@^1.0.0, chalk@^1.1.1, chalk@^1.1.3:
 
 chalk@^2.0.0, chalk@^2.4.2:
   version "2.4.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/chalk/-/chalk-2.4.2.tgz"
+  resolved "https://registry.npmjs.org/chalk/-/chalk-2.4.2.tgz"
   integrity sha1-zUJUFnelQzPPVBpJEIwUMrRMlCQ=
   dependencies:
     ansi-styles "^3.2.1"
@@ -755,7 +755,7 @@ charenc@0.0.2:
 
 "chokidar@>=3.0.0 <4.0.0":
   version "3.5.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
+  resolved "https://registry.npmjs.org/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha1-HPN8hwe5Mr0a8a4iwEMuKs0ZA70=
   dependencies:
     anymatch "~3.1.2"
@@ -796,7 +796,7 @@ cliui@^5.0.0:
 
 cliui@^6.0.0:
   version "6.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/cliui/-/cliui-6.0.0.tgz"
+  resolved "https://registry.npmjs.org/cliui/-/cliui-6.0.0.tgz"
   integrity sha1-UR1wLAxOQcoVbX0OlgIfI+EyJbE=
   dependencies:
     string-width "^4.2.0"
@@ -805,7 +805,7 @@ cliui@^6.0.0:
 
 clone-response@^1.0.2:
   version "1.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/clone-response/-/clone-response-1.0.3.tgz"
+  resolved "https://registry.npmjs.org/clone-response/-/clone-response-1.0.3.tgz"
   integrity sha1-ryAyqkeBY5nPXwodDbkC9ReruMM=
   dependencies:
     mimic-response "^1.0.0"
@@ -822,7 +822,7 @@ code-point-at@^1.0.0:
 
 color-convert@^1.9.0:
   version "1.9.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/color-convert/-/color-convert-1.9.3.tgz"
+  resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz"
   integrity sha1-u3GFBpDh8TZWfeYp0tVHHe2kweg=
   dependencies:
     color-name "1.1.3"
@@ -836,7 +836,7 @@ color-convert@^2.0.1:
 
 color-name@1.1.3:
   version "1.1.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/color-name/-/color-name-1.1.3.tgz"
+  resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.3.tgz"
   integrity sha1-p9BVi9icQveV3UIyj3QIMcpTvCU=
 
 color-name@~1.1.4:
@@ -846,7 +846,7 @@ color-name@~1.1.4:
 
 colors@1.4.0:
   version "1.4.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/colors/-/colors-1.4.0.tgz"
+  resolved "https://registry.npmjs.org/colors/-/colors-1.4.0.tgz"
   integrity sha1-xQSRR51MG9rtLJztMs98fcI2D3g=
 
 commander@^2.8.1:
@@ -861,7 +861,7 @@ commander@^6.1.0:
 
 compress-brotli@^1.3.8:
   version "1.3.8"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/compress-brotli/-/compress-brotli-1.3.8.tgz"
+  resolved "https://registry.npmjs.org/compress-brotli/-/compress-brotli-1.3.8.tgz"
   integrity sha1-DApgyXqYkUUxTsOB6E4maC57ONs=
   dependencies:
     "@types/json-buffer" "~3.0.0"
@@ -957,7 +957,7 @@ debug@^4.0.1, debug@^4.1.1:
 
 debug@^4.1.0:
   version "4.3.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/debug/-/debug-4.3.2.tgz"
+  resolved "https://registry.npmjs.org/debug/-/debug-4.3.2.tgz"
   integrity sha1-8KScGKyHeeMdSgxgKd+3aHPHQos=
   dependencies:
     ms "2.1.2"
@@ -969,7 +969,7 @@ decamelize@^1.2.0:
 
 decompress-response@^6.0.0:
   version "6.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/decompress-response/-/decompress-response-6.0.0.tgz"
+  resolved "https://registry.npmjs.org/decompress-response/-/decompress-response-6.0.0.tgz"
   integrity sha1-yjh2Et234QS9FthaqwDV7PCcZvw=
   dependencies:
     mimic-response "^3.1.0"
@@ -981,7 +981,7 @@ deep-is@^0.1.3, deep-is@~0.1.3:
 
 defer-to-connect@^2.0.0:
   version "2.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/defer-to-connect/-/defer-to-connect-2.0.1.tgz"
+  resolved "https://registry.npmjs.org/defer-to-connect/-/defer-to-connect-2.0.1.tgz"
   integrity sha1-gBa9tBQ+RjK3ejRJxiNid95SBYc=
 
 define-properties@^1.1.3:
@@ -1154,7 +1154,7 @@ es6-weak-map@^2.0.1:
 
 esbuild@^0.16.3:
   version "0.16.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/esbuild/-/esbuild-0.16.10.tgz#d485c28f1626a3f9c1796c952e4cd0561f0031bb"
+  resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.16.10.tgz#d485c28f1626a3f9c1796c952e4cd0561f0031bb"
   integrity sha1-1IXCjxYmo/nBeWyVLkzQVh8AMbs=
   optionalDependencies:
     "@esbuild/android-arm" "0.16.10"
@@ -1182,7 +1182,7 @@ esbuild@^0.16.3:
 
 escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz"
+  resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
 escape-string-regexp@^4.0.0:
@@ -1440,7 +1440,7 @@ event-emitter@~0.3.5:
 
 events@^3.3.0:
   version "3.3.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha1-Mala0Kkk4tLEGagTrrLE6HjqdAA=
 
 exit-hook@^1.0.0:
@@ -1552,12 +1552,12 @@ flow-bin@^0.114.0:
 
 flow-parser@^0.168.0:
   version "0.168.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-parser/-/flow-parser-0.168.0.tgz#e9c385499145828b42fd754d3528f4cb7d5c6edf"
+  resolved "https://registry.npmjs.org/flow-parser/-/flow-parser-0.168.0.tgz#e9c385499145828b42fd754d3528f4cb7d5c6edf"
   integrity sha1-6cOFSZFFgotC/XVNNSj0y31cbt8=
 
 flow-remove-types@2.168.0:
   version "2.168.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-remove-types/-/flow-remove-types-2.168.0.tgz#166f8f43d81b6d01173087ef41badf760c2e3265"
+  resolved "https://registry.npmjs.org/flow-remove-types/-/flow-remove-types-2.168.0.tgz#166f8f43d81b6d01173087ef41badf760c2e3265"
   integrity sha1-Fm+PQ9gbbQEXMIfvQbrfdgwuMmU=
   dependencies:
     flow-parser "^0.168.0"
@@ -1566,7 +1566,7 @@ flow-remove-types@2.168.0:
 
 flow-typed@^3.8.0:
   version "3.8.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flow-typed/-/flow-typed-3.8.0.tgz"
+  resolved "https://registry.npmjs.org/flow-typed/-/flow-typed-3.8.0.tgz"
   integrity sha1-Ltg+RyPt5IpscRNd6QKJxAMaGcY=
   dependencies:
     "@octokit/rest" "^18.12.0"
@@ -1587,7 +1587,7 @@ flow-typed@^3.8.0:
 
 flowgen@^1.10.0:
   version "1.20.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/flowgen/-/flowgen-1.20.0.tgz"
+  resolved "https://registry.npmjs.org/flowgen/-/flowgen-1.20.0.tgz"
   integrity sha1-JotJUGQpxdp2XaXNSf8jH6ZGX+c=
   dependencies:
     "@babel/code-frame" "^7.16.7"
@@ -1617,7 +1617,7 @@ fs-extra@^3.0.1:
 
 fs-extra@^8.1.0:
   version "8.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/fs-extra/-/fs-extra-8.1.0.tgz"
+  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-8.1.0.tgz"
   integrity sha1-SdQ8RaiM2Wd2aMt74bRu/bjS4cA=
   dependencies:
     graceful-fs "^4.2.0"
@@ -1631,12 +1631,12 @@ fs.realpath@^1.0.0:
 
 fsevents@~2.3.2:
   version "2.3.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
   integrity sha1-ilJveLj99GI7cJ4Ll1xSwkwC/Ro=
 
 function-bind@^1.1.1:
   version "1.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/function-bind/-/function-bind-1.1.1.tgz"
+  resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz"
   integrity sha1-pWiZ0+o8m6uHS7l3O3xe3pL0iV0=
 
 functional-red-black-tree@^1.0.1:
@@ -1674,7 +1674,7 @@ get-intrinsic@^1.0.2, get-intrinsic@^1.1.1:
 
 get-stream@^5.1.0:
   version "5.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/get-stream/-/get-stream-5.2.0.tgz"
+  resolved "https://registry.npmjs.org/get-stream/-/get-stream-5.2.0.tgz"
   integrity sha1-SWaheV7lrOZecGxLe+txJX1uItM=
   dependencies:
     pump "^3.0.0"
@@ -1700,7 +1700,7 @@ glob@^7.0.0, glob@^7.0.3, glob@^7.1.3, glob@~7.1.1:
 
 glob@^7.1.6:
   version "7.2.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/glob/-/glob-7.2.3.tgz"
+  resolved "https://registry.npmjs.org/glob/-/glob-7.2.3.tgz"
   integrity sha1-uN8PuAK7+o6JvR2Ti04WV47UTys=
   dependencies:
     fs.realpath "^1.0.0"
@@ -1712,7 +1712,7 @@ glob@^7.1.6:
 
 globals@^11.1.0:
   version "11.12.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/globals/-/globals-11.12.0.tgz"
+  resolved "https://registry.npmjs.org/globals/-/globals-11.12.0.tgz"
   integrity sha1-q4eVM4hooLq9hSV1gBjCp+uVxC4=
 
 globals@^12.1.0:
@@ -1752,7 +1752,7 @@ gonzales-pe-sl@^4.2.3:
 
 got@^11.8.5:
   version "11.8.5"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/got/-/got-11.8.5.tgz"
+  resolved "https://registry.npmjs.org/got/-/got-11.8.5.tgz"
   integrity sha1-znfQRRNt5W6PAkvruC6jSbxzAEY=
   dependencies:
     "@sindresorhus/is" "^4.0.0"
@@ -1774,7 +1774,7 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6:
 
 graceful-fs@^4.2.0:
   version "4.2.10"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/graceful-fs/-/graceful-fs-4.2.10.tgz"
+  resolved "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.10.tgz"
   integrity sha1-FH06AG2kyjzhRyjHrvwofDZ9emw=
 
 has-ansi@^2.0.0:
@@ -1791,7 +1791,7 @@ has-bigints@^1.0.1:
 
 has-flag@^3.0.0:
   version "3.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/has-flag/-/has-flag-3.0.0.tgz"
+  resolved "https://registry.npmjs.org/has-flag/-/has-flag-3.0.0.tgz"
   integrity sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
 
 has-flag@^4.0.0:
@@ -1806,14 +1806,14 @@ has-symbols@^1.0.1, has-symbols@^1.0.2:
 
 has@^1.0.3:
   version "1.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/has/-/has-1.0.3.tgz"
+  resolved "https://registry.npmjs.org/has/-/has-1.0.3.tgz"
   integrity sha1-ci18v8H2qoJB8W3YFOAR4fQeh5Y=
   dependencies:
     function-bind "^1.1.1"
 
 hls.js@^1.2.9:
   version "1.2.9"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/hls.js/-/hls.js-1.2.9.tgz#2f25e42ec4c2ea8c88ab23c0f854f39062d45ac9"
+  resolved "https://registry.npmjs.org/hls.js/-/hls.js-1.2.9.tgz#2f25e42ec4c2ea8c88ab23c0f854f39062d45ac9"
   integrity sha1-LyXkLsTC6oyIqyPA+FTzkGLUWsk=
 
 hosted-git-info@^2.1.4:
@@ -1823,12 +1823,12 @@ hosted-git-info@^2.1.4:
 
 http-cache-semantics@^4.0.0:
   version "4.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/http-cache-semantics/-/http-cache-semantics-4.1.0.tgz"
+  resolved "https://registry.npmjs.org/http-cache-semantics/-/http-cache-semantics-4.1.0.tgz"
   integrity sha1-SekcXL82yblLz81xwj1SSex045A=
 
 http2-wrapper@^1.0.0-beta.5.2:
   version "1.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/http2-wrapper/-/http2-wrapper-1.0.3.tgz"
+  resolved "https://registry.npmjs.org/http2-wrapper/-/http2-wrapper-1.0.3.tgz"
   integrity sha1-uPVeDB8l1OvQizsMLAeflZCACz0=
   dependencies:
     quick-lru "^5.1.1"
@@ -1846,7 +1846,7 @@ ignore@^4.0.6:
 
 immutable@^4.0.0:
   version "4.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/immutable/-/immutable-4.1.0.tgz#f795787f0db780183307b9eb2091fcac1f6fafef"
+  resolved "https://registry.npmjs.org/immutable/-/immutable-4.1.0.tgz#f795787f0db780183307b9eb2091fcac1f6fafef"
   integrity sha1-95V4fw23gBgzB7nrIJH8rB9vr+8=
 
 import-fresh@^3.0.0, import-fresh@^3.2.1:
@@ -1940,7 +1940,7 @@ is-callable@^1.1.4, is-callable@^1.2.3:
 
 is-core-module@^2.2.0:
   version "2.6.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-core-module/-/is-core-module-2.6.0.tgz"
+  resolved "https://registry.npmjs.org/is-core-module/-/is-core-module-2.6.0.tgz"
   integrity sha1-11U7JSb+Wbkro+QMjfdX7Ipwnhk=
   dependencies:
     has "^1.0.3"
@@ -1954,7 +1954,7 @@ is-core-module@^2.4.0:
 
 is-core-module@^2.9.0:
   version "2.9.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-core-module/-/is-core-module-2.9.0.tgz"
+  resolved "https://registry.npmjs.org/is-core-module/-/is-core-module-2.9.0.tgz"
   integrity sha1-4cNEKc1Rxt2eCeB5njluJ7GanGk=
   dependencies:
     has "^1.0.3"
@@ -2026,7 +2026,7 @@ is-number@^7.0.0:
 
 is-plain-object@^5.0.0:
   version "5.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/is-plain-object/-/is-plain-object-5.0.0.tgz"
+  resolved "https://registry.npmjs.org/is-plain-object/-/is-plain-object-5.0.0.tgz"
   integrity sha1-RCf1CrNCnpAl6n1S6QQ6nvQVk0Q=
 
 is-property@^1.0.0, is-property@^1.0.2:
@@ -2076,12 +2076,12 @@ javascript-natural-sort@^0.7.1:
 
 jmespath@^0.16.0:
   version "0.16.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jmespath/-/jmespath-0.16.0.tgz"
+  resolved "https://registry.npmjs.org/jmespath/-/jmespath-0.16.0.tgz"
   integrity sha1-sVsKhd/U2TDUPmntYFlDyAJ4UHY=
 
 js-tokens@^4.0.0:
   version "4.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/js-tokens/-/js-tokens-4.0.0.tgz"
+  resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
   integrity sha1-GSA/tZmR35jjoocFDUZHzerzJJk=
 
 js-yaml@^3.13.1, js-yaml@^3.4.6, js-yaml@^3.5.1, js-yaml@^3.5.4:
@@ -2094,12 +2094,12 @@ js-yaml@^3.13.1, js-yaml@^3.4.6, js-yaml@^3.5.1, js-yaml@^3.5.4:
 
 jsesc@^2.5.1:
   version "2.5.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsesc/-/jsesc-2.5.2.tgz"
+  resolved "https://registry.npmjs.org/jsesc/-/jsesc-2.5.2.tgz"
   integrity sha1-gFZNLkg9rPbo7yCWUKZ98/DCg6Q=
 
 json-buffer@3.0.1, json-buffer@~3.0.1:
   version "3.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/json-buffer/-/json-buffer-3.0.1.tgz"
+  resolved "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.1.tgz"
   integrity sha1-kziAKjDTtmBfvgYT4JQAjKjAWhM=
 
 json-logic-js@^2.0.0:
@@ -2148,7 +2148,7 @@ json5@^1.0.1:
 
 jsoneditor@^9.9.0:
   version "9.9.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsoneditor/-/jsoneditor-9.9.0.tgz"
+  resolved "https://registry.npmjs.org/jsoneditor/-/jsoneditor-9.9.0.tgz"
   integrity sha1-Zx4SMeI8Q+vG4etD/pey+XsVb68=
   dependencies:
     ace-builds "^1.6.0"
@@ -2187,7 +2187,7 @@ jsonpointer@^4.0.0:
 
 jsonrepair@^2.2.1:
   version "2.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/jsonrepair/-/jsonrepair-2.2.1.tgz"
+  resolved "https://registry.npmjs.org/jsonrepair/-/jsonrepair-2.2.1.tgz"
   integrity sha1-fGJXw2VQoxAVDEGrfV1Mq3GChFY=
 
 jsonschema@^1.4.0:
@@ -2197,7 +2197,7 @@ jsonschema@^1.4.0:
 
 keyv@^4.0.0:
   version "4.3.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/keyv/-/keyv-4.3.3.tgz"
+  resolved "https://registry.npmjs.org/keyv/-/keyv-4.3.3.tgz"
   integrity sha1-bBvNpjU6npb8G04a64A6bjUJC6k=
   dependencies:
     compress-brotli "^1.3.8"
@@ -2289,7 +2289,7 @@ lodash@^4.0.0, lodash@^4.17.15, lodash@^4.17.20, lodash@^4.3.0, lodash@~4.17.10:
 
 lowercase-keys@^2.0.0:
   version "2.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/lowercase-keys/-/lowercase-keys-2.0.0.tgz"
+  resolved "https://registry.npmjs.org/lowercase-keys/-/lowercase-keys-2.0.0.tgz"
   integrity sha1-JgPni3tLAAbLyi+8yKMgJVislHk=
 
 lru-cache@^6.0.0:
@@ -2320,7 +2320,7 @@ mimic-response@^1.0.0:
 
 mimic-response@^3.1.0:
   version "3.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mimic-response/-/mimic-response-3.1.0.tgz"
+  resolved "https://registry.npmjs.org/mimic-response/-/mimic-response-3.1.0.tgz"
   integrity sha1-LR1Zr5wbEpgVrMwsRqAipc4fo8k=
 
 minimatch@^3.0.4, minimatch@~3.0.2:
@@ -2332,7 +2332,7 @@ minimatch@^3.0.4, minimatch@~3.0.2:
 
 minimatch@^3.1.1:
   version "3.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/minimatch/-/minimatch-3.1.2.tgz"
+  resolved "https://registry.npmjs.org/minimatch/-/minimatch-3.1.2.tgz"
   integrity sha1-Gc0ZS/0+Qo8EmnCBfAONiatL41s=
   dependencies:
     brace-expansion "^1.1.7"
@@ -2344,7 +2344,7 @@ minimist@1.1.x:
 
 minimist@^1.2.0, minimist@^1.2.5:
   version "1.2.6"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/minimist/-/minimist-1.2.6.tgz"
+  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.6.tgz"
   integrity sha1-hjelt1nqDW6YcCz7OpKDMjyTr0Q=
 
 mkdirp@^0.5.0, mkdirp@^0.5.1:
@@ -2356,7 +2356,7 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
 
 mkdirp@^1.0.3:
   version "1.0.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/mkdirp/-/mkdirp-1.0.4.tgz"
+  resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha1-PrXtYmInVteaXw4qIh3+utdcL34=
 
 mobius1-selectr@^2.4.13:
@@ -2371,7 +2371,7 @@ ms@2.0.0:
 
 ms@2.1.2:
   version "2.1.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/ms/-/ms-2.1.2.tgz"
+  resolved "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
   integrity sha1-0J0fNXtEP0kzgqjrPM0YOHKuYAk=
 
 ms@^2.1.1:
@@ -2386,7 +2386,7 @@ mute-stream@0.0.5:
 
 nanoid@^3.3.4:
   version "3.3.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/nanoid/-/nanoid-3.3.4.tgz"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.4.tgz"
   integrity sha1-cwtn480J4t6s8DwCfIHJ2dvF6Ks=
 
 natural-compare@^1.4.0:
@@ -2401,7 +2401,7 @@ next-tick@~1.0.0:
 
 node-fetch@^2.6.7:
   version "2.6.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/node-fetch/-/node-fetch-2.6.7.tgz"
+  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.7.tgz"
   integrity sha1-JN6fuoJ+O0rkTciyAlajeRYAUq0=
   dependencies:
     whatwg-url "^5.0.0"
@@ -2413,7 +2413,7 @@ node-modules-regexp@^1.0.0:
 
 node-stream-zip@^1.15.0:
   version "1.15.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/node-stream-zip/-/node-stream-zip-1.15.0.tgz"
+  resolved "https://registry.npmjs.org/node-stream-zip/-/node-stream-zip-1.15.0.tgz"
   integrity sha1-FYrbiO2ABMbEmjlrUKal3jvKM+o=
 
 normalize-package-data@^2.3.2:
@@ -2433,7 +2433,7 @@ normalize-path@^3.0.0, normalize-path@~3.0.0:
 
 normalize-url@^6.0.1:
   version "6.1.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/normalize-url/-/normalize-url-6.1.0.tgz"
+  resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-6.1.0.tgz"
   integrity sha1-QNCIW1Nd7/4/MUe+yHfQX+TFZoo=
 
 number-is-nan@^1.0.0:
@@ -2529,7 +2529,7 @@ os-homedir@^1.0.0:
 
 p-cancelable@^2.0.0:
   version "2.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/p-cancelable/-/p-cancelable-2.1.1.tgz"
+  resolved "https://registry.npmjs.org/p-cancelable/-/p-cancelable-2.1.1.tgz"
   integrity sha1-qrf71BZYL6MqPbSYWcEiSHxe0s8=
 
 p-limit@^1.1.0:
@@ -2619,7 +2619,7 @@ path-key@^3.1.0:
 
 path-parse@^1.0.6, path-parse@^1.0.7:
   version "1.0.7"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/path-parse/-/path-parse-1.0.7.tgz"
+  resolved "https://registry.npmjs.org/path-parse/-/path-parse-1.0.7.tgz"
   integrity sha1-+8EUtgykKzDZ2vWFjkvWi77bZzU=
 
 path-type@^3.0.0:
@@ -2631,7 +2631,7 @@ path-type@^3.0.0:
 
 picocolors@^1.0.0:
   version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/picocolors/-/picocolors-1.0.0.tgz"
+  resolved "https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz"
   integrity sha1-y1vcdP8/UYkiNur3nWi8RFZKuBw=
 
 picomatch@^2.0.4, picomatch@^2.2.1:
@@ -2651,7 +2651,7 @@ pify@^3.0.0:
 
 pirates@^3.0.2:
   version "3.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/pirates/-/pirates-3.0.2.tgz#7e6f85413fd9161ab4e12b539b06010d85954bb9"
+  resolved "https://registry.npmjs.org/pirates/-/pirates-3.0.2.tgz#7e6f85413fd9161ab4e12b539b06010d85954bb9"
   integrity sha1-fm+FQT/ZFhq04StTmwYBDYWVS7k=
   dependencies:
     node-modules-regexp "^1.0.0"
@@ -2677,7 +2677,7 @@ pluralize@^1.2.1:
 
 postcss@^8.4.20:
   version "8.4.20"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/postcss/-/postcss-8.4.20.tgz#64c52f509644cecad8567e949f4081d98349dc56"
+  resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.20.tgz#64c52f509644cecad8567e949f4081d98349dc56"
   integrity sha1-ZMUvUJZEzsrYVn6Un0CB2YNJ3FY=
   dependencies:
     nanoid "^3.3.4"
@@ -2696,12 +2696,12 @@ prelude-ls@~1.1.2:
 
 prettier@^1.19.1:
   version "1.19.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/prettier/-/prettier-1.19.1.tgz"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-1.19.1.tgz"
   integrity sha1-99f1/4qc2HKnvkyhQglZVqYHl8s=
 
 prettier@^2.5.1:
   version "2.7.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/prettier/-/prettier-2.7.1.tgz"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-2.7.1.tgz"
   integrity sha1-4jWAaFDQV/l7sINopPfYmfd2DGQ=
 
 process-nextick-args@~2.0.0:
@@ -2734,7 +2734,7 @@ punycode@^2.1.0:
 
 quick-lru@^5.1.1:
   version "5.1.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/quick-lru/-/quick-lru-5.1.1.tgz"
+  resolved "https://registry.npmjs.org/quick-lru/-/quick-lru-5.1.1.tgz"
   integrity sha1-NmST5rPkKjpoheLpnRj4D7eoyTI=
 
 read-pkg-up@^3.0.0:
@@ -2778,7 +2778,7 @@ readable-stream@^2.2.2:
 
 readdirp@~3.6.0:
   version "3.6.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/readdirp/-/readdirp-3.6.0.tgz#74a370bd857116e245b29cc97340cd431a02a6c7"
+  resolved "https://registry.npmjs.org/readdirp/-/readdirp-3.6.0.tgz#74a370bd857116e245b29cc97340cd431a02a6c7"
   integrity sha1-dKNwvYVxFuJFspzJc0DNQxoCpsc=
   dependencies:
     picomatch "^2.2.1"
@@ -2829,7 +2829,7 @@ require-uncached@^1.0.2:
 
 resolve-alpn@^1.0.0:
   version "1.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/resolve-alpn/-/resolve-alpn-1.2.1.tgz"
+  resolved "https://registry.npmjs.org/resolve-alpn/-/resolve-alpn-1.2.1.tgz"
   integrity sha1-t629rDVGqq7CC0Xn2CZZJwcnJvk=
 
 resolve-from@^1.0.0:
@@ -2852,7 +2852,7 @@ resolve@^1.1.6, resolve@^1.10.0, resolve@^1.12.0, resolve@^1.13.1, resolve@^1.20
 
 resolve@^1.22.1:
   version "1.22.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/resolve/-/resolve-1.22.1.tgz"
+  resolved "https://registry.npmjs.org/resolve/-/resolve-1.22.1.tgz"
   integrity sha1-J8suu1P5GrtJRwqSi7p1WAZqwXc=
   dependencies:
     is-core-module "^2.9.0"
@@ -2861,7 +2861,7 @@ resolve@^1.22.1:
 
 responselike@^2.0.0:
   version "2.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/responselike/-/responselike-2.0.1.tgz"
+  resolved "https://registry.npmjs.org/responselike/-/responselike-2.0.1.tgz"
   integrity sha1-mgvI/cJS8/scymiwFlkQWboUIrw=
   dependencies:
     lowercase-keys "^2.0.0"
@@ -2890,7 +2890,7 @@ rimraf@~2.6.2:
 
 rollup@^3.7.0:
   version "3.8.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/rollup/-/rollup-3.8.0.tgz#f61dc3ae02467d842687bd55b17a047c93b456ad"
+  resolved "https://registry.npmjs.org/rollup/-/rollup-3.8.0.tgz#f61dc3ae02467d842687bd55b17a047c93b456ad"
   integrity sha1-9h3DrgJGfYQmh71VsXoEfJO0Vq0=
   optionalDependencies:
     fsevents "~2.3.2"
@@ -2941,7 +2941,7 @@ sass-lint@^1.13.1:
 
 sass@^1.53.0:
   version "1.53.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/sass/-/sass-1.53.0.tgz#eab73a7baac045cc57ddc1d1ff501ad2659952eb"
+  resolved "https://registry.npmjs.org/sass/-/sass-1.53.0.tgz#eab73a7baac045cc57ddc1d1ff501ad2659952eb"
   integrity sha1-6rc6e6rARcxX3cHR/1Aa0mWZUus=
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
@@ -2955,7 +2955,7 @@ sass@^1.53.0:
 
 semver@7.3.2:
   version "7.3.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/semver/-/semver-7.3.2.tgz"
+  resolved "https://registry.npmjs.org/semver/-/semver-7.3.2.tgz"
   integrity sha1-YElisFK4HtB4aq6EOJ/7pw/9OTg=
 
 semver@^7.2.1:
@@ -3019,7 +3019,7 @@ slice-ansi@^4.0.0:
 
 "source-map-js@>=0.6.2 <2.0.0", source-map-js@^1.0.2:
   version "1.0.2"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/source-map-js/-/source-map-js-1.0.2.tgz"
+  resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz"
   integrity sha1-rbw2HZxi3zgBJefxYfccgm8eSQw=
 
 source-map@^0.5.0:
@@ -3100,7 +3100,7 @@ string-width@^4.1.0, string-width@^4.2.0:
 
 string-width@^4.2.3:
   version "4.2.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/string-width/-/string-width-4.2.3.tgz"
+  resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
   integrity sha1-JpxxF9J7Ba0uU2gwqOyJXvnG0BA=
   dependencies:
     emoji-regex "^8.0.0"
@@ -3160,7 +3160,7 @@ strip-ansi@^6.0.0:
 
 strip-ansi@^6.0.1:
   version "6.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/strip-ansi/-/strip-ansi-6.0.1.tgz"
+  resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
   integrity sha1-nibGPTD1NEPpSJSVshBdN7Z6hdk=
   dependencies:
     ansi-regex "^5.0.1"
@@ -3187,7 +3187,7 @@ supports-color@^2.0.0:
 
 supports-color@^5.3.0:
   version "5.5.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-color/-/supports-color-5.5.0.tgz"
+  resolved "https://registry.npmjs.org/supports-color/-/supports-color-5.5.0.tgz"
   integrity sha1-4uaaRKyHcveKHsCzW2id9lMO/I8=
   dependencies:
     has-flag "^3.0.0"
@@ -3208,7 +3208,7 @@ supports-color@^7.1.0:
 
 supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
+  resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha1-btpL00SjyUrqN21MwxvHcxEDngk=
 
 table@^3.7.8:
@@ -3237,7 +3237,7 @@ table@^6.0.9:
 
 table@^6.7.3:
   version "6.8.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/table/-/table-6.8.0.tgz"
+  resolved "https://registry.npmjs.org/table/-/table-6.8.0.tgz"
   integrity sha1-h+KPFPpDIcM3e6KG8Ht5soGjs8o=
   dependencies:
     ajv "^8.0.1"
@@ -3253,7 +3253,7 @@ text-table@^0.2.0, text-table@~0.2.0:
 
 three@^0.148.0:
   version "0.148.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/three/-/three-0.148.0.tgz#b6f62f9c84227f8d51c151bf17b67984ded8e4d7"
+  resolved "https://registry.npmjs.org/three/-/three-0.148.0.tgz#b6f62f9c84227f8d51c151bf17b67984ded8e4d7"
   integrity sha1-tvYvnIQif41RwVG/F7Z5hN7Y5Nc=
 
 through@^2.3.6:
@@ -3263,7 +3263,7 @@ through@^2.3.6:
 
 to-fast-properties@^2.0.0:
   version "2.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
+  resolved "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
   integrity sha1-3F5pjL0HkmW8c+A3doGk5Og/YW4=
 
 to-regex-range@^5.0.1:
@@ -3275,7 +3275,7 @@ to-regex-range@^5.0.1:
 
 tr46@~0.0.3:
   version "0.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/tr46/-/tr46-0.0.3.tgz"
+  resolved "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz"
   integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
 
 tree-kill@^1.2.2:
@@ -3344,7 +3344,7 @@ typescript-compiler@^1.4.1-2:
 
 typescript@~4.4.4:
   version "4.4.4"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/typescript/-/typescript-4.4.4.tgz"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-4.4.4.tgz"
   integrity sha1-LNAaGh8WBwTTEB/VpY/w+fy4Aww=
 
 unbox-primitive@^1.0.0:
@@ -3359,7 +3359,7 @@ unbox-primitive@^1.0.0:
 
 universal-user-agent@^6.0.0:
   version "6.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/universal-user-agent/-/universal-user-agent-6.0.0.tgz"
+  resolved "https://registry.npmjs.org/universal-user-agent/-/universal-user-agent-6.0.0.tgz"
   integrity sha1-M4H4UDslHA2c0hvB3pOeyd9UgO4=
 
 universalify@^0.1.0:
@@ -3395,7 +3395,7 @@ util@^0.10.3:
 
 uuid@^9.0.0:
   version "9.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
   integrity sha1-WS9VBlACSjjOsMVi8vaqQ1dh77U=
 
 v8-compile-cache@^2.0.3:
@@ -3413,21 +3413,21 @@ validate-npm-package-license@^3.0.1:
 
 vanilla-picker@^2.12.1:
   version "2.12.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vanilla-picker/-/vanilla-picker-2.12.1.tgz"
+  resolved "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.12.1.tgz"
   integrity sha1-bmGe7PVTiRuNLQQrdFojyR8Z80w=
   dependencies:
     "@sphinxxxx/color-conversion" "^2.2.2"
 
 vite-plugin-flow@^0.2.1:
   version "0.2.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vite-plugin-flow/-/vite-plugin-flow-0.2.1.tgz#fbc30e637e03a4642990038b441bf4cdf59c5cfd"
+  resolved "https://registry.npmjs.org/vite-plugin-flow/-/vite-plugin-flow-0.2.1.tgz#fbc30e637e03a4642990038b441bf4cdf59c5cfd"
   integrity sha1-+8MOY34DpGQpkAOLRBv0zfWcXP0=
   dependencies:
     flow-remove-types "2.168.0"
 
 vite@^4.0.3:
   version "4.0.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vite/-/vite-4.0.3.tgz#de27ad3f263a03ae9419cdc8bc07721eadcba8b9"
+  resolved "https://registry.npmjs.org/vite/-/vite-4.0.3.tgz#de27ad3f263a03ae9419cdc8bc07721eadcba8b9"
   integrity sha1-3ietPyY6A66UGc3IvAdyHq3LqLk=
   dependencies:
     esbuild "^0.16.3"
@@ -3439,17 +3439,17 @@ vite@^4.0.3:
 
 vlq@^0.2.1:
   version "0.2.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
+  resolved "https://registry.npmjs.org/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
   integrity sha1-jz5DKM9jsVQMDWfhsneDhviXWyY=
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/webidl-conversions/-/webidl-conversions-3.0.1.tgz"
+  resolved "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz"
   integrity sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=
 
 whatwg-url@^5.0.0:
   version "5.0.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/whatwg-url/-/whatwg-url-5.0.0.tgz"
+  resolved "https://registry.npmjs.org/whatwg-url/-/whatwg-url-5.0.0.tgz"
   integrity sha1-lmRU6HZUYuN2RNNib2dCzotwll0=
   dependencies:
     tr46 "~0.0.3"
@@ -3494,7 +3494,7 @@ wrap-ansi@^5.1.0:
 
 wrap-ansi@^6.2.0:
   version "6.2.0"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/wrap-ansi/-/wrap-ansi-6.2.0.tgz"
+  resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz"
   integrity sha1-6Tk7oHEC5skaOyIUePAlfNKFblM=
   dependencies:
     ansi-styles "^4.0.0"
@@ -3538,7 +3538,7 @@ yargs-parser@^13.1.2:
 
 yargs-parser@^18.1.2:
   version "18.1.3"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/yargs-parser/-/yargs-parser-18.1.3.tgz"
+  resolved "https://registry.npmjs.org/yargs-parser/-/yargs-parser-18.1.3.tgz"
   integrity sha1-vmjEl1xrKr9GkjawyHA2L6sJp7A=
   dependencies:
     camelcase "^5.0.0"
@@ -3562,7 +3562,7 @@ yargs@^13.3.0:
 
 yargs@^15.1.0:
   version "15.4.1"
-  resolved "https://artifactory.virt.ch.bbc.co.uk:443/artifactory/api/npm/cosmos-npm/yargs/-/yargs-15.4.1.tgz"
+  resolved "https://registry.npmjs.org/yargs/-/yargs-15.4.1.tgz"
   integrity sha1-DYehbeAa7p2L7Cv7909nhRcw9Pg=
   dependencies:
     cliui "^6.0.0"
