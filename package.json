@@ -4,7 +4,7 @@
   "description": "StoryPlayer - reference player for BBC Research & Development's object-based media schema (https://www.npmjs.com/package/@bbc/object-based-media-schema)",
   "main": "./dist/storyplayer.js",
   "module": "./dist/storyplayer.js",
-  "ttttttttype": "module",
+  "type": "module",
   "keywords": [
     "BBC",
     "BBC Research & Development",
