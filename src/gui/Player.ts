@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import AnalyticEvents from "../AnalyticEvents"
 import type {AnalyticsLogger, AnalyticEventName} from "../AnalyticEvents"
 import Controller from "../Controller"

@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import Player, {PlayerEvents} from "../gui/Player"
 import { AssetCollectionFetcher, MediaFetcher } from "../types"
 import {REASONER_EVENTS} from "../Events"

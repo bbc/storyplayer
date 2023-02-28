@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import {handleButtonTouchEvent} from "../utils"
 import { UILogFunction } from '../types'
 const buttonClassPrefix = "romper-overlay-button-choice-"

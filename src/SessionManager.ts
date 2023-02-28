@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import {InternalVariableNames} from "./InternalVariables"
 const EXISTING_SESSIONS = "EXISTING_SESSION"
 const EMPTY_OBJECT = "{}"

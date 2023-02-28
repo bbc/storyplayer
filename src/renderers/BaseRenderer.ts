@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import BehaviourRunner from "../behaviours/BehaviourRunner"
 import BehaviourTimings from "../behaviours/BehaviourTimings"
 import PauseBehaviour from "../behaviours/PauseBehaviour"
@@ -468,7 +468,6 @@ export default class BaseRenderer extends EventEmitter {
 
     /* record some analytics for the renderer - not user actions though */
     logRendererAction(userEventName: AnalyticEventName) {
-        console.log('ANDY BR lRA', userEventName)
         const logData = {
             type: AnalyticEvents.types.RENDERER_ACTION,
             name: AnalyticEvents.names[userEventName],

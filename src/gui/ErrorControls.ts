@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import {handleButtonTouchEvent} from "../utils"
 import {PlayerEvents} from "./Player"
 import {createElementWithClass} from "../documentUtils"

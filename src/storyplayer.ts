@@ -127,7 +127,6 @@ export default {
     // playerVersion,
     // schemaVersion,
     init: (settings: Settings): Controller | null | undefined => {
-        console.log("ANDY initing Romper", settings)
         // eslint-disable-next-line no-undef
         // logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
         const mergedSettings = {...DEFAULT_SETTINGS, ...settings}

@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import AnalyticEvents from "../AnalyticEvents"
 import {handleButtonTouchEvent} from "../utils"
 import {ButtonEvents} from "./Buttons"

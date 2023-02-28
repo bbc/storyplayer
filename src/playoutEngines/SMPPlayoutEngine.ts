@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {v4 as uuid} from "uuid"
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import Player, {PlayerEvents} from "../gui/Player"
 import logger from "../logger"
 import {MediaFormats} from "../browserCapabilities"

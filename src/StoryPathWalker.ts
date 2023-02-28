@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import StoryReasoner from "./StoryReasoner"
 import type {StoryReasonerFactory} from "./StoryReasonerFactory"
 import {

@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import JsonLogic from "json-logic-js"
 import type {StoryReasonerFactory} from "./StoryReasonerFactory"
 import StoryReasoner, {ReasonerError, REASONER_ERRORS} from "./StoryReasoner"
@@ -88,7 +88,6 @@ export default class Controller extends EventEmitter {
         this._createRenderManager()
 
         this._storyIconRendererCreated = false
-        console.log("ANDY: SP running vite build")
     }
 
     _handleAnalytics(logData: AnalyticsPayload): any {

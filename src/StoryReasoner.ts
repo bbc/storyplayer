@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "eventemitter3"
 import type {Story, NarrativeElement, Link, DataResolver} from "./types"
 import evaluateConditions from "./logic"
 import type {StoryReasonerFactory} from "./StoryReasonerFactory"
