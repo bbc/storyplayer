@@ -3,7 +3,6 @@ import {
     NarrativeElement,
     ExperienceFetchers,
     Representation,
-    RepresentationChoice,
     AssetUrls,
     AssetCollection,
     Story,

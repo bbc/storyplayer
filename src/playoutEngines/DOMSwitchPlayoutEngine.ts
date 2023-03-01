@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import Hls from "hls.js"
-// @ts-ignore
+// @ts-expect-error - https://github.com/shaka-project/shaka-player/issues/3185
 import shaka from "shaka-player"
 import BasePlayoutEngine, {
     MEDIA_TYPES,
