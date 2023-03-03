@@ -85,7 +85,7 @@ function getParameterByName(name, url) {
 
 // load a story from file whose path supplied in query
 const getFilename = `./examples/${getParameterByName('storyjson')}`;
-console.log('ANDY', getFilename)
+
 if (getFilename) {
     fetchFile(getFilename).then((text) => {
         const storyjson = JSON.parse(text);
@@ -168,7 +168,7 @@ function run(config) {
     document.getElementById('restart-button').removeAttribute('disabled');
     document.getElementById('story-title').textContent = config.stories[0].name;
     jsonEditor.set(config);
-    console.log('ANDY running index.html run')
+
     romperInstance = Romper.init({
         target: document.getElementById('romper-target'),
         staticImageBaseUrl: '/src/assets/images/',
