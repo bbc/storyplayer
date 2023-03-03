@@ -8,7 +8,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/storyplayer.ts'),
       name: 'StoryPlayer',
-      fileName: (format) => `storyplayer.js`,
+      fileName: (format, entryName) => `${entryName}.js`,
       formats: ['cjs'],
     },
     rollupOptions: {

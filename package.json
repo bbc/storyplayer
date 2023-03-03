@@ -16,11 +16,11 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "concurrently --names \"eslint,sass-lint,tsc\" -c \"blue.bgWhite,magenta.bgWhite,green.bgBlack\" --prefix \"[{name}]\" \"yarn test:eslint\" \"yarn test:sass-lint\" \"yarn test:typescript\"",
+    "test": "concurrently --names \"eslint,sass-lint,tsc\" -c \"blue.bgWhite,magenta.bgWhite,green.bgBlack\" --prefix \"[{name}]\" \"npm run test:eslint\" \"npm run test:sass-lint\" \"npm run test:typescript\"",
     "test:eslint": "eslint src/",
     "test:sass-lint": "sass-lint -v",
     "test:typescript": "tsc",
-    "prepublishOnly": "yarn run test && yarn run build",
+    "prepublishOnly": "npm run test && npm run build",
     "dev": "vite"
   },
   "repository": {
@@ -41,12 +41,9 @@
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
-    "babel-eslint": "^10.1.0",
     "concurrently": "^5.3.0",
     "eslint": "^7.17.0",
-    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-import": "^2.22.1",
     "jsoneditor": "^9.9.0",
     "sass": "^1.53.0",
