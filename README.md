@@ -77,7 +77,7 @@ Building the library from the repo
 * First, clone [the repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
 * Run `npm install` to pull down and build all the dependencies, and the library.
 * `npm run build` will do a single build of the library
-* `npm run test` will do a single run of the tests (eslint and sass-lint)
+* `npm run test` will do a single run of the tests (eslint, sass-lint, tsc)
 * `npm run dev` will serve up the example content (see below) and continuously build and test the library on changes.
 
 Running the examples in the repo

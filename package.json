@@ -15,13 +15,14 @@
     "personalised"
   ],
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "vite build",
-    "test": "concurrently --names \"eslint,sass-lint,tsc\" -c \"blue.bgWhite,magenta.bgWhite,green.bgBlack\" --prefix \"[{name}]\" \"npm run test:eslint\" \"npm run test:sass-lint\" \"npm run test:typescript\"",
-    "test:eslint": "eslint src/",
-    "test:sass-lint": "sass-lint -v",
-    "test:typescript": "tsc",
-    "prepublishOnly": "npm run test && npm run build",
-    "dev": "vite"
+    "dev": "vite",
+    "test": "concurrently -c red,green,yellow -n t- npm:test-*",
+    "test-eslint": "eslint src/",
+    "test-sasslint": "sass-lint -v",
+    "test-types": "tsc",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "repository": {
     "type": "git",
