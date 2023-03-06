@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "moduleResolution":"node",
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "outDir": "./build/",
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "suppressExcessPropertyErrors": true,
+        "target": "es2019",
+        "typeRoots": [
+            "@types",
+            "types/",
+        ]
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [ ],
+    "lib": [
+        "es6",
+        "dom",
+        "es2020.bigint", "es2020.string", "es2020.symbol.wellknown"
+    ]
+}

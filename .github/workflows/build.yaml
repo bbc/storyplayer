@@ -10,14 +10,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        version: [16, 18]
+
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          cache: 'yarn'
+          node-version: ${{ matrix.version }}
+          cache: 'npm'
 
-      - run: yarn install --frozen-lockfile
-      - run: yarn test
-      - run: yarn build
+      - run: npm install --frozen-lockfile
+      - run: npm run test
+      - run: npm run build

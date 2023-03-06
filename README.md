@@ -69,26 +69,28 @@ The demo index page [here](https://github.com/bbc/storyplayer/blob/main/examples
 Building the library from the repo
 ==================================
 
-> We use [Yarn](https://classic.yarnpkg.com/en) for dependency management and building.\
-> We have an ESLint file based on [airbnb-base](https://www.npmjs.com/package/eslint-config-airbnb-base), with our own tweaks.\
-> We have used [Flow](https://flow.org) for type checking, but this is not consistent throughout the code base.
+> Ensure you have NodeJS v16 installed.
+> We use NPM for dependency management and building.\
+> We have an ESLint file based on the `typescript-eslint` parser.\
+> We have moved from Flow to TypeScript for type-checking, albeit the types are fairly permissive.
 
 * First, clone [the repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
-* Run `yarn` to pull down and build all the dependencies, and the library.
-* `yarn build` will do a single build of the library
-* `yarn test` will do a single run of the tests (ESLint, jest and sass-lint)
-* `yarn dev` will continuously build and test the library on changes
+* Run `npm install` to pull down and build all the dependencies, and the library.
+* `npm run build` will do a single build of the library
+* `npm run test` will do a single run of the tests (eslint, sass-lint, tsc)
+* `npm run dev` will serve up the example content (see below) and continuously build and test the library on changes.
 
 Running the examples in the repo
 --------------------------------
 
-To check everything is installed correctly, run `python3 -m http.server` in the root of the project, and visit `http://localhost:8000/examples`.
-Select a demo using the left hand tab. Use the middle tabs to inspect the demo's JSON representation. Use the right hand tab to play the selected story.
+To check everything is installed correctly, run `npm run dev` in the root of the project, then visit [`http://localhost:5173`](http://localhost:5173).
+
+Select a demo using the left hand tab. Use the middle tabs to inspect (and edit, if you wish) the demo's JSON representation. Use the right hand tab to play the selected story.
 
 Running StoryPlayer against local stories and media
 ---------------------------------------------------
 
-* Run `python3 -m http.server` in the root of the project.
+* Run `npm run dev` in the root of the project.
 
 * The media can be placed in the `/examples/` folder.  It can be put directly in, or organised into subfolders.
 
@@ -100,9 +102,9 @@ Running StoryPlayer against local stories and media
     }
 ```
 
-* Stories can be played by visiting `localhost:8000/examples/` (the server prefix may vary depending on your local web server - this should work if you have used python, as above); there you will see a list of the example stories provided in the repository.  Select a story in the "Select story" tab then visit the "Render" tab to play.
+* Stories can be played by visiting [`http://localhost:5173`](http://localhost:5173); there you will see a list of the example stories provided in the repository.  Select a story in the "Select story" tab then visit the "Render" tab to play.
 
-* Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:8000/examples/index.html?storyjson=my_story.json`.
+* Other stories can be viewed by providing the filename in the URL, e.g.,  `localhost:5173?storyjson=my_story.json` (e.g., if `my_story.json` is in the `examples/` folder).
 
 StoryPlayer Implementation details
 ----------------------------------
@@ -126,4 +128,3 @@ Licence
 =======
 
 StoryPlayer is available to everyone under the terms of the GNU General Public Licence v3.0. Take a look at the [licence file](https://github.com/bbc/storyplayer/blob/main/LICENCE) and [COPYING](https://github.com/bbc/storyplayer/blob/main/COPYING) in the repo for further details.
-
