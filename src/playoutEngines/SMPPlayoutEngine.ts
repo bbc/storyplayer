@@ -195,10 +195,8 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
 
         // Check if we have subtitles and that they are EBU-TT-D and not WebVTT
         if ("subs_url" in this._media[rendererId].media) {
-            // eslint-disable-next-line no-restricted-globals
-            const isPublishedExperience = parent.location.href.includes(
-                "/experience/",
-            )
+            const pageUrl = new URL(this._smpPlayerInterface.settings.embedPageURL);
+            const isPublishedExperience = pageUrl.pathname.includes("/experience/");
             const subsAreEbuttFormat = await fetch(
                 this._media[rendererId].media.subs_url,
                 {
@@ -257,7 +255,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             options: {
                 useCredentials: true,
             },
-            
+
             config: {
                 ondemandWebcastData: isTrimmed,
                 autoplay: true,
