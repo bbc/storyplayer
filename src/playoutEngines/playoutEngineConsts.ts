@@ -4,26 +4,6 @@ export const PLAYOUT_ENGINES = {
     IOS_PLAYOUT: "ios",
     SMP_PLAYOUT: "smp",
 }
-export const allDashEvents = [
-    "CAN_PLAY",
-    "PLAYBACK_PAUSED",
-    "PLAYBACK_TIME_UPDATED",
-    "PLAYBACK_PLAYING",
-    "PLAYBACK_ENDED",
-    "PLAYBACK_ERROR",
-    "PLAYBACK_STALLED",
-    "PLAYBACK_WAITING",
-    "PLAYBACK_NOT_ALLOWED",
-    "PLAYBACK_RATE_CHANGED",
-    "PLAYBACK_SEEK_ASKED",
-    "PLAYBACK_SEEKED",
-    "PLAYBACK_SEEKING",
-    "PLAYBACK_STARTED",
-    "ERROR",
-    "STREAM_INITIALIZED",
-    "SOURCE_INITIALIZED",
-    "STREAM_TEARDOWN_COMPLETE",
-]
 export const allShakaEvents = [
     "abrstatuschanged",
     "adaptation",
