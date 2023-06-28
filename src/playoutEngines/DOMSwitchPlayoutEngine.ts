@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-import Hls from "hls.js"
 // @ts-expect-error - https://github.com/shaka-project/shaka-player/issues/3185
 import shaka from "shaka-player"
 import BasePlayoutEngine, {
@@ -9,7 +7,6 @@ import BasePlayoutEngine, {
 import Player, {PlayerEvents} from "../gui/Player"
 import logger, {isDebug} from "../logger"
 import {
-    allHlsEvents,
     allShakaEvents,
     getMediaType,
     MediaTypes,
@@ -21,21 +18,20 @@ import {
     OVERRIDE_ACTIVE_BUFFERING,
     OVERRIDE_INACTIVE_BUFFERING,
 } from "../utils"
+import {
+    BrowserCapabilities,
+} from "../browserCapabilities"
+
 const DEBUG_BUFFER_CHECK_TIME = 1000
-const HLS_BUFFER_CHECK_TIME = 2000
-const HLS_BUFFER_ERROR_MARGIN = 0.1
-const SHAKKA_BANDWIDTH_CHECK_TIME = 1000
+const SHAKA_BANDWIDTH_CHECK_TIME = 1000
 
 interface ShakaConfig {
-    hls: object
-    dash: {
-        bufferingGoal: number
-    }
+    bufferingGoal: number
 }
 
 export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
     
-    _useHlsJs: boolean
+    _useShaka: boolean
     _activeConfig: ShakaConfig
     _inactiveConfig: ShakaConfig
     _estimatedBandwidth: number
@@ -55,46 +51,28 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             this._printActiveMSEBuffers()
         }
 
-        if (Hls.isSupported()) {
-            logger.info("HLS.js being used")
-            this._useHlsJs = true
+        if (BrowserCapabilities.shakaSupport()) {
+            logger.info("shaka player being used")
+            this._useShaka = true
         } else {
-            this._useHlsJs = false
+            this._useShaka = false
         }
 
         this._activeConfig = {
-            hls: {
-                maxBufferLength: 30,
-                maxMaxBufferLength: 600,
-            startFragPrefetch: true,
-                startLevel: 3,
-                debug: isDebug(),
-            },
-            dash: {
-                bufferingGoal: 10,
-            },
+            bufferingGoal: 10,
         }
         const activeBufferingOverride = getSetting(OVERRIDE_ACTIVE_BUFFERING)
 
         if (activeBufferingOverride) {
             logger.info(`activeBufferingOverride: ${activeBufferingOverride}`)
-            this._activeConfig.dash.bufferingGoal = parseInt(
+            this._activeConfig.bufferingGoal = parseInt(
                 activeBufferingOverride,
                 10,
             )
         }
 
         this._inactiveConfig = {
-            hls: {
-                maxBufferLength: 2,
-                maxMaxBufferLength: 4,
-                startFragPrefetch: true,
-                startLevel: 3,
-                debug: isDebug(),
-            },
-            dash: {
-                bufferingGoal: 2,
-            },
+            bufferingGoal: 2,
         }
         // bits/second (Set to 1gbps connection to get highest adaptation)
         this._estimatedBandwidth = 1000000000
@@ -106,7 +84,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             logger.info(
                 `inactiveBufferingOverride: ${inactiveBufferingOverride}`,
             )
-            this._inactiveConfig.dash.bufferingGoal = parseInt(
+            this._inactiveConfig.bufferingGoal = parseInt(
                 inactiveBufferingOverride,
                 10,
             )
@@ -185,7 +163,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 this._estimatedBandwidth = newBandwidth
                 // eslint-disable-next-line no-console
                 logger.debug(
-                    "DASH Shaka Bandwidth Update: ",
+                    "Shaka Bandwidth Update: ",
                     this._estimatedBandwidth.toFixed(2),
                     " ",
                     (this._estimatedBandwidth / 1000000).toFixed(2),
@@ -217,54 +195,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
         rendererPlayoutObj._shakaCheckBandwidthTimeout = setTimeout(() => {
             this._shakaCheckBandwidth(rendererId)
-        }, SHAKKA_BANDWIDTH_CHECK_TIME)
-    }
-
-    _hlsCheckBuffers(rendererId: string) {
-        const rendererPlayoutObj = this._media[rendererId]
-
-        if (rendererPlayoutObj && rendererPlayoutObj.mediaElement) {
-            const videoElement = rendererPlayoutObj.mediaElement
-            const bufferRanges = videoElement.buffered.length
-            const {currentTime} = videoElement
-            let i
-            let validPlayback = false
-            const log = []
-
-            if (bufferRanges > 0) {
-                for (i = 0; i < bufferRanges; i += 1) {
-                    const start = videoElement.buffered.start(i)
-                    const end = videoElement.buffered.end(i)
-
-                    if (
-                        currentTime > start - HLS_BUFFER_ERROR_MARGIN &&
-                        currentTime < end + HLS_BUFFER_ERROR_MARGIN
-                    ) {
-                        validPlayback = true
-                    }
-
-                    log.push(
-                        `HLS Buffers: ${i} ` +
-                            `${start}-${end} (CurrentTime: ${currentTime})`,
-                    )
-                }
-
-                if (validPlayback !== true) {
-                    logger.warn("HLS Buffers bad, reset level")
-                    log.forEach(logItem => {
-                        logger.warn(logItem)
-                    })
-                    // Below causes the video buffer to be cleared and hlsjs then
-                    // repopulates the buffer solving weird issues.
-                    // eslint-disable-next-line no-self-assign
-                    rendererPlayoutObj._hls.currentLevel = rendererPlayoutObj._hls.currentLevel
-                }
-            }
-        }
-
-        rendererPlayoutObj._hlsCheckBufferTimeout = setTimeout(() => {
-            this._hlsCheckBuffers(rendererId)
-        }, HLS_BUFFER_CHECK_TIME)
+        }, SHAKA_BANDWIDTH_CHECK_TIME)
     }
 
     _printActiveMSEBuffers() {
@@ -289,31 +220,28 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             }
 
             switch (this._activePlayer.mediaType) {
-                case MediaTypes.DASH: {
-                    const activeReps = this._activePlayer._shaka.getVariantTracks()
-
-                    const activeRep = activeReps.find(
-                        representation => representation.active,
-                    )
-
-                    if (
-                        this._activePlayer._shakaRep !==
-                        `${activeRep.width}x${activeRep.height}`
-                    ) {
-                        this._activePlayer._shakaRep = `${activeRep.width}x${activeRep.height}`
-                        // eslint-disable-next-line no-console
-                        logger.debug(
-                            `Active DASH shaka is using representation: ` +
-                                `${activeRep.width}x${activeRep.height}`,
-                        )
-                    }
-
-                    break
-                }
-
                 case MediaTypes.HLS:
-                    break
+                case MediaTypes.DASH:
+                    if (this._useShaka) {
+                        const activeReps = this._activePlayer._shaka.getVariantTracks()
 
+                        const activeRep = activeReps.find(
+                            representation => representation.active,
+                        )
+
+                        if (
+                            this._activePlayer._shakaRep !==
+                            `${activeRep.width}x${activeRep.height}`
+                        ) {
+                            this._activePlayer._shakaRep = `${activeRep.width}x${activeRep.height}`
+                            // eslint-disable-next-line no-console
+                            logger.debug(
+                                `Active shaka is using representation: ` +
+                                    `${activeRep.width}x${activeRep.height}`,
+                            )
+                        }
+                    }
+                    break
                 default:
                     logger.error(
                         "Cannot handle this mediaType (_printActiveMSEBuffers)",
@@ -426,24 +354,12 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
         switch (rendererPlayoutObj.mediaType) {
             case MediaTypes.HLS:
-                if (this._useHlsJs) {
-                    // Using HLS.js
-                    rendererPlayoutObj._hls = new Hls(this._inactiveConfig.hls)
-
-                    rendererPlayoutObj._hls.loadSource(url)
-
-                    rendererPlayoutObj._hls.attachMedia(
-                        rendererPlayoutObj.mediaElement,
-                    )
-
-                    this._hlsCheckBuffers(rendererId)
-                } else {
+                // handle native HLS (without shaka) and break, else continue to shaka player
+                if (!this._useShaka) {
                     // Using Video Element
                     rendererPlayoutObj.mediaElement.src = url
+                    break
                 }
-
-                break
-
             case MediaTypes.DASH: {
                 rendererPlayoutObj._shaka = new shaka.Player(
                     rendererPlayoutObj.mediaElement,
@@ -451,7 +367,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
                 rendererPlayoutObj._shaka.configure(
                     "streaming.bufferingGoal",
-                    this._inactiveConfig.dash.bufferingGoal,
+                    this._inactiveConfig.bufferingGoal,
                 )
 
                 rendererPlayoutObj._shaka.configure(
@@ -499,27 +415,15 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
 
         if (rendererPlayoutObj.mediaType) {
             switch (rendererPlayoutObj.mediaType) {
-                case MediaTypes.HLS:
-                    if (this._useHlsJs) {
-                        if (rendererPlayoutObj._hlsCheckBufferTimeout) {
-                            clearTimeout(
-                                rendererPlayoutObj._hlsCheckBufferTimeout,
-                            )
-                        }
-
-                        rendererPlayoutObj._hls.destroy()
-                    }
-
-                    break
-
                 case MediaTypes.OTHER:
                     break
-
+                case MediaTypes.HLS:
                 case MediaTypes.DASH:
-                    rendererPlayoutObj._shaka.unload()
+                    if (this._useShaka) {
+                        rendererPlayoutObj._shaka.unload()
 
-                    rendererPlayoutObj._shaka.destroy()
-
+                        rendererPlayoutObj._shaka.destroy()
+                    }
                     break
 
                 default:
@@ -560,108 +464,90 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             if (rendererPlayoutObj.mediaType) {
                 switch (rendererPlayoutObj.mediaType) {
                     case MediaTypes.HLS:
-                        if (this._useHlsJs) {
-                            // Using HLS.js
-                            rendererPlayoutObj._hls.config = {
-                                ...rendererPlayoutObj._hls.config,
-                                ...this._activeConfig.hls,
-                            }
-                            allHlsEvents.forEach(e => {
-                                rendererPlayoutObj._hls.on(
-                                    Hls.Events[e],
+                    case MediaTypes.DASH:
+                        if (this._useShaka) {
+                            rendererPlayoutObj._shaka.configure(
+                                "streaming.bufferingGoal",
+                                this._activeConfig.bufferingGoal,
+                            )
+
+                            rendererPlayoutObj._shaka.configure(
+                                "streaming.rebufferingGoal",
+                                5,
+                            )
+
+                            // Check bandwidth calculations and update the initial estimated
+                            // bandwidth of new videos
+                            this._shakaCheckBandwidth(rendererId)
+
+                            rendererPlayoutObj._shakaAdaptationHandler = this._ShakaAdaptationHandler(
+                                rendererId,
+                            )
+
+                            rendererPlayoutObj._shaka.addEventListener(
+                                "adaptation",
+                                rendererPlayoutObj._shakaAdaptationHandler,
+                            )
+
+                            // error handler
+                            // bufferiug errors
+                            rendererPlayoutObj._shaka.addEventListener(
+                                "buffering",
+                                e => {
+                                    if (rendererPlayoutObj._shaka.isBuffering()) {
+                                        this._player.showBufferingLayer()
+                                    }
+
+                                    if (!e.buffering) {
+                                        this._player.removeBufferingLayer()
+                                    }
+                                },
+                            )
+
+                            // generic error
+                            // eslint-disable-next-line max-len
+                            // if the error code is 1001 and http status is 404we can't find the segement so ignore the error as we shouldn't ever get in this situation.
+                            rendererPlayoutObj._shaka.addEventListener(
+                                SHAKA_EVENTS.error,
+                                e => {
+                                    if (e.detail && e.detail.data) {
+                                        if (
+                                            e.detail.code === 1001 &&
+                                            e.detail.data[1] === 404
+                                        ) {
+                                            logger.info(
+                                                "404 error failed to fetch media",
+                                            )
+                                            return
+                                        }
+
+                                        this._player.showErrorLayer()
+                                    }
+                                },
+                            )
+
+                            // resuming all good
+                            rendererPlayoutObj._shaka.addEventListener(
+                                "adaptation",
+                                this._player._removeErrorLayer,
+                            )
+
+                            rendererPlayoutObj._shaka.addEventListener(
+                                "adaptation",
+                                this._player.removeBufferingLayer,
+                            )
+
+                            allShakaEvents.forEach(e => {
+                                rendererPlayoutObj._shaka.addEventListener(
+                                    e,
                                     ev => {
                                         // eslint-disable-next-line no-console
-                                        logger.debug("HLS EVENT: ", ev)
+                                        logger.debug("SHAKA EVENT: ", ev)
                                     },
                                 )
                             })
                         }
-
                         break
-
-                    case MediaTypes.DASH: {
-                        rendererPlayoutObj._shaka.configure(
-                            "streaming.bufferingGoal",
-                            this._activeConfig.dash.bufferingGoal,
-                        )
-
-                        rendererPlayoutObj._shaka.configure(
-                            "streaming.rebufferingGoal",
-                            5,
-                        )
-
-                        // Check bandwidth calculations and update the initial estimated
-                        // bandwidth of new videos
-                        this._shakaCheckBandwidth(rendererId)
-
-                        rendererPlayoutObj._shakaAdaptationHandler = this._ShakaAdaptationHandler(
-                            rendererId,
-                        )
-
-                        rendererPlayoutObj._shaka.addEventListener(
-                            "adaptation",
-                            rendererPlayoutObj._shakaAdaptationHandler,
-                        )
-
-                        // error handler
-                        // bufferiug errors
-                        rendererPlayoutObj._shaka.addEventListener(
-                            "buffering",
-                            e => {
-                                if (rendererPlayoutObj._shaka.isBuffering()) {
-                                    this._player.showBufferingLayer()
-                                }
-
-                                if (!e.buffering) {
-                                    this._player.removeBufferingLayer()
-                                }
-                            },
-                        )
-
-                        // generic error
-                        // eslint-disable-next-line max-len
-                        // if the error code is 1001 and http status is 404we can't find the segement so ignore the error as we shouldn't ever get in this situation.
-                        rendererPlayoutObj._shaka.addEventListener(
-                            SHAKA_EVENTS.error,
-                            e => {
-                                if (e.detail && e.detail.data) {
-                                    if (
-                                        e.detail.code === 1001 &&
-                                        e.detail.data[1] === 404
-                                    ) {
-                                        logger.info(
-                                            "404 error failed to fetch media",
-                                        )
-                                        return
-                                    }
-
-                                    this._player.showErrorLayer()
-                                }
-                            },
-                        )
-
-                        // resuming all good
-                        rendererPlayoutObj._shaka.addEventListener(
-                            "adaptation",
-                            this._player._removeErrorLayer,
-                        )
-
-                        rendererPlayoutObj._shaka.addEventListener(
-                            "adaptation",
-                            this._player.removeBufferingLayer,
-                        )
-
-                        allShakaEvents.forEach(e => {
-                            rendererPlayoutObj._shaka.addEventListener(
-                                e,
-                                ev => {
-                                    // eslint-disable-next-line no-console
-                                    logger.debug("DASH SHAKA EVENT: ", ev)
-                                },
-                            )
-                        })
-                        break
-                    }
 
                     case MediaTypes.OTHER:
                         break
@@ -722,54 +608,46 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
             if (rendererPlayoutObj.mediaType) {
                 switch (rendererPlayoutObj.mediaType) {
                     case MediaTypes.HLS:
-                        if (this._useHlsJs) {
-                            // Using HLS.js
-                            rendererPlayoutObj._hls.config = {
-                                ...rendererPlayoutObj._hls.config,
-                                ...this._inactiveConfig.hls,
-                            } // remove the event listeners
-                        }
-
-                        break
-
                     case MediaTypes.DASH:
-                        rendererPlayoutObj._shaka.configure(
-                            "streaming.bufferingGoal",
-                            this._inactiveConfig.dash.bufferingGoal,
-                        )
+                        if (this._useShaka) {
+                            rendererPlayoutObj._shaka.configure(
+                                "streaming.bufferingGoal",
+                                this._inactiveConfig.bufferingGoal,
+                            )
 
-                        // Remove bandwidth calculations timeout and adaptation handler
-                        rendererPlayoutObj._shaka.removeEventListener(
-                            "adaptation",
-                            rendererPlayoutObj._shakaAdaptationHandler,
-                        )
+                            // Remove bandwidth calculations timeout and adaptation handler
+                            rendererPlayoutObj._shaka.removeEventListener(
+                                "adaptation",
+                                rendererPlayoutObj._shakaAdaptationHandler,
+                            )
 
-                        if (rendererPlayoutObj._shakaCheckBandwidthTimeout) {
-                            clearTimeout(
-                                rendererPlayoutObj._shakaCheckBandwidthTimeout,
+                            if (rendererPlayoutObj._shakaCheckBandwidthTimeout) {
+                                clearTimeout(
+                                    rendererPlayoutObj._shakaCheckBandwidthTimeout,
+                                )
+                            }
+
+                            // remove the event listeners
+                            rendererPlayoutObj._shaka.removeEventListener(
+                                SHAKA_EVENTS.error,
+                                this._player.showErrorLayer,
+                            )
+
+                            rendererPlayoutObj._shaka.removeEventListener(
+                                SHAKA_EVENTS.buffering,
+                                this._player.showBufferingLayer,
+                            )
+
+                            rendererPlayoutObj._shaka.removeEventListener(
+                                SHAKA_EVENTS.adaptation,
+                                this._player.removeBufferingLayer,
+                            )
+
+                            rendererPlayoutObj._shaka.removeEventListener(
+                                SHAKA_EVENTS.adaptation,
+                                this._player._removeErrorLayer,
                             )
                         }
-
-                        // remove the event listeners
-                        rendererPlayoutObj._shaka.removeEventListener(
-                            SHAKA_EVENTS.error,
-                            this._player.showErrorLayer,
-                        )
-
-                        rendererPlayoutObj._shaka.removeEventListener(
-                            SHAKA_EVENTS.buffering,
-                            this._player.showBufferingLayer,
-                        )
-
-                        rendererPlayoutObj._shaka.removeEventListener(
-                            SHAKA_EVENTS.adaptation,
-                            this._player.removeBufferingLayer,
-                        )
-
-                        rendererPlayoutObj._shaka.removeEventListener(
-                            SHAKA_EVENTS.adaptation,
-                            this._player._removeErrorLayer,
-                        )
 
                         break
 
