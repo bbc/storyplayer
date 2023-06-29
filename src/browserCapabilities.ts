@@ -147,6 +147,12 @@ export class BrowserCapabilities {
             return false
         }
 
+        // HLS should be supported if shaka player is supported
+        if (BrowserCapabilities.shakaSupport()) {
+            BrowserCapabilities.hlsSupported = true
+            return true
+        }
+
         const video = document.createElement("video")
 
         if (video.canPlayType("application/vnd.apple.mpegurl")) {
