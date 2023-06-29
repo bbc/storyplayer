@@ -360,6 +360,7 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                     rendererPlayoutObj.mediaElement.src = url
                     break
                 }
+            // eslint-disable-next-line no-fallthrough
             case MediaTypes.DASH: {
                 rendererPlayoutObj._shaka = new shaka.Player(
                     rendererPlayoutObj.mediaElement,
