@@ -108,7 +108,7 @@ if (getFilename) {
 // display a message to the user
 function showMessage(messageText, error=false) {
     const messageDiv = document.getElementById('feedback');
-    messageDiv.textContent = messageText;
+    messageDiv.textContent = `${new Date().toLocaleTimeString()} - ${messageText}\r\n` + messageDiv.textContent;
     if (error) {
         messageDiv.classList.add('warning');
     } else {
