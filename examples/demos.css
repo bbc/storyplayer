@@ -164,3 +164,13 @@ button:first-child {
   transform-origin: 50% 0;
   width: 20%;
 }
+
+.debug {
+  border: 1px solid #ccc;
+  visibility: hidden;
+  padding: 0 16px 16px;
+}
+
+.debug-div-shown {
+  visibility: visible;
+}
