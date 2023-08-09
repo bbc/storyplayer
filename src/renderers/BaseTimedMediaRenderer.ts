@@ -182,7 +182,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
         }
     }
 
-    async _queueMedia(mediaObjOverride, assetKey, subtitleKey = "sub_src") {
+    async _queueMedia(mediaObjOverride, assetKey) {
         if (this._representation.asset_collections.foreground_id) {
             const fg = await this._fetchAssetCollection(
                 this._representation.asset_collections.foreground_id,
@@ -227,18 +227,14 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                     mediaType,
                     includeCredentials: true,
                 }
-                const mediaUrl = await this._fetchMedia(
+                const mediaUrls = await this._fetchMedia(
                     fg.assets[assetKey],
                     options,
-                )
+                );
 
-                if (fg.assets[subtitleKey]) {
-                    const subsUrl = await this._fetchMedia(
-                        fg.assets[subtitleKey],
-                        {
-                            includeCredentials: true,
-                        },
-                    )
+                const { url : mediaUrl, subsUrl } = mediaUrls;
+
+                if (subsUrl) {
                     mediaObj.subs_url = subsUrl
                 }
 

@@ -194,7 +194,7 @@ export interface NarrativeElementFetcher { (id: string) : Promise<NarrativeEleme
 export interface RepresentationCollectionFetcher { (id: string) : Promise<RepresentationCollection> }
 export interface RepresentationFetcher { (id: string) : Promise<Representation> }
 export interface AssetCollectionFetcher { (id: string) : Promise<AssetCollection> }
-export interface MediaFetcher { (uri: string, options?: object) : Promise<string> }
+export interface MediaFetcher { (uri: string, options?: object) : Promise<{url: string; subsUrl?: string;}>}
 
 export interface ExperienceFetchers {
     storyFetcher: StoryFetcher,
@@ -259,7 +259,7 @@ export interface SMPPlayList {
 
 export interface UILogFunction {
     (
-        eventName: string, 
+        eventName: string,
         from?: string,
         to?: string,
     ): void

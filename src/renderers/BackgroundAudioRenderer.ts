@@ -187,7 +187,7 @@ export default class BackgroundAudioRenderer extends BackgroundRenderer {
 
     async _renderBackgroundAudio() {
         if (this._assetCollection && this._assetCollection.assets.audio_src) {
-            const mediaUrl = await this._fetchMedia(
+            const { url: mediaUrl } = await this._fetchMedia(
                 this._assetCollection.assets.audio_src,
                 {
                     mediaFormat: MediaFormats.getFormat(),

@@ -159,7 +159,7 @@ export default class StoryIconRenderer extends EventEmitter {
 
         return Promise.all(promises)
             .then(iconAssets => {
-                const resolvePromises = []
+                const resolvePromises: Promise<{ url: string, subsUrl?: string }>[] = []
                 iconAssets.forEach(assetUrl => {
                     if (assetUrl && assetUrl.assets.image_src) {
                         resolvePromises.push(
@@ -178,8 +178,8 @@ export default class StoryIconRenderer extends EventEmitter {
 
                 for (let i = 0; i < resolvedUrls.length; i += 2) {
                     const urls = {
-                        default: resolvedUrls[i],
-                        active: resolvedUrls[i + 1],
+                        default: resolvedUrls[i].url,
+                        active: resolvedUrls[i + 1].url,
                     }
                     resolvedAssetList.push(urls)
                 }

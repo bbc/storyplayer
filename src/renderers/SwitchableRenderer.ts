@@ -133,20 +133,20 @@ export default class SwitchableRenderer extends BaseRenderer {
                 ) {
                     const acid = choice.choice_representation.asset_collections.icon.default_id
                     try {
-                        const assetCollection = await this._fetchAssetCollection(acid)    
+                        const assetCollection = await this._fetchAssetCollection(acid)
                         if (assetCollection.assets.image_src) {
                             // eslint-disable-next-line max-len
-                            const imageUrl = await this._fetchMedia(
+                            const { url: imageUrl } = await this._fetchMedia(
                                 assetCollection.assets.image_src,
                                 {
                                     includeCredentials: true,
                                 },
                             )
-    
+
                             if (imageUrl) {
                                 const image = new Image()
                                 image.src = imageUrl
-    
+
                                 this._preloadedSwitchIcons.push(image)
                             }
                         }
@@ -173,7 +173,7 @@ export default class SwitchableRenderer extends BaseRenderer {
             )
             .map(async (choice, idx) => {
                 const choiceName = choice.choice_representation.name
-                let iconUrl = ""
+                let iconUrl = "";
 
                 if (
                     choice.choice_representation.asset_collections.icon &&
@@ -185,12 +185,12 @@ export default class SwitchableRenderer extends BaseRenderer {
                             .default_id,
                     )
                     if (iconAc.assets.image_src)
-                        iconUrl = await this._fetchMedia(
+                        iconUrl = (await this._fetchMedia(
                             iconAc.assets.image_src,
                             {
                                 includeCredentials: true,
                             },
-                        )
+                        )).url
                 }
 
                 return {

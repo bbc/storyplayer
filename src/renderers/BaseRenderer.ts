@@ -59,7 +59,7 @@ export const RENDERER_PHASES = {
 interface NEObject {
     targetNeId: string
     ne: NarrativeElement
-} 
+}
 
 export default class BaseRenderer extends EventEmitter {
     _rendererId: string
@@ -686,7 +686,7 @@ export default class BaseRenderer extends EventEmitter {
 
                     if (assetCollection.assets.image_src) {
                         // eslint-disable-next-line max-len
-                        const imageUrl = await this._fetchMedia(
+                        const { url: imageUrl } = await this._fetchMedia(
                             assetCollection.assets.image_src,
                             {
                                 includeCredentials: true,
@@ -732,7 +732,7 @@ export default class BaseRenderer extends EventEmitter {
             assetCollectionIds.map(async (iconAssetCollection) => {
                 const assetCollection = await this._fetchAssetCollection(iconAssetCollection)
                 if (assetCollection.assets.image_src) {
-                    const imageUrl = await this._fetchMedia(
+                    const { url: imageUrl } = await this._fetchMedia(
                         assetCollection.assets.image_src,
                         { includeCredentials: true },
                     )
@@ -1261,7 +1261,7 @@ export default class BaseRenderer extends EventEmitter {
                     const returnObjects = []
                     resolvedUrls.forEach((resolvedUrl, i) => {
                         const obj = iconObjects[i]
-                        obj.resolvedUrl = resolvedUrl
+                        obj.resolvedUrl = resolvedUrl.url
                         returnObjects.push(obj)
                     })
                     return returnObjects
@@ -1597,7 +1597,7 @@ export default class BaseRenderer extends EventEmitter {
             try {
                 const assetCollection = await this._fetchAssetCollection(assetCollectionId)
                 if (assetCollection.assets.image_src) {
-                    const imageUrl = await this._fetchMedia(
+                    const { url: imageUrl } = await this._fetchMedia(
                         assetCollection.assets.image_src,
                         { includeCredentials: true },
                     )

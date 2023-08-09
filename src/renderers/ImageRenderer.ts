@@ -149,7 +149,7 @@ export default class ImageRenderer extends BaseTimedIntervalRenderer {
 
             if (fg.assets.image_src) {
                 try {
-                    const mediaUrl = await this._fetchMedia(
+                    const { url: mediaUrl } = await this._fetchMedia(
                         fg.assets.image_src,
                         {
                             includeCredentials: true,

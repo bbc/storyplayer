@@ -166,6 +166,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
     }
 
     async queuePlayout(rendererId: string, mediaObj: Record<string, any>) {
+        console.log(`In queuePlayout, Media Obj: ${mediaObj}`, this._media[rendererId].media);
         if (mediaObj.type === MEDIA_TYPES.BACKGROUND_A) {
             // Handle with Secondary Playout
             this._secondaryPlayoutEngine.queuePlayout(rendererId, mediaObj)
@@ -190,15 +191,16 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
             options.loop = true
         }
 
-        const {url} = this._media[rendererId].media
+        const {url, subs_url: subsUrl } = this._media[rendererId].media
         let playlistItem: SMPPlayListItem = {}
 
         // Check if we have subtitles and that they are EBU-TT-D and not WebVTT
-        if ("subs_url" in this._media[rendererId].media) {
+        if (subsUrl) {
             const pageUrl = new URL(this._smpPlayerInterface.settings.embedPageURL);
             const isPublishedExperience = pageUrl.pathname.includes("/experience/");
+            console.log(`Fetching subs from: ${subsUrl}`);
             const subsAreEbuttFormat = await fetch(
-                this._media[rendererId].media.subs_url,
+                subsUrl,
                 {
                     credentials: isPublishedExperience
                         ? "same-origin"
@@ -210,10 +212,7 @@ class SMPPlayoutEngine extends BasePlayoutEngine {
                     text.includes('xmlns="http://www.w3.org/ns/ttml"'),
                 )
             // is this too much?  too little?
-            if (subsAreEbuttFormat)
-                playlistItem.captionsUrl = this._media[
-                    rendererId
-                ].media.subs_url
+            if (subsAreEbuttFormat) playlistItem.captionsUrl = subsUrl
         }
 
         let kind = "programme"

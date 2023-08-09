@@ -40,7 +40,7 @@ export default class SimpleAudioRenderer extends BaseTimedMediaRenderer {
                 )
 
                 if (image.assets.image_src) {
-                    const imageUrl = await this._fetchMedia(
+                    const { url: imageUrl } = await this._fetchMedia(
                         image.assets.image_src,
                         {
                             includeCredentials: true,
