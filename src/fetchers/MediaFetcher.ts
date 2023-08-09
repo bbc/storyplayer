@@ -18,7 +18,7 @@ export default function (params?: Record<string, any>) {
     return (uri: string): Promise<any> =>
         new Promise((resolve, reject) => {
             if (uri) {
-                resolve(uri)
+                resolve({ url: uri })
             } else {
                 reject(new Error("Invalid URI"))
             }

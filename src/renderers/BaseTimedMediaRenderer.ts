@@ -227,12 +227,10 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                     mediaType,
                     includeCredentials: true,
                 }
-                const mediaUrls = await this._fetchMedia(
+                const { url : mediaUrl, subsUrl } = await this._fetchMedia(
                     fg.assets[assetKey],
                     options,
                 );
-
-                const { url : mediaUrl, subsUrl } = mediaUrls;
 
                 if (subsUrl) {
                     mediaObj.subs_url = subsUrl

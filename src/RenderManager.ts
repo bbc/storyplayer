@@ -307,7 +307,7 @@ export default class RenderManager extends EventEmitter {
                 )
 
                 if (fg.assets.image_src) {
-                    const mediaUrl = await this._fetchers.mediaFetcher(
+                    const { url: mediaUrl } = await this._fetchers.mediaFetcher(
                         fg.assets.image_src,
                     )
                     logger.info(`FETCHED FROM MS MEDIA! ${mediaUrl}`)
@@ -354,7 +354,7 @@ export default class RenderManager extends EventEmitter {
                 )
 
                 if (fg.assets.image_src) {
-                    const mediaUrl = await this._fetchers.mediaFetcher(
+                    const { url: mediaUrl } = await this._fetchers.mediaFetcher(
                         fg.assets.image_src,
                     )
 

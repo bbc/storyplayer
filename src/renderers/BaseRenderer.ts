@@ -1240,7 +1240,7 @@ export default class BaseRenderer extends EventEmitter {
             })
             .then(iconObjects => {
                 // next get src urls from each asset collection and resolve them using media fetcher
-                const fetcherPromises = []
+                const fetcherPromises: Promise<{ url: string, subsUrl?: string }>[] = []
                 iconObjects.forEach(iconObject => {
                     if (
                         iconObject &&
@@ -1254,7 +1254,7 @@ export default class BaseRenderer extends EventEmitter {
                             }),
                         )
                     } else {
-                        fetcherPromises.push(Promise.resolve(""))
+                        fetcherPromises.push(Promise.resolve({ url : "" }))
                     }
                 })
                 return Promise.all(fetcherPromises).then(resolvedUrls => {
