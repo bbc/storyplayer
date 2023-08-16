@@ -1,6 +1,6 @@
 import EventEmitter from "eventemitter3"
 import Player, {PlayerEvents} from "../gui/Player"
-import { AssetCollectionFetcher, MediaFetcher } from "../types"
+import { AssetCollection, AssetCollectionFetcher, MediaFetcher } from "../types"
 import {REASONER_EVENTS} from "../Events"
 import type {StoryPathItem} from "../StoryPathWalker"
 export type IconUrlPair = {
@@ -133,7 +133,7 @@ export default class StoryIconRenderer extends EventEmitter {
     // default and active icons of each
     // then resolve the image_urls of each
     _getIconAssets(): Promise<Array<IconUrlPair>> {
-        const promises = []
+        const promises: Promise<AssetCollection | null>[] = [];
 
         this._pathItemList.forEach(pathItem => {
             if (pathItem.representation.asset_collections.icon) {
@@ -158,12 +158,12 @@ export default class StoryIconRenderer extends EventEmitter {
         })
 
         return Promise.all(promises)
-            .then(iconAssets => {
-                const resolvePromises: Promise<{ url: string, subsUrl?: string }>[] = []
-                iconAssets.forEach(assetUrl => {
-                    if (assetUrl && assetUrl.assets.image_src) {
+            .then(iconACs => {
+                const resolvePromises: Promise<{ url: string, subsUrl?: string } | null>[] = []
+                iconACs.forEach(iconAC => {
+                    if (iconAC && iconAC.assets?.image_src) {
                         resolvePromises.push(
-                            this._fetchMedia(assetUrl.assets.image_src, {
+                            this._fetchMedia(iconAC.assets.image_src, {
                                 includeCredentials: true,
                             }),
                         )
@@ -174,12 +174,12 @@ export default class StoryIconRenderer extends EventEmitter {
                 return Promise.all(resolvePromises)
             })
             .then(resolvedUrls => {
-                const resolvedAssetList = []
+                const resolvedAssetList: Array<IconUrlPair> = []
 
                 for (let i = 0; i < resolvedUrls.length; i += 2) {
                     const urls = {
-                        default: resolvedUrls[i].url,
-                        active: resolvedUrls[i + 1].url,
+                        default: resolvedUrls[i]?.url || null,
+                        active: resolvedUrls[i + 1]?.url || null,
                     }
                     resolvedAssetList.push(urls)
                 }
