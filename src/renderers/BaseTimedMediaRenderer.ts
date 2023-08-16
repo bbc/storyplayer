@@ -241,7 +241,7 @@ export default class BaseTimedMediaRenderer extends BaseRenderer {
                         "trying to populate video element that has been destroyed",
                     )
                 } else {
-                    mediaObj.url = mediaUrl
+                    mediaObj.url = mediaUrl;
                     await this._playoutEngine.queuePlayout(
                         this._rendererId,
                         mediaObj,

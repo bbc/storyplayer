@@ -17,6 +17,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "vite build",
+    "build:watch": "vite build --watch",
     "dev": "vite",
     "test": "concurrently -c red,green,yellow -n t- npm:test-*",
     "test-eslint": "eslint src/",

@@ -16,12 +16,8 @@ import {
 } from "./browserCapabilities"
 import {getSetting, WEBVIEW_DEBUG_FLAG, UA_DEBUG_FLAG} from "./utils"
 // Import Assets for assetUrls object as they may not of been imported in CSS
-import "./assets/images/media-play-8x.png"
-import "./assets/images/media-pause-8x.png"
-import "./assets/images/media-step-forward-8x.png"
-import "./assets/images/media-step-backward-8x.png"
-import "./assets/images/no-asset.svg"
-import "./assets/images/black.png"
+import noAssetSvg from "./assets/images/no-asset.svg";
+import blackPng from "./assets/images/black.png"
 import "./assets/styles/player.scss"
 import "./assets/styles/smp.scss"
 import {
@@ -47,7 +43,6 @@ const DEFAULT_SETTINGS = {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`)
         }
     },
-    staticImageBaseUrl: "/dist/images",
     privacyNotice: null,
     saveSession: false,
     handleKeys: true,
@@ -146,8 +141,8 @@ export default {
             mergedSettings.dataResolver,
         )
         const assetUrls: AssetUrls = {
-            noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
-            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/black.png`,
+            noAssetIconUrl: noAssetSvg,
+            noBackgroundAssetUrl: blackPng,
         }
         const fetchers: ExperienceFetchers = {
             storyFetcher: mergedSettings.storyFetcher,
