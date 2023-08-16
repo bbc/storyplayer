@@ -18,7 +18,8 @@
         ]
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "src/types/image.d.ts"
     ],
     "exclude": [ ],
     "lib": [
