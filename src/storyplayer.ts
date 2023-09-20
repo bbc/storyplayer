@@ -15,21 +15,20 @@ import {
     MediaFormats,
 } from "./browserCapabilities"
 import {getSetting, WEBVIEW_DEBUG_FLAG, UA_DEBUG_FLAG} from "./utils"
-// Import Assets for assetUrls object as they may not of been imported in CSS
-import "./assets/images/media-play-8x.png"
-import "./assets/images/media-pause-8x.png"
-import "./assets/images/media-step-forward-8x.png"
-import "./assets/images/media-step-backward-8x.png"
-import "./assets/images/no-asset.svg"
-import "./assets/images/black.png"
-import "./assets/styles/player.scss"
-import "./assets/styles/smp.scss"
+
+import noAssetSvg from "./assets/images/no-asset.svg";
+import blackPng from "./assets/images/black.png"
+
 import {
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     ERROR_EVENTS,
     DOM_EVENTS,
 } from "./Events"
+
+// import css styles
+import "./assets/styles/player.scss"
+
 const DEFAULT_SETTINGS = {
     mediaFetcher: MediaFetcher({}),
     analyticsLogger: logdata => {
@@ -47,7 +46,6 @@ const DEFAULT_SETTINGS = {
             logger.info(`ANALYTICS: ${logdata.type}, ${logdata.name}`)
         }
     },
-    staticImageBaseUrl: "/dist/images",
     privacyNotice: null,
     saveSession: false,
     handleKeys: true,
@@ -109,66 +107,70 @@ if (getSetting(UA_DEBUG_FLAG)) {
         `${MediaFormats.getFormat()}` +
         `<h3>Chosen Playout</h3>` +
         `${MediaFormats.getPlayoutEngine()}`
-} // eslint-disable-next-line no-undef
-// const playerVersion = __PLAYER_VERSION__;
-// eslint-disable-next-line no-undef
-// const schemaVersion = __LATEST_SCHEMA_VERSION__;
+}
 
-export default {
-    RESOLVERS: {
-        FROM_OBJECT: ObjectDataResolver,
-    },
+const Romper = (settings: Settings): Controller | null | undefined => {
+    // eslint-disable-next-line no-undef
+    // logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
+    const mergedSettings = {...DEFAULT_SETTINGS, ...settings}
+
+    if (!mergedSettings.dataResolver) {
+        logger.info("No data resolver passed to romper - creating one")
+        mergedSettings.dataResolver = ObjectDataResolver({})
+    }
+
+    const storyReasonerFactory = StoryReasonerFactory(
+        mergedSettings.storyFetcher,
+        mergedSettings.narrativeElementFetcher,
+        mergedSettings.dataResolver,
+    )
+    const representationReasonerFactory = RepresentationReasonerFactory(
+        mergedSettings.representationFetcher,
+        mergedSettings.dataResolver,
+    )
+    const assetUrls: AssetUrls = {
+        noAssetIconUrl: noAssetSvg,
+        noBackgroundAssetUrl: blackPng,
+    }
+    const fetchers: ExperienceFetchers = {
+        storyFetcher: mergedSettings.storyFetcher,
+        narrativeElementFetcher: mergedSettings.narrativeElementFetcher,
+        representationCollectionFetcher:
+            mergedSettings.representationCollectionFetcher,
+        representationFetcher: mergedSettings.representationFetcher,
+        assetCollectionFetcher: mergedSettings.assetCollectionFetcher,
+        mediaFetcher: mergedSettings.mediaFetcher,
+    }
+    return new Controller(
+        mergedSettings.target,
+        storyReasonerFactory,
+        representationReasonerFactory,
+        fetchers,
+        mergedSettings.analyticsLogger,
+        assetUrls,
+        mergedSettings.privacyNotice,
+        mergedSettings.saveSession,
+        mergedSettings.handleKeys,
+        mergedSettings.options,
+    )
+}
+
+export default Romper;
+
+export const RESOLVERS = {
+    FROM_OBJECT: ObjectDataResolver,
+};
+
+export {
     BrowserUserAgent,
     BrowserCapabilities,
     ERROR_EVENTS,
     REASONER_EVENTS,
     VARIABLE_EVENTS,
     DOM_EVENTS,
-    // playerVersion,
-    // schemaVersion,
-    init: (settings: Settings): Controller | null | undefined => {
-        // eslint-disable-next-line no-undef
-        // logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
-        const mergedSettings = {...DEFAULT_SETTINGS, ...settings}
-
-        if (!mergedSettings.dataResolver) {
-            logger.info("No data resolver passed to romper - creating one")
-            mergedSettings.dataResolver = ObjectDataResolver({})
-        }
-
-        const storyReasonerFactory = StoryReasonerFactory(
-            mergedSettings.storyFetcher,
-            mergedSettings.narrativeElementFetcher,
-            mergedSettings.dataResolver,
-        )
-        const representationReasonerFactory = RepresentationReasonerFactory(
-            mergedSettings.representationFetcher,
-            mergedSettings.dataResolver,
-        )
-        const assetUrls: AssetUrls = {
-            noAssetIconUrl: `${mergedSettings.staticImageBaseUrl}/no-asset.svg`,
-            noBackgroundAssetUrl: `${mergedSettings.staticImageBaseUrl}/black.png`,
-        }
-        const fetchers: ExperienceFetchers = {
-            storyFetcher: mergedSettings.storyFetcher,
-            narrativeElementFetcher: mergedSettings.narrativeElementFetcher,
-            representationCollectionFetcher:
-                mergedSettings.representationCollectionFetcher,
-            representationFetcher: mergedSettings.representationFetcher,
-            assetCollectionFetcher: mergedSettings.assetCollectionFetcher,
-            mediaFetcher: mergedSettings.mediaFetcher,
-        }
-        return new Controller(
-            mergedSettings.target,
-            storyReasonerFactory,
-            representationReasonerFactory,
-            fetchers,
-            mergedSettings.analyticsLogger,
-            assetUrls,
-            mergedSettings.privacyNotice,
-            mergedSettings.saveSession,
-            mergedSettings.handleKeys,
-            mergedSettings.options,
-        )
-    },
 }
+
+// eslint-disable-next-line no-undef
+// export const playerVersion = __PLAYER_VERSION__;
+// eslint-disable-next-line no-undef
+// export const schemaVersion = __LATEST_SCHEMA_VERSION__;
