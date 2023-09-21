@@ -242,7 +242,10 @@ export interface SMPPlayListItem {
     href?: Array<Record<string, string>>
     url?: string
     kind?: string
-    captionsUrl?: string
+    captionsUrl?: string,
+    versionID?: string,
+    in?: number,
+    out?: number
 }
 
 export interface SMPPlayList {
@@ -259,7 +262,7 @@ export interface SMPPlayList {
 
 export interface UILogFunction {
     (
-        eventName: string, 
+        eventName: string,
         from?: string,
         to?: string,
     ): void
