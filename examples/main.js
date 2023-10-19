@@ -169,7 +169,7 @@ function run(config) {
     document.getElementById('story-title').textContent = config.stories[0].name;
     jsonEditor.set(config);
 
-    romperInstance = Romper.init({
+    romperInstance = Romper({
         target: document.getElementById('romper-target'),
         staticImageBaseUrl: '/src/assets/images/',
         analyticsLogger: dataObj => {
