@@ -2,22 +2,14 @@ version: '3.5'
 
 services:
   storyplayer-dev:
-    image: 107881134874.dkr.ecr.eu-west-1.amazonaws.com/obm-build
-    user: ${DOCKER_USER_ID:-builder}
+    image: node:16
+    user: ${DOCKER_USER_ID:-node}
     working_dir: /storyplayer
     environment:
       - DOCKER=true
       - NODE_ENV=development
       - NPM_CONFIG_LOGLEVEL=warn
-      - HOME=${DOCKER_USER_HOME:-/home/builder}
-      - COSMOS_CERT=/etc/pki/tls/certs/client.crt
-      - COSMOS_CERT_KEY=/etc/pki/tls/private/client.key
-      - COSMOS_KEY=/etc/pki/tls/private/client.key
+      - HOME=${DOCKER_USER_HOME:-/home/node}
     volumes:
       - ./:/storyplayer:rw,cached
-      - ../dev.bbc.co.uk.crt:/etc/pki/tls/certs/client.crt:ro
-      - ../dev.bbc.co.uk.key:/etc/pki/tls/private/client.key:ro
-    command: bash -c '
-      sudo rm /etc/pki/tls/private/client_crt_chain_key.pem &&
-      cat /etc/pki/tls/certs/client.crt /etc/pki/tls/private/client.key | sudo tee -a /etc/pki/tls/private/client_crt_chain_key.pem &&
-      npm run build:watch'
+    command: bash -c 'npm install && npm run build:watch'
