@@ -16,6 +16,8 @@ import {
 } from "./browserCapabilities"
 import {getSetting, WEBVIEW_DEBUG_FLAG, UA_DEBUG_FLAG} from "./utils"
 
+import pkg from "../package.json";
+
 import noAssetSvg from "./assets/images/no-asset.svg";
 import blackPng from "./assets/images/black.png"
 
@@ -28,6 +30,9 @@ import {
 
 // import css styles
 import "./assets/styles/player.scss"
+
+const PLAYER_VERSION = pkg.version;
+const SCHEMA_VERSION = pkg.devDependencies["@bbc/object-based-media-schema"];
 
 const DEFAULT_SETTINGS = {
     mediaFetcher: MediaFetcher({}),
@@ -110,8 +115,7 @@ if (getSetting(UA_DEBUG_FLAG)) {
 }
 
 const Romper = (settings: Settings): Controller | null | undefined => {
-    // eslint-disable-next-line no-undef
-    // logger.info('StoryPlayer Version:', playerVersion, 'Schema Version:', schemaVersion);
+    logger.info('StoryPlayer Version:', PLAYER_VERSION, 'Schema Version:', SCHEMA_VERSION);
     const mergedSettings = {...DEFAULT_SETTINGS, ...settings}
 
     if (!mergedSettings.dataResolver) {
@@ -169,8 +173,3 @@ export {
     VARIABLE_EVENTS,
     DOM_EVENTS,
 }
-
-// eslint-disable-next-line no-undef
-// export const playerVersion = __PLAYER_VERSION__;
-// eslint-disable-next-line no-undef
-// export const schemaVersion = __LATEST_SCHEMA_VERSION__;
