@@ -13,7 +13,7 @@ Using the library
 
 > You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
-[storyplayer.js](src/storyplayer.js) exports an `init()` function that is used to initiate StoryPlayer and returns an instance of StoryPlayer.  It takes one argument, defining the Player settings, which has the following attributes:
+The default export from [storyplayer.js](src/storyplayer.js) is a function that is used to initiate and return an instance of StoryPlayer. It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
@@ -33,7 +33,7 @@ Using the library
 For example, in a React application import the player:
 
 ```
-import Storyplayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
+import StoryPlayer, { VARIABLE_EVENTS,  REASONER_EVENTS } from '@bbc/storyplayer';
 ```
 
 Initiate it using an Object with the attributes described above:
@@ -41,7 +41,7 @@ Initiate it using an Object with the attributes described above:
     const playerSettingsObject = {
         // an Object including the above attributes
     }
-    this.storyplayer = Storyplayer.init(playerSettingsObject);
+    this.storyplayer = StoryPlayer(playerSettingsObject);
 ```
 
 The returned instance will fire events that can be listened for and handled.  For example:
@@ -64,7 +64,7 @@ The returned instance will fire events that can be listened for and handled.  Fo
     this.storyplayer.on(REASONER_EVENTS.STORY_END, this.handleStoryEnd)
 ```
 
-The [examples code](https://github.com/bbc/storyplayer/blob/main/examples/main.js#L162) shows how this might work, with simple fetchers all reading from the same single pre-loaded JSON file for the story.  See [Running the examples in the repo](#running-the-examples-in-the-repo), below for how to view the demos. 
+The [examples code](https://github.com/bbc/storyplayer/blob/main/examples/main.js#L162) shows how this might work, with simple fetchers all reading from the same single pre-loaded JSON file for the story.  See [Running the examples in the repo](#running-the-examples-in-the-repo), below for how to view the demos.
 
 Building the library from the repo
 ==================================

@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  storyplayer-dev:
+    image: node:16
+    user: ${DOCKER_USER_ID:-node}
+    working_dir: /storyplayer
+    environment:
+      - DOCKER=true
+      - NODE_ENV=development
+      - NPM_CONFIG_LOGLEVEL=warn
+      - HOME=${DOCKER_USER_HOME:-/home/node}
+    volumes:
+      - ./:/storyplayer:rw,cached
+    command: bash -c 'npm install && npm run build:watch'
