@@ -13,7 +13,7 @@ Using the library
 
 > You'll notice the term "_romper_" appears frequently in the code, rather than StoryPlayer.  This is historical - the player was initially called Romper, an acronym for **R**&D **O**bject based **M**edia **P**lay**ER**.  The name was changed to better fit with the naming conventions of the StoryKit suite of tools, but _romper_ remains in many places in the code.
 
-The defaul export from [storyplayer.js](src/storyplayer.js) is a function that is used to initiate and return an instance of StoryPlayer. It takes one argument, defining the Player settings, which has the following attributes:
+The default export from [storyplayer.js](src/storyplayer.js) is a function that is used to initiate and return an instance of StoryPlayer. It takes one argument, defining the Player settings, which has the following attributes:
 
 * `target` - An HTML element for the player to live in.
 * fetchers - functions that take a UUID and return an Object describing an instance of the data model for the given experience.
