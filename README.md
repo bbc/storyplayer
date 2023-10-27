@@ -64,7 +64,7 @@ The returned instance will fire events that can be listened for and handled.  Fo
     this.storyplayer.on(REASONER_EVENTS.STORY_END, this.handleStoryEnd)
 ```
 
-The demo index page [here](https://github.com/bbc/storyplayer/blob/main/index.html) shows how this might work in a static HTML context, with simple fetchers all reading from the same single pre-loaded JSON file for the story.
+The [examples code](https://github.com/bbc/storyplayer/blob/main/examples/main.js#L162) shows how this might work, with simple fetchers all reading from the same single pre-loaded JSON file for the story.  See [Running the examples in the repo](#running-the-examples-in-the-repo), below for how to view the demos.
 
 Building the library from the repo
 ==================================

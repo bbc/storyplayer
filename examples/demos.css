@@ -29,8 +29,11 @@ body {
 .feedback {
   color: darkgrey;
   font-size: 80%;
-  height: 500px;
+  margin: 8px 0;
+  max-height: 350px;
+  overflow-y: auto;
   padding: 10px;
+  white-space: pre;
   width: 780px;
 }
 
@@ -163,4 +166,14 @@ button:first-child {
   max-width: 50px;
   transform-origin: 50% 0;
   width: 20%;
+}
+
+.debug {
+  border: 1px solid #ccc;
+  display: none;
+  padding: 0 16px 16px;
+}
+
+.debug-div-shown {
+  display: block;
 }

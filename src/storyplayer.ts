@@ -98,9 +98,9 @@ if (getSetting(WEBVIEW_DEBUG_FLAG)) {
 if (getSetting(UA_DEBUG_FLAG)) {
     document.getElementById("debug-div").classList.add("debug-div-shown")
     document.getElementById("debug-div").innerHTML +=
-        `<h3>platform</h3>` +
+        `<h3>Platform</h3>` +
         `<p>${window.navigator.platform}</p>` +
-        `<h3>ua</h3>` +
+        `<h3>User-Agent</h3>` +
         `<p>${window.navigator.userAgent}</p>` +
         `<h3>HLS Support</h3>` +
         `${BrowserCapabilities.hlsSupport()}` +
