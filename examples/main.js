@@ -108,7 +108,7 @@ if (getFilename) {
 // display a message to the user
 function showMessage(messageText, error=false) {
     const messageDiv = document.getElementById('feedback');
-    messageDiv.textContent = messageText;
+    messageDiv.textContent = `${new Date().toLocaleTimeString()} - ${messageText}\r\n` + messageDiv.textContent;
     if (error) {
         messageDiv.classList.add('warning');
     } else {
@@ -169,7 +169,7 @@ function run(config) {
     document.getElementById('story-title').textContent = config.stories[0].name;
     jsonEditor.set(config);
 
-    romperInstance = Romper.init({
+    romperInstance = Romper({
         target: document.getElementById('romper-target'),
         staticImageBaseUrl: '/src/assets/images/',
         analyticsLogger: dataObj => {

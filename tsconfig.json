@@ -10,15 +10,15 @@
         "outDir": "./build/",
         "resolveJsonModule": true,
         "sourceMap": true,
-        "suppressExcessPropertyErrors": true,
         "target": "es2019",
         "typeRoots": [
             "@types",
-            "types/",
+            "src/types/",
         ]
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "src/types/image.d.ts"
     ],
     "exclude": [ ],
     "lib": [
