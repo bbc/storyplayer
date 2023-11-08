@@ -30,6 +30,7 @@ import {
 
 // import css styles
 import "./assets/styles/player.scss"
+import "./assets/styles/smp.scss"
 
 const PLAYER_VERSION = pkg.version;
 const SCHEMA_VERSION = pkg.devDependencies["@bbc/object-based-media-schema"];
