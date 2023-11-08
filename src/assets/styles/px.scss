@@ -9,6 +9,55 @@ $px-border-width: 50px;
     padding: 85px (2 * $px-border-width) $px-border-width;
     width: $px-screen-width - (4 * $px-border-width);
 
+    .romper-link-control {
+      border: 5px solid $px-border;
+      margin: 0 $px-border-width;
+      max-width: $px-button-width;
+      min-width: $px-button-width;
+
+      &:nth-child(2) {
+        margin-left: auto;
+      }
+
+      &:last-child {
+        margin-right: auto;
+      }
+
+      &:focus {
+        background: $px-border;
+        border: 5px solid $px-border;
+      }
+    }
+
+    .romper-ux-divider {
+      border-bottom: 2px solid $white;
+      left: 0;
+      width: $px-screen-width;
+    }
+
+    .romper-control-selected {
+      &.text {
+        border: 5px solid $px-highlight;
+      }
+
+      .romper-link-icon-container {
+        border: 5px solid $px-highlight;
+      }
+    }
+
+    .romper-control-unselected,
+    .romper-control-selected {
+      &.default {
+        &.text {
+          border: 5px solid $px-highlight;
+        }
+
+        .romper-link-icon-container {
+          border: 5px solid $px-highlight;
+        }
+      }
+    }
+
     &.focused-3 {
       .romper-link-control {
         transform: translate(-$px-button-width, 0);
@@ -54,56 +103,6 @@ $px-border-width: 50px;
     &.focused-10 {
       .romper-link-control {
         transform: translate(-8 * $px-button-width, 0);
-      }
-    }
-
-    .romper-link-control {
-      border: 5px solid $px-border;
-      margin: 0 $px-border-width;
-      max-width: $px-button-width;
-      min-width: $px-button-width;
-
-      &:nth-child(2) {
-        margin-left: auto;
-      }
-
-      &:last-child {
-        margin-right: auto;
-      }
-
-      &:focus {
-        background: $px-border;
-        border: 5px solid $px-border;
-      }
-    }
-
-    .romper-ux-divider {
-      border-bottom: 2px solid $white;
-      left: 0;
-      width: $px-screen-width;
-    }
-
-    .romper-control-selected {
-
-      &.text {
-        border: 5px solid $px-highlight;
-      }
-
-      .romper-link-icon-container {
-        border: 5px solid $px-highlight;
-      }
-    }
-
-    .romper-control-unselected,
-    .romper-control-selected {
-      &.default {
-        &.text {
-          border: 5px solid $px-highlight;
-        }
-
-        .romper-link-icon-container {
-          border: 5px solid $px-highlight;
-        }
       }
     }
   }

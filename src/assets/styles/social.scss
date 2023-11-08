@@ -45,30 +45,6 @@ $facebook-blue: #3b5998;
         }
       }
     }
-
-    &.facebook {
-      button {
-        background-image: url('../images/f_logo_RGB-Blue_250.png');
-      }
-
-      &.white {
-        button {
-          background-image: url('../images/f_logo_RGB-White_250.png');
-        }
-      }
-
-      &.black {
-        button {
-          background-image: url('../images/f_logo_RGB-Black_250.png');
-        }
-      }
-
-      &.grey {
-        button {
-          background-image: url('../images/f_logo_RGB-Grey_250.png');
-        }
-      }
-     }
   }
 }
 
@@ -76,4 +52,3 @@ $facebook-blue: #3b5998;
   display: inline;
   min-height: 6em;
 }
-  
