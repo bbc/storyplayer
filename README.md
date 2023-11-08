@@ -69,7 +69,7 @@ The [examples code](https://github.com/bbc/storyplayer/blob/main/examples/main.j
 Building the library from the repo
 ==================================
 
-> Ensure you have NodeJS v16 installed.
+> Ensure you have NodeJS v20 installed.
 > We use NPM for dependency management and building.\
 > We have an ESLint file based on the `typescript-eslint` parser.\
 > We have moved from Flow to TypeScript for type-checking, albeit the types are fairly permissive.
