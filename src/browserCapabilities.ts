@@ -1,4 +1,5 @@
-import Hls from "hls.js"
+// @ts-expect-error - https://github.com/shaka-project/shaka-player/issues/3185
+import shaka from "shaka-player"
 import {
     getSetting,
     OVERRIDE_PLAYOUT,
@@ -131,8 +132,8 @@ export class BrowserCapabilities {
     static hlsSupported: boolean
     static dashSupported: boolean
 
-    static hlsJsSupport() {
-        return Hls.isSupported()
+    static shakaSupport() {
+        return shaka.Player.isBrowserSupported()
     }
 
     static hlsSupport() {
@@ -146,7 +147,8 @@ export class BrowserCapabilities {
             return false
         }
 
-        if (BrowserCapabilities.hlsJsSupport()) {
+        // HLS should be supported if shaka player is supported
+        if (BrowserCapabilities.shakaSupport()) {
             BrowserCapabilities.hlsSupported = true
             return true
         }

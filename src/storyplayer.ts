@@ -105,8 +105,8 @@ if (getSetting(UA_DEBUG_FLAG)) {
         `<p>${window.navigator.userAgent}</p>` +
         `<h3>HLS Support</h3>` +
         `${BrowserCapabilities.hlsSupport()}` +
-        `<h3>HLS.js Support</h3>` +
-        `${BrowserCapabilities.hlsJsSupport()}` +
+        `<h3>Shaka Player Support</h3>` +
+        `${BrowserCapabilities.shakaSupport()}` +
         `<h3>Dash Support</h3>` +
         `${BrowserCapabilities.dashSupport()}` +
         `<h3>Chosen Format</h3>` +
