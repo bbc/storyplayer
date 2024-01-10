@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   storyplayer-dev:
-    image: node:20
+    image: node:20.9
     user: ${DOCKER_USER_ID:-node}
     working_dir: /storyplayer
     environment:
