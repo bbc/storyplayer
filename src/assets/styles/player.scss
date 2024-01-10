@@ -1562,7 +1562,7 @@ $start-button-size: 15vw;
 
 // ##Device = Desktops
 // ##Screen = 1281px to higher resolution desktops
-@media (width >= 1281px) {
+@media (1281px <= width) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1572,7 +1572,7 @@ $start-button-size: 15vw;
 
 // ##Device = Laptops, Desktops
 // ##Screen = B/w 1025px to 1280px
-@media (width >= 1025px) and (width <= 1280px) {
+@media (1025px <= width <= 1280px) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1582,7 +1582,7 @@ $start-button-size: 15vw;
 
 // ##Device = Tablets, Ipads (portrait)
 // ##Screen = B/w 768px to 1024px
-@media (width >= 768px) and (width <= 1024px) {
+@media (768px <= width <= 1024px) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1602,7 +1602,7 @@ $start-button-size: 15vw;
 
 // ##Device = Tablets, Ipads (landscape)
 // ##Screen = B/w 768px to 1024px
-@media (width >= 768px) and (width <= 1024px) and (orientation: landscape) {
+@media (768px <= width <= 1024px) and (orientation: landscape) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1617,7 +1617,7 @@ $start-button-size: 15vw;
 }
 
 // portrait ios fullscreen devices
-@media (width >= 320px) and (orientation: portrait) {
+@media (320px <= width) and (orientation: portrait) {
   .ios-fullscreen-container {
     left: 50%;
     position: absolute;
@@ -1642,7 +1642,7 @@ $start-button-size: 15vw;
 }
 
 // landscape fullscreen ios
-@media (width >= 320px) and (orientation: landscape) {
+@media (320px <= width) and (orientation: landscape) {
   .ios-target-fullscreen {
     background-color: $romper-background-color;
     inset: 0;
@@ -1657,7 +1657,7 @@ $start-button-size: 15vw;
   }
 }
 
-@media (width >= 320px) and (width <= 500px),
+@media (320px <= width <= 500px),
   (height <= 450px) {
     .romper-behaviour-modal {
       >div {
@@ -1681,7 +1681,7 @@ $start-button-size: 15vw;
 
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
-@media (width >= 320px) and (width <= 767px), (height <= 450px) {
+@media (320px <= width <= 767px), (height <= 450px) {
   .romper-scrub-bar {
     bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;

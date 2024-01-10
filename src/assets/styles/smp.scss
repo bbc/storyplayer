@@ -197,12 +197,8 @@
   }
 }
 
-// BP 1 - not used
-// @media (max-width: 319px) { }
-
 // BP 2
-// @media (min-width: 320px) and (max-width: 599px) {
-@media (width <= 599px) {
+@media (599px <= width) {
   // stylelint-disable-next-line selector-class-pattern
   .controlsFadedIn {
     .volume-button {
@@ -222,7 +218,7 @@
 }
 
 // BP 3
-@media (width >= 600px) and (width <= 959px) {
+@media (600px <= width <= 959px) {
   // stylelint-disable-next-line selector-class-pattern
   .controlsFadedIn {
     .volume-button {
@@ -232,11 +228,8 @@
   }
 }
 
-// BP 4 is default, above
-// @media (min-width: 960px) { }
-
 // BP 5 is default, above
-@media (width >= 1140px) {
+@media (1140px <= width) {
   .volume-button {
     bottom: 40px;
     left: 82px;
