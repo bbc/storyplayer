@@ -145,9 +145,8 @@ class Player extends EventEmitter {
 
         this.useExternalTransport = () => {
             // eslint-disable-next-line no-restricted-globals
-            const useExternal =
-                new URLSearchParams(parent.location.search).getAll("noUi")
-                    .length > 0 || this._controller.options?.noUi
+            const useExternal = 
+                getSetting("noUi") === "true" || this._controller.options?.noUi
             if (useExternal === undefined) return false
             return useExternal
         }
