@@ -66,9 +66,9 @@ $start-button-size: 15vw;
 }
 
 // Safari
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes spin {
@@ -100,6 +100,7 @@ $start-button-size: 15vw;
   position: absolute;
 }
 
+// stylelint-disable-next-line selector-id-pattern
 #p_pluginContainer {
   .romper-player {
     display: unset;
@@ -125,10 +126,6 @@ $start-button-size: 15vw;
   }
 
   &.romper-player-fullscreen {
-    -moz-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    -o-transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
     height: 100%;
     left: 50%;
     position: absolute;
@@ -141,11 +138,8 @@ $start-button-size: 15vw;
   .romper-background,
   .romper-media,
   .romper-gui {
-    bottom: 0;
-    left: 0;
+    inset: 0;
     position: absolute;
-    right: 0;
-    top: 0;
   }
 
   .romper-gui {
@@ -169,8 +163,6 @@ $start-button-size: 15vw;
   }
 
   .romper-error {
-    -moz-transform: translateX(-50%) translateY(-50%);
-    -webkit-transform: translateX(-50%) translateY(-50%);
     background-color: $forty-percent-black;
     border: 1px solid $white;
     height: auto;
@@ -238,9 +230,8 @@ $start-button-size: 15vw;
 
   .romper-loading-inner {
     @include button-icon('../images/loading.svg');
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
 
+    animation: spin 2s linear infinite;
     height: 2.5em;
     left: calc(50% - 1.25em);
     margin: 0;
@@ -340,6 +331,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/media-play.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -350,6 +342,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/media-pause.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -360,6 +353,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/seek-forward-40.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -370,6 +364,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/seek-back-40.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -380,6 +375,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/volume-high.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -387,6 +383,7 @@ $start-button-size: 15vw;
 
   .romper-start-button {
     @include button;
+
     margin-right: 20px;
     padding: 0;
 
@@ -401,6 +398,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/layers.svg');
+
       height: 60%;
       width: 60%;
     }
@@ -411,6 +409,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/list.svg');
+
       height: 60%;
       width: 60%;
     }
@@ -421,6 +420,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/fullscreen-enter.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -430,6 +430,7 @@ $start-button-size: 15vw;
     .romper-fullscreen-button {
       div {
         @include button-icon('../images/fullscreen-exit.svg');
+
         height: $romper-button-height;
         width: $romper-button-width;
       }
@@ -441,6 +442,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/media-step-backward.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -448,10 +450,12 @@ $start-button-size: 15vw;
 
   .romper-next-button {
     @include button;
+
     margin-right: auto;
 
     div {
       @include button-icon('../images/media-step-forward.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -470,6 +474,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/subtitles.svg');
+
       height: $romper-button-height;
       width: $romper-button-width;
     }
@@ -481,18 +486,21 @@ $start-button-size: 15vw;
 
   .romper-mute-button {
     @include button;
+
     margin-right: auto;
     margin-top: 0;
     padding: 3px;
 
     div {
       @include button-icon('../images/volume-high.svg');
+
       background-size: 80%;
     }
   }
 
   .romper-muted-button {
     @include button;
+
     margin-right: auto;
     margin-top: 0;
     padding: 3px;
@@ -505,6 +513,7 @@ $start-button-size: 15vw;
 
     div {
       @include button-icon('../images/volume-off.svg');
+
       background-size: 80%;
 
       &:hover,
@@ -520,7 +529,6 @@ $start-button-size: 15vw;
   }
 
   .romper-error-buttons {
-
     &.hide {
       display: none;
     }
@@ -532,6 +540,7 @@ $start-button-size: 15vw;
     .romper-ignore-button,
     .romper-next-button {
       @include button;
+
       border: 1px solid $white;
       color: $white;
       line-height: $romper-button-height;
@@ -548,6 +557,7 @@ $start-button-size: 15vw;
 
   .romper-volume-overlay {
     @include overlay;
+
     background-color: $black;
     bottom: 104px;
     flex-direction: column;
@@ -591,7 +601,7 @@ $start-button-size: 15vw;
       }
 
       .romper-volume-range {
-        -webkit-appearance: none;
+        appearance: none;
         background-color: $transparent;
         border: 2px solid transparent;
         margin-left: 5px;
@@ -600,13 +610,13 @@ $start-button-size: 15vw;
         width: 100%;
 
         &::-webkit-slider-runnable-track {
-          -webkit-appearance: none;
+          appearance: none;
           background-color: $white;
           height: 1px;
         }
 
         &::-webkit-slider-thumb {
-          -webkit-appearance: none;
+          appearance: none;
           background-color: $white;
           border-radius: 50%;
           height: 12px;
@@ -637,6 +647,7 @@ $start-button-size: 15vw;
 
   .romper-representation-overlay {
     @include overlay;
+
     background-color: $black;
     bottom: 104px;
     flex-wrap: wrap;
@@ -653,6 +664,7 @@ $start-button-size: 15vw;
 
   .romper-icon-overlay {
     @include overlay;
+
     background-color: $black;
     bottom: 104px;
     flex-wrap: wrap;
@@ -735,7 +747,6 @@ $start-button-size: 15vw;
     }
 
     &.romper-icon-fade {
-
       .romper-control-selected {
         opacity: 0;
         pointer-events: none;
@@ -759,9 +770,7 @@ $start-button-size: 15vw;
 
     .romper-link-control {
       background: none;
-      border-bottom-color: $transparent;
-      border-bottom-style: solid;
-      border-bottom-width: $romper-button-border;
+      border-bottom: $romper-button-border solid $transparent;
       border-left: 2px solid transparent;
       border-right: 2px solid transparent;
       border-top: 2px solid transparent;
@@ -783,7 +792,6 @@ $start-button-size: 15vw;
     }
 
     .romper-control-selected {
-
       &.text {
         border-bottom: $romper-button-border solid $highlight;
       }
@@ -794,7 +802,6 @@ $start-button-size: 15vw;
     }
 
     .romper-control-unselected {
-
       &.default {
         &.text {
           border-bottom: $romper-button-border solid $backing-colour;
@@ -845,7 +852,6 @@ $start-button-size: 15vw;
 }
 
 .romper-player > .romper-gui {
-
   .romper-start-button {
     bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
@@ -870,10 +876,7 @@ $start-button-size: 15vw;
       border: 1px solid $white;
       border-radius: 50%;
       height: 0.75 * $start-button-size;
-      margin-bottom: auto;
-      margin-left: auto;
-      margin-right: auto;
-      margin-top: auto;
+      margin: auto;
       max-height: 170px;
       max-width: 170px;
       width: 0.75 * $start-button-size;
@@ -983,8 +986,7 @@ $start-button-size: 15vw;
   >.romper-overlays {
     align-items: center;
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
+    flex-flow: row nowrap;
     height: calc(100% - 120px);
     justify-content: center;
     width: 100%;
@@ -1059,11 +1061,11 @@ $start-button-size: 15vw;
   }
 
   &[type='range'] {
-    -webkit-appearance: none;
+    appearance: none;
     background-color: $transparent;
 
     &::-webkit-slider-runnable-track {
-      -webkit-appearance: none;
+      appearance: none;
       background-color: $transparent;
     }
 
@@ -1184,17 +1186,14 @@ $start-button-size: 15vw;
 
 .romper-variable-panel {
   background: linear-gradient($transparent 0%, $var-panel-background 10%, $var-panel-background 100%);
-  bottom: 0;
+  inset: 40% 0 0;
   color: $transparent-white;
   display: flex;
   flex-direction: column;
-  left: 0;
   opacity: 0;
   padding-bottom: 0;
   position: absolute;
-  right: 0;
   text-align: center;
-  top: 40%;
   transition: opacity 0.5s ease;
   z-index: 2;
 
@@ -1461,22 +1460,16 @@ $start-button-size: 15vw;
   width: 100%;
 }
 
-.noselect {
-  -moz-user-select: none; // Firefox
-  -ms-user-select: none; // Internet Explorer/Edge
-  -webkit-touch-callout: none; // iOS Safari
-  -webkit-user-select: none; // Safari
+.noselect { // Firefox // Internet Explorer/Edge
+  -webkit-touch-callout: none; // iOS Safari // Safari
   user-select: none; // Non-prefixed version, currently
 }
 
 .continue-modal {
   background-color: $forty-percent-black;
-  bottom: 0;
+  inset: 0;
   display: none;
-  left: 0;
   position: inherit;
-  right: 0;
-  top: 0;
 
   .modal-inner-content {
     border-bottom: 1px solid $white;
@@ -1533,6 +1526,7 @@ $start-button-size: 15vw;
         .romper-resume-button,
         .romper-restart-button {
           @include button;
+
           background-size: 80%;
           border: 1px solid $white;
           border-radius: 50%;
@@ -1568,7 +1562,7 @@ $start-button-size: 15vw;
 
 // ##Device = Desktops
 // ##Screen = 1281px to higher resolution desktops
-@media (min-width: 1281px) {
+@media (1281px <= width) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1578,7 +1572,7 @@ $start-button-size: 15vw;
 
 // ##Device = Laptops, Desktops
 // ##Screen = B/w 1025px to 1280px
-@media (min-width: 1025px) and (max-width: 1280px) {
+@media (1025px <= width <= 1280px) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1588,7 +1582,7 @@ $start-button-size: 15vw;
 
 // ##Device = Tablets, Ipads (portrait)
 // ##Screen = B/w 768px to 1024px
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (768px <= width <= 1024px) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1608,7 +1602,7 @@ $start-button-size: 15vw;
 
 // ##Device = Tablets, Ipads (landscape)
 // ##Screen = B/w 768px to 1024px
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+@media (768px <= width <= 1024px) and (orientation: landscape) {
   .romper-player > .romper-gui {
     >.romper-buttons {
       width: 100%;
@@ -1623,7 +1617,7 @@ $start-button-size: 15vw;
 }
 
 // portrait ios fullscreen devices
-@media (min-width: 320px) and (orientation: portrait) {
+@media (320px <= width) and (orientation: portrait) {
   .ios-fullscreen-container {
     left: 50%;
     position: absolute;
@@ -1648,15 +1642,12 @@ $start-button-size: 15vw;
 }
 
 // landscape fullscreen ios
-@media (min-width: 320px) and (orientation: landscape) {
+@media (320px <= width) and (orientation: landscape) {
   .ios-target-fullscreen {
     background-color: $romper-background-color;
-    bottom: 0;
+    inset: 0;
     height: 100vh;
-    left: 0;
     position: fixed;
-    right: 0;
-    top: 0;
     width: 100vw;
     z-index: 1;
 
@@ -1666,8 +1657,8 @@ $start-button-size: 15vw;
   }
 }
 
-@media (min-width: 320px) and (max-width: 500px),
-  (max-height: 450px) {
+@media (320px <= width <= 500px),
+  (height <= 450px) {
     .romper-behaviour-modal {
       >div {
         font-size: 80%;
@@ -1690,7 +1681,7 @@ $start-button-size: 15vw;
 
 // ##Device = Low Resolution Tablets, Mobiles (Landscape)
 // ##Screen = B/w 481px to 767px
-@media (min-width: 320px) and (max-width: 767px), (max-height: 450px) {
+@media (320px <= width <= 767px), (height <= 450px) {
   .romper-scrub-bar {
     bottom: ((2 * ($romper-button-height + 15px)) + 5px);
     font-size: 100%;
@@ -1774,8 +1765,6 @@ $start-button-size: 15vw;
 }
 
 .webview-error-div {
-  -ms-transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
   margin: 0;
   position: absolute;
   top: 50%;

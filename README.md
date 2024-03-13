@@ -69,7 +69,7 @@ The [examples code](https://github.com/bbc/storyplayer/blob/main/examples/main.j
 Building the library from the repo
 ==================================
 
-> Ensure you have NodeJS v16 installed.
+> Ensure you have NodeJS v20 installed.
 > We use NPM for dependency management and building.\
 > We have an ESLint file based on the `typescript-eslint` parser.\
 > We have moved from Flow to TypeScript for type-checking, albeit the types are fairly permissive.
@@ -77,7 +77,7 @@ Building the library from the repo
 * First, clone [the repo](https://github.com/bbc/storyplayer) and ```cd``` into the new directory.
 * Run `npm install` to pull down and build all the dependencies, and the library.
 * `npm run build` will do a single build of the library
-* `npm run test` will do a single run of the tests (eslint, sass-lint, tsc)
+* `npm run test` will do a single run of the tests (eslint, stylelint, tsc)
 * `npm run dev` will serve up the example content (see below) and continuously build and test the library on changes.
 
 Running the examples in the repo

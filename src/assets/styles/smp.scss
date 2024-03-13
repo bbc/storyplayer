@@ -1,5 +1,6 @@
 @import './colours';
 
+// stylelint-disable-next-line selector-class-pattern
 .controlsFadedOut {
   .chapter-button {
     display: none;
@@ -22,6 +23,7 @@
   }
 }
 
+// stylelint-disable-next-line selector-class-pattern
 .controlsFadedIn {
   .chapter-button {
     right: 0;
@@ -83,7 +85,7 @@
       .volume-label {
         color: $smp-text-white;
         display: inline-flex;
-        font-family: 'ReithSans';
+        font-family: ReithSans, sans-serif;
         font-size: 14px;
         font-stretch: normal;
         font-style: normal;
@@ -103,7 +105,7 @@
     }
 
     .audio-slider {
-      -webkit-appearance: none;
+      appearance: none;
       background-color: $transparent;
       height: 13px;
       margin-top: 5px;
@@ -111,13 +113,13 @@
       width: 160px;
 
       &::-webkit-slider-runnable-track {
-        -webkit-appearance: none;
+        appearance: none;
         background-color: $white;
         height: 1px;
       }
 
       &::-webkit-slider-thumb {
-        -webkit-appearance: none;
+        appearance: none;
         background-color: $white;
         border-radius: 50%;
         height: 12px;
@@ -136,7 +138,7 @@
 
     .audio-slider-label {
       color: $smp-text-white;
-      font-family: 'ReithSans';
+      font-family: ReithSans, sans-serif;
       font-size: 14px;
       font-stretch: normal;
       font-style: normal;
@@ -195,12 +197,9 @@
   }
 }
 
-// BP 1 - not used
-// @media (max-width: 319px) { }
-
 // BP 2
-// @media (min-width: 320px) and (max-width: 599px) {
-@media (max-width: 599px) {
+@media (599px <= width) {
+  // stylelint-disable-next-line selector-class-pattern
   .controlsFadedIn {
     .volume-button {
       bottom: 0;
@@ -219,7 +218,8 @@
 }
 
 // BP 3
-@media (min-width: 600px) and (max-width: 959px) {
+@media (600px <= width <= 959px) {
+  // stylelint-disable-next-line selector-class-pattern
   .controlsFadedIn {
     .volume-button {
       bottom: 8px;
@@ -228,11 +228,8 @@
   }
 }
 
-// BP 4 is default, above
-// @media (min-width: 960px) { }
-
 // BP 5 is default, above
-@media (min-width: 1140ps) {
+@media (1140px <= width) {
   .volume-button {
     bottom: 40px;
     left: 82px;
