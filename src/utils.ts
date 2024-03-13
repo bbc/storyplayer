@@ -87,6 +87,7 @@ export const getCurrentUrl = () => {
     return window.location.href
 }
 export const getVariableOverrides = () => {
+    if (inSMPWrapper) return [];
     const varNames = new URLSearchParams(window.location.search).getAll(
         "varName",
     )
