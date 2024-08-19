@@ -387,7 +387,11 @@ export default class DOMSwitchPlayoutEngine extends BasePlayoutEngine {
                 )
 
                 rendererPlayoutObj._shaka
-                    .load(url)
+                    .preload(url)
+                    .then((preloadManager) => {
+                        logger.info(`Preloaded ${url}`)
+                        return rendererPlayoutObj._shaka.load(preloadManager)
+                    })
                     .then(() => {
                         logger.info(`Loaded ${url}`)
                     })
