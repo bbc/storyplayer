@@ -40,7 +40,7 @@
   "homepage": "https://github.com/bbc/storyplayer#readme",
   "devDependencies": {
     "@bbc/object-based-media-schema": "^1.0.4",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.16.11",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "concurrently": "^5.3.0",
