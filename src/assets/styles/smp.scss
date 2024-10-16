@@ -83,7 +83,7 @@
       .volume-label {
         color: $smp-text-white;
         display: inline-flex;
-        font-family: 'ReithSans';
+        font-family: ReithSans, Helvetica, Arial, freesans, sans-serif;
         font-size: 14px;
         font-stretch: normal;
         font-style: normal;
@@ -136,7 +136,7 @@
 
     .audio-slider-label {
       color: $smp-text-white;
-      font-family: 'ReithSans';
+      font-family: ReithSans, Helvetica, Arial, freesans, sans-serif;
       font-size: 14px;
       font-stretch: normal;
       font-style: normal;

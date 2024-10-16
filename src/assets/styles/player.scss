@@ -520,7 +520,6 @@ $start-button-size: 15vw;
   }
 
   .romper-error-buttons {
-
     &.hide {
       display: none;
     }
@@ -735,7 +734,6 @@ $start-button-size: 15vw;
     }
 
     &.romper-icon-fade {
-
       .romper-control-selected {
         opacity: 0;
         pointer-events: none;
@@ -783,7 +781,6 @@ $start-button-size: 15vw;
     }
 
     .romper-control-selected {
-
       &.text {
         border-bottom: $romper-button-border solid $highlight;
       }
@@ -794,7 +791,6 @@ $start-button-size: 15vw;
     }
 
     .romper-control-unselected {
-
       &.default {
         &.text {
           border-bottom: $romper-button-border solid $backing-colour;
@@ -845,7 +841,6 @@ $start-button-size: 15vw;
 }
 
 .romper-player > .romper-gui {
-
   .romper-start-button {
     bottom: calc(50% - #{(0.5 * $start-button-size)});
     display: grid;
